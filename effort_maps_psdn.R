@@ -98,7 +98,7 @@ ann.effort.sf.ocean <- cbind(ann.effort.sf.ocean, st_coordinates(ann.effort.sf.o
 
 
 # Generate map of aggregate CPS boats activity (this won't work anymore)
-# register_google(key = "AIzaSyBypi8T09hkTVlclaBDxFf-qjIpt39UhwQ")
+# register_google(key = "ENTER KEY HERE")
 
 map <- get_stamenmap(bbox = c(left = -128,
                               bottom = 42,
