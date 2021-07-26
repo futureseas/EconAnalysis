@@ -1,0 +1,23 @@
+﻿port_group_code,port_group_name,lat,lon
+NPS,N. Puget Sound WA area,48.773294,-122.906648
+SPS,S. Puget Sound WA area,47.524511,-122.431841
+CWA,Coastal WA area,47.059953,-124.245444
+CLW,Columbia River WA area,46.301429,-123.935924
+WA5,Unknown WA port,,
+CLO,Columbia River OR area,46.169008,-123.867984
+TLA,Tillamook OR area,45.515176,-123.918987
+NPA,Newport OR area,44.631373,-124.077343
+CBA,Coos Bay OR area,43.429424,-124.30548
+BRA,Brookings OR area,42.070437,-124.333196
+OR1,Unknown OR port,,
+CCA,Crescent City CA area,41.743072,-124.190916
+ERA,Eureka CA area,40.804256,-124.20926
+BGA,Fort Bragg CA area,39.442628,-123.817268
+BDA,Bodega Bay CA area,38.307998,-123.043413
+SFA,San Francisco CA area,37.813859,-122.461254
+MNA,Monterey CA area,36.622672,-121.885687
+MRA,Morro Bay CA area,35.363933,-120.865663
+SBA,Santa Barbara CA area,34.408403,-119.679786
+LAA,Los Angeles CA area,33.713065,-118.262033
+SDA,San Diego CA area,32.671773,-117.215043
+CA2,Unknown CA port,,
