@@ -1,0 +1,635 @@
+---
+title: "Future Seas Econ Report"
+author: "Felipe J. Quezada"
+date: "`r format(Sys.time(), '%B %e, %Y')`"
+header-includes:
+  \usepackage{mathtools}
+  \usepackage{tcolorbox}
+  \usepackage{float}
+  \floatplacement{figure}{H}
+output:
+  pdf_document: 
+    number_sections: yes
+    citation_package: natbib
+bibliography: references.bib
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(bookdown)
+library(doBy)
+library(dplyr)
+library(fastDummies)
+library(ggplot2)
+library(here)
+library(hrbrthemes)
+library(lmtest)
+library(lubridate)
+library(magrittr)
+library(plm)
+library(reshape)
+library(reshape2)
+library(rstan)
+library(scales)
+library(sjlabelled)
+library(summarytools)
+library(texreg)
+library(tidyr)
+library(tidyverse)
+library(tinytex)
+library(viridis)
+library(xtable)
+library(zoo)
+```
+
+```{r read_data, include=FALSE} 
+PacFIN_dat    <- read.csv(file = here::here("Data", "PacFin.csv"))
+```
+
+```{r functions, include=FALSE}
+
+meanfun <- function(x, ...){
+  c(mean=mean(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
+}
+
+sumfun <- function(x, ...){
+  c(sum=sum(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
+}
+
+sum_mean_fun <- function(x, ...){
+  c(mean=mean(x, na.rm=TRUE, ...), sum=sum(x, na.rm=TRUE, ...)) #, l=length(x))
+}
+```
+
+# Introduction
+
+This is a weekly report for the Economic group of the Future Seas Project. I downloaded landings data publicity available from [PacFIN](http://pacfin.psmfc.org/). The data has a panel data structure, where we observe commercial **west coast** species over *years*.
+
+
+\begin{tcolorbox}
+Changes from previous reportand work to do:
+\begin{itemize}
+\item Start developing Bayesian model for landings
+\item Leraning how to build a model in Stan
+\item Incorporate comments from monthly meeting
+\item Analyze logbook data for market squid in CA
+\item Retrieve info about port constraint.
+\end{itemize}
+\end{tcolorbox}
+
+
+# Descriptive statistics
+Table 1 shows descriptive statistics for each variable in the dataset:
+
+```{r desc_table, echo=FALSE, results='asis'}
+
+# PacFIN_data <- PacFIN_data %>%
+#   var_labels(LANDING_YEAR = "Landing Year", PACFIN_SPECIES_CODE = "Species ID", PACFIN_SPECIES_COMMON_NAME = "Species Name", LANDED_WEIGHT_MTONS = "Landings (M Tons)", EXVESSEL_REVENUE = "Ex-Vessel Revenues", LANDED_PPP = "Price ($/lb)", NUMBER_OF_VESSELS = "Number of Vessels", NUMBER_OF_DEALERS = "Number of Dealers", CONFIDENTIAL_FLAG = "Confidential flag", LANDING_QUARTER = "Landing Quarter", date = "Date")
+
+#PacFIN_data <- subset(PacFIN_data_port, select = -c(Landing_quarter))
+
+print(xtable(descr(PacFIN_dat, stats = c("mean", "sd", "min", "max"), transpose = TRUE, headings = TRUE), caption = 'Descriptive statistics.'), comment = FALSE, caption.placement = 'top')
+```
+ 
+# Graphical analysis
+
+## Revenue and landings: Historical averages. 
+Mean revenues by species are shown in Figure \ref{fig:plot_revenue}, while mean landings by species are shown in Figure \ref{fig:plot_landings}.
+
+```{r plot_revenue, echo=FALSE, fig.cap="Annual mean revenue by CPS species. 1981-2021.\\label{fig:plot_revenue} "}
+
+plotdata <- PacFIN_dat %>%
+  filter(Management_group == "CPEL") %>%
+  filter(Species_code != "PBNT")
+
+plotdata <- summaryBy(Revenue ~ Species_code + Landings_year, FUN=sumfun, data=plotdata) 
+plotdata <- summaryBy(Revenue.sum ~ Species_code, FUN=meanfun, data=plotdata) 
+
+ggplot(plotdata, aes(x = Species_code, y = Revenue.sum.mean)) + 
+  geom_bar(stat = "identity", fill = "cornflowerblue") + 
+  labs(x = "Species", y = "Revenue ($)")
+```
+
+
+```{r plot_landings, echo=FALSE, fig.cap="Annual mean landing by CPS species. 1981-2021. \\label{fig:plot_landings}"}
+plotdata <- PacFIN_dat %>%
+  filter(Management_group == "CPEL") %>%
+  filter(Species_code != "PBNT")
+
+
+plotdata <- summaryBy(Landings     ~ Species_code + Landings_year, FUN=sumfun, data=plotdata) 
+plotdata <- summaryBy(Landings.sum ~ Species_code, FUN=meanfun, data=plotdata) 
+
+ggplot(plotdata, aes(x = Species_code, y = Landings.sum.mean)) + 
+  geom_bar(stat = "identity", fill = "cornflowerblue") + 
+  labs(x = "Species", y = "Landings (M Tons)")
+```
+
+## Price, Revenue and landings: Time series
+Figure \ref{fig:ts_landings} shows landing over time by species, while Figure \ref{fig:ts_prices} shows landing and prices over time for selected CPS species. 
+
+```{r ts_revenue, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Total annual landing by CPS species.\\label{fig:ts_landings}"}
+
+collapse <- PacFIN_dat %>%
+  filter(Management_group == "CPEL") %>%
+  filter(Species_code != "PBNT" & Species_code != "CMCK" & Species_code != "JMCK" & Species_code != "RHRG" & Species_code != "UMCK")
+
+collapse <- summaryBy(Revenue + Landings + Price ~ Species_name  + Landing_year, FUN=sumfun, data=collapse) %>%
+  dplyr::select(Landing_year, Price.sum, Revenue.sum, Landings.sum, Species_name) 
+
+revenue_plot <- ggplot(collapse, aes(x = Landing_year, y = Revenue.sum, group= Species_name, colour =  Species_name)) + 
+  geom_line(size=1.5) +
+  scale_y_continuous(name = "Revenue ($)") + 
+  theme(legend.position = "top")
+
+landings_plot <- ggplot(collapse, aes(x = Landing_year, y = Landings.sum, group= Species_name, colour =  Species_name)) + 
+  geom_line(size=1.5) +
+  scale_y_continuous(name = "Landings ($)")  +
+  theme(legend.position = "none")
+
+
+get_legend<-function(myggplot){
+  tmp <- ggplot_gtable(ggplot_build(myggplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
+legend <- get_legend(revenue_plot )
+revenue_plot  <- revenue_plot  + theme(legend.position="none")
+blankPlot <- ggplot()+geom_blank(aes(1,1)) + 
+  cowplot::theme_nothing()
+
+library(gridExtra)
+grid.arrange(blankPlot, legend, revenue_plot, landings_plot,
+             ncol=2, nrow = 2, 
+             widths = c(2.7, 2.7), heights = c(0.2, 2.5))
+
+grid.arrange(revenue_plot, landings_plot, legend, ncol=2, nrow = 2, 
+             layout_matrix = rbind(c(1,2), c(3,3)),
+             widths = c(2.7, 2.7), heights = c(2.5, 0.2))
+
+
+```
+
+
+```{r ts_landings, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Total annual landing by CPS species.\\label{fig:ts_landings}"}
+
+collapse <- PacFIN_dat %>%
+  filter(Management_group == "CPEL") %>%
+  filter(Species_code != "PBNT" & Species_code != "CMCK" & Species_code != "JMCK" & Species_code != "RHRG" & Species_code != "UMCK")
+
+collapse <- summaryBy(Landings + Price ~ Species_name  + Landing_year, FUN=sumfun, data=collapse) %>%
+  dplyr::select(Landing_year, Price.sum, Landings.sum, Species_name) 
+
+ggplot(collapse, aes(x = Landing_year, y = Landings.sum, group= Species_name, colour =  Species_name)) + 
+  geom_line(size=1.5) +
+  scale_y_continuous(name = "Landings (M Tons)")
+```
+
+
+```{r ts_prices, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Annual averages of prices by CPS species.\\label{fig:ts_prices}"}
+collapse <- filter(PacFIN_dat, Species_name == "MARKET SQUID" |  Species_name == "NORTHERN ANCHOVY" | Species_name == "PACIFIC SARDINE" | Species_name == "PACIFIC HERRING")
+collapse <- summaryBy(Landings + Price ~ Species_name  + Landing_year, FUN=meanfun, data=collapse) %>%
+  dplyr::select(Landing_year, Price.mean, Landings.mean, Species_name) 
+
+ggplot(collapse, aes(x = Landing_year, y = Price.mean, group= Species_name, colour =  Species_name)) + 
+  geom_line(size=1.5) +
+  scale_y_continuous(name = "Price ($/lb)")
+```
+
+### Sardine
+
+```{r ts_sardine ,  fig.cap = "Landing v/s Prices. Pacific Sardine.", echo=FALSE}
+collapse <- summaryBy(Landings + Price ~ Species_code + Landing_year, FUN=sum_mean_fun,
+  data=PacFIN_dat) %>%
+  filter(Species_code == "PSDN") %>%
+  dplyr::select(Landing_year, Price.mean, Landings.sum) 
+coeff <- 500000
+collapse$Price.mean <- collapse$Price.mean * coeff 
+df <- gather(collapse, key = Variable, value = value,
+             c("Landings.sum", "Price.mean"))
+
+# Plot
+ggplot(df, aes(x=Landing_year, y = value, group = Variable, colour = Variable)) + 
+geom_line(size=1.5) +
+scale_y_continuous(name = "Landings (M Tons)", 
+                   sec.axis = sec_axis(~./coeff, name = "Price ($/lb)")) 
+
+# # Other option #
+# ggplot(collapse, aes(x = Landing_year)) + 
+#   geom_line(aes(y = Landings.mean, color="Landings"), size=1.5) +
+#   geom_line(aes(y = Price.mean, color="Price"), size=1.5) +
+#   scale_y_continuous(name = "Landings (M Tons)", 
+#   sec.axis = sec_axis(~./coeff, name = "Price ($/lb)")) +
+#   scale_color_manual(values = c("Landings" = "#69b3a2", "Price" = rgb(0.2, 0.6, 0.9, 1)))
+
+```
+
+### Anchovy
+
+```{r ts_anchovy,  fig.cap = "Landing v/s Prices. Northern Anchovy.", echo=FALSE}
+collapse <- summaryBy(Landings + Price ~ Species_code+ Landing_year, FUN=sum_mean_fun,
+  data=PacFIN_dat) %>%
+  filter(Species_code == "NANC") %>%
+  dplyr::select(Landing_year, Price.mean, Landings.sum) 
+coeff <- 100000
+collapse$Price.mean <- collapse$Price.mean * coeff 
+df <- gather(collapse, key = Variable, value = value,
+             c("Landings.sum", "Price.mean"))
+
+# Plot
+ggplot(df, aes(x=Landing_year, y = value, group = Variable, colour = Variable)) + 
+geom_line(size=1.5) +
+scale_y_continuous(name = "Landings (M Tons)", 
+                   sec.axis = sec_axis(~./coeff, name = "Price ($/lb)")) 
+```
+
+### Market squid
+
+```{r ts_squid,  fig.cap = "Landing v/s Prices. Market Squid.", echo=FALSE}
+collapse <- summaryBy(Landings + Price ~ Species_code+ Landing_year, FUN=sum_mean_fun,
+  data=PacFIN_dat) %>%
+  filter(Species_code == "MSQD") %>%
+  dplyr::select(Landing_year, Price.mean, Landings.sum) 
+coeff <- 500000
+collapse$Price.mean <- collapse$Price.mean * coeff 
+df <- gather(collapse, key = Variable, value = value,
+             c("Landings.sum", "Price.mean"))
+
+# Plot
+ggplot(df, aes(x=Landing_year, y = value, group = Variable, colour = Variable)) + 
+geom_line(size=1.5) +
+scale_y_continuous(name = "Landings (M Tons)", 
+                   sec.axis = sec_axis(~./coeff, name = "Price ($/lb)")) 
+```
+
+### Pacific Herring
+
+```{r ts_herring,  fig.cap = "Landing v/s Prices. Market Squid.", echo=FALSE}
+collapse <- summaryBy(Landings + Price ~ Species_code + Landing_year, FUN=sum_mean_fun,
+  data=PacFIN_dat) %>%
+  filter(Species_code == "PHRG") %>%
+  dplyr::select(Landing_year, Price.mean, Landings.sum) 
+coeff <- 10000
+collapse$Price.mean <- collapse$Price.mean * coeff 
+df <- gather(collapse, key = Variable, value = value,
+             c("Landings.sum", "Price.mean"))
+
+# Plot
+ggplot(df, aes(x=Landing_year, y = value, group = Variable, colour = Variable)) + 
+geom_line(size=1.5) +
+scale_y_continuous(name = "Landings (M Tons)", 
+                   sec.axis = sec_axis(~./coeff, name = "Price ($/lb)")) 
+```
+
+
+
+## Historical averages by state and port
+
+```{r state_landings, echo=FALSE, fig.cap="Landing by state.", message=FALSE, warning=FALSE}
+collapse <- summaryBy(Landings ~ Species_name + State + Landing_year, FUN=sumfun, data=PacFIN_dat) 
+collapse <- summaryBy(Landings.sum ~ Species_name + State, FUN=meanfun, data=collapse) %>%
+  filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") 
+
+ggplot(collapse, aes(fill=Species_name, y=Landings.sum.mean, x=State)) + 
+    geom_bar(position="dodge", stat="identity") +     
+    scale_fill_viridis(discrete = T, option="viridis") 
+```
+
+```{r port_CA, eval=FALSE, fig.cap="Landing by port. California.", include=FALSE}
+collapse <- summaryBy(Landings ~ Species_name + Port + State, FUN=meanfun, data=PacFIN_dat) %>%
+  filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
+  filter(State == "C" & (Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING")) %>%
+  mutate(port = fct_relevel(port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
+
+
+ggplot(collapse, aes(fill=Species_name, y=Landings.mean, x=Port)) + 
+    geom_bar(position="dodge", stat="identity")
+```
+
+
+```{r by_port,  fig.cap = "Landing by Port.", echo=FALSE, message=FALSE, warning=FALSE}
+collapse <- summaryBy(Landings ~ Species_name + Species_code + Port + State, FUN=meanfun, data=PacFIN_dat) %>%
+  filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
+  filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") %>%
+  mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
+
+
+
+ggplot(collapse, aes(fill=Species_code, y=Landings.mean, x=Port)) +
+  geom_bar(position="dodge", stat="identity") + 
+  facet_grid(~ State, scale="free", space="free_x") +
+  theme(legend.position="bottom") + 
+  scale_fill_viridis(discrete = T) + 
+  theme(axis.text.x = element_text(angle=90))
+
+```
+
+
+## Time series by state and area ports
+
+```{r ts_by_state,  fig.cap = "Annual average landing by state.", echo=FALSE, message=FALSE, warning=FALSE}
+collapse <- summaryBy(Landings ~ Species_name + Landing_year + State, FUN=sumfun, data=PacFIN_dat) %>%
+  filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") 
+
+ggplot(collapse, aes(y = Landings.sum, x = Landing_year,  group= Species_name, colour =  Species_name)) +
+  geom_line(size=1) +
+  facet_wrap(~State) +
+  theme(legend.position="bottom") + 
+  theme(axis.text.x = element_text(angle=90))
+
+```
+
+
+```{r function_ports, include=FALSE}
+
+port_by_state <- function(state_name) {
+  if (state_name == "ALL") {
+    collapse <- PacFIN_dat %>%
+    filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
+      filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") %>%
+      mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
+  }
+  else {
+    collapse <- PacFIN_dat %>%
+    filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
+    filter(State == state_name & (Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING")) %>%
+    mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
+  }
+  
+  ggplot(collapse, aes(y=Landings, x=Landing_year, color=Species_code, group=Species_code)) +
+  geom_line(size=1) + 
+  facet_wrap(~ Port) +
+  theme(legend.position="bottom") + 
+  theme(axis.text.x = element_text(angle=90))
+}
+
+```
+
+
+### California ports
+
+```{r ts_by_port_C,  fig.cap = "Annual average landing by area ports in California. \\textit{Notes:} BDA = Bodega Bay; CCA = Crescent City; ERA = Eureka; LAA = Los Angeles; MNA = Monterey; MRA = Morro Bay; SBA = Santa Barbara; SDA = San Diego; SFA = San Francisco.", echo=FALSE, message=FALSE, warning=FALSE}
+
+port_by_state(state_name = "C")
+
+```
+
+### Oregon ports
+
+```{r ts_by_port_O,  fig.cap = "Annual average landing by area ports in Oregon. \\textit{Notes:} BRA = Brookings; CBA = Coos Bay; CLO = Columbia River (OR); NPA = Newport.", echo=FALSE, message=FALSE, warning=FALSE}
+port_by_state(state_name = "O")
+
+```
+
+```{r ts_by_port_W, eval=FALSE, fig.cap="Annual average landing by area ports in Washington. \\textit{Notes:} CLW = Columbia River (WA) ; CWA = Washington Coastal; NPS = North Puget Sound.", message=FALSE, warning=FALSE, include=FALSE}
+port_by_state(state_name = "W")
+
+```
+
+
+### All ports
+```{r ts_by_port,  fig.cap = "Annual average landing by area port. \\textit{Notes:} BDA = Bodega Bay; BRA = Brookings; CBA = Coos Bay; CCA = Crescent City; CLO = Columbia River (OR); ERA = Eureka; LAA = Los Angeles; MNA = Monterey; MRA = Morro Bay; NPA = Newport; NPS = North Puget Sound; SBA = Santa Barbara; SDA = San Diego; SFA = San Francisco.", echo=FALSE, message=FALSE, warning=FALSE}
+
+port_by_state("ALL")
+
+```
+
+```{r ts_by_port_revenue,  fig.cap = "Annual average revenue by area port. \\textit{Notes:} BDA = Bodega Bay; BRA = Brookings; CBA = Coos Bay; CCA = Crescent City; CLO = Columbia River (OR); ERA = Eureka; LAA = Los Angeles; MNA = Monterey; MRA = Morro Bay; NPA = Newport; NPS = North Puget Sound; SBA = Santa Barbara; SDA = San Diego; SFA = San Francisco.", echo=FALSE, message=FALSE, warning=FALSE}
+collapse <- PacFIN_dat %>%
+  filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
+  filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") %>%
+  mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
+
+ggplot(collapse, aes(y=Revenue, x=Landing_year, color=Species_code, group=Species_code)) +
+  geom_line(size=1) + 
+  facet_wrap(~ Port) +
+  theme(legend.position="bottom") +
+  theme(axis.text.x = element_text(angle=90))
+
+```
+
+
+## SDM by ports
+```{r SDM_by_port,  fig.cap = "SDM mean for Pacific Sardine by area port. \\textit{Notes:} BDA = Bodega Bay; BRA = Brookings; CBA = Coos Bay; CCA = Crescent City; CLO = Columbia River (OR); ERA = Eureka; LAA = Los Angeles; MNA = Monterey; MRA = Morro Bay; NPA = Newport; NPS = North Puget Sound; SBA = Santa Barbara; SDA = San Diego; SFA = San Francisco.", echo=FALSE, message=FALSE, warning=FALSE}
+
+collapse <- PacFIN_dat %>%
+  filter(Species_code == "PSDN") %>%
+  select(Landing_year, Port, PSDN_SDM_mean, Landings) %>% 
+  filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
+      mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
+
+coeff <- 75000
+collapse$PSDN_SDM_mean <- collapse$PSDN_SDM_mean * coeff 
+df <- gather(collapse, key = Variable, value = value,
+             c("Landings", "PSDN_SDM_mean"))
+
+# Plot
+ggplot(df, aes(x=Landing_year, y = value, group = Variable, colour = Variable)) + 
+geom_line(size=1) +
+scale_y_continuous(name = "Landings (M Tons)", 
+                   sec.axis = sec_axis(~./coeff, name = "SDM (Probability)")) +
+  facet_wrap(~ Port) +
+  theme(legend.position="bottom") + 
+  theme(axis.text.x = element_text(angle=90)) + 
+  theme(axis.text.x = element_text(size = 5)) +
+  theme(axis.text.y = element_text(size = 5)) 
+
+```
+
+
+
+\newpage
+
+# Potential research
+
+## The effect of sardine distribution on landings model
+
+**Research question:** What is the effect of climate change on ports' landings? 
+
+<!-- # ```{r gfw_data} -->
+<!-- #  -->
+<!-- # # Load packages -->
+<!-- # library(furrr) # for parallel operations on lists -->
+<!-- # library(maps) # additional helpful mapping packages -->
+<!-- # library(maptools) -->
+<!-- # library(raster) # for working with rasters -->
+<!-- # library(rgeos) -->
+<!-- # library(sf) # for vector data  -->
+<!-- #  -->
+<!-- # # World polygons from the maps package -->
+<!-- # world_shp <- sf::st_as_sf(maps::map("world", plot = FALSE, fill = TRUE)) -->
+<!-- # eezs <- read_sf('C:/Users/felip/Google Drive (UCSC)/Project/Data/Shape Files/World_EEZ_v11_20191118', layer = 'eez_v11')  -->
+<!-- #  -->
+<!-- # %>% -->
+<!-- #   filter(Pol_type == '200NM') # select the 200 nautical mile polygon layer -->
+<!-- #  -->
+<!-- #  -->
+<!-- # # Specify location of data directory -->
+<!-- # data_dir <- 'C:/Users/felip/Google Drive (UCSC)/Project/Data/Global Fishing Watch/' -->
+<!-- #  -->
+<!-- # # Generate a vector of dates of interest using ymd from lubridate -->
+<!-- # effort_dates <- seq(ymd('2019-01-01'), ymd('2019-12-31'), by='days') -->
+<!-- #  -->
+<!-- # # Create dataframe of filenames dates and filter to date range of interest -->
+<!-- # effort_files <- tibble( -->
+<!-- #   file = list.files(paste0(data_dir, 'mmsi-daily-csvs-10-v2-2019'),  -->
+<!-- #                     pattern = '.csv', recursive = T, full.names = T), -->
+<!-- #   date = ymd(str_extract(file,  -->
+<!-- #                          pattern = '[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}'))) %>% -->
+<!-- #   filter(date %in% effort_dates) -->
+<!-- #  -->
+<!-- # # Read in data  -->
+<!-- # plan(multisession)  -->
+<!-- # effort_df <- furrr::future_map_dfr(effort_files$file, .f = read_csv) %>% -->
+<!-- #   mutate(year  = year(date), -->
+<!-- #          month = month(date), -->
+<!-- #          lat_bin = lat_bin / 10, # convert to degrees -->
+<!-- #          lon_bin = lon_bin / 10) -->
+<!-- # ``` -->
+
+### Model fundamentals 
+
+In general, landings are conditional to biological stocks (affected by climate change), harvest cost, prices and regulations. 
+ 
+* Outcome variable:
+  + Pacific sardine landings by vessel, port and year. In this case we would predict landing by vessel $i$ that land in port $j$
+  
+* Treatment variable:
+  + Change spatial distribution of species due to climate.  
+    + @smith2021potential relate port-level landings to the probaility of presence from a sardine species distribution model (SDM), and then makes projection to quantify future changes in landings. 
+    + Specifically, @smith2021potential use mean monthly probability of presence of sardine within 60 km of port. 
+
+* Explanatory variables
+  + Harvest costs (e.g., distances and fuel cost)
+  + Own price and substitutes
+  + Effort
+    + Fishing effort from matching PacFIN data to Global Fishing Watch
+    + "VESSEL_NUM" in PacFIN data: "It can be a USCG VID (ex: 1234567 or AK1234nn) or MISSING or UNKNOWN if vessel ID not provided or invalid. It is also “Null” if no vessel was used."
+  + Regulations. Incorporate ACL in the model (@smith2021potential obtained this information from [CPS Fisheries Management Plan](pcouncil.org), and [Federal Register](federalregister.gov)), maybe with a function that have a ceiling limit, or as **censored data** ([Stan code](https://mc-stan.org/docs/2_18/stan-users-guide/censored-data.html)). Same about port capacity...
+  + Port fixed-effects (reflect capacity and effort, assuming fixed over time.)
+    + Do we need heriarchal random effects for this?
+  
+* Random-coefficients?
+  + By vessel: Different intercept explained by vessel characteristics?
+  
+* Some considerations:
+  + Vessels likely to have contract with ports. Less flexibility where they land.
+  + Harvest happen near-shore, less probability of longer trips if species move further. 
+  + Multivariate framework allows us to consider interrelation between species and CPS fleet. 
+      + Sardine harvest affect squid harvest?
+      + If Sardine opens… Sardine more preferred? Sequentially or simultaneous harvest?
+  
+<!-- # print summary -->
+<!-- texreg(list(f2, f3, r2, r3), caption = 'Panel data models for Pacific Sardine landings.\\label{table:sardine_est}', caption.above = TRUE, float.pos = "h", custom.model.names = c("FE: Model 1", "FE: Model 2", "RE: Model 1", "RE: Model 2")) -->
+<!-- ``` -->
+
+### Empirical strategy
+
+  + Statistical model:
+    + Bayesian hierarchical model? 
+      + Random effects vessels and time. 
+      + Uncertainty from modeling the process (as well as from the imperfect observation of the process).
+      + Model the zeros in data 
+        + Closures
+        + Port restrictions (i.e. no infrastructure)
+    + @smith2021potential estimate with GAM framework (allows for non-linear relationships)
+  
+    + Some details:
+      + Spatial autocorrelation between ports through species abundance? Between areas where vessel harvest? 
+        + @morris2019bayesian include spatial errors in a bayesian framework.
+ 
+ 
+### Bayesian model  
+
+\begin{align*}
+[\alpha_i,\beta_i,\gamma,\sigma^2_{\alpha},\sigma^2_{\beta},\Sigma | \log(q_{i,t})] &  \varpropto \text{multivariate normal}(\log(q_{i,t}) | \log(\mu_{i,t}),\Sigma) \times  \\ 
+&  [\alpha_i | \mu_{\alpha},\sigma^2_{\alpha}] \times [\beta_i | \mu_{\beta},\sigma^2_{\beta}] \times [\gamma][\mu_{\alpha}][\mu_{\beta}][\sigma^2_{\alpha}][\sigma^2_{\beta}][\Sigma],
+\end{align*} 
+
+where $q_{i,t}$ is the observed landings in port $i$ at year $t$, $\mu_{i,t} = \alpha_i + \beta_i SDM + \gamma Price + \ldots$, $\beta$ are parameters to be estimated that describe the process of harvest, $\sigma^2_p$ is the stochasticity in the harvest process, and $x_{i,t}$ is the vector of variable that explain landing in port $i$ during the landing year $t$.
+
+### Bayesian model: Multivariate normal
+
+A basic Bayesian model for multi-species landings can be described as follow:
+
+$$\ln(landings) \sim \text{multivariate normal}(\ln(\mu),\Sigma)$$ 
+$$\mu = \alpha + \beta_1 SDM + \beta_2 FishingHours + \beta_3 Price$$
+
+
+## Fishers portfolio model
+
+**Research question:** Understand the determinant of fisher decision on species harvested.
+  
+  + Data:
+    + PacFin data by vessel? 
+    + We can identify each vessel and which species they land.
+    
+  + Model:
+    + Conditional logit models?
+    + Each species is a category, and probability of being selected is affected by their characteristics. Species distribution might be one of the characteristics.
+    + We also can include vessel characteristics in a *random-coefficient model* (e.g. size, gear, etc)
+  
+  + Problems:
+    + Endogeneity in prices? (from non-observable species characteristics that affect prices) 
+    + Include quota in their decision?
+    + Simultanous or sequential harvest?
+    
+  + Considerations:
+    + Easy to change between species (low cost for substitution)
+    
+    
+  + Network analysis?
+      + Understand relationship between fisheries.
+      + At the human level? Nodes are fisheries, while they are connected by participating fishing vessels. Edge weight calculated as the number of vessel participating in both fisheries.
+      + How is the knowledge in environmental relationships? 
+    
+    
+
+    
+    
+## Estimating trade-off of leaving forage species in the ocean
+
+**Research question:** Do fishers take into account trade-offs in their harvest decision?
+
+  + How to quantify this trade off?
+    + Atlantis model could give us insight about the trade-off.
+    + Require to quantify non-commercial species
+        + How is this related to fishers communities?
+    
+    
+## Effect of climate change on fishing communities
+
+**Research question:** How climate change affects fishers communities that depend (directly or indirectly) on forage species?
+  
+  + Employment?
+  + Incomes?
+  + Consumption?
+
+    
+## Price determination model
+
+**Research question:** Does landing of pacific sardine (or other species) have an effect on prices?
+  
+  + Some events that can allow us to estimate elasticities.
+    + COVID-19 event
+      1. From supply as closure / outbreak disrupt production.
+      2. Demand affected by market disruptions and restaurant consumption
+      3. Market change to other direction (consumption at home). 
+      4. Processor have been affected (cost of closures and implementing sanitary conditions, and reduced demand coastwide)
+    
+    + ENSO event
+    
+  + Using species prices behavior over years we can also analyze substitution pattern and price leadership.
+    + Cointegration methods.
+    + *Some questions that we can answer:* Are prices following a common trend? Is there any price which is exogeneous from the system? or the leader? Are prices following fishmeal prices, or world market prices? (e.g. from Peru?) 
+  
+  
+<!-- ## Others research topics -->
+
+<!-- Some ideas: -->
+
+<!--   + Climate dependent international fishery agreement (e.g., Mexico / West coast USA / Canada) -->
+
+

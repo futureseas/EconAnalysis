@@ -1,0 +1,165 @@
+---
+title: "Multivariate landing model for the CPS fishery"
+author: "Felipe J. Quezada"
+date: "`r format(Sys.time(), '%B %e, %Y')`"
+header-includes:
+  \usepackage{mathtools}
+  \usepackage{tcolorbox}
+  \usepackage{float}
+  \floatplacement{figure}{H}
+output:
+  pdf_document: 
+    number_sections: yes
+    citation_package: natbib
+bibliography: references.bib
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(bookdown)
+library(doBy)
+library(dplyr)
+library(fastDummies)
+library(ggplot2)
+library(here)
+library(hrbrthemes)
+library(lmtest)
+library(lubridate)
+library(magrittr)
+library(plm)
+library(reshape)
+library(reshape2)
+library(rstan)
+library(scales)
+library(sjlabelled)
+library(summarytools)
+library(texreg)
+library(tidyr)
+library(tidyverse)
+library(tinytex)
+library(viridis)
+library(xtable)
+library(zoo)
+```
+
+
+
+```{r read_data, include=FALSE} 
+PacFIN_dat <- read.csv(file = here("Data", "PacFin.csv"))
+```
+
+```{r functions, include=FALSE}
+
+meanfun <- function(x, ...){
+  c(mean=mean(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
+}
+
+sumfun <- function(x, ...){
+  c(sum=sum(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
+}
+
+sum_mean_fun <- function(x, ...){
+  c(mean=mean(x, na.rm=TRUE, ...), sum=sum(x, na.rm=TRUE, ...)) #, l=length(x))
+}
+
+port_by_state <- function(state_name) {
+  if (state_name == "ALL") {
+    collapse <- PacFIN_dat %>%
+    filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
+      filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") %>%
+      mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
+  }
+  else {
+    collapse <- PacFIN_dat %>%
+    filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
+    filter(State == state_name & (Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING")) %>%
+    mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
+  }
+  
+  ggplot(collapse, aes(y=Landings, x=Landing_year, color=Species_code, group=Species_code)) +
+  geom_line(size=1) + 
+  facet_wrap(~ Port) +
+  theme(legend.position="bottom") + 
+  theme(axis.text.x = element_text(angle=90))
+}
+
+```
+
+# Introduction
+
++ Research question:
+  + **Big question:** What is the effect of climate change on fish patterns. 
+  + **Narrow question:** How does changes in the presence of CPS affect species and location choices by vessels registered in the US west coast?
+
++ Contribution:
+  + SDM projections to forecast fisher behavior
+  + Better understanding of fishers species portfolio
+  + Policy analysis
+
++ Method
+  + Mixed logir model:
+    + Mixed logit? (A mixed logit (or random-coefficient logit) avoids assuming IIA allowing for marginal utility varies between individuals)
+    + Relax the independence of irrelevant alternative assumption: Coeficient vary randomnly across vessels, and "Variance in the unobserved vessel-specific parameters induces correlation over alternatives in the stochastic portion
+of utility." (Revelt and Train, 1997)
+    + Account for correlation in unobserved utility between repeated choices (Revelt and Train). The estimations is efficient. 
+
+
+# Species/location choice model for the CPS fishery
+
++ Choices:
+  + Set of location/specie
+  + Number of choices can vary between vessels, as well as the number of periods or choice situtations (Revelt and Train, 1997).
+  +
+
++ Explanatory variables:
+  + Species value? This assumes fisher that has rational preferences and maximizes utility. It might be that they harvest a species as they have been doing it for a long time. 
+Landings;
+  + Vessel characteristics (Note: Not all vessels go to the exact location, so that decisions might depend on their characteristics).
+  + Expected catch / species abundance?
+
+
++ Data 
+  + CDWF logbooks and landings (Caitlin)
+  + PacFIN landings by vessel & logbooks (try to connect to Global Fishing Watch). 
+  + SDM's from Barb
+
++ Consideration:
+  + Choice set important (locations and species).
+  + Outside option?
+
+
+# Graphs
+
+```{r SDM_logbooks, eval=FALSE, include=FALSE}
+#' Join SDM and landings data by port and plot correlations
+#'
+
+# Load data
+SDM_port <- read_csv("data/SDM_port.csv")
+
+landings_port <- read_csv("data/sard_dat.csv") %>%
+  select(LANDING_YEAR, port, LANDED_WEIGHT_MTONS, port_group_name) %>%
+  rename(year = LANDING_YEAR,
+         sard_mtons = LANDED_WEIGHT_MTONS) %>%
+  # replace NAs with 0s
+  mutate(sard_mtons = replace_na(sard_mtons, 0))
+
+port_dat <- landings_port %>%
+  inner_join(SDM_port, by = c("year", "port")) %>%
+  drop_na(SDM_mean)
+
+ggplot(data = port_dat, aes(x = sard_mtons, y = SDM_mean)) +
+  geom_point(alpha = 0.5) +
+  labs(x = "Sardine Landed Weight (MTONS)",
+       y = "Expected SDM Probability")
+ggsave("figures/port_compare_all.pdf", width = 5, height = 4, units = "in")
+
+ggplot(data = port_dat, aes(x = sard_mtons / 1000, y = SDM_mean)) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~port_group_name) +
+  labs(x = "Sardine Landed Weight (1000 MTONS)",
+       y = "Expected SDM Probability")
+ggsave("figures/port_compare_byport.pdf", width = 8, height = 7, units = "in")
+
+```
