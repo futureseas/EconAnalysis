@@ -1,5 +1,5 @@
 ---
-title: "Multivariate landing model for the CPS fishery"
+title: "Discrete Choice model for the CPS fishery"
 author: "Felipe J. Quezada"
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 header-includes:
@@ -114,6 +114,9 @@ of utility." @revelt1998
     + Crucial for the model the selection of the choice set. If is erroneous, our estimates would be biased.
     + We don't observe fishers complete set of alternatives.
     + They propose a method to construct alternative choices when alternative are effectively infinite *we just observe a point where vessel fish over a very large open ocean area).
+    + What is wrong with aggregating fishing areas? -> "areas may encompass highly heterogeneous fishing locations in terms of species composition and density or feasibility of fishing (e.g.unfishable rocky areas)".
+    + How this work: "Sample points from a fine scale grid of specific locations." It is a point-based approach for choosing the choice set. 
+    + Shpuld improve modeling in setting with fine-scale spatial heteogeneity.
     
     
 + Explanatory variables:

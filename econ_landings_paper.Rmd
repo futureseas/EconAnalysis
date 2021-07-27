@@ -450,7 +450,7 @@ portID_names_all <- est_data_psnd_all %>%
 
 
 
-```{r psdn_est, message=FALSE, warning=FALSE, include=FALSE}
+```{r psdn_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 
 # Notes: BRMS cannot handle splines in group-level terms.
@@ -493,6 +493,8 @@ save.image (file = "stan_fit.RData")
 pp_logn <- pp_check(fit_qPSDN_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "none")
 pp_gamm <- pp_check(fit_qPSDN_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
 
+pp_gamm <- pp_check(fit_qPSDN_gamma_close) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
+
 pp_logn / pp_gamm
 
 # What does this mean?
@@ -500,6 +502,10 @@ pp_logn / pp_gamm
 
 ```{r y_rep_gamma, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks. (Gamma distribution)"}
 pp_check(fit_qPSDN_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
+```
+
+```{r y_rep_gamma_close, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks. (Gamma distribution)"}
+pp_check(fit_qPSDN_gamma_close) + ggtitle('Gamma distribution (including closure)') + theme(legend.position = "bottom")
 ```
 
 ```{r yrep_log, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks. (Lognormal distribution)"}
@@ -681,7 +687,7 @@ portID_names_all <- est_data_msqd_all %>%
   unique()
 ```
 
-```{r msqd_est, message=FALSE, warning=FALSE, include=FALSE}
+```{r msqd_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 
 est_data_msqd$dACL_MSQD <- factor(est_data_msqd$dACL_MSQD)
