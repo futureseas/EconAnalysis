@@ -415,27 +415,16 @@ portID_names <- est_data_psnd %>%
   unique()
 ```
 
-```{r psdn_data, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
+```{r psdn_data_all, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
 
-###############################
-## Pacific Sardine Equation ###
-###############################
-
-  # hist_psdn <- est_data %>%
-  #   filter(MSQD_Landings>0) %>%
-  #   mutate(log_land_psdn = MSQD_Landings)
-  # 
-  # hist(hist_psdn$log_land_psdn)
-  
-# Select data for estimation, replace N/A landings to zero #
 est_data_psnd_all <- est_data %>%
   dplyr::select(port_num, Port, PSDN_SDM, MSQD_SDM, PSDN_Landings, Landing_year, ACL_PSDN) %>%
   dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>% 
-  filter(Landing_year >= 2000 & Landing_year < 2021)
+  filter(Landing_year >= 2000)
 
 
 # Select ports that at least they have landing PSDN once, and drop N/A #
-Tot.landings.ports <- as.data.frame(cbind(rowsum(est_data_psnd$PSDN_Landings, est_data_psnd$Port, na.rm = TRUE)))
+Tot.landings.ports <- as.data.frame(cbind(rowsum(est_data_psnd_all$PSDN_Landings, est_data_psnd_all$Port, na.rm = TRUE)))
 
 Tot.landings.ports <- Tot.landings.ports %>%
   mutate(dTotalPSDN = ifelse(V1>0, 1, 0)) %>%
@@ -450,24 +439,21 @@ est_data_psnd_all <- est_data_psnd_all %>%
   drop_na() %>%
   mutate(dClose = ifelse(ACL_PSDN == 0, 1, 0))
   
-
 # Create matrices and vectors to run STAN model #
-year_id <- as.vector(cbind(as.numeric(factor(est_data_psnd$Landing_year))));
-est_data_psnd$port_ID <- udpipe::unique_identifier(est_data_psnd, fields = "port_num", start_from = 1) 
+year_id <- as.vector(cbind(as.numeric(factor(est_data_psnd_all$Landing_year))));
+est_data_psnd_all$port_ID <- udpipe::unique_identifier(est_data_psnd_all, fields = "port_num", start_from = 1) 
 
-portID_names <- est_data_psnd %>%
+portID_names_all <- est_data_psnd_all %>%
   dplyr::select(Port, port_ID) %>%
   unique()
 ```
 
 
 
-```{r psdn_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r psdn_est, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 
 # Notes: BRMS cannot handle splines in group-level terms.
-
-
 
 fit_qPSDN_lognormal <- brm(
   bf(PSDN_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID),
@@ -486,9 +472,9 @@ fit_qPSDN_gamma <- brm(
                           chains = 4, cores = 4)
 
 fit_qPSDN_gamma_close <- brm(
-  bf(PSDN_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID),
-                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID)),
-                          data = est_data_psnd,
+  bf(PSDN_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + dClose + (1 | port_ID),
+                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + dClose + (1 | port_ID)),
+                          data = est_data_psnd_all,
                           family = hurdle_gamma(), 
                           control = list(adapt_delta = 0.999, max_treedepth = 20),
                           chains = 4, cores = 4)
@@ -658,7 +644,44 @@ portID_names <- est_data_msqd %>%
   unique()
 ```
 
-```{r msqd_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r msqd_data_all, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
+
+# Select data for estimation, replace N/A landings to zero #
+est_data_msqd_all <- est_data %>%
+  dplyr::select(port_num, Port, PSDN_SDM, MSQD_SDM, MSQD_Landings, Landing_year, ACL_MSQD) %>%
+  dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>% 
+  filter(Landing_year >= 2000) %>%
+  dplyr::mutate(dACL_MSQD= ifelse(Landing_year>=2004, 1, 0))
+
+
+# Select ports that at least they have landing PSDN once, and drop N/A #
+Tot.landings.ports <- as.data.frame(cbind(rowsum(est_data_msqd_all$MSQD_Landings, est_data_msqd_all$Port, na.rm = TRUE)))
+
+Tot.landings.ports <- Tot.landings.ports %>%
+  mutate(dTotalMSQD = ifelse(V1>0, 1, 0)) %>%
+  mutate(Port = rownames(Tot.landings.ports)) %>%
+  dplyr::select(Port, dTotalMSQD)
+
+
+### NOTE: If I use drop_na, some ports without MSQD landings are excluded. ###
+est_data_msqd_all <- est_data_msqd_all %>%
+  merge(Tot.landings.ports, by.x = "Port", by.y = "Port", all.x = TRUE, all.y = FALSE) %>%
+  filter(dTotalMSQD==1) %>%
+  # mutate(dSDA = ifelse(Port == "SDA", 1, 0)) %>%
+  # filter(dSDA == 0) %>%
+  drop_na() %>%
+  mutate(dClose = ifelse(Landing_year >= 2015,1,0))
+  
+# Create matrices and vectors to run STAN model #
+year_id <- as.vector(cbind(as.numeric(factor(est_data_msqd_all$Landing_year))));
+est_data_msqd_all$port_ID <- udpipe::unique_identifier(est_data_msqd_all, fields = "port_num", start_from = 1) 
+
+portID_names_all <- est_data_msqd_all %>%
+  dplyr::select(Port, port_ID) %>%
+  unique()
+```
+
+```{r msqd_est, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 
 est_data_msqd$dACL_MSQD <- factor(est_data_msqd$dACL_MSQD)
@@ -676,6 +699,22 @@ fit_qMSQD_gamma <- brm(
   bf(MSQD_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + (1 | port_ID),
                 hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + (1 | port_ID)),
                        data = est_data_msqd,
+                       family = hurdle_gamma(), 
+                       control = list(adapt_delta = 0.999, max_treedepth = 20),
+                       chains = 4, cores = 4)
+
+fit_qMSQD_gamma_all <- brm(
+  bf(MSQD_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + (1 | port_ID),
+                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + (1 | port_ID)),
+                       data = est_data_msqd_all,
+                       family = hurdle_gamma(), 
+                       control = list(adapt_delta = 0.999, max_treedepth = 20),
+                       chains = 4, cores = 4)
+
+fit_qMSQD_gamma_all_close <- brm(
+  bf(MSQD_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + dClose + (1 | port_ID),
+                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + dClose + (1 | port_ID)),
+                       data = est_data_msqd_all,
                        family = hurdle_gamma(), 
                        control = list(adapt_delta = 0.999, max_treedepth = 20),
                        chains = 4, cores = 4)

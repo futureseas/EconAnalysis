@@ -113,7 +113,7 @@ of utility." @revelt1998
   + Use @hicks2020 methodology to select the choice set:
     + Crucial for the model the selection of the choice set. If is erroneous, our estimates would be biased.
     + We don't observe fishers complete set of alternatives.
-    + 
+    + They propose a method to construct alternative choices when alternative are effectively infinite *we just observe a point where vessel fish over a very large open ocean area).
     
     
 + Explanatory variables:
