@@ -101,17 +101,21 @@ port_by_state <- function(state_name) {
   + Mixed logir model:
     + Mixed logit? (A mixed logit (or random-coefficient logit) avoids assuming IIA allowing for marginal utility varies between individuals)
     + Relax the independence of irrelevant alternative assumption: Coeficient vary randomnly across vessels, and "Variance in the unobserved vessel-specific parameters induces correlation over alternatives in the stochastic portion
-of utility." (Revelt and Train, 1997)
-    + Account for correlation in unobserved utility between repeated choices (Revelt and Train). The estimations is efficient. 
+of utility." @revelt1998
+    + Account for correlation in unobserved utility between repeated choices @revelt1998. The estimations is efficient. 
 
 
 # Species/location choice model for the CPS fishery
 
 + Choices:
   + Set of location/specie
-  + Number of choices can vary between vessels, as well as the number of periods or choice situtations (Revelt and Train, 1997).
-  +
-
+  + Number of choices can vary between vessels, as well as the number of periods or choice situtations @revelt1998.
+  + Use @hicks2020 methodology to select the choice set:
+    + Crucial for the model the selection of the choice set. If is erroneous, our estimates would be biased.
+    + We don't observe fishers complete set of alternatives.
+    + 
+    
+    
 + Explanatory variables:
   + Species value? This assumes fisher that has rational preferences and maximizes utility. It might be that they harvest a species as they have been doing it for a long time. 
 Landings;
