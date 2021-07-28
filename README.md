@@ -2,8 +2,8 @@
 Economic analysis of the project (e.g. landings model and discrete choice model)
 
 ## Landing model (paper draft: econ_landings_paper.pdf)
-In this paper we analayze how precese of squid and sardine affects landings of this two species, taking into consideration closures and no-fishing decision. 
-Interralation between species come from their abundance. 
+In this paper we analayze how probability of precense of squid and sardine affects landings of these two species, taking into consideration closures and no-fishing decision. 
+Interralation between species come from their probability of precense. 
 
 + Work to do...
   + Do model with closure years perform better?
