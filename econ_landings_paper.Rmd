@@ -455,13 +455,13 @@ portID_names_all <- est_data_psnd_all %>%
 
 # Notes: BRMS cannot handle splines in group-level terms.
 
-fit_qPSDN_lognormal <- brm(
-  bf(PSDN_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID),
-                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID)),
-                          data = est_data_psnd,
-                          family = hurdle_lognormal(), 
-                          control = list(adapt_delta = 0.999, max_treedepth = 20),
-                          chains = 4, cores = 4)
+# fit_qPSDN_lognormal <- brm(
+#   bf(PSDN_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID),
+#                 hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID)),
+#                           data = est_data_psnd,
+#                           family = hurdle_lognormal(), 
+#                           control = list(adapt_delta = 0.999, max_treedepth = 20),
+#                           chains = 4, cores = 4)
 
 fit_qPSDN_gamma <- brm(
   bf(PSDN_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID),
@@ -489,15 +489,40 @@ save.image (file = "stan_fit.RData")
 ```
 
 ### Compare models 
-```{r compare_dist, eval=FALSE, fig.cap="Graphical posterior predictive checks. Lognormal v/s Gamma Distribution", message=FALSE, warning=FALSE, include=FALSE}
-pp_logn <- pp_check(fit_qPSDN_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "none")
-pp_gamm <- pp_check(fit_qPSDN_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
+```{r compare_model, message=FALSE, warning=FALSE, results='asis'}
 
-pp_gamm <- pp_check(fit_qPSDN_gamma_close) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
+loo(fit_qPSDN_gamma, fit_qPSDN_gamma_close)
 
-pp_logn / pp_gamm
+# fit_qPSDN_gamma <- add_criterion(fit_qPSDN_gamma, "loo")
+# fit_qPSDN_gamma <- add_criterion(fit_qPSDN_gamma, "waic")
+# fit_qPSDN_gamma_close <- add_criterion(fit_qPSDN_gamma_close, "loo")
+# fit_qPSDN_gamma_close <- add_criterion(fit_qPSDN_gamma_close, "waic")
+# 
+# loo_compare(loo(fit_qPSDN_gamma), loo(fit_qPSDN_gamma_close)) %>%
+#   as.data.frame() %>%
+#   select(elpd_loo, elpd_diff, se_diff, p_loo, looic) %>%
+#   dplyr::rename(
+#     "ELPD-Diff" = elpd_diff, "SE-Diff" = se_diff, 
+#     "ELPD-LOO" = elpd_loo, "P-LOO" = p_loo, "LOOIC" = looic
+#   )
+# 
+# mw1 <- model_weights(fit_qPSDN_gamma, fit_qPSDN_gamma_close, weights = "loo")[rownames(comp)]
+# 
+# comp %>%
+#   cbind("Akaike-Weight" = mw1) %>%
+#   apa_table(
+#     format = "latex", booktabs = TRUE, digits = 2,
+#     caption = "Comparison of models fit1 to fit3 based on approximate leave-one-out cross-validation.",
+#     note =  "ELPD-LOO = expected log posterior predictive density (higher is better); ELPD-DIFF = difference in ELPD values compared to the best model. SE-DIFF = standard error of the ELPD difference. P-LOO = effective number of model parameters (lower is better); LOOIC: leave-one-out information criterion (lower is better); Akaike-Weight = Model weight based on the LOOIC values (higher is better).",
+#     align = c("l", rep("r", 6))
+#     )
 
-# What does this mean?
+# pp_logn <- pp_check(fit_qPSDN_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "none")
+# pp_gamm <- pp_check(fit_qPSDN_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
+# 
+# pp_gamm_c <- pp_check(fit_qPSDN_gamma_close) + ggtitle('Gamma distribution (close)') + theme(legend.position = "bottom")
+# 
+# pp_gamm_c / pp_gamm
 ```
 
 ```{r y_rep_gamma, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks. (Gamma distribution)"}
@@ -508,33 +533,8 @@ pp_check(fit_qPSDN_gamma) + ggtitle('Gamma distribution') + theme(legend.positio
 pp_check(fit_qPSDN_gamma_close) + ggtitle('Gamma distribution (including closure)') + theme(legend.position = "bottom")
 ```
 
-```{r yrep_log, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks. (Lognormal distribution)"}
+```{r yrep_log, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
 pp_check(fit_qPSDN_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "bottom")
-```
-
-
-```{r model-comp, message=FALSE, warning=FALSE, results='asis'}
-fit_qPSDN_gamma <- add_criterion(fit_qPSDN_gamma, "loo")
-fit_qPSDN_lognormal <- add_criterion(fit_qPSDN_lognormal, "loo")
-
-comp <- loo_compare(loo(fit_qPSDN_gamma), loo(fit_qPSDN_lognormal)) %>%
-  as.data.frame() %>%
-  select(elpd_loo, elpd_diff, se_diff, p_loo, looic) %>%
-  dplyr::rename(
-    "ELPD-Diff" = elpd_diff, "SE-Diff" = se_diff, 
-    "ELPD-LOO" = elpd_loo, "P-LOO" = p_loo, "LOOIC" = looic
-  )
-
-mw1 <- model_weights(fit_qPSDN_gamma, fit_qPSDN_lognormal, weights = "loo")[rownames(comp)]
-
-comp %>%
-  cbind("Akaike-Weight" = mw1) %>%
-  apa_table(
-    format = "latex", booktabs = TRUE, digits = 2,
-    caption = "Comparison of models fit1 to fit3 based on approximate leave-one-out cross-validation.",
-    note =  "ELPD-LOO = expected log posterior predictive density (higher is better); ELPD-DIFF = difference in ELPD values compared to the best model. SE-DIFF = standard error of the ELPD difference. P-LOO = effective number of model parameters (lower is better); LOOIC: leave-one-out information criterion (lower is better); Akaike-Weight = Model weight based on the LOOIC values (higher is better).",
-    align = c("l", rep("r", 6))
-  )
 ```
 
 
