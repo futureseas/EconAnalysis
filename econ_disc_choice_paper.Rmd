@@ -117,6 +117,9 @@ of utility." @revelt1998
     + What is wrong with aggregating fishing areas? -> "areas may encompass highly heterogeneous fishing locations in terms of species composition and density or feasibility of fishing (e.g.unfishable rocky areas)". THIS COULD BIAS OUR RESULTS.
     + How this work: "Sample points from a fine scale grid of specific locations." It is a point-based approach for choosing the choice set. 
     + Should improve modeling in setting with fine-scale spatial heteogeneity.
+    + The method is called: **Grid point-based sampling models.**
+      + The region study is restricted, but within the region there are infinite points.
+      + The choice set considerate **depth on water**
     
     
     
