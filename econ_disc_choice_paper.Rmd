@@ -119,7 +119,7 @@ of utility." @revelt1998
     + Should improve modeling in setting with fine-scale spatial heteogeneity.
     + The method is called: **Grid point-based sampling models.**
       + The region study is restricted, but within the region there are infinite points.
-      + The choice set considerate **depth on water**
+      + The choice set considerate **depth on water**. Does this is an important variable for CPS fisheries?
     
     
     

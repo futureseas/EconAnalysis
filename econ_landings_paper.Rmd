@@ -416,7 +416,7 @@ portID_names <- est_data_psnd %>%
 ```
 
 
-```{r psdn_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r psdn_est, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 
 # Notes: BRMS cannot handle splines in group-level terms.
@@ -512,8 +512,7 @@ plot(conditional_effects(fit_qPSDN_gamma, "PSDN_SDM", surface=TRUE), ask = FALSE
 plot(conditional_effects(fit_qPSDN_gamma, "MSQD_SDM", surface=TRUE), ask = FALSE)
 ```  
 
-```{r ACL_effect, echo=FALSE, fig.cap=, message=FALSE, warning=FALSE}
-
+```{r ACL_effect, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
 # summary(fit_qPSDN_gamma) 
 plot(conditional_effects(fit_qPSDN_gamma, "ACL_PSDN", surface=TRUE), ask = FALSE)
 ```  
@@ -646,7 +645,7 @@ portID_names_all <- est_data_msqd_all %>%
   unique()
 ```
 
-```{r msqd_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r msqd_est, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 
 est_data_msqd$dACL_MSQD <- factor(est_data_msqd$dACL_MSQD)
@@ -679,19 +678,10 @@ save.image (file = "stan_fit.RData")
 # launch_shinystan(fit_qPSDN_gamma) 
 ```
 
-### Compare models 
-```{r y_rep_gamma_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landings model. (Gamma distribution)"}
-pp_check(fit_qMSQD_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "bottom")
-```
-
-### Compare models 
-```{r y_rep_gamma_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landings model. (Gamma distribution)"}
-pp_check(fit_qMSQD_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
-```
 
 ```{r model-comp-msqd, message=FALSE, warning=FALSE, results='asis'}
-fit_qMSQD_gamma_gamma <- add_criterion(fit_qMSQD_gamma, "loo")
-fit_qMSQD_gamma_lognormal <- add_criterion(fit_qMSQD_lognormal, "loo")
+fit_qMSQD_gamma <- add_criterion(fit_qMSQD_gamma, "loo")
+fit_qMSQD_lognormal <- add_criterion(fit_qMSQD_lognormal, "loo")
 
 comp <- loo_compare(loo(fit_qMSQD_gamma), loo(fit_qMSQD_lognormal)) %>%
   as.data.frame() %>%
@@ -712,6 +702,18 @@ comp %>%
     align = c("l", rep("r", 6))
   )
 ```
+
+
+### Compare models 
+```{r y_rep_logn_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landings model. (Gamma distribution)"}
+pp_check(fit_qMSQD_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "bottom")
+```
+
+### Compare models 
+```{r y_rep_gamma_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landings model. (Gamma distribution)"}
+pp_check(fit_qMSQD_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
+```
+
 
 ### Effect of SDM's on Market SquidSardine landings
 
