@@ -654,11 +654,19 @@ est_data_msqd_all$dACL_MSQD <- factor(est_data_msqd_all$dACL_MSQD)
 str(est_data_msqd$dACL_MSQD)
 str(est_data_msqd_all$dACL_MSQD)
 
-fit_qMSQD_gamma_all_close <- brm(
+fit_qMSQD_gamma <- brm(
   bf(MSQD_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + dClose + (1 | port_ID),
                 hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + dClose + (1 | port_ID)),
                        data = est_data_msqd_all,
                        family = hurdle_gamma(), 
+                       control = list(adapt_delta = 0.999, max_treedepth = 20),
+                       chains = 4, cores = 4)
+
+fit_qMSQD_lognormal <- brm(
+  bf(MSQD_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + dClose + (1 | port_ID),
+                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + dClose + (1 | port_ID)),
+                       data = est_data_msqd_all,
+                       family = hurdle_lognormal(), 
                        control = list(adapt_delta = 0.999, max_treedepth = 20),
                        chains = 4, cores = 4)
 
@@ -672,21 +680,13 @@ save.image (file = "stan_fit.RData")
 ```
 
 ### Compare models 
-```{r compare_dist_msqd, eval=FALSE, fig.cap="Graphical posterior predictive checks. Lognormal v/s Gamma Distribution for MSQD landings model", message=FALSE, warning=FALSE, include=FALSE}
-pp_logn <- pp_check(fit_qMSQD_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "none")
-pp_gamm <- pp_check(fit_qMSQD_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
-
-pp_logn / pp_gamm
-
-# What does this mean?
+```{r y_rep_gamma_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landings model. (Gamma distribution)"}
+pp_check(fit_qMSQD_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "bottom")
 ```
 
+### Compare models 
 ```{r y_rep_gamma_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landings model. (Gamma distribution)"}
 pp_check(fit_qMSQD_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
-```
-
-```{r yrep_log_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landinsg model. (Lognormal distribution)"}
-pp_check(fit_qMSQD_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "bottom")
 ```
 
 ```{r model-comp-msqd, message=FALSE, warning=FALSE, results='asis'}

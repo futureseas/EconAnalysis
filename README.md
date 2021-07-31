@@ -7,6 +7,7 @@ Interralation between species come from their probability of precense.
 
 + Work to do...
   + What is the best way to incorporate ACL? Nonlinear function with a cap? Directly in the linear model? Censored data?
+  + Try different specifications for Market Squid estimations.
   + Check prediction power of the models... Read [Making prediction from stan models in R](https://medium.com/@alex.pavlakis/making-predictions-from-stan-models-in-r-3e349dfac1ed)
 
 ## Discrete Choice Model (paper draft: econ_disc_choice_paper.pdf)
@@ -14,4 +15,4 @@ Estimation of a mixed logit for location/species decision using PacFIN vessel da
 
 + Work to do...
   + Read more theory
-  + I will sellecting choice set based on Hicks's paper.
+  + I will selecting the choice set based on Hicks's paper.

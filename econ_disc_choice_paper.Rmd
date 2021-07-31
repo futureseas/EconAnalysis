@@ -143,8 +143,7 @@ Landings;
 # Graphs
 
 ```{r SDM_logbooks, eval=FALSE, include=FALSE}
-#' Join SDM and landings data by port and plot correlations
-#'
+#' Join SDM and landings data by port and plot correlations #'
 
 # Load data
 SDM_port <- read_csv("data/SDM_port.csv")
