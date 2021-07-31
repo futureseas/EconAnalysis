@@ -416,7 +416,7 @@ portID_names <- est_data_psnd %>%
 ```
 
 
-```{r psdn_est, message=FALSE, warning=FALSE, include=FALSE}
+```{r psdn_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 
 # Notes: BRMS cannot handle splines in group-level terms.
@@ -645,7 +645,7 @@ portID_names_all <- est_data_msqd_all %>%
   unique()
 ```
 
-```{r msqd_est, message=FALSE, warning=FALSE, include=FALSE}
+```{r msqd_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 
 est_data_msqd$dACL_MSQD <- factor(est_data_msqd$dACL_MSQD)
