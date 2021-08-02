@@ -787,7 +787,7 @@ plot(conditional_effects(
 
 # Appendix 
 
-```{r int_effect_sep, fig.cap = "SDMs effect Landings and Hurdle."}
+```{r int_effect_sep, eval=FALSE, fig.cap=, include=FALSE}
 
 hu <- plot(conditional_effects(fit_qPSDN_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="hu"),
            plot = FALSE, ask = FALSE)
@@ -798,7 +798,7 @@ mu[[1]] + hu[[1]] + plot_layout(nrow = 2)
 
 ```
 
-```{r int_effect_sep_msqd, fig.cap = "SDMs effect Landings and Hurdle."}
+```{r int_effect_sep_msqd, eval=FALSE, fig.cap=, include=FALSE}
 
 hu <- plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="hu"),
            plot = FALSE, ask = FALSE)
