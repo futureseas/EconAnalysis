@@ -438,7 +438,8 @@ fit_qPSDN_gamma <- brm(
                 hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID)),
                           data = est_data_psnd,
                           family = hurdle_gamma(), 
-                          control = list(adapt_delta = 0.999, max_treedepth = 20))
+                          control = list(adapt_delta = 0.999, max_treedepth = 20),
+                       chains = 4, cores = 4)
 
 save.image (file = "stan_fit.RData")
 
