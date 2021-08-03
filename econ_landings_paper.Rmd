@@ -17,7 +17,7 @@ urlcolor: blue
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-load("stan_fit.RData")
+# load("stan_fit.RData")
 # rm(list = ls(all.names = TRUE)) 
 # gc()
 library(bookdown)
@@ -416,7 +416,7 @@ portID_names <- est_data_psnd %>%
 ```
 
 
-```{r psdn_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r psdn_est, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 
 # Notes: BRMS cannot handle splines in group-level terms.
@@ -428,6 +428,10 @@ portID_names <- est_data_psnd %>%
 #                           family = hurdle_lognormal(), 
 #                           control = list(adapt_delta = 0.999, max_treedepth = 20),
 #                           chains = 4, cores = 4)
+
+est_data_psnd$port_ID<- factor(est_data_psnd$port_ID)
+str(est_data_psnd$port_ID)
+
 
 fit_qPSDN_gamma <- brm(
   bf(PSDN_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID),
@@ -446,51 +450,9 @@ save.image (file = "stan_fit.RData")
 # launch_shinystan(fit_qPSDN_gamma) 
 ```
 
-### Compare models 
-```{r compare_model, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
-fit_qPSDN_gamma <- add_criterion(fit_qPSDN_gamma, "loo")
-fit_qPSDN_lognormal <- add_criterion(fit_qPSDN_gamma, "waic")
-
-# loo_compare(loo(fit_qPSDN_gamma), loo(fit_qPSDN_gamma_close)) %>%
-#   as.data.frame() %>%
-#   select(elpd_loo, elpd_diff, se_diff, p_loo, looic) %>%
-#   dplyr::rename(
-#     "ELPD-Diff" = elpd_diff, "SE-Diff" = se_diff, 
-#     "ELPD-LOO" = elpd_loo, "P-LOO" = p_loo, "LOOIC" = looic
-#   )
-# 
-# mw1 <- model_weights(fit_qPSDN_gamma, fit_qPSDN_gamma_close, weights = "loo")[rownames(comp)]
-# 
-# comp %>%
-#   cbind("Akaike-Weight" = mw1) %>%
-#   apa_table(
-#     format = "latex", booktabs = TRUE, digits = 2,
-#     caption = "Comparison of models fit1 to fit3 based on approximate leave-one-out cross-validation.",
-#     note =  "ELPD-LOO = expected log posterior predictive density (higher is better); ELPD-DIFF = difference in ELPD values compared to the best model. SE-DIFF = standard error of the ELPD difference. P-LOO = effective number of model parameters (lower is better); LOOIC: leave-one-out information criterion (lower is better); Akaike-Weight = Model weight based on the LOOIC values (higher is better).",
-#     align = c("l", rep("r", 6))
-#     )
-
-# pp_logn <- pp_check(fit_qPSDN_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "none")
-# pp_gamm <- pp_check(fit_qPSDN_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
-# 
-# pp_gamm_c <- pp_check(fit_qPSDN_gamma_close) + ggtitle('Gamma distribution (close)') + theme(legend.position = "bottom")
-# 
-# pp_gamm_c / pp_gamm
-```
-
-
 ```{r y_rep_gamma, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks. (Gamma distribution)"}
 pp_check(fit_qPSDN_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
 ```
-
-```{r y_rep_gamma_close, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
-pp_check(fit_qPSDN_gamma_close) + ggtitle('Gamma distribution (including closure)') + theme(legend.position = "bottom")
-```
-
-```{r yrep_log, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
-pp_check(fit_qPSDN_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "bottom")
-```
-
 
 ### Effect of SDM's on Sardine landings
 
@@ -645,27 +607,32 @@ portID_names_all <- est_data_msqd_all %>%
   unique()
 ```
 
-```{r msqd_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r msqd_est, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 
 est_data_msqd$dACL_MSQD <- factor(est_data_msqd$dACL_MSQD)
 est_data_msqd_all$dACL_MSQD <- factor(est_data_msqd_all$dACL_MSQD)
 str(est_data_msqd$dACL_MSQD)
 str(est_data_msqd_all$dACL_MSQD)
+est_data_msqd_all$dClose<- factor(est_data_msqd_all$dClose)
+str(est_data_msqd_all$dClose)
+est_data_msqd_all$port_ID<- factor(est_data_msqd_all$port_ID)
+str(est_data_msqd_all$port_ID)
 
-fit_qMSQD_gamma <- brm(
-  bf(MSQD_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + dClose + (1 | port_ID),
-                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + dClose + (1 | port_ID)),
+fit_qMSQD_gamma_dClose <- brm(
+  bf(MSQD_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + (dClose +  1 | port_ID),
+                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + (dClose +  1 | port_ID)),
                        data = est_data_msqd_all,
-                       family = hurdle_gamma(), 
+                       family = hurdle_gamma(),
                        control = list(adapt_delta = 0.999, max_treedepth = 20),
                        chains = 4, cores = 4)
 
-fit_qMSQD_lognormal <- brm(
-  bf(MSQD_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + dClose + (1 | port_ID),
-                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dACL_MSQD + dClose + (1 | port_ID)),
+
+fit_qMSQD_gamma <- brm(
+  bf(MSQD_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + (1 | port_ID),
+                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + (1 | port_ID)),
                        data = est_data_msqd_all,
-                       family = hurdle_lognormal(), 
+                       family = hurdle_gamma(), 
                        control = list(adapt_delta = 0.999, max_treedepth = 20),
                        chains = 4, cores = 4)
 
@@ -681,7 +648,7 @@ save.image (file = "stan_fit.RData")
 
 ```{r model-comp-msqd, message=FALSE, warning=FALSE, results='asis'}
 fit_qMSQD_gamma <- add_criterion(fit_qMSQD_gamma, "loo")
-fit_qMSQD_lognormal <- add_criterion(fit_qMSQD_lognormal, "loo")
+fit_qMSQD_lognormal <- add_criterion(fit_qMSQD_gamma_dClose, "loo")
 
 comp <- loo_compare(loo(fit_qMSQD_gamma), loo(fit_qMSQD_lognormal)) %>%
   as.data.frame() %>%
@@ -706,7 +673,7 @@ comp %>%
 
 ### Compare models 
 ```{r y_rep_logn_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landings model. (Gamma distribution)"}
-pp_check(fit_qMSQD_lognormal) + ggtitle('Lognormal distribution') + theme(legend.position = "bottom")
+pp_check(fit_qMSQD_gamma_dClose) + ggtitle('Lognormal distribution') + theme(legend.position = "bottom")
 ```
 
 ### Compare models 
@@ -720,17 +687,17 @@ pp_check(fit_qMSQD_gamma) + ggtitle('Gamma distribution') + theme(legend.positio
 ```{r PSDN_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of SDMs on Pacific Sardine landings."}
 
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qMSQD_gamma_dClose, "PSDN_SDM", surface=TRUE), ask = FALSE)
 ```  
 
 ```{r MSQD_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of SDMs on Pacific Sardine landings."}
 
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qMSQD_gamma, "MSQD_SDM", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qMSQD_gamma_dClose, "MSQD_SDM", surface=TRUE), ask = FALSE)
 ```  
 ```{r ACL_effect_msqd, echo=FALSE, fig.cap="Effect ACL on MSQD", message=TRUE, warning=TRUE}
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qMSQD_gamma, "dACL_MSQD"), ask = FALSE)
+plot(conditional_effects(fit_qMSQD_gamma_dClose, "port_ID"), ask = FALSE)
 ```  
 
 
@@ -740,7 +707,7 @@ plot(conditional_effects(fit_qMSQD_gamma, "dACL_MSQD"), ask = FALSE)
 conditions <- data.frame(port_ID = unique(est_data_msqd$port_ID))
 rownames(conditions) <- unique(est_data_msqd$Port)
 plot(conditional_effects(
-  fit_qMSQD_gamma, "PSDN_SDM", surface=TRUE, conditions = conditions, 
+  fit_qMSQD_gamma_dClose, "PSDN_SDM", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
@@ -748,7 +715,7 @@ plot(conditional_effects(
 
 ```{r by_port_msqd_sdm_msqd}
 plot(conditional_effects(
-  fit_qMSQD_gamma, "MSQD_SDM", surface=TRUE, conditions = conditions, 
+  fit_qMSQD_gamma_dClose, "MSQD_SDM", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 
 ```
@@ -759,7 +726,7 @@ plot(conditional_effects(
 ```{r int_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of SDMs on Pacific Sardine landings."}
 
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qMSQD_gamma_dClose, "PSDN_SDM:MSQD_SDM", surface=TRUE), ask = FALSE)
 
 # Investigate chain and posterior distributions. 
 # https://cran.r-project.org/web/packages/bayesplot/vignettes/graphical-ppcs.html
@@ -777,7 +744,7 @@ plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE), as
 
 ```{r by_port_both_sdm_msqd, echo=FALSE, message=FALSE, warning=FALSE}
 plot(conditional_effects(
-  fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, conditions = conditions, 
+  fit_qMSQD_gamma_dClose, "PSDN_SDM:MSQD_SDM", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 

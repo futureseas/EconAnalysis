@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.6.22)  31 JUL 2021 11:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.6.22)  2 AUG 2021 08:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1043,7 +1043,7 @@ LaTeX Warning: Reference `fig:plot_landings' on page 1 undefined on input line
 LaTeX Warning: Reference `fig:ts_prices' on page 1 undefined on input line 134.
 
 
-<econ_landings_paper_files/figure-latex/ts_landings-1.pdf, id=92, 469.755pt x 3
+<econ_landings_paper_files/figure-latex/ts_landings-1.pdf, id=88, 469.755pt x 3
 25.215pt>
 File: econ_landings_paper_files/figure-latex/ts_landings-1.pdf Graphic file (ty
 pe pdf)
@@ -1055,7 +1055,7 @@ df  used on input line 139.
 
 {c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pd
 ftex.map}]
-<econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf, id=107, 469.
+<econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf, id=103, 469.
 755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf Graphic 
 file (type pdf)
@@ -1069,7 +1069,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.148 
        <./econ_landings_paper_files/figure-latex/ts_landings-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port-1.pdf, id=118, 469.755pt x 325.
+<econ_landings_paper_files/figure-latex/by_port-1.pdf, id=114, 469.755pt x 325.
 215pt>
 File: econ_landings_paper_files/figure-latex/by_port-1.pdf Graphic file (type p
 df)
@@ -1083,7 +1083,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.154 
        <./econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf>]
-<econ_landings_paper_files/figure-latex/ts_by_port-1.pdf, id=128, 469.755pt x 3
+<econ_landings_paper_files/figure-latex/ts_by_port-1.pdf, id=124, 469.755pt x 3
 25.215pt>
 File: econ_landings_paper_files/figure-latex/ts_by_port-1.pdf Graphic file (typ
 e pdf)
@@ -1097,7 +1097,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.164 
        <./econ_landings_paper_files/figure-latex/by_port-1.pdf>]
-<econ_landings_paper_files/figure-latex/SDM_by_port-1.pdf, id=139, 469.755pt x 
+<econ_landings_paper_files/figure-latex/SDM_by_port-1.pdf, id=135, 469.755pt x 
 325.215pt>
 File: econ_landings_paper_files/figure-latex/SDM_by_port-1.pdf Graphic file (ty
 pe pdf)
@@ -1116,7 +1116,7 @@ LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-<econ_landings_paper_files/figure-latex/SDM_by_port_msqd-1.pdf, id=151, 469.755
+<econ_landings_paper_files/figure-latex/SDM_by_port_msqd-1.pdf, id=147, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/SDM_by_port_msqd-1.pdf Graphic fil
 e (type pdf)
@@ -1131,7 +1131,7 @@ has been already used, duplicate ignored
 l.181 \begin{verbatim}
                        <./econ_landings_paper_files/figure-latex/SDM_by_port-1.
 pdf>]
-<econ_landings_paper_files/figure-latex/SDM_by_port_msqd_v2-1.pdf, id=163, 469.
+<econ_landings_paper_files/figure-latex/SDM_by_port_msqd_v2-1.pdf, id=159, 469.
 755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/SDM_by_port_msqd_v2-1.pdf Graphic 
 file (type pdf)
@@ -1153,7 +1153,7 @@ n already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.360       U
              ncertainty from modeling the process (as well as from the]
-<econ_landings_paper_files/figure-latex/y_rep_gamma-1.pdf, id=211, 469.755pt x 
+<econ_landings_paper_files/figure-latex/y_rep_gamma-1.pdf, id=207, 469.755pt x 
 325.215pt>
 File: econ_landings_paper_files/figure-latex/y_rep_gamma-1.pdf Graphic file (ty
 pe pdf)
@@ -1162,7 +1162,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/y_rep_gamma-1.p
 df  used on input line 448.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [10]
-<econ_landings_paper_files/figure-latex/by_port_sdm_psdn-1.pdf, id=224, 469.755
+<econ_landings_paper_files/figure-latex/by_port_sdm_psdn-1.pdf, id=220, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_sdm_psdn-1.pdf Graphic fil
 e (type pdf)
@@ -1177,7 +1177,7 @@ n-1.pdf  used on input line 459.
 l.461 \includegraphics
                       {econ_landings_paper_files/figure-latex/by_port_msqd_s...
  <./econ_landings_paper_files/figure-latex/y_rep_gamma-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_msqd_sdm-1.pdf, id=241, 469.755
+<econ_landings_paper_files/figure-latex/by_port_msqd_sdm-1.pdf, id=237, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_msqd_sdm-1.pdf Graphic fil
 e (type pdf)
@@ -1186,7 +1186,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_msqd_sd
 m-1.pdf  used on input line 461.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [12 <./econ_landings_paper_files/figure-latex/by_port_sdm_psdn-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_acl_psdn-1.pdf, id=256, 469.755
+<econ_landings_paper_files/figure-latex/by_port_acl_psdn-1.pdf, id=252, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_acl_psdn-1.pdf Graphic fil
 e (type pdf)
@@ -1195,7 +1195,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_acl_psd
 n-1.pdf  used on input line 463.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [13 <./econ_landings_paper_files/figure-latex/by_port_msqd_sdm-1.pdf>]
-<econ_landings_paper_files/figure-latex/int_effect_total-1.pdf, id=270, 469.755
+<econ_landings_paper_files/figure-latex/int_effect_total-1.pdf, id=266, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/int_effect_total-1.pdf Graphic fil
 e (type pdf)
@@ -1204,7 +1204,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_tota
 l-1.pdf  used on input line 472.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [14 <./econ_landings_paper_files/figure-latex/by_port_acl_psdn-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_both_sdm-1.pdf, id=284, 469.755
+<econ_landings_paper_files/figure-latex/by_port_both_sdm-1.pdf, id=280, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_both_sdm-1.pdf Graphic fil
 e (type pdf)
@@ -1219,11 +1219,7 @@ m-1.pdf  used on input line 476.
 l.479 ...t Squid model}\label{market-squid-model}}
                                                    <./econ_landings_paper_files
 /figure-latex/int_effect_total-1.pdf>]
-Overfull \hbox (201.63454pt too wide) in paragraph at lines 485--503
- [] 
- []
-
-<econ_landings_paper_files/figure-latex/y_rep_logn_msqd-1.pdf, id=297, 469.755p
+<econ_landings_paper_files/figure-latex/y_rep_logn_msqd-1.pdf, id=292, 469.755p
 t x 325.215pt>
 File: econ_landings_paper_files/figure-latex/y_rep_logn_msqd-1.pdf Graphic file
  (type pdf)
@@ -1237,7 +1233,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.516 
        <./econ_landings_paper_files/figure-latex/by_port_both_sdm-1.pdf>]
-<econ_landings_paper_files/figure-latex/y_rep_gamma_msqd-1.pdf, id=310, 469.755
+<econ_landings_paper_files/figure-latex/y_rep_gamma_msqd-1.pdf, id=306, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/y_rep_gamma_msqd-1.pdf Graphic fil
 e (type pdf)
@@ -1251,7 +1247,7 @@ d-1.pdf  used on input line 522.
                                                   \__shipout_drop_firstpage_...
 l.526 
        <./econ_landings_paper_files/figure-latex/y_rep_logn_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/PSDN_effect_total_msqd-1.pdf, id=326, 4
+<econ_landings_paper_files/figure-latex/PSDN_effect_total_msqd-1.pdf, id=322, 4
 69.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/PSDN_effect_total_msqd-1.pdf Graph
 ic file (type pdf)
@@ -1265,7 +1261,7 @@ al_msqd-1.pdf  used on input line 533.
                                                   \__shipout_drop_firstpage_...
 l.536 
        <./econ_landings_paper_files/figure-latex/y_rep_gamma_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/MSQD_effect_total_msqd-1.pdf, id=342, 4
+<econ_landings_paper_files/figure-latex/MSQD_effect_total_msqd-1.pdf, id=338, 4
 69.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/MSQD_effect_total_msqd-1.pdf Graph
 ic file (type pdf)
@@ -1273,7 +1269,7 @@ ic file (type pdf)
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/MSQD_effect_tot
 al_msqd-1.pdf  used on input line 537.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-<econ_landings_paper_files/figure-latex/ACL_effect_msqd-1.pdf, id=343, 469.755p
+<econ_landings_paper_files/figure-latex/ACL_effect_msqd-1.pdf, id=339, 469.755p
 t x 325.215pt>
 File: econ_landings_paper_files/figure-latex/ACL_effect_msqd-1.pdf Graphic file
  (type pdf)
@@ -1297,7 +1293,7 @@ Overfull \vbox (0.9984pt too high) has occurred while \output is active []
 
 [20 <./econ_landings_paper_files/figure-latex/MSQD_effect_total_msqd-1.pdf> <./
 econ_landings_paper_files/figure-latex/ACL_effect_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_sdm_msdq-1.pdf, id=377, 469.755
+<econ_landings_paper_files/figure-latex/by_port_sdm_msdq-1.pdf, id=373, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_sdm_msdq-1.pdf Graphic fil
 e (type pdf)
@@ -1305,7 +1301,7 @@ e (type pdf)
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_sdm_msd
 q-1.pdf  used on input line 543.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-<econ_landings_paper_files/figure-latex/by_port_msqd_sdm_msqd-1.pdf, id=378, 46
+<econ_landings_paper_files/figure-latex/by_port_msqd_sdm_msqd-1.pdf, id=374, 46
 9.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_msqd_sdm_msqd-1.pdf Graphi
 c file (type pdf)
@@ -1314,7 +1310,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_msqd_sd
 m_msqd-1.pdf  used on input line 545.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [21 <./econ_landings_paper_files/figure-latex/by_port_sdm_msdq-1.pdf>]
-<econ_landings_paper_files/figure-latex/int_effect_total_msqd-1.pdf, id=391, 46
+<econ_landings_paper_files/figure-latex/int_effect_total_msqd-1.pdf, id=387, 46
 9.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/int_effect_total_msqd-1.pdf Graphi
 c file (type pdf)
@@ -1323,7 +1319,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_tota
 l_msqd-1.pdf  used on input line 554.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [22 <./econ_landings_paper_files/figure-latex/by_port_msqd_sdm_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_both_sdm_msqd-1.pdf, id=405, 46
+<econ_landings_paper_files/figure-latex/by_port_both_sdm_msqd-1.pdf, id=401, 46
 9.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_both_sdm_msqd-1.pdf Graphi
 c file (type pdf)
@@ -1337,37 +1333,9 @@ m_msqd-1.pdf  used on input line 558.
                                                   \__shipout_drop_firstpage_...
 l.561 \section{Conclusions}\label{conclusions}}
                                                 <./econ_landings_paper_files/fi
-gure-latex/int_effect_total_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/int_effect_sep-1.pdf, id=417, 469.755pt
- x 325.215pt>
-File: econ_landings_paper_files/figure-latex/int_effect_sep-1.pdf Graphic file 
-(type pdf)
-<use econ_landings_paper_files/figure-latex/int_effect_sep-1.pdf>
-Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_sep-
-1.pdf  used on input line 568.
-(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[24 <./econ_landings_paper_files/figure-latex/by_port_both_sdm_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/int_effect_sep_msqd-1.pdf, id=430, 469.
-755pt x 325.215pt>
-File: econ_landings_paper_files/figure-latex/int_effect_sep_msqd-1.pdf Graphic 
-file (type pdf)
-<use econ_landings_paper_files/figure-latex/int_effect_sep_msqd-1.pdf>
-Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_sep_
-msqd-1.pdf  used on input line 574.
-(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[25pdfTeX warning (ext4): destination with the same identifier (name{figure.12}
-) has been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.577 
-       <./econ_landings_paper_files/figure-latex/int_effect_sep-1.pdf>] (./econ
-_landings_paper.bbl) [26pdfTeX warning (ext4): destination with the same identi
-fier (name{figure.13}) has been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.580 \end{document}
-                     <./econ_landings_paper_files/figure-latex/int_effect_sep_m
-sqd-1.pdf>] (./econ_landings_paper.aux)
+gure-latex/int_effect_total_msqd-1.pdf>] (./econ_landings_paper.bbl) [24 <./eco
+n_landings_paper_files/figure-latex/by_port_both_sdm_msqd-1.pdf>] (./econ_landi
+ngs_paper.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -1375,13 +1343,13 @@ LaTeX Warning: There were undefined references.
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `econ_landings_paper.out' has not changed.
-(rerunfilecheck)             Checksum: 639DCBE903AD57200A5F1EEF038969B6;3607.
+(rerunfilecheck)             Checksum: 805D0F7D65C6AD7AD516F980D1E76C91;3523.
  ) 
 Here is how much of TeX's memory you used:
- 22298 strings out of 480470
- 408413 string characters out of 5897013
- 712813 words of memory out of 5000000
- 39457 multiletter control sequences out of 15000+600000
+ 22276 strings out of 480470
+ 407450 string characters out of 5897013
+ 712814 words of memory out of 5000000
+ 39443 multiletter control sequences out of 15000+600000
  459741 words of font info for 71 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  83i,11n,83p,523b,524s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1404,10 +1372,10 @@ lic/lm/lmri10.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/t
 ype1/public/lm/lmsy10.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist
 /fonts/type1/public/lm/lmtt10.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/te
 xmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on econ_landings_paper.pdf (26 pages, 686180 bytes).
+Output written on econ_landings_paper.pdf (24 pages, 584326 bytes).
 PDF statistics:
- 540 PDF objects out of 1000 (max. 8388607)
- 425 compressed objects within 5 object streams
- 87 named destinations out of 1000 (max. 500000)
- 301 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 507 PDF objects out of 1000 (max. 8388607)
+ 402 compressed objects within 5 object streams
+ 81 named destinations out of 1000 (max. 500000)
+ 283 words of extra memory for PDF output out of 10000 (max. 10000000)
 
