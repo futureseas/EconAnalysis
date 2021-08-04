@@ -570,7 +570,7 @@ portID_names_all <- est_data_msqd_all %>%
   unique()
 ```
 
-```{r msqd_est, message=FALSE, warning=FALSE, include=FALSE}
+```{r msqd_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 est_data_msqd_all$dACL_MSQD <- factor(est_data_msqd_all$dACL_MSQD)
 est_data_msqd_all$dClose    <- factor(est_data_msqd_all$dClose)
@@ -596,6 +596,8 @@ fit_qMSQD_gamma <- brm(
                        chains = 4, cores = 4)
 
 save.image (file = "stan_fit.RData")
+
+LOO(fit_qMSQD_gamma, fit_qMSQD_gamma_dClose)
 
 # ##  Extract Grouo-Level estimates ##
 # ranef(fit_qPSDN_gamma)
@@ -676,6 +678,13 @@ plot(conditional_effects(
 ```{r by_port_msqd_sdm_msqd}
 plot(conditional_effects(
   fit_qMSQD_gamma_dClose, "MSQD_SDM", surface=TRUE, conditions = conditions, 
+  re_formula = NULL), ncol = 4, points = FALSE)
+
+```
+
+```{r by_port_msqd_sdm_msqd}
+plot(conditional_effects(
+  fit_qMSQD_gamma_dClose, "dClose", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 
 ```
