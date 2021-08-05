@@ -18,7 +18,7 @@ urlcolor: blue
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 rm(list = ls(all.names = TRUE)) 
-load("stan_fit.RData")
+# load("stan_fit.RData")
 # gc()
 library(bookdown)
 library(brms)
@@ -413,16 +413,15 @@ est_data_psnd$port_ID <- udpipe::unique_identifier(est_data_psnd, fields = "port
 portID_names <- est_data_psnd %>%
   dplyr::select(Port, port_ID) %>%
   unique()
+
+est_data_psnd$port_ID <- as.factor(est_data_psnd$port_ID)
+class(est_data_psnd$port_ID)
 ```
 
 
 ```{r psdn_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
-
-est_data_psnd$port_ID <- as.numeric(est_data_psnd$port_ID)
-class(est_data_psnd$port_ID)
-
-fit_qPSDN_gamma_v2 <- brm(
+fit_qPSDN_gamma <- brm(
   bf(PSDN_Landings ~ s(PSDN_SDM, MSQD_SDM) + s(ACL_PSDN) + (1 + PSDN_SDM + MSQD_SDM | port_ID),
                 hu ~ s(PSDN_SDM, MSQD_SDM) + s(ACL_PSDN) + (1 + PSDN_SDM + MSQD_SDM | port_ID)),
                           data = est_data_psnd,
@@ -431,10 +430,9 @@ fit_qPSDN_gamma_v2 <- brm(
                        chains = 2, cores = 4)
 
 save.image (file = "stan_fit.RData")
-LOO(fit_qPSDN_gamma, fit_qPSDN_gamma_v2)
 
 # ##  Extract Grouo-Level estimates ##
-ranef(fit_qPSDN_gamma)
+# ranef(fit_qPSDN_gamma)
 # 
 # ## Check divergence and other model check ##
 # launch_shinystan(fit_qPSDN_gamma) 
@@ -595,7 +593,7 @@ fit_qMSQD_gamma_dClose_v5 <- brm(
 
 save.image (file = "stan_fit.RData")
 
-LOO(fit_qMSQD_gamma_dClose_v5, fit_qMSQD_gamma_dClose_v7)
+LOO(fit_qMSQD_gamma_dClose_v5, fit_qMSQD_gamma_dClose_v7, moment_match = TRUE)
 
 # LOO(fit_qMSQD_gamma, fit_qMSQD_gamma_dClose)
 
