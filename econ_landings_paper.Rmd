@@ -419,38 +419,29 @@ portID_names <- est_data_psnd %>%
 ```{r psdn_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 
-# Notes: BRMS cannot handle splines in group-level terms.
-
-# fit_qPSDN_lognormal <- brm(
-#   bf(PSDN_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID),
-#                 hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID)),
-#                           data = est_data_psnd,
-#                           family = hurdle_lognormal(), 
-#                           control = list(adapt_delta = 0.999, max_treedepth = 20),
-#                           chains = 4, cores = 4)
-
 est_data_psnd$port_ID <- as.numeric(est_data_psnd$port_ID)
 class(est_data_psnd$port_ID)
 
-fit_qPSDN_gamma <- brm(
-  bf(PSDN_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID),
-                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + s(ACL_PSDN) + (1 | port_ID)),
+fit_qPSDN_gamma_v2 <- brm(
+  bf(PSDN_Landings ~ s(PSDN_SDM, MSQD_SDM) + s(ACL_PSDN) + (1 + PSDN_SDM + MSQD_SDM | port_ID),
+                hu ~ s(PSDN_SDM, MSQD_SDM) + s(ACL_PSDN) + (1 + PSDN_SDM + MSQD_SDM | port_ID)),
                           data = est_data_psnd,
                           family = hurdle_gamma(), 
                           control = list(adapt_delta = 0.999, max_treedepth = 20),
-                       chains = 4, cores = 4)
+                       chains = 2, cores = 4)
 
 save.image (file = "stan_fit.RData")
+LOO(fit_qPSDN_gamma, fit_qPSDN_gamma_v2)
 
 # ##  Extract Grouo-Level estimates ##
-# ranef(fit_qPSDN_gamma)
+ranef(fit_qPSDN_gamma)
 # 
 # ## Check divergence and other model check ##
 # launch_shinystan(fit_qPSDN_gamma) 
 ```
 
 ```{r y_rep_gamma, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks. (Gamma distribution)"}
-pp_check(fit_qPSDN_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
+pp_check(fit_qPSDN_gamma_v2) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
 ```
 
 ### Effect of SDM's on Sardine landings
@@ -461,16 +452,16 @@ pseq_gamma[[1]] + pseq_gamma[[2]] + plot_layout(nrow = 2)
 
 ```
 
-```{r PSDN_effect_total, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
+```{r PSDN_effect_total, echo=FALSE, fig.cap=, message=FALSE, warning=FALSE}
 
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qPSDN_gamma, "PSDN_SDM", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qPSDN_gamma_v2, "PSDN_SDM", surface=TRUE), ask = FALSE)
 ```  
 
-```{r MSQD_effect_total, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
+```{r MSQD_effect_total, echo=FALSE, fig.cap=, message=FALSE, warning=FALSE}
 
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qPSDN_gamma, "MSQD_SDM", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qPSDN_gamma_v2, "MSQD_SDM", surface=TRUE), ask = FALSE)
 ```  
 
 ```{r ACL_effect, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
@@ -485,21 +476,21 @@ plot(conditional_effects(fit_qPSDN_gamma, "ACL_PSDN", surface=TRUE), ask = FALSE
 conditions <- data.frame(port_ID = unique(est_data_psnd$port_ID))
 rownames(conditions) <- unique(est_data_psnd$Port)
 plot(conditional_effects(
-  fit_qPSDN_gamma, "PSDN_SDM", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
+  fit_qPSDN_gamma_v2, "PSDN_SDM", surface=TRUE, conditions = conditions, 
+  re_formula = NULL), ncol = 4, points =FALSE)
 ```
 
 
 ```{r by_port_msqd_sdm}
 plot(conditional_effects(
-  fit_qPSDN_gamma, "MSQD_SDM", surface=TRUE, conditions = conditions, 
+  fit_qPSDN_gamma_v2, "MSQD_SDM", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 
 ```
 
 ```{r by_port_acl_psdn}
 plot(conditional_effects(
-  fit_qPSDN_gamma, "ACL_PSDN", surface=TRUE, conditions = conditions, 
+  fit_qPSDN_gamma_v2, "ACL_PSDN", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 
 ```
@@ -507,10 +498,10 @@ plot(conditional_effects(
 
 ### Interactive effects between Pacific Sardine and Market Squid SDMs
 
-```{r int_effect_total, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
+```{r int_effect_total, echo=FALSE, fig.cap=, message=FALSE, warning=FALSE}
 
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qPSDN_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qPSDN_gamma_v2, "PSDN_SDM:MSQD_SDM", surface=TRUE), ask = FALSE)
 
 # Investigate chain and posterior distributions. 
 # https://cran.r-project.org/web/packages/bayesplot/vignettes/graphical-ppcs.html
@@ -528,7 +519,7 @@ plot(conditional_effects(fit_qPSDN_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE), as
 
 ```{r by_port_both_sdm, echo=FALSE, message=FALSE, warning=FALSE}
 plot(conditional_effects(
-  fit_qPSDN_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, conditions = conditions, 
+  fit_qPSDN_gamma_v2, "PSDN_SDM:MSQD_SDM", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
@@ -559,7 +550,8 @@ est_data_msqd_all <- est_data_msqd_all %>%
   merge(Tot.landings.ports, by.x = "Port", by.y = "Port", all.x = TRUE, all.y = FALSE) %>%
   filter(dTotalMSQD==1) %>%
   drop_na() %>%
-  mutate(dClose = ifelse(Landing_year >= 2015,1,0))
+  mutate(dClose = ifelse(Landing_year >= 2015,1,0)) %>%
+  mutate(dOpen = ifelse(Landing_year < 2015,1,0))
   
 # Create matrices and vectors to run STAN model #
 year_id <- as.vector(cbind(as.numeric(factor(est_data_msqd_all$Landing_year))));
@@ -568,46 +560,60 @@ est_data_msqd_all$port_ID <- udpipe::unique_identifier(est_data_msqd_all, fields
 portID_names_all <- est_data_msqd_all %>%
   dplyr::select(Port, port_ID) %>%
   unique()
-```
 
-```{r msqd_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 ### Estimate using BRMS package ###
 est_data_msqd_all$dACL_MSQD <- factor(est_data_msqd_all$dACL_MSQD)
 est_data_msqd_all$dClose    <- factor(est_data_msqd_all$dClose)
-est_data_msqd_all$port_ID   <- as.numeric(est_data_msqd_all$port_ID)
+est_data_msqd_all$port_ID   <- factor(est_data_msqd_all$port_ID)
 class(est_data_msqd_all$dACL_MSQD)
 class(est_data_msqd_all$dClose)
 class(est_data_msqd_all$port_ID)
+class(est_data_msqd_all$dOpen)
+```
 
-fit_qMSQD_gamma_dClose <- brm(
-  bf(MSQD_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dClose + (dClose +  1 | port_ID),
-                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + dClose + (dClose +  1 | port_ID)),
+```{r msqd_est_v2}
+
+est_data_msqd_all$f1f2 <- interaction(est_data_msqd_all$dClose, est_data_msqd_all$port_ID, drop = TRUE)
+est_data_msqd_all <- est_data_msqd_all %>%
+                      mutate(PSDN_SDM_dOpen = PSDN_SDM * dOpen)
+
+fit_qMSQD_gamma_dClose_v7 <- brm(
+bf(MSQD_Landings ~ s(MSQD_SDM, PSDN_SDM_dOpen) + dClose + (1 + MSQD_SDM + PSDN_SDM_dOpen + dClose | port_ID),
+              hu ~ s(MSQD_SDM, PSDN_SDM_dOpen) + dClose + (1 + MSQD_SDM + PSDN_SDM_dOpen + dClose | port_ID)),
                        data = est_data_msqd_all,
                        family = hurdle_gamma(),
                        control = list(adapt_delta = 0.999, max_treedepth = 20),
-                       chains = 4, cores = 4)
+                       chains = 2, cores = 4)
 
-fit_qMSQD_gamma <- brm(
-  bf(MSQD_Landings ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + (1 | port_ID),
-                hu ~ s(PSDN_SDM, MSQD_SDM, by = port_ID) + (1 | port_ID)),
+fit_qMSQD_gamma_dClose_v5 <- brm(
+ bf(MSQD_Landings ~ MSQD_SDM + PSDN_SDM_dOpen + dClose + (1 + MSQD_SDM + PSDN_SDM_dOpen + dClose | port_ID),
+               hu ~ MSQD_SDM + PSDN_SDM_dOpen + dClose + (1 + MSQD_SDM + PSDN_SDM_dOpen + dClose | port_ID)),
                        data = est_data_msqd_all,
-                       family = hurdle_gamma(), 
+                       family = hurdle_gamma(),
                        control = list(adapt_delta = 0.999, max_treedepth = 20),
-                       chains = 4, cores = 4)
+                       chains = 2, cores = 4)
 
 save.image (file = "stan_fit.RData")
 
-LOO(fit_qMSQD_gamma, fit_qMSQD_gamma_dClose)
+LOO(fit_qMSQD_gamma_dClose_v5, fit_qMSQD_gamma_dClose_v7)
+
+# LOO(fit_qMSQD_gamma, fit_qMSQD_gamma_dClose)
 
 # ##  Extract Grouo-Level estimates ##
 # ranef(fit_qPSDN_gamma)
 # 
 # ## Check divergence and other model check ##
 # launch_shinystan(fit_qPSDN_gamma) 
+
+
+
+
 ```
 
 
 ```{r model-comp-msqd, message=FALSE, warning=FALSE, results='asis'}
+
+
 fit_qMSQD_gamma <- add_criterion(fit_qMSQD_gamma, "loo")
 fit_qMSQD_gamma_dClose <- add_criterion(fit_qMSQD_gamma_dClose, "loo")
 
@@ -634,42 +640,37 @@ comp %>%
 
 ### Compare models 
 ```{r y_rep_logn_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landings model. (Gamma distribution)"}
-pp_check(fit_qMSQD_gamma_dClose) + ggtitle('Gamma distribution + dClose') + theme(legend.position = "bottom")
+class(est_data_msqd_all$port_ID)
+pp_check(fit_qMSQD_gamma_dClose_v5) + ggtitle('Gamma distribution + dClose') + theme(legend.position = "bottom")
 ```
-
-### Compare models 
-```{r y_rep_gamma_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landings model. (Gamma distribution)"}
-pp_check(fit_qMSQD_gamma) + ggtitle('Gamma distribution') + theme(legend.position = "bottom")
-```
-
 
 ### Effect of SDM's on Market SquidSardine landings
 
 ```{r PSDN_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of SDMs on Pacific Sardine landings."}
 
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qMSQD_gamma_dClose, "PSDN_SDM", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qMSQD_gamma_dClose_v5, "PSDN_SDM_dOpen", surface=TRUE), ask = FALSE)
 ```  
 
 ```{r MSQD_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of SDMs on Pacific Sardine landings."}
 
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qMSQD_gamma_dClose, "MSQD_SDM", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qMSQD_gamma_dClose_v5, "MSQD_SDM", surface=TRUE), ask = FALSE)
 ```  
 
 ```{r ACL_effect_msqd, echo=FALSE, fig.cap="Effect ACL on MSQD", message=TRUE, warning=TRUE}
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qMSQD_gamma_dClose, "dClose"), ask = FALSE)
+plot(conditional_effects(fit_qMSQD_gamma_dClose_v5, "dClose"), ask = FALSE)
 ```  
 
 
 ### Results by port
 
 ```{r by_port_sdm_msdq}
-conditions <- data.frame(port_ID = unique(est_data_msqd$port_ID))
-rownames(conditions) <- unique(est_data_msqd$Port)
+conditions <- data.frame(port_ID = unique(est_data_msqd_all$port_ID))
+rownames(conditions) <- unique(est_data_msqd_all$Port)
 plot(conditional_effects(
-  fit_qMSQD_gamma_dClose, "PSDN_SDM", surface=TRUE, conditions = conditions, 
+  fit_qMSQD_gamma_dClose_v5, "PSDN_SDM_dOpen", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
@@ -677,14 +678,14 @@ plot(conditional_effects(
 
 ```{r by_port_msqd_sdm_msqd}
 plot(conditional_effects(
-  fit_qMSQD_gamma_dClose, "MSQD_SDM", surface=TRUE, conditions = conditions, 
+  fit_qMSQD_gamma_dClose_v5, "MSQD_SDM", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 
 ```
 
-```{r by_port_msqd_sdm_msqd}
+```{r by_port_msqd_dclose}
 plot(conditional_effects(
-  fit_qMSQD_gamma_dClose, "dClose", surface=TRUE, conditions = conditions, 
+  fit_qMSQD_gamma_dClose_v5, "dClose", conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 
 ```
@@ -695,7 +696,7 @@ plot(conditional_effects(
 ```{r int_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of SDMs on Pacific Sardine landings."}
 
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qMSQD_gamma_dClose, "PSDN_SDM:MSQD_SDM", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qMSQD_gamma_dClose_v4, "PSDN_SDM:MSQD_SDM", surface=TRUE), ask = FALSE)
 
 # Investigate chain and posterior distributions. 
 # https://cran.r-project.org/web/packages/bayesplot/vignettes/graphical-ppcs.html
