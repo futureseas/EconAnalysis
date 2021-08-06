@@ -1,4 +1,4 @@
-# Map fishing activity for Market Squid using available Logbooks from CDFW #
+# Map fishing activity for Pacific Sardine using available Logbooks from CDFW #
 
 ## Load packages ##
 library(ggmap)
@@ -18,7 +18,7 @@ library(readxl)
 # Load data
 
 ## Oregon
-psdn.logbook.OR <- read_excel(here::here("Data", "ODFW CPS logbooks", "Sardine logbooks.xlsx"), sheet = "Sardine") %>%
+psdn.logbook.OR <- read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logbooks.xlsx", sheet = "Sardine") %>%
   mutate(Lat = Lat + LatMin/60) %>%
   mutate(Long = Long + LongMin/60) %>%
   mutate(vessel="OR") %>%
@@ -31,7 +31,7 @@ psdn.logbook.OR <- read_excel(here::here("Data", "ODFW CPS logbooks", "Sardine l
   dplyr::rename(effort = Sard) %>%
   dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
 
-psdn.logbook.WA <- read_excel(here::here("Data", "WDFW CPS logbooks", "WA Sardine Logbook Flatfile Data Reques 20-15485.xlsx")) %>%
+psdn.logbook.WA <- read_excel("C:\\Data\\WDFW CPS logbooks\\WA Sardine Logbook Flatfile Data Reques 20-15485.xlsx") %>%
   mutate(Lat = `Latitude Degrees` + `Latitude Minutes`/60) %>%
   mutate(Long = `Longitude Degrees` + `Longitude Minutes`/60) %>%
   mutate(vessel="WA") %>%
@@ -84,54 +84,13 @@ library(doBy)
 sumfun <- function(x, ...){
   c(sum=sum(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
 }
-
 ann.effort <- doBy::summaryBy(effort ~ year + lat + lon + vessel, FUN=sum, data=psdn.logbook)
 
-### Exclude and idendify effort made inland using Ocean shape file to obtain intersection ###
-
+### Exclude and identify effort made inland using Ocean shape file to obtain intersection ###
 ocean.shp <- sf::read_sf(here::here("Data", "ne_10m_ocean", "ne_10m_ocean.shp"))
 ann.effort.sf <- sf::st_as_sf(ann.effort, coords = c("lon", "lat"), crs = 4326, na.fail = FALSE)
-
-
 ann.effort.sf.ocean <- ann.effort.sf[ocean.shp, ]
 ann.effort.sf.ocean <- cbind(ann.effort.sf.ocean, st_coordinates(ann.effort.sf.ocean))
-
-
-# Generate map of aggregate CPS boats activity (this won't work anymore)
-# register_google(key = "ENTER KEY HERE")
-
-map <- get_stamenmap(bbox = c(left = -128,
-                              bottom = 42,
-                              right = -121,
-                              top = 50),
-                     zoom = 6,
-                     maptype = "toner-lite")
-
-msqd_map <- ggmap(map) + 
-  geom_point(aes(x = X, y = Y, colour = as.factor(vessel)),
-             data = ann.effort.sf.ocean) +
-  transition_time(year) +
-  labs(title = 'Year: {frame_time} - Pacific Sardine'
-       , subtitle =  'Distance to closest port: Mean = 28; SD = 11.78; Min = 0.40; Max = 317.7',
-       colour = 'State')
-
-gganimate::animate(msqd_map, fps = 1, duration = 14)
-anim_save("Figures/psdn_logbook.gif")
-
-
-## Identify effort made in-land (errors?) ##
-
-psdn.logbook.sf <- sf::st_as_sf(psdn.logbook, coords = c("lon", "lat"), crs = 4326, na.fail = FALSE)
-logbook.intersects.ocean <- st_intersects(psdn.logbook.sf, ocean.shp, sparse = FALSE)
-
-psdn.logbook.inland.sf <- psdn.logbook.sf %>%
-  mutate(intersects_ocean  = logbook.intersects.ocean) %>%
-  filter(intersects_ocean == "FALSE")
-
-n_inland_data = nrow(psdn.logbook.inland.sf) / nrow(psdn.logbook.sf)
-
-#  0.7% of the logbooks
-
 
 
 ## Calculate distance and min/max/mean ##
@@ -160,9 +119,45 @@ ports.sf <- sf::st_as_sf(ports, coords = c("lon", "lat"), crs = 4326, na.fail = 
 dist_port <- as.data.frame(st_distance(ann.effort.sf.ocean, ports.sf))
 ann.effort.sf.ocean$min_dist <- apply(dist_port, 1, FUN=min) / 1000
 
+# Assumes 20 km/hr and 22 hours for traveling there and back and 2 hours for fishing (Rose et al)
 ann.effort.sf.ocean <- ann.effort.sf.ocean %>%
-   filter(min_dist < 1000)
+  filter(min_dist <= 220)
 
 descr(ann.effort.sf.ocean$min_dist, stats = c("mean", "sd", "min", "max"), transpose = TRUE, headings = TRUE)
+
+# Generate map of aggregate CPS boats activity (this won't work anymore)
+# register_google(key = "ENTER KEY HERE")
+
+map <- get_stamenmap(bbox = c(left = -128,
+                              bottom = 42,
+                              right = -121,
+                              top = 50),
+                     zoom = 6,
+                     maptype = "toner-lite")
+
+psdn_map <- ggmap(map) + 
+  geom_point(aes(x = X, y = Y, colour = as.factor(vessel)),
+             data = ann.effort.sf.ocean) +
+  transition_time(year) +
+  labs(title = 'Year: {frame_time} - Pacific Sardine'
+       , subtitle =  'Distance to closest port: Mean = 27.95; SD = 11.24; Min = 0.40; Max = 182.29',
+       colour = 'State')
+
+gganimate::animate(psdn_map, fps = 1, duration = 14)
+anim_save("Figures/psdn_logbook.gif")
+
+
+## Identify effort made in-land (errors?) ##
+
+psdn.logbook.sf <- sf::st_as_sf(psdn.logbook, coords = c("lon", "lat"), crs = 4326, na.fail = FALSE)
+logbook.intersects.ocean <- st_intersects(psdn.logbook.sf, ocean.shp, sparse = FALSE)
+
+psdn.logbook.inland.sf <- psdn.logbook.sf %>%
+  mutate(intersects_ocean  = logbook.intersects.ocean) %>%
+  filter(intersects_ocean == "FALSE")
+
+n_inland_data = nrow(psdn.logbook.inland.sf) / nrow(psdn.logbook.sf)
+
+#  0.7% of the logbooks
 
 

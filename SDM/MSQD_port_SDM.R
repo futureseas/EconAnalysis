@@ -8,9 +8,7 @@ library(here)
 SDM_port <- tibble(year = integer(),
                    month = integer(),
                    port = character(),
-                   SDM_60 = numeric(),
-                   SDM_90 = numeric(),
-                   SDM_120 = numeric())
+                   SDM_90 = numeric())
 
 # Load port info
     ports <- read_csv(here::here("Data","port_areas.csv")) %>%
@@ -55,22 +53,14 @@ for (y in 1998:2018) {
 			
 			# Filter three different distance bands
 			
-			dat_prob_60 <- sdmMelt %>%
-			  dplyr::filter(dist <= 60)
 			dat_prob_90 <- sdmMelt %>%
 			  dplyr::filter(dist <= 90)
-			dat_prob_120 <- sdmMelt %>%
-			  dplyr::filter(dist <= 120)
 			
-			SDM_mean_60 <- mean(dat_prob_60$exp_prob, na.rm = T)
 			SDM_mean_90 <- mean(dat_prob_90$exp_prob, na.rm = T)
-			SDM_mean_120 <- mean(dat_prob_120$exp_prob, na.rm = T)
 			
 			SDM_port <- SDM_port %>%
 			  add_row(year = y, month = m, port = as.character(ports[j, 1]),
-			          SDM_60 = SDM_mean_60,
-			          SDM_90 = SDM_mean_90,
-			          SDM_120 = SDM_mean_120)
+			          SDM_90 = SDM_mean_90)
 	    
 	    print(y)
 	    print(m)

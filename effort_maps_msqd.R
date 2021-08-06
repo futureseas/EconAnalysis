@@ -18,7 +18,7 @@ library(readxl)
 # Load data
 
 ## Oregon
-sqd.logbook.OR.2016 <- read_excel(here::here("Data", "ODFW CPS logbooks", "Squid logbooks.xlsx"), sheet = "Squid 2016") %>%
+sqd.logbook.OR.2016 <- read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2016") %>%
   mutate(Lat = Lat + min...9/60) %>%
   mutate(Long = Long + min...11/60) %>%
   mutate(vessel="OR") %>%
@@ -31,7 +31,7 @@ sqd.logbook.OR.2016 <- read_excel(here::here("Data", "ODFW CPS logbooks", "Squid
   dplyr::rename(effort = `Squid (Lbs)`) %>%
   dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
 
-sqd.logbook.OR.2018 <- read_excel(here::here("Data", "ODFW CPS logbooks", "Squid logbooks.xlsx"), sheet = "Squid 2018") %>%
+sqd.logbook.OR.2018 <- read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2018") %>%
   mutate(Lat = Lat + Min/60) %>%
   mutate(Long = Long + mins/60) %>%
   mutate(vessel="OR") %>%
@@ -45,7 +45,7 @@ sqd.logbook.OR.2018 <- read_excel(here::here("Data", "ODFW CPS logbooks", "Squid
   dplyr::rename(effort = `Lbs`) %>%
   dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
 
-sqd.logbook.OR.2019 <- read_excel(here::here("Data", "ODFW CPS logbooks", "Squid logbooks.xlsx"), sheet = "Squid 2019") %>%
+sqd.logbook.OR.2019 <- read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2019") %>%
   mutate(lat = Lat + lat/60) %>%
   mutate(lon = Long + long/60) %>%
   mutate(vessel="OR") %>%
@@ -56,7 +56,7 @@ sqd.logbook.OR.2019 <- read_excel(here::here("Data", "ODFW CPS logbooks", "Squid
   dplyr::rename(effort = `Est Lbs Squid`) %>%
   dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
 
-sqd.logbook.OR.2020 <- read_excel(here::here("Data", "ODFW CPS logbooks", "Squid logbooks.xlsx"), sheet = "Squid 2020") %>%
+sqd.logbook.OR.2020 <- read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2020") %>%
   mutate(Lat = Lat + Min/60) %>%
   mutate(Long = Long + mins/60) %>%
   mutate(vessel="OR") %>%
@@ -74,7 +74,7 @@ sqd.logbook.OR <- rbind(sqd.logbook.OR.2016, sqd.logbook.OR.2018, sqd.logbook.OR
 
 ## California
 
-sqd.logbook.vessel <- read_csv(here::here("Data", "CDFW CPS Logbooks", "MarketSquidVesselDataExtract.csv")) %>%
+sqd.logbook.vessel <- read_csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidVesselDataExtract.csv") %>%
   dplyr::rename(lat = SetLatitude) %>%
   dplyr::rename(lon = SetLongitude) %>%
   mutate(vessel="CA Vessel") %>%
@@ -84,7 +84,7 @@ sqd.logbook.vessel <- read_csv(here::here("Data", "CDFW CPS Logbooks", "MarketSq
   dplyr::rename(effort = "CatchEstimate") %>%
   dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
 
-sqd.logbook.light.brail <- read_csv(here::here("Data", "CDFW CPS Logbooks", "MarketSquidLightBrailLogDataExtract.csv")) %>%
+sqd.logbook.light.brail <- read_csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidLightBrailLogDataExtract.csv") %>%
   dplyr::rename(lat = Lat_DD) %>%
   dplyr::rename(lon = Long_DD) %>%
   mutate(vessel="CA Light Boat") %>%
@@ -135,55 +135,13 @@ library(doBy)
 sumfun <- function(x, ...){
   c(sum=sum(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
 }
-
 ann.effort <- doBy::summaryBy(effort ~ year + lat + lon + vessel, FUN=sum, data=sqd.logbook)
 
 ### Exclude and idendify effort made inland using Ocean shape file to obtain intersection ###
-
 ocean.shp <- sf::read_sf(here::here("Data", "ne_10m_ocean", "ne_10m_ocean.shp"))
 ann.effort.sf <- sf::st_as_sf(ann.effort, coords = c("lon", "lat"), crs = 4326, na.fail = FALSE)
-
-
 ann.effort.sf.ocean <- ann.effort.sf[ocean.shp, ]
 ann.effort.sf.ocean <- cbind(ann.effort.sf.ocean, st_coordinates(ann.effort.sf.ocean))
-
-
-# Generate map of aggregate CPS boats activity (this won't work anymore)
-# register_google(key = "AIzaSyBypi8T09hkTVlclaBDxFf-qjIpt39UhwQ")
-
-map <- get_stamenmap(bbox = c(left = -128,
-                              bottom = 30,
-                              right = -116,
-                              top = 47),
-                     zoom = 6,
-                     maptype = "toner-lite")
-
-msqd_map <- ggmap(map) + 
-  geom_point(aes(x = X, y = Y, colour = as.factor(vessel)),
-             data = ann.effort.sf.ocean) +
-  transition_time(year) +
-  labs(title = 'Year: {frame_time} - Market Squid'
-       , subtitle =  'Distance to closest port: Mean = 26.91; SD = 22.77; Min = 0.10; Max = 442.85',
-       colour = 'Category')
-
-gganimate::animate(msqd_map, fps = 1, duration = 19)
-anim_save("Figures/msqd_logbook.gif")
-
-
-## Identify effort made in-land (errors?) ##
-
-ann.effort <- doBy::summaryBy(effort ~ year + lat + lon, FUN=sum, data=sqd.logbook)
-
-sqd.logbook.sf <- sf::st_as_sf(sqd.logbook, coords = c("lon", "lat"), crs = 4326, na.fail = FALSE)
-logbook.intersects.ocean <- st_intersects(sqd.logbook.sf, ocean.shp, sparse = FALSE)
-
-sqd.logbook.inland.sf <- sqd.logbook.sf %>%
-  mutate(intersects_ocean  = logbook.intersects.ocean) %>%
-  filter(intersects_ocean == "FALSE")
-
-n_inland_data = nrow(sqd.logbook.inland.sf) / nrow(sqd.logbook.sf)
-
-#  6.4% of the logbooks, mostly around 2004-2008
 
 
 ## Calculate distance and min/max/mean ##
@@ -214,9 +172,49 @@ ann.effort.sf.ocean$min_dist <- apply(dist_port, 1, FUN=min) / 1000
 
 
 ann.effort.sf.ocean <- ann.effort.sf.ocean %>%
-   filter(min_dist < 1000)
+   filter(min_dist < 220)
 
 
 descr(ann.effort.sf.ocean$min_dist, stats = c("mean", "sd", "min", "max"), transpose = TRUE, headings = TRUE)
+
+
+
+# Generate map of aggregate CPS boats activity (this won't work anymore)
+# register_google(key = "AIzaSyBypi8T09hkTVlclaBDxFf-qjIpt39UhwQ")
+
+map <- get_stamenmap(bbox = c(left = -128,
+                              bottom = 30,
+                              right = -116,
+                              top = 47),
+                     zoom = 6,
+                     maptype = "toner-lite")
+
+msqd_map <- ggmap(map) + 
+  geom_point(aes(x = X, y = Y, colour = as.factor(vessel)),
+             data = ann.effort.sf.ocean) +
+  transition_time(year) +
+  labs(title = 'Year: {frame_time} - Market Squid'
+       , subtitle =  'Distance to closest port: Mean = 26.76; SD = 21.82; Min = 0.10; Max = 219.88',
+       colour = 'Category')
+
+gganimate::animate(msqd_map, fps = 1, duration = 19)
+anim_save("Figures/msqd_logbook.gif")
+
+
+## Identify effort made in-land (errors?) ##
+
+ann.effort <- doBy::summaryBy(effort ~ year + lat + lon, FUN=sum, data=sqd.logbook)
+
+sqd.logbook.sf <- sf::st_as_sf(sqd.logbook, coords = c("lon", "lat"), crs = 4326, na.fail = FALSE)
+logbook.intersects.ocean <- st_intersects(sqd.logbook.sf, ocean.shp, sparse = FALSE)
+
+sqd.logbook.inland.sf <- sqd.logbook.sf %>%
+  mutate(intersects_ocean  = logbook.intersects.ocean) %>%
+  filter(intersects_ocean == "FALSE")
+
+n_inland_data = nrow(sqd.logbook.inland.sf) / nrow(sqd.logbook.sf)
+
+#  6.4% of the logbooks, mostly around 2004-2008
+
 
 

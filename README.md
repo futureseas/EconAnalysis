@@ -7,8 +7,8 @@ Interralation between species come from their probability of precense.
 
 + Work to do...
   + What is the best way to incorporate ACL? Nonlinear function with a cap? Directly in the linear model? Censored data?
-  + Try different specifications for Market Squid estimations.
-	+ Number of vessel: how change after the time
+  + Number of vessel after 2015 for squid: how change after the time
+  + Include Anchovy in the models. 
   + Check if other events can simulate a closure of squid
 	+ Check logbooks
   	+ Check coastwide CPS survey
