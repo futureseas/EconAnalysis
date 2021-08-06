@@ -6,7 +6,7 @@
   #Sample Hauls  
   #Set seed
   set.seed(seed)
-  seedz <- sample(1:1e7, size = nrow(hauls))
+  seedz <- sample(1:1e7, size = nrow(hauls)) # changes hauls for trips?
   
   #Sample hauls and calculate distances
   #For each haul in the focus year, sample nhauls_sampled tows
