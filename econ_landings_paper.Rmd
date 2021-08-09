@@ -174,14 +174,14 @@ port_by_state("ALL")
 
 collapse <- PacFIN_dat %>%
   filter(Species_code == "PSDN") %>%
-  select(Landing_year, Port, PSDN_SDM, Landings) %>% 
+  select(Landing_year, Port, PSDN_SDM_60, Landings) %>% 
   filter(Port == "CBA" | Port == "CLO" | Port == "LAA" | Port == "MNA" | Port == "NPA" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
       mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "SFA", "CBA", "NPA", "CLO"))
 
 coeff <- 75000
 collapse$PSDN_SDM <- collapse$PSDN_SDM * coeff 
 df <- gather(collapse, key = Variable, value = value,
-             c("Landings", "PSDN_SDM"))
+             c("Landings", "PSDN_SDM_60"))
 
 # Plot
 ggplot(df, aes(x=Landing_year, y = value, group = Variable, colour = Variable)) + 
@@ -270,8 +270,8 @@ est_data <- PacFIN_dat %>%
   dplyr::rename(MSQD_SDM_60 = MSQD_MSQD_SDM_60) %>%
   dplyr::rename(MSQD_SDM_90 = MSQD_MSQD_SDM_90) %>%
   dplyr::rename(MSQD_SDM_120 = MSQD_MSQD_SDM_120) %>%
-  dplyr::rename(NANC_SDM_60 = MSQD_MSQD_SDM_60) %>%
-  dplyr::rename(NANC_SDM_90 = MSQD_MSQD_SDM_90) %>%
+  dplyr::rename(NANC_SDM_60 = MSQD_NANC_SDM_60) %>%
+  dplyr::rename(NANC_SDM_90 = MSQD_NANC_SDM_90) %>%
   dplyr::rename(ACL_PSDN = PSDN_ACL_PSDN.sum) %>%
   dplyr::rename(ACL_MSQD = MSQD_ACL_MSQD.mean)
 
@@ -434,7 +434,9 @@ fit_qPSDN <- brm(
                           control = list(adapt_delta = 0.999, max_treedepth = 20),
                        chains = 4, cores = 4)
 save.image (file = "stan_fit.RData")
+```
 
+```{r psdn_est_v2, message=FALSE, warning=FALSE, include=FALSE}
 fit_qPSDN_90 <- brm(
   bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + s(ACL_PSDN) + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 | port_ID),
                 hu ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + s(ACL_PSDN) + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 | port_ID)),
