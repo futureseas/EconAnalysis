@@ -423,20 +423,7 @@ est_data_psnd$port_ID <- as.factor(est_data_psnd$port_ID)
 class(est_data_psnd$port_ID)
 ```
 
-
 ```{r psdn_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-### Estimate using BRMS package ###
-fit_qPSDN <- brm(
-  bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_60 + s(ACL_PSDN) + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_60 | port_ID),
-                hu ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_60 + s(ACL_PSDN) + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_60 | port_ID)),
-                          data = est_data_psnd,
-                          family = hurdle_gamma(), 
-                          control = list(adapt_delta = 0.999, max_treedepth = 20),
-                       chains = 4, cores = 4)
-save.image (file = "stan_fit.RData")
-```
-
-```{r psdn_est_v2, message=FALSE, warning=FALSE, include=FALSE}
 fit_qPSDN_90 <- brm(
   bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + s(ACL_PSDN) + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 | port_ID),
                 hu ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + s(ACL_PSDN) + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 | port_ID)),
@@ -444,8 +431,7 @@ fit_qPSDN_90 <- brm(
                           family = hurdle_gamma(), 
                           control = list(adapt_delta = 0.999, max_treedepth = 20),
                        chains = 4, cores = 4)
-
-LOO(fit_qPSDN, fit_qPSDN_90)
+save.image (file = "stan_fit.RData")
 
 # ##  Extract Grouo-Level estimates ##
 # ranef(fit_qPSDN_gamma)
@@ -469,34 +455,34 @@ LOO(fit_qPSDN, fit_qPSDN_90)
 
 
 ```{r y_rep, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks. (Gamma distribution)"}
-pp_check(fit_qPSDN) + ggtitle('Pacific Sardine model') + theme(legend.position = "bottom")
+pp_check(fit_qPSDN_90) + ggtitle('Pacific Sardine model') + theme(legend.position = "bottom") +  xlim(0, 20000) 
 ```
 
 ### Effect of SDM's on Sardine landings
 
 ```{r int_effect_smooth, eval=FALSE, include=FALSE}
-pseq_gamma <- plot(conditional_smooths(fit_qPSDN), plot = FALSE, ask = FALSE)
+pseq_gamma <- plot(conditional_smooths(fit_qPSDN_90), plot = FALSE, ask = FALSE)
 pseq_gamma[[1]] + pseq_gamma[[2]] + plot_layout(nrow = 2)
 ```
 
 ```{r PSDN_effect_total, echo=FALSE, message=FALSE, warning=FALSE}
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qPSDN, "PSDN_SDM_60", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qPSDN_90, "PSDN_SDM_60", surface=TRUE), ask = FALSE)
 ```  
 
 ```{r MSQD_effect_total, echo=FALSE, message=FALSE, warning=FALSE}
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qPSDN, "MSQD_SDM_90", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qPSDN_90, "MSQD_SDM_90", surface=TRUE), ask = FALSE)
 ```  
 
 ```{r NANC_effect_total, echo=FALSE, message=FALSE, warning=FALSE}
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qPSDN, "NANC_SDM_60", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qPSDN_90, "NANC_SDM_90", surface=TRUE), ask = FALSE)
 ```  
 
 ```{r ACL_effect, echo=FALSE, message=FALSE, warning=FALSE}
 # summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qPSDN, "ACL_PSDN", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qPSDN_90, "ACL_PSDN", surface=TRUE), ask = FALSE)
 ```  
 
 
@@ -506,7 +492,7 @@ plot(conditional_effects(fit_qPSDN, "ACL_PSDN", surface=TRUE), ask = FALSE)
 conditions <- data.frame(port_ID = unique(est_data_psnd$port_ID))
 rownames(conditions) <- unique(est_data_psnd$Port)
 plot(conditional_effects(
-  fit_qPSDN, "PSDN_SDM_60", surface=TRUE, conditions = conditions, 
+  fit_qPSDN_90, "PSDN_SDM_60", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points =FALSE)
 ```
 
@@ -518,7 +504,7 @@ plot(conditional_effects(
 
 ```{r by_port_msqd_sdm}
 plot(conditional_effects(
-  fit_qPSDN, "NANC_SDM_60", surface=TRUE, conditions = conditions, 
+  fit_qPSDN_90, "NANC_SDM_90", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
@@ -534,23 +520,25 @@ plot(conditional_effects(
 
 ```{r int_effect_MSQD_total, echo=FALSE, message=FALSE, warning=FALSE}
 plot(conditional_effects(
-  fit_qPSDN, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE), ask = FALSE)
+  fit_qPSDN_90, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE), ask = FALSE)
 ```   
 
 ```{r int_effect_NANC_total, echo=FALSE, message=FALSE, warning=FALSE}
 plot(conditional_effects(
-  fit_qPSDN, "PSDN_SDM_60:NANC_SDM_60", surface=TRUE), ask = FALSE)
+  fit_qPSDN_90, "PSDN_SDM_60:NANC_SDM_90", surface=TRUE), ask = FALSE)
 ```   
+
+
 
 ```{r int_effect_MSQD_by_port, echo=FALSE, message=FALSE, warning=FALSE}
 plot(conditional_effects(
-  fit_qPSDN, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
+  fit_qPSDN_90, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
 ```{r int_effect_NANC_by_port, echo=FALSE, message=FALSE, warning=FALSE}
 plot(conditional_effects(
-  fit_qPSDN, "PSDN_SDM_60:NANC_SDM_60", surface=TRUE, conditions = conditions, 
+  fit_qPSDN_90, "PSDN_SDM_60:NANC_SDM_90", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
@@ -566,7 +554,7 @@ est_data_msqd_all <- est_data %>%
   dplyr::mutate(dClose = ifelse(Landing_year >= 2015,1,0)) %>%
   dplyr::mutate(dOpen = ifelse(Landing_year < 2015,1,0)) %>%
   dplyr::mutate(PSDN_SDM_60_dOpen = PSDN_SDM_60 * dOpen) %>%
-  filter(Landing_year >= 2000) %>%
+  filter(Landing_year >= 2000)
 
 # Select ports that at least they have landing PSDN once, and drop N/A #
 Tot.landings.ports <- as.data.frame(cbind(rowsum(est_data_msqd_all$MSQD_Landings, est_data_msqd_all$Port, na.rm = TRUE)))
@@ -599,17 +587,7 @@ class(est_data_msqd_all$port_ID)
 class(est_data_msqd_all$dOpen)
 ```
 
-```{r msqd_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-fit_qMSQD <- brm(
- bf(MSQD_Landings ~ MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_60 + dClose + (1 + MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_60 + dClose | port_ID),
-               hu ~ MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_60 + dClose + (1 + MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_60 + dClose | port_ID)),
-                       data = est_data_msqd_all,
-                       family = hurdle_gamma(),
-                       control = list(adapt_delta = 0.999, max_treedepth = 20),
-                       chains = 4, cores = 4)
-
-save.image (file = "stan_fit.RData")
-
+```{r msqd_est_90, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 fit_qMSQD_90 <- brm(
  bf(MSQD_Landings ~ MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose + (1 + MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose | port_ID),
                hu ~ MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose + (1 + MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose | port_ID)),
@@ -617,8 +595,7 @@ fit_qMSQD_90 <- brm(
                        family = hurdle_gamma(),
                        control = list(adapt_delta = 0.999, max_treedepth = 20),
                        chains = 4, cores = 4)
-
-LOO(fit_qMSQD, fit_qMSQD_90)
+save.image (file = "stan_fit.RData")
 ```
 
 
@@ -648,13 +625,13 @@ comp %>%
 
 ### Compare models 
 ```{r y_rep_logn_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landings model."}
-pp_check(fit_qMSQD) + ggtitle('Market Squid landing model') + theme(legend.position = "bottom")  +  xlim(0, 10) 
+pp_check(fit_qMSQD_90) + ggtitle('Market Squid landing model') + theme(legend.position = "bottom")  +  xlim(0, 10) 
 ```
 
 ### Effect of SDM's on Market SquidSardine landings
 
 ```{r PSDN_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of probability of occurrence of Pacific Sardine on Squid landings."}
-plot(conditional_effects(fit_qMSQD, "PSDN_SDM_60_dOpen", surface=TRUE), ask = FALSE)
+plot(conditional_effects(fit_qMSQD_s, "PSDN_SDM_60_dOpen", surface=TRUE), ask = FALSE)
 ```  
 
 ```{r MSQD_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of probability of occurrence of Market Squid on Squid landings."}
@@ -676,37 +653,76 @@ plot(conditional_effects(fit_qMSQD, "dClose", dpar="mu"), ask = FALSE)
 conditions <- data.frame(port_ID = unique(est_data_msqd_all$port_ID))
 rownames(conditions) <- unique(est_data_msqd_all$Port)
 plot(conditional_effects(
-  fit_qMSQD_v7, "PSDN_SDM_dOpen", surface=TRUE, conditions = conditions, 
+  fit_qMSQD_90, "PSDN_SDM_60_dOpen", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
 ```{r by_port_msqd_sdm_msqd}
 plot(conditional_effects(
-  fit_qMSQD_v5, "MSQD_SDM", surface=TRUE, conditions = conditions, 
+  fit_qMSQD_90, "MSQD_SDM_90", surface=TRUE, conditions = conditions, 
+  re_formula = NULL), ncol = 4, points = FALSE)
+```
+
+```{r by_port_msqd_sdm_msqd}
+plot(conditional_effects(
+  fit_qMSQD_90, "NANC_SDM_90", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
 ```{r by_port_msqd_dclose}
 plot(conditional_effects(
-  fit_qMSQD_120, "dClose", conditions = conditions, 
-  re_formula = NULL, dpar="hu"), ncol = 4, points = FALSE)
+  fit_qMSQD_90, "dClose", conditions = conditions, 
+  re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
+```{r by_port_msqd_dclose_hu}
+plot(conditional_effects(
+  fit_qMSQD_90, "dClose", conditions = conditions, 
+  re_formula = NULL, dpar="hu"), ncol = 4, points = FALSE)
+```
+```{r by_port_msqd_dclose_mu}
+plot(conditional_effects(
+  fit_qMSQD_90, "dClose", conditions = conditions, 
+  re_formula = NULL, dpar="mu"), ncol = 4, points = FALSE)
+```
 
 ### Interactive effects between Pacific Sardine and Market Squid SDMs
+
+```{r both_sdm_msqd, echo=FALSE, message=FALSE, warning=FALSE}
+conditions_dClose <- data.frame(port_ID = unique(est_data_msqd_all$dClose))
+rownames(conditions_dClose) <- unique(est_data_msqd_all$dClose)
+
+plot(conditional_effects(
+  fit_qMSQD_90, "PSDN_SDM_60_dOpen:MSQD_SDM_90", surface=TRUE, re_formula = NULL), ncol = 4, points = FALSE)
+```
+
+```{r both_sdm_nanc, echo=FALSE, message=FALSE, warning=FALSE}
+conditions_dClose <- data.frame(port_ID = unique(est_data_msqd_all$dClose))
+rownames(conditions_dClose) <- unique(est_data_msqd_all$dClose)
+
+plot(conditional_effects(
+  fit_qMSQD_90, "NANC_SDM_90:MSQD_SDM_90", surface=TRUE, re_formula = NULL), ncol = 4, points = FALSE)
+```
 
 ```{r by_port_both_sdm_msqd, echo=FALSE, message=FALSE, warning=FALSE}
 conditions_dClose <- data.frame(port_ID = unique(est_data_msqd_all$dClose))
 rownames(conditions_dClose) <- unique(est_data_msqd_all$dClose)
 
 plot(conditional_effects(
-  fit_qMSQD_v5, "PSDN_SDM_dOpen:MSQD_SDM", surface=TRUE, conditions = conditions_dClose, 
+  fit_qMSQD_90, "PSDN_SDM_60_dOpen:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
-```{r int_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of SDMs on Pacific Sardine landings."}
-plot(conditional_effects(fit_qMSQD_v7, "PSDN_SDM_dOpen:MSQD_SDM", surface=TRUE), ask = FALSE)
-```   
+```{r by_port_both_sdm_nanc, echo=FALSE, message=FALSE, warning=FALSE}
+conditions_dClose <- data.frame(port_ID = unique(est_data_msqd_all$dClose))
+rownames(conditions_dClose) <- unique(est_data_msqd_all$dClose)
+
+plot(conditional_effects(
+  fit_qMSQD_90, "NANC_SDM_90:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
+  re_formula = NULL), ncol = 4, points = FALSE)
+```
+
+ 
 
 # Conclusions
 
