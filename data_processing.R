@@ -188,6 +188,8 @@ names(PacFIN_data_vessels)[names(PacFIN_data_vessels) == "N_dealers.mean"] <- "N
 names(PacFIN_data_vessels)[names(PacFIN_data_vessels) == "N_vessels.mean"] <- "N_vessels"
 PacFIN_data_merged <- merge(PacFIN_data_port,PacFIN_data_vessels,by=c("Year","Species_code"),all.x = TRUE)
 
+
+
 # Merge data with SDM Pacific Sardine #
 SDM_port_PSDN <- read.csv(file = here("Data", "SDM_port_month_PSDN.csv"))
     names(SDM_port_PSDN)[names(SDM_port_PSDN) == "port"] <- "Port"
@@ -200,7 +202,9 @@ SDM_port_PSDN <- read.csv(file = here("Data", "SDM_port_month_PSDN.csv"))
 
   PacFIN_data_merged <- merge(PacFIN_data_merged,SDM_port_PSDN,by=c("Port","Year"),all.x = TRUE)
 
-# Merge data with SDM Market squid #
+
+
+# Merge data with SDM Market Squid #
 SDM_port_MSQD <- read.csv(file = here("Data", "SDM_port_month_MSQD.csv"))
     names(SDM_port_MSQD)[names(SDM_port_MSQD) == "port"] <- "Port"
     names(SDM_port_MSQD)[names(SDM_port_MSQD) == "year"] <- "Year"
@@ -214,7 +218,9 @@ SDM_port_MSQD <- read.csv(file = here("Data", "SDM_port_month_MSQD.csv"))
 
   PacFIN_data_merged <- merge(PacFIN_data_merged,SDM_port_MSQD,by=c("Port","Year"),all.x = TRUE)
 
-# Merge data with SDM Market squid #
+
+
+# Merge data with SDM Northern Anchovy #
 SDM_port_NANC <- read.csv(file = here("Data", "SDM_port_month_NANC.csv"))
     names(SDM_port_NANC)[names(SDM_port_NANC) == "port"] <- "Port"
     names(SDM_port_NANC)[names(SDM_port_NANC) == "year"] <- "Year"
