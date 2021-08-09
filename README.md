@@ -17,6 +17,9 @@ Interralation between species come from their probability of precense.
 Estimation of a mixed logit for location/species decision using PacFIN vessel data and Google Fishing Watch spatial location. 
 
 + Work to do...
+  + **From logbooks**:
+    + Static or dynamics. Do they change location?
+    + Do they behave similarly to peers? Do they go to the same fishing grounds? 
   + Read more theory
   + Use Hicks's paper to select choice set.
   + Identify capital (gear) and distances. Region of analysis (sampling) and species choice set might differ
