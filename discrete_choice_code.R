@@ -2,170 +2,102 @@
 ## Sampling choice set based on Peter's code for Hicks's paper ##
 #################################################################
 
+### Note: Thanks Peter for sharing the code used in Hicks's paper. 
+### I modify it a little to be used with CPS logbooks. A trip would be similiar to a ticket, 
+### a "set" similar to haul, and coordinates "set" and "up" are the same. 
+
 ## Load packages ##
-library(ggmap)
-library(tidyverse)
-library(gganimate)
-library(magick)
-library(lubridate)
-library(here)
-library(tigris)
 library(ggplot2)
-library(terra)
-library(raster)
-library(sf)
 library(plyr)
-library(readxl)
+library(dplyr)
+library(lubridate)
+library(reshape2)
+library(devtools)
+library(maps)
+library(doParallel)
+library(lubridate)
+library(tidyr)
+library(mlogit)
+library(parallel)
+library(OneR)
 
-## Read logbooks available for Pacific Sardine from CDFW ##
+#-----------------------------------------------------------------------------
 
-### Oregon
-psdn.logbook.OR <- read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logbooks.xlsx", sheet = "Sardine") %>%
-  mutate(Lat = Lat + LatMin/60) %>%
-  mutate(Long = Long + LongMin/60) %>%
-  mutate(vessel="OR") %>%
-  dplyr::rename(lat = Lat) %>%
-  dplyr::rename(lon = Long) %>%
-  dplyr::rename(VesselID = FedDoc) %>%
+## Read logbooks available for Pacific Sardine from ODFW ##
+
+psdn.logbook <- read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logbooks.xlsx", sheet = "Sardine") %>%
+  mutate(set_lat = Lat + LatMin/60) %>%
+  mutate(set_long = Long + LongMin/60) %>%
+  mutate(up_lat = set_lat) %>%
+  mutate(up_long = set_long) %>%
+  mutate(fleet_name="OR") %>%
+  mutate(species="PSDN") %>%
+  dplyr::rename(drvid = FedDoc) %>%
   mutate(date = as.Date(Date,format="%Y-%m-%d")) %>%
-  mutate(year = year(date)) %>%
-  mutate(month = month(date)) %>%
-  dplyr::rename(effort = Sard) %>%
-  dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+  mutate(set_year = year(date)) %>%
+  mutate(set_month = month(date)) %>%
+  mutate(set_day = day(date)) %>%
+  dplyr::rename(catch = Sard) %>%
+  dplyr::rename(haul_num = Set) %>%
+  dplyr::rename(trip_id = Ticket) %>%
+  dplyr::rename(depth = Depth) %>%
+  filter(set_year > 2000) 
 
-psdn.logbook.WA <- read_excel("C:\\Data\\WDFW CPS logbooks\\WA Sardine Logbook Flatfile Data Reques 20-15485.xlsx") %>%
-  mutate(Lat = `Latitude Degrees` + `Latitude Minutes`/60) %>%
-  mutate(Long = `Longitude Degrees` + `Longitude Minutes`/60) %>%
-  mutate(vessel="WA") %>%
-  dplyr::rename(lat = Lat) %>%
-  dplyr::rename(lon = Long) %>%
-  dplyr::rename(VesselID = `Vessel`) %>%
-  mutate(date = as.Date(`Fishing Date`,format="%Y-%m-%d")) %>%
-  mutate(year = year(date)) %>%
-  mutate(month = month(date)) %>%
-  dplyr::rename(effort = `Sardine Retained mt`) %>%
-  dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+psdn.logbook <- psdn.logbook[-which(is.na(psdn.logbook$set_lat)), ] 
+psdn.logbook <- psdn.logbook[-which(psdn.logbook$haul_num == 0), ] 
+psdn.logbook$set_long <- with(psdn.logbook, ifelse(set_long > 0, -set_long, set_long))
+psdn.logbook$haul_id <- unique_identifier(psdn.logbook, fields = c("trip_id", "haul_num"))
+psdn.logbook$depth_bin <- cut(psdn.logbook$depth, 9, include.lowest=TRUE, 
+                              labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
+
+psdn.logbook <- psdn.logbook %>% 
+  dplyr::select(c('set_lat', 'set_long', 'up_lat', 'up_long', 'depth_bin', 'drvid', 'fleet_name', 
+                'set_year', 'set_month', 'set_day', 'date', 
+                'catch', 'haul_num', 'haul_id', 'trip_id'))
 
 
-
-## Read logbooks available for Pacific Sardine from ODFW and CDFW ##
-
-### Oregon
-
-sqd.logbook.OR.2016 <- read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2016") %>%
-  mutate(Lat = Lat + min...9/60) %>%
-  mutate(Long = Long + min...11/60) %>%
-  mutate(vessel="OR") %>%
-  dplyr::rename(lat = Lat) %>%
-  dplyr::rename(lon = Long) %>%
-  dplyr::rename(VesselID = FedDoc) %>%
+### Include port coordinate associated to a specific vessel ###
+psdn.port.OR <- read_excel("C:\\Data\\ODFW CPS logbooks\\2021 CPS Request Lengths.xlsx", sheet = "2021_CPS_Request_Lengths") %>%
+  filter(Year > 2000) %>%
+  dplyr::rename(set_year = Year) %>%
+  dplyr::rename(drvid = BOATID) %>%
+  dplyr::rename(port = PORT) %>%
   mutate(date = as.Date(Date,format="%Y-%m-%d")) %>%
-  mutate(year = year(date)) %>%
-  mutate(month = month(date)) %>%
-  dplyr::rename(effort = `Squid (Lbs)`) %>%
-  dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+  mutate(set_month = month(date)) %>%
+  mutate(set_day = day(date)) %>%
+  filter(COMMON_NAME == 'PACIFIC SARDINE') %>%
+  distinct(drvid, port, set_year)
 
-sqd.logbook.OR.2018 <- read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2018") %>%
-  mutate(Lat = Lat + Min/60) %>%
-  mutate(Long = Long + mins/60) %>%
-  mutate(vessel="OR") %>%
-  dplyr::rename(lat = Lat) %>%
-  dplyr::rename(lon = Long) %>%
-  dplyr::rename(VesselID = `Doc #`) %>%
-  tidyr::fill(VesselID) %>%
-  mutate(date = as.Date(`Log Date`,format="%Y-%m-%d")) %>%
-  mutate(year = year(date)) %>%
-  mutate(month = month(date)) %>%
-  dplyr::rename(effort = `Lbs`) %>%
-  dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+psdn.logbook <- merge(psdn.logbook,psdn.port.OR,by=c('drvid', 'set_year'),all.x = TRUE)
 
-sqd.logbook.OR.2019 <- read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2019") %>%
-  mutate(lat = Lat + lat/60) %>%
-  mutate(lon = Long + long/60) %>%
-  mutate(vessel="OR") %>%
-  dplyr::rename(VesselID = `doc number`) %>%
-  mutate(date = as.Date(`Fishing date`,format="%Y-%m-%d")) %>%
-  mutate(year = year(date)) %>%
-  mutate(month = month(date)) %>%
-  dplyr::rename(effort = `Est Lbs Squid`) %>%
-  dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+# Load port georeferenced data
+ports <- read_csv("C://GitHub//EconAnalysis//Data//port_names.csv")
 
-sqd.logbook.OR.2020 <- read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2020") %>%
-  mutate(Lat = Lat + Min/60) %>%
-  mutate(Long = Long + mins/60) %>%
-  mutate(vessel="OR") %>%
-  dplyr::rename(lat = Lat) %>%
-  dplyr::rename(lon = Long) %>%
-  dplyr::rename(VesselID = `Doc #`) %>%
-  mutate(date = as.Date(`log date`,format="%Y-%m-%d")) %>%
-  mutate(year = year(date)) %>%
-  mutate(month = month(date)) %>%
-  dplyr::rename(effort = `Lbs`) %>%
-  dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+# change uppercase letters
+psdn.logbook <- psdn.logbook %>%
+  mutate(port = tolower(port))
 
-sqd.logbook.OR <- rbind(sqd.logbook.OR.2016, sqd.logbook.OR.2018, sqd.logbook.OR.2019, sqd.logbook.OR.2020)
+ports <- ports %>%
+  dplyr::rename(port = port_name) %>%
+  dplyr::rename(d_port_long = lon) %>%
+  dplyr::rename(d_port_lat = lat) %>%
+  mutate(port = tolower(port))
+
+psdn.logbook <- merge(psdn.logbook,ports,by=c('port'),all.x = TRUE)
+
+psdn.logbook.set <- psdn.logbook %>%
+                      filter(set_year >= 2011, set_year <= 2012)
 
 
-### California
-
-sqd.logbook.vessel <- read_csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidVesselDataExtract.csv") %>%
-  dplyr::rename(lat = SetLatitude) %>%
-  dplyr::rename(lon = SetLongitude) %>%
-  mutate(vessel="CA Vessel") %>%
-  mutate(date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
-  mutate(year = year(date)) %>%
-  mutate(month = month(date)) %>%
-  dplyr::rename(effort = "CatchEstimate") %>%
-  dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
-
-sqd.logbook.light.brail <- read_csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidLightBrailLogDataExtract.csv") %>%
-  dplyr::rename(lat = Lat_DD) %>%
-  dplyr::rename(lon = Long_DD) %>%
-  mutate(vessel="CA Light Boat") %>%
-  mutate(date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
-  mutate(year = year(date)) %>%
-  mutate(month = month(date)) %>%
-  dplyr::rename(effort = "ElapsedTime") %>% 
-  dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
-
-
-# DATABASE
-sqd.logbook <- rbind(sqd.logbook.OR, sqd.logbook.vessel,sqd.logbook.light.brail)
-sqd.logbook <- sqd.logbook[-which(is.na(sqd.logbook$lat)), ] 
-sqd.logbook <- sqd.logbook[-which(sqd.logbook$lat == 0), ] 
-sqd.logbook <- sqd.logbook[-which(sqd.logbook$lon == 0), ] 
-sqd.logbook$lon <- with(sqd.logbook, ifelse(lon > 0, -lon, lon))
-
-psdn.logbook <- rbind(psdn.logbook.OR, psdn.logbook.WA)
-psdn.logbook <- psdn.logbook[-which(is.na(psdn.logbook$lat)), ] 
-# psdn.logbook <- psdn.logbook[-which(psdn.logbook$lat == 0), ] 
-# psdn.logbook <- psdn.logbook[-which(psdn.logbook$lon == 0), ] 
-psdn.logbook$lon <- with(psdn.logbook, ifelse(lon > 0, -lon, lon))
-
-logbook_data <- psdn.logbook %>% 
-  filter(year > 2001)
-
-
-
+#-----------------------------------------------------------------------------
 
 ## Sampling choice data ##
+source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums.R")
 
-  #Sample Hauls  
-  #Set seed
-  set.seed(seed)
-  seedz <- sample(1:1e7, size = nrow(hauls)) # changes hauls for trips?
-  
-  #Sample hauls and calculate distances
-  #For each haul in the focus year, sample nhauls_sampled tows
-  cl <- makeCluster(ncores)
-  registerDoParallel(cl)
-  
-  sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls), 
-                                    .export = c("sample_hauls"), 
-                                    .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% 
-    sample_hauls(xx = ii, hauls1 = hauls, 
-                 dist_hauls_catch_shares1 = dist_hauls_catch_shares, nhauls_sampled1 = nhauls_sampled,
-                 depth_bin_proportions = dbp, the_seed = seedz[ii])
-  
-  print("Done sampling hauls")  
-  sampled_hauls <- plyr::ldply(sampled_hauls)
+samps <- sampled_rums(data_in = psdn.logbook, the_port = "OR",
+                      min_year = 2010, max_year = 2012, risk_coefficient = 1,
+                      ndays = 30, focus_year = 2012, nhauls_sampled = 10, seed = 42,
+                      ncores = 1, rev_scale = 100,  model_type = 'no_bycatch',
+                      net_cost = "qcos", habit_distance = 5, return_hauls = TRUE)
+
+#-----------------------------------------------------------------------------

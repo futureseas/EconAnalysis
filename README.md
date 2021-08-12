@@ -18,6 +18,8 @@ Estimation of a mixed logit for location/species decision using PacFIN vessel da
 
 + Work to do...
   + **From logbooks**:
+    + Start using OR logbooks for sardine
+       + There is no logbook for same year to compare species decision choice.
     + Static or dynamics. Do they change location?
     + Do they behave similarly to peers? Do they go to the same fishing grounds? 
   + Read more theory
