@@ -1,7 +1,5 @@
 #' Function to Sample Hauls
 
-#' Function to Sample Hauls
-
 #' @param xx Index
 #' @param hauls1 hauls data frame
 #' @param dist_hauls_catch_shares1 df with distance after catch shares
@@ -13,13 +11,12 @@
   sample_hauls <- function(xx, hauls1 = hauls, dist_hauls_catch_shares1 = dist_hauls_catch_shares,
     nhauls_sampled1 = 50, depth_bin_proportions, the_seed){
     
-    
-    
-    #---------------------------------------------------------------
-    ## Load functions
-    source("C:\\GitHub\\EconAnalysis\\Functions\\deg2rad.R")
-    source("C:\\GitHub\\EconAnalysis\\Functions\\gcd_slc.R")
-    #---------------------------------------------------------------
+   #---------------------------------------------------------------
+   ## Load functions
+   source("C:\\GitHub\\EconAnalysis\\Functions\\deg2rad.R")
+   source("C:\\GitHub\\EconAnalysis\\Functions\\gcd_slc.R")
+   
+   #---------------------------------------------------------------
 
    #Seed uses the row index in the foreach function of sampled_rums
    set.seed(the_seed)
@@ -40,12 +37,14 @@
     prev_point <- actual_haul %>% select(prev_up_long, prev_up_lat)
     the_samples$prev_up_long <- prev_point$prev_up_long
     the_samples$prev_up_lat <- prev_point$prev_up_lat
+    
+    ## for the samples
     the_samples[, c('set_long', 'set_lat', 'prev_up_lat', 'prev_up_long')] <- deg2rad(the_samples[, 
       c('set_long', 'set_lat', 'prev_up_lat', 'prev_up_long')])
-    
     the_samples$distance <- gcd_slc(the_samples$prev_up_long, 
         the_samples$prev_up_lat, the_samples$set_long, the_samples$set_lat)
   
+    ## for the actual data
     actual_haul[, c('set_long', 'set_lat', 'prev_up_lat', 'prev_up_long')] <- deg2rad(actual_haul[, 
         c('set_long', 'set_lat', 'prev_up_lat', 'prev_up_long')])  
     actual_haul$distance <- gcd_slc(actual_haul$prev_up_long, 
@@ -65,21 +64,3 @@
     
     return(the_samples)
   }
-
-    #Sample in proportion to depth bins
-    # the_samples <- dist_hauls_catch_shares1 %>% filter(haul_id != hauls1[xx, 'haul_id']) %>% 
-    #   sample_n(size = nhauls_sampled1, replace = F)
-
-      # the_samples$prev_avg_long <- prev_point$prev_avg_long
-    # the_samples$prev_avg_lat <- prev_point$prev_avg_lat
-    # the_samples[, c('avg_long', 'avg_lat', 'prev_avg_lat', 'prev_avg_long')] <- deg2rad(the_samples[, 
-    #   c('avg_long', 'avg_lat', 'prev_avg_lat', 'prev_avg_long')])
-  
-    # the_samples$distance <- gcd_slc(the_samples$prev_avg_long, 
-    #     the_samples$prev_avg_lat, the_samples$avg_long, the_samples$avg_lat)
-
-  #Calculate distance of empirical haul
-    # actual_haul[, c('avg_long', 'avg_lat', 'prev_avg_lat', 'prev_avg_long')] <- deg2rad(actual_haul[, 
-    #     c('avg_long', 'avg_lat', 'prev_avg_lat', 'prev_avg_long')])  
-    # actual_haul$distance <- gcd_slc(actual_haul$prev_avg_long, 
-    #     actual_haul$prev_avg_lat, actual_haul$avg_long, actual_haul$avg_lat)

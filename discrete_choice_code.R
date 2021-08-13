@@ -7,19 +7,20 @@
 ### a "set" similar to haul, and coordinates "set" and "up" are the same. 
 
 ## Load packages ##
-library(ggplot2)
-library(plyr)
-library(dplyr)
-library(lubridate)
-library(reshape2)
 library(devtools)
-library(maps)
 library(doParallel)
+library(dplyr)
+library(ggplot2)
 library(lubridate)
-library(tidyr)
+library(maps)
 library(mlogit)
 library(parallel)
-library(OneR)
+library(plyr)
+library(reshape2)
+library(tidyr)
+library(tidyverse)
+library(udpipe)
+library(xlsx)
 
 #-----------------------------------------------------------------------------
 
@@ -95,9 +96,10 @@ psdn.logbook.set <- psdn.logbook %>%
 source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums.R")
 
 samps <- sampled_rums(data_in = psdn.logbook, the_port = "OR",
-                      min_year = 2010, max_year = 2012, risk_coefficient = 1,
-                      ndays = 30, focus_year = 2012, nhauls_sampled = 10, seed = 42,
-                      ncores = 1, rev_scale = 100,  model_type = 'no_bycatch',
-                      net_cost = "qcos", habit_distance = 5, return_hauls = TRUE)
+                      min_year = 2010, max_year = 2012, ndays = 30, 
+                      focus_year = 2012, nhauls_sampled = 10, 
+                      seed = 42, ncores = 1, rev_scale = 100, 
+                      model_type = 'no_bycatch', net_cost = "qcos",
+                      habit_distance = 5, return_hauls = TRUE)
 
 #-----------------------------------------------------------------------------

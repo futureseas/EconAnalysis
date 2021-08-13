@@ -9,6 +9,13 @@
 #' @export
 
 process_dummys2 <- function(xx, td2 = td1, dat1 = dat, hab_dist = 5, n_cost){
+  
+  #---------------------------------------------------------------
+  ## Load functions
+  source("C:\\GitHub\\EconAnalysis\\Functions\\deg2rad.R")
+  source("C:\\GitHub\\EconAnalysis\\Functions\\gcd_slc.R")
+  #---------------------------------------------------------------
+  
   temp_dat <- td2[xx, ]
 
   fltz <- strsplit(temp_dat$fleet_name, "_")[[1]]
@@ -69,30 +76,6 @@ process_dummys2 <- function(xx, td2 = td1, dat1 = dat, hab_dist = 5, n_cost){
   
   dum_rev_dollars <- mean_rev
 
-#Deprecated features
-  # mean_weak <- mean(dum_rev$weak_quota_value, na.rm = T)
-  # mean_weak <- replace(mean_weak, is.na(mean_weak), 0)
-  
-  # dum_rev$quota_cost <- dum_rev$avg_quota_price * dum_rev$apounds
-  # mean_qc <- mean(dum_rev$quota_cost, na.rm = T)
-  # mean_qc <- replace(mean_qc, is.na(mean_qc), 0)
-
-  # #Calculate different values based on arguments
-  # if(n_cost == "trev"){
-  #   dum_rev_dollars <- mean_rev
-  # }
-
-  # if(n_cost == 'cons'){
-  #   dum_rev_dollars <- mean_rev - mean_weak
-  # }
-
-  # #quota costs for all species included
-  # if(n_cost == "qcos"){
-  #   dum_rev_dollars <- mean_rev - mean_qc
-  # }
-  
-  # dum_rev_dollars <- mean_rev - mean_weak
-  
   temp_dat$dummy_prev_days <- dum30_val
   temp_dat$dummy_prev_year_days <- dum30y_val
   temp_dat$dummy_miss <- dum_rev_val
