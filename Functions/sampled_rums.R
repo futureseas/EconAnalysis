@@ -103,7 +103,7 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   cl <- makeCluster(ncores)
   registerDoParallel(cl)
   source("C:\\GitHub\\EconAnalysis\\Functions\\sample_hauls.R")
-  
+
   sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls),
     .export = c("sample_hauls"),
     .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
@@ -192,80 +192,64 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   #-----------------------------------------------------------------------------
   #Format as mlogit.data
   rdo <- sampled_hauls %>% dplyr::select(haul_id, haul_num, distance, fished, fished_haul,
-    dummy_prev_days, dummy_prev_year_days, dummy_first, dummy_not_first)
+    dummy_prev_days, dummy_prev_year_days, dummy_first, dummy_not_first, set_lat, set_long)
 
   rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(haul_id)) %>% as.data.frame
 
-  # #-----------------------------------------------------------------------------
-  # #Fit mlogit models returning the coefficients, the models, and the data going into the
-  # #Filter out tows with missing values for distance
-  # rdo <- rdo %>% dplyr::filter(is.na(distance) == FALSE)
-  # remove_all_missing <- rdo %>% group_by(fished_haul) %>%
-  #   summarize(keep = sum(fished)) %>% dplyr::filter(keep != 1) %>% as.data.frame
-  # rdo <- rdo %>% dplyr::filter(fished_haul %in% remove_all_missing$fished_haul == F)
-  #
-  # #Fit the model for everything at once
-  # the_tows <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'alt_tow',
-  #   chid.var = 'fished_haul')
-  #
-  # if(model_type == "no_bycatch"){
-  #   mf <- mFormula(fished ~ miss_rev_adj * dummy_first +
-  #     distance * dummy_first + miss_rev_adj * dummy_not_first +
-  #     distance * dummy_not_first - distance - miss_rev_adj - 1 -
-  #     dummy_first - dummy_not_first + dummy_prev_days + dummy_prev_year_days + dummy_miss)
-  # }
-  #
-  # if(model_type == 'dummy_bycatch'){
-  #   browser()
-  # }
-  #
-  # res <- mlogit(mf, the_tows)
-  #
-  # #List coefficients and rename to align with jeem paper
-  # coefs <- coef(res)
-  #
-  # if(model_type == 'no_bycatch'){
-  #   coefs <- plyr::rename(coefs, c('dummy_prev_days' = 'dum30',
-  #   "dummy_prev_year_days" = "dum30y", "miss_rev_adj:dummy_first" = "rev1",
-  #   "dummy_first:distance" = 'dist1', "miss_rev_adj:dummy_not_first" = "rev",
-  #   "distance:dummy_not_first" = 'dist', "dummy_miss" = "dmiss"))
-  #   coefs <- data.frame(coefs = round(coefs[c('dist', 'dist1', 'rev', 'rev1', 'dmiss', 'dum30', 'dum30y')],
-  #     digits = 5))
-  #
-  #   ps <- summary(res)$CoefTable[, 4]
-  #
-  #   ps <- plyr::rename(ps, c('dummy_prev_days' = 'dum30',
-  #     "dummy_prev_year_days" = "dum30y", "miss_rev_adj:dummy_first" = "rev1",
-  #     "dummy_first:distance" = 'dist1', "miss_rev_adj:dummy_not_first" = "rev",
-  #     "distance:dummy_not_first" = 'dist', "dummy_miss" = "dmiss"))
-  #
-  #   ps <- ps[c('dist', 'dist1', 'rev', 'rev1', 'dmiss','dum30', 'dum30y')]
-  # }
-  #
-  # #Add significance values
-  # coefs$p_values <- round(ps, digits = 5)
-  # coefs$significance <- " "
-  # coefs[which(coefs$p_values <= .10), 'significance'] <- "."
-  # coefs[which(coefs$p_values <= .05), 'significance'] <- "*"
-  # coefs[which(coefs$p_values <= .01), 'significance'] <- "**"
-  # coefs[which(coefs$p_values <= .001), 'significance'] <- "***"
-  #
-  # #Generate and format the predictions
-  # preds <- pred_metrics(choices = sampled_hauls, mod = res)
-  # preds <- data.frame(score1 = preds[1], score2 = preds[2], score3 = preds[3],
-  #   score4 = preds[4])
-  # preds$min_year <- min_year
-  # preds$focus_year <- focus_year
-  # preds$nhauls_sampled <- nhauls_sampled
-  # preds$seed <- preds$seed
-  # preds$risk_coefficient <- risk_coefficient
-  # preds$rev_scale <- rev_scale
-  # preds$habit_distance <- habit_distance
-  # preds$ndays <- ndays
-  # preds$net_cost <- net_cost
-  #
-  # if(length(the_port) > 1) the_port <- paste(the_port, collapse = " and ")
-  # preds$port <- the_port
-  outs <- list(data = rdo, choices = sampled_hauls)
+  #-----------------------------------------------------------------------------
+  ##Fit mlogit models returning the coefficients, the models, and the data going into the model
+
+  #Filter out tows with missing values for distance
+  rdo <- rdo %>% dplyr::filter(is.na(distance) == FALSE)
+  remove_all_missing <- rdo %>% group_by(fished_haul) %>%
+    summarize(keep = sum(fished)) %>% 
+    dplyr::filter(keep != 1) %>% 
+    as.data.frame
+  rdo <- rdo %>% dplyr::filter(fished_haul %in% remove_all_missing$fished_haul == F)
+  
+  #Fit the model for everything at once
+  the_tows <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'alt_tow', chid.var = 'fished_haul')
+  mf <- mFormula(fished ~ distance * dummy_first + distance * dummy_not_first - distance - 1 -
+      dummy_first - dummy_not_first + dummy_prev_days + dummy_prev_year_days)
+  res <- mlogit(mf, the_tows)
+  
+  #List coefficients and rename to align with jeem paper
+  coefs <- coef(res)
+    coefs <- plyr::rename(coefs, c('dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y", 
+                                  "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'dist'))
+    coefs <- data.frame(coefs = round(coefs[c('dist', 'dist1', 'dum30', 'dum30y')], digits = 5))
+  
+  ps <- summary(res)$CoefTable[, 4]
+    ps <- plyr::rename(ps, c('dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y",
+                             "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'dist'))
+    ps <- ps[c('dist', 'dist1','dum30', 'dum30y')]
+
+  
+  #Add significance values
+  coefs$p_values <- round(ps, digits = 5)
+  coefs$significance <- " "
+  coefs[which(coefs$p_values <= .10), 'significance'] <- "."
+  coefs[which(coefs$p_values <= .05), 'significance'] <- "*"
+  coefs[which(coefs$p_values <= .01), 'significance'] <- "**"
+  coefs[which(coefs$p_values <= .001), 'significance'] <- "***"
+  
+  #Generate and format the predictions
+  source("C:\\GitHub\\EconAnalysis\\Functions\\pred_metrics.R")
+  preds <- pred_metrics(choices = rdo, mod = res)
+  preds <- data.frame(score1 = preds[1], score2 = preds[2], score3 = preds[3], score4 = preds[4])
+  preds$min_year <- min_year
+  preds$focus_year <- focus_year
+  preds$nhauls_sampled <- nhauls_sampled
+  preds$seed <- preds$seed
+  preds$rev_scale <- rev_scale
+  preds$habit_distance <- habit_distance
+  preds$ndays <- ndays
+  preds$net_cost <- net_cost
+
+  if(length(the_port) > 1) the_port <- paste(the_port, collapse = " and ")
+   preds$port <- the_port
+
+  ## Output from the model
+  outs <- list(coefs = coefs, mod = res, preds = preds, choices = sampled_hauls, data = rdo)  
   return(outs)
 }

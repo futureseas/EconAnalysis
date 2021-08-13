@@ -98,7 +98,9 @@ source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums.R")
 samps <- sampled_rums(data_in = psdn.logbook, the_port = "OR",
                       min_year = 2010, max_year = 2012, ndays = 30, 
                       focus_year = 2012, nhauls_sampled = 10, 
-                      seed = 42, ncores = 4, rev_scale = 100, 
-                      model_type = 'no_bycatch', net_cost = "qcos",
+                      seed = 42, ncores = 4, rev_scale = 100, net_cost = "qcos",
                       habit_distance = 5, return_hauls = FALSE)
 
+# Add revenue per area and expected catch.
+# Think how to add a multispecies framework. 
+# This would work with PacFIN landing data???
