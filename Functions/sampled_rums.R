@@ -26,15 +26,20 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   
   
   #---------------------------------------------------------------
-  ## Load functions
-  source("C:\\GitHub\\EconAnalysis\\Functions\\sample_hauls.R")
-  source("C:\\GitHub\\EconAnalysis\\Functions\\process_dummys2.R")
-  
-  #---------------------------------------------------------------
   ##Filter the data
 
-  dat <- data_in %>% filter(set_year >= min_year, set_year <= max_year,
+  dat <- data_in %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
     fleet_name %in% the_port)
+
+  #---------------------------------------------------------------
+  # #Modify the weak stock catches 
+  # dat$weak_quota_value <- dat$weak_quota_value * risk_coefficient
+
+  # #---------------------------------------------------------------
+  # #Calculate net revenues for each haul
+  # dat$net_revenue <- 999
+  # dat <- dat %>% group_by(haul_id) %>%
+  #     mutate(haul_net_revenue = sum(net_revenue, na.rm = T))
 
   #---------------------------------------------------------------
   #Create data set, for each tow
@@ -44,11 +49,11 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
       set_long, set_lat, haul_num, depth_bin, up_long, up_lat) %>% 
     as.data.frame
 
-  dist_hauls_catch_shares <- dist_hauls %>% filter(set_year >= min_year)
+  dist_hauls_catch_shares <- dist_hauls %>% dplyr::filter(set_year >= min_year)
 
   #For each tow in the focus year, sample other tows
   #Hauls in focus year
-  hauls <- dist_hauls %>% filter(set_year == focus_year) %>% arrange(trip_id, haul_num)
+  hauls <- dist_hauls %>% dplyr::filter(set_year == focus_year) %>% arrange(trip_id, haul_num)
   hauls$prev_haul_num <- hauls$haul_num - 1
 
   #Data frame of previous haul locations
@@ -71,7 +76,7 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   hauls <- hauls %>% left_join(prev_hauls, by = c('trip_id', 'prev_haul_num'))
 
   #Calculate depth bin proportions
-  dbp <- dist_hauls_catch_shares %>% filter(depth_bin != 69) %>%
+  dbp <- dist_hauls_catch_shares %>% dplyr::filter(depth_bin != 69) %>%
     group_by(depth_bin) %>% summarize(nvals = length(unique(haul_id))) %>%
     mutate(tot_nvals = sum(nvals), prop = nvals / tot_nvals)
 
@@ -97,40 +102,42 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   #For each haul in the focus year, sample nhauls_sampled tows
   cl <- makeCluster(ncores)
   registerDoParallel(cl)
+  source("C:\\GitHub\\EconAnalysis\\Functions\\sample_hauls.R")
   
   sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls),
     .export = c("sample_hauls"),
-    .packages = c("dplyr", 'plyr', 'lubridate')) %dopar%
+    .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
       sample_hauls(xx = ii, hauls1 = hauls,
         dist_hauls_catch_shares1 = dist_hauls_catch_shares, nhauls_sampled1 = nhauls_sampled,
         depth_bin_proportions = dbp, the_seed = seedz[ii])
-
+    }
   print("Done sampling hauls")
   sampled_hauls <- plyr::ldply(sampled_hauls)
+  
+  #Add in the vessel that's doing the fishing
+  fd <- sampled_hauls %>% dplyr::filter(fished == TRUE) %>% distinct(fished_haul, drvid)
+  fd <- plyr::rename(fd, c("drvid" = 'fished_drvid'))
+  sampled_hauls <- sampled_hauls %>% left_join(fd, by = "fished_haul")
+
+  #Obtain previous day, year and day/year date
+  sampled_hauls$prev_days_date <- sampled_hauls$set_date - days(ndays)
+  sampled_hauls$prev_year_set_date <- sampled_hauls$set_date - days(365)
+  sampled_hauls$prev_year_days_date <- sampled_hauls$prev_days_date - days(365)
 
   if(return_hauls == TRUE) {
     stopCluster(cl)
     return(sampled_hauls)
   }
-
+  
   #-----------------------------------------------------------------------------
-  #Calculate revenues from each period and Process dummy variables
-  sampled_hauls$prev_days_date <- sampled_hauls$set_date - days(ndays)
-  sampled_hauls$prev_year_set_date <- sampled_hauls$set_date - days(365)
-  sampled_hauls$prev_year_days_date <- sampled_hauls$prev_days_date - days(365)
-
-  #Add in the vessel that's doing the fishing
-  fd <- sampled_hauls %>% filter(fished == TRUE) %>% distinct(fished_haul, drvid)
-  fd <- plyr::rename(fd, c("drvid" = 'fished_drvid'))
-
-  sampled_hauls <- sampled_hauls %>% left_join(fd, by = "fished_haul")
-
+  ### Calculate interval between previews day and year
+  
   #What were the average revenues in each location
   tow_dates <- sampled_hauls %>%
     dplyr::select(haul_id, drvid, set_date, prev_days_date, prev_year_set_date, prev_year_days_date,
                   set_lat, set_long, up_lat, up_long, depth_bin, fished_drvid)
 
-  #Look at the unique dates and clusters only
+  #calculate intervals
   tow_dates$days_inter <- interval(tow_dates$prev_days_date, tow_dates$set_date)
   tow_dates$prev_year_days_inter <- interval(tow_dates$prev_year_days_date, tow_dates$prev_year_set_date)
 
@@ -139,29 +146,30 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   tow_dates$fleet_name <- paste_port
   td1 <- tow_dates
 
-  dummys2 <- foreach::foreach(ii = 1:nrow(td1),
-    .packages = c("dplyr", 'lubridate', 'ch4')) %dopar%
-      process_dummys2(xx = ii, td2 = td1, dat1 = dat, hab_dist = habit_distance, n_cost = net_cost)
-  stopCluster(cl)
 
+  #-----------------------------------------------------------------------------
+  ### Calculate revenues (LATER!) from each period and process dummy variables
+
+  dummys2 <- foreach::foreach(ii = 1:nrow(td1),
+    .packages = c("dplyr", 'lubridate')) %dopar% {
+      source("C:\\GitHub\\EconAnalysis\\Functions\\process_dummys2.R")
+      process_dummys2(xx = ii, td2 = td1, dat1 = dat, hab_dist = habit_distance, n_cost = net_cost)
+    }
   print("Done calculating dummys and revenues")
+  stopCluster(cl)
+  
   td1 <- ldply(dummys2)
 
   #-----------------------------------------------------------------------------
-
-  #Check to see that this value is right
-  #converte set_date to character string to merge with the sampled_hauls
+  ##Create additional dummys
+  
+  #Convert set_date to character string to merge with the sampled_hauls
   tow_dates$set_date_chr <- as.character(tow_dates$set_date)
   td1$set_date_chr <- as.character(td1$set_date)
-
-  #Add in charcater set_date for sampled_hauls
   sampled_hauls$set_date_chr <- as.character(sampled_hauls$set_date)
-  # td1 <- td1 %>% select(unq_clust, set_date_chr, dummy_prev_days, dummy_prev_year_days,
-  #   dummy_miss, miss_rev)
-  # sampled_hauls <- sampled_hauls %>% left_join(td1, by = c("unq_clust", "set_date_chr"))
 
   #Add in dummy variable for first tow
-  first_hauls <- sampled_hauls %>% filter(fished == TRUE, haul_num == 1) %>% dplyr::select(fished_haul)
+  first_hauls <- sampled_hauls %>% dplyr::filter(fished == TRUE, haul_num == 1) %>% dplyr::select(fished_haul)
   sampled_hauls$dummy_first <- 0
   sampled_hauls[which(sampled_hauls$fished_haul %in% first_hauls$fished_haul), 'dummy_first'] <- 1
   sampled_hauls$dummy_not_first <- sampled_hauls$dummy_first
@@ -170,36 +178,31 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   sampled_hauls[which(sampled_hauls$dummy_not_first == 0), "dummy_not_first"] <- 1
   sampled_hauls[which(sampled_hauls$dummy_not_first == 2), "dummy_not_first"] <- 0
 
-
   td1[which(td1$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
   td1[which(td1$dummy_prev_year_days != 0), 'dummy_prev_year_days'] <- 1
 
-  td1[which(td1$miss_rev != 0), 'dummy_miss'] <- 0
-  td1[which(td1$miss_rev == 0), 'dummy_miss'] <- 1
+  # td1[which(td1$miss_rev != 0), 'dummy_miss'] <- 0
+  # td1[which(td1$miss_rev == 0), 'dummy_miss'] <- 1
 
-  td1$miss_rev_adj <- td1$miss_rev / rev_scale
-
-  #Add dummy values into sampled_hauls
-  sum(sampled_hauls$haul_id == td1$haul_id)
+  # td1$miss_rev_adj <- td1$miss_rev / rev_scale
 
   sampled_hauls <- cbind(sampled_hauls,
-    td1[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'miss_rev', 'miss_rev_adj')] )
+    td1[, c('dummy_prev_days', 'dummy_prev_year_days')] )
 
   #-----------------------------------------------------------------------------
   #Format as mlogit.data
   rdo <- sampled_hauls %>% dplyr::select(haul_id, haul_num, distance, fished, fished_haul,
-    dummy_prev_days, dummy_prev_year_days, dummy_miss, miss_rev, miss_rev_adj,
-    dummy_first, dummy_not_first)
+    dummy_prev_days, dummy_prev_year_days, dummy_first, dummy_not_first)
 
   rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(haul_id)) %>% as.data.frame
 
   # #-----------------------------------------------------------------------------
   # #Fit mlogit models returning the coefficients, the models, and the data going into the
   # #Filter out tows with missing values for distance
-  # rdo <- rdo %>% filter(is.na(distance) == FALSE)
+  # rdo <- rdo %>% dplyr::filter(is.na(distance) == FALSE)
   # remove_all_missing <- rdo %>% group_by(fished_haul) %>%
-  #   summarize(keep = sum(fished)) %>% filter(keep != 1) %>% as.data.frame
-  # rdo <- rdo %>% filter(fished_haul %in% remove_all_missing$fished_haul == F)
+  #   summarize(keep = sum(fished)) %>% dplyr::filter(keep != 1) %>% as.data.frame
+  # rdo <- rdo %>% dplyr::filter(fished_haul %in% remove_all_missing$fished_haul == F)
   #
   # #Fit the model for everything at once
   # the_tows <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'alt_tow',
@@ -265,5 +268,4 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   # preds$port <- the_port
   outs <- list(data = rdo, choices = sampled_hauls)
   return(outs)
-
 }

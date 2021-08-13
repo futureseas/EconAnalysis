@@ -23,7 +23,7 @@
    
    #Check to make sure there are enough samples of each thing to sample without replacement
    the_samples <- lapply(1:nrow(depth_bin_proportions), FUN = function(dd){
-                      temp <- dist_hauls_catch_shares1 %>% filter(haul_id != hauls1[xx, 'haul_id'],
+                      temp <- dist_hauls_catch_shares1 %>% dplyr::filter(haul_id != hauls1[xx, 'haul_id'],
                                   depth_bin == depth_bin_proportions[dd, "depth_bin"])
                       samps <- temp %>% sample_n(size = depth_bin_proportions[dd, "n_samp"], replace = F)
                       return(samps)
