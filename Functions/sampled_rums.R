@@ -12,15 +12,17 @@
 #' @param seed Seed for sampling tows
 #' @param ncores Number of cores to use
 #' @param rev_scale Scale the revenue by this factor
-#' @param net_cost Type of netting of costs;
 #' @param habit_distance Distance of spatiotemporal filter
 #' @param return_hauls Option to return the hauls before processing dummys, defaults to FALSE
+#' @param exp_rev Type of expected revenue (from sdm or catch)
 #'
 #' @export
 
 sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON",
-  min_year = 2010, max_year = 2012, ndays = 60, focus_year = 2012, nhauls_sampled = 50, seed = 300, ncores, rev_scale,
-  model_type = 'no_bycatch', net_cost, habit_distance, return_hauls = FALSE){
+  min_year = 2010, max_year = 2012, ndays = 60, focus_year = 2012, nhauls_sampled = 50, 
+  seed = 300, ncores, rev_scale, habit_distance, 
+  return_hauls = FALSE, exp_rev = "sdm"){
+
 #Start by sampling 50 tows within the same fleet
 #Figure out how close the different clusters are
   
@@ -154,7 +156,7 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   dummys2 <- foreach::foreach(ii = 1:nrow(td1),
     .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\process_dummys2.R")
-      process_dummys2(xx = ii, td2 = td1, dat1 = dat, hab_dist = habit_distance, n_cost = net_cost)
+      process_dummys2(xx = ii, td2 = td1, dat1 = dat, hab_dist = habit_distance)
     }
   print("Done calculating dummys and revenues")
   stopCluster(cl)
@@ -182,18 +184,19 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   td1[which(td1$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
   td1[which(td1$dummy_prev_year_days != 0), 'dummy_prev_year_days'] <- 1
 
-  # td1[which(td1$miss_rev != 0), 'dummy_miss'] <- 0
-  # td1[which(td1$miss_rev == 0), 'dummy_miss'] <- 1
+  td1[which(td1$mean_rev != 0), 'dummy_miss'] <- 0
+  td1[which(td1$mean_rev == 0), 'dummy_miss'] <- 1
 
-  # td1$miss_rev_adj <- td1$miss_rev / rev_scale
+  td1$mean_rev_adj <- td1$mean_rev / rev_scale
 
   sampled_hauls <- cbind(sampled_hauls,
-    td1[, c('dummy_prev_days', 'dummy_prev_year_days')] )
+    td1[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
 
   #-----------------------------------------------------------------------------
   #Format as mlogit.data
   rdo <- sampled_hauls %>% dplyr::select(haul_id, haul_num, distance, fished, fished_haul,
-    dummy_prev_days, dummy_prev_year_days, dummy_first, dummy_not_first, set_lat, set_long, haul_net_revenue.sdm, haul_net_revenue.catch)
+    dummy_prev_days, dummy_prev_year_days, dummy_first, dummy_not_first, set_lat, set_long, haul_net_revenue.sdm, haul_net_revenue.catch,
+    dummy_miss, mean_rev, mean_rev_adj)
 
   rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(haul_id)) %>% as.data.frame
 
@@ -210,24 +213,58 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   
   #Fit the model for everything at once
   the_tows <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'alt_tow', chid.var = 'fished_haul')
-  mf <- mFormula(fished ~ distance * dummy_first + distance * dummy_not_first - distance - 1 -
-      dummy_first - dummy_not_first + dummy_prev_days + dummy_prev_year_days + haul_net_revenue.sdm )
-  res <- mlogit(mf, the_tows)
   
-  #List coefficients and rename to align with jeem paper
-  coefs <- coef(res)
-    coefs <- plyr::rename(coefs, c('dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y", 
-                                  "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'dist', 
-                                  "haul_net_revenue.sdm" = 'rev'))
-    coefs <- data.frame(coefs = round(coefs[c('dist', 'dist1', 'dum30', 'dum30y', 'rev')], digits = 5))
-  
-  ps <- summary(res)$CoefTable[, 4]
-    ps <- plyr::rename(ps, c('dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y",
-                             "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'dist', 
-                             "haul_net_revenue.sdm" = 'rev'))
-    ps <- ps[c('dist', 'dist1','dum30', 'dum30y', 'rev')]
+  if(exp_rev == "sdm"){
+    mf <- mFormula(fished ~  distance * dummy_first + distance * dummy_not_first + dummy_prev_days + dummy_prev_year_days + haul_net_revenue.sdm 
+                   - 1 - dist - distance - dummy_first - dummy_not_first)
+    res <- mlogit(mf, the_tows)
+    
+    #List coefficients and rename to align with jeem paper
+    coefs <- coef(res)
+    coefs <- plyr::rename(coefs, c('dummy_prev_days' = 'dum30',
+                                   "dummy_prev_year_days" = "dum30y", "distance:dummy_first" = 'dist1',
+                                   "distance:dummy_not_first" = 'distN',
+                                   'haul_net_revenue.sdm' = 'rev'))
+    coefs <- data.frame(coefs = round(coefs[c('distN', 'dist1', 'dum30', 'dum30y', 'rev')],
+      digits = 5))
+    
+    ps <- summary(res)$CoefTable[, 4]
 
+    ps <- plyr::rename(ps, c('dummy_prev_days' = 'dum30',
+                             "dummy_prev_year_days" = "dum30y", "distance:dummy_first" = 'dist1',
+                             "distance:dummy_not_first" = 'distN', 
+                             'haul_net_revenue.sdm' = 'rev'))
+    
+    ps <- ps[c('dist1', 'distN', 'dum30', 'dum30y', 'rev')]
+  }  
   
+  if(exp_rev == "catch"){
+    mf <- mFormula(fished ~ mean_rev_adj + distance * dummy_first + distance * dummy_not_first 
+                   + dummy_prev_days + dummy_prev_year_days + dummy_miss 
+                   - 1 - distance - dummy_first - dummy_not_first)
+    res <- mlogit(mf, the_tows)
+    
+    #List coefficients and rename to align with jeem paper
+    coefs <- coef(res)
+
+    coefs <- plyr::rename(coefs, c('dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y",
+                                   "mean_rev_adj" = "rev",
+                                   "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'distN',
+                                   "dummy_miss" = "dmiss"))
+    coefs <- data.frame(coefs = round(coefs[c('dist1', 'distN', 'rev', 'dmiss', 'dum30', 'dum30y')],
+      digits = 5))
+
+    ps <- summary(res)$CoefTable[, 4]
+
+    ps <- plyr::rename(ps, c('dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y", 
+                             "mean_rev_adj" = "rev",
+                             "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'distN',
+                             "dummy_miss" = "dmiss"))
+    ps <- ps[c('dist1', 'distN', 'rev', 'dmiss', 'dum30', 'dum30y')]
+  }
+  
+  print("Done with estimating discrete choice model")
+
   #Add significance values
   coefs$p_values <- round(ps, digits = 5)
   coefs$significance <- " "
@@ -239,6 +276,7 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   #Generate and format the predictions
   source("C:\\GitHub\\EconAnalysis\\Functions\\pred_metrics.R")
   preds <- pred_metrics(choices = rdo, mod = res)
+  print("Done calculating predictive metrics")
   preds <- data.frame(score1 = preds[1], score2 = preds[2], score3 = preds[3], score4 = preds[4])
   preds$min_year <- min_year
   preds$focus_year <- focus_year
@@ -247,7 +285,6 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   preds$rev_scale <- rev_scale
   preds$habit_distance <- habit_distance
   preds$ndays <- ndays
-  preds$net_cost <- net_cost
 
   if(length(the_port) > 1) the_port <- paste(the_port, collapse = " and ")
    preds$port <- the_port

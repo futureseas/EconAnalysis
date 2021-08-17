@@ -41,7 +41,8 @@ psdn.logbook <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logbook
   dplyr::rename(haul_num = Set) %>%
   dplyr::rename(trip_id = Ticket) %>%
   dplyr::rename(depth = Depth) %>%
-  filter(set_year > 2000) 
+  filter(set_year > 2000) %>%
+  filter(trip_id != "No ticket") 
 
 psdn.logbook <- psdn.logbook[-which(is.na(psdn.logbook$set_lat)), ] 
 psdn.logbook <- psdn.logbook[-which(psdn.logbook$haul_num == 0), ] 
@@ -106,15 +107,15 @@ for (y in min.year:max.year) {
   for (m in 1:12) {
     
     # Read netcdf
-    dat <- nc_open(paste0("G:/My Drive/Project/Data/SDM/sardine/sard_", 
+    dat <- ncdf4::nc_open(paste0("G:/My Drive/Project/Data/SDM/sardine/sard_", 
                           paste0(as.character(m), paste0("_", paste0(as.character(y),"_GAM.nc")))))
-    lon <- ncvar_get(dat, "lon")
-    lat <- ncvar_get(dat, "lat")
-    tim <- ncvar_get(dat, "time")
-    predSDM <- ncvar_get(dat, "predGAM")
+    lon <- ncdf4::ncvar_get(dat, "lon")
+    lat <- ncdf4::ncvar_get(dat, "lat")
+    tim <- ncdf4::ncvar_get(dat, "time")
+    predSDM <- ncdf4::ncvar_get(dat, "predGAM")
     
     # Close the netcdf
-    nc_close(dat)			
+    ncdf4::nc_close(dat)			
     
     # Reshape the 3D array so we can map it, change the time field to be date
     dimnames(predSDM) <- list(lon = lon, lat = lat, tim = tim)
@@ -140,7 +141,7 @@ psdn.logbook <- merge(psdn.logbook,SDM_pred,by=c('set_year', 'set_month', 'set_l
 # ------------------------------------------------------------------
 ## Obtain (year) price variable from PacFIN landing data
 
-PacFIN_dat <- read.csv(file = here("Data", "PacFin.csv"))
+PacFIN_dat <- read.csv(file = here::here("Data", "PacFin.csv"))
 price_PSDN <- PacFIN_dat %>%
   dplyr::filter(Species_code == "PSDN") %>%
   group_by(Landing_year) %>%
@@ -155,21 +156,27 @@ psdn.logbook <- merge(psdn.logbook,price_PSDN,by=c('set_year'),all.x = TRUE)
 ## Create psdn_rev variable (Using monthly SDM and catch)
 
 
-psdn.logbook.final <- psdn.logbook %>%
+psdn.logbook <- psdn.logbook %>%
   mutate(psdn.rev.catch = catch * price.PSDN) %>%
-  mutate(psdn.rev.sdm = pSDM * price.PSDN) %>% drop_na()
+  mutate(psdn.rev.sdm = pSDM * price.PSDN)
 
 
 #-----------------------------------------------------------------------------
 ## Sampling choice data ##
 source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums.R")
 
-samps <- sampled_rums(data_in = psdn.logbook.final, the_port = "OR",
+sampsSDM <- sampled_rums(data_in = psdn.logbook, the_port = "OR",
                       min_year = min.year, max_year = max.year, ndays = 30, 
                       focus_year = max.year, nhauls_sampled = 10, 
-                      seed = 42, ncores = 4, rev_scale = 100, net_cost = "qcos",
-                      habit_distance = 5, return_hauls =FALSE)
+                      seed = 42, ncores = 4, rev_scale = 100, habit_distance = 5,
+                      return_hauls =FALSE, exp_rev = "sdm")
 
-# Add revenue per area and expected catch.
+sampsCatch <- sampled_rums(data_in = psdn.logbook, the_port = "OR",
+                         min_year = min.year, max_year = max.year, ndays = 30, 
+                         focus_year = max.year, nhauls_sampled = 10, 
+                         seed = 42, ncores = 4, rev_scale = 100, habit_distance = 5,
+                         return_hauls =FALSE, exp_rev = "catch")
+
+
 # Think how to add a multispecies framework. 
 # This would work with PacFIN landing data???
