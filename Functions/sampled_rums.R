@@ -35,18 +35,19 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   # #Modify the weak stock catches 
   # dat$weak_quota_value <- dat$weak_quota_value * risk_coefficient
 
-  # #---------------------------------------------------------------
-  # #Calculate net revenues for each haul
-  # dat$net_revenue <- 999
-  # dat <- dat %>% group_by(haul_id) %>%
-  #     mutate(haul_net_revenue = sum(net_revenue, na.rm = T))
+  #---------------------------------------------------------------
+  #Calculate net revenues for each haul
+  dat <- dat %>% group_by(haul_id) %>%
+      mutate(haul_net_revenue.catch = sum(psdn.rev.catch, na.rm = T)) %>%
+    mutate(haul_net_revenue.sdm = sum(psdn.rev.sdm, na.rm = T))
 
   #---------------------------------------------------------------
   #Create data set, for each tow
   dist_hauls <- dat %>% 
     distinct(haul_id, .keep_all = T) %>% 
     dplyr::select(haul_id, set_month, drvid, trip_id, set_day, set_year, 
-      set_long, set_lat, haul_num, depth_bin, up_long, up_lat) %>% 
+      set_long, set_lat, haul_num, depth_bin, up_long, up_lat,
+      haul_net_revenue.sdm, haul_net_revenue.catch) %>% 
     as.data.frame
 
   dist_hauls_catch_shares <- dist_hauls %>% dplyr::filter(set_year >= min_year)
@@ -135,7 +136,7 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   #What were the average revenues in each location
   tow_dates <- sampled_hauls %>%
     dplyr::select(haul_id, drvid, set_date, prev_days_date, prev_year_set_date, prev_year_days_date,
-                  set_lat, set_long, up_lat, up_long, depth_bin, fished_drvid)
+                  set_lat, set_long, up_lat, up_long, depth_bin, fished_drvid, haul_net_revenue.sdm, haul_net_revenue.catch)
 
   #calculate intervals
   tow_dates$days_inter <- interval(tow_dates$prev_days_date, tow_dates$set_date)
@@ -192,7 +193,7 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   #-----------------------------------------------------------------------------
   #Format as mlogit.data
   rdo <- sampled_hauls %>% dplyr::select(haul_id, haul_num, distance, fished, fished_haul,
-    dummy_prev_days, dummy_prev_year_days, dummy_first, dummy_not_first, set_lat, set_long)
+    dummy_prev_days, dummy_prev_year_days, dummy_first, dummy_not_first, set_lat, set_long, haul_net_revenue.sdm, haul_net_revenue.catch)
 
   rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(haul_id)) %>% as.data.frame
 
@@ -210,19 +211,21 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   #Fit the model for everything at once
   the_tows <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'alt_tow', chid.var = 'fished_haul')
   mf <- mFormula(fished ~ distance * dummy_first + distance * dummy_not_first - distance - 1 -
-      dummy_first - dummy_not_first + dummy_prev_days + dummy_prev_year_days)
+      dummy_first - dummy_not_first + dummy_prev_days + dummy_prev_year_days + haul_net_revenue.sdm )
   res <- mlogit(mf, the_tows)
   
   #List coefficients and rename to align with jeem paper
   coefs <- coef(res)
     coefs <- plyr::rename(coefs, c('dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y", 
-                                  "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'dist'))
-    coefs <- data.frame(coefs = round(coefs[c('dist', 'dist1', 'dum30', 'dum30y')], digits = 5))
+                                  "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'dist', 
+                                  "haul_net_revenue.sdm" = 'rev'))
+    coefs <- data.frame(coefs = round(coefs[c('dist', 'dist1', 'dum30', 'dum30y', 'rev')], digits = 5))
   
   ps <- summary(res)$CoefTable[, 4]
     ps <- plyr::rename(ps, c('dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y",
-                             "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'dist'))
-    ps <- ps[c('dist', 'dist1','dum30', 'dum30y')]
+                             "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'dist', 
+                             "haul_net_revenue.sdm" = 'rev'))
+    ps <- ps[c('dist', 'dist1','dum30', 'dum30y', 'rev')]
 
   
   #Add significance values

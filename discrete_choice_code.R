@@ -8,6 +8,8 @@
 
 gc()
 memory.limit(9999999999)
+min.year = 2011
+max.year = 2013
 
 ## Load packages ##
 library(ggplot2)
@@ -28,8 +30,6 @@ library(parallel)
 psdn.logbook <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logbooks.xlsx", sheet = "Sardine") %>%
   mutate(set_lat = Lat + LatMin/60) %>%
   mutate(set_long = Long + LongMin/60) %>%
-  mutate(up_lat = set_lat) %>%
-  mutate(up_long = set_long) %>%
   mutate(fleet_name="OR") %>%
   mutate(species="PSDN") %>%
   dplyr::rename(drvid = FedDoc) %>%
@@ -51,12 +51,17 @@ psdn.logbook$depth_bin <- cut(psdn.logbook$depth, 9, include.lowest=TRUE,
                               labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
 
 psdn.logbook <- psdn.logbook %>% 
+  mutate(up_lat = set_lat) %>%
+  mutate(up_long = set_long) %>%
+  mutate(set_lat_sdm = round(set_lat, digits = 1)) %>%
+  mutate(set_long_sdm = round(set_long, digits = 1)) %>%
   dplyr::select(c('set_lat', 'set_long', 'up_lat', 'up_long', 'depth_bin', 'drvid', 'fleet_name', 
                 'set_year', 'set_month', 'set_day', 'set_date', 
-                'catch', 'haul_num', 'haul_id', 'trip_id')) %>% drop_na()
+                'catch', 'haul_num', 'haul_id', 'trip_id', 'set_lat_sdm', 'set_long_sdm')) %>% drop_na()
 
+# ------------------------------------------------------------------
 
-### Include port coordinate associated to a specific vessel ###
+## Include port coordinate associated to a specific vessel ###
 psdn.port.OR <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\2021 CPS Request Lengths.xlsx", sheet = "2021_CPS_Request_Lengths") %>%
   filter(Year > 2000) %>%
   dplyr::rename(set_year = Year) %>%
@@ -86,20 +91,84 @@ ports <- ports %>%
 
 psdn.logbook <- merge(psdn.logbook,ports,by=c('port'),all.x = TRUE) 
 
-psdn.logbook.set <- psdn.logbook %>%
-                      filter(set_year >= 2011, set_year <= 2012)
+
+# ------------------------------------------------------------------
+## Merge logbook to SDM outputs
+
+SDM_pred <- tibble(set_year = integer(),
+                   set_month = integer(),
+                   set_lat_sdm = numeric(),
+                   set_long_sdm = numeric(),
+                   pSDM = numeric())
+
+
+for (y in min.year:max.year) {
+  for (m in 1:12) {
+    
+    # Read netcdf
+    dat <- nc_open(paste0("G:/My Drive/Project/Data/SDM/sardine/sard_", 
+                          paste0(as.character(m), paste0("_", paste0(as.character(y),"_GAM.nc")))))
+    lon <- ncvar_get(dat, "lon")
+    lat <- ncvar_get(dat, "lat")
+    tim <- ncvar_get(dat, "time")
+    predSDM <- ncvar_get(dat, "predGAM")
+    
+    # Close the netcdf
+    nc_close(dat)			
+    
+    # Reshape the 3D array so we can map it, change the time field to be date
+    dimnames(predSDM) <- list(lon = lon, lat = lat, tim = tim)
+    sdmMelt <- reshape2::melt(predSDM, value.name = "predSDM")
+    sdmMelt$dt <- as.Date("1900-01-01") + days(sdmMelt$tim)			
+    
+    sdmMelt <- sdmMelt %>%
+      group_by(lat, lon) %>%
+      summarize(exp_prob = mean(predSDM, na.rm = T))	%>%
+      ungroup(.)  
+    
+    SDM_pred <- SDM_pred %>%
+      add_row(set_year = y, set_month = m, set_long_sdm = sdmMelt$lon , set_lat_sdm = sdmMelt$lat, pSDM = sdmMelt$exp_prob)
+    
+    print(y)
+    print(m)
+  }
+}
+
+psdn.logbook <- merge(psdn.logbook,SDM_pred,by=c('set_year', 'set_month', 'set_lat_sdm', 'set_long_sdm'),all.x = TRUE) 
+
+
+# ------------------------------------------------------------------
+## Obtain (year) price variable from PacFIN landing data
+
+PacFIN_dat <- read.csv(file = here("Data", "PacFin.csv"))
+price_PSDN <- PacFIN_dat %>%
+  dplyr::filter(Species_code == "PSDN") %>%
+  group_by(Landing_year) %>%
+  summarize(price.PSDN = mean(Price, na.rm = T)) %>%
+  dplyr::rename(set_year = Landing_year)
+
+psdn.logbook <- merge(psdn.logbook,price_PSDN,by=c('set_year'),all.x = TRUE) 
+
+
+
+# ------------------------------------------------------------------
+## Create psdn_rev variable (Using monthly SDM and catch)
+
+
+psdn.logbook.final <- psdn.logbook %>%
+  mutate(psdn.rev.catch = catch * price.PSDN) %>%
+  mutate(psdn.rev.sdm = pSDM * price.PSDN) %>% drop_na()
 
 
 #-----------------------------------------------------------------------------
-
 ## Sampling choice data ##
 source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums.R")
 
-samps <- sampled_rums(data_in = psdn.logbook, the_port = "OR",
-                      min_year = 2010, max_year = 2012, ndays = 30, 
-                      focus_year = 2012, nhauls_sampled = 10, 
+samps <- sampled_rums(data_in = psdn.logbook.final, the_port = "OR",
+                      min_year = min.year, max_year = max.year, ndays = 30, 
+                      focus_year = max.year, nhauls_sampled = 10, 
                       seed = 42, ncores = 4, rev_scale = 100, net_cost = "qcos",
-                      habit_distance = 5, return_hauls = FALSE)
+                      habit_distance = 5, return_hauls =FALSE)
 
 # Add revenue per area and expected catch.
 # Think how to add a multispecies framework. 

@@ -502,7 +502,7 @@ plot(conditional_effects(
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
-```{r by_port_msqd_sdm}
+```{r by_port_nanc_sdm}
 plot(conditional_effects(
   fit_qPSDN_90, "NANC_SDM_90", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
@@ -638,7 +638,7 @@ plot(conditional_effects(fit_qMSQD_s, "PSDN_SDM_60_dOpen", surface=TRUE), ask = 
 plot(conditional_effects(fit_qMSQD, "MSQD_SDM_90", surface=TRUE), ask = FALSE)
 ```  
 
-```{r MSQD_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of probability of occurrence of Northern Anchovy on Squid landings."}
+```{r MSQD_effect_total_nanc, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of probability of occurrence of Northern Anchovy on Squid landings."}
 plot(conditional_effects(fit_qMSQD, "NANC_SDM_60", surface=TRUE), ask = FALSE)
 ```  
 
@@ -663,7 +663,7 @@ plot(conditional_effects(
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
-```{r by_port_msqd_sdm_msqd}
+```{r by_port_msqd_sdm_nanc}
 plot(conditional_effects(
   fit_qMSQD_90, "NANC_SDM_90", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
