@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.8.24)  26 AUG 2021 17:02
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.8.24)  26 AUG 2021 17:16
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1099,8 +1099,7 @@ t-1.pdf  used on input line 256.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [5]
 
-LaTeX Warning: Reference `tab:sum_stats' on page 6 undefined on input line 275.
-
+Package natbib Warning: Citation `ref' on page 6 undefined on input line 275.
 
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <10> on input line 280.
@@ -1409,7 +1408,11 @@ m_nanc-1.pdf  used on input line 457.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [34 <./econ_landings_paper_files/figure-latex/by_port_both_sdm_msqd-1.pdf>] (./
 econ_landings_paper.bbl [35 <./econ_landings_paper_files/figure-latex/by_port_b
-oth_sdm_nanc-1.pdf>]) [36] (./econ_landings_paper.aux)
+oth_sdm_nanc-1.pdf>])
+
+Package natbib Warning: There were undefined citations.
+
+[36] (./econ_landings_paper.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -1417,10 +1420,10 @@ Package rerunfilecheck Info: File `econ_landings_paper.out' has not changed.
 (rerunfilecheck)             Checksum: 67F9EC6B3E52E588F17A6EC91AF4D56F;2949.
  ) 
 Here is how much of TeX's memory you used:
- 22358 strings out of 480502
- 412138 string characters out of 5897829
+ 22357 strings out of 480502
+ 412123 string characters out of 5897829
  708768 words of memory out of 5000000
- 39468 multiletter control sequences out of 15000+600000
+ 39467 multiletter control sequences out of 15000+600000
  469518 words of font info for 84 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  83i,10n,83p,581b,446s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1442,7 +1445,7 @@ amsfonts/symbols/msam10.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-di
 st/fonts/type1/urw/times/utmb8a.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/
 texmf-dist/fonts/type1/urw/times/utmr8a.pfb><c:/Users/fequezad/AppData/Roaming/
 TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on econ_landings_paper.pdf (36 pages, 674464 bytes).
+Output written on econ_landings_paper.pdf (36 pages, 674481 bytes).
 PDF statistics:
  612 PDF objects out of 1000 (max. 8388607)
  475 compressed objects within 5 object streams
