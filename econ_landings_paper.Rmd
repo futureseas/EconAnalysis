@@ -273,7 +273,7 @@ g1 / g2 / g3
 ```
 
 Beside the biological stock, landings are affected by socio-economics conditions. Some of them are harvest cost, prices received by species and their substitutes, and regulations imposed by the authorities. In our data we include as a proxy of harvest cost average distances traveled by vessel from the port of origin *(TO BE INCLUDED USING GLOBAL FISHING WATCH...)* and fuel cost (TO BE INCLUDED...). Own price and substitute were included in the data and were obtained from PacFIN landings dataset. As regulatory variables, we construct a binary variable called **dClose** that takes the value 1 when the Pacific sardine fishery is close, and the value "0" when its close. We also include the Annual Catch Limit (ACL) for the Pacific sardine model. The ACL for Pacifin sardine were obtained from the [CPS Fisheries Management Plan](pcouncil.org)???. 
-A summary statistics of our data set is shown in Table @ref(tab:sum_stats).
+A summary statistics of our data set is shown in Table \ref{tab:sum_stats}.
 ```{r desc_table, echo=FALSE, results='asis'}
 # Clean dataset
 PacFIN_dat = PacFIN_dat[,!grepl("*_LE_",names(PacFIN_dat))]
@@ -305,7 +305,7 @@ est_data <- PacFIN_dat %>%
   est_data$ACL_PSDN <- as.numeric(est_data$ACL_PSDN)
   est_data$ACL_MSQD <- as.numeric(est_data$ACL_MSQD)
   
-print(xtable(descr(PacFIN_dat, stats = c("mean", "sd", "min", "max"), transpose = TRUE, headings = TRUE), caption = 'Descriptive statistics.'), label="tab:sum_stats", comment = FALSE, caption.placement = 'top')
+print(xtable(descr(PacFIN_dat, stats = c("mean", "sd", "min", "max"), transpose = TRUE, headings = TRUE), caption = 'Descriptive statistics.\\label{tab:sum_stats}'), comment = FALSE, caption.placement = 'top')
 ```
 
 ## Empirical model

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.8.24)  26 AUG 2021 17:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.8.24)  26 AUG 2021 17:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1098,9 +1098,6 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/SDM_land_by_por
 t-1.pdf  used on input line 256.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [5]
-
-Package natbib Warning: Citation `ref' on page 6 undefined on input line 275.
-
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <10> on input line 280.
 LaTeX Font Info:    External font `lmex10' loaded for size
@@ -1113,7 +1110,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.316 
        <./econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf>]
-<econ_landings_paper_files/figure-latex/y_rep-1.pdf, id=153, 469.755pt x 325.21
+<econ_landings_paper_files/figure-latex/y_rep-1.pdf, id=155, 469.755pt x 325.21
 5pt>
 File: econ_landings_paper_files/figure-latex/y_rep-1.pdf Graphic file (type pdf
 )
@@ -1127,7 +1124,7 @@ as been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.350 
       ]
-<econ_landings_paper_files/figure-latex/PSDN_effect_total-1.pdf, id=172, 469.75
+<econ_landings_paper_files/figure-latex/PSDN_effect_total-1.pdf, id=173, 469.75
 5pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/PSDN_effect_total-1.pdf Graphic fi
 le (type pdf)
@@ -1142,7 +1139,7 @@ has been already used, duplicate ignored
 l.357 \includegraphics
                       {econ_landings_paper_files/figure-latex/MSQD_effect_to...
  <./econ_landings_paper_files/figure-latex/y_rep-1.pdf>]
-<econ_landings_paper_files/figure-latex/MSQD_effect_total-1.pdf, id=188, 469.75
+<econ_landings_paper_files/figure-latex/MSQD_effect_total-1.pdf, id=189, 469.75
 5pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/MSQD_effect_total-1.pdf Graphic fi
 le (type pdf)
@@ -1151,7 +1148,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/MSQD_effect_tot
 al-1.pdf  used on input line 357.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [9 <./econ_landings_paper_files/figure-latex/PSDN_effect_total-1.pdf>]
-<econ_landings_paper_files/figure-latex/NANC_effect_total-1.pdf, id=202, 469.75
+<econ_landings_paper_files/figure-latex/NANC_effect_total-1.pdf, id=203, 469.75
 5pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/NANC_effect_total-1.pdf Graphic fi
 le (type pdf)
@@ -1160,7 +1157,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/NANC_effect_tot
 al-1.pdf  used on input line 359.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [10 <./econ_landings_paper_files/figure-latex/MSQD_effect_total-1.pdf>]
-<econ_landings_paper_files/figure-latex/ACL_effect-1.pdf, id=215, 469.755pt x 3
+<econ_landings_paper_files/figure-latex/ACL_effect-1.pdf, id=216, 469.755pt x 3
 25.215pt>
 File: econ_landings_paper_files/figure-latex/ACL_effect-1.pdf Graphic file (typ
 e pdf)
@@ -1169,7 +1166,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/ACL_effect-1.pd
 f  used on input line 361.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [11 <./econ_landings_paper_files/figure-latex/NANC_effect_total-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_sdm_psdn-1.pdf, id=228, 469.755
+<econ_landings_paper_files/figure-latex/by_port_sdm_psdn-1.pdf, id=229, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_sdm_psdn-1.pdf Graphic fil
 e (type pdf)
@@ -1178,7 +1175,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_sdm_psd
 n-1.pdf  used on input line 366.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [12 <./econ_landings_paper_files/figure-latex/ACL_effect-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_msqd_sdm-1.pdf, id=242, 469.755
+<econ_landings_paper_files/figure-latex/by_port_msqd_sdm-1.pdf, id=243, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_msqd_sdm-1.pdf Graphic fil
 e (type pdf)
@@ -1187,7 +1184,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_msqd_sd
 m-1.pdf  used on input line 368.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [13 <./econ_landings_paper_files/figure-latex/by_port_sdm_psdn-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_nanc_sdm-1.pdf, id=256, 469.755
+<econ_landings_paper_files/figure-latex/by_port_nanc_sdm-1.pdf, id=257, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_nanc_sdm-1.pdf Graphic fil
 e (type pdf)
@@ -1196,7 +1193,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_nanc_sd
 m-1.pdf  used on input line 370.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [14 <./econ_landings_paper_files/figure-latex/by_port_msqd_sdm-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_acl_psdn-1.pdf, id=269, 469.755
+<econ_landings_paper_files/figure-latex/by_port_acl_psdn-1.pdf, id=270, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_acl_psdn-1.pdf Graphic fil
 e (type pdf)
@@ -1205,7 +1202,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_acl_psd
 n-1.pdf  used on input line 372.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [15 <./econ_landings_paper_files/figure-latex/by_port_nanc_sdm-1.pdf>]
-<econ_landings_paper_files/figure-latex/int_effect_MSQD_total-1.pdf, id=282, 46
+<econ_landings_paper_files/figure-latex/int_effect_MSQD_total-1.pdf, id=283, 46
 9.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/int_effect_MSQD_total-1.pdf Graphi
 c file (type pdf)
@@ -1214,7 +1211,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_MSQD
 _total-1.pdf  used on input line 379.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [16 <./econ_landings_paper_files/figure-latex/by_port_acl_psdn-1.pdf>]
-<econ_landings_paper_files/figure-latex/int_effect_NANC_total-1.pdf, id=297, 46
+<econ_landings_paper_files/figure-latex/int_effect_NANC_total-1.pdf, id=298, 46
 9.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/int_effect_NANC_total-1.pdf Graphi
 c file (type pdf)
@@ -1223,7 +1220,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_NANC
 _total-1.pdf  used on input line 381.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [17 <./econ_landings_paper_files/figure-latex/int_effect_MSQD_total-1.pdf>]
-<econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port-1.pdf, id=308, 
+<econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port-1.pdf, id=309, 
 469.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port-1.pdf Grap
 hic file (type pdf)
@@ -1232,7 +1229,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_MSQD
 _by_port-1.pdf  used on input line 383.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [18 <./econ_landings_paper_files/figure-latex/int_effect_NANC_total-1.pdf>]
-<econ_landings_paper_files/figure-latex/int_effect_NANC_by_port-1.pdf, id=319, 
+<econ_landings_paper_files/figure-latex/int_effect_NANC_by_port-1.pdf, id=320, 
 469.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/int_effect_NANC_by_port-1.pdf Grap
 hic file (type pdf)
@@ -1241,7 +1238,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_NANC
 _by_port-1.pdf  used on input line 385.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [19 <./econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port-1.pdf>]
-<econ_landings_paper_files/figure-latex/y_rep_logn_msqd-1.pdf, id=331, 469.755p
+<econ_landings_paper_files/figure-latex/y_rep_logn_msqd-1.pdf, id=332, 469.755p
 t x 325.215pt>
 File: econ_landings_paper_files/figure-latex/y_rep_logn_msqd-1.pdf Graphic file
  (type pdf)
@@ -1250,7 +1247,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/y_rep_logn_msqd
 -1.pdf  used on input line 395.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [20 <./econ_landings_paper_files/figure-latex/int_effect_NANC_by_port-1.pdf>]
-<econ_landings_paper_files/figure-latex/PSDN_effect_total_msqd-1.pdf, id=343, 4
+<econ_landings_paper_files/figure-latex/PSDN_effect_total_msqd-1.pdf, id=344, 4
 69.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/PSDN_effect_total_msqd-1.pdf Graph
 ic file (type pdf)
@@ -1264,7 +1261,7 @@ al_msqd-1.pdf  used on input line 406.
                                                   \__shipout_drop_firstpage_...
 l.410 
        <./econ_landings_paper_files/figure-latex/y_rep_logn_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/MSQD_effect_total_msqd-1.pdf, id=359, 4
+<econ_landings_paper_files/figure-latex/MSQD_effect_total_msqd-1.pdf, id=360, 4
 69.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/MSQD_effect_total_msqd-1.pdf Graph
 ic file (type pdf)
@@ -1278,7 +1275,7 @@ al_msqd-1.pdf  used on input line 413.
                                                   \__shipout_drop_firstpage_...
 l.417 
        <./econ_landings_paper_files/figure-latex/PSDN_effect_total_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/MSQD_effect_total_nanc-1.pdf, id=374, 4
+<econ_landings_paper_files/figure-latex/MSQD_effect_total_nanc-1.pdf, id=375, 4
 69.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/MSQD_effect_total_nanc-1.pdf Graph
 ic file (type pdf)
@@ -1292,7 +1289,7 @@ al_nanc-1.pdf  used on input line 420.
                                                   \__shipout_drop_firstpage_...
 l.424 
        <./econ_landings_paper_files/figure-latex/MSQD_effect_total_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/ACL_effect_msqd-1.pdf, id=388, 469.755p
+<econ_landings_paper_files/figure-latex/ACL_effect_msqd-1.pdf, id=389, 469.755p
 t x 325.215pt>
 File: econ_landings_paper_files/figure-latex/ACL_effect_msqd-1.pdf Graphic file
  (type pdf)
@@ -1306,7 +1303,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/ACL_effect_msqd
                                                   \__shipout_drop_firstpage_...
 l.431 
        <./econ_landings_paper_files/figure-latex/MSQD_effect_total_nanc-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_sdm_msdq-1.pdf, id=402, 469.755
+<econ_landings_paper_files/figure-latex/by_port_sdm_msdq-1.pdf, id=403, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_sdm_msdq-1.pdf Graphic fil
 e (type pdf)
@@ -1321,7 +1318,7 @@ q-1.pdf  used on input line 435.
 l.437 \includegraphics
                       {econ_landings_paper_files/figure-latex/by_port_msqd_s...
  <./econ_landings_paper_files/figure-latex/ACL_effect_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_msqd_sdm_msqd-1.pdf, id=414, 46
+<econ_landings_paper_files/figure-latex/by_port_msqd_sdm_msqd-1.pdf, id=415, 46
 9.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_msqd_sdm_msqd-1.pdf Graphi
 c file (type pdf)
@@ -1330,7 +1327,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_msqd_sd
 m_msqd-1.pdf  used on input line 437.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [26 <./econ_landings_paper_files/figure-latex/by_port_sdm_msdq-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_msqd_sdm_nanc-1.pdf, id=429, 46
+<econ_landings_paper_files/figure-latex/by_port_msqd_sdm_nanc-1.pdf, id=430, 46
 9.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_msqd_sdm_nanc-1.pdf Graphi
 c file (type pdf)
@@ -1339,7 +1336,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_msqd_sd
 m_nanc-1.pdf  used on input line 439.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [27 <./econ_landings_paper_files/figure-latex/by_port_msqd_sdm_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf, id=442, 469.
+<econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf, id=443, 469.
 755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf Graphic 
 file (type pdf)
@@ -1348,7 +1345,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_msqd_dc
 lose-1.pdf  used on input line 441.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [28 <./econ_landings_paper_files/figure-latex/by_port_msqd_sdm_nanc-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_msqd_dclose_hu-1.pdf, id=455, 4
+<econ_landings_paper_files/figure-latex/by_port_msqd_dclose_hu-1.pdf, id=456, 4
 69.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_msqd_dclose_hu-1.pdf Graph
 ic file (type pdf)
@@ -1356,7 +1353,7 @@ ic file (type pdf)
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_msqd_dc
 lose_hu-1.pdf  used on input line 443.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-<econ_landings_paper_files/figure-latex/by_port_msqd_dclose_mu-1.pdf, id=456, 4
+<econ_landings_paper_files/figure-latex/by_port_msqd_dclose_mu-1.pdf, id=457, 4
 69.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_msqd_dclose_mu-1.pdf Graph
 ic file (type pdf)
@@ -1371,7 +1368,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 443--445
 
 [29 <./econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf>] [30 <
 ./econ_landings_paper_files/figure-latex/by_port_msqd_dclose_hu-1.pdf>]
-<econ_landings_paper_files/figure-latex/both_sdm_msqd-1.pdf, id=475, 469.755pt 
+<econ_landings_paper_files/figure-latex/both_sdm_msqd-1.pdf, id=476, 469.755pt 
 x 325.215pt>
 File: econ_landings_paper_files/figure-latex/both_sdm_msqd-1.pdf Graphic file (
 type pdf)
@@ -1380,7 +1377,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/both_sdm_msqd-1
 .pdf  used on input line 451.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [31 <./econ_landings_paper_files/figure-latex/by_port_msqd_dclose_mu-1.pdf>]
-<econ_landings_paper_files/figure-latex/both_sdm_nanc-1.pdf, id=487, 469.755pt 
+<econ_landings_paper_files/figure-latex/both_sdm_nanc-1.pdf, id=488, 469.755pt 
 x 325.215pt>
 File: econ_landings_paper_files/figure-latex/both_sdm_nanc-1.pdf Graphic file (
 type pdf)
@@ -1389,7 +1386,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/both_sdm_nanc-1
 .pdf  used on input line 453.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [32 <./econ_landings_paper_files/figure-latex/both_sdm_msqd-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_both_sdm_msqd-1.pdf, id=498, 46
+<econ_landings_paper_files/figure-latex/by_port_both_sdm_msqd-1.pdf, id=499, 46
 9.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_both_sdm_msqd-1.pdf Graphi
 c file (type pdf)
@@ -1398,7 +1395,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_both_sd
 m_msqd-1.pdf  used on input line 455.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [33 <./econ_landings_paper_files/figure-latex/both_sdm_nanc-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_both_sdm_nanc-1.pdf, id=509, 46
+<econ_landings_paper_files/figure-latex/by_port_both_sdm_nanc-1.pdf, id=510, 46
 9.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_both_sdm_nanc-1.pdf Graphi
 c file (type pdf)
@@ -1408,11 +1405,7 @@ m_nanc-1.pdf  used on input line 457.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [34 <./econ_landings_paper_files/figure-latex/by_port_both_sdm_msqd-1.pdf>] (./
 econ_landings_paper.bbl [35 <./econ_landings_paper_files/figure-latex/by_port_b
-oth_sdm_nanc-1.pdf>])
-
-Package natbib Warning: There were undefined citations.
-
-[36] (./econ_landings_paper.aux)
+oth_sdm_nanc-1.pdf>]) [36] (./econ_landings_paper.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -1420,10 +1413,10 @@ Package rerunfilecheck Info: File `econ_landings_paper.out' has not changed.
 (rerunfilecheck)             Checksum: 67F9EC6B3E52E588F17A6EC91AF4D56F;2949.
  ) 
 Here is how much of TeX's memory you used:
- 22357 strings out of 480502
- 412123 string characters out of 5897829
- 708768 words of memory out of 5000000
- 39467 multiletter control sequences out of 15000+600000
+ 22358 strings out of 480502
+ 412138 string characters out of 5897829
+ 707768 words of memory out of 5000000
+ 39468 multiletter control sequences out of 15000+600000
  469518 words of font info for 84 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  83i,10n,83p,581b,446s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1445,10 +1438,10 @@ amsfonts/symbols/msam10.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-di
 st/fonts/type1/urw/times/utmb8a.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/
 texmf-dist/fonts/type1/urw/times/utmr8a.pfb><c:/Users/fequezad/AppData/Roaming/
 TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on econ_landings_paper.pdf (36 pages, 674481 bytes).
+Output written on econ_landings_paper.pdf (36 pages, 674489 bytes).
 PDF statistics:
- 612 PDF objects out of 1000 (max. 8388607)
- 475 compressed objects within 5 object streams
+ 613 PDF objects out of 1000 (max. 8388607)
+ 476 compressed objects within 5 object streams
  84 named destinations out of 1000 (max. 500000)
  301 words of extra memory for PDF output out of 10000 (max. 10000000)
 
