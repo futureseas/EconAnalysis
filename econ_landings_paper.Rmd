@@ -243,9 +243,9 @@ ggplot(collapse, aes(x=Landing_year, y = N_vessels.mean,  colour = Species_name)
 # Methods
 
 ## Data 
-Our data set contain a number of variables measured at the port and *vessel levels* for CPS the fishery located in the U.S. West Coast. Our outcome variables are landings by port areas in a year and landing by vessel in a month. These two different outcome variables would allows us to study the degree of flexibility that vessel have in comparison to ports in regard to species substitution and catch composition. If vessels have strong contracts with processor associated with a port, then we should observe that substitution of vessels and port is similar. Yearly panel data data on landing by port areas during the the period 1980 - 2020 is publicly available from [PacFIN](http://pacfin.psmfc.org/). **Vessel level data was obtained upon request from...** We only include ports areas where substitution could happen. In practical terms, we drop port that have never landed either Pacific sardine, market squid or Northern anchovy during our period of analysis.\\footnote{N/A were converted to zero.} We assume that this criteria would allows to identify ports that have the infrastructure to land all of the species in consideration.
+Our data set contain a number of variables measured at the port and *vessel levels* for CPS the fishery located in the U.S. West Coast. Our outcome variables are landings by port areas in a year and landing by vessel in a month. These two different outcome variables would allows us to study the degree of flexibility that vessel have in comparison to ports in regard to species substitution and catch composition. If vessels have strong contracts with processor associated with a port, then we should observe that substitution of vessels and port is similar. Yearly panel data data on landing by port areas during the the period 1980 - 2020 is publicly available from [PacFIN](http://pacfin.psmfc.org/). **Vessel level data was obtained upon request from...** We only include ports areas where substitution could happen. In practical terms, we drop port that have never landed either Pacific sardine, market squid or Northern anchovy during our period of analysis.^[N/A were converted to zero.] We assume that this criteria would allows to identify ports that have the infrastructure to land all of the species in consideration.
 
-Our main treatment variables are species probability of presence. This variables were obtained from Species Distribution Models (SDM), and future forecast of these variables allows us to simulate the CPS fishery in the future. Prior landings models have shown that the probability of presence have a large contribution on explaining landings. For instance, @smith2021potential use mean monthly probability of presence of sardine within 60 km of the port as explanatory variable. They found a positive effect of probability of presence on Pacific sardine landings. Moreover, landings where mostly explained by this variable. We follow their same procedure to associate SDM's outputs with ports. For Pacific sardine, we compute the average probability of presence within the same radius of 60 kilometers around the port. This radious also coincide with the average distance with two standard deviation traveled by vessels based on logbook availables for this fisheries. For market squid and Northern anchovy, we set this radius to 90 km. We also use logbook in the case or market squid, while for the Northern anchovy, the optimal distance for Northern anchovy was chosen empirically\\footnote{To see an animation of how far vessel travel please visit [this link](https://drive.google.com/file/d/1-PE_lcZNcXNcyILA_6xhkHyEhV3mV2TA/view?usp=sharing).}.   
+Our main treatment variables are species probability of presence. This variables were obtained from Species Distribution Models (SDM), and future forecast of these variables allows us to simulate the CPS fishery in the future. Prior landings models have shown that the probability of presence have a large contribution on explaining landings. For instance, @smith2021potential use mean monthly probability of presence of sardine within 60 km of the port as explanatory variable. They found a positive effect of probability of presence on Pacific sardine landings. Moreover, landings where mostly explained by this variable. We follow their same procedure to associate SDM's outputs with ports. For Pacific sardine, we compute the average probability of presence within the same radius of 60 kilometers around the port. This radious also coincide with the average distance with two standard deviation traveled by vessels based on logbook availables for this fisheries. For market squid and Northern anchovy, we set this radius to 90 km. We also use logbook in the case or market squid, while for the Northern anchovy, the optimal distance for Northern anchovy was chosen empirically.^[To see an animation of how far vessel travel please visit [this link](https://drive.google.com/file/d/1-PE_lcZNcXNcyILA_6xhkHyEhV3mV2TA/view?usp=sharing).]   
 
 Figure \ref{fig:sdm_land_by_port} show the relationship between the probability of presence and landings by species in three main port areas: Los Angeles, Monterrey and Santa Barbara areas. The graph suggest that Pacific sardine landings are positive correlated with the probability of presence of this species, similar to @smith2021potential. This is also true in Monterrey area for the Northern anchovy, In the case of market squid, we cannot distinguish correlation between landings and probability of presence. Note, however, that the evidence shown in this figure may not capturing the actual effect of the probability of presence as other effect may be in play. Our empirical strategy is designed to isolate the effect of the probability on landing in a multivariate model framework.
 
@@ -300,8 +300,9 @@ g1 / g2 / g3
 
 ```
 
-Beside the biological stock, landings are affected by socio-economics conditions. Some of them are harvest cost, prices received by species and their substitutes, and regulations imposed by the authorities. In our data we include as a proxy of harvest cost average distances traveled by vessel from the port of origin *(TO BE INCLUDED USING GLOBAL FISHING WATCH...)* and fuel cost *(TO BE INCLUDED...)*. Own price and substitute were included in the data and were obtained from PacFIN landings dataset *(TO BE INCLUDED...)*. As regulatory variables, we construct a binary variable called **dClose** that takes the value "1" when the Pacific sardine fishery is close, and the value "0" when its close. We also include the Annual Catch Limit (ACL) for the Pacific sardine model. The ACL for Pacific sardine were obtained from the [CPS Fisheries Management Plan](pcouncil.org)???. 
+Beside the biological stock, landings are affected by socio-economics conditions. Some of them are harvest cost, prices received by species and their substitutes, and regulations imposed by the authorities. In our data we include as a proxy of harvest cost average distances traveled by vessel from the port of origin *(TO BE INCLUDED USING GLOBAL FISHING WATCH...)* and fuel cost *(TO BE INCLUDED...)*. Own price was included and it was obtained from PacFIN landings dataset. When price was missing, we replace this value for the average price of the species in all ports for the corresponding year. As regulatory variables, we construct a binary variable called **dClose** that takes the value "1" when the Pacific sardine fishery is close, and the value "0" when its close. We also include the Annual Catch Limit (ACL) for the Pacific sardine model. The ACL for Pacific sardine were obtained from the [CPS Fisheries Management Plan](pcouncil.org)???. 
 A summary statistics of our data set is shown in Table \ref{tab:sum_stats}.
+
 ```{r desc_table, echo=FALSE, results='asis'}
 # Clean dataset
 PacFIN_dat = PacFIN_dat[,!grepl("*_LE_",names(PacFIN_dat))]
@@ -322,14 +323,43 @@ est_data = subset(PacFIN_dat, select = -c(MSQD_PSDN_SDM_60, MSQD_NANC_SDM_90, MS
                                           NANC_PSDN_SDM_60, NANC_MSQD_SDM_90, NANC_ACL_PSDN.sum,
                                           PSDN_MSQD_SDM_90, PSDN_NANC_SDM_90))
 
-  # Change chr to numeric #
-  est_data$PSDN_SDM_60   <- as.numeric(est_data$PSDN_SDM_60)
-  est_data$MSQD_SDM_90   <- as.numeric(est_data$MSQD_SDM_90)
-  est_data$NANC_SDM_90   <- as.numeric(est_data$NANC_SDM_90)
-  est_data$PSDN_Landings <- as.numeric(est_data$PSDN_Landings)
-  est_data$MSQD_Landings <- as.numeric(est_data$MSQD_Landings)
-  est_data$NANC_Landings <- as.numeric(est_data$NANC_Landings)
-  est_data$ACL_PSDN <- as.numeric(est_data$ACL_PSDN)
+# Calculate year price for N/A's
+price.year.PSDN <- aggregate(x= est_data$PSDN_Price, by = list(est_data$Landing_year), FUN = mean, na.rm=T)
+  price.year.PSDN <- price.year.PSDN %>%
+    dplyr::rename(Landing_year = Group.1) %>%
+    dplyr::rename(PSDN_Price.year = x)
+  
+price.year.MSQD <- aggregate(x= est_data$MSQD_Price, by = list(est_data$Landing_year), FUN = mean, na.rm=T)
+  price.year.MSQD <- price.year.MSQD %>%
+    dplyr::rename(Landing_year = Group.1) %>%
+    dplyr::rename(MSQD_Price.year = x)
+
+price.year.NANC <- aggregate(x= est_data$NANC_Price, by = list(est_data$Landing_year), FUN = mean, na.rm=T)
+  price.year.NANC <- price.year.NANC %>%
+    dplyr::rename(Landing_year = Group.1) %>%
+    dplyr::rename(NANC_Price.year = x)
+    
+est_data <- est_data %>%
+  left_join(price.year.PSDN, by = "Landing_year") %>%
+    left_join(price.year.MSQD, by = "Landing_year") %>%
+    left_join(price.year.NANC, by = "Landing_year") %>%
+  mutate(PSDN_Price_full = ifelse(is.na(PSDN_Price), PSDN_Price.year, PSDN_Price)) %>%
+    mutate(MSQD_Price_full = ifelse(is.na(MSQD_Price), MSQD_Price.year, MSQD_Price)) %>%
+    mutate(NANC_Price_full = ifelse(is.na(NANC_Price), NANC_Price.year, NANC_Price)) %>%
+  subset(select = -c(PSDN_Price, MSQD_Price, NANC_Price, PSDN_Price.year, MSQD_Price.year, NANC_Price.year)) %>%
+    dplyr::rename(PSDN_Price = PSDN_Price_full) %>% 
+    dplyr::rename(MSQD_Price = MSQD_Price_full) %>%
+    dplyr::rename(NANC_Price = NANC_Price_full)
+
+
+# Change chr to numeric #
+est_data$PSDN_SDM_60   <- as.numeric(est_data$PSDN_SDM_60)
+est_data$MSQD_SDM_90   <- as.numeric(est_data$MSQD_SDM_90)
+est_data$NANC_SDM_90   <- as.numeric(est_data$NANC_SDM_90)
+est_data$PSDN_Landings <- as.numeric(est_data$PSDN_Landings)
+est_data$MSQD_Landings <- as.numeric(est_data$MSQD_Landings)
+est_data$NANC_Landings <- as.numeric(est_data$NANC_Landings)
+est_data$ACL_PSDN <- as.numeric(est_data$ACL_PSDN)
   
 sjlabelled::set_label(est_data$MSQD_SDM_90)   <- "Prob(presence): MSQD"
 sjlabelled::set_label(est_data$PSDN_SDM_60)   <- "Prob(presence): PSDN"
@@ -368,13 +398,17 @@ sjlabelled::set_label(est_data_set$PSDN_Price)    <- "Price: PSDN"
 sjlabelled::set_label(est_data_set$PSDN_Revenue)  <- "Revenue: PSDN"
 sjlabelled::set_label(est_data_set$port_num)      <- "Port ID"
 
+est_data_set <- est_data_set[c("Port", "PSDN_Landings", "MSQD_Landings", "NANC_Landings", 
+                                "PSDN_SDM_60", "MSQD_SDM_90", "NANC_SDM_90", "PSDN_Price", "MSQD_Price" , "NANC_Price",
+                                "PSDN_Revenue", "MSQD_Revenue", "NANC_Revenue", "ACL_PSDN")]
+                                 
 vtable::st(est_data_set, labels = TRUE, title='Summary Statistics \\label{tab:sum_stats}', out='latex')
 ```
 
 ## Empirical model
 We use a Hierarchical Bayesian Hurdle model to estimate the effect of species distribution on fish landings. We estimate a separate model for the three species in consideration. We use a Bayesian framework for several reasons. First, it allows us to consider uncertainty from modeling the process as well as from the imperfect observation of the process, assuming that all parameters are random variables. Second, it allows us to incorporate multilevel effects (i.e. hierarchical effects). Finally, it allow us to incorporate previous knowledge as a prior. For instance, we can include a prior the results obtained in @smith2021potential for the Pacific sardine landing equation. 
 
-Specifically, we fit a hierarchical Bayesian hurdle model to model the zeros included in our landing data. We observe a zero when no landings occur in a specific time period. This zero could mean that there was no incentives for the fleet/vessel to harvest the species in consideration.  In general, our Bayesian models have the following structure:
+Specifically, we fit a hierarchical Bayesian hurdle model to model the zeros included in our landing data. We observe a zero when no landings occur in a specific time period (landings observations with "NA" were transformed to zero). This zero could mean that there was no incentives for the fleet/vessel to harvest the species in consideration.  In general, our Bayesian models have the following structure:
 \begin{align*}
 [\theta_i | q_{i,t}] &  \varpropto f\left(q_{i,t} | \theta_i\right) \times [\theta_i] 
 \end{align*} 
@@ -405,9 +439,12 @@ where $j$ indicate the species in consideration. $\text{logit}(p_{i,j})$ follows
 ```{r psdn_data, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
 # Select data for estimation, replace N/A landings to zero #
 est_data_psnd <- est_data %>%
-  dplyr::select(port_num, Port, PSDN_SDM_60, MSQD_SDM_90, NANC_SDM_90, PSDN_Landings, Landing_year, ACL_PSDN) %>%
+  dplyr::select(port_num, Port, PSDN_SDM_60, PSDN_Landings, PSDN_Price, ACL_PSDN,
+                MSQD_SDM_90, NANC_SDM_90, Landing_year) %>%
   dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>% 
   filter(Landing_year >= 2000 & Landing_year < 2015)
+
+
 
 
 # Select ports that at least they have landing PSDN once, and drop N/A #
@@ -735,7 +772,7 @@ plot(conditional_effects(
 ```
 
 # Conclusions
-A possible extension of our research is to consider spatial autocorrelations between ports.\\footnote{See \cite{morris2019bayesian} for an application of a spatial model in a bayesian framework.} Ports landing maybe correlated as vessel have the incentives to choose the port of landing, conditional on whether the port have the infrastructure for this. It is likely that they just land wherever is closer to the area they are fishing. Nevertheless, differntial in prices could encourage them to travel a little further for higher prices. 
+A possible extension of our research is to consider spatial autocorrelations between ports.^[See \cite{morris2019bayesian} for an application of a spatial model in a Bayesian framework.] Ports landing maybe correlated as vessel have the incentives to choose the port of landing, conditional on whether the port have the infrastructure for this. It is likely that they just land wherever is closer to the area they are fishing. Nevertheless, differntial in prices could encourage them to travel a little further for higher prices. 
 
 
 
