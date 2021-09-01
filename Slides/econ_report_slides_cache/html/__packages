@@ -33,3 +33,5 @@ xtable
 here
 xaringanthemer
 patchwork
+Rcpp
+brms

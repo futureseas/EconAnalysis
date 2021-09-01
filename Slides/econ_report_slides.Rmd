@@ -27,6 +27,7 @@ output:
 ```
 
 ```{r setup, include=FALSE}
+load("C:\\GitHub\\EconAnalysis\\stan_fit.RData")
 options(htmltools.dir.version = FALSE)
 library(knitr)
 opts_chunk$set(
@@ -37,6 +38,7 @@ opts_chunk$set(
   cache=T#, echo=F, warning=F, message=F
   )
 library(bookdown)
+library(brms)
 library(doBy)
 library(dplyr)
 library(fontawesome)
@@ -122,38 +124,22 @@ name: landingmodel
 $$f\left(q_{i,t} | \mu_i, \sigma_{\mu}^2, p_i \right) = \begin{cases} p_i & \text{if} \quad q_{it} = 0  \\ \left[1-p_i\right] \text{gamma} \left(q_{i,t} | \frac{\mu_i^2}{\sigma_{\mu}^2}, \frac{\mu_i}{\sigma_{\mu}^2} \right) & \text{if} \quad q_{it} > 0. \end{cases}$$
 ---
 
-# Results 
+# Results: interaction between SDMs
 
 ```{r int_effect_MSQD_by_port, echo=FALSE, message=FALSE, warning=FALSE}
-plot(conditional_effects(
-  fit_qPSDN_90, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
-```
-
-```{r int_effect_NANC_by_port, echo=FALSE, message=FALSE, warning=FALSE}
-plot(conditional_effects(
-  fit_qPSDN_90, "PSDN_SDM_60:NANC_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
-```
-
-```{r by_port_both_sdm_msqd, echo=FALSE, message=FALSE, warning=FALSE}
-conditions_dClose <- data.frame(port_ID = unique(est_data_msqd_all$dClose))
-rownames(conditions_dClose) <- unique(est_data_msqd_all$dClose)
+conditions_psdn <- conditions %>% 
+  filter(port_ID == 1 | port_ID == 2 | port_ID == 3)
 
 plot(conditional_effects(
-  fit_qMSQD_90, "PSDN_SDM_60_dOpen:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
+  fit_qPSDN_90, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, conditions = conditions_psdn, 
+  re_formula = NULL), ncol = 4, points = FALSE, xlab = "Prob(presence): PSDN", ylab = "Prob(presence): PSDN")
 ```
 
-```{r by_port_both_sdm_nanc, echo=FALSE, message=FALSE, warning=FALSE}
-conditions_dClose <- data.frame(port_ID = unique(est_data_msqd_all$dClose))
-rownames(conditions_dClose) <- unique(est_data_msqd_all$dClose)
+---
 
-plot(conditional_effects(
-  fit_qMSQD_90, "NANC_SDM_90:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
-```
-```{r by_port_msqd_dclose}
+# Results: sardine closure
+
+```{r by_port_msqd_dclose, echo=FALSE, message=FALSE, warning=FALSE}
 plot(conditional_effects(
   fit_qMSQD_90, "dClose", conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
