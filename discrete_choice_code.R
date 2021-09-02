@@ -23,6 +23,7 @@ library(doParallel)
 library(tidyr)
 library(mlogit)
 library(parallel)
+
 #-----------------------------------------------------------------------------
 
 ## Read logbooks available for Pacific Sardine from ODFW ##
@@ -59,6 +60,10 @@ psdn.logbook <- psdn.logbook %>%
   dplyr::select(c('set_lat', 'set_long', 'up_lat', 'up_long', 'depth_bin', 'drvid', 'fleet_name', 
                 'set_year', 'set_month', 'set_day', 'set_date', 
                 'catch', 'haul_num', 'haul_id', 'trip_id', 'set_lat_sdm', 'set_long_sdm')) %>% drop_na()
+
+#-----------------------------------------------------------------------------
+# Use Vessel ID to obtain MMSI
+
 
 # ------------------------------------------------------------------
 
@@ -180,3 +185,6 @@ sampsCatch <- sampled_rums(data_in = psdn.logbook, the_port = "OR",
 
 # Think how to add a multispecies framework. 
 # This would work with PacFIN landing data???
+
+
+

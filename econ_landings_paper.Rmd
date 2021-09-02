@@ -412,7 +412,7 @@ Specifically, we fit a hierarchical Bayesian hurdle model to model the zeros inc
 \begin{align*}
 [\theta_i | q_{i,t}] &  \varpropto f\left(q_{i,t} | \theta_i\right) \times [\theta_i] 
 \end{align*} 
-where $q_{i,t}$ is the observed landings of the corresponding species in port $i \in (1,\ldots,L)$ at year $t$, $L$ is the total number of port, and $\theta_i$ are the parameters (i.e. random-coefficients) to be estimated at the port level. The latter give the name of hierarchical to our model.^[For more details about Heriachichal models, see \cite{hobbs2015}.] 
+where $q_{i,t}$ is the observed landings of the corresponding species in port $i \in (1,\ldots,L)$ at year $t$, $L$ is the total number of port, and $\theta_i$ are the parameters (i.e. random-coefficients) to be estimated at the port level. The latter give the name of hierarchical to our model.^[For more details about Hierarchichal models, see \cite{hobbs2015}.] 
 The distribution $f\left(q_{i,t} | \theta_j\right)$ can be rewritten as:
 \begin{equation}
 f\left(q_{i,t} | \theta_j \right) = \begin{cases}
@@ -426,14 +426,8 @@ where $\text{logit}(p_{i,j}) = \bf{X}\gamma$ and $\mu = \bf{X}\beta$. Specifical
 \end{equation}
 where $j$ indicate the species in consideration. $\text{logit}(p_{i,j})$ follows the same structure, but coefficient are replaced by $\gamma$. 
 
-<!-- @smith2021potential estimate with GAM framework (allows for non-linear relationships) -->
+For the Pacific sardine, we also include annual catch limits as an additional explanatory variable in both $\mu_i$ and $\text{logit}(p_i)$ equations. We restrict our data set for this species to the period when the fishery was open (2000-2015). We only consider ports where landing have occur at least once in our sample period. Thus, we avoid to deal with ports where infrastructure to land Pacific sardine is inexistent.  
 
-# Results
-
-## Pacific Sardine model
-
-<!-- # print summary -->
-<!-- texreg(list(f2, f3, r2, r3), caption = 'Panel data models for Pacific Sardine landings.\\label{table:sardine_est}', caption.above = TRUE, float.pos = "h", custom.model.names = c("FE: Model 1", "FE: Model 2", "RE: Model 1", "RE: Model 2")) -->
 
 
 ```{r psdn_data, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
@@ -443,9 +437,6 @@ est_data_psnd <- est_data %>%
                 MSQD_SDM_90, NANC_SDM_90, Landing_year) %>%
   dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>% 
   filter(Landing_year >= 2000 & Landing_year < 2015)
-
-
-
 
 # Select ports that at least they have landing PSDN once, and drop N/A #
 Tot.landings.ports <- as.data.frame(cbind(rowsum(est_data_psnd$PSDN_Landings, est_data_psnd$Port, na.rm = TRUE)))
@@ -475,127 +466,34 @@ est_data_psnd$port_ID <- as.factor(est_data_psnd$port_ID)
 class(est_data_psnd$port_ID)
 ```
 
-```{r psdn_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-fit_qPSDN_90 <- brm(
-  bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + s(ACL_PSDN) + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 | port_ID),
-                hu ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + s(ACL_PSDN) + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 | port_ID)),
+```{r psdn_est, message=FALSE, warning=FALSE, include=FALSE}
+fit_qPSDN <- brm(
+  bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + s(ACL_PSDN) 
+                      + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 | port_ID),
+                hu ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + s(ACL_PSDN) 
+                      + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 | port_ID)),
                           data = est_data_psnd,
                           family = hurdle_gamma(), 
                           control = list(adapt_delta = 0.999, max_treedepth = 20),
                        chains = 4, cores = 4)
 save.image (file = "stan_fit.RData")
 
-# ##  Extract Grouo-Level estimates ##
-# ranef(fit_qPSDN_gamma)
-# 
-# ## Check divergence and other model check ##
-# launch_shinystan(fit_qPSDN_gamma)
-
-# Investigate chain and posterior distributions. 
-# https://cran.r-project.org/web/packages/bayesplot/vignettes/graphical-ppcs.html
-# plot(fit_qPSDN_t2nc, pars = c("PSDN_SDM"))
-
-# ### Predictions ###
-# pred_data <- data.frame(PSDN_SDM = c(0.5, 0.25), MSQD_SDM = c(0.5), Port_ID = 1)
-# predict(fit_qPSDN, newdata = pred_data, re_formula = NA)
-
-# ## Compare models ##
-# loo(fit1, fit2)
-
-## Check https://www.pcouncil.org/stock-assessments-and-fishery-evaluation-safe-documents/ for ACL and closures.
 ```
 
+```{r psdn_est_v2, message=FALSE, warning=FALSE, include=FALSE}
+fit_qPSDN_price <- brm(
+  bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + PSDN_Price + s(ACL_PSDN) 
+                      + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + PSDN_Price | port_ID),
+                hu ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + PSDN_Price + s(ACL_PSDN) 
+                      + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + PSDN_Price | port_ID)),
+                          data = est_data_psnd,
+                          family = hurdle_gamma(), 
+                          control = list(adapt_delta = 0.999, max_treedepth = 20),
+                       chains = 4, cores = 4)
 
-```{r y_rep, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks. (Gamma distribution)"}
-pp_check(fit_qPSDN_90) + ggtitle('Pacific Sardine model') + theme(legend.position = "bottom") +  xlim(0, 20000) 
-```
-
-### Effect of SDM's on Sardine landings
-
-```{r int_effect_smooth, eval=FALSE, include=FALSE}
-pseq_gamma <- plot(conditional_smooths(fit_qPSDN_90), plot = FALSE, ask = FALSE)
-pseq_gamma[[1]] + pseq_gamma[[2]] + plot_layout(nrow = 2)
-```
-
-```{r PSDN_effect_total, echo=FALSE, message=FALSE, warning=FALSE}
-# summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qPSDN_90, "PSDN_SDM_60", surface=TRUE), ask = FALSE)
-```  
-
-```{r MSQD_effect_total, echo=FALSE, message=FALSE, warning=FALSE}
-# summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qPSDN_90, "MSQD_SDM_90", surface=TRUE), ask = FALSE)
-```  
-
-```{r NANC_effect_total, echo=FALSE, message=FALSE, warning=FALSE}
-# summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qPSDN_90, "NANC_SDM_90", surface=TRUE), ask = FALSE)
-```  
-
-```{r ACL_effect, echo=FALSE, message=FALSE, warning=FALSE}
-# summary(fit_qPSDN_gamma) 
-plot(conditional_effects(fit_qPSDN_90, "ACL_PSDN", surface=TRUE), ask = FALSE)
-```  
-
-
-### Results by port
-
-```{r by_port_sdm_psdn}
-conditions <- data.frame(port_ID = unique(est_data_psnd$port_ID))
-rownames(conditions) <- unique(est_data_psnd$Port)
-plot(conditional_effects(
-  fit_qPSDN_90, "PSDN_SDM_60", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points =FALSE)
-```
-
-```{r by_port_msqd_sdm}
-plot(conditional_effects(
-  fit_qPSDN, "MSQD_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
-```
-
-```{r by_port_nanc_sdm}
-plot(conditional_effects(
-  fit_qPSDN_90, "NANC_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
-```
-
-```{r by_port_acl_psdn}
-plot(conditional_effects(
-  fit_qPSDN, "ACL_PSDN", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
+save.image (file = "stan_fit.RData")
 
 ```
-
-
-### Interactive effects between Pacific Sardine and Market Squid SDMs
-
-```{r int_effect_MSQD_total, echo=FALSE, message=FALSE, warning=FALSE}
-plot(conditional_effects(
-  fit_qPSDN_90, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE), ask = FALSE)
-```   
-
-```{r int_effect_NANC_total, echo=FALSE, message=FALSE, warning=FALSE}
-plot(conditional_effects(
-  fit_qPSDN_90, "PSDN_SDM_60:NANC_SDM_90", surface=TRUE), ask = FALSE)
-```   
-
-
-
-```{r int_effect_MSQD_by_port, echo=FALSE, message=FALSE, warning=FALSE}
-plot(conditional_effects(
-  fit_qPSDN_90, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
-```
-
-```{r int_effect_NANC_by_port, echo=FALSE, message=FALSE, warning=FALSE}
-plot(conditional_effects(
-  fit_qPSDN_90, "PSDN_SDM_60:NANC_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
-```
-
-
-## Market Squid model
 
 ```{r msqd_data_all, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
 # Select data for estimation, replace N/A landings to zero #
@@ -648,7 +546,50 @@ save.image (file = "stan_fit.RData")
 ```
 
 
-```{r model-comp-msqd, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
+# Results
+
+<!-- # print summary -->
+<!-- texreg(list(f2, f3, r2, r3), caption = 'Panel data models for Pacific Sardine landings.\\label{table:sardine_est}', caption.above = TRUE, float.pos = "h", custom.model.names = c("FE: Model 1", "FE: Model 2", "RE: Model 1", "RE: Model 2")) -->
+
+
+<!-- # ##  Extract Grouo-Level estimates ## -->
+<!-- # ranef(fit_qPSDN_gamma) -->
+<!-- #  -->
+<!-- # ## Check divergence and other model check ## -->
+<!-- # launch_shinystan(fit_qPSDN_gamma) -->
+
+<!-- # Investigate chain and posterior distributions.  -->
+<!-- # https://cran.r-project.org/web/packages/bayesplot/vignettes/graphical-ppcs.html -->
+<!-- # plot(fit_qPSDN_t2nc, pars = c("PSDN_SDM")) -->
+
+<!-- # ### Predictions ### -->
+<!-- # pred_data <- data.frame(PSDN_SDM = c(0.5, 0.25), MSQD_SDM = c(0.5), Port_ID = 1) -->
+<!-- # predict(fit_qPSDN, newdata = pred_data, re_formula = NA) -->
+
+<!-- # ## Compare models ## -->
+<!-- # loo(fit1, fit2) -->
+
+<!-- ## Check https://www.pcouncil.org/stock-assessments-and-fishery-evaluation-safe-documents/ for ACL and closures. -->
+
+## Graphical posterior predictive
+Before presenting the results for the three species in consideration, we check graphically whether the posterior distribution is able to predict the actual distribution. We exclude zero in our graph to avoid plotting different data generation processes. 
+
+```{r y_rep, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks\\label{fig:posteriors}"}
+g1 <- pp_check(fit_qPSDN_90) + ggtitle('(a) Pacific sardine') + theme(legend.position = "none") +  xlim(0.1, 15000) 
+g2 <- pp_check(fit_qMSQD_90) + ggtitle('(b) Market Squid') + theme(legend.position = "right")  +  xlim(0.1, 15000) 
+
+g1 + g2
+```
+
+```{r y_rep_zero, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
+g1 <- pp_check(fit_qPSDN_90) + ggtitle('(a) Pacific sardine') + theme(legend.position = "none") +  xlim(0, 0.1) 
+g2 <- pp_check(fit_qMSQD_90) + ggtitle('(b) Market Squid') + theme(legend.position = "right")  +  xlim(0, 0.1) 
+
+g1 + g2
+```
+
+
+```{r model-comparision, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
 fit_qMSQD <- add_criterion(fit_qMSQD, "loo")
 fit_qMSQD_90 <- add_criterion(fit_qMSQD_90, "loo")
 
@@ -672,37 +613,25 @@ comp %>%
   )
 ```
 
-### Compare models 
-```{r y_rep_logn_msqd, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks for Market Squid landings model."}
-pp_check(fit_qMSQD_90) + ggtitle('Market Squid landing model') + theme(legend.position = "bottom")  +  xlim(0, 10) 
+
+## Port-level effects
+The inclusion of hierarchical effects by port allows us to analyze the effects of the probability of presence on landings disaggregated by ports.
+
+
+```{r by_port_sdm_psdn}
+conditions <- data.frame(port_ID = unique(est_data_psnd$port_ID))
+rownames(conditions) <- unique(est_data_psnd$Port)
+plot(conditional_effects(
+  fit_qPSDN_90, "PSDN_SDM_60", surface=TRUE, conditions = conditions, 
+  re_formula = NULL), ncol = 4, points =FALSE)
 ```
 
-### Effect of SDM's on Market SquidSardine landings
-
-```{r PSDN_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of probability of occurrence of Pacific Sardine on Squid landings."}
-plot(conditional_effects(fit_qMSQD_s, "PSDN_SDM_60_dOpen", surface=TRUE), ask = FALSE)
-```  
-
-```{r MSQD_effect_total_msqd, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Conditional effect of probability of occurrence of Market Squid on Squid landings."}
-plot(conditional_effects(fit_qMSQD, "MSQD_SDM_90", surface=TRUE), ask = FALSE)
-```  
-
-```{r MSQD_effect_total_nanc, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
-plot(conditional_effects(fit_qMSQD, "NANC_SDM_90", surface=TRUE), ask = FALSE)
-```  
-
-```{r ACL_effect_msqd, echo=FALSE, fig.cap="Conditional effect of Pacific Sardin Closure on Market Squid Landings", message=TRUE, warning=TRUE}
-plot(conditional_effects(fit_qMSQD, "dClose", dpar="mu"), ask = FALSE)
-```  
+<!-- @smith2021potential estimate with GAM framework (allows for non-linear relationships) -->
 
 
-### Results by port
-
-```{r by_port_sdm_msdq}
-conditions <- data.frame(port_ID = unique(est_data_msqd_all$port_ID))
-rownames(conditions) <- unique(est_data_msqd_all$Port)
+```{r by_port_acl_psdn}
 plot(conditional_effects(
-  fit_qMSQD_90, "PSDN_SDM_60_dOpen", surface=TRUE, conditions = conditions, 
+  fit_qPSDN, "ACL_PSDN", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
@@ -712,45 +641,20 @@ plot(conditional_effects(
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
-```{r by_port_msqd_sdm_nanc}
-plot(conditional_effects(
-  fit_qMSQD_90, "NANC_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
-```
-
 ```{r by_port_msqd_dclose}
 plot(conditional_effects(
   fit_qMSQD_90, "dClose", conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
-```{r by_port_msqd_dclose_hu}
+
+
+## Interactions
+
+```{r int_effect_MSQD_by_port, echo=FALSE, message=FALSE, warning=FALSE}
 plot(conditional_effects(
-  fit_qMSQD_90, "dClose", conditions = conditions, 
-  re_formula = NULL, dpar="hu"), ncol = 4, points = FALSE)
-```
-```{r by_port_msqd_dclose_mu}
-plot(conditional_effects(
-  fit_qMSQD_90, "dClose", conditions = conditions, 
-  re_formula = NULL, dpar="mu"), ncol = 4, points = FALSE)
-```
-
-### Interactive effects between Pacific Sardine and Market Squid SDMs
-
-```{r both_sdm_msqd, echo=FALSE, message=FALSE, warning=FALSE}
-conditions_dClose <- data.frame(port_ID = unique(est_data_msqd_all$dClose))
-rownames(conditions_dClose) <- unique(est_data_msqd_all$dClose)
-
-plot(conditional_effects(
-  fit_qMSQD_90, "PSDN_SDM_60_dOpen:MSQD_SDM_90", surface=TRUE, re_formula = NULL), ncol = 4, points = FALSE)
-```
-
-```{r both_sdm_nanc, echo=FALSE, message=FALSE, warning=FALSE}
-conditions_dClose <- data.frame(port_ID = unique(est_data_msqd_all$dClose))
-rownames(conditions_dClose) <- unique(est_data_msqd_all$dClose)
-
-plot(conditional_effects(
-  fit_qMSQD_90, "NANC_SDM_90:MSQD_SDM_90", surface=TRUE, re_formula = NULL), ncol = 4, points = FALSE)
+  fit_qPSDN_90, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
+  re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
 ```{r by_port_both_sdm_msqd, echo=FALSE, message=FALSE, warning=FALSE}
@@ -759,6 +663,12 @@ rownames(conditions_dClose) <- unique(est_data_msqd_all$dClose)
 
 plot(conditional_effects(
   fit_qMSQD_90, "PSDN_SDM_60_dOpen:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
+  re_formula = NULL), ncol = 4, points = FALSE)
+```
+
+```{r int_effect_NANC_by_port, echo=FALSE, message=FALSE, warning=FALSE}
+plot(conditional_effects(
+  fit_qPSDN_90, "PSDN_SDM_60:NANC_SDM_90", surface=TRUE, conditions = conditions, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
@@ -772,36 +682,32 @@ plot(conditional_effects(
 ```
 
 # Conclusions
-A possible extension of our research is to consider spatial autocorrelations between ports.^[See \cite{morris2019bayesian} for an application of a spatial model in a Bayesian framework.] Ports landing maybe correlated as vessel have the incentives to choose the port of landing, conditional on whether the port have the infrastructure for this. It is likely that they just land wherever is closer to the area they are fishing. Nevertheless, differntial in prices could encourage them to travel a little further for higher prices. 
+A possible extension of our research is to consider spatial autocorrelations between ports.^[See \cite{morris2019bayesian} for an application of a spatial model in a Bayesian framework.] Ports landing maybe correlated as vessel have the incentives to choose the port of landing, conditional on whether the port have the infrastructure for this. It is likely that they just land wherever is closer to the area they are fishing. Nevertheless, differential in prices could encourage them to travel a little further for higher prices. 
 
 
 
 
- 
+<!-- ```{r int_effect_sep, eval=FALSE, include=FALSE} -->
 
+<!-- hu <- plot(conditional_effects(fit_qPSDN, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="hu"), -->
+<!--            plot = FALSE, ask = FALSE) -->
+<!-- mu <- plot(conditional_effects(fit_qPSDN, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="mu"), -->
+<!--            plot = FALSE, ask = FALSE) -->
 
+<!-- mu[[1]] + hu[[1]] + plot_layout(nrow = 2) -->
 
-```{r int_effect_sep, eval=FALSE, include=FALSE}
+<!-- ``` -->
 
-hu <- plot(conditional_effects(fit_qPSDN, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="hu"),
-           plot = FALSE, ask = FALSE)
-mu <- plot(conditional_effects(fit_qPSDN, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="mu"),
-           plot = FALSE, ask = FALSE)
+<!-- ```{r int_effect_sep_msqd, eval=FALSE, fig.cap=, include=FALSE} -->
 
-mu[[1]] + hu[[1]] + plot_layout(nrow = 2)
+<!-- hu <- plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="hu"), -->
+<!--            plot = FALSE, ask = FALSE) -->
+<!-- mu <- plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="mu"), -->
+<!--            plot = FALSE, ask = FALSE) -->
 
-```
+<!-- mu[[1]] + hu[[1]] + plot_layout(nrow = 2) -->
 
-```{r int_effect_sep_msqd, eval=FALSE, fig.cap=, include=FALSE}
-
-hu <- plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="hu"),
-           plot = FALSE, ask = FALSE)
-mu <- plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="mu"),
-           plot = FALSE, ask = FALSE)
-
-mu[[1]] + hu[[1]] + plot_layout(nrow = 2)
-
-```
+<!-- ``` -->
 
 
 
