@@ -23,7 +23,6 @@ Estimation of a mixed logit for location/species decision using PacFIN vessel da
     + Static or dynamics. Do they change location?
     + Do they behave similarly to peers? Do they go to the same fishing grounds? 
   + Hicks's paper to select choice set.
-    + Add revenue per area and expected catch.
     + Think how to add a multispecies framework. 
     + This would work with PacFIN landing data???
   + Identify capital (gear) and distances. Region of analysis (sampling) and species choice set might differ

@@ -44,9 +44,9 @@ class: center, middle, inverse, title-slide
   + How do fishers decide between species?
   + How catch composition will be affected due to climate change?
   
-+ Two approach to address this question:
-  + Landing model for Pacific sardine, market squid and Northern anchovy.
-  + Discrete choice model for location decision and species choice. 
++ Two approaches to address these questions:
+  + Landing model: Pacific sardine, market squid and Northern anchovy.
+  + Discrete choice model: location &amp; species. 
 
 ---
 class: inverse, center, middle
@@ -62,6 +62,8 @@ name: landingmodel
 # Landing model
 
 + Separate landing model for each species.
+  + Based on Smith et al. (2021): "The potential impact of a shifting pacific sardine distribution on us west coast landings", *Fisheries
+Oceanography*.
 
 + Interaction between species on landing
   + Probability of presence (SDMs outputs)
@@ -76,7 +78,7 @@ name: landingmodel
 
 ---
 
-# Results: sardine closure
+# Results: Sardine closure
 
 &lt;img src="econ_report_slides_files/figure-html/by_port_msqd_dclose-1.png" style="display: block; margin: auto;" /&gt;
 
@@ -99,8 +101,8 @@ name: discrete-choice
         + Not available.
         + Merge landing data to Global Fishing Watch to recreate "logbooks"
     + Choice set:
-        + Hicks (2020) to sample choice set from logbooks (thanks Peter for the code...)
-    + SDM will be included to calculate exepcted catch. 
+        + Hicks et al. (2020): "Choice sets for spatial discrete choice models in data rich environments", *Resource and Energy Economics*,  to sample the choice set from logbooks (thanks Peter for the code...)
+    + SDM will be included to calculate expected catch. 
         + Forecasting
   
 ---

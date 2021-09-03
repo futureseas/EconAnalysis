@@ -98,9 +98,9 @@ sum_mean_fun <- function(x, ...){
   + How do fishers decide between species?
   + How catch composition will be affected due to climate change?
   
-+ Two approach to address this question:
-  + Landing model for Pacific sardine, market squid and Northern anchovy.
-  + Discrete choice model for location decision and species choice. 
++ Two approaches to address these questions:
+  + Landing model: Pacific sardine, market squid and Northern anchovy.
+  + Discrete choice model: location & species. 
 
 ---
 class: inverse, center, middle
@@ -116,6 +116,8 @@ name: landingmodel
 # Landing model
 
 + Separate landing model for each species.
+  + Based on Smith et al. (2021): "The potential impact of a shifting pacific sardine distribution on us west coast landings", *Fisheries
+Oceanography*.
 
 + Interaction between species on landing
   + Probability of presence (SDMs outputs)
@@ -127,21 +129,34 @@ $$f\left(q_{i,t} | \mu_i, \sigma_{\mu}^2, p_i \right) = \begin{cases} p_i & \tex
 # Results: interaction between SDMs
 
 ```{r int_effect_MSQD_by_port, echo=FALSE, message=FALSE, warning=FALSE}
+conditions <- data.frame(port_ID = unique(est_data_psnd$port_ID))
+  rownames(conditions) <- unique(est_data_psnd$Port)
+
 conditions_psdn <- conditions %>% 
-  filter(port_ID == 1 | port_ID == 2 | port_ID == 3)
+  rownames_to_column('port_name') %>%
+  filter(port_ID == 1 | port_ID == 2 | port_ID == 3) %>%
+  column_to_rownames('port_name')
 
 plot(conditional_effects(
-  fit_qPSDN_90, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, conditions = conditions_psdn, 
+  fit_qPSDN_price, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, conditions = conditions_psdn, 
   re_formula = NULL), ncol = 4, points = FALSE, xlab = "Prob(presence): PSDN", ylab = "Prob(presence): PSDN")
 ```
 
 ---
 
-# Results: sardine closure
+# Results: Sardine closure
 
 ```{r by_port_msqd_dclose, echo=FALSE, message=FALSE, warning=FALSE}
+conditions2 <- data.frame(port_ID = unique(est_data_msqd$port_ID))
+  rownames(conditions2) <- unique(est_data_msqd$Port)
+
+conditions_msqd <- conditions2 %>% 
+  rownames_to_column('port_name') %>%
+  filter(port_ID == 4  | port_ID == 5  | port_ID == 8) %>%
+  column_to_rownames('port_name')
+
 plot(conditional_effects(
-  fit_qMSQD_90, "dClose", conditions = conditions, 
+  fit_qMSQD_price, "dClose", conditions = conditions_msqd, 
   re_formula = NULL), ncol = 4, points = FALSE)
 ```
 
@@ -164,8 +179,8 @@ name: discrete-choice
         + Not available.
         + Merge landing data to Global Fishing Watch to recreate "logbooks"
     + Choice set:
-        + Hicks (2020) to sample choice set from logbooks (thanks Peter for the code...)
-    + SDM will be included to calculate exepcted catch. 
+        + Hicks et al. (2020): "Choice sets for spatial discrete choice models in data rich environments", *Resource and Energy Economics*,  to sample the choice set from logbooks (thanks Peter for the code...)
+    + SDM will be included to calculate expected catch. 
         + Forecasting
   
 ---

@@ -270,7 +270,8 @@ g1 <- ggplot(collapse) +
   facet_wrap(~ Port) + 
   scale_x_continuous(name = element_blank(), labels = NULL) +
   scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff, name = "")) +
-  theme(plot.title = element_text(size=9, face="bold.italic")) + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
   ggtitle("(a) Pacific sardine")
 
 g2 <- ggplot(collapse) + 
@@ -281,7 +282,8 @@ g2 <- ggplot(collapse) +
   facet_wrap(~ Port) + 
   scale_x_continuous(name = element_blank(), labels = NULL) +
   scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff, name = "P(presence)")) +
-  theme(plot.title = element_text(size=9, face="bold.italic")) + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
   ggtitle("(b) Market squid")
 
 g3 <- ggplot(collapse) + 
@@ -292,7 +294,8 @@ g3 <- ggplot(collapse) +
   facet_wrap(~ Port) + 
   scale_x_continuous(name = "Year", labels = NULL) +
   scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff, name = element_blank())) +
-  theme(legend.position="bottom", plot.title = element_text(size=9, face="bold.italic")) + 
+  theme(legend.position="bottom", plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
   ggtitle("(c) Northern anchovy") +  scale_color_manual(name = "Variable: ", 
                      values = c("Landings" = "grey", "Probability of presence" = "blue"))
 
@@ -300,7 +303,7 @@ g1 / g2 / g3
 
 ```
 
-Beside the biological stock, landings are affected by socio-economics conditions. Some of them are harvest cost, prices received by species and their substitutes, and regulations imposed by the authorities. In our data we include as a proxy of harvest cost average distances traveled by vessel from the port of origin *(TO BE INCLUDED USING GLOBAL FISHING WATCH...)* and fuel cost *(TO BE INCLUDED...)*. Own price was included and it was obtained from PacFIN landings dataset. When price was missing, we replace this value for the average price of the species in all ports for the corresponding year. As regulatory variables, we construct a binary variable called **dClose** that takes the value "1" when the Pacific sardine fishery is close, and the value "0" when its close. We also include the Annual Catch Limit (ACL) for the Pacific sardine model. The ACL for Pacific sardine were obtained from the [CPS Fisheries Management Plan](pcouncil.org)???. 
+Beside the biological stock, landings are affected by socio-economics conditions. Some of them are harvest cost, prices received by species and their substitutes, and regulations imposed by the authorities. In our data we include as a proxy of harvest cost average distances traveled by vessel from the port of origin *(TO BE INCLUDED USING GLOBAL FISHING WATCH...)* and fuel cost *(TO BE INCLUDED...)*. Own price was included and it was obtained from PacFIN landings dataset. When price was missing, we replace this value for the average price of the species in all ports for the corresponding year. We include the Annual Catch Limit (ACL) for the Pacific sardine model. The ACL for Pacific sardine were obtained from the [CPS Fisheries Management Plan](pcouncil.org)???. 
 A summary statistics of our data set is shown in Table \ref{tab:sum_stats}.
 
 ```{r desc_table, echo=FALSE, results='asis'}
@@ -432,14 +435,14 @@ For the Pacific sardine, we also include annual catch limits as an additional ex
 
 ```{r psdn_data, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
 # Select data for estimation, replace N/A landings to zero #
-est_data_psnd <- est_data %>%
+est_data_psdn <- est_data %>%
   dplyr::select(port_num, Port, PSDN_SDM_60, PSDN_Landings, PSDN_Price, ACL_PSDN,
                 MSQD_SDM_90, NANC_SDM_90, Landing_year) %>%
   dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>% 
   filter(Landing_year >= 2000 & Landing_year < 2015)
 
 # Select ports that at least they have landing PSDN once, and drop N/A #
-Tot.landings.ports <- as.data.frame(cbind(rowsum(est_data_psnd$PSDN_Landings, est_data_psnd$Port, na.rm = TRUE)))
+Tot.landings.ports <- as.data.frame(cbind(rowsum(est_data_psdn$PSDN_Landings, est_data_psdn$Port, na.rm = TRUE)))
 
 Tot.landings.ports <- Tot.landings.ports %>%
   mutate(dTotalPSDN = ifelse(V1>0, 1, 0)) %>%
@@ -447,7 +450,7 @@ Tot.landings.ports <- Tot.landings.ports %>%
   dplyr::select(Port, dTotalPSDN)
 
 ### NOTE: If I use drop_na, some ports without MSQD landings are excluded. ###
-est_data_psnd <- est_data_psnd %>%
+est_data_psdn <- est_data_psdn %>%
   merge(Tot.landings.ports, by.x = "Port", by.y = "Port", all.x = TRUE, all.y = FALSE) %>%
   filter(dTotalPSDN==1) %>%
   drop_na()
@@ -455,24 +458,24 @@ est_data_psnd <- est_data_psnd %>%
   # filter(dSDA == 0) %>%  
 
 # Create matrices and vectors to run STAN model #
-year_id <- as.vector(cbind(as.numeric(factor(est_data_psnd$Landing_year))));
-est_data_psnd$port_ID <- udpipe::unique_identifier(est_data_psnd, fields = "port_num", start_from = 1) 
+year_id <- as.vector(cbind(as.numeric(factor(est_data_psdn$Landing_year))));
+est_data_psdn$port_ID <- udpipe::unique_identifier(est_data_psdn, fields = "port_num", start_from = 1) 
 
-portID_names <- est_data_psnd %>%
+portID_names_PSDN <- est_data_psdn %>%
   dplyr::select(Port, port_ID) %>%
   unique()
 
-est_data_psnd$port_ID <- as.factor(est_data_psnd$port_ID)
-class(est_data_psnd$port_ID)
+est_data_psdn$port_ID <- as.factor(est_data_psdn$port_ID)
+class(est_data_psdn$port_ID)
 ```
 
-```{r psdn_est, message=FALSE, warning=FALSE, include=FALSE}
+```{r psdn_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 fit_qPSDN <- brm(
   bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + s(ACL_PSDN) 
                       + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 | port_ID),
                 hu ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + s(ACL_PSDN) 
                       + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 | port_ID)),
-                          data = est_data_psnd,
+                          data = est_data_psdn,
                           family = hurdle_gamma(), 
                           control = list(adapt_delta = 0.999, max_treedepth = 20),
                        chains = 4, cores = 4)
@@ -480,13 +483,14 @@ save.image (file = "stan_fit.RData")
 
 ```
 
-```{r psdn_est_v2, message=FALSE, warning=FALSE, include=FALSE}
+
+```{r psdn_est_price, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 fit_qPSDN_price <- brm(
   bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + PSDN_Price + s(ACL_PSDN) 
                       + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + PSDN_Price | port_ID),
                 hu ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + PSDN_Price + s(ACL_PSDN) 
                       + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_90 + PSDN_Price | port_ID)),
-                          data = est_data_psnd,
+                          data = est_data_psdn,
                           family = hurdle_gamma(), 
                           control = list(adapt_delta = 0.999, max_treedepth = 20),
                        chains = 4, cores = 4)
@@ -495,10 +499,13 @@ save.image (file = "stan_fit.RData")
 
 ```
 
-```{r msqd_data_all, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
+In the case of market squid, our databse comprise the time period between 2000 and 2018. We do not include ACL as an explanatory variable as there is no variation between years. To capture any change on fishers behavior when Pacific sardine fishery closed, we include a binary variable called **dClose** that takes the value "1" when the Pacific sardine fishery is close, and the value "0" when its close. Pacific sardine probability takes the value of zero when the fishery is closed. Thus, the effect of this variable is only relevant when it PAcific sardine fishery is open in order to capture potential substitution between targets. 
+
+```{r msqd_data, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
 # Select data for estimation, replace N/A landings to zero #
-est_data_msqd_all <- est_data %>%
-  dplyr::select(port_num, Port, PSDN_SDM_60, MSQD_SDM_90, NANC_SDM_90, MSQD_Landings, Landing_year) %>%
+est_data_msqd <- est_data %>%
+  dplyr::select(port_num, Port, MSQD_SDM_90, MSQD_Landings, MSQD_Price, 
+                  PSDN_SDM_60, NANC_SDM_90, Landing_year) %>%
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>% 
   dplyr::mutate(dClose = ifelse(Landing_year >= 2015,1,0)) %>%
   dplyr::mutate(dOpen = ifelse(Landing_year < 2015,1,0)) %>%
@@ -506,7 +513,7 @@ est_data_msqd_all <- est_data %>%
   filter(Landing_year >= 2000)
 
 # Select ports that at least they have landing PSDN once, and drop N/A #
-Tot.landings.ports <- as.data.frame(cbind(rowsum(est_data_msqd_all$MSQD_Landings, est_data_msqd_all$Port, na.rm = TRUE)))
+Tot.landings.ports <- as.data.frame(cbind(rowsum(est_data_msqd$MSQD_Landings, est_data_msqd$Port, na.rm = TRUE)))
 
 Tot.landings.ports <- Tot.landings.ports %>%
   mutate(dTotalMSQD = ifelse(V1>0, 1, 0)) %>%
@@ -514,36 +521,104 @@ Tot.landings.ports <- Tot.landings.ports %>%
   dplyr::select(Port, dTotalMSQD)
 
 ### NOTE: If I use drop_na, some ports without MSQD landings are excluded. ###
-est_data_msqd_all <- est_data_msqd_all %>%
+est_data_msqd <- est_data_msqd %>%
   merge(Tot.landings.ports, by.x = "Port", by.y = "Port", all.x = TRUE, all.y = FALSE) %>%
   filter(dTotalMSQD==1) %>%
   drop_na() 
   
 # Create matrices and vectors to run STAN model #
-year_id <- as.vector(cbind(as.numeric(factor(est_data_msqd_all$Landing_year))));
-est_data_msqd_all$port_ID <- udpipe::unique_identifier(est_data_msqd_all, fields = "port_num", start_from = 1) 
-portID_names_all <- est_data_msqd_all %>%
+year_id <- as.vector(cbind(as.numeric(factor(est_data_msqd$Landing_year))));
+est_data_msqd$port_ID <- udpipe::unique_identifier(est_data_msqd, fields = "port_num", start_from = 1) 
+portID_names_MSQD <- est_data_msqd %>%
   dplyr::select(Port, port_ID) %>%
   unique()
 
 ### Estimate using BRMS package ###
-est_data_msqd_all$dClose    <- factor(est_data_msqd_all$dClose)
-est_data_msqd_all$port_ID   <- factor(est_data_msqd_all$port_ID)
-class(est_data_msqd_all$dClose)
-class(est_data_msqd_all$port_ID)
-class(est_data_msqd_all$dOpen)
+est_data_msqd$dClose    <- factor(est_data_msqd$dClose)
+est_data_msqd$port_ID   <- factor(est_data_msqd$port_ID)
+class(est_data_msqd$dClose)
+class(est_data_msqd$port_ID)
+class(est_data_msqd$dOpen)
 ```
 
-```{r msqd_est_90, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-fit_qMSQD_90 <- brm(
- bf(MSQD_Landings ~ MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose + (1 + MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose | port_ID),
-               hu ~ MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose + (1 + MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose | port_ID)),
-                       data = est_data_msqd_all,
+```{r msqd_est, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+fit_qMSQD <- brm(bf(MSQD_Landings ~ MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose 
+                      + (1 + MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose | port_ID),
+                               hu ~ MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose 
+                      + (1 + MSQD_SDM_90 + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose | port_ID)),
+                       data = est_data_msqd,
                        family = hurdle_gamma(),
                        control = list(adapt_delta = 0.999, max_treedepth = 20),
                        chains = 4, cores = 4)
 save.image (file = "stan_fit.RData")
 ```
+
+```{r msqd_est_price, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+fit_qMSQD_price <- brm(bf(MSQD_Landings ~ MSQD_SDM_90 + MSQD_Price + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose 
+                      + (1 + MSQD_SDM_90 + MSQD_Price + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose | port_ID),
+                               hu ~ MSQD_SDM_90 + MSQD_Price + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose 
+                      + (1 + MSQD_SDM_90 + MSQD_Price + PSDN_SDM_60_dOpen + NANC_SDM_90 + dClose | port_ID)),
+                       data = est_data_msqd,
+                       family = hurdle_gamma(),
+                       control = list(adapt_delta = 0.999, max_treedepth = 20),
+                       chains = 4, cores = 4)
+save.image (file = "stan_fit.RData")
+```
+
+Finally, a similar structure than Market squid models is followed for our estimation of Northern anchovy landing by ports.
+
+```{r nanc_data, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
+# Select data for estimation, replace N/A landings to zero #
+est_data_nanc <- est_data %>%
+  dplyr::select(port_num, Port, NANC_SDM_90, NANC_Landings, NANC_Price, 
+                  PSDN_SDM_60, MSQD_SDM_90, Landing_year) %>%
+  dplyr::mutate(NANC_Landings = coalesce(NANC_Landings, 0)) %>% 
+  dplyr::mutate(dClose = ifelse(Landing_year >= 2015,1,0)) %>%
+  dplyr::mutate(dOpen = ifelse(Landing_year < 2015,1,0)) %>%
+  dplyr::mutate(PSDN_SDM_60_dOpen = PSDN_SDM_60 * dOpen) %>%
+  filter(Landing_year >= 2000)
+
+# Select ports that at least they have landing PSDN once, and drop N/A #
+Tot.landings.ports <- as.data.frame(cbind(rowsum(est_data_nanc$NANC_Landings, est_data_nanc$Port, na.rm = TRUE)))
+
+Tot.landings.ports <- Tot.landings.ports %>%
+  mutate(dTotalNANC = ifelse(V1>0, 1, 0)) %>%
+  mutate(Port = rownames(Tot.landings.ports)) %>%
+  dplyr::select(Port, dTotalNANC)
+
+### NOTE: If I use drop_na, some ports without MSQD landings are excluded. ###
+est_data_nanc <- est_data_nanc %>%
+  merge(Tot.landings.ports, by.x = "Port", by.y = "Port", all.x = TRUE, all.y = FALSE) %>%
+  filter(dTotalNANC==1) %>%
+  drop_na() 
+  
+# Create matrices and vectors to run STAN model #
+year_id <- as.vector(cbind(as.numeric(factor(est_data_nanc$Landing_year))));
+est_data_nanc$port_ID <- udpipe::unique_identifier(est_data_nanc, fields = "port_num", start_from = 1) 
+portID_names_NANC <- est_data_nanc %>%
+  dplyr::select(Port, port_ID) %>%
+  unique()
+
+### Estimate using BRMS package ###
+est_data_nanc$dClose    <- factor(est_data_nanc$dClose)
+est_data_nanc$port_ID   <- factor(est_data_nanc$port_ID)
+class(est_data_nanc$dClose)
+class(est_data_nanc$port_ID)
+class(est_data_nanc$dOpen)
+```
+
+```{r nanc_est_price, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+fit_qNANC_price <- brm(bf(NANC_Landings ~ NANC_SDM_90 + NANC_Price + PSDN_SDM_60_dOpen + MSQD_SDM_90 + dClose 
+                      + (1 +  NANC_SDM_90 + NANC_Price + PSDN_SDM_60_dOpen + MSQD_SDM_90 + dClose | port_ID),
+                                     hu ~ NANC_SDM_90 + NANC_Price + PSDN_SDM_60_dOpen + MSQD_SDM_90 + dClose + dClose 
+                      + (1 + NANC_SDM_90 + NANC_Price + PSDN_SDM_60_dOpen + MSQD_SDM_90 + dClose | port_ID)),
+                       data = est_data_nanc,
+                       family = hurdle_gamma(),
+                       control = list(adapt_delta = 0.999, max_treedepth = 20),
+                       chains = 4, cores = 4)
+save.image (file = "stan_fit.RData")
+```
+
 
 
 # Results
@@ -575,17 +650,26 @@ save.image (file = "stan_fit.RData")
 Before presenting the results for the three species in consideration, we check graphically whether the posterior distribution is able to predict the actual distribution. We exclude zero in our graph to avoid plotting different data generation processes. 
 
 ```{r y_rep, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks\\label{fig:posteriors}"}
-g1 <- pp_check(fit_qPSDN_90) + ggtitle('(a) Pacific sardine') + theme(legend.position = "none") +  xlim(0.1, 15000) 
-g2 <- pp_check(fit_qMSQD_90) + ggtitle('(b) Market Squid') + theme(legend.position = "right")  +  xlim(0.1, 15000) 
+g1 <- pp_check(fit_qPSDN_price) + ggtitle('(a) Pacific sardine') + 
+  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic")) +  xlim(0.1, 15000) 
+g2 <- pp_check(fit_qMSQD_price) + ggtitle('(b) Market Squid') + 
+  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"))  +  xlim(0.1, 15000) 
+g3 <- pp_check(fit_qNANC_price) + ggtitle('(c) Northern Anchovy') +
+  theme(legend.position = "right", plot.title = element_text(size=9, face="bold.italic"))  +  xlim(0.1, 15000) 
 
-g1 + g2
+
+g1 + g2 + g3
 ```
 
-```{r y_rep_zero, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
-g1 <- pp_check(fit_qPSDN_90) + ggtitle('(a) Pacific sardine') + theme(legend.position = "none") +  xlim(0, 0.1) 
-g2 <- pp_check(fit_qMSQD_90) + ggtitle('(b) Market Squid') + theme(legend.position = "right")  +  xlim(0, 0.1) 
+```{r y_rep_zero, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+g1 <- pp_check(fit_qPSDN_price) + ggtitle('(a) Pacific sardine') + theme(legend.position = "none") +  xlim(0, 0.1) 
+g2 <- pp_check(fit_qMSQD_price) + ggtitle('(b) Market Squid') + theme(legend.position = "none")  +  xlim(0, 0.1) 
+g3 <- pp_check(fit_qNANC_price) + 
+  ggtitle('(c) Northern anchovy') + 
+  theme(legend.position = "right", plot.title = element_text(size=9, face="bold.italic"))  +  xlim(0, 0.1)
 
-g1 + g2
+
+g1 + g2 + g3
 ```
 
 
@@ -614,72 +698,230 @@ comp %>%
 ```
 
 
-## Port-level effects
+
+## Own species distribution effect
+
 The inclusion of hierarchical effects by port allows us to analyze the effects of the probability of presence on landings disaggregated by ports.
 
 
-```{r by_port_sdm_psdn}
-conditions <- data.frame(port_ID = unique(est_data_psnd$port_ID))
-rownames(conditions) <- unique(est_data_psnd$Port)
-plot(conditional_effects(
-  fit_qPSDN_90, "PSDN_SDM_60", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points =FALSE)
+```{r by_port_sdm, fig.cap = "Effect of probability of presence on landings by species and port\\label{fig:sdmeffects}"}
+# PSDN plots
+conditions <- data.frame(port_ID = unique(est_data_psdn$port_ID))
+  rownames(conditions) <- unique(est_data_psdn$Port)
+conditions_psdn <- conditions %>% 
+  rownames_to_column('port_name') %>%
+  filter(port_ID == 1 | port_ID == 2 | port_ID == 3) %>%
+  column_to_rownames('port_name')
+
+c_eff_psdn <- (conditional_effects
+               (fit_qPSDN_price, "PSDN_SDM_60", surface=TRUE, conditions = conditions_psdn, re_formula = NULL))
+g1 <- plot(c_eff_psdn, plot = FALSE, nrow = 3, ncol = 1)[[1]] + ggtitle('(a) Pacific sardine')+ 
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+  scale_x_continuous(name = element_blank(), labels = NULL) +
+  scale_y_continuous(name = "Landings (tons)")
+
+# MSQD plots
+conditions2 <- data.frame(port_ID = unique(est_data_msqd$port_ID))
+  rownames(conditions2) <- unique(est_data_msqd$Port)
+conditions_msqd <- conditions2 %>% 
+  rownames_to_column('port_name') %>%
+  filter(port_ID == 4  | port_ID == 5  | port_ID == 8) %>%
+  column_to_rownames('port_name')
+c_eff_msqd <- (conditional_effects
+               (fit_qMSQD_price, "MSQD_SDM_90", surface=TRUE, conditions = conditions_msqd, re_formula = NULL))
+g2 <- plot(c_eff_msqd, plot = FALSE, nrow = 3, ncol = 1)[[1]] + ggtitle('(b) Market squid') + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+  scale_x_continuous(name = "Year", labels = NULL) +
+  scale_y_continuous(name = element_blank()) 
+
+# NANC plots
+conditions3 <- data.frame(port_ID = unique(est_data_nanc$port_ID))
+  rownames(conditions3) <- unique(est_data_nanc$Port)
+conditions_nanc <- conditions3 %>% 
+  rownames_to_column('port_name') %>%
+  filter(port_ID == 3  | port_ID == 4  | port_ID == 5) %>%
+  column_to_rownames('port_name')
+c_eff_nanc <- (conditional_effects
+               (fit_qNANC_price, "NANC_SDM_90", surface=TRUE, conditions = conditions_nanc, re_formula = NULL))
+g3 <- plot(c_eff_nanc, plot = FALSE, nrow = 3, ncol = 1)[[1]] + ggtitle('(c) Northern anchovy') + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+  scale_x_continuous(name = element_blank(), labels = NULL) +
+  scale_y_continuous(name = element_blank()) 
+
+# Merge plots
+g1 + g2 + g3
+
 ```
 
 <!-- @smith2021potential estimate with GAM framework (allows for non-linear relationships) -->
 
 
-```{r by_port_acl_psdn}
-plot(conditional_effects(
-  fit_qPSDN, "ACL_PSDN", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
+## Interaction effects
+
+```{r int_effect_PSDN_by_port, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+c_eff_int_psdn_msqd <- (conditional_effects(fit_qPSDN_price, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, 
+                                            conditions = conditions_psdn, re_formula = NULL))
+c_eff_int_psdn_nanc <- (conditional_effects(fit_qPSDN_price, "PSDN_SDM_60:NANC_SDM_90", surface=TRUE, 
+                                            conditions = conditions_psdn, re_formula = NULL))
+c_eff_int_msqd_nanc <- (conditional_effects(fit_qPSDN_price, "MSQD_SDM_90:NANC_SDM_90", surface=TRUE, 
+                                            conditions = conditions_psdn, re_formula = NULL))
+
+g1_PSDN <-  plot(c_eff_int_psdn_msqd, plot = FALSE)[[1]] + ggtitle('(a) Pacific sardine x Market squid') + 
+         theme(
+          plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), 
+          axis.title = element_text(size = 8),
+          legend.title = element_text(size = 9), 
+          legend.text = element_text(size=8)
+        ) + guides(colour=guide_legend(title="Landings: PSDN")) +
+  scale_x_continuous(name = "P(Pres): PSDN") + scale_y_continuous(name = "P(Pres): MSQD") 
+
+g2_PSDN <-  plot(c_eff_int_psdn_nanc, plot = FALSE)[[1]] + ggtitle('(b) Pacific sardine x Northern anchovy') + 
+         theme(
+          plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), 
+          axis.title = element_text(size = 8),
+          legend.title = element_text(size = 9), 
+          legend.text = element_text(size=8)
+        ) + guides(colour=guide_legend(title="Landings: PSDN")) + 
+        scale_x_continuous(name = "P(Pres): PSDN") + scale_y_continuous(name = "P(Pres): NANC") 
+
+g3_PSDN <-  plot(c_eff_int_msqd_nanc, plot = FALSE)[[1]] + ggtitle('(c) Northern anchovy x Market squid') + 
+         theme(
+          plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), 
+          axis.title = element_text(size = 8),
+          legend.title = element_text(size = 9), 
+          legend.text = element_text(size=8)
+        ) + guides(colour=guide_legend(title="Landings: PSDN")) + 
+        scale_x_continuous(name = "P(Pres): MSQD") + scale_y_continuous(name = "P(Pres): NANC") 
+save.image (file = "stan_fit.RData")
 ```
 
-```{r by_port_msqd_sdm_msqd}
-plot(conditional_effects(
-  fit_qMSQD_90, "MSQD_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
+```{r int_effect_PSDN_by_port_PLOT, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Interaction effects between species distribution on Pacific sardine landings by port\\label{fig:sdm_int_psdn}"}
+g1_PSDN / g2_PSDN / g3_PSDN
 ```
 
-```{r by_port_msqd_dclose}
-plot(conditional_effects(
-  fit_qMSQD_90, "dClose", conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
+```{r int_effect_MSQD_by_port, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+c_eff_int_msqd_psdn <- (conditional_effects(fit_qMSQD_price, "MSQD_SDM_90:PSDN_SDM_60_dOpen", surface=TRUE, 
+                                            conditions = conditions_msqd, re_formula = NULL))
+c_eff_int_msqd_nanc <- (conditional_effects(fit_qMSQD_price, "MSQD_SDM_90:NANC_SDM_90", surface=TRUE, 
+                                            conditions = conditions_msqd, re_formula = NULL))
+c_eff_int_psdn_nanc <- (conditional_effects(fit_qMSQD_price, "PSDN_SDM_60_dOpen:NANC_SDM_90", surface=TRUE, 
+                                            conditions = conditions_msqd, re_formula = NULL))
+
+g1_MSQD <-  plot(c_eff_int_msqd_psdn, plot = FALSE)[[1]] + ggtitle('(a) Market squid x Pacific sardine') + 
+         theme(
+          plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), 
+          axis.title = element_text(size = 8),
+          legend.title = element_text(size = 9), 
+          legend.text = element_text(size=8)
+        ) + guides(colour=guide_legend(title="Landings: MSQD")) +
+  scale_x_continuous(name = "P(Pres): MSQD") + scale_y_continuous(name = "P(Pres): PSDN") 
+
+g2_MSQD <-  plot(c_eff_int_msqd_nanc, plot = FALSE)[[1]] + ggtitle('(b) Market squid x Northern anchovy') + 
+         theme(
+          plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), 
+          axis.title = element_text(size = 8),
+          legend.title = element_text(size = 9), 
+          legend.text = element_text(size=8)
+        ) + guides(colour=guide_legend(title="Landings: MSQD")) + 
+        scale_x_continuous(name = "P(Pres): MSQD") + scale_y_continuous(name = "P(Pres): NANC") 
+
+g3_MSQD <-  plot(c_eff_int_psdn_nanc, plot = FALSE)[[1]] + ggtitle('(c) Pacific sardine x Northern anchovy') + 
+         theme(
+          plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), 
+          axis.title = element_text(size = 8),
+          legend.title = element_text(size = 9), 
+          legend.text = element_text(size=8)
+        ) + guides(colour=guide_legend(title="Landings: MSQD")) + 
+        scale_x_continuous(name = "P(Pres): PSDN") + scale_y_continuous(name = "P(Pres): NANC") 
+save.image (file = "stan_fit.RData")
+```
+
+```{r int_effect_MSQD_by_port_PLOT, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Interaction effects between species distribution on market squid landings by port\\label{fig:sdm_int_msqd}"}
+g1_MSQD / g2_MSQD / g3_MSQD
 ```
 
 
+```{r int_effect_NANC_by_port, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+conditions_nanc <- conditions_nanc %>% filter(port_ID == 3  | port_ID == 5)
 
-## Interactions
+c_eff_int_nanc_psdn <- (conditional_effects(fit_qNANC_price, "NANC_SDM_90:PSDN_SDM_60_dOpen", surface=TRUE, 
+                                            conditions = conditions_nanc, re_formula = NULL))
+c_eff_int_nanc_msqd <- (conditional_effects(fit_qNANC_price, "NANC_SDM_90:MSQD_SDM_90", surface=TRUE, 
+                                            conditions = conditions_nanc, re_formula = NULL))
+c_eff_int_psdn_msqd <- (conditional_effects(fit_qNANC_price, "PSDN_SDM_60_dOpen:MSQD_SDM_90", surface=TRUE, 
+                                            conditions = conditions_nanc, re_formula = NULL))
 
-```{r int_effect_MSQD_by_port, echo=FALSE, message=FALSE, warning=FALSE}
-plot(conditional_effects(
-  fit_qPSDN_90, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
+g1_NANC <-  plot(c_eff_int_nanc_psdn, plot = FALSE)[[1]] + ggtitle('(a) Northern anchovy x Pacific sardine') + 
+         theme(
+          plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), 
+          axis.title = element_text(size = 8),
+          legend.title = element_text(size = 9), 
+          legend.text = element_text(size=8)
+        ) + guides(colour=guide_legend(title="Landings: PSDN")) +
+  scale_x_continuous(name = "P(Pres): NANC") + scale_y_continuous(name = "P(Pres): PSDN") 
+
+g2_NANC <-  plot(c_eff_int_nanc_msqd, plot = FALSE)[[1]] + ggtitle('(b) Northern anchovy x Market squid') + 
+         theme(
+          plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), 
+          axis.title = element_text(size = 8),
+          legend.title = element_text(size = 9), 
+          legend.text = element_text(size=8)
+        ) + guides(colour=guide_legend(title="Landings: PSDN")) + 
+        scale_x_continuous(name = "P(Pres): NANC") + scale_y_continuous(name = "P(Pres): MSQD") 
+
+g3_NANC <-  plot(c_eff_int_psdn_msqd, plot = FALSE)[[1]] + ggtitle('(c) Pacific sardine x Market squid') + 
+         theme(
+          plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), 
+          axis.title = element_text(size = 8),
+          legend.title = element_text(size = 9), 
+          legend.text = element_text(size=8)
+        ) + guides(colour=guide_legend(title="Landings: PSDN")) + 
+        scale_x_continuous(name = "P(Pres): PSDN") + scale_y_continuous(name = "P(Pres): MSQD") 
+save.image (file = "stan_fit.RData")
 ```
 
-```{r by_port_both_sdm_msqd, echo=FALSE, message=FALSE, warning=FALSE}
-conditions_dClose <- data.frame(port_ID = unique(est_data_msqd_all$dClose))
-rownames(conditions_dClose) <- unique(est_data_msqd_all$dClose)
-
-plot(conditional_effects(
-  fit_qMSQD_90, "PSDN_SDM_60_dOpen:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
+```{r int_effect_NANC_by_port_PLOT, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Interaction effects between species distribution on Northern anchovy landings by port\\label{fig:sdm_int_nanc}"}
+g1_NANC / g2_NANC / g3_NANC
 ```
 
-```{r int_effect_NANC_by_port, echo=FALSE, message=FALSE, warning=FALSE}
-plot(conditional_effects(
-  fit_qPSDN_90, "PSDN_SDM_60:NANC_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
+
+## Pacific sardine closure
+
+
+```{r by_port_msqd_dclose, echo=FALSE, fig.cap = "Effect of Pacific sardine fishery closure on markt squid landings by species and  port\\label{fig:sdmeffects}"}
+# conditions_dClose <- data.frame(port_ID = unique(est_data_msqd$dClose))
+# rownames(conditions_dClose) <- unique(est_data_msqd$dClose)
+c_eff_close_msqd <- (conditional_effects(fit_qMSQD_price, "dClose", conditions = conditions_msqd, re_formula = NULL))
+g1 <-  plot(c_eff_close_msqd, plot = FALSE)[[1]] + ggtitle('(a) Market squid') + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+  scale_x_discrete(name = "") +
+  scale_y_continuous(name = "Landings (tons)") 
+
+c_eff_close_nanc <- (conditional_effects(fit_qNANC_price, "dClose", conditions = conditions_nanc, re_formula = NULL))
+g2 <- plot(c_eff_close_nanc, plot = FALSE)[[1]] + ggtitle('(b) Northern anchovy') + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  scale_x_discrete(name = "Closure? (1 = True; 0 = False)") +
+  scale_y_continuous(name = "Landings (tons)") 
+
+g1 / g2
 ```
 
-```{r by_port_both_sdm_nanc, echo=FALSE, message=FALSE, warning=FALSE}
-conditions_dClose <- data.frame(port_ID = unique(est_data_msqd_all$dClose))
-rownames(conditions_dClose) <- unique(est_data_msqd_all$dClose)
-
-plot(conditional_effects(
-  fit_qMSQD_90, "NANC_SDM_90:MSQD_SDM_90", surface=TRUE, conditions = conditions, 
-  re_formula = NULL), ncol = 4, points = FALSE)
-```
+# Predictions
+...
 
 # Conclusions
 A possible extension of our research is to consider spatial autocorrelations between ports.^[See \cite{morris2019bayesian} for an application of a spatial model in a Bayesian framework.] Ports landing maybe correlated as vessel have the incentives to choose the port of landing, conditional on whether the port have the infrastructure for this. It is likely that they just land wherever is closer to the area they are fishing. Nevertheless, differential in prices could encourage them to travel a little further for higher prices. 
