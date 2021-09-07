@@ -1,6 +1,17 @@
 ---
-title: "Catch subtitution between Coastal Pelagic Species under climate change scenarios"
-author: "Felipe J. Quezada + ....... add authors "
+title: "Catch Subtitution between Coastal Pelagic Species under Climate Change Scenarios"
+author:
+  - name: Felipe Quezada
+    email: felipe.quezada@noaa.gov
+    institute: [ucsc, noaa]
+    correspondence: true
+  - name: Stephen Stohs
+    institute: noaa
+  - name: Desiree Tommasi
+    institute: [ucsc, noaa]
+institute:
+  - ucsc: Institute of Marine Sciences, University of California Santa Cruz
+  - noaa: NOAA Southwest Fisheries Science Center
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 abstract: "Fisher do not only catch one species. They have a set of possible choices, called 'fishing portfolio'. Some species are easier to shift as gear and method used are similar between them. Therefore, the cost of shifting between species is low and fishers could adapt quickly to a shift in fish species spatial distributions in response to climate change. Nevertheless, it is not clear whether actually this substitution happen as other constraint may be in play. Port constraints, as well as market characteristics could reduce substitution between species. In this study we analyze how changing in spatial distribution affects landing subtitution between three coastal pelagic species: Pacific sardine, market squid and Northern anchovy. We primary focus on the substitution that ocur between these species, and we project change on catch composition due to future climate change."
 header-includes:
@@ -10,11 +21,14 @@ header-includes:
   \floatplacement{figure}{H}
   \usepackage{times}
   \usepackage{setspace}
-  \setstretch{1.5} 
+  \setstretch{1.5}
 output:
-  pdf_document: 
+  pdf_document:
     number_sections: yes
     citation_package: natbib
+    pandoc_args:
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'
 bibliography: references.bib
 urlcolor: blue
 ---
@@ -200,7 +214,6 @@ ggplot(collapse, aes(fill=Species_code, y=Landings.mean, x=Port)) +
 ```
 
 To analyze substitution more in detail, we compute total annual landing by port during 1980-2020 period (Figure \ref{fig:ts_landings_by_ports}). There is a general conception that vessel that harvest Pacific sardine switch to market squid when the conditions are favorable. However, we can notice from Figure \ref{fig:ts_landings_by_ports} that landings of market squid have been decreasing in the last five years. We would expect that the closure of the Pacific sardine fishery would have switch targeted species, but the graphs show some complementary instead of substitution. Under this scenario is useful to ask to ask whether after the closure, vessel that harvest Market squid left the fishery or stayed. We show the number of vessels by species in Figure \ref{fig:ts_n_vessels}. 
-
 
 
 ```{r ts_by_port,  fig.cap = "Total annual landing by port area. 2000 - 2020. \\textit{Notes:} CLO = Columbia River (OR); LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara; SFA = San Francisco.\\label{fig:ts_landings_by_ports}" , echo=FALSE, message=FALSE, warning=FALSE}
@@ -499,7 +512,7 @@ save.image (file = "stan_fit.RData")
 
 ```
 
-In the case of market squid, our databse comprise the time period between 2000 and 2018. We do not include ACL as an explanatory variable as there is no variation between years. To capture any change on fishers behavior when Pacific sardine fishery closed, we include a binary variable called **dClose** that takes the value "1" when the Pacific sardine fishery is close, and the value "0" when its close. Pacific sardine probability takes the value of zero when the fishery is closed. Thus, the effect of this variable is only relevant when it PAcific sardine fishery is open in order to capture potential substitution between targets. 
+In the case of market squid, our database comprise the time period between 2000 and 2018. We do not include ACL as an explanatory variable as there is no variation between years. To capture any change on fishers behavior when Pacific sardine fishery closed, we include a binary variable called **dClose** that takes the value "1" when the Pacific sardine fishery is close, and the value "0" when its close. Pacific sardine probability takes the value of zero when the fishery is closed. Thus, the effect of this variable is only relevant when it PAcific sardine fishery is open in order to capture potential substitution between targets. 
 
 ```{r msqd_data, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
 # Select data for estimation, replace N/A landings to zero #
@@ -631,7 +644,7 @@ save.image (file = "stan_fit.RData")
 <!-- # ranef(fit_qPSDN_gamma) -->
 <!-- #  -->
 <!-- # ## Check divergence and other model check ## -->
-<!-- # launch_shinystan(fit_qPSDN_gamma) -->
+<!-- # shinystan::launch_shinystan(fit_qPSDN_gamma) -->
 
 <!-- # Investigate chain and posterior distributions.  -->
 <!-- # https://cran.r-project.org/web/packages/bayesplot/vignettes/graphical-ppcs.html -->
@@ -647,7 +660,7 @@ save.image (file = "stan_fit.RData")
 <!-- ## Check https://www.pcouncil.org/stock-assessments-and-fishery-evaluation-safe-documents/ for ACL and closures. -->
 
 ## Graphical posterior predictive
-Before presenting the results for the three species in consideration, we check graphically whether the posterior distribution is able to predict the actual distribution. We exclude zero in our graph to avoid plotting different data generation processes. 
+Before presenting the results for the three species in consideration, we check graphically whether the posterior distribution is able to predict the actual distribution. We exclude zero in our graph to avoid plotting different data generation processes. In Figure \ref{fig:posteriors} we show a posterior sample compare with the true sample distribution for the three species in analysis. Some deviation from the true sample distribution is observed in the three models, but still the posterior sample follow a similar shape than the actual curve. Moreover, our pacific sardine sample do well in predicting probabilities at lower landing levels. 
 
 ```{r y_rep, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks\\label{fig:posteriors}"}
 g1 <- pp_check(fit_qPSDN_price) + ggtitle('(a) Pacific sardine') + 
@@ -659,6 +672,14 @@ g3 <- pp_check(fit_qNANC_price) + ggtitle('(c) Northern Anchovy') +
 
 
 g1 + g2 + g3
+```
+
+In addition to a posterior predictive check, we also check divergence and treedepth.^[Explain what are these concepts...] In all three models, we did not have any divergent step in our estimation. The maximum treedepth was 11 for the Pacific sardine model, while in the other it was 10.   
+
+```{r shinystan, eval=FALSE, include=FALSE}
+shinystan::launch_shinystan(fit_qPSDN_price) 
+shinystan::launch_shinystan(fit_qMSQD_price) 
+shinystan::launch_shinystan(fit_qNANC_price) 
 ```
 
 ```{r y_rep_zero, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
@@ -698,13 +719,12 @@ comp %>%
 ```
 
 
-
 ## Own species distribution effect
 
-The inclusion of hierarchical effects by port allows us to analyze the effects of the probability of presence on landings disaggregated by ports.
+The inclusion of hierarchical effects by port allows us to analyze the effects of the probability of presence on landings disaggregated by ports. We only focus our analysis in owns probability of presence effects, as other probability are analyzed as interaction (see next subsection). We can observe that the effect of own probability of presence is not strong (maybe I should use logs...). However, it is clear that it have a positive effect on landings, specially on port areas such as Monterrey for Northern anchovy and Columbia River at Oregon for Pacific sardine. 
 
 
-```{r by_port_sdm, fig.cap = "Effect of probability of presence on landings by species and port\\label{fig:sdmeffects}"}
+```{r by_port_sdm, echo=FALSE, fig.cap = "Effect of probability of presence on landings by species and port\\label{fig:sdmeffects}"}
 # PSDN plots
 conditions <- data.frame(port_ID = unique(est_data_psdn$port_ID))
   rownames(conditions) <- unique(est_data_psdn$Port)
@@ -715,11 +735,12 @@ conditions_psdn <- conditions %>%
 
 c_eff_psdn <- (conditional_effects
                (fit_qPSDN_price, "PSDN_SDM_60", surface=TRUE, conditions = conditions_psdn, re_formula = NULL))
+               #, transform = log, method = "posterior_predict"))
 g1 <- plot(c_eff_psdn, plot = FALSE, nrow = 3, ncol = 1)[[1]] + ggtitle('(a) Pacific sardine')+ 
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-  scale_x_continuous(name = element_blank(), labels = NULL) +
-  scale_y_continuous(name = "Landings (tons)")
+  scale_x_continuous(name = element_blank()) +
+  scale_y_continuous(name = "log(Landings)")
 
 # MSQD plots
 conditions2 <- data.frame(port_ID = unique(est_data_msqd$port_ID))
@@ -730,10 +751,11 @@ conditions_msqd <- conditions2 %>%
   column_to_rownames('port_name')
 c_eff_msqd <- (conditional_effects
                (fit_qMSQD_price, "MSQD_SDM_90", surface=TRUE, conditions = conditions_msqd, re_formula = NULL))
+               #, transform = log, method = "posterior_predict"))
 g2 <- plot(c_eff_msqd, plot = FALSE, nrow = 3, ncol = 1)[[1]] + ggtitle('(b) Market squid') + 
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-  scale_x_continuous(name = "Year", labels = NULL) +
+  scale_x_continuous(name = "Prob(Presence)") +
   scale_y_continuous(name = element_blank()) 
 
 # NANC plots
@@ -745,10 +767,11 @@ conditions_nanc <- conditions3 %>%
   column_to_rownames('port_name')
 c_eff_nanc <- (conditional_effects
                (fit_qNANC_price, "NANC_SDM_90", surface=TRUE, conditions = conditions_nanc, re_formula = NULL))
+               #, transform = log, method = "posterior_predict"))
 g3 <- plot(c_eff_nanc, plot = FALSE, nrow = 3, ncol = 1)[[1]] + ggtitle('(c) Northern anchovy') + 
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-  scale_x_continuous(name = element_blank(), labels = NULL) +
+  scale_x_continuous(name = element_blank()) +
   scale_y_continuous(name = element_blank()) 
 
 # Merge plots
@@ -760,6 +783,8 @@ g1 + g2 + g3
 
 
 ## Interaction effects
+
+To study the effect of other species distribution on landings, we compute the conditional effects of the interaction between probabilities of presence. 
 
 ```{r int_effect_PSDN_by_port, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 c_eff_int_psdn_msqd <- (conditional_effects(fit_qPSDN_price, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, 
