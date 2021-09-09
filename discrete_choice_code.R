@@ -16,11 +16,12 @@ library(ggplot2)
 library(plyr)
 library(dplyr)
 library(lubridate)
-library(reshape2)
+# library(reshape2)
 library(devtools)
 library(maps)
 library(doParallel)
 library(tidyr)
+library(tidyverse)
 library(mlogit)
 library(parallel)
 
@@ -45,6 +46,176 @@ psdn.logbook <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logbook
   filter(set_year > 2000) %>%
   filter(trip_id != "No ticket") 
 
+
+#-----------------------------------------------------------------------------
+# Use Vessel ID to obtain MMSI
+
+#' Scrapes call sign and mmsi from USCG NAIS website using list of US Official numbers
+#' from the CPS permit data I collected earlier.
+#'
+
+library(rvest)
+library(curl)
+
+id <- psdn.logbook %>%
+  select(drvid, ) %>%
+  unique()
+
+id$mmsi <- "NA"
+
+for(i in 1:nrow(id)) {
+  url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(US%20Official%20No~contains~", id$drvid[i], ")&f=all#skipdata")
+  
+  html.table <- read_html(url) %>%
+    html_node("table") %>%
+    html_table(fill = T) %>%
+    slice(13:14)
+  
+  names(html.table) <- html.table[1,]
+  html.table <- html.table[-1,]
+  if(is.null(html.table$`MMSI:`) == T) {
+    id$mmsi[i] <- "NA"
+  }
+  else {
+    id$mmsi[i] <- html.table$'MMSI:'
+  }
+}
+
+### We know from this dataframe that these MMSI actually havest Pacific Sardine ###
+url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(Official%20Name~contains~Emerald%20Sea)&f=all#skipdata")
+html.table <- read_html(url) %>%
+  html_node("table") %>%
+  html_table(fill = T) %>%
+  slice(13:30)
+
+# id$mmsi <- as.integer(id$mmsi)
+
+
+
+
+# -----------
+# Download GFW data and obtain names and MMSI for a select group of obervation within West Coast boundaries (i.e. only US flags close to port)
+
+
+
+# fishing_vessels <- dplyr::tbl(BQ_connection, "fishing_vessels_v2")
+# fishing_effort_byvessel <- dplyr::tbl(BQ_connection, "fishing_effort_byvessel_v2")
+# 
+# ts_USA_effort <- fishing_effort_byvessel %>% 
+#   inner_join(fishing_vessels %>% 
+#                filter(flag_gfw == "USA", vessel_class_gfw == "purse_seines"), by = "mmsi") %>% 
+#   filter(date < as.Date("2015-01-01")) %>%
+#   arrange(date) %>% 
+#   collect()
+# 
+# head(ts_USA_effort)
+
+
+
+
+library(DBI)
+library(bigrquery)
+library(Rcpp)
+
+BQ_connection <-  dbConnect(bigquery(), 
+                            project = 'global-fishing-watch',
+                            dataset = 'gfw_public_data', 
+                            billing = 'future-seas-2021',
+                            use_legacy_sql = FALSE) # specify we are using Standard SQL
+
+full_sql <- glue::glue_sql("
+WITH
+  all_mmsi_effort AS (
+  SELECT
+    date,
+    mmsi,
+    cell_ll_lat,
+    cell_ll_lon,
+    fishing_hours
+  FROM
+    `global-fishing-watch.gfw_public_data.fishing_effort_byvessel_v2`
+  WHERE   date >= '2014-01-01'
+    AND date < '2015-01-01'
+    AND cell_ll_lat > 32
+    AND cell_ll_lat < 50
+    AND cell_ll_lon < -117
+    AND cell_ll_lon > -130),
+  purse_seines AS (
+  SELECT
+    mmsi
+  FROM
+    `global-fishing-watch.gfw_public_data.fishing_vessels_v2`
+  WHERE
+    flag_gfw = 'USA'
+    AND vessel_class_gfw = 'purse_seines'
+    OR vessel_class_gfw = 'other_purse_seines')
+SELECT
+  *
+FROM
+  all_mmsi_effort AS a
+INNER JOIN
+  purse_seines AS b
+ON
+  a.mmsi = b.mmsi
+WHERE
+  fishing_hours > 0
+  ",
+  .con = BQ_connection
+)
+
+USA_westcoast_purse_seines <- dbGetQuery(BQ_connection, 
+                                full_sql)
+
+
+# Query to get effort by mmsi and date after 2012
+all_effort_by_mmsi_query <- glue::glue_sql(
+  '
+  Select
+  date,
+  mmsi,
+  fishing_hours
+  FROM
+  `global-fishing-watch.gfw_public_data.fishing_effort_byvessel_v2`
+  WHERE   
+  EXTRACT(YEAR FROM PARSE_DATE("%F",date)) = {max_year}
+  ',
+  .con = BQ_connection
+)
+
+# Query to extract only chinese trawlers
+USA_vessels_sub_query <- glue::glue_sql(
+  '
+  Select
+  mmsi
+  FROM
+  `global-fishing-watch.gfw_public_data.fishing_vessels_v2`
+  WHERE flag_gfw = {flag}
+  AND vessel_class_gfw = {gear}
+  ',
+  .con = BQ_connection
+)
+
+full_sql <- glue::glue_sql(
+  "
+  SELECT
+  date,
+  sum(fishing_hours) AS fishing_hours
+  FROM ({all_effort_by_mmsi_query}) AS a
+  LEFT JOIN  ({USA_vessels_sub_query}) AS b
+  ON a.mmsi = b.mmsi
+  GROUP BY date
+  ORDER BY date
+  DESC
+  ",
+  .con = BQ_connection
+)
+
+
+US_purse_seine <- dbGetQuery(BQ_connection, full_sql)
+
+#-----------------------------------------------------------------------------
+# Clean dataset for discrete choice model
+
 psdn.logbook <- psdn.logbook[-which(is.na(psdn.logbook$set_lat)), ] 
 psdn.logbook <- psdn.logbook[-which(psdn.logbook$haul_num == 0), ] 
 psdn.logbook$set_long <- with(psdn.logbook, ifelse(set_long > 0, -set_long, set_long))
@@ -61,8 +232,6 @@ psdn.logbook <- psdn.logbook %>%
                 'set_year', 'set_month', 'set_day', 'set_date', 
                 'catch', 'haul_num', 'haul_id', 'trip_id', 'set_lat_sdm', 'set_long_sdm')) %>% drop_na()
 
-#-----------------------------------------------------------------------------
-# Use Vessel ID to obtain MMSI
 
 
 # ------------------------------------------------------------------
