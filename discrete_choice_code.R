@@ -26,18 +26,6 @@ library(mlogit)
 library(parallel)
 
 
-#--------------------------------------------------------
-# Load database from Global Fishing Watch 
-
-gfw.fishing.effort <- readr::read_csv(here::here("Data", "GFW_data", "GFW_purse_seines_USwestcoast_2012-2014.csv"))
-vessel.names <- readr::read_csv(here::here("Data", "GFW_data", "MMSI_vessel_name.csv"))
-                                
-gfw.fishing.effort <- gfw.fishing.effort %>%
-  merge(y = vessel.names, by = "mmsi", all.x=TRUE) %>%
-  select(-c("mmsi_1", "flag"))
-                                                          
-      
-
 #-----------------------------------------------------------------------------
 
 ## Read logbooks available for Pacific Sardine from ODFW ##
@@ -56,7 +44,8 @@ psdn.logbook <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logbook
   dplyr::rename(haul_num = Set) %>%
   dplyr::rename(trip_id = Ticket) %>%
   dplyr::rename(depth = Depth) %>%
-  filter(set_year > 2000) %>%
+  filter(set_year >= min.year) %>%
+  filter(set_year <= max.year) %>%
   filter(trip_id != "No ticket") 
 
 
@@ -95,17 +84,31 @@ for(i in 1:nrow(id)) {
   }
 }
 
-### Merge with GFW (first using MMSI, then by Name. Check how good is the math with logbooks...)
+### Fix it manually using vessel.names from GFW databse 
+### (online: https://globalfishingwatch.org/map/)
+
+# write.csv(id,"id_mmsi.csv", row.names = FALSE)
+id.updated <- readr::read_csv(here::here("id_mmsi.csv"))
 
 
-### We know from this dataframe that these MMSI actually harvest Pacific Sardine ###
-url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(Official%20Name~contains~Emerald%20Sea)&f=all#skipdata")
-html.table <- read_html(url) %>%
-  html_node("table") %>%
-  html_table(fill = T) %>%
-  slice(13:30)
 
-id$mmsi <- as.integer(id$mmsi)
+#--------------------------------------------------------
+# Load database from Global Fishing Watch... Add set variable (position within a day)
+
+gfw.fishing.effort <- readr::read_csv(here::here("Data", "GFW_data", "GFW_westcoast_2012-2014.csv"))
+vessel.names <- readr::read_csv(here::here("Data", "GFW_data", "MMSI_vessel_name.csv"))
+
+gfw.fishing.effort <- gfw.fishing.effort %>%
+  merge(y = vessel.names, by = "mmsi", all.x=TRUE)
+
+# --------------------------------------------------------
+# Merge GFW to logbook data
+id_mmsi <- id %>% select(drvid, mmsi) %>% drop_na()
+
+psdn.logbook.gfw <- psdn.logbook %>% 
+  left_join(id_mmsi, by = "drvid")  %>%
+  dplyr::rename(date = Date) %>% merge(y = gfw.fishing.effort, by = c("mmsi", "date"), all.x=TRUE) 
+# I just want to do this to identify wich vessels from GFW actually harvest PSDN or MSQD or ANCHOVY...
 
 
 #-----------------------------------------------------------------------------
@@ -126,7 +129,6 @@ psdn.logbook <- psdn.logbook %>%
   dplyr::select(c('set_lat', 'set_long', 'up_lat', 'up_long', 'depth_bin', 'drvid', 'fleet_name', 
                 'set_year', 'set_month', 'set_day', 'set_date', 
                 'catch', 'haul_num', 'haul_id', 'trip_id', 'set_lat_sdm', 'set_long_sdm')) %>% drop_na()
-
 
 
 # ------------------------------------------------------------------
