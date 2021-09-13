@@ -51,6 +51,7 @@ library(kableExtra)
 library(lmtest)
 library(lubridate)
 library(magrittr)
+library(Rcpp)
 library(patchwork)
 library(plm)
 library(papaja)
@@ -59,7 +60,6 @@ library(reshape2)
 library(rstan)
 library(scales)
 library(sjlabelled)
-library(summarytools)
 library(texreg)
 library(tidyr)
 library(tidyverse)
@@ -784,7 +784,7 @@ g1 + g2 + g3
 
 ## Interaction effects
 
-To study the effect of other species distribution on landings, we compute the conditional effects of the interaction between probabilities of presence. 
+To study the effect of other species distribution on landings, we compute the conditional effects of the interaction between probabilities of presence. For the Pacific sardine equation, we compute these results for the probability of presence effect between Pacific sardine and market squid, Pacific sardine and Northern anchovy, and market squid and Northern anchovy 
 
 ```{r int_effect_PSDN_by_port, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 c_eff_int_psdn_msqd <- (conditional_effects(fit_qPSDN_price, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, 

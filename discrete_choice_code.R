@@ -60,29 +60,30 @@ library(rvest)
 library(curl)
 
 # Use IDs from PSDN logbook in Oregon. Later we can expand this for the whole west coast using individual vessel data # 
-id <- psdn.logbook %>%
-  select(drvid, BoatName) %>%
-  unique()
 
-id$mmsi <- "NA"
-
-for(i in 1:nrow(id)) {
-  url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(US%20Official%20No~contains~", id$drvid[i], ")&f=all#skipdata")
-  
-  html.table <- read_html(url) %>%
-    html_node("table") %>%
-    html_table(fill = T) %>%
-    slice(13:14)
-  
-  names(html.table) <- html.table[1,]
-  html.table <- html.table[-1,]
-  if(is.null(html.table$`MMSI:`) == T) {
-    id$mmsi[i] <- "NA"
-  }
-  else {
-    id$mmsi[i] <- html.table$'MMSI:'
-  }
-}
+# id <- psdn.logbook %>%
+#   select(drvid, BoatName) %>%
+#   unique()
+# 
+# id$mmsi <- "NA"
+# 
+# for(i in 1:nrow(id)) {
+#   url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(US%20Official%20No~contains~", id$drvid[i], ")&f=all#skipdata")
+#   
+#   html.table <- read_html(url) %>%
+#     html_node("table") %>%
+#     html_table(fill = T) %>%
+#     slice(13:14)
+#   
+#   names(html.table) <- html.table[1,]
+#   html.table <- html.table[-1,]
+#   if(is.null(html.table$`MMSI:`) == T) {
+#     id$mmsi[i] <- "NA"
+#   }
+#   else {
+#     id$mmsi[i] <- html.table$'MMSI:'
+#   }
+# }
 
 ### Fix it manually using vessel.names from GFW databse 
 ### (online: https://globalfishingwatch.org/map/)
@@ -95,22 +96,34 @@ id.updated <- readr::read_csv(here::here("id_mmsi.csv"))
 #--------------------------------------------------------
 # Load database from Global Fishing Watch... Add set variable (position within a day)
 
-gfw.fishing.effort <- readr::read_csv(here::here("Data", "GFW_data", "GFW_westcoast_2012-2014.csv"))
+gfw.fishing.effort <- readr::read_csv(here::here("Data", "GFW_data", "GFW_westcoast_2012-2014v2.csv"))
+  gfw.fishing.effort <- gfw.fishing.effort %>% filter(fishing_hours > 0) 
+  gfw.fishing.effort$haul_num <- with(gfw.fishing.effort, ave(mmsi, mmsi, date, FUN = seq_along))
+
 vessel.names <- readr::read_csv(here::here("Data", "GFW_data", "MMSI_vessel_name.csv"))
 
-gfw.fishing.effort <- gfw.fishing.effort %>%
-  merge(y = vessel.names, by = "mmsi", all.x=TRUE)
+# gfw.fishing.effort <- gfw.fishing.effort %>%
+#   merge(y = vessel.names, by = "mmsi", all.x=TRUE)
+
 
 # --------------------------------------------------------
 # Merge GFW to logbook data
-id_mmsi <- id %>% select(drvid, mmsi) %>% drop_na()
+id.mmsi <- id.updated %>% select(mmsi, drvid) %>% drop_na() %>% unique()
 
-psdn.logbook.gfw <- psdn.logbook %>% 
-  left_join(id_mmsi, by = "drvid")  %>%
-  dplyr::rename(date = Date) %>% merge(y = gfw.fishing.effort, by = c("mmsi", "date"), all.x=TRUE) 
-# I just want to do this to identify wich vessels from GFW actually harvest PSDN or MSQD or ANCHOVY...
+psdn.logbook.gfw <- psdn.logbook %>% left_join(id.mmsi, by = "drvid") %>% 
+    dplyr::rename(date = Date) 
+    psdn.logbook.gfw$mmsi[psdn.logbook.gfw$BoatName == "Pacific Pursuit"] <- 367153810
+  psdn.logbook.gfw <- psdn.logbook.gfw %>% select(mmsi, date) %>% drop_na() %>% mutate(dPSDN = 1)
+  
+# Identify which vessels from GFW actually harvest PSDN or MSQD or ANCHOVY...
+
+gfw.fishing.effort.CPS <- gfw.fishing.effort %>% 
+  left_join(psdn.logbook.gfw, by = c("mmsi", "date")) %>% filter(dPSDN == 1) %>% unique()
+  
 
 
+##############################################################################
+##############################################################################
 #-----------------------------------------------------------------------------
 # Clean dataset for discrete choice model
 
