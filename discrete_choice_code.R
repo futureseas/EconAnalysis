@@ -8,8 +8,8 @@
 
 gc()
 memory.limit(9999999999)
-min.year = 2012
-max.year = 2014
+min.year = 2013
+max.year = 2015
 
 ## Load packages ##
 library(ggplot2)
@@ -48,6 +48,13 @@ psdn.logbook <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logbook
   filter(set_year <= max.year) %>%
   filter(trip_id != "No ticket") 
 
+psdn.logbook <- psdn.logbook[-which(is.na(psdn.logbook$set_lat)), ] 
+psdn.logbook <- psdn.logbook[-which(psdn.logbook$haul_num == 0), ] 
+psdn.logbook$set_long <- with(psdn.logbook, ifelse(set_long > 0, -set_long, set_long))
+psdn.logbook$haul_id <- udpipe::unique_identifier(psdn.logbook, fields = c("trip_id", "haul_num"))
+psdn.logbook$depth_bin <- cut(psdn.logbook$depth, 9, include.lowest=TRUE, 
+                              labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
+
 
 #-----------------------------------------------------------------------------
 # Use Vessel ID to obtain MMSI
@@ -69,12 +76,12 @@ library(curl)
 # 
 # for(i in 1:nrow(id)) {
 #   url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(US%20Official%20No~contains~", id$drvid[i], ")&f=all#skipdata")
-#   
+# 
 #   html.table <- read_html(url) %>%
 #     html_node("table") %>%
 #     html_table(fill = T) %>%
 #     slice(13:14)
-#   
+# 
 #   names(html.table) <- html.table[1,]
 #   html.table <- html.table[-1,]
 #   if(is.null(html.table$`MMSI:`) == T) {
@@ -84,19 +91,19 @@ library(curl)
 #     id$mmsi[i] <- html.table$'MMSI:'
 #   }
 # }
-
-### Fix it manually using vessel.names from GFW databse 
-### (online: https://globalfishingwatch.org/map/)
-
-# write.csv(id,"id_mmsi.csv", row.names = FALSE)
-id.updated <- readr::read_csv(here::here("id_mmsi.csv"))
+# 
+# ### Fix it manually using vessel.names from GFW databse 
+# ### (online: https://globalfishingwatch.org/map/)
+# 
+# write.csv(id,"id_mmsi_2013-2015.csv", row.names = FALSE)
+id.updated <- readr::read_csv(here::here("id_mmsi_2013-2015.csv"))
 
 
 
 #--------------------------------------------------------
 # Load database from Global Fishing Watch... Add set variable (position within a day)
 
-gfw.fishing.effort <- readr::read_csv(here::here("Data", "GFW_data", "GFW_westcoast_2012-2014v2.csv"))
+gfw.fishing.effort <- readr::read_csv(here::here("Data", "GFW_data", "GFW_westcoast_2013-2015.csv"))
   gfw.fishing.effort <- gfw.fishing.effort %>% filter(fishing_hours > 0) 
   gfw.fishing.effort$haul_num <- with(gfw.fishing.effort, ave(mmsi, mmsi, date, FUN = seq_along))
 
@@ -115,25 +122,46 @@ psdn.logbook.gfw <- psdn.logbook %>% left_join(id.mmsi, by = "drvid") %>%
     psdn.logbook.gfw$mmsi[psdn.logbook.gfw$BoatName == "Pacific Pursuit"] <- 367153810
   psdn.logbook.gfw <- psdn.logbook.gfw %>% select(mmsi, date) %>% drop_na() %>% mutate(dPSDN = 1)
   
+#---------------------------------------------------------
 # Identify which vessels from GFW actually harvest PSDN or MSQD or ANCHOVY...
-
 gfw.fishing.effort.CPS <- gfw.fishing.effort %>% 
   left_join(psdn.logbook.gfw, by = c("mmsi", "date")) %>% filter(dPSDN == 1) %>% unique()
   
 
 
+#---------------------------------------------------------
+# How many trips GFW capture from logbooks? (R: 121 trips of 495 for the Oregon's PSDN logbook -> 24%)
+psdn.logbook.compare <- psdn.logbook %>% left_join(id.mmsi, by = "drvid") %>% 
+  dplyr::rename(date = Date) 
+  psdn.logbook.compare$mmsi[psdn.logbook.compare$BoatName == "Pacific Pursuit"] <- 367153810
+  psdn.logbook.compare <- psdn.logbook.compare %>%  group_by(BoatName, drvid, mmsi, date) %>%
+    summarise(across(c("set_lat", "set_long"), mean, na.rm = TRUE)) %>% drop_na()
+  
+gfw.fishing.effort.compare <- gfw.fishing.effort %>% 
+  group_by(mmsi, date) %>%
+  summarise(across(c("cell_ll_lat", "cell_ll_lon"), mean, na.rm = TRUE))
+
+psdn.joint.compare <- psdn.logbook.compare %>% left_join(gfw.fishing.effort.compare, by = c("mmsi", "date")) 
+
+# How good is GFW compared to logbooks?
+psdn.joint.compare <- psdn.joint.compare %>% drop_na()
+
+gcd_slc <- function(long1, lat1, long2, lat2) {
+  R <- 6371 # Earth mean radius [km]
+  d <- acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2) * cos(long2-long1)) * 110
+  return(d) # Distance in km
+}
+
+  psdn.joint.compare$dist <- gcd_slc(psdn.joint.compare$set_long, psdn.joint.compare$set_lat, 
+                                              psdn.joint.compare$cell_ll_lon, psdn.joint.compare$cell_ll_lat)
+
+  
+summary(psdn.joint.compare$dist)
+
 ##############################################################################
 ##############################################################################
 #-----------------------------------------------------------------------------
 # Clean dataset for discrete choice model
-
-psdn.logbook <- psdn.logbook[-which(is.na(psdn.logbook$set_lat)), ] 
-psdn.logbook <- psdn.logbook[-which(psdn.logbook$haul_num == 0), ] 
-psdn.logbook$set_long <- with(psdn.logbook, ifelse(set_long > 0, -set_long, set_long))
-psdn.logbook$haul_id <- udpipe::unique_identifier(psdn.logbook, fields = c("trip_id", "haul_num"))
-psdn.logbook$depth_bin <- cut(psdn.logbook$depth, 9, include.lowest=TRUE, 
-                              labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
-
 psdn.logbook <- psdn.logbook %>% 
   mutate(up_lat = set_lat) %>%
   mutate(up_long = set_long) %>%
