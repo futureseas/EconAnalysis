@@ -70,7 +70,7 @@ library(zoo)
 ```
 
 ```{r read_data, include=FALSE} 
-PacFIN_dat <- read.csv(file = here("Data", "PacFin.csv"))
+PacFIN_dat <- read.csv(file = here::here("Data", "PacFin.csv"))
 sapply(PacFIN_dat, class) 
 ```
 
@@ -262,11 +262,11 @@ Our main treatment variables are species probability of presence. This variables
 
 Figure \ref{fig:sdm_land_by_port} show the relationship between the probability of presence and landings by species in three main port areas: Los Angeles, Monterrey and Santa Barbara areas. The graph suggest that Pacific sardine landings are positive correlated with the probability of presence of this species, similar to @smith2021potential. This is also true in Monterrey area for the Northern anchovy, In the case of market squid, we cannot distinguish correlation between landings and probability of presence. Note, however, that the evidence shown in this figure may not capturing the actual effect of the probability of presence as other effect may be in play. Our empirical strategy is designed to isolate the effect of the probability on landing in a multivariate model framework.
 
-```{r SDM_land_by_port,  fig.cap = "Landings v/s probability of presence by port area. \\textit{Notes:} LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara.\\label{fig:sdm_land_by_port}", echo=FALSE, message=FALSE, warning=FALSE}
+```{r SDM_land_by_port, echo=FALSE, fig.cap="Landings v/s probability of presence by port area. \\textit{Notes:} LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE}
 
 collapse <- PacFIN_dat %>%
   filter(Species_code == "PSDN" | Species_code == "MSQD"  | Species_code == "NANC") %>%
-  select(Landing_year, Port, PSDN_SDM_60, MSQD_SDM_90, NANC_SDM_90, Landings, Species_code) %>% 
+  dplyr::select(Landing_year, Port, PSDN_SDM_60, MSQD_SDM_90, NANC_SDM_90, Landings, Species_code) %>% 
   filter(Port == "LAA" | Port == "MNA" | Port == "SBA") %>%
       mutate(Port = fct_relevel(Port, "LAA", "SBA", "MNA")) %>% 
   spread(Species_code, Landings) %>% 
@@ -313,6 +313,59 @@ g3 <- ggplot(collapse) +
                      values = c("Landings" = "grey", "Probability of presence" = "blue"))
 
 g1 / g2 / g3
+
+```
+
+```{r SDM_land_by_port_NANC, eval=FALSE, fig.cap="Landings v/s probability of presence by port area. \\textit{Notes:} LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE, include=FALSE}
+
+collapse <- PacFIN_dat %>%
+  filter(Species_code == "NANC") %>%
+  dplyr::select(Landing_year, Port, NANC_SDM_90, Landings, Species_code) %>% 
+  filter(Port == "MNA") %>% mutate(Port = fct_relevel(Port, "MNA")) %>% 
+  spread(Species_code, Landings) %>% dplyr::rename(Landings_NANC = NANC) %>%
+  filter(Landing_year >= 2000 & Landing_year <= 2018)
+  
+# Plot
+coeff <- 50000
+g3 <- ggplot(collapse) + 
+  geom_line(mapping = aes(x = Landing_year, y = Landings_NANC, color = "Landings"),
+            size = 0.5) +
+  geom_line(mapping = aes(x = Landing_year, y = NANC_SDM_90*coeff, color = "Probability of presence"), 
+            size = 0.5, linetype = "dashed") + 
+  facet_wrap(~ Port) + 
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff, name = element_blank())) +
+  theme(legend.position="bottom", plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("Northern anchovy") +  scale_color_manual(name = "Variable: ", 
+                     values = c("Landings" = "grey", "Probability of presence" = "blue"))
+
+g3
+
+
+collapse2 <- as.data.frame(diff(collapse$NANC_SDM_90))
+  names(collapse2)[1] <- 'NANC_SDM_90'
+  collapse2 <- collapse2 %>% mutate(Landings_NANC = diff(collapse$Landings_NANC)) %>% mutate(Port = "MNA") %>%
+    mutate(Landing_year = seq(2001,2018))
+
+dg3 <- ggplot(collapse2) + 
+  geom_line(mapping = aes(x = Landing_year, y = Landings_NANC, color = "diff(Landings)"),
+            size = 0.5) +
+  geom_line(mapping = aes(x = Landing_year, y = NANC_SDM_90*coeff, color = "diff(Probability of presence)"), 
+            size = 0.5, linetype = "dashed") + 
+  facet_wrap(~ Port) + 
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff, name = element_blank())) +
+  theme(legend.position="bottom", plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("Northern anchovy (first differences)") +  scale_color_manual(name = "Variable: ", 
+                     values = c("diff(Landings)" = "grey", "diff(Probability of presence)" = "blue"))
+
+dg3
+
+
+library("writexl")
+write_xlsx(collapse,"Data\\monterrey_NANC_sdm_landings.xlsx")
 
 ```
 

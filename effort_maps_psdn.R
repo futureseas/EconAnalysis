@@ -87,7 +87,8 @@ sumfun <- function(x, ...){
 ann.effort <- doBy::summaryBy(effort ~ year + lat + lon + vessel, FUN=sum, data=psdn.logbook)
 
 ### Exclude and identify effort made inland using Ocean shape file to obtain intersection ###
-ocean.shp <- sf::read_sf(here::here("Data", "ne_10m_ocean", "ne_10m_ocean.shp"))
+sf::sf_use_s2(FALSE) # https://stackoverflow.com/questions/68478179/how-to-resolve-spherical-geometry-failures-when-joining-spatial-data
+ocean.shp <- sf::read_sf(here::here("Data", "ne_10m_ocean", "ne_10m_ocean.shp"), as_tibble = TRUE)
 ann.effort.sf <- sf::st_as_sf(ann.effort, coords = c("lon", "lat"), crs = 4326, na.fail = FALSE)
 ann.effort.sf.ocean <- ann.effort.sf[ocean.shp, ]
 ann.effort.sf.ocean <- cbind(ann.effort.sf.ocean, st_coordinates(ann.effort.sf.ocean))
@@ -113,15 +114,14 @@ ports_dist <- ports_dist %>%
     distHaversine(c(row$lon.x, row$lat.x), c(row$lon.y, row$lat.y)) / 1000}))
 
 # Calculate SDM values and build output data frame.
-
 library(lwgeom)
 ports.sf <- sf::st_as_sf(ports, coords = c("lon", "lat"), crs = 4326, na.fail = FALSE)
 dist_port <- as.data.frame(st_distance(ann.effort.sf.ocean, ports.sf))
 ann.effort.sf.ocean$min_dist <- apply(dist_port, 1, FUN=min) / 1000
 
 # Assumes 20 km/hr and 22 hours for traveling there and back and 2 hours for fishing (Rose et al)
-ann.effort.sf.ocean <- ann.effort.sf.ocean %>%
-  filter(min_dist <= 220)
+# ann.effort.sf.ocean <- ann.effort.sf.ocean %>%
+#   filter(min_dist <= 220)
 
 descr(ann.effort.sf.ocean$min_dist, stats = c("mean", "sd", "min", "max"), transpose = TRUE, headings = TRUE)
 

@@ -132,7 +132,7 @@ gfw.fishing.effort.CPS <- gfw.fishing.effort %>%
 #---------------------------------------------------------
 # How many trips GFW capture from logbooks? (R: 121 trips of 495 for the Oregon's PSDN logbook -> 24%)
 psdn.logbook.compare <- psdn.logbook %>% left_join(id.mmsi, by = "drvid") %>% 
-  dplyr::rename(date = Date) 
+  dplyr::rename(date = Date) # %>% filter(catch > 0)
   psdn.logbook.compare$mmsi[psdn.logbook.compare$BoatName == "Pacific Pursuit"] <- 367153810
   psdn.logbook.compare <- psdn.logbook.compare %>%  group_by(BoatName, drvid, mmsi, date) %>%
     summarise(across(c("set_lat", "set_long"), mean, na.rm = TRUE)) %>% drop_na()
@@ -143,20 +143,34 @@ gfw.fishing.effort.compare <- gfw.fishing.effort %>%
 
 psdn.joint.compare <- psdn.logbook.compare %>% left_join(gfw.fishing.effort.compare, by = c("mmsi", "date")) 
 
-# How good is GFW compared to logbooks?
+
+# --------------------------------------------------------
+# How good is GFW compared to logbooks? (R: 20.9546 km average deviation).
 psdn.joint.compare <- psdn.joint.compare %>% drop_na()
 
-gcd_slc <- function(long1, lat1, long2, lat2) {
-  R <- 6371 # Earth mean radius [km]
-  d <- acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2) * cos(long2-long1)) * 110
-  return(d) # Distance in km
+
+deg2rad <- function(deg) {
+  m <- deg * (pi/180)
+  return(m)
 }
 
-  psdn.joint.compare$dist <- gcd_slc(psdn.joint.compare$set_long, psdn.joint.compare$set_lat, 
-                                              psdn.joint.compare$cell_ll_lon, psdn.joint.compare$cell_ll_lat)
+getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
+  R <- 6371
+  dLat <- deg2rad(lat2-lat1)
+  dLon <- deg2rad(lon2-lon1) 
+  a <- sin(dLat/2) * sin(dLat/2) +  cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * sin(dLon/2) * sin(dLon/2) 
+  c <- 2 * atan2(sqrt(a), sqrt(1-a))
+  d <- R * c
+  return(d)
+}
 
-  
+psdn.joint.compare$dist <- getDistanceFromLatLonInKm(psdn.joint.compare$set_lat, psdn.joint.compare$set_long, 
+                                               psdn.joint.compare$cell_ll_lat, psdn.joint.compare$cell_ll_lon)
+
 summary(psdn.joint.compare$dist)
+psdn.joint.hist <- psdn.joint.compare %>% filter(dist<400)
+hist(psdn.joint.hist$dist)
+
 
 ##############################################################################
 ##############################################################################
