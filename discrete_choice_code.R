@@ -56,6 +56,26 @@ psdn.logbook$depth_bin <- cut(psdn.logbook$depth, 9, include.lowest=TRUE,
                               labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
 
 
+## Read logbooks available for market squid from ODFW (2016) ##
+
+sqd.logbook.OR.2016 <- read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2016") %>%
+  mutate(Lat = Lat + min...9/60) %>%
+  mutate(Long = Long + min...11/60) %>%
+  mutate(vessel="OR") %>%
+  dplyr::rename(lat = Lat) %>%
+  dplyr::rename(lon = Long) %>%
+  dplyr::rename(VesselID = FedDoc) %>%
+  mutate(date = as.Date(Date,format="%Y-%m-%d")) %>%
+  mutate(year = year(date)) %>%
+  mutate(month = month(date)) %>%
+  dplyr::rename(effort = `Squid (Lbs)`) %>%
+  dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+
+
+
+## Read logbooks available for Northern anchovy from ODFW (2015-2016) ##
+
+
 #-----------------------------------------------------------------------------
 # Use Vessel ID to obtain MMSI
 
