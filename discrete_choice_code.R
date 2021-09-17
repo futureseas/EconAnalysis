@@ -39,7 +39,7 @@ psdn.logbook.OR <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logb
   mutate(set_year = year(set_date)) %>%
   mutate(set_month = month(set_date)) %>%
   mutate(set_day = day(set_date)) %>%
-  dplyr::rename(catch = Sard) %>%
+  dplyr::rename(effort = Sard) %>%
   dplyr::rename(haul_num = Set) %>%
   dplyr::rename(trip_id = Ticket) %>%
   dplyr::rename(depth = Depth) %>%
@@ -47,12 +47,8 @@ psdn.logbook.OR <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logb
   filter(set_year <= max.year) %>%
   filter(trip_id != "No ticket") 
 
-psdn.logbook.OR <- psdn.logbook.OR[-which(is.na(psdn.logbook.OR$set_lat)), ] 
-psdn.logbook.OR <- psdn.logbook.OR[-which(psdn.logbook.OR$haul_num == 0), ] 
-psdn.logbook.OR$set_long <- with(psdn.logbook.OR, ifelse(set_long > 0, -set_long, set_long))
-
 logbooks <- psdn.logbook.OR %>%
-  dplyr::select(c('set_lat', 'set_long', 'fleet_name', 'drvid', 'set_year', 'set_month', 'set_date', 'catch', 'BoatName', 'species'))
+  dplyr::select(c('set_lat', 'set_long', 'fleet_name', 'drvid', 'set_year', 'set_month', 'set_date', 'effort', 'BoatName', 'species'))
 
 
 ## Read logbooks available for market squid from ODFW (2016) ##
@@ -68,8 +64,8 @@ msqd.logbook.OR <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logboo
   mutate(set_date = as.Date(Date,format="%Y-%m-%d")) %>%
   mutate(set_year = year(set_date)) %>%
   mutate(set_month = month(set_date)) %>%
-  dplyr::rename(catch = `Squid (Lbs)`) %>%
-  dplyr::select(c('set_lat', 'set_long', 'fleet_name', 'drvid', 'set_year', 'set_month', 'set_date', 'catch', 'BoatName', 'species'))
+  dplyr::rename(effort = `Squid (Lbs)`) %>%
+  dplyr::select(c('set_lat', 'set_long', 'fleet_name', 'drvid', 'set_year', 'set_month', 'set_date', 'effort', 'BoatName', 'species'))
 logbooks <- rbind(logbooks, msqd.logbook.OR)
 
 
@@ -89,62 +85,75 @@ nanc.logbook.OR <- rbind(nanc.logbook.OR, nanc.logbook.OR.2016)
     mutate(set_long = lon_D + lon_min/60) %>%
     mutate(fleet_name="OR") %>%
   dplyr::rename(drvid = FedDoc) %>%
+  dplyr::rename('BoatName' = "Boat Name") %>%
+  mutate(species="NANC") %>%
   mutate(set_date = as.Date(Date,format="%Y-%m-%d")) %>%
   mutate(set_year = year(set_date)) %>%
   mutate(set_month = month(set_date)) %>%
-  dplyr::rename(catch = `lbs anchovy`) %>%
-  dplyr::select(c('set_lat', 'set_long', 'fleet_name', 'drvid', 'set_year', 'set_month', 'set_date', 'catch'))
+  dplyr::rename(effort = `lbs anchovy`) %>%
+  dplyr::select(c('set_lat', 'set_long', 'fleet_name', 'drvid', 'set_year', 'set_month', 'set_date', 'effort', 'BoatName', 'species'))
 
-
+logbooks <- rbind(logbooks, nanc.logbook.OR)
 
 ## Read logbooks available for Market squid from CDFW (2013-2016) ##
 
   ## California
   
-  sqd.logbook.vessel <- read_csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidVesselDataExtract.csv") %>%
-    dplyr::rename(lat = SetLatitude) %>%
-    dplyr::rename(lon = SetLongitude) %>%
-    mutate(vessel="CA Vessel") %>%
-    mutate(date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
-    mutate(year = year(date)) %>%
-    mutate(month = month(date)) %>%
+  sqd.logbook.vessel.CA <- read_csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidVesselDataExtract.csv") %>%
+    dplyr::rename(set_lat = SetLatitude) %>%
+    dplyr::rename(set_long = SetLongitude) %>%
+    mutate(fleet_name="CA") %>%
+    mutate(species="MSQD") %>%
+    mutate(set_date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
+    mutate(set_year = year(set_date)) %>%
+    mutate(set_month = month(set_date)) %>%
     dplyr::rename(effort = "CatchEstimate") %>%
-    dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+    dplyr::rename(drvid = "VesselID") %>%
+    mutate(BoatName = NA) %>%
+    filter(set_year >= min.year) %>%
+    filter(set_year <= max.year) %>%
+    dplyr::select(c('set_lat', 'set_long', 'drvid', 'fleet_name', 'set_year', 'set_month', 'set_date', 'effort', 'BoatName', 'species'))
+  logbooks <- rbind(logbooks, sqd.logbook.vessel.CA)
   
-  sqd.logbook.light.brail <- read_csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidLightBrailLogDataExtract.csv") %>%
-    dplyr::rename(lat = Lat_DD) %>%
-    dplyr::rename(lon = Long_DD) %>%
-    mutate(vessel="CA Light Boat") %>%
-    mutate(date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
-    mutate(year = year(date)) %>%
-    mutate(month = month(date)) %>%
-    dplyr::rename(effort = "ElapsedTime") %>% 
-    dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+  # sqd.logbook.light.brail.CA <- read_csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidLightBrailLogDataExtract.csv") %>%
+  #   dplyr::rename(set_lat = Lat_DD) %>%
+  #   dplyr::rename(set_long = Long_DD) %>%
+  #   mutate(fleet_name="CA Light Boat") %>%
+  #   mutate(species="MSQD") %>%
+  #   mutate(set_date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
+  #   mutate(set_year = year(set_date)) %>%
+  #   mutate(set_month = month(set_date)) %>%
+  #   dplyr::rename(effort = "ElapsedTime") %>%
+  #   dplyr::rename(drvid = "VesselID") %>%
+  #   mutate(BoatName = NA) %>%
+  #   filter(set_year >= min.year) %>%
+  #   filter(set_year <= max.year) %>%
+  #   dplyr::select(c('set_lat', 'set_long', 'drvid', 'fleet_name', 'set_year', 'set_month', 'set_date', 'effort', 'BoatName', 'species'))
+  # logbooks <- rbind(logbooks, sqd.logbook.light.brail.CA)
   
   
-## Read logbooks available for Market squid from WDFW (2013-2014) ##
+## Read logbooks available for Pacific sardine from WDFW (2013-2014) ##
   
-  
-  psdn.logbook.WA <- read_excel("C:\\Data\\WDFW CPS logbooks\\WA Sardine Logbook Flatfile Data Reques 20-15485.xlsx") %>%
+  psdn.logbook.WA <- readxl::read_excel("C:\\Data\\WDFW CPS logbooks\\WA Sardine Logbook Flatfile Data Reques 20-15485.xlsx") %>%
     mutate(Lat = `Latitude Degrees` + `Latitude Minutes`/60) %>%
     mutate(Long = `Longitude Degrees` + `Longitude Minutes`/60) %>%
-    mutate(vessel="WA") %>%
-    dplyr::rename(lat = Lat) %>%
-    dplyr::rename(lon = Long) %>%
-    dplyr::rename(VesselID = `Vessel`) %>%
-    mutate(date = as.Date(`Fishing Date`,format="%Y-%m-%d")) %>%
-    mutate(year = year(date)) %>%
-    mutate(month = month(date)) %>%
+    mutate(fleet_name="WA") %>%
+    mutate(species="PSDN") %>%
+    dplyr::rename(set_lat = Lat) %>%
+    dplyr::rename(set_long = Long) %>%
+    dplyr::rename(BoatName = `Vessel`) %>%
+    mutate(set_date = as.Date(`Fishing Date`,format="%Y-%m-%d")) %>%
+    mutate(set_year = year(set_date)) %>%
+    mutate(set_month = month(set_date)) %>%
     dplyr::rename(effort = `Sardine Retained mt`) %>%
-    dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+    filter(set_year >= min.year) %>%
+    mutate(drvid = 0000) %>%
+    dplyr::select(c('set_lat', 'set_long', 'drvid', 'fleet_name', 'set_year', 'set_month', 'set_date', 'effort', 'BoatName', 'species'))
+  logbooks <- rbind(logbooks, psdn.logbook.WA)
   
   # DATABASE
-  psdn.logbook <- rbind(psdn.logbook.OR, psdn.logbook.WA)
-  psdn.logbook <- psdn.logbook[-which(is.na(psdn.logbook$lat)), ] 
-  # psdn.logbook <- psdn.logbook[-which(psdn.logbook$lat == 0), ] 
-  # psdn.logbook <- psdn.logbook[-which(psdn.logbook$lon == 0), ] 
-  psdn.logbook$lon <- with(psdn.logbook, ifelse(lon > 0, -lon, lon))
-  
+  logbooks <- logbooks[-which(is.na(logbooks$set_lat)), ]
+    logbooks$set_long <- with(logbooks, ifelse(set_long > 0, -set_long, set_long))
   
 #-----------------------------------------------------------------------------
 # Use Vessel ID to obtain MMSI
@@ -157,39 +166,70 @@ library(rvest)
 library(curl)
 
 # Use IDs from PSDN logbook in Oregon. Later we can expand this for the whole west coast using individual vessel data # 
+    
+    
+## California
+id.CA <- logbooks %>% dplyr::filter(fleet_name == "CA") %>% 
+  select(drvid)  %>%
+  unique()
 
-# id <- psdn.logbook %>%
-#   select(drvid, BoatName) %>%
-#   unique()
-# 
-# id$mmsi <- "NA"
-# 
-# for(i in 1:nrow(id)) {
-#   url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(US%20Official%20No~contains~", id$drvid[i], ")&f=all#skipdata")
-# 
-#   html.table <- read_html(url) %>%
-#     html_node("table") %>%
-#     html_table(fill = T) %>%
-#     slice(13:14)
-# 
-#   names(html.table) <- html.table[1,]
-#   html.table <- html.table[-1,]
-#   if(is.null(html.table$`MMSI:`) == T) {
-#     id$mmsi[i] <- "NA"
-#   }
-#   else {
-#     id$mmsi[i] <- html.table$'MMSI:'
-#   }
-# }
-# 
-# ### Fix it manually using vessel.names from GFW databse 
-# ### (online: https://globalfishingwatch.org/map/)
-# 
-# write.csv(id,"id_mmsi_2013-2015.csv", row.names = FALSE)
-id.updated <- readr::read_csv(here::here("id_mmsi_2013-2015.csv"))
+id.CA$mmsi <- "NA"
+
+for(i in 1:nrow(id.CA)) {
+  url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(US%20Official%20No~contains~", id.CA$drvid[i], ")&f=all#skipdata")
+
+  html.table <- read_html(url) %>%
+    html_node("table") %>%
+    html_table(fill = T) %>%
+    slice(13:14)
+
+  names(html.table) <- html.table[1,]
+  html.table <- html.table[-1,]
+  if(is.null(html.table$`MMSI:`) == T) {
+    id$mmsi[i] <- "NA"
+  }
+  else {
+    id$mmsi[i] <- html.table$'MMSI:'
+  }
+}
+write.csv(id.CA,"id_mmsi_CA.csv", row.names = FALSE)
 
 
+## Oregon
 
+id.OR <- logbooks %>% dplyr::filter(fleet_name == "OR") %>% 
+  select(drvid, BoatName)  %>%
+  unique() %>% drop_na()
+
+id.OR$mmsi <- "NA"
+
+for(i in 1:nrow(id.OR)) {
+  url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(US%20Official%20No~contains~", id.OR$drvid[i], ")&f=all#skipdata")
+  
+  html.table <- read_html(url) %>%
+    html_node("table") %>%
+    html_table(fill = T) %>%
+    slice(13:14)
+  
+  names(html.table) <- html.table[1,]
+  html.table <- html.table[-1,]
+  if(is.null(html.table$`MMSI:`) == T) {
+    id$mmsi[i] <- "NA"
+  }
+  else {
+    id$mmsi[i] <- html.table$'MMSI:'
+  }
+}
+write.csv(id.OR,"id_mmsi_OR.csv", row.names = FALSE)
+
+
+### Fix it manually using vessel.names from GFW databse
+### (online: https://globalfishingwatch.org/map/)
+id.all <- logbooks %>% select(drvid, BoatName, fleet_name) %>% unique()
+  id.all$mmsi <- "NA"
+  write.csv(id.all,"id_mmsi_all.csv", row.names = FALSE)
+  id.all.update <- readr::read_csv(here::here("id_mmsi_all_update.csv"))
+  
 #--------------------------------------------------------
 # Load database from Global Fishing Watch... Add set variable (position within a day)
 
@@ -205,12 +245,12 @@ vessel.names <- readr::read_csv(here::here("Data", "GFW_data", "MMSI_vessel_name
 
 # --------------------------------------------------------
 # Merge GFW to logbook data
-id.mmsi <- id.updated %>% select(mmsi, drvid) %>% drop_na() %>% unique()
+id.mmsi <- id.all.updated %>% select(mmsi, drvid) %>% drop_na() %>% unique()
 
-psdn.logbook.gfw <- psdn.logbook %>% left_join(id.mmsi, by = "drvid") %>% 
+  logbooks.gfw <- logbooks %>% left_join(id.mmsi, by = "drvid") %>% 
     dplyr::rename(date = Date) 
-    psdn.logbook.gfw$mmsi[psdn.logbook.gfw$BoatName == "Pacific Pursuit"] <- 367153810
-  psdn.logbook.gfw <- psdn.logbook.gfw %>% select(mmsi, date) %>% drop_na() %>% mutate(dPSDN = 1)
+    logbooks.gfw$mmsi[logbooks.gfw$BoatName == "Pacific Pursuit"] <- 367153810
+  logbooks.gfw <- logbooks.gfw %>% select(mmsi, date) %>% drop_na() %>% mutate(dPSDN = 1)
   
 #---------------------------------------------------------
 # Identify which vessels from GFW actually harvest PSDN or MSQD or ANCHOVY...
@@ -221,13 +261,13 @@ gfw.fishing.effort.CPS <- gfw.fishing.effort %>%
 
 #---------------------------------------------------------
 # How many trips GFW capture from logbooks? (R: 121 trips of 495 for the Oregon's PSDN logbook -> 24%)
-psdn.logbook.compare <- psdn.logbook %>% left_join(id.mmsi, by = "drvid") %>% 
+logbooks.compare <- logbooks %>% left_join(id.mmsi, by = "drvid") %>% 
   dplyr::rename(date = Date) # %>% filter(catch > 0)
-  psdn.logbook.compare$mmsi[psdn.logbook.compare$BoatName == "Pacific Pursuit"] <- 367153810
-  psdn.logbook.compare <- psdn.logbook.compare %>%  group_by(BoatName, drvid, mmsi, date) %>%
+  logbooks.compare$mmsi[logbooks.compare$BoatName == "Pacific Pursuit"] <- 367153810
+  logbooks.compare <- logbooks.compare %>%  group_by(BoatName, drvid, mmsi, date) %>%
     summarise(across(c("set_lat", "set_long"), mean, na.rm = TRUE)) %>% drop_na()
   
-gfw.fishing.effort.compare <- gfw.fishing.effort %>% 
+gfw.compare <- gfw.fishing.effort %>% 
   group_by(mmsi, date) %>%
   summarise(across(c("cell_ll_lat", "cell_ll_lon"), mean, na.rm = TRUE))
 
@@ -262,11 +302,15 @@ psdn.joint.hist <- psdn.joint.compare %>% filter(dist<400)
 hist(psdn.joint.hist$dist)
 
 
-##############################################################################
-##############################################################################
+
+#
 #-----------------------------------------------------------------------------
 # Clean dataset for discrete choice model
-psdn.logbook.OR$haul_id <- udpipe::unique_identifier(psdn.logbook.OR, fields = c("trip_id", "haul_num"))
+
+psdn.logbook.OR <- psdn.logbook.OR[-which(is.na(psdn.logbook.OR$set_lat)), ] 
+  psdn.logbook.OR <- psdn.logbook.OR[-which(psdn.logbook.OR$haul_num == 0), ] 
+  psdn.logbook.OR$set_long <- with(psdn.logbook.OR, ifelse(set_long > 0, -set_long, set_long))
+  psdn.logbook.OR$haul_id <- udpipe::unique_identifier(psdn.logbook.OR, fields = c("trip_id", "haul_num"))
   psdn.logbook.OR$depth_bin <- cut(psdn.logbook.OR$depth, 9, include.lowest=TRUE, labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
   psdn.logbook.OR <- psdn.logbook.OR %>% 
     mutate(up_lat = set_lat) %>%
