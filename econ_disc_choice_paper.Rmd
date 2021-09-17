@@ -140,6 +140,19 @@ Landings;
   + Outside option?
 
 
+
+
+<!-- Stafford (2018):  -->
+<!-- When alternatives are combined, they are treated as identical alternatives. Regardless of similarity between them or with an alternative in the model. → Misleading estimates and distort substitution patterns.  -->
+<!-- “The empirical results and Monte Carlo analysis suggest that researchers and practitioners should explicitly model choices closely related to the decisions of interest whenever possible and, when not possible, carefully consider the potential biases introduced by pooling such choices with other outside options.” -->
+<!-- Model: Nested logit model -->
+<!-- Stages: Participation, species, and location. -->
+<!-- Variables: They include alternative-specific observations (for species and location) as well as alternative-invariant variables.  -->
+<!-- Q: What about individual characteristics in the model to show heterogeneity in fleets? -->
+<!-- How closure predictions were made? -->
+
+
+
 # Graphs
 
 ```{r SDM_logbooks, eval=FALSE, include=FALSE}

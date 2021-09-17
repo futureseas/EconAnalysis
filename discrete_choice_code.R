@@ -9,7 +9,7 @@
 gc()
 memory.limit(9999999999)
 min.year = 2013
-max.year = 2015
+max.year = 2016
 
 ## Load packages ##
 library(ggplot2)
@@ -28,9 +28,8 @@ library(parallel)
 
 #-----------------------------------------------------------------------------
 
-## Read logbooks available for Pacific Sardine from ODFW ##
-
-psdn.logbook <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logbooks.xlsx", sheet = "Sardine") %>%
+## Read logbooks available for Pacific Sardine from ODFW (2013-2015) ##
+psdn.logbook.OR <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logbooks.xlsx", sheet = "Sardine") %>%
   mutate(set_lat = Lat + LatMin/60) %>%
   mutate(set_long = Long + LongMin/60) %>%
   mutate(fleet_name="OR") %>%
@@ -48,34 +47,105 @@ psdn.logbook <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Sardine logbook
   filter(set_year <= max.year) %>%
   filter(trip_id != "No ticket") 
 
-psdn.logbook <- psdn.logbook[-which(is.na(psdn.logbook$set_lat)), ] 
-psdn.logbook <- psdn.logbook[-which(psdn.logbook$haul_num == 0), ] 
-psdn.logbook$set_long <- with(psdn.logbook, ifelse(set_long > 0, -set_long, set_long))
-psdn.logbook$haul_id <- udpipe::unique_identifier(psdn.logbook, fields = c("trip_id", "haul_num"))
-psdn.logbook$depth_bin <- cut(psdn.logbook$depth, 9, include.lowest=TRUE, 
-                              labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
+psdn.logbook.OR <- psdn.logbook.OR[-which(is.na(psdn.logbook.OR$set_lat)), ] 
+psdn.logbook.OR <- psdn.logbook.OR[-which(psdn.logbook.OR$haul_num == 0), ] 
+psdn.logbook.OR$set_long <- with(psdn.logbook.OR, ifelse(set_long > 0, -set_long, set_long))
+
+logbooks <- psdn.logbook.OR %>%
+  dplyr::select(c('set_lat', 'set_long', 'fleet_name', 'drvid', 'set_year', 'set_month', 'set_date', 'catch', 'BoatName', 'species'))
 
 
 ## Read logbooks available for market squid from ODFW (2016) ##
-
-sqd.logbook.OR.2016 <- read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2016") %>%
+msqd.logbook.OR <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2016") %>%
   mutate(Lat = Lat + min...9/60) %>%
   mutate(Long = Long + min...11/60) %>%
-  mutate(vessel="OR") %>%
-  dplyr::rename(lat = Lat) %>%
-  dplyr::rename(lon = Long) %>%
-  dplyr::rename(VesselID = FedDoc) %>%
-  mutate(date = as.Date(Date,format="%Y-%m-%d")) %>%
-  mutate(year = year(date)) %>%
-  mutate(month = month(date)) %>%
-  dplyr::rename(effort = `Squid (Lbs)`) %>%
-  dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
-
+  mutate(fleet_name="OR") %>%
+  mutate(species="MSQD") %>%
+  dplyr::rename(set_lat = Lat) %>%
+  dplyr::rename(set_long = Long) %>%
+  dplyr::rename(drvid = FedDoc) %>%
+  dplyr::rename(BoatName = "Boat Name") %>%  
+  mutate(set_date = as.Date(Date,format="%Y-%m-%d")) %>%
+  mutate(set_year = year(set_date)) %>%
+  mutate(set_month = month(set_date)) %>%
+  dplyr::rename(catch = `Squid (Lbs)`) %>%
+  dplyr::select(c('set_lat', 'set_long', 'fleet_name', 'drvid', 'set_year', 'set_month', 'set_date', 'catch', 'BoatName', 'species'))
+logbooks <- rbind(logbooks, msqd.logbook.OR)
 
 
 ## Read logbooks available for Northern anchovy from ODFW (2015-2016) ##
+nanc.logbook.OR.2016 <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Anchovy logbooks.xlsx", sheet = "2016") 
+  nanc.logbook.OR.2016 <- nanc.logbook.OR.2016 %>% dplyr::select(c("Boat Name", "FedDoc", "Date", "Set", "Time", "Fathoms",
+                                                                   "Temp", "Long (D)", "Long (Decimal Min)", "Lat (D)", 
+                                                                   "Lat (DM)", "lbs anchovy", "Ticket"))
+  nanc.logbook.OR <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\Anchovy logbooks.xlsx", sheet = "2015") 
+  nanc.logbook.OR <- nanc.logbook.OR %>% mutate(Ticket = "No ticket") %>% dplyr::select(-c("lbs sardine", "lbs mackerel"))
+  
+nanc.logbook.OR <- rbind(nanc.logbook.OR, nanc.logbook.OR.2016)
+  nanc.logbook.OR <- nanc.logbook.OR %>%
+    dplyr::rename("lat_D" = "Lat (D)") %>% dplyr::rename("lat_min" = "Lat (DM)") %>%
+    mutate(set_lat = lat_D + lat_min/60) %>%
+    dplyr::rename("lon_D" = "Long (D)") %>% dplyr::rename("lon_min" = "Long (Decimal Min)")  %>% 
+    mutate(set_long = lon_D + lon_min/60) %>%
+    mutate(fleet_name="OR") %>%
+  dplyr::rename(drvid = FedDoc) %>%
+  mutate(set_date = as.Date(Date,format="%Y-%m-%d")) %>%
+  mutate(set_year = year(set_date)) %>%
+  mutate(set_month = month(set_date)) %>%
+  dplyr::rename(catch = `lbs anchovy`) %>%
+  dplyr::select(c('set_lat', 'set_long', 'fleet_name', 'drvid', 'set_year', 'set_month', 'set_date', 'catch'))
 
 
+
+## Read logbooks available for Market squid from CDFW (2013-2016) ##
+
+  ## California
+  
+  sqd.logbook.vessel <- read_csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidVesselDataExtract.csv") %>%
+    dplyr::rename(lat = SetLatitude) %>%
+    dplyr::rename(lon = SetLongitude) %>%
+    mutate(vessel="CA Vessel") %>%
+    mutate(date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
+    mutate(year = year(date)) %>%
+    mutate(month = month(date)) %>%
+    dplyr::rename(effort = "CatchEstimate") %>%
+    dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+  
+  sqd.logbook.light.brail <- read_csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidLightBrailLogDataExtract.csv") %>%
+    dplyr::rename(lat = Lat_DD) %>%
+    dplyr::rename(lon = Long_DD) %>%
+    mutate(vessel="CA Light Boat") %>%
+    mutate(date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
+    mutate(year = year(date)) %>%
+    mutate(month = month(date)) %>%
+    dplyr::rename(effort = "ElapsedTime") %>% 
+    dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+  
+  
+## Read logbooks available for Market squid from WDFW (2013-2014) ##
+  
+  
+  psdn.logbook.WA <- read_excel("C:\\Data\\WDFW CPS logbooks\\WA Sardine Logbook Flatfile Data Reques 20-15485.xlsx") %>%
+    mutate(Lat = `Latitude Degrees` + `Latitude Minutes`/60) %>%
+    mutate(Long = `Longitude Degrees` + `Longitude Minutes`/60) %>%
+    mutate(vessel="WA") %>%
+    dplyr::rename(lat = Lat) %>%
+    dplyr::rename(lon = Long) %>%
+    dplyr::rename(VesselID = `Vessel`) %>%
+    mutate(date = as.Date(`Fishing Date`,format="%Y-%m-%d")) %>%
+    mutate(year = year(date)) %>%
+    mutate(month = month(date)) %>%
+    dplyr::rename(effort = `Sardine Retained mt`) %>%
+    dplyr::select(c('lat', 'lon', 'VesselID', 'vessel', 'year', 'month', 'date', 'effort'))
+  
+  # DATABASE
+  psdn.logbook <- rbind(psdn.logbook.OR, psdn.logbook.WA)
+  psdn.logbook <- psdn.logbook[-which(is.na(psdn.logbook$lat)), ] 
+  # psdn.logbook <- psdn.logbook[-which(psdn.logbook$lat == 0), ] 
+  # psdn.logbook <- psdn.logbook[-which(psdn.logbook$lon == 0), ] 
+  psdn.logbook$lon <- with(psdn.logbook, ifelse(lon > 0, -lon, lon))
+  
+  
 #-----------------------------------------------------------------------------
 # Use Vessel ID to obtain MMSI
 
@@ -196,12 +266,14 @@ hist(psdn.joint.hist$dist)
 ##############################################################################
 #-----------------------------------------------------------------------------
 # Clean dataset for discrete choice model
-psdn.logbook <- psdn.logbook %>% 
-  mutate(up_lat = set_lat) %>%
-  mutate(up_long = set_long) %>%
-  mutate(set_lat_sdm = round(set_lat, digits = 1)) %>%
-  mutate(set_long_sdm = round(set_long, digits = 1)) %>%
-  dplyr::select(c('set_lat', 'set_long', 'up_lat', 'up_long', 'depth_bin', 'drvid', 'fleet_name', 
+psdn.logbook.OR$haul_id <- udpipe::unique_identifier(psdn.logbook.OR, fields = c("trip_id", "haul_num"))
+  psdn.logbook.OR$depth_bin <- cut(psdn.logbook.OR$depth, 9, include.lowest=TRUE, labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
+  psdn.logbook.OR <- psdn.logbook.OR %>% 
+    mutate(up_lat = set_lat) %>%
+    mutate(up_long = set_long) %>%
+    mutate(set_lat_sdm = round(set_lat, digits = 1)) %>%
+    mutate(set_long_sdm = round(set_long, digits = 1)) %>%
+    dplyr::select(c('set_lat', 'set_long', 'up_lat', 'up_long', 'depth_bin', 'drvid', 'fleet_name', 
                 'set_year', 'set_month', 'set_day', 'set_date', 
                 'catch', 'haul_num', 'haul_id', 'trip_id', 'set_lat_sdm', 'set_long_sdm')) %>% drop_na()
 

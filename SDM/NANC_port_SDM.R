@@ -8,15 +8,14 @@ library(here)
 SDM_port <- tibble(year = integer(),
                    month = integer(),
                    port = character(),
-                   SDM_60 = numeric(),
-                   SDM_90 = numeric())
+                   SDM_20 = numeric())
 
 # Load port info
     ports <- read_csv(here::here("Data","port_areas.csv")) %>%
       dplyr::rename(port = port_group_code)
 
 
-for (y in 1998:2018) {
+for (y in 2012:2018) {
   for (m in 1:12) {
     for (j in 1:nrow(ports)) {
 	  		# Read netcdf
@@ -39,7 +38,7 @@ for (y in 1998:2018) {
 			  distLand <- (read.csv(here::here("SDM", "DistLandROMSPoints.csv"), head=TRUE, sep=","))[c("lon","lat","distLand")]
 			}
 			sdmMelt <- dplyr::full_join(sdmMelt, distLand, by = c("lon", "lat"))
-			sdmMelt <- subset(sdmMelt, sdmMelt$distLand < 500000)			
+			sdmMelt <- subset(sdmMelt, sdmMelt$distLand < 50000)			
 			
 
 			sdmMelt <- sdmMelt %>%
@@ -54,18 +53,15 @@ for (y in 1998:2018) {
 			
 			# Filter three different distance bands
 			
-			dat_prob_60 <- sdmMelt %>%
-			  dplyr::filter(dist <= 60)
-			dat_prob_90 <- sdmMelt %>%
-			  dplyr::filter(dist <= 90)
+			dat_prob_20 <- sdmMelt %>%
+			  dplyr::filter(dist <= 20)
 
-			SDM_mean_60 <- mean(dat_prob_60$exp_prob, na.rm = T)
-			SDM_mean_90 <- mean(dat_prob_90$exp_prob, na.rm = T)
+			SDM_mean_20 <- mean(dat_prob_20$exp_prob, na.rm = T)
+
 
 			SDM_port <- SDM_port %>%
 			  add_row(year = y, month = m, port = as.character(ports[j, 1]),
-			          SDM_60 = SDM_mean_60,
-			          SDM_90 = SDM_mean_90)
+			          SDM_20 = SDM_mean_20)
 	    
 	    print(y)
 	    print(m)
@@ -74,6 +70,6 @@ for (y in 1998:2018) {
 	  }
   }
   # Save database each year
-  write_csv(SDM_port, file = "data/SDM_port_month_NANC.csv")
+  write_csv(SDM_port, file = "data/SDM_port_month_NANC_20_2012-2018.csv")
 }
 

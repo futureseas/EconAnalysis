@@ -221,18 +221,24 @@ SDM_port_MSQD <- read.csv(file = here("Data", "SDM_port_month_MSQD.csv"))
 
 
 # Merge data with SDM Northern Anchovy #
-SDM_port_NANC <- read.csv(file = here("Data", "SDM_port_month_NANC.csv"))
+SDM_port_NANC <- read.csv(file = here("Data", "SDM_port_month_NANC_20.csv"))
     names(SDM_port_NANC)[names(SDM_port_NANC) == "port"] <- "Port"
     names(SDM_port_NANC)[names(SDM_port_NANC) == "year"] <- "Year"
 
-  SDM_port_NANC <- SDM_port_NANC %>%
+  SDM_port_NANC_year <- SDM_port_NANC %>%
     group_by(Port, Year) %>%
-    summarize(NANC_SDM_60 = mean(SDM_60, na.rm = T), 
-              NANC_SDM_90 = mean(SDM_90, na.rm = T)) %>%
+    summarize(NANC_SDM_20 = mean(SDM_20, na.rm = T)) %>%
+    ungroup(.) 
+  
+  SDM_port_NANC_sep_dec <- SDM_port_NANC %>%
+    filter(month >= 9) %>% 
+    group_by(Port, Year) %>%
+    summarize(NANC_SDM_20_sep_dec = mean(SDM_20, na.rm = T)) %>%
     ungroup(.) 
 
-  PacFIN_data_merged <- merge(PacFIN_data_merged,SDM_port_NANC,by=c("Port","Year"),all.x = TRUE)
-
+  PacFIN_data_merged <- merge(PacFIN_data_merged,SDM_port_NANC_year,by=c("Port","Year"),all.x = TRUE)
+  PacFIN_data_merged <- merge(PacFIN_data_merged,SDM_port_NANC_sep_dec,by=c("Port","Year"),all.x = TRUE)
+  
 
 # Merge data with ACL Pacific Sardine #
 PacFIN_data_merged <- merge(PacFIN_data_merged,ACL_msqd_annual,by=c("Year"),all.x = TRUE)
