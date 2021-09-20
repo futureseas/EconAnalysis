@@ -272,7 +272,7 @@ gfw.compare <- gfw.fishing.effort %>%
 
 joint.compare <- logbooks.compare %>% left_join(gfw.compare, by = c("mmsi", "date")) 
 
-## 150 observations of 677 ~ 22% of logbooks. 
+## 150 observations of 677 ~ 22% of logbooks... missing ~50% of MMSI
 
 
 # --------------------------------------------------------
