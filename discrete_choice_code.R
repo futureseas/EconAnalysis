@@ -165,69 +165,71 @@ logbooks <- rbind(logbooks, nanc.logbook.OR)
 library(rvest)
 library(curl)
 
-# Use IDs from PSDN logbook in Oregon. Later we can expand this for the whole west coast using individual vessel data # 
-    
-    
-## California
-id.CA <- logbooks %>% dplyr::filter(fleet_name == "CA") %>% 
-  select(drvid)  %>%
-  unique()
+# Use IDs from logbooks available # 
 
-id.CA$mmsi <- "NA"
-
-for(i in 1:nrow(id.CA)) {
-  url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(US%20Official%20No~contains~", id.CA$drvid[i], ")&f=all#skipdata")
-
-  html.table <- read_html(url) %>%
-    html_node("table") %>%
-    html_table(fill = T) %>%
-    slice(13:14)
-
-  names(html.table) <- html.table[1,]
-  html.table <- html.table[-1,]
-  if(is.null(html.table$`MMSI:`) == T) {
-    id$mmsi[i] <- "NA"
-  }
-  else {
-    id$mmsi[i] <- html.table$'MMSI:'
-  }
-}
-write.csv(id.CA,"id_mmsi_CA.csv", row.names = FALSE)
-
-
-## Oregon
-
-id.OR <- logbooks %>% dplyr::filter(fleet_name == "OR") %>% 
-  select(drvid, BoatName)  %>%
-  unique() %>% drop_na()
-
-id.OR$mmsi <- "NA"
-
-for(i in 1:nrow(id.OR)) {
-  url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(US%20Official%20No~contains~", id.OR$drvid[i], ")&f=all#skipdata")
+# ## California
+# id.CA <- logbooks %>% dplyr::filter(fleet_name == "CA") %>% 
+#   select(drvid)  %>%
+#   unique()
+# 
+# id.CA$mmsi <- "NA"
+# 
+# for(i in 1:nrow(id.CA)) {
+#   url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(US%20Official%20No~contains~", id.CA$drvid[i], ")&f=all#skipdata")
+#   html.table <- read_html(url) %>%
+#     html_node("table") %>%
+#     html_table(fill = T) %>%
+#     slice(13:14)
+#   names(html.table) <- html.table[1,]
+#   html.table <- html.table[-1,]
+#   if(is.null(html.table$`MMSI:`) == T) {
+#     id.CA$mmsi[i] <- "NA"
+#   }
+#   else {
+#     id.CA$mmsi[i] <- html.table$'MMSI:'
+#   }
+# }
+# write.csv(id.CA,"id_mmsi_CA.csv", row.names = FALSE)
+# 
+# 
+# ## Oregon
+# id.OR <- logbooks %>% dplyr::filter(fleet_name == "OR") %>% 
+#   select(drvid, BoatName)  %>%
+#   unique() %>% drop_na()
+# id.OR$mmsi <- "NA"
+# 
+# for(i in 1:nrow(id.OR)) {
+#  url <- str_c("https://www.navcen.uscg.gov/aisSearch/dbo_aisVessels_list.php?q=(US%20Official%20No~contains~", id.OR$drvid[i], ")&f=all#skipdata")
+#   html.table <- read_html(url) %>%
+#     html_node("table") %>%
+#     html_table(fill = T) %>%
+#     slice(13:14)
+#    names(html.table) <- html.table[1,]
+#   html.table <- html.table[-1,]
+#  if(is.null(html.table$`MMSI:`) == T) {
+#   id.OR$mmsi[i] <- "NA"
+#  }
+#  else {
+#   id.OR$mmsi[i] <- html.table$'MMSI:'
+#  }
+# }
+# write.csv(id.OR,"id_mmsi_OR.csv", row.names = FALSE)
+# 
+# 
+# # Washington
+# id.WA <- logbooks %>% dplyr::filter(fleet_name == "WA") %>% 
+#   select(drvid, BoatName)  %>%
+#   unique() %>% drop_na()
+# 
+# 
+# # All
+# id.all <- logbooks %>% select(drvid, BoatName, fleet_name) %>% unique()
+#   id.all$mmsi <- "NA"
+#   write.csv(id.all,"id_mmsi_all.csv", row.names = FALSE)
   
-  html.table <- read_html(url) %>%
-    html_node("table") %>%
-    html_table(fill = T) %>%
-    slice(13:14)
-  
-  names(html.table) <- html.table[1,]
-  html.table <- html.table[-1,]
-  if(is.null(html.table$`MMSI:`) == T) {
-    id$mmsi[i] <- "NA"
-  }
-  else {
-    id$mmsi[i] <- html.table$'MMSI:'
-  }
-}
-write.csv(id.OR,"id_mmsi_OR.csv", row.names = FALSE)
 
-
-### Fix it manually using vessel.names from GFW databse
+## Fix it manually using vessel.names from GFW databse
 ### (online: https://globalfishingwatch.org/map/)
-id.all <- logbooks %>% select(drvid, BoatName, fleet_name) %>% unique()
-  id.all$mmsi <- "NA"
-  write.csv(id.all,"id_mmsi_all.csv", row.names = FALSE)
   id.all.update <- readr::read_csv(here::here("id_mmsi_all_update.csv"))
   
 #--------------------------------------------------------
