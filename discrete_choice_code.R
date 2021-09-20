@@ -247,38 +247,37 @@ vessel.names <- readr::read_csv(here::here("Data", "GFW_data", "MMSI_vessel_name
 
 # --------------------------------------------------------
 # Merge GFW to logbook data
-id.mmsi <- id.all.updated %>% select(mmsi, drvid) %>% drop_na() %>% unique()
+id.drvid <- id.all.update %>% select(mmsi, drvid) %>% drop_na() %>% unique() %>% dplyr::rename(mmsi_drvid = mmsi)
+id.boatname <- id.all.update %>% select(mmsi, BoatName) %>% drop_na() %>% unique() 
+  logbooks.gfw <- logbooks %>% left_join(id.boatname, by = "BoatName")
+  logbooks.gfw <- logbooks.gfw %>% left_join(id.drvid, by = "drvid") 
+  logbooks.gfw$mmsi <- ifelse(is.na(logbooks.gfw$mmsi) & !is.na(logbooks.gfw$mmsi_drvid), logbooks.gfw$mmsi_drvid, logbooks.gfw$mmsi)
 
-  logbooks.gfw <- logbooks %>% left_join(id.mmsi, by = "drvid") %>% 
-    dplyr::rename(date = Date) 
-    logbooks.gfw$mmsi[logbooks.gfw$BoatName == "Pacific Pursuit"] <- 367153810
-  logbooks.gfw <- logbooks.gfw %>% select(mmsi, date) %>% drop_na() %>% mutate(dPSDN = 1)
+logbooks.gfw.cps.day <- logbooks.gfw %>% select(mmsi, set_date) %>% dplyr::rename(date = set_date) %>% mutate(dCPS = 1) %>% drop_na()
   
 #---------------------------------------------------------
 # Identify which vessels from GFW actually harvest PSDN or MSQD or ANCHOVY...
 gfw.fishing.effort.CPS <- gfw.fishing.effort %>% 
-  left_join(psdn.logbook.gfw, by = c("mmsi", "date")) %>% filter(dPSDN == 1) %>% unique()
+  left_join(logbooks.gfw.cps.day, by = c("mmsi", "date")) %>% filter(dCPS == 1) %>% unique()
   
-
 
 #---------------------------------------------------------
 # How many trips GFW capture from logbooks? (R: 121 trips of 495 for the Oregon's PSDN logbook -> 24%)
-logbooks.compare <- logbooks %>% left_join(id.mmsi, by = "drvid") %>% 
-  dplyr::rename(date = Date) # %>% filter(catch > 0)
-  logbooks.compare$mmsi[logbooks.compare$BoatName == "Pacific Pursuit"] <- 367153810
-  logbooks.compare <- logbooks.compare %>%  group_by(BoatName, drvid, mmsi, date) %>%
-    summarise(across(c("set_lat", "set_long"), mean, na.rm = TRUE)) %>% drop_na()
+logbooks.compare <- logbooks.gfw %>%  dplyr::rename(date = set_date) %>% group_by(BoatName, drvid, mmsi, date) %>%
+    summarise(across(c("set_lat", "set_long"), mean, na.rm = TRUE)) %>% drop_na()  # %>% filter(catch > 0)
   
 gfw.compare <- gfw.fishing.effort %>% 
   group_by(mmsi, date) %>%
   summarise(across(c("cell_ll_lat", "cell_ll_lon"), mean, na.rm = TRUE))
 
-psdn.joint.compare <- psdn.logbook.compare %>% left_join(gfw.fishing.effort.compare, by = c("mmsi", "date")) 
+joint.compare <- logbooks.compare %>% left_join(gfw.compare, by = c("mmsi", "date")) 
+
+## 150 observations of 677 ~ 22% of logbooks. 
 
 
 # --------------------------------------------------------
-# How good is GFW compared to logbooks? (R: 20.9546 km average deviation).
-psdn.joint.compare <- psdn.joint.compare %>% drop_na()
+# How good is GFW compared to logbooks? (R: ~ 22 km average deviation).
+joint.compare <- joint.compare %>% drop_na()
 
 
 deg2rad <- function(deg) {
@@ -296,13 +295,13 @@ getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
   return(d)
 }
 
-psdn.joint.compare$dist <- getDistanceFromLatLonInKm(psdn.joint.compare$set_lat, psdn.joint.compare$set_long, 
-                                               psdn.joint.compare$cell_ll_lat, psdn.joint.compare$cell_ll_lon)
+joint.compare$dist <- getDistanceFromLatLonInKm(joint.compare$set_lat, joint.compare$set_long, 
+                                               joint.compare$cell_ll_lat, joint.compare$cell_ll_lon)
 
-summary(psdn.joint.compare$dist)
-psdn.joint.hist <- psdn.joint.compare %>% filter(dist<400)
-hist(psdn.joint.hist$dist)
-
+summary(joint.compare$dist)
+joint.hist <- joint.compare %>% filter(dist<400)
+hist(joint.hist$dist)
+hist(joint.compare$dist)
 
 
 #
