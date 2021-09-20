@@ -306,21 +306,36 @@ hist(joint.compare$dist)
 
 #
 #-----------------------------------------------------------------------------
-# Clean dataset for discrete choice model
+# Clean dataset for discrete choice model (Change to Global Fishing Watch)
 
-psdn.logbook.OR <- psdn.logbook.OR[-which(is.na(psdn.logbook.OR$set_lat)), ] 
-  psdn.logbook.OR <- psdn.logbook.OR[-which(psdn.logbook.OR$haul_num == 0), ] 
-  psdn.logbook.OR$set_long <- with(psdn.logbook.OR, ifelse(set_long > 0, -set_long, set_long))
-  psdn.logbook.OR$haul_id <- udpipe::unique_identifier(psdn.logbook.OR, fields = c("trip_id", "haul_num"))
-  psdn.logbook.OR$depth_bin <- cut(psdn.logbook.OR$depth, 9, include.lowest=TRUE, labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
-  psdn.logbook.OR <- psdn.logbook.OR %>% 
+gfw.fishing.effort.CPS$haul_id <- udpipe::unique_identifier(gfw.fishing.effort.CPS, fields = c("mmsi", "date", "haul_num"))
+  gfw.fishing.effort.CPS <- gfw.fishing.effort.CPS %>% 
+    dplyr::rename(set_lat = cell_ll_lat) %>%  dplyr::rename(set_long = cell_ll_lon) %>%
+    dplyr::rename(set_date = date) %>%
     mutate(up_lat = set_lat) %>%
-    mutate(up_long = set_long) %>%
-    mutate(set_lat_sdm = round(set_lat, digits = 1)) %>%
-    mutate(set_long_sdm = round(set_long, digits = 1)) %>%
-    dplyr::select(c('set_lat', 'set_long', 'up_lat', 'up_long', 'depth_bin', 'drvid', 'fleet_name', 
-                'set_year', 'set_month', 'set_day', 'set_date', 
-                'catch', 'haul_num', 'haul_id', 'trip_id', 'set_lat_sdm', 'set_long_sdm')) %>% drop_na()
+    mutate(up_long = set_long) 
+  
+  
+# Include depth...
+    
+  library(raster)
+  depths <- raster("G:\\My Drive\\Project\\Data\\Global Fishing Watch\\Bathymetric\\bathymetry.tif")
+  gfw_spdf <- SpatialPointsDataFrame(
+    gfw.fishing.effort.CPS[,4:3], proj4string=depths@crs, gfw.fishing.effort.CPS)
+  
+  depth_mean <- raster::extract(depths,             # raster layer
+                              gfw_spdf,   # SPDF with centroids for buffer
+                              buffer = 20,     # buffer size, units depend on CRS
+                              fun=mean,         # what to value to extract
+                              df=TRUE)         # return a dataframe? 
+  
+  gfw.fishing.effort.CPS$depth <- depth_mean$bathymetry
+  gfw.fishing.effort.CPS$depth_bin <- cut(gfw.fishing.effort.CPS$depth, 9, include.lowest=TRUE, labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
+
+    
+    # dplyr::select(c('set_lat', 'set_long', 'up_lat', 'up_long', 'depth_bin', 'drvid', 'fleet_name', 
+    #             'set_year', 'set_month', 'set_day', 'set_date', 
+    #             'catch', 'haul_num', 'haul_id', 'trip_id', 'set_lat_sdm', 'set_long_sdm')) %>% drop_na()
 
 
 # ------------------------------------------------------------------
@@ -358,6 +373,10 @@ psdn.logbook <- merge(psdn.logbook,ports,by=c('port'),all.x = TRUE)
 
 # ------------------------------------------------------------------
 ## Merge logbook to SDM outputs
+
+# 
+# mutate(set_lat_sdm = round(set_lat, digits = 1)) %>%
+#   mutate(set_long_sdm = round(set_long, digits = 1)) 
 
 SDM_pred <- tibble(set_year = integer(),
                    set_month = integer(),
