@@ -299,10 +299,47 @@ joint.compare$dist <- getDistanceFromLatLonInKm(joint.compare$set_lat, joint.com
                                                joint.compare$cell_ll_lat, joint.compare$cell_ll_lon)
 
 summary(joint.compare$dist)
-joint.hist <- joint.compare %>% filter(dist<400)
-hist(joint.hist$dist)
-hist(joint.compare$dist)
+  joint.hist <- joint.compare %>% filter(dist<400)
+  hist(joint.hist$dist)
+  hist(joint.compare$dist)
 
+#------------------------------------------------------------
+  library(maps)
+  library(geosphere)
+  library(magrittr)
+  
+  logbook.coords <- cbind.data.frame(joint.compare$set_long, joint.compare$set_lat)
+      gfw.coords   <- cbind.data.frame(joint.compare$cell_ll_lon, joint.compare$cell_ll_lat)
+    
+    maps::map("world", xlim=c(-142,-122),ylim=c(42,50) ,col="#1a2732", bg="white", fill=TRUE, lty = 0, interior = false,mar = c(0.1, 0.1, 0, 0.1))
+    points(x=joint.compare$set_long, y=joint.compare$set_lat, col="#96ce00", cex=0.5, pch=20)
+    points(x=joint.compare$cell_ll_lon, y=joint.compare$cell_ll_lat, col="red", cex=0.5, pch=20)
+
+  inter <- geosphere::gcIntermediate(cbind(joint.compare$set_long, joint.compare$set_lat),
+                          cbind(joint.compare$cell_ll_lon, joint.compare$cell_ll_lat), n=50, addStartEnd=TRUE)             
+  lines(inter, col="#96ce00")
+  
+  
+  
+  library(plotly)
+  library(dplyr)
+
+  joint.map <- joint.compare %>% filter(dist > 11) %>% filter(dist < 220)
+  # map projection
+  fig <- plot_geo(locationmode = 'USA-states', color = I("red"))
+  
+  fig <- fig %>% add_markers(
+    data = joint.map, x = ~set_long, y = ~set_lat,
+    size = ~dist, hoverinfo = "text", alpha = 0.5
+  )
+  
+  fig <- fig %>% add_segments(
+    x = ~set_long, xend = ~cell_ll_lon,
+    y = ~set_lat, yend = ~cell_ll_lat,
+    alpha = 0.3, size = I(1), hoverinfo = "none"
+  )
+  
+  fig
 
 #
 #-----------------------------------------------------------------------------
@@ -316,7 +353,7 @@ gfw.fishing.effort.CPS$haul_id <- udpipe::unique_identifier(gfw.fishing.effort.C
     mutate(up_long = set_long) 
   
   
-# Include depth...
+# Include depth variable
     
   library(raster)
   depths <- raster("G:\\My Drive\\Project\\Data\\Global Fishing Watch\\Bathymetric\\bathymetry.tif")
@@ -332,12 +369,19 @@ gfw.fishing.effort.CPS$haul_id <- udpipe::unique_identifier(gfw.fishing.effort.C
   gfw.fishing.effort.CPS$depth <- depth_mean$bathymetry
   gfw.fishing.effort.CPS$depth_bin <- cut(gfw.fishing.effort.CPS$depth, 9, include.lowest=TRUE, labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
 
-    
+# Calculate distance to port and coast
+  
+
+# Include SDMs and environmental variables 
+  
     # dplyr::select(c('set_lat', 'set_long', 'up_lat', 'up_long', 'depth_bin', 'drvid', 'fleet_name', 
     #             'set_year', 'set_month', 'set_day', 'set_date', 
     #             'catch', 'haul_num', 'haul_id', 'trip_id', 'set_lat_sdm', 'set_long_sdm')) %>% drop_na()
 
+  
+  
 
+  
 # ------------------------------------------------------------------
 
 ## Include port coordinate associated to a specific vessel ###

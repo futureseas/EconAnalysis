@@ -91,6 +91,7 @@ port_by_state <- function(state_name) {
 + Research question:
   + **Big question:** What is the effect of climate change on fish patterns. 
   + **Narrow question:** How does changes in the presence of CPS affect species and location choices by vessels registered in the US west coast?
+  + Check if state limits affect the behavior of fish decisions.
 
 + Contribution:
   + SDM projections to forecast fisher behavior
@@ -103,6 +104,15 @@ port_by_state <- function(state_name) {
     + Relax the independence of irrelevant alternative assumption: Coeficient vary randomnly across vessels, and "Variance in the unobserved vessel-specific parameters induces correlation over alternatives in the stochastic portion
 of utility." @revelt1998
     + Account for correlation in unobserved utility between repeated choices @revelt1998. The estimations is efficient. 
+
+
+
++ Characterize the fishery
+  + Heterogeneity in location, do a map and calculate variation on latitude and longitude.
+  + How far from ports
+  + How far from the coast. 
+  + Average distance traveled. 
+  + Fishing effort
 
 
 # Species/location choice model for the CPS fishery
