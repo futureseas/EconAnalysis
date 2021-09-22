@@ -401,81 +401,35 @@ gfw.fishing.effort.CPS$trip_id <- udpipe::unique_identifier(gfw.fishing.effort.C
   shore.dist <- raster("G:\\My Drive\\Project\\Data\\Global Fishing Watch\\distance-from-shore.tif")
   gfw_spdf <- SpatialPointsDataFrame(
     gfw.fishing.effort.CPS[,4:3], proj4string=shore.dist@crs, gfw.fishing.effort.CPS)
-  shore.dist_mean <- raster::extract(shore.dist, gfw_spdf, buffer = 20, fun=mean, df=TRUE)
+  shore.dist_mean <- raster::extract(shore.dist, gfw_spdf, buffer = 10, fun=mean, df=TRUE)
     gfw.fishing.effort.CPS$shore.dist <- shore.dist_mean$distance.from.shore
 
 # Include distance to port 
   port.dist <- raster("G:\\My Drive\\Project\\Data\\Global Fishing Watch\\distance-from-port-v20201104.tiff")
   gfw_spdf <- SpatialPointsDataFrame(
     gfw.fishing.effort.CPS[,4:3], proj4string=port.dist@crs, gfw.fishing.effort.CPS)
-  port.dist_mean <- raster::extract(port.dist, gfw_spdf, buffer = 20, fun=mean, df=TRUE)
+  port.dist_mean <- raster::extract(port.dist, gfw_spdf, buffer = 10, fun=mean, df=TRUE)
     gfw.fishing.effort.CPS$depth <- depth_mean$bathymetry
-
-# Include SDMs and environmental variables 
-  
-    # dplyr::select(c('set_lat', 'set_long', 'up_lat', 'up_long', 'depth_bin', 'drvid', 'fleet_name', 
-    #             'set_year', 'set_month', 'set_day', 'set_date', 
-    #             'catch', 'haul_num', 'haul_id', 'trip_id', 'set_lat_sdm', 'set_long_sdm')) %>% drop_na()
-
-  
-  
-
-  
-# ------------------------------------------------------------------
-
-## Include port coordinate associated to a specific vessel ###
-psdn.port.OR <- readxl::read_excel("C:\\Data\\ODFW CPS logbooks\\2021 CPS Request Lengths.xlsx", sheet = "2021_CPS_Request_Lengths") %>%
-  filter(Year > 2000) %>%
-  dplyr::rename(set_year = Year) %>%
-  dplyr::rename(drvid = BOATID) %>%
-  dplyr::rename(port = PORT) %>%
-  mutate(set_date = as.Date(Date,format="%Y-%m-%d")) %>%
-  mutate(set_month = month(set_date)) %>%
-  mutate(set_day = day(set_date)) %>%
-  filter(COMMON_NAME == 'PACIFIC SARDINE') %>%
-  distinct(drvid, port, set_year)
-
-psdn.logbook <- merge(psdn.logbook,psdn.port.OR,by=c('drvid', 'set_year'),all.x = TRUE)
-
-
-# Load port georeferenced data
-ports <- readr::read_csv("C://GitHub//EconAnalysis//Data//port_names.csv")
-
-# change uppercase letters
-psdn.logbook <- psdn.logbook %>%
-  mutate(port = tolower(port)) 
-
-ports <- ports %>%
-  dplyr::rename(port = port_name) %>%
-  dplyr::rename(d_port_long = lon) %>%
-  dplyr::rename(d_port_lat = lat) %>%
-  mutate(port = tolower(port))
-
-psdn.logbook <- merge(psdn.logbook,ports,by=c('port'),all.x = TRUE) 
 
 
 # ------------------------------------------------------------------
 ## Merge logbook to SDM outputs
 
-# 
-# mutate(set_lat_sdm = round(set_lat, digits = 1)) %>%
-#   mutate(set_long_sdm = round(set_long, digits = 1)) 
-
-SDM_pred <- tibble(set_year = integer(),
-                   set_month = integer(),
-                   set_lat_sdm = numeric(),
-                   set_long_sdm = numeric(),
-                   pSDM = numeric())
-
-
+sdm.all <- tibble(set_date = integer(),
+                   set_lat = integer(),
+                  set_long = integer(),
+                   predSDM = integer(),
+                       tim = integer())
+    
 for (y in min.year:max.year) {
   for (m in 1:12) {
-    
-    # Read netcdf
+  
     dat <- ncdf4::nc_open(paste0("G:/My Drive/Project/Data/SDM/sardine/sard_", 
-                          paste0(as.character(m), paste0("_", paste0(as.character(y),"_GAM.nc")))))
-    lon <- ncdf4::ncvar_get(dat, "lon")
-    lat <- ncdf4::ncvar_get(dat, "lat")
+                                     paste0(as.character(m), 
+                                            paste0("_", paste0(as.character(y),"_GAM.nc")))))    
+
+    set_long <- ncdf4::ncvar_get(dat, "lon")
+    set_lat <- ncdf4::ncvar_get(dat, "lat")
     tim <- ncdf4::ncvar_get(dat, "time")
     predSDM <- ncdf4::ncvar_get(dat, "predGAM")
     
@@ -483,24 +437,28 @@ for (y in min.year:max.year) {
     ncdf4::nc_close(dat)			
     
     # Reshape the 3D array so we can map it, change the time field to be date
-    dimnames(predSDM) <- list(lon = lon, lat = lat, tim = tim)
+    dimnames(predSDM) <- list(set_long = set_long, set_lat = set_lat, tim = tim)
     sdmMelt <- reshape2::melt(predSDM, value.name = "predSDM")
-    sdmMelt$dt <- as.Date("1900-01-01") + days(sdmMelt$tim)			
+    sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$tim)			
     
-    sdmMelt <- sdmMelt %>%
-      group_by(lat, lon) %>%
-      summarize(exp_prob = mean(predSDM, na.rm = T))	%>%
-      ungroup(.)  
     
-    SDM_pred <- SDM_pred %>%
-      add_row(set_year = y, set_month = m, set_long_sdm = sdmMelt$lon , set_lat_sdm = sdmMelt$lat, pSDM = sdmMelt$exp_prob)
+    # mutate(set_lat_sdm = round(set_lat, digits = 1)) %>%
+    # mutate(set_long_sdm = round(set_long, digits = 1)) 
+    
+    sdm.month <- gfw.fishing.effort.CPS %>%
+      left_join(sdmMelt, by = c("set_date", "set_lat", "set_long")) %>% drop_na(predSDM) %>% 
+      select("set_date", "set_lat", "set_long", "predSDM", "tim")
+    
+    sdm.all <- rbind(sdm.all, sdm.month)
     
     print(y)
     print(m)
   }
 }
+  
+gfw.fishing.effort.CPS <- gfw.fishing.effort.CPS %>%
+  left_join(sdm.all, by = c("set_date", "set_lat", "set_long")) 
 
-psdn.logbook <- merge(psdn.logbook,SDM_pred,by=c('set_year', 'set_month', 'set_lat_sdm', 'set_long_sdm'),all.x = TRUE) 
 
 
 # ------------------------------------------------------------------
