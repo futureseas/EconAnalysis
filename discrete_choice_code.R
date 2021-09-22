@@ -249,26 +249,27 @@ vessel.names <- readr::read_csv(here::here("Data", "GFW_data", "MMSI_vessel_name
 # Merge GFW to logbook data
 id.drvid <- id.all.update %>% select(mmsi, drvid) %>% drop_na() %>% unique() %>% dplyr::rename(mmsi_drvid = mmsi)
 id.boatname <- id.all.update %>% select(mmsi, BoatName) %>% drop_na() %>% unique() 
-  logbooks.gfw <- logbooks %>% left_join(id.boatname, by = "BoatName")
-  logbooks.gfw <- logbooks.gfw %>% left_join(id.drvid, by = "drvid") 
-  logbooks.gfw$mmsi <- ifelse(is.na(logbooks.gfw$mmsi) & !is.na(logbooks.gfw$mmsi_drvid), logbooks.gfw$mmsi_drvid, logbooks.gfw$mmsi)
+  logbooks.mmsi <- logbooks %>% left_join(id.boatname, by = "BoatName")
+  logbooks.mmsi <- logbooks.mmsi %>% left_join(id.drvid, by = "drvid") 
+  logbooks.mmsi$mmsi <- ifelse(is.na(logbooks.mmsi$mmsi) & !is.na(logbooks.mmsi$mmsi_drvid), logbooks.mmsi$mmsi_drvid, logbooks.mmsi$mmsi)
 
-logbooks.gfw.cps.day <- logbooks.gfw %>% select(mmsi, set_date) %>% dplyr::rename(date = set_date) %>% mutate(dCPS = 1) %>% drop_na()
+logbooks.mmsi.day <- logbooks.mmsi %>% select(mmsi, set_date, species, fleet_name) %>% dplyr::rename(date = set_date) %>% mutate(dCPS = 1) %>% drop_na()
   
 #---------------------------------------------------------
 # Identify which vessels from GFW actually harvest PSDN or MSQD or ANCHOVY...
 gfw.fishing.effort.CPS <- gfw.fishing.effort %>% 
-  left_join(logbooks.gfw.cps.day, by = c("mmsi", "date")) %>% filter(dCPS == 1) %>% unique()
+  left_join(logbooks.mmsi.day, by = c("mmsi", "date")) %>% filter(dCPS == 1) %>% unique()
   
 
 #---------------------------------------------------------
-# How many trips GFW capture from logbooks? (R: 121 trips of 495 for the Oregon's PSDN logbook -> 24%)
-logbooks.compare <- logbooks.gfw %>%  dplyr::rename(date = set_date) %>% group_by(BoatName, drvid, mmsi, date) %>%
-    summarise(across(c("set_lat", "set_long"), mean, na.rm = TRUE)) %>% drop_na()  # %>% filter(catch > 0)
+# How many trips GFW capture from logbooks? 
+
+logbooks.compare <- logbooks.mmsi %>%  dplyr::rename(date = set_date) %>% group_by(BoatName, drvid, mmsi, date, fleet_name, species) %>%
+    summarise(across(c("set_lat", "set_long", "effort"), list(mean = mean, sum = sum), na.rm = TRUE)) %>% drop_na(mmsi)  # %>% filter(catch > 0)
   
 gfw.compare <- gfw.fishing.effort %>% 
   group_by(mmsi, date) %>%
-  summarise(across(c("cell_ll_lat", "cell_ll_lon"), mean, na.rm = TRUE))
+  summarise(across(c("cell_ll_lat", "cell_ll_lon", "fishing_hours"), list(mean = mean, sum = sum), na.rm = TRUE))
 
 joint.compare <- logbooks.compare %>% left_join(gfw.compare, by = c("mmsi", "date")) 
 
@@ -277,8 +278,9 @@ joint.compare <- logbooks.compare %>% left_join(gfw.compare, by = c("mmsi", "dat
 
 # --------------------------------------------------------
 # How good is GFW compared to logbooks? (R: ~ 22 km average deviation).
-joint.compare <- joint.compare %>% drop_na()
 
+joint.compare <- joint.compare %>% drop_na(cell_ll_lat_mean)
+  joint.compare$id_seq <- seq(1, nrow(joint.compare))
 
 deg2rad <- function(deg) {
   m <- deg * (pi/180)
@@ -295,57 +297,86 @@ getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
   return(d)
 }
 
-joint.compare$dist <- getDistanceFromLatLonInKm(joint.compare$set_lat, joint.compare$set_long, 
-                                               joint.compare$cell_ll_lat, joint.compare$cell_ll_lon)
+joint.compare$dist <- getDistanceFromLatLonInKm(joint.compare$set_lat_mean, joint.compare$set_long_mean, 
+                                               joint.compare$cell_ll_lat_mean, joint.compare$cell_ll_lon_mean)
 
 summary(joint.compare$dist)
   joint.hist <- joint.compare %>% filter(dist<400)
   hist(joint.hist$dist)
   hist(joint.compare$dist)
+  
 
-#------------------------------------------------------------
+## Create map of deviations
+  
   library(maps)
   library(geosphere)
   library(magrittr)
-  
-  logbook.coords <- cbind.data.frame(joint.compare$set_long, joint.compare$set_lat)
-      gfw.coords   <- cbind.data.frame(joint.compare$cell_ll_lon, joint.compare$cell_ll_lat)
-    
-    maps::map("world", xlim=c(-142,-122),ylim=c(42,50) ,col="#1a2732", bg="white", fill=TRUE, lty = 0, interior = false,mar = c(0.1, 0.1, 0, 0.1))
-    points(x=joint.compare$set_long, y=joint.compare$set_lat, col="#96ce00", cex=0.5, pch=20)
-    points(x=joint.compare$cell_ll_lon, y=joint.compare$cell_ll_lat, col="red", cex=0.5, pch=20)
-
-  inter <- geosphere::gcIntermediate(cbind(joint.compare$set_long, joint.compare$set_lat),
-                          cbind(joint.compare$cell_ll_lon, joint.compare$cell_ll_lat), n=50, addStartEnd=TRUE)             
-  lines(inter, col="#96ce00")
-  
-  
-  
   library(plotly)
   library(dplyr)
 
-  joint.map <- joint.compare %>% filter(dist > 11) %>% filter(dist < 220)
+  joint.map <- joint.compare  %>% filter(dist > 11) %>% filter(dist < 220)
+  
+  
   # map projection
-  fig <- plot_geo(locationmode = 'USA-states', color = I("red"))
   
-  fig <- fig %>% add_markers(
-    data = joint.map, x = ~set_long, y = ~set_lat,
-    size = ~dist, hoverinfo = "text", alpha = 0.5
+  g <- list(
+    scope = 'usa',
+    projection = list(type = 'albers usa'),
+    showland = TRUE,
+    landcolor = toRGB("gray95"),
+    subunitcolor = toRGB("gray85"),
+    countrycolor = toRGB("gray85"),
+    countrywidth = 0.5,
+    subunitwidth = 0.5,
+    showocean = TRUE,
+    oceancolor = toRGB("blue")
   )
   
-  fig <- fig %>% add_segments(
-    x = ~set_long, xend = ~cell_ll_lon,
-    y = ~set_lat, yend = ~cell_ll_lat,
-    alpha = 0.3, size = I(1), hoverinfo = "none"
-  )
+  fig <- plot_geo() %>%
+    layout(geo = g, legend = list(x = 0.9, y = 0.1)) %>% 
+    add_markers(data = joint.map, x = ~set_long_mean, y = ~set_lat_mean, 
+                size = ~dist, text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), joint.map$mmsi), 
+                hoverinfo = "text", name = "Loogbook location") %>% 
+    add_markers(data = joint.map, x = ~cell_ll_lon_mean, y = ~cell_ll_lat_mean,
+                size = ~dist, text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), joint.map$mmsi), 
+                hoverinfo = "text", name = "GFW location") %>% 
+    add_segments(x = ~set_long_mean, xend = ~cell_ll_lon_mean,
+                 y = ~set_lat_mean, yend = ~cell_ll_lat_mean, 
+                 color = I("gray"), text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), 
+                 joint.map$mmsi),  opacity = 0.3, hoverinfo = "text", name = "Error (km)")
+    fig
   
-  fig
 
+
+
+# How effort is related between GFW and logbooks?
+  coeff <- 25000
+  gfwColor <- "#69b3a2"
+  logbooksColor <- rgb(0.2, 0.6, 0.9, 1)
+  
+  ggplot(joint.compare, aes(id_seq)) +
+    geom_line( aes(y= fishing_hours_sum), size=1, color=gfwColor) + 
+    geom_line( aes(y=  effort_sum / coeff), size=1, color=logbooksColor)  +
+    scale_y_continuous(name = "GFW Fishing hours",
+                       sec.axis = sec_axis(~.*coeff, name="Logbooks Catch")
+    ) + theme(
+      axis.title.y = element_text(color = gfwColor, size=13),
+      axis.title.y.right = element_text(color = logbooksColor, size=13)
+    ) + ggtitle("GFW vs Logbooks")
+  
+  
+  library(plm)
+  # I get a negative value for effort????
+  d_panel <- pdata.frame(joint.compare, index=c("mmsi", "date"))
+  model <- plm(effort_sum ~ fishing_hours_sum, data=d_panel, model="within")
+  summary(model)
+  
 #
 #-----------------------------------------------------------------------------
 # Clean dataset for discrete choice model (Change to Global Fishing Watch)
 
-gfw.fishing.effort.CPS$haul_id <- udpipe::unique_identifier(gfw.fishing.effort.CPS, fields = c("mmsi", "date", "haul_num"))
+gfw.fishing.effort.CPS$trip_id <- udpipe::unique_identifier(gfw.fishing.effort.CPS, fields = c("mmsi", "date"))
+  gfw.fishing.effort.CPS$haul_id <- udpipe::unique_identifier(gfw.fishing.effort.CPS, fields = c("trip_id", "haul_num"))
   gfw.fishing.effort.CPS <- gfw.fishing.effort.CPS %>% 
     dplyr::rename(set_lat = cell_ll_lat) %>%  dplyr::rename(set_long = cell_ll_lon) %>%
     dplyr::rename(set_date = date) %>%
@@ -354,23 +385,31 @@ gfw.fishing.effort.CPS$haul_id <- udpipe::unique_identifier(gfw.fishing.effort.C
   
   
 # Include depth variable
-    
   library(raster)
   depths <- raster("G:\\My Drive\\Project\\Data\\Global Fishing Watch\\Bathymetric\\bathymetry.tif")
   gfw_spdf <- SpatialPointsDataFrame(
     gfw.fishing.effort.CPS[,4:3], proj4string=depths@crs, gfw.fishing.effort.CPS)
-  
-  depth_mean <- raster::extract(depths,             # raster layer
-                              gfw_spdf,   # SPDF with centroids for buffer
-                              buffer = 20,     # buffer size, units depend on CRS
-                              fun=mean,         # what to value to extract
-                              df=TRUE)         # return a dataframe? 
-  
-  gfw.fishing.effort.CPS$depth <- depth_mean$bathymetry
-  gfw.fishing.effort.CPS$depth_bin <- cut(gfw.fishing.effort.CPS$depth, 9, include.lowest=TRUE, labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
+  depth_mean <- raster::extract(depths,    # raster layer
+                              gfw_spdf,    # SPDF with centroids for buffer
+                              buffer = 20, # buffer size, units depend on CRS
+                              fun=mean,    # what to value to extract
+                              df=TRUE)     # return a dataframe?
+    gfw.fishing.effort.CPS$depth <- depth_mean$bathymetry
+    gfw.fishing.effort.CPS$depth_bin <- cut(gfw.fishing.effort.CPS$depth, 9, include.lowest=TRUE, labels=c("1", "2", "3", "4", "5", "6", "7", "8", "9"))
 
-# Calculate distance to port and coast
-  
+# Include distance to shore
+  shore.dist <- raster("G:\\My Drive\\Project\\Data\\Global Fishing Watch\\distance-from-shore.tif")
+  gfw_spdf <- SpatialPointsDataFrame(
+    gfw.fishing.effort.CPS[,4:3], proj4string=shore.dist@crs, gfw.fishing.effort.CPS)
+  shore.dist_mean <- raster::extract(shore.dist, gfw_spdf, buffer = 20, fun=mean, df=TRUE)
+    gfw.fishing.effort.CPS$shore.dist <- shore.dist_mean$distance.from.shore
+
+# Include distance to port 
+  port.dist <- raster("G:\\My Drive\\Project\\Data\\Global Fishing Watch\\distance-from-port-v20201104.tiff")
+  gfw_spdf <- SpatialPointsDataFrame(
+    gfw.fishing.effort.CPS[,4:3], proj4string=port.dist@crs, gfw.fishing.effort.CPS)
+  port.dist_mean <- raster::extract(port.dist, gfw_spdf, buffer = 20, fun=mean, df=TRUE)
+    gfw.fishing.effort.CPS$depth <- depth_mean$bathymetry
 
 # Include SDMs and environmental variables 
   
