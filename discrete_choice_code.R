@@ -261,116 +261,124 @@ gfw.fishing.effort.CPS <- gfw.fishing.effort %>%
   left_join(logbooks.mmsi.day, by = c("mmsi", "date")) %>% filter(dCPS == 1) %>% unique()
   
 
-#---------------------------------------------------------
-# How many trips GFW capture from logbooks? 
+# #---------------------------------------------------------
+# # How many trips GFW capture from logbooks? 
+# 
+# logbooks.compare <- logbooks.mmsi %>%  dplyr::rename(date = set_date) %>% group_by(BoatName, drvid, mmsi, date, fleet_name, species) %>%
+#     summarise(across(c("set_lat", "set_long", "effort"), list(mean = mean, sum = sum), na.rm = TRUE)) %>% drop_na(mmsi)  # %>% filter(catch > 0)
+#   
+# gfw.compare <- gfw.fishing.effort %>% 
+#   group_by(mmsi, date) %>%
+#   summarise(across(c("cell_ll_lat", "cell_ll_lon", "fishing_hours"), list(mean = mean, sum = sum), na.rm = TRUE))
+# 
+# joint.compare <- logbooks.compare %>% left_join(gfw.compare, by = c("mmsi", "date")) 
+# 
+# ## 150 observations of 677 ~ 22% of logbooks... missing ~50% of MMSI
+# 
+# 
+# # --------------------------------------------------------
+# # How good is GFW compared to logbooks? (R: ~ 22 km average deviation).
+# 
+# joint.compare <- joint.compare %>% drop_na(cell_ll_lat_mean)
+#   joint.compare$id_seq <- seq(1, nrow(joint.compare))
+# 
+# deg2rad <- function(deg) {
+#   m <- deg * (pi/180)
+#   return(m)
+# }
+# 
+# getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
+#   R <- 6371
+#   dLat <- deg2rad(lat2-lat1)
+#   dLon <- deg2rad(lon2-lon1) 
+#   a <- sin(dLat/2) * sin(dLat/2) +  cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * sin(dLon/2) * sin(dLon/2) 
+#   c <- 2 * atan2(sqrt(a), sqrt(1-a))
+#   d <- R * c
+#   return(d)
+# }
+# 
+# joint.compare$dist <- getDistanceFromLatLonInKm(joint.compare$set_lat_mean, joint.compare$set_long_mean, 
+#                                                joint.compare$cell_ll_lat_mean, joint.compare$cell_ll_lon_mean)
+# 
+# summary(joint.compare$dist)
+hist(joint.compare$dist)
 
-logbooks.compare <- logbooks.mmsi %>%  dplyr::rename(date = set_date) %>% group_by(BoatName, drvid, mmsi, date, fleet_name, species) %>%
-    summarise(across(c("set_lat", "set_long", "effort"), list(mean = mean, sum = sum), na.rm = TRUE)) %>% drop_na(mmsi)  # %>% filter(catch > 0)
-  
-gfw.compare <- gfw.fishing.effort %>% 
-  group_by(mmsi, date) %>%
-  summarise(across(c("cell_ll_lat", "cell_ll_lon", "fishing_hours"), list(mean = mean, sum = sum), na.rm = TRUE))
-
-joint.compare <- logbooks.compare %>% left_join(gfw.compare, by = c("mmsi", "date")) 
-
-## 150 observations of 677 ~ 22% of logbooks... missing ~50% of MMSI
-
-
-# --------------------------------------------------------
-# How good is GFW compared to logbooks? (R: ~ 22 km average deviation).
-
-joint.compare <- joint.compare %>% drop_na(cell_ll_lat_mean)
-  joint.compare$id_seq <- seq(1, nrow(joint.compare))
-
-deg2rad <- function(deg) {
-  m <- deg * (pi/180)
-  return(m)
-}
-
-getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
-  R <- 6371
-  dLat <- deg2rad(lat2-lat1)
-  dLon <- deg2rad(lon2-lon1) 
-  a <- sin(dLat/2) * sin(dLat/2) +  cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * sin(dLon/2) * sin(dLon/2) 
-  c <- 2 * atan2(sqrt(a), sqrt(1-a))
-  d <- R * c
-  return(d)
-}
-
-joint.compare$dist <- getDistanceFromLatLonInKm(joint.compare$set_lat_mean, joint.compare$set_long_mean, 
-                                               joint.compare$cell_ll_lat_mean, joint.compare$cell_ll_lon_mean)
-
-summary(joint.compare$dist)
-  joint.hist <- joint.compare %>% filter(dist<400)
+joint.hist <- joint.compare %>% filter(dist<200)
   hist(joint.hist$dist)
-  hist(joint.compare$dist)
-  
 
-## Create map of deviations
-  
-  library(maps)
-  library(geosphere)
-  library(magrittr)
-  library(plotly)
-  library(dplyr)
+joint.hist <- joint.compare %>% filter(dist<80)
+  hist(joint.hist$dist)
 
-  joint.map <- joint.compare  %>% filter(dist > 11) %>% filter(dist < 220)
+joint.hist <- joint.compare %>% filter(dist<20)
+  hist(joint.hist$dist)
   
-  
-  # map projection
-  
-  g <- list(
-    scope = 'usa',
-    projection = list(type = 'albers usa'),
-    showland = TRUE,
-    landcolor = toRGB("gray95"),
-    subunitcolor = toRGB("gray85"),
-    countrycolor = toRGB("gray85"),
-    countrywidth = 0.5,
-    subunitwidth = 0.5,
-    showocean = TRUE,
-    oceancolor = toRGB("blue")
-  )
-  
-  fig <- plot_geo() %>%
-    layout(geo = g, legend = list(x = 0.9, y = 0.1)) %>% 
-    add_markers(data = joint.map, x = ~set_long_mean, y = ~set_lat_mean, 
-                size = ~dist, text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), joint.map$mmsi), 
-                hoverinfo = "text", name = "Loogbook location") %>% 
-    add_markers(data = joint.map, x = ~cell_ll_lon_mean, y = ~cell_ll_lat_mean,
-                size = ~dist, text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), joint.map$mmsi), 
-                hoverinfo = "text", name = "GFW location") %>% 
-    add_segments(x = ~set_long_mean, xend = ~cell_ll_lon_mean,
-                 y = ~set_lat_mean, yend = ~cell_ll_lat_mean, 
-                 color = I("gray"), text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), 
-                 joint.map$mmsi),  opacity = 0.3, hoverinfo = "text", name = "Error (km)")
-    fig
-  
-
-
-
-# How effort is related between GFW and logbooks?
-  coeff <- 25000
-  gfwColor <- "#69b3a2"
-  logbooksColor <- rgb(0.2, 0.6, 0.9, 1)
-  
-  ggplot(joint.compare, aes(id_seq)) +
-    geom_line( aes(y= fishing_hours_sum), size=1, color=gfwColor) + 
-    geom_line( aes(y=  effort_sum / coeff), size=1, color=logbooksColor)  +
-    scale_y_continuous(name = "GFW Fishing hours",
-                       sec.axis = sec_axis(~.*coeff, name="Logbooks Catch")
-    ) + theme(
-      axis.title.y = element_text(color = gfwColor, size=13),
-      axis.title.y.right = element_text(color = logbooksColor, size=13)
-    ) + ggtitle("GFW vs Logbooks")
-  
-  
-  library(plm)
-  # I get a negative value for effort????
-  d_panel <- pdata.frame(joint.compare, index=c("mmsi", "date"))
-  model <- plm(effort_sum ~ fishing_hours_sum, data=d_panel, model="within")
-  summary(model)
-  
+#   
+# 
+# ## Create map of deviations
+#   
+#   library(maps)
+#   library(geosphere)
+#   library(magrittr)
+#   library(plotly)
+#   library(dplyr)
+# 
+#   joint.map <- joint.compare  %>% filter(dist > 11) %>% filter(dist < 220)
+#   
+#   
+#   # map projection
+#   
+#   g <- list(
+#     scope = 'usa',
+#     projection = list(type = 'albers usa'),
+#     showland = TRUE,
+#     landcolor = toRGB("gray95"),
+#     subunitcolor = toRGB("gray85"),
+#     countrycolor = toRGB("gray85"),
+#     countrywidth = 0.5,
+#     subunitwidth = 0.5,
+#     showocean = TRUE,
+#     oceancolor = toRGB("blue")
+#   )
+#   
+#   fig <- plot_geo() %>%
+#     layout(geo = g, legend = list(x = 0.9, y = 0.1)) %>% 
+#     add_markers(data = joint.map, x = ~set_long_mean, y = ~set_lat_mean, 
+#                 size = ~dist, text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), joint.map$mmsi), 
+#                 hoverinfo = "text", name = "Loogbook location") %>% 
+#     add_markers(data = joint.map, x = ~cell_ll_lon_mean, y = ~cell_ll_lat_mean,
+#                 size = ~dist, text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), joint.map$mmsi), 
+#                 hoverinfo = "text", name = "GFW location") %>% 
+#     add_segments(x = ~set_long_mean, xend = ~cell_ll_lon_mean,
+#                  y = ~set_lat_mean, yend = ~cell_ll_lat_mean, 
+#                  color = I("gray"), text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), 
+#                  joint.map$mmsi),  opacity = 0.3, hoverinfo = "text", name = "Error (km)")
+#     fig
+#   
+# 
+# 
+# 
+# # How effort is related between GFW and logbooks?
+#   coeff <- 25000
+#   gfwColor <- "#69b3a2"
+#   logbooksColor <- rgb(0.2, 0.6, 0.9, 1)
+#   
+#   ggplot(joint.compare, aes(id_seq)) +
+#     geom_line( aes(y= fishing_hours_sum), size=1, color=gfwColor) + 
+#     geom_line( aes(y=  effort_sum / coeff), size=1, color=logbooksColor)  +
+#     scale_y_continuous(name = "GFW Fishing hours",
+#                        sec.axis = sec_axis(~.*coeff, name="Logbooks Catch")
+#     ) + theme(
+#       axis.title.y = element_text(color = gfwColor, size=13),
+#       axis.title.y.right = element_text(color = logbooksColor, size=13)
+#     ) + ggtitle("GFW vs Logbooks")
+#   
+#   
+#   library(plm)
+#   # I get a negative value for effort????
+#   d_panel <- pdata.frame(joint.compare, index=c("mmsi", "date"))
+#   model <- plm(effort_sum ~ fishing_hours_sum, data=d_panel, model="within")
+#   summary(model)
+#   
 #
 #-----------------------------------------------------------------------------
 # Clean dataset for discrete choice model (Change to Global Fishing Watch)
@@ -409,17 +417,15 @@ gfw.fishing.effort.CPS$trip_id <- udpipe::unique_identifier(gfw.fishing.effort.C
   gfw_spdf <- SpatialPointsDataFrame(
     gfw.fishing.effort.CPS[,4:3], proj4string=port.dist@crs, gfw.fishing.effort.CPS)
   port.dist_mean <- raster::extract(port.dist, gfw_spdf, buffer = 10, fun=mean, df=TRUE)
-    gfw.fishing.effort.CPS$depth <- depth_mean$bathymetry
+    gfw.fishing.effort.CPS$port.dist <- port.dist_mean$distance.from.port.v20201104
 
 
 # ------------------------------------------------------------------
-## Merge logbook to SDM outputs
+## Merge location data to SDM outputs
 
-sdm.all <- tibble(set_date = integer(),
-                   set_lat = integer(),
-                  set_long = integer(),
-                   predSDM = integer(),
-                       tim = integer())
+# Pacific sardine
+
+sdm.psdn.all <- tibble(set_date = integer(), set_lat = integer(), set_long = integer(), psdn.sdm = integer(), psdn.date.sdm = integer())
     
 for (y in min.year:max.year) {
   for (m in 1:12) {
@@ -430,39 +436,230 @@ for (y in min.year:max.year) {
 
     set_long <- ncdf4::ncvar_get(dat, "lon")
     set_lat <- ncdf4::ncvar_get(dat, "lat")
-    tim <- ncdf4::ncvar_get(dat, "time")
-    predSDM <- ncdf4::ncvar_get(dat, "predGAM")
+    psdn.date.sdm <- ncdf4::ncvar_get(dat, "time")
+    psdn.sdm <- ncdf4::ncvar_get(dat, "predGAM")
     
     # Close the netcdf
     ncdf4::nc_close(dat)			
     
     # Reshape the 3D array so we can map it, change the time field to be date
-    dimnames(predSDM) <- list(set_long = set_long, set_lat = set_lat, tim = tim)
-    sdmMelt <- reshape2::melt(predSDM, value.name = "predSDM")
-    sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$tim)			
+    dimnames(psdn.sdm) <- list(set_long = set_long, set_lat = set_lat, psdn.date.sdm = psdn.date.sdm)
+    sdmMelt <- reshape2::melt(psdn.sdm, value.name = "psdn.sdm")
+    sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$psdn.date.sdm)			
     
     
     # mutate(set_lat_sdm = round(set_lat, digits = 1)) %>%
     # mutate(set_long_sdm = round(set_long, digits = 1)) 
     
     sdm.month <- gfw.fishing.effort.CPS %>%
-      left_join(sdmMelt, by = c("set_date", "set_lat", "set_long")) %>% drop_na(predSDM) %>% 
-      select("set_date", "set_lat", "set_long", "predSDM", "tim")
+      left_join(sdmMelt, by = c("set_date", "set_lat", "set_long")) %>% drop_na(psdn.sdm) %>% 
+      select("set_date", "set_lat", "set_long", "psdn.sdm", "psdn.date.sdm")
     
-    sdm.all <- rbind(sdm.all, sdm.month)
+    sdm.psdn.all <- rbind(sdm.psdn.all, sdm.month)
     
     print(y)
     print(m)
   }
 }
   
+sdm.psdn.all <-  sdm.psdn.all  %>% unique() 
 gfw.fishing.effort.CPS <- gfw.fishing.effort.CPS %>%
-  left_join(sdm.all, by = c("set_date", "set_lat", "set_long")) 
+  left_join(sdm.psdn.all, by = c("set_date", "set_lat", "set_long"))
+  gfw.fishing.effort.CPS$psdn.date.sdm <- as.Date("1900-01-01") + days(gfw.fishing.effort.CPS$psdn.date.sdm)	
+
+
+# Northern anchovy
+
+sdm.nanc.all <- tibble(set_date = integer(), set_lat = integer(), set_long = integer(), nanc.sdm = integer(), nanc.date.sdm = integer())
+    
+for (y in min.year:max.year) {
+  for (m in 1:12) {
+  
+    dat <- ncdf4::nc_open(paste0("G:/My Drive/Project/Data/SDM/anchovy/anch_", 
+                                     paste0(as.character(m), 
+                                            paste0("_", paste0(as.character(y),"_GAM.nc")))))    
+
+    set_long <- ncdf4::ncvar_get(dat, "lon")
+    set_lat <- ncdf4::ncvar_get(dat, "lat")
+    nanc.date.sdm <- ncdf4::ncvar_get(dat, "time")
+    nanc.sdm <- ncdf4::ncvar_get(dat, "predGAM")
+    
+    # Close the netcdf
+    ncdf4::nc_close(dat)      
+    
+    # Reshape the 3D array so we can map it, change the time field to be date
+    dimnames(nanc.sdm) <- list(set_long = set_long, set_lat = set_lat, nanc.date.sdm = nanc.date.sdm)
+    sdmMelt <- reshape2::melt(nanc.sdm, value.name = "nanc.sdm")
+    sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$nanc.date.sdm)     
+    
+    
+    # mutate(set_lat_sdm = round(set_lat, digits = 1)) %>%
+    # mutate(set_long_sdm = round(set_long, digits = 1)) 
+    
+    sdm.month <- gfw.fishing.effort.CPS %>%
+      left_join(sdmMelt, by = c("set_date", "set_lat", "set_long")) %>% drop_na(nanc.sdm) %>% 
+      select("set_date", "set_lat", "set_long", "nanc.sdm", "nanc.date.sdm")
+    
+    sdm.nanc.all <- rbind(sdm.nanc.all, sdm.month)
+    
+    print(y)
+    print(m)
+  }
+}
+  
+sdm.nanc.all <-  sdm.nanc.all  %>% unique() 
+gfw.fishing.effort.CPS <- gfw.fishing.effort.CPS %>%
+  left_join(sdm.nanc.all, by = c("set_date", "set_lat", "set_long"))
+  gfw.fishing.effort.CPS$nanc.date.sdm <- as.Date("1900-01-01") + days(gfw.fishing.effort.CPS$nanc.date.sdm)
+
+
+# Market squid
+
+sdm.msqd.all <- tibble(set_date = integer(), set_lat = integer(), set_long = integer(), msqd.sdm = integer(), msqd.date.sdm = integer())
+    
+for (y in min.year:max.year) {
+  for (m in 1:12) {
+  
+    dat <- ncdf4::nc_open(paste0("G:/My Drive/Project/Data/SDM/squid/squid_", 
+                                     paste0(as.character(m), 
+                                            paste0("_", paste0(as.character(y),"_GAM.nc")))))    
+
+    set_long <- ncdf4::ncvar_get(dat, "lon")
+    set_lat <- ncdf4::ncvar_get(dat, "lat")
+    msqd.date.sdm <- ncdf4::ncvar_get(dat, "time")
+    msqd.sdm <- ncdf4::ncvar_get(dat, "predGAM")
+    
+    # Close the netcdf
+    ncdf4::nc_close(dat)      
+    
+    # Reshape the 3D array so we can map it, change the time field to be date
+    dimnames(msqd.sdm) <- list(set_long = set_long, set_lat = set_lat, msqd.date.sdm = msqd.date.sdm)
+    sdmMelt <- reshape2::melt(msqd.sdm, value.name = "msqd.sdm")
+    sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$msqd.date.sdm)     
+    
+    
+    # mutate(set_lat_sdm = round(set_lat, digits = 1)) %>%
+    # mutate(set_long_sdm = round(set_long, digits = 1)) 
+    
+    sdm.month <- gfw.fishing.effort.CPS %>%
+      left_join(sdmMelt, by = c("set_date", "set_lat", "set_long")) %>% drop_na(msqd.sdm) %>% 
+      select("set_date", "set_lat", "set_long", "msqd.sdm", "msqd.date.sdm")
+    
+    sdm.msqd.all <- rbind(sdm.msqd.all, sdm.month)
+    
+    print(y)
+    print(m)
+  }
+}
+  
+sdm.msqd.all <-  sdm.msqd.all  %>% unique() 
+gfw.fishing.effort.CPS <- gfw.fishing.effort.CPS %>%
+  left_join(sdm.msqd.all, by = c("set_date", "set_lat", "set_long"))
+  gfw.fishing.effort.CPS$msqd.date.sdm <- as.Date("1900-01-01") + days(gfw.fishing.effort.CPS$msqd.date.sdm)
+
+
+# ------------------------------------------------------------------
+## Merge location data to wind
+  
+# wind u  
+dat_u <- ncdf4::nc_open("C:/Data/ROMS u-v/wcnrt_su_daily_20110102_20170419.nc")  
+  set_long <- ncdf4::ncvar_get(dat_u, "lon")
+    set_long <- set_long[,1]
+  set_lat <- ncdf4::ncvar_get(dat_u, "lat")
+    set_lat <- set_lat[1,]
+  wind.u.date <- dat_u$dim$time$vals
+  wind.u <- ncdf4::ncvar_get(dat_u, "su")
+  
+# Close the netcdf
+ncdf4::nc_close(dat_u)      
+  
+# Reshape the 3D array so we can map it, change the time field to be date
+dimnames(wind.u) <- list(set_long = set_long, set_lat = set_lat, wind.u.date = wind.u.date)
+  wind.u.Melt <- reshape2::melt(wind.u, value.name = "wind.u")
+  wind.u.Melt$set_date <- as.Date("2011-01-01") + days(wind.u.Melt$wind.u.date)   
+  wind.u.Melt <- wind.u.Melt %>% mutate(set_long = set_long - 0.05)
+
+gfw.fishing.effort.CPS <- merge(gfw.fishing.effort.CPS, wind.u.Melt, 
+                                   by=c("set_date", "set_lat", "set_long"), all.x = TRUE)
+  gfw.fishing.effort.CPS$wind.u.date <- as.Date("2011-01-01") + days(gfw.fishing.effort.CPS$wind.u.date)  
+
+  
+# wind v  
+dat_v <- ncdf4::nc_open("C:/Data/ROMS u-v/wcnrt_sv_daily_20110102_20170419.nc")  
+  set_long <- ncdf4::ncvar_get(dat_v, "lon")
+    set_long <- set_long[,1]
+  set_lat <- ncdf4::ncvar_get(dat_v, "lat")
+    set_lat <- set_lat[1,]
+  wind.v.date <- dat_v$dim$time$vals
+  wind.v <- ncdf4::ncvar_get(dat_v, "sv")
+  
+# Close the netcdf
+ncdf4::nc_close(dat_v)      
+  
+# Reshape the 3D array so we can map it, change the time field to be date
+dimnames(wind.v) <- list(set_long = set_long, set_lat = set_lat, wind.v.date = wind.v.date)
+  wind.v.Melt <- reshape2::melt(wind.v, value.name = "wind.v")
+  wind.v.Melt$set_date <- as.Date("2011-01-01") + days(wind.v.Melt$wind.v.date)   
+  wind.v.Melt <- wind.v.Melt %>% mutate(set_lat = set_lat - 0.05)
+   
+gfw.fishing.effort.CPS <- merge(gfw.fishing.effort.CPS, wind.v.Melt, 
+                                by=c("set_date", "set_lat", "set_long"), all.x = TRUE)
+  gfw.fishing.effort.CPS$wind.v.date <- as.Date("2011-01-01") + days(gfw.fishing.effort.CPS$wind.v.date)  
+  
+
+gfw.fishing.effort.CPS.save <- gfw.fishing.effort.CPS %>% 
+ select("set_date", "set_lat", "set_long", "mmsi", "fishing_hours", "haul_num", "species", 
+  "fleet_name", "trip_id", "haul_id", "up_lat", "up_long", "depth", "depth_bin", "shore.dist", 
+  "port.dist", "psdn.sdm", "nanc.sdm", "msqd.sdm", "wind.u", "wind.v")
+
+  write.csv(gfw.fishing.effort.CPS.save,"Data\\discrete_choice_data.csv", row.names = FALSE)
+  save.image (file = "disc_choice.RData")
+  
+# -------------------------------------------------------------
+## Obtain port of landing... (closest port for now...)  
+ports.coord <- read.csv(file = "G://My Drive//Project//Data//Storm Warnings//WCports_mww_events09-16.csv")
+  ports.coord <- ports.coord %>% select("pcid", "pcid_lat", "pcid_long") %>% unique()
+  port.min.dist <- tibble(closest.port = character())
+  
+for (i in 1:nrow(gfw.fishing.effort.CPS)) {
+  ports.coord$dist <- getDistanceFromLatLonInKm(ports.coord$pcid_lat, 
+                                                ports.coord$pcid_long,
+                                                gfw.fishing.effort.CPS$set_lat[i], 
+                                                gfw.fishing.effort.CPS$set_long[i])
+    ports.coord.min.dist <- ports.coord %>% filter(dist == min(dist)) %>% do(head(.,1))
+    port.min.dist <- port.min.dist %>% add_row(closest.port = as.character(ports.coord.min.dist[1, 1]))
+}
+  
+gfw.fishing.effort.CPS <- cbind(gfw.fishing.effort.CPS, port.min.dist)
+
+
+# -------------------------------------------------
+## Merge storm warning signals
+warnings.signals <- read.csv(file = "G://My Drive//Project//Data//Storm Warnings//WCports_mww_events09-16.csv")
+  warnings.signals <- warnings.signals %>% 
+    select("pcid","phenoms", "d_issued", "d_expired", "hurricane", "gale", "smcraft", "mww_other") %>%
+    dplyr::rename(closest.port = pcid) 
+    warnings.signals$d_issued <- as.Date(warnings.signals$d_issued, "%d%b%Y %H:%M:%OS")
+    warnings.signals$d_expired <- as.Date(warnings.signals$d_expired, "%d%b%Y %H:%M:%OS")
+
+  str(warnings.signals)
+
+                        
+                    
+# --------------------------------------------------
+## Save database! 
+gfw.fishing.effort.CPS.save <- gfw.fishing.effort.CPS %>% 
+  select("set_date", "set_lat", "set_long", "mmsi", "fishing_hours", "haul_num", "species", 
+         "fleet_name", "trip_id", "haul_id", "up_lat", "up_long", "depth", "depth_bin", "shore.dist", 
+         "port.dist", "psdn.sdm", "nanc.sdm", "msqd.sdm", "wind.u", "wind.v", "closest.port")
+
+write.csv(gfw.fishing.effort.CPS.save,"Data\\discrete_choice_data.csv", row.names = FALSE)
+save.image (file = "disc_choice.RData")
 
 
 
 # ------------------------------------------------------------------
-## Obtain (year) price variable from PacFIN landing data
+## Obtain (year) price by port from PacFIN landing data
 
 PacFIN_dat <- read.csv(file = here::here("Data", "PacFin.csv"))
 price_PSDN <- PacFIN_dat %>%
@@ -474,10 +671,9 @@ price_PSDN <- PacFIN_dat %>%
 psdn.logbook <- merge(psdn.logbook,price_PSDN,by=c('set_year'),all.x = TRUE) 
 
 
-
 # ------------------------------------------------------------------
-## Create psdn_rev variable (Using monthly SDM and catch)
-
+## Create expected and actual revenue -- psdn_rev variable-- using SDMs (maybe moving average?) and catch
+## (I need prices by port)
 
 psdn.logbook <- psdn.logbook %>%
   mutate(psdn.rev.catch = catch * price.PSDN) %>%
