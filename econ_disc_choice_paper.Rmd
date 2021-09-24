@@ -1,21 +1,39 @@
 ---
-title: "Discrete Choice model for the CPS fishery"
-author: "Felipe J. Quezada"
+title: "Climate effects on species-location choices"
+author:
+  - name: Felipe Quezada
+    email: felipe.quezada@noaa.gov
+    institute: [ucsc, noaa]
+    correspondence: true
+  - name: Desiree Tommasi
+    institute: [ucsc, noaa]
+  - name: Stephen Stohs
+    institute: noaa
+institute:
+  - ucsc: Institute of Marine Sciences, University of California Santa Cruz
+  - noaa: NOAA Southwest Fisheries Science Center
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 header-includes:
   \usepackage{mathtools}
   \usepackage{tcolorbox}
   \usepackage{float}
   \floatplacement{figure}{H}
+  \usepackage{times}
+  \usepackage{setspace}
+  \setstretch{1.5}
 output:
-  pdf_document: 
+  pdf_document:
     number_sections: yes
     citation_package: natbib
+    pandoc_args:
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'
 bibliography: references.bib
 urlcolor: blue
 ---
 
 ```{r setup, include=FALSE}
+gc()
 knitr::opts_chunk$set(echo = TRUE)
 library(bookdown)
 library(doBy)
@@ -46,42 +64,13 @@ library(zoo)
 
 
 ```{r read_data, include=FALSE} 
-PacFIN_dat <- read.csv(file = here("Data", "PacFin.csv"))
+disc.choice.dat <- read.csv(file = here("Data", "discrete_choice_data.csv"))
+
 ```
 
 ```{r functions, include=FALSE}
-
-meanfun <- function(x, ...){
-  c(mean=mean(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
-}
-
-sumfun <- function(x, ...){
-  c(sum=sum(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
-}
-
-sum_mean_fun <- function(x, ...){
-  c(mean=mean(x, na.rm=TRUE, ...), sum=sum(x, na.rm=TRUE, ...)) #, l=length(x))
-}
-
-port_by_state <- function(state_name) {
-  if (state_name == "ALL") {
-    collapse <- PacFIN_dat %>%
-    filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
-      filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") %>%
-      mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
-  }
-  else {
-    collapse <- PacFIN_dat %>%
-    filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
-    filter(State == state_name & (Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING")) %>%
-    mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
-  }
-  
-  ggplot(collapse, aes(y=Landings, x=Landing_year, color=Species_code, group=Species_code)) +
-  geom_line(size=1) + 
-  facet_wrap(~ Port) +
-  theme(legend.position="bottom") + 
-  theme(axis.text.x = element_text(angle=90))
+cntrd <- function(x) {
+  data.frame(geosphere::centroid(as.matrix(x[,c("set_long", "set_lat")])))
 }
 
 ```
@@ -164,6 +153,25 @@ Landings;
 
 
 # Graphs
+
+```{r dist_from_centroid, eval=FALSE, include=FALSE}
+### How many standard error deviate from the average (by mmsi and fleet) ###
+
+## Calculate centroids
+centroids.mmsi <- disc.choice.dat %>% group_by(mmsi) %>% do(cntrd(.)) %>% 
+    dplyr::rename(long_mmsi = lon) %>% dplyr::rename(lat_mmsi = lat)
+  centroids.fleet <- disc.choice.dat %>% group_by(fleet_name, species) %>% do(cntrd(.)) %>% 
+    dplyr::rename(long_fleet = lon) %>% dplyr::rename(lat_fleet = lat)
+  disc.choice.dat <- merge(disc.choice.dat, centroids.mmsi, by=c('mmsi'),all.x = TRUE) 
+  disc.choice.dat <- merge(disc.choice.dat, centroids.fleet, by=c('fleet_name', 'species'),all.x = TRUE) 
+  
+## Calculate distance to centroid
+  
+  
+## Summary statistics of distances
+  
+
+```
 
 ```{r SDM_logbooks, eval=FALSE, include=FALSE}
 #' Join SDM and landings data by port and plot correlations #'

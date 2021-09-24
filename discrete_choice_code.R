@@ -25,6 +25,22 @@ library(tidyverse)
 library(mlogit)
 library(parallel)
 
+## Functions ##
+deg2rad <- function(deg) {
+  m <- deg * (pi/180)
+  return(m)
+}
+
+getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
+  R <- 6371
+  dLat <- deg2rad(lat2-lat1)
+  dLon <- deg2rad(lon2-lon1)
+  a <- sin(dLat/2) * sin(dLat/2) +  cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * sin(dLon/2) * sin(dLon/2)
+  c <- 2 * atan2(sqrt(a), sqrt(1-a))
+  d <- R * c
+  return(d)
+}
+
 
 #-----------------------------------------------------------------------------
 
@@ -161,12 +177,12 @@ logbooks <- rbind(logbooks, nanc.logbook.OR)
 #' Scrapes call sign and mmsi from USCG NAIS website using list of US Official numbers
 #' from the CPS permit data I collected earlier.
 #'
-
-library(rvest)
-library(curl)
-
+#
+# library(rvest)
+# library(curl)
+#
 # Use IDs from logbooks available # 
-
+#
 # ## California
 # id.CA <- logbooks %>% dplyr::filter(fleet_name == "CA") %>% 
 #   select(drvid)  %>%
@@ -239,8 +255,7 @@ gfw.fishing.effort <- readr::read_csv(here::here("Data", "GFW_data", "GFW_westco
   gfw.fishing.effort <- gfw.fishing.effort %>% filter(fishing_hours > 0) 
   gfw.fishing.effort$haul_num <- with(gfw.fishing.effort, ave(mmsi, mmsi, date, FUN = seq_along))
 
-vessel.names <- readr::read_csv(here::here("Data", "GFW_data", "MMSI_vessel_name.csv"))
-
+# vessel.names <- readr::read_csv(here::here("Data", "GFW_data", "MMSI_vessel_name.csv"))
 # gfw.fishing.effort <- gfw.fishing.effort %>%
 #   merge(y = vessel.names, by = "mmsi", all.x=TRUE)
 
@@ -282,36 +297,22 @@ gfw.fishing.effort.CPS <- gfw.fishing.effort %>%
 # joint.compare <- joint.compare %>% drop_na(cell_ll_lat_mean)
 #   joint.compare$id_seq <- seq(1, nrow(joint.compare))
 # 
-# deg2rad <- function(deg) {
-#   m <- deg * (pi/180)
-#   return(m)
-# }
-# 
-# getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
-#   R <- 6371
-#   dLat <- deg2rad(lat2-lat1)
-#   dLon <- deg2rad(lon2-lon1) 
-#   a <- sin(dLat/2) * sin(dLat/2) +  cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * sin(dLon/2) * sin(dLon/2) 
-#   c <- 2 * atan2(sqrt(a), sqrt(1-a))
-#   d <- R * c
-#   return(d)
-# }
 # 
 # joint.compare$dist <- getDistanceFromLatLonInKm(joint.compare$set_lat_mean, joint.compare$set_long_mean, 
 #                                                joint.compare$cell_ll_lat_mean, joint.compare$cell_ll_lon_mean)
 # 
 # summary(joint.compare$dist)
-hist(joint.compare$dist)
-
-joint.hist <- joint.compare %>% filter(dist<200)
-  hist(joint.hist$dist)
-
-joint.hist <- joint.compare %>% filter(dist<80)
-  hist(joint.hist$dist)
-
-joint.hist <- joint.compare %>% filter(dist<20)
-  hist(joint.hist$dist)
-  
+# hist(joint.compare$dist)
+# 
+# joint.hist <- joint.compare %>% filter(dist<200)
+#   hist(joint.hist$dist)
+# 
+# joint.hist <- joint.compare %>% filter(dist<80)
+#   hist(joint.hist$dist)
+# 
+# joint.hist <- joint.compare %>% filter(dist<20)
+#   hist(joint.hist$dist)
+#   
 #   
 # 
 # ## Create map of deviations
@@ -607,19 +608,11 @@ gfw.fishing.effort.CPS <- merge(gfw.fishing.effort.CPS, wind.v.Melt,
   gfw.fishing.effort.CPS$wind.v.date <- as.Date("2011-01-01") + days(gfw.fishing.effort.CPS$wind.v.date)  
   
 
-gfw.fishing.effort.CPS.save <- gfw.fishing.effort.CPS %>% 
- select("set_date", "set_lat", "set_long", "mmsi", "fishing_hours", "haul_num", "species", 
-  "fleet_name", "trip_id", "haul_id", "up_lat", "up_long", "depth", "depth_bin", "shore.dist", 
-  "port.dist", "psdn.sdm", "nanc.sdm", "msqd.sdm", "wind.u", "wind.v")
-
-  write.csv(gfw.fishing.effort.CPS.save,"Data\\discrete_choice_data.csv", row.names = FALSE)
-  save.image (file = "disc_choice.RData")
-  
 # -------------------------------------------------------------
 ## Obtain port of landing... (closest port for now...)  
 ports.coord <- read.csv(file = "G://My Drive//Project//Data//Storm Warnings//WCports_mww_events09-16.csv")
   ports.coord <- ports.coord %>% select("pcid", "pcid_lat", "pcid_long") %>% unique()
-  port.min.dist <- tibble(closest.port = character())
+  port.min.dist <- tibble(closest_port = character())
   
 for (i in 1:nrow(gfw.fishing.effort.CPS)) {
   ports.coord$dist <- getDistanceFromLatLonInKm(ports.coord$pcid_lat, 
@@ -627,31 +620,49 @@ for (i in 1:nrow(gfw.fishing.effort.CPS)) {
                                                 gfw.fishing.effort.CPS$set_lat[i], 
                                                 gfw.fishing.effort.CPS$set_long[i])
     ports.coord.min.dist <- ports.coord %>% filter(dist == min(dist)) %>% do(head(.,1))
-    port.min.dist <- port.min.dist %>% add_row(closest.port = as.character(ports.coord.min.dist[1, 1]))
+    port.min.dist <- port.min.dist %>% add_row(closest_port = as.character(ports.coord.min.dist[1, 1]))
 }
   
 gfw.fishing.effort.CPS <- cbind(gfw.fishing.effort.CPS, port.min.dist)
+
 
 
 # -------------------------------------------------
 ## Merge storm warning signals
 warnings.signals <- read.csv(file = "G://My Drive//Project//Data//Storm Warnings//WCports_mww_events09-16.csv")
   warnings.signals <- warnings.signals %>% 
-    select("pcid","phenoms", "d_issued", "d_expired", "hurricane", "gale", "smcraft", "mww_other") %>%
-    dplyr::rename(closest.port = pcid) 
+    select("pcid", "d_issued", "d_expired", "hurricane", "gale", "smcraft", "mww_other") %>%
+    dplyr::rename(closest_port = pcid) 
     warnings.signals$d_issued <- as.Date(warnings.signals$d_issued, "%d%b%Y %H:%M:%OS")
     warnings.signals$d_expired <- as.Date(warnings.signals$d_expired, "%d%b%Y %H:%M:%OS")
+    warnings.signals <- warnings.signals %>% unique() 
 
-  str(warnings.signals)
+library(sqldf)
+df1 <- gfw.fishing.effort.CPS
+df2 <- warnings.signals
+    
+warnings.signals <-  sqldf("select df1.*, df2.hurricane, df2.gale, df2.smcraft, df2.mww_other
+                                        from df1 left join df2 on
+                                        (df1.closest_port = df2.closest_port) AND 
+                                        (df1.set_date between df2.d_issued and df2.d_expired)") 
 
-                        
-                    
+warnings.signals <- warning.signals %>% unique() %>% 
+  select("haul_id", "hurricane", "gale", "smcraft", "mww_other")
+  warnings.signals <- warning.signals %>% group_by(haul_id) %>%
+    summarise(hurricane = sum(hurricane), gale = sum(gale), 
+              smcraft = sum(smcraft), mww_other = sum(mww_other))
+  warnings.signals[is.na(warnings.signals)] <- 0
+
+  gfw.fishing.effort.CPS <- merge(gfw.fishing.effort.CPS, warnings.signals, 
+                                  by=c("haul_id"), all.x = TRUE)
+  
 # --------------------------------------------------
 ## Save database! 
 gfw.fishing.effort.CPS.save <- gfw.fishing.effort.CPS %>% 
   select("set_date", "set_lat", "set_long", "mmsi", "fishing_hours", "haul_num", "species", 
          "fleet_name", "trip_id", "haul_id", "up_lat", "up_long", "depth", "depth_bin", "shore.dist", 
-         "port.dist", "psdn.sdm", "nanc.sdm", "msqd.sdm", "wind.u", "wind.v", "closest.port")
+         "port.dist", "psdn.sdm", "nanc.sdm", "msqd.sdm", "wind.u", "wind.v", "closest_port",
+         "hurricane", "gale", "smcraft", "mww_other")
 
 write.csv(gfw.fishing.effort.CPS.save,"Data\\discrete_choice_data.csv", row.names = FALSE)
 save.image (file = "disc_choice.RData")
