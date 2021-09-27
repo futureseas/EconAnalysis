@@ -73,6 +73,21 @@ cntrd <- function(x) {
   data.frame(geosphere::centroid(as.matrix(x[,c("set_long", "set_lat")])))
 }
 
+deg2rad <- function(deg) {
+  m <- deg * (pi/180)
+  return(m)
+}
+
+getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
+  R <- 6371
+  dLat <- deg2rad(lat2-lat1)
+  dLon <- deg2rad(lon2-lon1)
+  a <- sin(dLat/2) * sin(dLat/2) +  cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * sin(dLon/2) * sin(dLon/2)
+  c <- 2 * atan2(sqrt(a), sqrt(1-a))
+  d <- R * c
+  return(d)
+}
+
 ```
 
 # Introduction
@@ -154,53 +169,49 @@ Landings;
 
 # Graphs
 
-```{r dist_from_centroid, eval=FALSE, include=FALSE}
-### How many standard error deviate from the average (by mmsi and fleet) ###
-
-## Calculate centroids
+```{r dist_from_centroid, include=FALSE}
+## Calculate centroids and distances
 centroids.mmsi <- disc.choice.dat %>% group_by(mmsi) %>% do(cntrd(.)) %>% 
-    dplyr::rename(long_mmsi = lon) %>% dplyr::rename(lat_mmsi = lat)
-  centroids.fleet <- disc.choice.dat %>% group_by(fleet_name, species) %>% do(cntrd(.)) %>% 
-    dplyr::rename(long_fleet = lon) %>% dplyr::rename(lat_fleet = lat)
+  dplyr::rename(long_mmsi = lon) %>% dplyr::rename(lat_mmsi = lat)
   disc.choice.dat <- merge(disc.choice.dat, centroids.mmsi, by=c('mmsi'),all.x = TRUE) 
+
+centroids.fleet <- disc.choice.dat %>% group_by(fleet_name, species) %>% do(cntrd(.)) %>% 
+  dplyr::rename(long_fleet = lon) %>% dplyr::rename(lat_fleet = lat)
   disc.choice.dat <- merge(disc.choice.dat, centroids.fleet, by=c('fleet_name', 'species'),all.x = TRUE) 
-  
-## Calculate distance to centroid
-  
-  
-## Summary statistics of distances
-  
+
+## Calculate distances to centroids   
+disc.choice.dat$dist_cntrd_mmsi <- getDistanceFromLatLonInKm(disc.choice.dat$set_lat,  
+                                                             disc.choice.dat$set_long,
+                                                             disc.choice.dat$lat_mmsi,
+                                                             disc.choice.dat$long_mmsi)
+disc.choice.dat$dist_cntrd_fleet <- getDistanceFromLatLonInKm(disc.choice.dat$set_lat,  
+                                                              disc.choice.dat$set_long,
+                                                              disc.choice.dat$lat_fleet,
+                                                              disc.choice.dat$long_fleet)
+```
+
+
+```{r mmsi_dist, echo=FALSE, fig.cap="Histogram for distance from centroid", message=FALSE, warning=FALSE}
+### How many standard error deviate from the average (by mmsi and fleet) ###
+hist(disc.choice.dat$dist_cntrd_mmsi, breaks=60, main="", 
+     xlab="Distance from centroid (km)")
+```
+
+
+```{r mmsi_dist_by_mmsi, echo=FALSE, fig.cap="Histogram for distance from centroid by vessels", message=FALSE, warning=FALSE}
+ggplot(disc.choice.dat, aes(x = dist_cntrd_mmsi)) +
+  geom_histogram()+facet_wrap(~mmsi)+
+  xlim(0, 200) + labs(x = "Distance from centroid (km)", y = "Frequency")
 
 ```
 
-```{r SDM_logbooks, eval=FALSE, include=FALSE}
-#' Join SDM and landings data by port and plot correlations #'
-
-# Load data
-SDM_port <- read_csv("data/SDM_port.csv")
-
-landings_port <- read_csv("data/sard_dat.csv") %>%
-  select(LANDING_YEAR, port, LANDED_WEIGHT_MTONS, port_group_name) %>%
-  rename(year = LANDING_YEAR,
-         sard_mtons = LANDED_WEIGHT_MTONS) %>%
-  # replace NAs with 0s
-  mutate(sard_mtons = replace_na(sard_mtons, 0))
-
-port_dat <- landings_port %>%
-  inner_join(SDM_port, by = c("year", "port")) %>%
-  drop_na(SDM_mean)
-
-ggplot(data = port_dat, aes(x = sard_mtons, y = SDM_mean)) +
-  geom_point(alpha = 0.5) +
-  labs(x = "Sardine Landed Weight (MTONS)",
-       y = "Expected SDM Probability")
-ggsave("figures/port_compare_all.pdf", width = 5, height = 4, units = "in")
-
-ggplot(data = port_dat, aes(x = sard_mtons / 1000, y = SDM_mean)) +
-  geom_point(alpha = 0.5) +
-  facet_wrap(~port_group_name) +
-  labs(x = "Sardine Landed Weight (1000 MTONS)",
-       y = "Expected SDM Probability")
-ggsave("figures/port_compare_byport.pdf", width = 8, height = 7, units = "in")
+```{r statistics_deviation, echo=FALSE, , fig.cap="Histogram for distance from centroid by fleet", message=FALSE, warning=FALSE}
+### How many standard error deviate from the average (by mmsi and fleet) ###
+disc.choice.dat <- disc.choice.dat %>% tidyr::unite('fleet', fleet_name:species, remove = FALSE)
+ggplot(disc.choice.dat, aes(x = dist_cntrd_fleet)) +
+  geom_histogram()+facet_wrap(~fleet)+
+  xlim(0, 200) + labs(x = "Distance from centroid (km)", y = "Frequency")
 
 ```
+
+
