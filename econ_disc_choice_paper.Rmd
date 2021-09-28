@@ -166,6 +166,41 @@ Landings;
 <!-- How closure predictions were made? -->
 
 
+# # Graphs
+
+```{r std_coordinates, include=FALSE}
+
+centroids.mmsi <- disc.choice.dat %>% group_by(mmsi) %>% do(cntrd(.)) %>% 
+  dplyr::rename(long_mmsi = lon) %>% dplyr::rename(lat_mmsi = lat)
+  disc.choice.dat <- merge(disc.choice.dat, centroids.mmsi, by=c('mmsi'),all.x = TRUE) 
+  std_coordinates <- disc.choice.dat %>% 
+    mutate(std_lat = (set_lat - lat_mmsi)^2) %>% 
+    mutate(std_lon = (set_long - long_mmsi)^2)  %>% group_by(mmsi) %>% 
+    mutate(sum_std_lat=sum(std_lat), n=n(), sum_std_lon=sum(std_lon))  %>%
+    mutate(std_lat = sqrt(sum_std_lat / (n-1))) %>% mutate(std_lon = sqrt(sum_std_lon / (n-1))) %>% 
+    select("std_lon", "std_lat", "mmsi" ) %>% unique()
+
+```
+
+```{r hist_lat, echo=FALSE, fig.cap="Histogram for standard deviation of latitude", message=FALSE, warning=FALSE}
+### How many standard error deviate from the average (by mmsi and fleet) ###
+hist(std_coordinates$std_lat, breaks=20, main="", 
+     xlab="MMSI Standar deviation for latitudes")
+```
+
+```{r hist_long, echo=FALSE, fig.cap="Histogram for standard deviation of longitudes", message=FALSE, warning=FALSE}
+### How many standard error deviate from the average (by mmsi and fleet) ###
+hist(std_coordinates$std_lon, breaks=20, main="", 
+     xlab="MMSI Standar deviation for longitudes")
+```
+
+
+```{r mmsi_dist, echo=FALSE, fig.cap="Histogram for distance from centroid", message=FALSE, warning=FALSE}
+### How many standard error deviate from the average (by mmsi and fleet) ###
+hist(std_coordinates$dist_cntrd_mmsi, breaks=60, main="", 
+     xlab="Distance from centroid (km)")
+```
+
 
 # Graphs
 
@@ -210,7 +245,7 @@ ggplot(disc.choice.dat, aes(x = dist_cntrd_mmsi)) +
 disc.choice.dat <- disc.choice.dat %>% tidyr::unite('fleet', fleet_name:species, remove = FALSE)
 ggplot(disc.choice.dat, aes(x = dist_cntrd_fleet)) +
   geom_histogram()+facet_wrap(~fleet)+
-  xlim(0, 200) + labs(x = "Distance from centroid (km)", y = "Frequency")
+  xlim(0, 250) + labs(x = "Distance from centroid (km)", y = "Frequency")
 
 ```
 

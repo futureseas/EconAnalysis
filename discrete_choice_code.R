@@ -276,47 +276,46 @@ gfw.fishing.effort.CPS <- gfw.fishing.effort %>%
   left_join(logbooks.mmsi.day, by = c("mmsi", "date")) %>% filter(dCPS == 1) %>% unique()
   
 
-# #---------------------------------------------------------
-# # How many trips GFW capture from logbooks? 
-# 
-# logbooks.compare <- logbooks.mmsi %>%  dplyr::rename(date = set_date) %>% group_by(BoatName, drvid, mmsi, date, fleet_name, species) %>%
-#     summarise(across(c("set_lat", "set_long", "effort"), list(mean = mean, sum = sum), na.rm = TRUE)) %>% drop_na(mmsi)  # %>% filter(catch > 0)
-#   
-# gfw.compare <- gfw.fishing.effort %>% 
-#   group_by(mmsi, date) %>%
-#   summarise(across(c("cell_ll_lat", "cell_ll_lon", "fishing_hours"), list(mean = mean, sum = sum), na.rm = TRUE))
-# 
-# joint.compare <- logbooks.compare %>% left_join(gfw.compare, by = c("mmsi", "date")) 
-# 
-# ## 150 observations of 677 ~ 22% of logbooks... missing ~50% of MMSI
-# 
-# 
-# # --------------------------------------------------------
-# # How good is GFW compared to logbooks? (R: ~ 22 km average deviation).
-# 
-# joint.compare <- joint.compare %>% drop_na(cell_ll_lat_mean)
-#   joint.compare$id_seq <- seq(1, nrow(joint.compare))
-# 
-# 
-# joint.compare$dist <- getDistanceFromLatLonInKm(joint.compare$set_lat_mean, joint.compare$set_long_mean, 
-#                                                joint.compare$cell_ll_lat_mean, joint.compare$cell_ll_lon_mean)
-# 
-# summary(joint.compare$dist)
-# hist(joint.compare$dist)
-# 
-# joint.hist <- joint.compare %>% filter(dist<200)
-#   hist(joint.hist$dist)
-# 
-# joint.hist <- joint.compare %>% filter(dist<80)
-#   hist(joint.hist$dist)
-# 
-# joint.hist <- joint.compare %>% filter(dist<20)
-#   hist(joint.hist$dist)
-#   
-#   
-# 
+#---------------------------------------------------------
+# How many trips GFW capture from logbooks?
+
+logbooks.compare <- logbooks.mmsi %>%  dplyr::rename(date = set_date) %>% group_by(BoatName, drvid, mmsi, date, fleet_name, species) %>%
+    summarise(across(c("set_lat", "set_long", "effort"), list(mean = mean, sum = sum), na.rm = TRUE)) %>% drop_na(mmsi)  # %>% filter(catch > 0)
+
+gfw.compare <- gfw.fishing.effort %>%
+  group_by(mmsi, date) %>%
+  summarise(across(c("cell_ll_lat", "cell_ll_lon", "fishing_hours"), list(mean = mean, sum = sum), na.rm = TRUE))
+
+joint.compare <- logbooks.compare %>% left_join(gfw.compare, by = c("mmsi", "date"))
+
+## 150 observations of 677 ~ 22% of logbooks... missing ~50% of MMSI
+
+
+# --------------------------------------------------------
+# How good is GFW compared to logbooks? (R: ~ 22 km average deviation).
+
+joint.compare <- joint.compare %>% drop_na(cell_ll_lat_mean)
+  joint.compare$id_seq <- seq(1, nrow(joint.compare))
+
+
+joint.compare$dist <- getDistanceFromLatLonInKm(joint.compare$set_lat_mean, joint.compare$set_long_mean,
+                                               joint.compare$cell_ll_lat_mean, joint.compare$cell_ll_lon_mean)
+
+summary(joint.compare$dist)
+hist(joint.compare$dist)
+
+joint.hist <- joint.compare %>% filter(dist<200)
+  hist(joint.hist$dist)
+
+joint.hist <- joint.compare %>% filter(dist<80)
+  hist(joint.hist$dist)
+
+joint.hist <- joint.compare %>% filter(dist<20)
+  hist(joint.hist$dist)
+
+  
 # ## Create map of deviations
-#   
+# 
 #   library(maps)
 #   library(geosphere)
 #   library(magrittr)
@@ -324,10 +323,10 @@ gfw.fishing.effort.CPS <- gfw.fishing.effort %>%
 #   library(dplyr)
 # 
 #   joint.map <- joint.compare  %>% filter(dist > 11) %>% filter(dist < 220)
-#   
-#   
+# 
+# 
 #   # map projection
-#   
+# 
 #   g <- list(
 #     scope = 'usa',
 #     projection = list(type = 'albers usa'),
@@ -340,21 +339,21 @@ gfw.fishing.effort.CPS <- gfw.fishing.effort %>%
 #     showocean = TRUE,
 #     oceancolor = toRGB("blue")
 #   )
-#   
+# 
 #   fig <- plot_geo() %>%
-#     layout(geo = g, legend = list(x = 0.9, y = 0.1)) %>% 
-#     add_markers(data = joint.map, x = ~set_long_mean, y = ~set_lat_mean, 
-#                 size = ~dist, text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), joint.map$mmsi), 
-#                 hoverinfo = "text", name = "Loogbook location") %>% 
+#     layout(geo = g, legend = list(x = 0.9, y = 0.1)) %>%
+#     add_markers(data = joint.map, x = ~set_long_mean, y = ~set_lat_mean,
+#                 size = ~dist, text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), joint.map$mmsi),
+#                 hoverinfo = "text", name = "Loogbook location") %>%
 #     add_markers(data = joint.map, x = ~cell_ll_lon_mean, y = ~cell_ll_lat_mean,
-#                 size = ~dist, text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), joint.map$mmsi), 
-#                 hoverinfo = "text", name = "GFW location") %>% 
+#                 size = ~dist, text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), joint.map$mmsi),
+#                 hoverinfo = "text", name = "GFW location") %>%
 #     add_segments(x = ~set_long_mean, xend = ~cell_ll_lon_mean,
-#                  y = ~set_lat_mean, yend = ~cell_ll_lat_mean, 
-#                  color = I("gray"), text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "), 
+#                  y = ~set_lat_mean, yend = ~cell_ll_lat_mean,
+#                  color = I("gray"), text = ~paste(paste(paste(joint.map$dist, " km; "),"MMSI: "),
 #                  joint.map$mmsi),  opacity = 0.3, hoverinfo = "text", name = "Error (km)")
 #     fig
-#   
+# 
 # 
 # 
 # 
@@ -362,9 +361,9 @@ gfw.fishing.effort.CPS <- gfw.fishing.effort %>%
 #   coeff <- 25000
 #   gfwColor <- "#69b3a2"
 #   logbooksColor <- rgb(0.2, 0.6, 0.9, 1)
-#   
+# 
 #   ggplot(joint.compare, aes(id_seq)) +
-#     geom_line( aes(y= fishing_hours_sum), size=1, color=gfwColor) + 
+#     geom_line( aes(y= fishing_hours_sum), size=1, color=gfwColor) +
 #     geom_line( aes(y=  effort_sum / coeff), size=1, color=logbooksColor)  +
 #     scale_y_continuous(name = "GFW Fishing hours",
 #                        sec.axis = sec_axis(~.*coeff, name="Logbooks Catch")
@@ -372,8 +371,8 @@ gfw.fishing.effort.CPS <- gfw.fishing.effort %>%
 #       axis.title.y = element_text(color = gfwColor, size=13),
 #       axis.title.y.right = element_text(color = logbooksColor, size=13)
 #     ) + ggtitle("GFW vs Logbooks")
-#   
-#   
+# 
+# 
 #   library(plm)
 #   # I get a negative value for effort????
 #   d_panel <- pdata.frame(joint.compare, index=c("mmsi", "date"))
@@ -381,6 +380,7 @@ gfw.fishing.effort.CPS <- gfw.fishing.effort %>%
 #   summary(model)
 #   
 #
+
 #-----------------------------------------------------------------------------
 # Clean dataset for discrete choice model (Change to Global Fishing Watch)
 
@@ -393,6 +393,32 @@ gfw.fishing.effort.CPS$trip_id <- udpipe::unique_identifier(gfw.fishing.effort.C
     mutate(up_long = set_long) 
   
   
+# # Get distance between rows
+#   setorder(gfw.fishing.effort.CPS, trip_id, haul_num)
+#   rownames(gfw.fishing.effort.CPS) = seq(length=nrow(dt))
+#   dist_travelled <- tibble(trip_id = integer(),
+#                           haul_num = integer(),
+#                          dist_prev = numeric())
+#   
+#   for (i in 2:nrow(gfw.fishing.effort.CPS)) {
+#   j = i - 1
+#   dist_travelled <- dist_travelled %>%
+#     add_row(haul_num = gfw.fishing.effort.CPS$haul_num[i], 
+#             trip_id = gfw.fishing.effort.CPS$trip_id[i],
+#             dist_prev = getDistanceFromLatLonInKm(
+#               gfw.fishing.effort.CPS$set_lat[i], 
+#               gfw.fishing.effort.CPS$set_long[i],
+#               gfw.fishing.effort.CPS$set_lat[j],
+#               gfw.fishing.effort.CPS$set_long[j]))
+#   
+#   }
+#   
+#   dist_travelled <- dist_travelled %>% filter(haul_num>1)
+#     summarize(dist_travelled,mean_dist_travelled=mean(dist_prev),
+#               sd_dist_travelled=sd(dist_prev))
+  
+
+
 # Include depth variable
   library(raster)
   depths <- raster("G:\\My Drive\\Project\\Data\\Global Fishing Watch\\Bathymetric\\bathymetry.tif")
