@@ -92,8 +92,20 @@ getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
 
 # Introduction
 
+High variability on forage fisheries could encourage fisher to have complex fishers portfolio, using diversification as a tool for reducing risk [@kasperski2013]. This diversification can allow for species-specific environmental shocks affect other non-related fisheries through "harvest" arbitrage [@richerson2017]. Hetoregeneity must be considerate as fleet that differ by specific characteristics may have different responses to changes in policy and environmental conditions [@zhang2011]. We capture vessel heterogeneity estimating a Mixed Logit model. 
+
+Because we have access to vessel characteristics, we can estimate a sorting model with observable heterogeneity following @zhang2011.
+
+
+Previous studies on fishers behavior focus moslty on a single-species framework. TO our knowledge, only [@richerson2017] address the complexity of fleet dynamics on multispecies fishery in the U.S. West Coast, where the desicion which species to harvest is interdependent between species. They study how a closure of the salmon fishery on fisher behavior. Our study expand on their work studying the interrelation and the effect of closures and weather events on the desion to participate in fishery for the Coastal Pelagic Species fishery in the California current.  
+
+Moreover, fisher decision to participate in a particular fishery could vary depending on the season. Some vessels change within a year their target species to follow species distribution over the year. Regulations (e.g. whether or not the fishery have limited entry, and the vessel holds a permit) and profitability can also condition the decision to participate in a fishery during a year [@richerson2017]. Complementary v/s substitute fisheries [@richerson2017]
+
+Additional, we study fishers response to weather events (e.g. storms) and to a fishery closure, such as the Pacific sardine closure in 2015.
+
+
 + Research question:
-  + **Big question:** What is the effect of climate change on fish patterns. 
+  + **Big question:** What is the effect of climate change on fishers dexision. 
   + **Narrow question:** How does changes in the presence of CPS affect species and location choices by vessels registered in the US west coast?
   + Check if state limits affect the behavior of fish decisions.
 
@@ -124,6 +136,7 @@ of utility." @revelt1998
 + Choices:
   + Set of location/specie
   + Number of choices can vary between vessels, as well as the number of periods or choice situtations @revelt1998.
+  + What is the outside option, non-CPS fishery or non-fishing? [@zhang2011]
   + Use @hicks2020 methodology to select the choice set:
     + Crucial for the model the selection of the choice set. If is erroneous, our estimates would be biased.
     + We don't observe fishers complete set of alternatives. "A limitation of all of the models discussed thus far is the assumption that the choice set is finite and tractable. In the caseof spatial choice models in a number of environmental settings, including fisheries, the choice set is virtually infinite as spacecan be continually divided to form different “alternatives.”"
@@ -142,6 +155,8 @@ of utility." @revelt1998
 Landings;
   + Vessel characteristics (Note: Not all vessels go to the exact location, so that decisions might depend on their characteristics).
   + Expected catch / species abundance?
+  + Catch per unit of effort" (use monthly data to calculate this, maybe correlated with SDM outputs [@zhang2011])
+  + DIstance? Maybe is endogenus (comment from Dale Squires)
 
 
 + Data 
@@ -154,25 +169,41 @@ Landings;
   + Outside option?
 
 
+# Method
 
++ Dale comments
+  + Results are sensible when your have high resolution data (stochastic within day)
+  + We have to find the optimal degree of disagregation (multicollinearity between explanatory variables)
+  + Check for endogeneity, heterokedasticity and serial correlation (in panel data).
+    + Distance might be endogeneous (location or distance is chosen? do a Hausman test)
+  + Try including splines in the regressors 
 
-<!-- Stafford (2018):  -->
-<!-- When alternatives are combined, they are treated as identical alternatives. Regardless of similarity between them or with an alternative in the model. → Misleading estimates and distort substitution patterns.  -->
-<!-- “The empirical results and Monte Carlo analysis suggest that researchers and practitioners should explicitly model choices closely related to the decisions of interest whenever possible and, when not possible, carefully consider the potential biases introduced by pooling such choices with other outside options.” -->
-<!-- Model: Nested logit model -->
-<!-- Stages: Participation, species, and location. -->
-<!-- Variables: They include alternative-specific observations (for species and location) as well as alternative-invariant variables.  -->
-<!-- Q: What about individual characteristics in the model to show heterogeneity in fleets? -->
-<!-- How closure predictions were made? -->
+It is of high relevance to define rigorously the choice set. For instance, @stafford2018 show that aggregating relevant alternative in the generic outside option lead to biased results and distorted substitution patterns. Thus, we should carefully assess the set of alternative in this case. In our case, this require to carefully select the set of species a fisher has as alternatives, as well as the location included in the choice set.
+<!-- Model: Nested logit model -> Stages: Participation, species, and location. / How closure predictions were made? -->
+
+We develop to different discrete choice model:
+  + Multispecies participation model
+  + Location and species decision model
+  
+For the multispecies participation model, we follow a similar methodology than @richerson201. We estimate a discrete choice model for probability that a vessel participate in a particular fishery. First, we identify vessels that participate in at least two fishery. Then, we...
+
+Variables that can explain fishery participation on a particular fishery are **HHI and LI?** (Think about this) (Peña et al have some ideas how to use expected catch and cost. It could be the month average...)
+
+Our second model is a location and species decision model. We can estimate a conditional logit for species-location choice set using charactristics of the choice and incorporating heterogeneity through interaction variables. 
 
 
 # # Graphs
 
 ```{r std_coordinates, include=FALSE}
-
+# Calculate centroids 
+centroids.fleet <- disc.choice.dat %>% group_by(fleet_name, species) %>% do(cntrd(.)) %>% 
+  dplyr::rename(long_fleet = lon) %>% dplyr::rename(lat_fleet = lat)
+  disc.choice.dat <- merge(disc.choice.dat, centroids.fleet, by=c('fleet_name', 'species'),all.x = TRUE) 
 centroids.mmsi <- disc.choice.dat %>% group_by(mmsi) %>% do(cntrd(.)) %>% 
   dplyr::rename(long_mmsi = lon) %>% dplyr::rename(lat_mmsi = lat)
   disc.choice.dat <- merge(disc.choice.dat, centroids.mmsi, by=c('mmsi'),all.x = TRUE) 
+  
+# Caclulate standard errors
   std_coordinates <- disc.choice.dat %>% 
     mutate(std_lat = (set_lat - lat_mmsi)^2) %>% 
     mutate(std_lon = (set_long - long_mmsi)^2)  %>% group_by(mmsi) %>% 
@@ -195,25 +226,10 @@ hist(std_coordinates$std_lon, breaks=20, main="",
 ```
 
 
-```{r mmsi_dist, echo=FALSE, fig.cap="Histogram for distance from centroid", message=FALSE, warning=FALSE}
-### How many standard error deviate from the average (by mmsi and fleet) ###
-hist(std_coordinates$dist_cntrd_mmsi, breaks=60, main="", 
-     xlab="Distance from centroid (km)")
-```
-
 
 # Graphs
 
 ```{r dist_from_centroid, include=FALSE}
-## Calculate centroids and distances
-centroids.mmsi <- disc.choice.dat %>% group_by(mmsi) %>% do(cntrd(.)) %>% 
-  dplyr::rename(long_mmsi = lon) %>% dplyr::rename(lat_mmsi = lat)
-  disc.choice.dat <- merge(disc.choice.dat, centroids.mmsi, by=c('mmsi'),all.x = TRUE) 
-
-centroids.fleet <- disc.choice.dat %>% group_by(fleet_name, species) %>% do(cntrd(.)) %>% 
-  dplyr::rename(long_fleet = lon) %>% dplyr::rename(lat_fleet = lat)
-  disc.choice.dat <- merge(disc.choice.dat, centroids.fleet, by=c('fleet_name', 'species'),all.x = TRUE) 
-
 ## Calculate distances to centroids   
 disc.choice.dat$dist_cntrd_mmsi <- getDistanceFromLatLonInKm(disc.choice.dat$set_lat,  
                                                              disc.choice.dat$set_long,
