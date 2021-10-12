@@ -171,6 +171,11 @@ logbooks <- rbind(logbooks, nanc.logbook.OR)
   logbooks <- logbooks[-which(is.na(logbooks$set_lat)), ]
     logbooks$set_long <- with(logbooks, ifelse(set_long > 0, -set_long, set_long))
   
+    
+### Save logbooks ###
+write.csv(logbooks,"Data\\logbooks_merged.csv", row.names = FALSE)
+    
+    
 #-----------------------------------------------------------------------------
 # Use Vessel ID to obtain MMSI
 

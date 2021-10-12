@@ -65,6 +65,7 @@ library(zoo)
 
 ```{r read_data, include=FALSE} 
 disc.choice.dat <- read.csv(file = here("Data", "discrete_choice_data.csv"))
+logbooks.dat <- read.csv(file = here("Data", "logbooks_merged.csv"))
 
 ```
 
@@ -155,8 +156,10 @@ of utility." @revelt1998
 Landings;
   + Vessel characteristics (Note: Not all vessels go to the exact location, so that decisions might depend on their characteristics).
   + Expected catch / species abundance?
-  + Catch per unit of effort" (use monthly data to calculate this, maybe correlated with SDM outputs [@zhang2011])
-  + DIstance? Maybe is endogenus (comment from Dale Squires)
+  + Catch per unit of effort" (use monthly data to calculate this, maybe correlated with SDM outputs [@zhang2011]) Maybe is endogenus (comment from Dale Squires)... better to use SDM to get expected biomass at this area. 
+  + DIstance? 
+  
+  + Girardin may have a way to compute congestion in location
 
 
 + Data 
@@ -192,77 +195,84 @@ Variables that can explain fishery participation on a particular fishery are **H
 Our second model is a location and species decision model. We can estimate a conditional logit for species-location choice set using charactristics of the choice and incorporating heterogeneity through interaction variables. 
 
 
-# # Graphs
+## Graphs
 
 ```{r std_coordinates, include=FALSE}
 # Calculate centroids 
-centroids.fleet <- disc.choice.dat %>% group_by(fleet_name, species) %>% do(cntrd(.)) %>% 
-  dplyr::rename(long_fleet = lon) %>% dplyr::rename(lat_fleet = lat)
-  disc.choice.dat <- merge(disc.choice.dat, centroids.fleet, by=c('fleet_name', 'species'),all.x = TRUE) 
-centroids.mmsi <- disc.choice.dat %>% group_by(mmsi) %>% do(cntrd(.)) %>% 
-  dplyr::rename(long_mmsi = lon) %>% dplyr::rename(lat_mmsi = lat)
-  disc.choice.dat <- merge(disc.choice.dat, centroids.mmsi, by=c('mmsi'),all.x = TRUE) 
+centroids.fleet <- logbooks.dat %>% group_by(fleet_name, species) %>% do(cntrd(.)) %>% 
+  dplyr::rename(long_fleet = lon) %>% dplyr::rename(lat_fleet = lat) 
+  logbooks.dat <- logbooks.dat %>% 
+    merge(centroids.fleet, by=c('fleet_name', 'species'),all.x = TRUE) %>% 
+    mutate(drvid = ifelse(drvid == 0, BoatName, ifelse(is.na(drvid), BoatName, drvid)))
+  
+centroids.drvid <- logbooks.dat %>% group_by(drvid) %>% mutate(count = n()) %>% dplyr::filter(count>2) %>%
+  group_by(drvid) %>% do(cntrd(.)) %>% 
+  dplyr::rename(long_drvid = lon) %>% dplyr::rename(lat_drvid = lat)
+  logbooks.dat <- merge(logbooks.dat, centroids.drvid, by=c('drvid'),all.x = TRUE) 
   
 # Caclulate standard errors
-  std_coordinates <- disc.choice.dat %>% 
-    mutate(std_lat = (set_lat - lat_mmsi)^2) %>% 
-    mutate(std_lon = (set_long - long_mmsi)^2)  %>% group_by(mmsi) %>% 
+  std_coordinates <- logbooks.dat %>% 
+    mutate(std_lat = (set_lat - lat_drvid)^2) %>% 
+    mutate(std_lon = (set_long - long_drvid)^2)  %>% group_by(drvid) %>% 
     mutate(sum_std_lat=sum(std_lat), n=n(), sum_std_lon=sum(std_lon))  %>%
-    mutate(std_lat = sqrt(sum_std_lat / (n-1))) %>% mutate(std_lon = sqrt(sum_std_lon / (n-1))) %>% 
-    select("std_lon", "std_lat", "mmsi" ) %>% unique()
+    mutate(std_lat = sqrt(sum_std_lat / (n-1))) %>% mutate(std_lon = sqrt(sum_std_lon / (n-1))) %>%
+    tidyr::unite('fleet', fleet_name:species, remove = FALSE) %>% 
+    dplyr::select("std_lon", "std_lat", "drvid", "fleet") %>% unique()
 
 ```
 
-```{r hist_lat, echo=FALSE, fig.cap="Histogram for standard deviation of latitude", message=FALSE, warning=FALSE}
+```{r hist_all, echo=FALSE, fig.cap="Histogram for standard deviation from centroid", message=FALSE, warning=FALSE}
 ### How many standard error deviate from the average (by mmsi and fleet) ###
-hist(std_coordinates$std_lat, breaks=20, main="", 
-     xlab="MMSI Standar deviation for latitudes")
+LonCol <- rgb(1,0,0,0.2)
+LatCol <- rgb(0,0,1,0.2)
+hist_data <- gather(std_coordinates, condition, measurement, std_lon, std_lat, factor_key=TRUE)
+ggplot(hist_data, aes(measurement, fill = condition)) +  geom_density(alpha = 0.2) +
+  labs(fill = "Variable", x = "Standard deviation (in degrees) from centroids", y = "Density") +
+  scale_fill_manual(labels = c("Longitude (SD)", "Latitute (SD)"), values = c(LonCol, LatCol))
+
 ```
 
-```{r hist_long, echo=FALSE, fig.cap="Histogram for standard deviation of longitudes", message=FALSE, warning=FALSE}
+```{r hist_fleet, echo=FALSE, fig.cap="Histogram for standard deviation from centroid by fleet", message=FALSE, warning=FALSE}
 ### How many standard error deviate from the average (by mmsi and fleet) ###
-hist(std_coordinates$std_lon, breaks=20, main="", 
-     xlab="MMSI Standar deviation for longitudes")
+hist_data <- gather(std_coordinates, condition, measurement, std_lon, std_lat, factor_key=TRUE)
+ggplot(hist_data, aes(measurement, fill = condition)) +  geom_density(alpha = 0.2) +
+  labs(fill = "Variable", x = "Standard deviation (in degrees) from centroids", y = "Density") +
+  scale_fill_manual(labels = c("Longitude (SD)", "Latitute (SD)"), values = c(LonCol, LatCol)) + 
+  facet_wrap(~fleet, scales = "free")
 ```
 
 
+## Convex hull estimation
 
-# Graphs
+```{r convex_hull, echo=FALSE, fig.cap="Histogram for standard deviation of latitude", message=FALSE, warning=FALSE}
+### Minimum convex polygon (or convex hull) It is the smallest polygon in which no internal angle exceeds 180 degrees and which contains all sites. 
 
-```{r dist_from_centroid, include=FALSE}
-## Calculate distances to centroids   
-disc.choice.dat$dist_cntrd_mmsi <- getDistanceFromLatLonInKm(disc.choice.dat$set_lat,  
-                                                             disc.choice.dat$set_long,
-                                                             disc.choice.dat$lat_mmsi,
-                                                             disc.choice.dat$long_mmsi)
-disc.choice.dat$dist_cntrd_fleet <- getDistanceFromLatLonInKm(disc.choice.dat$set_lat,  
-                                                              disc.choice.dat$set_long,
-                                                              disc.choice.dat$lat_fleet,
-                                                              disc.choice.dat$long_fleet)
-```
+logbooks.dat.sp <- logbooks.dat %>% tidyr::unite('fleet', fleet_name:species, remove = FALSE) %>% 
+  group_by(drvid) %>% mutate(count = n()) %>% dplyr::filter(count>=5) 
+logbooks.sp <- logbooks.dat.sp[, c("drvid", "set_long", "set_lat")] 
 
 
-```{r mmsi_dist, echo=FALSE, fig.cap="Histogram for distance from centroid", message=FALSE, warning=FALSE}
-### How many standard error deviate from the average (by mmsi and fleet) ###
-hist(disc.choice.dat$dist_cntrd_mmsi, breaks=60, main="", 
-     xlab="Distance from centroid (km)")
-```
+# Create a SpatialPointsDataFrame by defining the coordinates
+library(sp)
+coordinates(logbooks.sp) <- c("set_long", "set_lat")
+# proj4string(logbooks.sp) <- CRS( "+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs" )
 
+# Calculate MCPs for each turtle
+library(adehabitatHR) # Load library to estimate "home range estimation" (used in ecology I guess)
+logbooks.mcp <- mcp(logbooks.sp, percent = 100, unin = c("km"), unout = c("ha"))
+logbooks.convex.hull <- as.data.frame(logbooks.mcp)
+# # Plot
+library(scales) # Helps make polygons partly transparent using the alpha argument below
+plot(logbooks.sp, col = as.factor(logbooks.sp@data$drvid), pch = 16)
+plot(logbooks.mcp, col = alpha(1:5, 0.5), add = TRUE)
+# 
 
-```{r mmsi_dist_by_mmsi, echo=FALSE, fig.cap="Histogram for distance from centroid by vessels", message=FALSE, warning=FALSE}
-ggplot(disc.choice.dat, aes(x = dist_cntrd_mmsi)) +
-  geom_histogram()+facet_wrap(~mmsi)+
-  xlim(0, 200) + labs(x = "Distance from centroid (km)", y = "Frequency")
+# Plot histrogram for convex hull by fleet
+convex.hull <- logbooks.dat %>% dplyr::select("drvid", "fleet") %>% unique() %>% dplyr::rename(id = drvid) %>% 
+  merge(logbooks.convex.hull, by=c('id'), all.x = TRUE)
+  ggplot(convex.hull, aes(area)) +  geom_density() + facet_wrap(~fleet, scales = "free") +
+    labs(x = "Convex hull area (hectares)", y = "Density")
 
-```
-
-```{r statistics_deviation, echo=FALSE, , fig.cap="Histogram for distance from centroid by fleet", message=FALSE, warning=FALSE}
-### How many standard error deviate from the average (by mmsi and fleet) ###
-disc.choice.dat <- disc.choice.dat %>% tidyr::unite('fleet', fleet_name:species, remove = FALSE)
-ggplot(disc.choice.dat, aes(x = dist_cntrd_fleet)) +
-  geom_histogram()+facet_wrap(~fleet)+
-  xlim(0, 250) + labs(x = "Distance from centroid (km)", y = "Frequency")
 
 ```
-
 
