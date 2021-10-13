@@ -268,8 +268,9 @@ plot(logbooks.mcp, col = alpha(1:5, 0.5), add = TRUE)
 # 
 
 # Plot histrogram for convex hull by fleet
-convex.hull <- logbooks.dat %>% dplyr::select("drvid", "fleet") %>% unique() %>% dplyr::rename(id = drvid) %>% 
-  merge(logbooks.convex.hull, by=c('id'), all.x = TRUE)
+convex.hull <- logbooks.dat %>% tidyr::unite('fleet', fleet_name:species, remove = FALSE) %>% 
+  dplyr::select("drvid", "fleet") %>% unique() %>% dplyr::rename(id = drvid) 
+  convex.hull <- merge(convex.hull, logbooks.convex.hull, by=c('id'), all.x = TRUE)
   ggplot(convex.hull, aes(area)) +  geom_density() + facet_wrap(~fleet, scales = "free") +
     labs(x = "Convex hull area (hectares)", y = "Density")
 

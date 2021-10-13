@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.8.30)  30 SEP 2021 15:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.8.30)  13 OCT 2021 15:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -961,94 +961,77 @@ File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ftex.map}] [2] [3]
 
 Package natbib Warning: Citation `richerson201' on page 4 undefined on input li
-ne 353.
+ne 356.
 
-<econ_disc_choice_paper_files/figure-latex/hist_lat-1.pdf, id=83, 469.755pt x 3
+<econ_disc_choice_paper_files/figure-latex/hist_all-1.pdf, id=83, 469.755pt x 3
 25.215pt>
-File: econ_disc_choice_paper_files/figure-latex/hist_lat-1.pdf Graphic file (ty
+File: econ_disc_choice_paper_files/figure-latex/hist_all-1.pdf Graphic file (ty
 pe pdf)
-<use econ_disc_choice_paper_files/figure-latex/hist_lat-1.pdf>
-Package pdftex.def Info: econ_disc_choice_paper_files/figure-latex/hist_lat-1.p
-df  used on input line 372.
+<use econ_disc_choice_paper_files/figure-latex/hist_all-1.pdf>
+Package pdftex.def Info: econ_disc_choice_paper_files/figure-latex/hist_all-1.p
+df  used on input line 375.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [4]
-<econ_disc_choice_paper_files/figure-latex/hist_long-1.pdf, id=90, 469.755pt x 
-325.215pt>
-File: econ_disc_choice_paper_files/figure-latex/hist_long-1.pdf Graphic file (t
-ype pdf)
-<use econ_disc_choice_paper_files/figure-latex/hist_long-1.pdf>
-Package pdftex.def Info: econ_disc_choice_paper_files/figure-latex/hist_long-1.
-pdf  used on input line 378.
+<econ_disc_choice_paper_files/figure-latex/hist_fleet-1.pdf, id=90, 469.755pt x
+ 325.215pt>
+File: econ_disc_choice_paper_files/figure-latex/hist_fleet-1.pdf Graphic file (
+type pdf)
+<use econ_disc_choice_paper_files/figure-latex/hist_fleet-1.pdf>
+Package pdftex.def Info: econ_disc_choice_paper_files/figure-latex/hist_fleet-1
+.pdf  used on input line 381.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [5pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.381 
-       <./econ_disc_choice_paper_files/figure-latex/hist_lat-1.pdf>]
-<econ_disc_choice_paper_files/figure-latex/mmsi_dist-1.pdf, id=101, 469.755pt x
- 325.215pt>
-File: econ_disc_choice_paper_files/figure-latex/mmsi_dist-1.pdf Graphic file (t
-ype pdf)
-<use econ_disc_choice_paper_files/figure-latex/mmsi_dist-1.pdf>
-Package pdftex.def Info: econ_disc_choice_paper_files/figure-latex/mmsi_dist-1.
-pdf  used on input line 387.
+l.384 
+       <./econ_disc_choice_paper_files/figure-latex/hist_all-1.pdf>]
+<econ_disc_choice_paper_files/figure-latex/convex_hull-1.pdf, id=104, 469.755pt
+ x 325.215pt>
+File: econ_disc_choice_paper_files/figure-latex/convex_hull-1.pdf Graphic file 
+(type pdf)
+<use econ_disc_choice_paper_files/figure-latex/convex_hull-1.pdf>
+Package pdftex.def Info: econ_disc_choice_paper_files/figure-latex/convex_hull-
+1.pdf  used on input line 388.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[6pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) 
-has been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.390 
-       <./econ_disc_choice_paper_files/figure-latex/hist_long-1.pdf>]
-<econ_disc_choice_paper_files/figure-latex/mmsi_dist_by_mmsi-1.pdf, id=112, 469
-.755pt x 325.215pt>
-File: econ_disc_choice_paper_files/figure-latex/mmsi_dist_by_mmsi-1.pdf Graphic
- file (type pdf)
-<use econ_disc_choice_paper_files/figure-latex/mmsi_dist_by_mmsi-1.pdf>
-Package pdftex.def Info: econ_disc_choice_paper_files/figure-latex/mmsi_dist_by
-_mmsi-1.pdf  used on input line 393.
+<econ_disc_choice_paper_files/figure-latex/convex_hull-2.pdf, id=105, 469.755pt
+ x 325.215pt>
+File: econ_disc_choice_paper_files/figure-latex/convex_hull-2.pdf Graphic file 
+(type pdf)
+<use econ_disc_choice_paper_files/figure-latex/convex_hull-2.pdf>
+Package pdftex.def Info: econ_disc_choice_paper_files/figure-latex/convex_hull-
+2.pdf  used on input line 389.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[7pdfTeX warning (ext4): destination with the same identifier (name{figure.3}) 
-has been already used, duplicate ignored
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--390
+[]
+ []
+
+(./econ_disc_choice_paper.bbl [6pdfTeX warning (ext4): destination with the sam
+e identifier (name{figure.2}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.396 
-       <./econ_disc_choice_paper_files/figure-latex/mmsi_dist-1.pdf>]
-<econ_disc_choice_paper_files/figure-latex/statistics_deviation-1.pdf, id=125, 
-469.755pt x 325.215pt>
-File: econ_disc_choice_paper_files/figure-latex/statistics_deviation-1.pdf Grap
-hic file (type pdf)
-<use econ_disc_choice_paper_files/figure-latex/statistics_deviation-1.pdf>
-Package pdftex.def Info: econ_disc_choice_paper_files/figure-latex/statistics_d
-eviation-1.pdf  used on input line 399.
-(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[8pdfTeX warning (ext4): destination with the same identifier (name{figure.4}) 
-has been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.402 
-       <./econ_disc_choice_paper_files/figure-latex/mmsi_dist_by_mmsi-1.pdf>] (
-./econ_disc_choice_paper.bbl [9pdfTeX warning (ext4): destination with the same
- identifier (name{figure.5}) has been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.48 \end{thebibliography}
-                           <./econ_disc_choice_paper_files/figure-latex/statist
-ics_deviation-1.pdf>])
+l.1 \begin{thebibliography}{6}
+                               <./econ_disc_choice_paper_files/figure-latex/his
+t_fleet-1.pdf>] [7]
+Overfull \vbox (23.89229pt too high) has occurred while \output is active []
+
+[8 <./econ_disc_choice_paper_files/figure-latex/convex_hull-1.pdf> <./econ_disc
+_choice_paper_files/figure-latex/convex_hull-2.pdf>])
 
 Package natbib Warning: There were undefined citations.
 
-[10] (./econ_disc_choice_paper.aux)
+[9] (./econ_disc_choice_paper.aux)
 Package rerunfilecheck Info: File `econ_disc_choice_paper.out' has not changed.
 
-(rerunfilecheck)             Checksum: 754DEE32F630F1382B6FEA195118AA6F;644.
+(rerunfilecheck)             Checksum: 4E41A3105F404664C13BBB6449CED3B3;742.
  ) 
 Here is how much of TeX's memory you used:
  22451 strings out of 480559
- 409964 string characters out of 5901528
- 730727 words of memory out of 5000000
- 39458 multiletter control sequences out of 15000+600000
- 460643 words of font info for 165 fonts, out of 8000000 for 9000
+ 409584 string characters out of 5901528
+ 730751 words of memory out of 5000000
+ 39454 multiletter control sequences out of 15000+600000
+ 463700 words of font info for 171 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  83i,10n,83p,584b,522s stack positions out of 5000i,500n,10000p,200000b,80000s
 {c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r
@@ -1056,10 +1039,10 @@ Here is how much of TeX's memory you used:
 s/utmb8a.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/
 urw/times/utmr8a.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/font
 s/type1/urw/times/utmri8a.pfb>
-Output written on econ_disc_choice_paper.pdf (10 pages, 88300 bytes).
+Output written on econ_disc_choice_paper.pdf (9 pages, 854527 bytes).
 PDF statistics:
- 178 PDF objects out of 1000 (max. 8388607)
- 148 compressed objects within 2 object streams
- 33 named destinations out of 1000 (max. 500000)
- 36942 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 170 PDF objects out of 1000 (max. 8388607)
+ 143 compressed objects within 2 object streams
+ 29 named destinations out of 1000 (max. 500000)
+ 41033 words of extra memory for PDF output out of 42996 (max. 10000000)
 
