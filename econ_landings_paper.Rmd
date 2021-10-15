@@ -686,9 +686,17 @@ fit_qNANC_price <- brm(bf(NANC_Landings ~ NANC_SDM_20 + NANC_Price + PSDN_SDM_60
 save.image (file = "stan_fit.RData")
 ```
 
+##  Multispecies participation model
+
+<< WORK ON THIS >>
+For the multispecies participation model, we follow a similar methodology than @richerson201. We estimate a discrete choice model for probability that a vessel participate in a particular fishery. First, we identify vessels that participate in at least two fishery. Then, we...
+
+Variables that can explain fishery participation on a particular fishery are **HHI and LI?** (Think about this) (Peña et al have some ideas how to use expected catch and cost. It could be the month average...)
 
 
 # Results
+
+## Landing model
 
 <!-- # print summary -->
 <!-- texreg(list(f2, f3, r2, r3), caption = 'Panel data models for Pacific Sardine landings.\\label{table:sardine_est}', caption.above = TRUE, float.pos = "h", custom.model.names = c("FE: Model 1", "FE: Model 2", "RE: Model 1", "RE: Model 2")) -->
@@ -713,7 +721,7 @@ save.image (file = "stan_fit.RData")
 
 <!-- ## Check https://www.pcouncil.org/stock-assessments-and-fishery-evaluation-safe-documents/ for ACL and closures. -->
 
-## Graphical posterior predictive
+### Graphical posterior predictive
 Before presenting the results for the three species in consideration, we check graphically whether the posterior distribution is able to predict the actual distribution. We exclude zero in our graph to avoid plotting different data generation processes. In Figure \ref{fig:posteriors} we show a posterior sample compare with the true sample distribution for the three species in analysis. Some deviation from the true sample distribution is observed in the three models, but still the posterior sample follow a similar shape than the actual curve. Moreover, our pacific sardine sample do well in predicting probabilities at lower landing levels. 
 
 ```{r y_rep, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks\\label{fig:posteriors}"}
@@ -728,7 +736,7 @@ g3 <- pp_check(fit_qNANC_price) + ggtitle('(c) Northern Anchovy') +
 g1 + g2 + g3
 ```
 
-In addition to a posterior predictive check, we also check divergence and treedepth.^[Explain what are these concepts...] In all three models, we did not have any divergent step in our estimation. The maximum treedepth was 11 for the Pacific sardine model, while in the other it was 10.   
+In addition to a posterior predictive check, we also check divergence and treedepth.^[Explain what are these concepts...] In all three models, we did not have any divergent step in our estimation. The maximum treedepth was 11 for the Pacific sardine model, while in the others it was 10.   
 
 ```{r shinystan, eval=FALSE, include=FALSE}
 shinystan::launch_shinystan(fit_qPSDN_price) 
@@ -773,9 +781,9 @@ comp %>%
 ```
 
 
-## Own species distribution effect
+### Own species distribution effect
 
-The inclusion of hierarchical effects by port allows us to analyze the effects of the probability of presence on landings disaggregated by ports. We only focus our analysis in owns probability of presence effects, as other probability are analyzed as interaction (see next subsection). We can observe that the effect of own probability of presence is not strong (maybe I should use logs...). However, it is clear that it have a positive effect on landings, specially on port areas such as Monterrey for Northern anchovy and Columbia River at Oregon for Pacific sardine. 
+The inclusion of hierarchical effects by port allows us to analyze the effects of the probability of presence on landings disaggregated by ports. We only focus our analysis in owns probability of presence effects, as other probability are analyzed as interaction (see next subsection). We can observe that the effect of own probability of presence is not strong (maybe I should use logs...). However, it is clear that it have a positive effect on landings, specially on port areas such as Columbia River at Oregon for Pacific sardine, and Monterrey for Northern anchovy, while a more moderate effect is observed at Santa Barbara Area for Northern anchovy.
 
 
 ```{r by_port_sdm, echo=FALSE, fig.cap = "Effect of probability of presence on landings by species and port\\label{fig:sdmeffects}"}
@@ -836,9 +844,9 @@ g1 + g2 + g3
 <!-- @smith2021potential estimate with GAM framework (allows for non-linear relationships) -->
 
 
-## Interaction effects
+### Interaction effects
 
-To study the effect of other species distribution on landings, we compute the conditional effects of the interaction between probabilities of presence. For the Pacific sardine equation, we compute these results for the probability of presence effect between Pacific sardine and market squid, Pacific sardine and Northern anchovy, and market squid and Northern anchovy 
+To study the effect of other species distribution on landings, we compute the conditional effects of the interaction between probabilities of presence. Let denote species A the species which we are analysing its landings, and species B and C the other species included in the model for species A landings. For each species, we compute the effect on landing of the interaction between the probability of presences of: (i) species A and species B, (ii) species A versus species C, and (iii) species B versus species C. For example, for the Pacific sardine equation, we compute these results for the probability of presence effect between Pacific sardine and market squid, Pacific sardine and Northern anchovy, and market squid and Northern anchovy. 
 
 ```{r int_effect_PSDN_by_port, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 c_eff_int_psdn_msqd <- (conditional_effects(fit_qPSDN_price, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, 
@@ -879,6 +887,7 @@ g3_PSDN <-  plot(c_eff_int_msqd_nanc, plot = FALSE)[[1]] + ggtitle('(c) Northern
         scale_x_continuous(name = "P(Pres): MSQD") + scale_y_continuous(name = "P(Pres): NANC") 
 save.image (file = "stan_fit.RData")
 ```
+
 
 ```{r int_effect_PSDN_by_port_PLOT, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Interaction effects between species distribution on Pacific sardine landings by port\\label{fig:sdm_int_psdn}"}
 g1_PSDN / g2_PSDN / g3_PSDN
@@ -976,7 +985,7 @@ g1_NANC / g2_NANC / g3_NANC
 ```
 
 
-## Pacific sardine closure
+### Pacific sardine closure
 
 
 ```{r by_port_msqd_dclose, echo=FALSE, fig.cap = "Effect of Pacific sardine fishery closure on markt squid landings by species and  port\\label{fig:sdmeffects}"}
@@ -998,6 +1007,10 @@ g2 <- plot(c_eff_close_nanc, plot = FALSE)[[1]] + ggtitle('(b) Northern anchovy'
 
 g1 / g2
 ```
+
+## Multispecies participation model
+
+
 
 # Predictions
 ...

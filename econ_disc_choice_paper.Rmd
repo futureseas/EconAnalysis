@@ -185,13 +185,10 @@ It is of high relevance to define rigorously the choice set. For instance, @staf
 <!-- Model: Nested logit model -> Stages: Participation, species, and location. / How closure predictions were made? -->
 
 We develop to different discrete choice model:
-  + Multispecies participation model
+  + species participation model
   + Location and species decision model
+  + species and gear decision model
   
-For the multispecies participation model, we follow a similar methodology than @richerson201. We estimate a discrete choice model for probability that a vessel participate in a particular fishery. First, we identify vessels that participate in at least two fishery. Then, we...
-
-Variables that can explain fishery participation on a particular fishery are **HHI and LI?** (Think about this) (Peña et al have some ideas how to use expected catch and cost. It could be the month average...)
-
 Our second model is a location and species decision model. We can estimate a conditional logit for species-location choice set using charactristics of the choice and incorporating heterogeneity through interaction variables. 
 
 
