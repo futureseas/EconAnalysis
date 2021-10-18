@@ -938,7 +938,7 @@ g3_MSQD <-  plot(c_eff_int_psdn_nanc, plot = FALSE)[[1]] + ggtitle('(c) Pacific 
 save.image (file = "stan_fit.RData")
 ```
 
-We found some similar findings in Figure \ref{fig:sdm_int_msqd}...
+We found some similar findings for market squid in Figure \ref{fig:sdm_int_msqd}. Pacific sardine it is a strong substitute of market squid. In regard to Norther anchovy, there is some complementarity with market squid. We observe that when Northern anchovy presence increase, there is also an increase in market squid landings. 
 
 ```{r int_effect_MSQD_by_port_PLOT, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Interaction effects between species distribution on market squid landings by port\\label{fig:sdm_int_msqd}"}
 g1_MSQD / g2_MSQD 
@@ -987,6 +987,8 @@ g3_NANC <-  plot(c_eff_int_psdn_msqd, plot = FALSE)[[1]] + ggtitle('(c) Pacific 
 save.image (file = "stan_fit.RData")
 ```
 
+
+However, this complementary is not observed for Northern anchovy landings. When market squid presence increase, we observe a decrease in Northern anchovy landings. An interesting case is observed for Pacific sardine and Northern anchovy, in particular at Monterrey area. For small levels of Pacific sardine presence, Pacific sardine is a complement with Northern anchovy. However, after certain threshold, Pacific sardine is no longer complement and Pacific sardine become a substitute, reducing Northern anchovy landings when the probability of presence for Pacific sardine increase.
 ```{r int_effect_NANC_by_port_PLOT, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Interaction effects between species distribution on Northern anchovy landings by port\\label{fig:sdm_int_nanc}"}
 g1_NANC / g2_NANC 
 ```
