@@ -5,10 +5,10 @@ author:
     email: felipe.quezada@noaa.gov
     institute: [ucsc, noaa]
     correspondence: true
-  - name: Desiree Tommasi
-    institute: [ucsc, noaa]
-  - name: Stephen Stohs
-    institute: noaa
+  # - name: Desiree Tommasi
+  #   institute: [ucsc, noaa]
+  # - name: Stephen Stohs
+  #   institute: noaa
 institute:
   - ucsc: Institute of Marine Sciences, University of California Santa Cruz
   - noaa: NOAA Southwest Fisheries Science Center
@@ -783,7 +783,7 @@ comp %>%
 
 ### Own species distribution effect
 
-The inclusion of hierarchical effects by port allows us to analyze the effects of the probability of presence on landings disaggregated by ports. We only focus our analysis in owns probability of presence effects, as other probability are analyzed as interaction (see next subsection). We can observe that the effect of own probability of presence is not strong (maybe I should use logs...). However, it is clear that it have a positive effect on landings, specially on port areas such as Columbia River at Oregon for Pacific sardine, and Monterrey for Northern anchovy, while a more moderate effect is observed at Santa Barbara Area for Northern anchovy.
+The inclusion of hierarchical effects by port allows us to analyze the effects of the probability of presence on landings disaggregated by ports. We only focus our analysis in owns probability of presence effects, as other probability are analyzed as interaction (see next subsection). We can observe in Figure \ref{fig:sdmeffects} that the effects of the own probability of presence on landings are not strong (maybe I should use logs...). However, it is clear that it have a positive effect on landings, specially on port areas such as Columbia River at Oregon for Pacific sardine, and Monterrey for Northern anchovy, while a more moderate effect is observed at Santa Barbara Area for Northern anchovy.
 
 
 ```{r by_port_sdm, echo=FALSE, fig.cap = "Effect of probability of presence on landings by species and port\\label{fig:sdmeffects}"}
@@ -846,7 +846,11 @@ g1 + g2 + g3
 
 ### Interaction effects
 
-To study the effect of other species distribution on landings, we compute the conditional effects of the interaction between probabilities of presence. Let denote species A the species which we are analysing its landings, and species B and C the other species included in the model for species A landings. For each species, we compute the effect on landing of the interaction between the probability of presences of: (i) species A and species B, (ii) species A versus species C, and (iii) species B versus species C. For example, for the Pacific sardine equation, we compute these results for the probability of presence effect between Pacific sardine and market squid, Pacific sardine and Northern anchovy, and market squid and Northern anchovy. 
+To study the effect of other species distribution on landings, we compute the conditional effects of the interaction between probabilities of presence. Let denote species A the species which we are analysing its landings, and species B and C the other species included in the model for species A landings. For each species, we compute the effect on landing of the interaction between the probability of presences of: 
+  + Species A and species B, 
+  + Species A versus species C,
+  + Species B versus species C.
+For example, for the Pacific sardine equation, we compute these results for the probability of presence effect between Pacific sardine and market squid, Pacific sardine and Northern anchovy, and market squid and Northern anchovy. 
 
 ```{r int_effect_PSDN_by_port, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 c_eff_int_psdn_msqd <- (conditional_effects(fit_qPSDN_price, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, 
@@ -888,9 +892,10 @@ g3_PSDN <-  plot(c_eff_int_msqd_nanc, plot = FALSE)[[1]] + ggtitle('(c) Northern
 save.image (file = "stan_fit.RData")
 ```
 
+Let first analyze the interaction effect of the probability of presences on Pacific sardine landings, presented in Figure \ref{fig:sdm_int_psdn}. We only shows results for the main three port where Pacific sardine is landed (Columbia River at Oregon, Los Angeles Area  and Monterrey Area). As we already commented in Figure \ref{fig:sdmeffects}, the effects the Pacific sardine's own probability of presence is positive, changing color from left to right in panels (a) and (b). Market squid seems to be an stronger substitute for Pacific sardine than Northern anchovy. This is suggested by the different slopes between panel (a) and panel (b). For instane, in Columbia River, an increase in the probability of presence for anchovy does decrease Pacific sardine landings as much as an increase in the probability of presece of market squid. 
 
 ```{r int_effect_PSDN_by_port_PLOT, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Interaction effects between species distribution on Pacific sardine landings by port\\label{fig:sdm_int_psdn}"}
-g1_PSDN / g2_PSDN / g3_PSDN
+g1_PSDN / g2_PSDN
 ```
 
 ```{r int_effect_MSQD_by_port, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
@@ -933,8 +938,10 @@ g3_MSQD <-  plot(c_eff_int_psdn_nanc, plot = FALSE)[[1]] + ggtitle('(c) Pacific 
 save.image (file = "stan_fit.RData")
 ```
 
+We found some similar findings in Figure \ref{fig:sdm_int_msqd}...
+
 ```{r int_effect_MSQD_by_port_PLOT, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Interaction effects between species distribution on market squid landings by port\\label{fig:sdm_int_msqd}"}
-g1_MSQD / g2_MSQD / g3_MSQD
+g1_MSQD / g2_MSQD 
 ```
 
 
@@ -981,7 +988,7 @@ save.image (file = "stan_fit.RData")
 ```
 
 ```{r int_effect_NANC_by_port_PLOT, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Interaction effects between species distribution on Northern anchovy landings by port\\label{fig:sdm_int_nanc}"}
-g1_NANC / g2_NANC / g3_NANC
+g1_NANC / g2_NANC 
 ```
 
 
