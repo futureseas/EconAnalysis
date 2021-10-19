@@ -989,13 +989,14 @@ save.image (file = "stan_fit.RData")
 
 
 However, this complementary is not observed for Northern anchovy landings. When market squid presence increase, we observe a decrease in Northern anchovy landings. An interesting case is observed for Pacific sardine and Northern anchovy, in particular at Monterrey area. For small levels of Pacific sardine presence, Pacific sardine is a complement with Northern anchovy. However, after certain threshold, Pacific sardine is no longer complement and Pacific sardine become a substitute, reducing Northern anchovy landings when the probability of presence for Pacific sardine increase.
+
 ```{r int_effect_NANC_by_port_PLOT, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Interaction effects between species distribution on Northern anchovy landings by port\\label{fig:sdm_int_nanc}"}
 g1_NANC / g2_NANC 
 ```
 
 
 ### Pacific sardine closure
-
+Finally, lets analyze the effect of the Pacific sardine closure on market squind and Northern anchovy landings.  
 
 ```{r by_port_msqd_dclose, echo=FALSE, fig.cap = "Effect of Pacific sardine fishery closure on markt squid landings by species and  port\\label{fig:sdmeffects}"}
 # conditions_dClose <- data.frame(port_ID = unique(est_data_msqd$dClose))
