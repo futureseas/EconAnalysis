@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.8.30)  18 OCT 2021 14:59
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.8.30)  19 OCT 2021 09:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1246,26 +1246,31 @@ File: econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1.pdf
 <use econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1.pdf>
 
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_NANC
-_by_port_PLOT-1.pdf  used on input line 520.
+_by_port_PLOT-1.pdf  used on input line 523.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [14pdfTeX warning (ext4): destination with the same identifier (name{figure.9})
  has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.523 ... closure}\label{pacific-sardine-closure}}
-                                                   <./econ_landings_paper_files
-/figure-latex/int_effect_MSQD_by_port_PLOT-1.pdf>]
+l.527 
+       <./econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port_PLOT-1
+.pdf>]
 <econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf, id=272, 469.
 755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf Graphic 
 file (type pdf)
 <use econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_msqd_dc
-lose-1.pdf  used on input line 527.
+lose-1.pdf  used on input line 542.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[15 <./econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1.pd
-f>] (./econ_landings_paper.bbl [16pdfTeX warning (ext4): destination with the s
-ame identifier (name{figure.10}) has been already used, duplicate ignored
+[15pdfTeX warning (ext4): destination with the same identifier (name{figure.10}
+) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.546 
+       <./econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1
+.pdf>] (./econ_landings_paper.bbl [16pdfTeX warning (ext4): destination with th
+e same identifier (name{figure.11}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
 l.14   and DiMaggio]{morris2019bayesian}
@@ -1282,11 +1287,11 @@ Package rerunfilecheck Info: File `econ_landings_paper.out' has not changed.
 (rerunfilecheck)             Checksum: 695D911EB013EA59AF5290465158EF82;2258.
  ) 
 Here is how much of TeX's memory you used:
- 24091 strings out of 480559
- 435654 string characters out of 5901528
- 769401 words of memory out of 5000000
- 40904 multiletter control sequences out of 15000+600000
- 492114 words of font info for 238 fonts, out of 8000000 for 9000
+ 24096 strings out of 480559
+ 435708 string characters out of 5901528
+ 769511 words of memory out of 5000000
+ 40905 multiletter control sequences out of 15000+600000
+ 492244 words of font info for 240 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  83i,11n,83p,581b,454s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{Hfootnote.5} has been referenced but does not exi
@@ -1323,10 +1328,10 @@ lic/amsfonts/symbols/msam10.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texm
 f-dist/fonts/type1/urw/times/utmb8a.pfb><c:/Users/fequezad/AppData/Roaming/Tiny
 TeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><c:/Users/fequezad/AppData/Roam
 ing/TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on econ_landings_paper.pdf (17 pages, 560469 bytes).
+Output written on econ_landings_paper.pdf (17 pages, 561087 bytes).
 PDF statistics:
- 382 PDF objects out of 1000 (max. 8388607)
- 313 compressed objects within 4 object streams
- 70 named destinations out of 1000 (max. 500000)
+ 383 PDF objects out of 1000 (max. 8388607)
+ 314 compressed objects within 4 object streams
+ 71 named destinations out of 1000 (max. 500000)
  53436 words of extra memory for PDF output out of 61914 (max. 10000000)
 

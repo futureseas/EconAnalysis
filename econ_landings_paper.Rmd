@@ -996,7 +996,7 @@ g1_NANC / g2_NANC
 
 
 ### Pacific sardine closure
-Finally, lets analyze the effect of the Pacific sardine closure on market squind and Northern anchovy landings.  
+Finally, lets analyze the effect of the Pacific sardine closure on market squid and Northern anchovy landings. We do not find significant results in the case of Northern anchovy. In the case of market squid, we found a decrease in the level of landing after the closure was implemented. It seems that some fisher exit the CPS fishery after the closure of Pacific sardine, reducing their participation in the market squid fishery. Our participation model results give us more details about what happen after the Pacific sardine closure.
 
 ```{r by_port_msqd_dclose, echo=FALSE, fig.cap = "Effect of Pacific sardine fishery closure on markt squid landings by species and  port\\label{fig:sdmeffects}"}
 # conditions_dClose <- data.frame(port_ID = unique(est_data_msqd$dClose))
