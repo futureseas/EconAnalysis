@@ -122,7 +122,17 @@ Additional, we study fishers response to weather events (e.g. storms) and to a f
 of utility." @revelt1998
     + Account for correlation in unobserved utility between repeated choices @revelt1998. The estimations is efficient. 
 
+"Technological, economic, and management factors can limit both
+the willingness and capacity for fishers to respond to shifting the
+availability of target species, thus affecting the coupling between
+landings and availability." Selden 2020
 
+
+"Rogers in Nature: fishers are often limited in where they can fish based on local ecological
+knowledge, vessel size or gear type, geographic distance,
+spatial management or conservation measures and, in some cases,
+customary territories9. Peer groups of vessels from the same port
+and using the same gear type"
 
 + Characterize the fishery
   + Heterogeneity in location, do a map and calculate variation on latitude and longitude.
@@ -190,6 +200,11 @@ We develop to different discrete choice model:
   + species and gear decision model
   
 Our second model is a location and species decision model. We can estimate a conditional logit for species-location choice set using charactristics of the choice and incorporating heterogeneity through interaction variables. 
+
+
+A locations/species model could be implemented to see how fine scale behavior emerge to the aggregate one that we observe. Another think to consider is whether is better to use mixed logir or conditional logit with interactive terms (see Phaneuf and Requate (2016): "A Course in Environmental Economics: Theory, Policy, and Practice". 
+
+
 
 
 ## Graphs
