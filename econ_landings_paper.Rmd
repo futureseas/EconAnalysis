@@ -126,9 +126,9 @@ Fishing portfolios are an important mechanism to safeguard fishers livelihood. D
 
 In this study we analyze how changing in spatial distribution affects landing substitutions and fisher participation between three coastal pelagic species (CPS): Pacific sardine (PSDN), market squid (MSQD) and Northern anchovy (NANC). Moreover, using climate projections we can predict how catch composition is affected under climate change. Our analysis is focused on the US west coast CPS fishery. Fisheries historically have been analyzed as single species. Our research give a step further an analyze the CPS as a multispecies, interdependent fishery. 
 
+Our papers builds on the model developed by @smith2021potential for sardine landings.  We expand their model including a landing equation for all of the three species analyzed. Moreover, we use the probability of presence obtained from Species Distribution Models (SDM) as explanatory variable instead of landing by species. This allows us to project landing over time using SDM predictions for different climate scenarios. We analyze how species distribution interact between each others. We expect that this additions allows us to characterize better how fishers portfolio is composed, and also to understand better species interactions on catch rates. Additionally, we also estimate a multiplicities participation model based on @richerson2017 who study the effect of salmon closure on fishers participation, expanding their analysis to the CPS fishery. 
 
-Our papers builds on the model developed by @smith2021potential for sardine landings.  We expand their model including a landing equation for all of the three species analyzed. Moreover, we use the probability of presence obtained from Species Distribution Models (SDM) as explanatory variable instead of landing by species. This allows us to project landing over time using SDM predictions for different climate scenarios. We analyze how species distribution interact between each others. We expect that this additions allows us to characterize better how fishers portfolio is composed, and also to understand better species interactions on catch rates. Additionally, we also build a multiplicities participation model based on @richerson2017 who study the effect of salmon closure on fishers participation, expanding their analysis to the CPS fishery. 
-
+Fisheries closures are a interesting policy instrument in a multispecies framework as give us the opportunity to study a quasi-experiment. For example, @vermard2008 study the effect of an anchovy closure in trip choices conducted by the Bay of Biscai pelagic fleet. <!-- They use their estimate pre-closure to simulate the anchovy closure and compare with actual data. --> 
 
 The remainder of the paper is organized as follows: Section \ref{coastal-pelagic-species-fishery} provides background on the CPS fishery in the US west coast. In Section \ref{methods} we discusses our data set and empirical strategy. Section \ref{results} presents the results of the estimations, and we conclude in Section \ref{conclusions}.
 
@@ -480,7 +480,7 @@ est_data_set <- est_data_set[c("Port", "PSDN_Landings", "MSQD_Landings", "NANC_L
 vtable::st(est_data_set, labels = TRUE, title='Summary Statistics \\label{tab:sum_stats}', out='latex')
 ```
 
-## Empirical model
+## Multispecies Landing Model
 We use a Hierarchical Bayesian Hurdle model to estimate the effect of species distribution on fish landings. We estimate a separate model for the three species in consideration. We use a Bayesian framework for several reasons. First, it allows us to consider uncertainty from modeling the process as well as from the imperfect observation of the process, assuming that all parameters are random variables. Second, it allows us to incorporate multilevel effects (i.e. hierarchical effects). Finally, it allow us to incorporate previous knowledge as a prior. For instance, we can include a prior the results obtained in @smith2021potential for the Pacific sardine landing equation. 
 
 Specifically, we fit a hierarchical Bayesian hurdle model to model the zeros included in our landing data. We observe a zero when no landings occur in a specific time period (landings observations with "NA" were transformed to zero). This zero could mean that there was no incentives for the fleet/vessel to harvest the species in consideration.  In general, our Bayesian models have the following structure:
@@ -699,6 +699,8 @@ First, we identify vessels that participate harvesting at least two species from
 According @richerson2017, fishers participation decision should depend, in general terms, on profitability, species distribution and regulations. Specifically, based on different studies (**REF here**), variables that can explain fishery participation on a particular fishery in a month are:
   
   + Expected revenue. We calculate expected revenue from the average outputs of the SDMs. Using SDM outputs instead of catch to compute expected revenues allow us to project fishers decision on time using SDM's projections. Moreover, using catch to compute expected revenue as a regress in a discrete choice model could incorporate endogeneity as it can be correlated with unobservables not captured by the choice constant. 
+  + Closure: Whether or not the Pacific sardine fishery was closed.
+  
   + **HHI and LI?** (@richerson2017)
   + (Peña et al have some ideas how to use expected catch and cost. It could be the month average...)
 
