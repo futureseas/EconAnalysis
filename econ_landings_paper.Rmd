@@ -698,12 +698,10 @@ First, we identify vessels that participate harvesting at least two species from
 
 According @richerson2017, fishers participation decision should depend, in general terms, on profitability, species distribution and regulations. Specifically, based on different studies (**REF here**), variables that can explain fishery participation on a particular fishery in a month are:
   
+  + Expected revenue. We calculate expected revenue from the average outputs of the SDMs. Using SDM outputs instead of catch to compute expected revenues allow us to project fishers decision on time using SDM's projections. Moreover, using catch to compute expected revenue as a regress in a discrete choice model could incorporate endogeneity as it can be correlated with unobservables not captured by the choice constant. 
   + **HHI and LI?** (@richerson2017)
   + (Peña et al have some ideas how to use expected catch and cost. It could be the month average...)
 
-<!-- 
-There is also a discussion about endogeneity when we use catch as explanatory variable. We are using SDM to get an idea of expected revenue, which can allow to deal with the problem. Also allos us to isolate the effect of abundance from the choice constant. 
--->
 
 # Results
 
