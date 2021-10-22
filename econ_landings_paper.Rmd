@@ -256,6 +256,9 @@ ggplot(collapse, aes(x=Landing_year, y = N_vessels.mean,  colour = Species_name)
   theme(legend.position="none") + xlab("Year") 
 ```
 
+**<< SHOULD WE STUDY HOW FISHING GROUNDS CHANGE FROM PORTS (THUS DISTANCE TO FISHING GROUNDS AND WEATHER VARIABLES AFFECTED), LIKE SELDEN (2020) AND PAPAIOANNOU (2021)??? IN BOTH MODELS? >>**
+
+
 # Methods
 
 ## Data 
