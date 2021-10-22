@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.8.30)  22 OCT 2021 11:09
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.8.30)  22 OCT 2021 14:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1103,176 +1103,180 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 
 {c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pd
 ftex.map}]
-<econ_landings_paper_files/figure-latex/avg_landings-1.pdf, id=98, 469.755pt x 
-325.215pt>
+<econ_landings_paper_files/figure-latex/avg_landings-1.pdf, id=100, 469.755pt x
+ 325.215pt>
 File: econ_landings_paper_files/figure-latex/avg_landings-1.pdf Graphic file (t
 ype pdf)
 <use econ_landings_paper_files/figure-latex/avg_landings-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/avg_landings-1.
-pdf  used on input line 200.
+pdf  used on input line 203.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [2]
-<econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf, id=113, 469
+<econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf, id=116, 469
 .755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf Graphic
  file (type pdf)
 <use econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/avg_landings_by
-_port-1.pdf  used on input line 218.
+_port-1.pdf  used on input line 221.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [3pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.222 
+l.225 
        <./econ_landings_paper_files/figure-latex/avg_landings-1.pdf>]
-<econ_landings_paper_files/figure-latex/ts_by_port-1.pdf, id=128, 469.755pt x 3
+
+Package natbib Warning: Citation `karperski2017' on page 4 undefined on input l
+ine 240.
+
+<econ_landings_paper_files/figure-latex/ts_by_port-1.pdf, id=131, 469.755pt x 3
 25.215pt>
 File: econ_landings_paper_files/figure-latex/ts_by_port-1.pdf Graphic file (typ
 e pdf)
 <use econ_landings_paper_files/figure-latex/ts_by_port-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/ts_by_port-1.pd
-f  used on input line 239.
+f  used on input line 244.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [4pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.244 
+l.249 
        <./econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf>]
-<econ_landings_paper_files/figure-latex/ts_n_vessels-1.pdf, id=140, 469.755pt x
+<econ_landings_paper_files/figure-latex/ts_n_vessels-1.pdf, id=143, 469.755pt x
  325.215pt>
 File: econ_landings_paper_files/figure-latex/ts_n_vessels-1.pdf Graphic file (t
 ype pdf)
 <use econ_landings_paper_files/figure-latex/ts_n_vessels-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/ts_n_vessels-1.
-pdf  used on input line 247.
+pdf  used on input line 252.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [5pdfTeX warning (ext4): destination with the same identifier (name{figure.3}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.251 
+l.256 
        <./econ_landings_paper_files/figure-latex/ts_by_port-1.pdf>] [6pdfTeX wa
 rning (ext4): destination with the same identifier (name{figure.4}) has been al
 ready used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.297 
+l.302 
        <./econ_landings_paper_files/figure-latex/ts_n_vessels-1.pdf>]
-<econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf, id=173, 469.755
+<econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf, id=176, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf Graphic fil
 e (type pdf)
 <use econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/SDM_land_by_por
-t-1.pdf  used on input line 313.
+t-1.pdf  used on input line 318.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [7] [8pdfTeX warning (ext4): destination with the same identifier (name{figure.
 5}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.349 \begin{equation}
+l.354 \begin{equation}
                        <./econ_landings_paper_files/figure-latex/SDM_land_by_po
 rt-1.pdf>] [9pdfTeX warning (ext4): destination with the same identifier (name{
 table.1}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.419 
+l.424 
       ]
 Package textcomp Info: Symbol \textasciiacute not provided by
 (textcomp)             font family ptm in TS1 encoding.
-(textcomp)             Default family used instead on input line 434.
+(textcomp)             Default family used instead on input line 439.
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 4
-45.
+51.
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/psnfss/ts1ptm.f
 d
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [10]
-<econ_landings_paper_files/figure-latex/y_rep-1.pdf, id=231, 469.755pt x 325.21
+<econ_landings_paper_files/figure-latex/y_rep-1.pdf, id=236, 469.755pt x 325.21
 5pt>
 File: econ_landings_paper_files/figure-latex/y_rep-1.pdf Graphic file (type pdf
 )
 <use econ_landings_paper_files/figure-latex/y_rep-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/y_rep-1.pdf  us
-ed on input line 484.
+ed on input line 489.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [11pdfTeX warning (ext4): destination with the same identifier (name{figure.6})
  has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.496 ...}\label{own-species-distribution-effect}}
+l.501 ...}\label{own-species-distribution-effect}}
                                                    <./econ_landings_paper_files
 /figure-latex/y_rep-1.pdf>]
-<econ_landings_paper_files/figure-latex/by_port_sdm-1.pdf, id=252, 469.755pt x 
+<econ_landings_paper_files/figure-latex/by_port_sdm-1.pdf, id=257, 469.755pt x 
 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_sdm-1.pdf Graphic file (ty
 pe pdf)
 <use econ_landings_paper_files/figure-latex/by_port_sdm-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_sdm-1.p
-df  used on input line 512.
+df  used on input line 517.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [12pdfTeX warning (ext4): destination with the same identifier (name{figure.7})
  has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.531 
+l.536 
        <./econ_landings_paper_files/figure-latex/by_port_sdm-1.pdf>]
 <econ_landings_paper_files/figure-latex/int_effect_PSDN_by_port_PLOT-1.pdf, id=
-272, 469.755pt x 325.215pt>
+277, 469.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/int_effect_PSDN_by_port_PLOT-1.pdf
  Graphic file (type pdf)
 <use econ_landings_paper_files/figure-latex/int_effect_PSDN_by_port_PLOT-1.pdf>
 
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_PSDN
-_by_port_PLOT-1.pdf  used on input line 547.
+_by_port_PLOT-1.pdf  used on input line 552.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 <econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port_PLOT-1.pdf, id=
-274, 469.755pt x 325.215pt>
+279, 469.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port_PLOT-1.pdf
  Graphic file (type pdf)
 <use econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port_PLOT-1.pdf>
 
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_MSQD
-_by_port_PLOT-1.pdf  used on input line 560.
+_by_port_PLOT-1.pdf  used on input line 565.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [13pdfTeX warning (ext4): destination with the same identifier (name{figure.8})
  has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.564 
+l.569 
        <./econ_landings_paper_files/figure-latex/int_effect_PSDN_by_port_PLOT-1
 .pdf>]
 <econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1.pdf, id=
-289, 469.755pt x 325.215pt>
+294, 469.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1.pdf
  Graphic file (type pdf)
 <use econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1.pdf>
 
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_NANC
-_by_port_PLOT-1.pdf  used on input line 577.
+_by_port_PLOT-1.pdf  used on input line 582.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [14pdfTeX warning (ext4): destination with the same identifier (name{figure.9})
  has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.581 
+l.586 
        <./econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port_PLOT-1
 .pdf>]
-<econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf, id=300, 469.
+<econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf, id=305, 469.
 755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf Graphic 
 file (type pdf)
 <use econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_msqd_dc
-lose-1.pdf  used on input line 596.
+lose-1.pdf  used on input line 601.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [15pdfTeX warning (ext4): destination with the same identifier (name{figure.10}
 ) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.600 
+l.605 
        <./econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1
 .pdf>] (./econ_landings_paper.bbl [16pdfTeX warning (ext4): destination with th
 e same identifier (name{figure.11}) has been already used, duplicate ignored
@@ -1280,7 +1284,11 @@ e same identifier (name{figure.11}) has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.13 ...asperski and Holland(2013)]{kasperski2013}
                                                    <./econ_landings_paper_files
-/figure-latex/by_port_msqd_dclose-1.pdf>]) [17] (./econ_landings_paper.aux)
+/figure-latex/by_port_msqd_dclose-1.pdf>])
+
+Package natbib Warning: There were undefined citations.
+
+[17] (./econ_landings_paper.aux)
 
 LaTeX Warning: There were multiply-defined labels.
 
@@ -1288,11 +1296,11 @@ Package rerunfilecheck Info: File `econ_landings_paper.out' has not changed.
 (rerunfilecheck)             Checksum: 1EC793FBD8D687A688A9671EBA140F92;2316.
  ) 
 Here is how much of TeX's memory you used:
- 24139 strings out of 480559
- 436497 string characters out of 5901528
- 770679 words of memory out of 5000000
- 40941 multiletter control sequences out of 15000+600000
- 493648 words of font info for 241 fonts, out of 8000000 for 9000
+ 24146 strings out of 480559
+ 436589 string characters out of 5901528
+ 770713 words of memory out of 5000000
+ 40944 multiletter control sequences out of 15000+600000
+ 493778 words of font info for 243 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  83i,11n,83p,581b,454s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{Hfootnote.5} has been referenced but does not exi
@@ -1330,10 +1338,10 @@ st/fonts/type1/public/amsfonts/symbols/msam10.pfb><c:/Users/fequezad/AppData/Ro
 aming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/Users/fequezad/Ap
 pData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><c:/Users/feq
 uezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on econ_landings_paper.pdf (17 pages, 566488 bytes).
+Output written on econ_landings_paper.pdf (17 pages, 567187 bytes).
 PDF statistics:
- 416 PDF objects out of 1000 (max. 8388607)
- 346 compressed objects within 4 object streams
- 74 named destinations out of 1000 (max. 500000)
+ 421 PDF objects out of 1000 (max. 8388607)
+ 351 compressed objects within 4 object streams
+ 75 named destinations out of 1000 (max. 500000)
  55484 words of extra memory for PDF output out of 61914 (max. 10000000)
 
