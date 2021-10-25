@@ -261,8 +261,9 @@ ggplot(collapse, aes(x=Landing_year, y = N_vessels.mean,  colour = Species_name)
 
 # Methods
 
-## Data 
-Our data set contain a number of variables measured at the port and *vessel levels* for CPS the fishery located in the U.S. West Coast. Our outcome variables are landings by port areas in a year and landing by vessel in a month. These two different outcome variables would allows us to study the degree of flexibility that vessel have in comparison to ports in regard to species substitution and catch composition. If vessels have strong contracts with processor associated with a port, then we should observe that substitution of vessels and port is similar. Yearly panel data data on landing by port areas during the the period 1980 - 2020 is publicly available from [PacFIN](http://pacfin.psmfc.org/). **Vessel level data was obtained upon request from...** We only include ports areas where substitution could happen. In practical terms, we drop port that have never landed either Pacific sardine, market squid or Northern anchovy during our period of analysis.^[N/A were converted to zero.] We assume that this criteria would allows to identify ports that have the infrastructure to land all of the species in consideration.
+## Multispecies Landing Model
+
+Our data set contain a number of variables measured at the port and *vessel levels* for CPS the fishery located in the U.S. West Coast. In regard to landings, our outcome variables are landings by port areas in a year, landing by vessel in a month. These two different outcome variables would allows us to study the degree of flexibility that vessel have in comparison to ports in regard to species substitution and catch composition. If vessels have strong contracts with processor associated with a port, then we should observe that substitution of vessels and port is similar. Yearly panel data data on landing by port areas during the the period 1980 - 2020 is publicly available from [PacFIN](http://pacfin.psmfc.org/). **Vessel level data was obtained upon request from...** We only include ports areas where substitution could happen. In practical terms, we drop port that have never landed either Pacific sardine, market squid or Northern anchovy during our period of analysis.^[N/A were converted to zero.] We assume that this criteria would allows to identify ports that have the infrastructure to land all of the species in consideration.
 
 Our main treatment variables are species probability of presence and Pacific sardine closure. Probability of presence were obtained from Species Distribution Models (SDM), and future forecast of these variables allows us to simulate the CPS fishery in the future. Prior landings models have shown that the probability of presence have a large contribution on explaining landings. For instance, @smith2021potential use mean monthly probability of presence of sardine within 60 km of the port as explanatory variable. They found a positive effect of probability of presence on Pacific sardine landings. Moreover, landings where mostly explained by this variable. We follow their same procedure to associate SDM's outputs with ports. For Pacific sardine, we compute the average probability of presence within the same radius of 60 kilometers around the port. This radius also coincide with the average distance with two standard deviation traveled by vessels based on logbooks available for these fisheries. For market squid and Northern anchovy, we set this radius to 90 and 20 kilometers, respectively, also based in the average distance to fishing ground obtained from logbooks.^[To see an animation of how far vessel travel please visit [this link](https://drive.google.com/file/d/1-PE_lcZNcXNcyILA_6xhkHyEhV3mV2TA/view?usp=sharing).]   
 
@@ -376,7 +377,6 @@ write_xlsx(collapse,"Data\\monterrey_NANC_sdm_landings.xlsx")
 ```
 
 
-## Multispecies Landing Model
 We use a Hierarchical Bayesian Hurdle model to estimate the effect of species distribution on fish landings. We estimate a separate model for the three species in consideration. We use a Bayesian framework for several reasons. First, it allows us to consider uncertainty from modeling the process as well as from the imperfect observation of the process, assuming that all parameters are random variables. Second, it allows us to incorporate multilevel effects (i.e. hierarchical effects). Finally, it allow us to incorporate previous knowledge as a prior. For instance, we can include a prior the results obtained in @smith2021potential for the Pacific sardine landing equation. 
 
 Specifically, we fit a hierarchical Bayesian hurdle model to model the zeros included in our landing data. We observe a zero when no landings occur in a specific time period (landings observations with "NA" were transformed to zero). This zero could mean that there was no incentives for the fleet/vessel to harvest the species in consideration.  In general, our Bayesian models have the following structure:
@@ -691,10 +691,17 @@ fit_qNANC_price <- brm(bf(NANC_Landings ~ NANC_SDM_20 + NANC_Price + PSDN_SDM_60
 save.image (file = "stan_fit.RData")
 ```
 
-##  Multispecies participation model
-For the multispecies participation model, we follow a similar methodology than @richerson2017. We estimate a discrete choice model for probability that a vessel participate harvesting a particular species during a specific month. This approach allows us to further understand how a closure or abrupt weather/abundance changes restructure fisher's portfolios. 
 
-First, we identify vessels that participate harvesting at least two species from the CPS fishery during the last *X years*. We expect that using monthly data allows us to observe seasonality in fishers´behavior and to reduce the risk to not loosing general behavior when we dissagregate data in a finer scale. 
+##  Multispecies participation model
+For the multispecies participation model, we follow a similar methodology than @richerson2017. We estimate a discrete choice model for probability that a vessel participate in a particular species fishery during a specific month. This approach allows us to further understand how a closure or abrupt weather/abundance changes restructure fisher's portfolios. 
+
+In the participation model, our outcome variable is a categorical variable that indicate whether a vessel participate in a specific fishery. It ranges from 0 to 4 where: 0 = "No fishing during the month", 1 = "Pacific sardine", 2 = "Market Squid", 3 = "Northern Anchovy", and 4 = "Other". **<<Can I combine Anchovy + sardine in category 5? What if in the same month a vessel harvest two different species. Should we maybe assume 1 for the principal species, zero to the second one?>>** To select vessels in or database, they should met the following criteria:
+
+  1. Vessel active at least **XX%** of the sample. 
+  2. Total revenue at least **XX%** of CPS fishery.
+  3. Total annual revenue average for two or more species listed of at least **XXX**.
+  
+We expect that using monthly **<<Should I use Yearly data???>>** data allows us to observe seasonality in fishers´ behavior and to reduce the risk to not loosing general behavior when we dissagregate data in a finer scale.
 
 According @richerson2017, fishers participation decision should depend, in general terms, on profitability, species distribution and regulations. Specifically, based on different studies (**REF here**), variables that can explain fishery participation on a particular fishery in a month are:
 
@@ -703,8 +710,9 @@ According @richerson2017, fishers participation decision should depend, in gener
     + We calculate expected revenue as a function of average outputs of the SDMs. Using SDM outputs instead of catch to compute expected revenues allow us to project fishers decision on time using SDM's projections. Moreover, using catch to compute expected revenue as a regress in a discrete choice model could incorporate endogeneity as it can be correlated with unobservables not captured by the choice constant. 
 * Closure: Whether or not the Pacific sardine fishery was closed.
 * Diversification using HHI (measurement of diversification, from @richerson2017)
-* Dependence on the species in consideratio*n
-* Spatial variables of area and range. LI index from [@richerson2017]
+* Dependence on the species in consideration (historical % of the revenue from the species considered)
+* Typical landings location: Latitudinal center of gravity (LCG) index from [@richerson2017]
+* Dispersion around centre of gravity: Latitude inertia (LI) index from [@richerson2017]
   
   
 <!--  (Peña et al have some ideas how to use expected catch and cost. It could be the month average...) -->
