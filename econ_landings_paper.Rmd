@@ -132,7 +132,11 @@ The remainder of the paper is organized as follows: Section \ref{coastal-pelagic
 
 # Coastal Pelagic Species fishery 
 
-Before Pacific sardine closure in 2015, the CPS fishery have been mainly dominated by Pacific sardine and market squid in landings (see Figure \ref{fig:avg_lan_rev}). In terms of revenue, due to the low prices received for sardine, the revenues in the CPS fishery are the highest for market squid. 
+Before Pacific sardine closure in 2015, landings in the CPS fishery have been mainly dominated by Pacific sardine and market squid, as is shown in panel (a) in Figure \ref{fig:avg_lan_rev}. Low average landings for Pacific herring and Northern anchovy could be related with geography and regulatory constraint that restrict vessels to exploit them. Nevertheless, this lower levels compare with Market squid and Pacific sardine could be reflecting lower economics incentives for its exploitation. In terms of revenue, we can observe in panel (b) that market squid have the largest revenue, while Pacific sardine lost relevance due to the low prices received by fishers.
+
+
+
+<!-- <<<ISAAC: Need some more details on anchovy and herring fisheries, these I believe are constrained by management and geography, so may not be real "choices" for the substitution. >>>  -->
 
 ```{r avg_landings, echo=FALSE, fig.cap="Average annual landing and revenues for the CPS fishery by species.\\label{fig:avg_lan_rev}", message=FALSE, warning=FALSE}
 landings <- summaryBy(Landings ~ Species_code + Landing_year + Management_group, FUN=sumfun, data=PacFIN_dat) %>%
@@ -145,13 +149,15 @@ landings <- summaryBy(Landings.sum ~ Species_code, FUN=meanfun, data=landings)
 g1 <- ggplot(landings, aes(Species_code, Landings.sum.mean)) +
   geom_col(width=0.4) + ggtitle("(a) Landings") + 
   theme(plot.title = element_text(size=9, face="bold.italic")) +
-  xlab("Port areas") + ylab("Landings (tons)")
+  xlab("Species") + ylab("Landings (tons)") + 
+  scale_x_discrete(labels=c("MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
+                            "PHRG" = "Pacific\nHerring", "PSDN" = "Pacific\nSardine"))
 
 
 revenue <- summaryBy(Revenue ~ Species_code + Landing_year + Management_group, FUN=sumfun, data=PacFIN_dat) %>%
   filter(Management_group == "CPEL") %>%
   filter(Species_code != "PBNT" & Species_code != "CMCK" & 
-           Species_code != "JMCK" & Species_code != "RHRG" & Species_code != "UMCK")
+           Species_code != "JMCK" & Species_code != "RHRG" & Species_code != "UMCK") 
 
 revenue <- summaryBy(Revenue.sum ~ Species_code, FUN=meanfun, data=revenue)
 
@@ -159,7 +165,9 @@ revenue <- summaryBy(Revenue.sum ~ Species_code, FUN=meanfun, data=revenue)
 g2 <- ggplot(revenue, aes(Species_code, Revenue.sum.mean)) +
   geom_col(width=0.4) + ggtitle("(b) Revenue") + 
   theme(plot.title = element_text(size=9, face="bold.italic")) +
-  xlab("Port areas") + ylab("Revenues (USD)")
+  xlab("Species") + ylab("Revenues (USD)") + 
+  scale_x_discrete(labels=c("MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
+                            "PHRG" = "Pacific\nHerring", "PSDN" = "Pacific\nSardine"))
 
 
 g1 + g2
@@ -205,18 +213,25 @@ collapse <- summaryBy(Landings ~ Species_name + Species_code + Port + State, FUN
   filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") %>%
   mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
 
+states_names <- as_labeller(
+     c(`C` = "California", `O` = "Oregon",`W` = "Washington"))
+
 ggplot(collapse, aes(fill=Species_code, y=Landings.mean, x=Port)) +
   geom_bar(position="dodge", stat="identity") + 
-  facet_grid(~ State, scale="free", space="free_x") +
+  facet_grid(~ State, scale="free", space="free_x", labeller = states_names) + 
+  theme(strip.text.x = element_text(size = 6)) +
   theme(legend.position="bottom") + 
-  scale_fill_viridis(discrete = T) + 
-  theme(axis.text.x = element_text(angle=90)) + 
+  scale_fill_viridis(discrete = T, labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
+                               "PHRG" = "Pacific Herring", "PSDN" = "Pacific Sardine")) + 
+  theme(axis.text.x = element_text(angle=90, hjust=0.95, vjust=0.45)) + 
   xlab("Port areas") + ylab("Landings (tons)") +
-  guides(fill=guide_legend(title="Species: ")) +
-  scale_color_brewer(palette="Set2")
+  guides(fill=guide_legend(title="Species: "))   + 
+  scale_x_discrete(labels=c("SDA" = "San\nDiego", "LAA" = "Los\nAngeles", "SBA" = "Santa\nBarbara", "MNA" = "Monterrey", "MRA" = "Morro\nBay", "SFA" = "San\nFrancisco", "BDA" = "Bodega\nBay", "ERA" = "Eureka", "CCA" = "Crescent\nCity", "CBA" = "Coos\nBay", "NPA" = "Newport", "CLO" = "Columbia\nRiver (OR)", "NPS" = "North\nPuget\nSound")) + 
+   scale_color_brewer(palette="Set2")
+
 ```
 
-To analyze substitution more in detail, we compute total annual landing by port during 1980-2020 period (Figure \ref{fig:ts_landings_by_ports}). There is a general conception that vessel that harvest Pacific sardine switch to market squid when the conditions are favorable. However, we can notice from Figure \ref{fig:ts_landings_by_ports} that landings of market squid have been decreasing in the last five years. We would expect that the closure of the Pacific sardine fishery would have switch targeted species, but the graphs show some complementary instead of substitution. Under this scenario is useful to ask to ask whether after the closure, vessel that harvest Market squid left the fishery or stayed, which we can answer from our multispecies participation model. We show the number of vessels by species in Figure \ref{fig:ts_n_vessels}. This would be suggesting an unintended consequence from a policy that aims to only affect Pacific sardine, but its effect affects indirectly other fisheries [@karperski2017]. 
+To analyze substitution more in detail, we compute total annual landing by port during 1980-2020 period (Figure \ref{fig:ts_landings_by_ports}). There is a general conception that vessel that harvest Pacific sardine switch to market squid when the conditions are favorable. However, we can notice from Figure \ref{fig:ts_landings_by_ports} that landings of market squid have been decreasing in the last five years. We would expect that the closure of the Pacific sardine fishery would have switch targeted species, but the graphs show some complementary instead of substitution. Under this scenario is useful to ask to ask whether after the closure, vessel that harvest Market squid left the fishery or stayed, which we can answer from our multispecies participation model. We show the number of vessels by species in Figure \ref{fig:ts_n_vessels}. This would be suggesting an unintended consequence from a policy that aims to only affect Pacific sardine, but its effect affects indirectly other fisheries [@richerson2017]. 
 
 
 ```{r ts_by_port,  fig.cap = "Total annual landing by port area. 2000 - 2020. \\textit{Notes:} CLO = Columbia River (OR); LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara; SFA = San Francisco.\\label{fig:ts_landings_by_ports}" , echo=FALSE, message=FALSE, warning=FALSE}
@@ -228,13 +243,18 @@ collapse <- PacFIN_dat %>%
     mutate(Port = fct_relevel(Port, "LAA", "SBA", "MNA", "SFA", "CLO")) %>%
   filter(Landing_year >= 2000 & Landing_year <= 2020)
 
+
+port_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara", `MNA` = "Monterrey",
+                            `SFA` = "San Francisco", `CLO` = "Columbia River (OR)"))
+     
 ggplot(collapse, aes(y=Landings, x=Landing_year, color=Species_code, group=Species_code)) +
   geom_line(size=1) + xlab("Port areas") + ylab("Landings (tons)") + 
-  facet_wrap(~ Port) +
+  facet_wrap(~ Port, labeller = port_names) +
   theme(legend.position="bottom") + 
   theme(axis.text.x = element_text(angle=90)) +
   guides(color=guide_legend(title="Species: ")) +
-  scale_color_brewer(palette="Set2")
+  scale_color_brewer(palette="Set2", labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
+             "PHRG" = "Pacific Herring", "PSDN" = "Pacific Sardine"))
 ```
 
 ```{r ts_n_vessels, fig.cap = "Total number of vessel by species. 2000 - 2020.\\label{fig:ts_n_vessels}", echo=FALSE, message=FALSE, warning=FALSE}
@@ -265,7 +285,7 @@ ggplot(collapse, aes(x=Landing_year, y = N_vessels.mean,  colour = Species_name)
 
 Our data set contain a number of variables measured at the port and *vessel levels* for CPS the fishery located in the U.S. West Coast. In regard to landings, our outcome variables are landings by port areas in a year, landing by vessel in a month. These two different outcome variables would allows us to study the degree of flexibility that vessel have in comparison to ports in regard to species substitution and catch composition. If vessels have strong contracts with processor associated with a port, then we should observe that substitution of vessels and port is similar. Yearly panel data data on landing by port areas during the the period 1980 - 2020 is publicly available from [PacFIN](http://pacfin.psmfc.org/). **Vessel level data was obtained upon request from...** We only include ports areas where substitution could happen. In practical terms, we drop port that have never landed either Pacific sardine, market squid or Northern anchovy during our period of analysis.^[N/A were converted to zero.] We assume that this criteria would allows to identify ports that have the infrastructure to land all of the species in consideration.
 
-Our main treatment variables are species probability of presence and Pacific sardine closure. Probability of presence were obtained from Species Distribution Models (SDM), and future forecast of these variables allows us to simulate the CPS fishery in the future. Prior landings models have shown that the probability of presence have a large contribution on explaining landings. For instance, @smith2021potential use mean monthly probability of presence of sardine within 60 km of the port as explanatory variable. They found a positive effect of probability of presence on Pacific sardine landings. Moreover, landings where mostly explained by this variable. We follow their same procedure to associate SDM's outputs with ports. For Pacific sardine, we compute the average probability of presence within the same radius of 60 kilometers around the port. This radius also coincide with the average distance with two standard deviation traveled by vessels based on logbooks available for these fisheries. For market squid and Northern anchovy, we set this radius to 90 and 20 kilometers, respectively, also based in the average distance to fishing ground obtained from logbooks.^[To see an animation of how far vessel travel please visit [this link](https://drive.google.com/file/d/1-PE_lcZNcXNcyILA_6xhkHyEhV3mV2TA/view?usp=sharing).]   
+Our main treatment variables are species probability of presence and Pacific sardine closure. Probability of presence were obtained from Species Distribution Models (SDM), and future forecast of these variables allows us to simulate the CPS fishery in the future. Distribution of species have change relative to ports in the last decades [@selden2020]. Thus, it have been used to explain variability in fish landings [@selden2020, @smith2021potential]. For instance, @smith2021potential use mean monthly probability of presence of sardine within 60 km of the port as explanatory variable. They found a positive effect of probability of presence on Pacific sardine landings. Moreover, landings where mostly explained by this variable. We follow their same procedure to associate SDM's outputs with ports. For Pacific sardine, we compute the average probability of presence within the same radius of 60 kilometers around the port. This radius also coincide with the average distance with two standard deviation traveled by vessels based on logbooks available for these fisheries.^[@selden2020 use the 75th quantile of the travel distances made by vessels to define the availability of an species associated to a port for multiple species, and weight this distances by the catch of those species.] For market squid and Northern anchovy, we set this radius to 90 and 20 kilometers, respectively, also based in the average distance to fishing ground obtained from logbooks.^[To see an animation of how far vessel travel please visit [this link](https://drive.google.com/file/d/1-PE_lcZNcXNcyILA_6xhkHyEhV3mV2TA/view?usp=sharing).]   
 
 Figure \ref{fig:sdm_land_by_port} show the relationship between the probability of presence and landings by species in three main port areas: Los Angeles, Monterrey and Santa Barbara areas. The graph suggest that Pacific sardine landings are positive correlated with the probability of presence of this species, similar to @smith2021potential. This is also true in Monterrey area for the Northern anchovy, In the case of market squid, we cannot distinguish correlation between landings and probability of presence. Note, however, that the evidence shown in this figure may not capturing the actual effect of the probability of presence as other effect may be in play. Our empirical strategy is designed to isolate the effect of the probability on landing in a multivariate model framework.
 
@@ -718,10 +738,31 @@ According @richerson2017, fishers participation decision should depend, in gener
 We model the probability $p_{ijm}$ that vessel $i$ fishes species $j$ in month $y$ as:
 \begin{align*}
 \text{logit}(p_{ijy}) = & \beta_1 + \beta_2  Closure + \beta_3 Mean.revenue_j + \beta_4 ExpectedCatch_j \\
-& + \beta_5 HHI_i + \beta_6 Percent.revenue_j + \beta_7 LCG_i + \beta_8 LI_i + \beta_9 Year.fished 
+& + \beta_5 HHI_i + \beta_6 Percent.revenue_j + \beta_7 LCG_i + \beta_8 LI_i + \beta_9 Year.fished. 
 \end{align*}
+Note that we are not able to observe if a vessel leave the CPS fishery for another resource or actually exit fishing entirely. Therefore, the outside option include is interpreted as "No fishing in any of the CPS fishery".
 
-<!-- Soould I inlude expected catch???  (Peña et al have some ideas how to use expected catch and cost. It could be the month average...) -->
+Should we study also the desicion to leave or stay the CPS fishery? I think in implicit in the participation model. Can we test this using the prediction from that model?
+
+<!-- We can extend our analysis and infer cases in which a vessel do not longer participate in the fish industry after a the closure. For this, we can use Global Fishing Watch and observe whether a vessel that stop harvesting CPS species still actively fishing other species.  -->
+
+<!-- Soould I include expected catch???  (Peña et al have some ideas how to use expected catch and cost. It could be the month average...) -->
+
+## Effort susbsitution ## 
+
+* Time series of number of trips (as a proxy for effort) for all the species
+* @richerson2017 use a method identify the nature of the outliers in an ARMA time series model (read more if interested) 
+    + I propose to estimate a system of simultaneous equations (VECM model) to study equilibrium of effort and short-run and long-run effects of the closure (structural breaks)
+    + Have a long-run equation for each species (simultaneously estimated) and test for structural break in this long-run relationship.
+    
+    
+## Seasonality changes ##
+
+* Seasonality can be studied calculating monthly share of total trips by species, regress it using month dummiues and see any is there any structural change after the closure [@richerson2017]. 
+
+
+
+<!-- Shall we study also effort as number of trips, and seasonality using time series -->
 
 
 # Results
