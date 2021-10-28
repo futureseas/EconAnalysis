@@ -266,13 +266,17 @@ collapse <- PacFIN_dat %>%
 
 collapse <- summaryBy(N_vessels ~ Species_name  + Landing_year, FUN=meanfun, data=collapse) 
 
+species_names <- as_labeller(c(`MARKET SQUID` = "Market Squid", 
+                               `PACIFIC SARDINE` = "Pacific Sardine", 
+                               `NORTHERN ANCHOVY` = "Northern Anchovy"))
+
 # Plot
 ggplot(collapse, aes(x=Landing_year, y = N_vessels.mean,  colour = Species_name)) + 
   geom_line(size=1) +
   scale_y_continuous(name = "Number of vessels") +
-  facet_wrap(~Species_name) + theme(legend.position="bottom") +
+  facet_wrap(~Species_name, labeller = species_names) + theme(legend.position="bottom") +
   guides(colour=guide_legend(title="Species: ")) +
-  scale_color_brewer(palette="Set2") + 
+  scale_color_brewer(palette="Set2") + theme(axis.text.x = element_text(angle=90)) +
   theme(legend.position="none") + xlab("Year") 
 ```
 
@@ -420,7 +424,9 @@ where $j$ indicate the species in consideration. $\text{logit}(p_{i,j})$ follows
 
 Beside the biological stock, landings are affected by socio-economics conditions. Some of them are harvest cost, prices received by species and their substitutes, and regulations imposed by the authorities. In our data we include as a proxy of harvest cost average distances traveled by vessel from the port of origin *(TO BE INCLUDED USING GLOBAL FISHING WATCH...)* and fuel cost *(TO BE INCLUDED...)*. Own price was included and it was obtained from PacFIN landings dataset. When price was missing, we replace this value for the average price of the species in all ports for the corresponding year. 
 
-We include the Annual Catch Limit (ACL) for the Pacific sardine model as an additional explanatory variable in both $\mu_i$ and $\text{logit}(p_i)$ equations. The ACL for Pacific sardine were obtained from the [CPS Fisheries Management Plan](pcouncil.org)???.  For this species, we restrict our data set to the period when the fishery was open (2000-2015). We only consider ports where landing have occur at least once in our sample period. Thus, we avoid to deal with ports where infrastructure to land Pacific sardine is nonexistent. 
+<!-- ISAAC's comments: Is this the ACL, or the remaining part of the ACL (accounting for previous catch). R: In the annual case doesn't matter, but in a monthly model I should consider this. -->
+
+We include the Annual Catch Limit (ACL) for the Pacific sardine model as an additional explanatory variable in both $\mu_i$ and $\text{logit}(p_i)$ equations. ACL variable is the total quota allocated each year for this fishery and was obtained from the [CPS Fisheries Management Plan](pcouncil.org)???.  For this species, we restrict our data set to the period when the fishery was open (2000-2015). We only consider ports where landing have occur at least once in our sample period. Thus, we avoid to deal with ports where infrastructure to land Pacific sardine is nonexistent. 
 
 ```{r desc_table, echo=FALSE, results='asis'}
 # Clean dataset
@@ -723,7 +729,14 @@ In the participation model, our outcome variable is a categorical variable that 
   
 We expect that using monthly **<<Should I use Yearly data???>>** data allows us to observe seasonality in fishers´ behavior and to reduce the risk to not loosing general behavior when we dissagregate data in a finer scale.
 
-According @richerson2017, fishers participation decision should depend, in general terms, on profitability, species distribution and regulations. Specifically, based on different studies (**REF here**), variables that can explain fishery participation on a particular fishery in a month are:
+According @richerson2017, fishers participation decision should depend, in general terms, on profitability, species distribution and regulations. Specifically, based on different studies [@richerson2017] (MORE REF), variables that can explain fishery participation on a particular fishery in a month are:
+
+<!-- see if these are relevant:  -->
+<!-- Holland D. S.. A bioeconomic model of marine sanctuaries on Georges Bank, Canadian Journal of Fisheries and Aquatic Sciences, 2000, vol. 57 (pg. 1307-1319) -->
+
+<!-- Holland D. S.,  Herrera G. E.. Flexible catch-balancing policies for multispecies individual fishery quotas, Canadian Journal of Fisheries and Aquatic Sciences, 2006, vol. 63 (pg. 1669-1685)10.1139/f06-066 -->
+
+<!-- Toft J. E.,  Punt A. E.,  Little L. R.. Modelling the economic and ecological impacts of the transition to individual transferable quotas in the multispecies US west coast groundfish trawl fleet, ICES Journal of Marine Science, 2011, vol. 68 (pg. 1566-1579)10.1093/icesjms/fsr095 -->
 
 * Previous revenues
 * Expected catch: 
@@ -797,11 +810,23 @@ Before presenting the results for the three species in consideration, we check g
 
 ```{r y_rep, message=FALSE, warning=FALSE, fig.cap = "Graphical posterior predictive checks\\label{fig:posteriors}"}
 g1 <- pp_check(fit_qPSDN_price) + ggtitle('(a) Pacific sardine') + 
-  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic")) +  xlim(0.1, 15000) 
-g2 <- pp_check(fit_qMSQD_price) + ggtitle('(b) Market Squid') + 
-  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"))  +  xlim(0.1, 15000) 
-g3 <- pp_check(fit_qNANC_price) + ggtitle('(c) Northern Anchovy') +
-  theme(legend.position = "right", plot.title = element_text(size=9, face="bold.italic"))  +  xlim(0.1, 15000) 
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                       labels = c("y" = "Observed", "yrep" = "Replicated")) +  
+  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic")) +  
+  xlim(0.1, 15000) + ylab("Density")
+
+g2 <- pp_check(fit_qMSQD_price) + ggtitle('(b) Market Squid') +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                       labels = c("y" = "Observed", "yrep" = "Replicated")) + 
+  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"))  + 
+  xlim(0.1, 15000) + xlab("Landing (tons)")
+
+g3 <- pp_check(fit_qNANC_price) + ggtitle('(c) Northern Anchovy') + 
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                       labels = c("y" = "Observed", "yrep" = "Replicated")) +
+  theme(legend.position = "right", plot.title = element_text(size=9, face="bold.italic"))  +  
+  xlim(0.1, 15000) 
+
 
 
 g1 + g2 + g3
@@ -816,11 +841,11 @@ shinystan::launch_shinystan(fit_qNANC_price)
 ```
 
 ```{r y_rep_zero, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-g1 <- pp_check(fit_qPSDN_price) + ggtitle('(a) Pacific sardine') + theme(legend.position = "none") +  xlim(0, 0.1) 
-g2 <- pp_check(fit_qMSQD_price) + ggtitle('(b) Market Squid') + theme(legend.position = "none")  +  xlim(0, 0.1) 
-g3 <- pp_check(fit_qNANC_price) + 
-  ggtitle('(c) Northern anchovy') + 
-  theme(legend.position = "right", plot.title = element_text(size=9, face="bold.italic"))  +  xlim(0, 0.1)
+g1 <- pp_check(fit_qPSDN_price) + ggtitle('(a) Pacific sardine')  + theme(legend.position = "none") + xlim(0, 0.1) 
+g2 <- pp_check(fit_qMSQD_price) + ggtitle('(b) Market Squid')     + theme(legend.position = "none") + xlim(0, 0.1) 
+g3 <- pp_check(fit_qNANC_price) + ggtitle('(c) Northern anchovy') + theme(legend.position = "right", 
+                                             plot.title = element_text(size=9, face="bold.italic")) + xlim(0, 0.1) 
+
 
 
 g1 + g2 + g3
@@ -1058,6 +1083,7 @@ g3_NANC <-  plot(c_eff_int_psdn_msqd, plot = FALSE)[[1]] + ggtitle('(c) Pacific 
 save.image (file = "stan_fit.RData")
 ```
 
+<!-- ISAAC COMMENTS: There are some notes from two stakeholder workshops (Desiree et al.). It would be good to use these to understand and motivate the discussion of complementarity and substition.  -->
 
 However, this complementary is not observed for Northern anchovy landings. When market squid presence increase, we observe a decrease in Northern anchovy landings. An interesting case is observed for Pacific sardine and Northern anchovy, in particular at Monterrey area. For small levels of Pacific sardine presence, Pacific sardine is a complement with Northern anchovy. However, after certain threshold, Pacific sardine is no longer complement and Pacific sardine become a substitute, reducing Northern anchovy landings when the probability of presence for Pacific sardine increase.
 
