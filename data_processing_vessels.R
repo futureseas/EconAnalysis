@@ -40,12 +40,11 @@ sumfun <- function(x, ...){
   c(sum=sum(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
 }
 
-
 ### Read PacFIN data by vessels ###
-PacFIN_vessels <- read.csv(file = "G:/.shortcut-targets-by-id/1pJjy45KdwUX5VR8XqghuA5D-xC8bMshI/COCA_forage/Pacfin data/FutureSeasIII_2010_2020.csv")
+PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
+PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
 
-
-
+PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
 
 ### Read ACL data and merge with PacFIN ###
 ## Note: Squid is straightforward as it is a constant cap, the sardine one depends on the estimated biomass.

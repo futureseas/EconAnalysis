@@ -136,14 +136,14 @@ colorize <- function(x, color) {
   + Protected species.
 2. Climate is changing: 
 ```{r climate, echo=FALSE, out.width = '100%'}
-knitr::include_graphics("C:/GitHub/EconAnalysis/Slides/Landings paper/figures/climate.png")
+knitr::include_graphics("climate.png")
 ```
 ]
 
 .pull-right[
 
 ```{r sardine_biomass1, echo=FALSE, fig.cap = "3. Changes in species distribution and regulations", out.width = '100%'}
-knitr::include_graphics("C:/GitHub/EconAnalysis/Slides/Landings paper/figures/sardine_biomass.png")
+knitr::include_graphics("sardine_biomass.png")
 ```
 ]
 
@@ -185,11 +185,12 @@ name: landingmodel
 
 * Separate model for:
   + Pacific sardine, Northern anchovy and Market squid. 
+* Ports were chosen using historical landings. 
 * Interaction between species 
   + Through the probability of presence (SDMs outputs)
 
 ```{r sdm_landings, echo=FALSE, out.width = '65%'}
-knitr::include_graphics("C:/GitHub/EconAnalysis/Figures/by_port_sdm.png")
+knitr::include_graphics("by_port_sdm.png")
 ```
 
 ---
@@ -234,7 +235,7 @@ $$\begin{eqnarray} \mu_{it}  = & \beta^0_{i} & + \beta^1_{i} Pr(Prec.PSDN)_{it} 
   
 .pull-right[
 
-![Port radious is used to compute presence.](C:/GitHub/EconAnalysis/Figures/psdn_logbook.gif)
+![Port radious is used to compute presence.](psdn_logbook.gif)
 
 ]
   
@@ -285,7 +286,7 @@ name: landingmodel
 # Results: Effect of presence
 
 ```{r sdm_on_landings, echo=FALSE, out.width = '75%'}
-knitr::include_graphics("C:/GitHub/EconAnalysis/Figures/by_port_SDM_on_landings.png")
+knitr::include_graphics("by_port_SDM_on_landings.png")
 
 ```
 
@@ -296,7 +297,7 @@ knitr::include_graphics("C:/GitHub/EconAnalysis/Figures/by_port_SDM_on_landings.
 # Results: Interaction effects on PSDN
 
 ```{r int_psdn, echo=FALSE, out.width = '75%'}
-knitr::include_graphics("C:/GitHub/EconAnalysis/Figures/PSDN_int_effects.png")
+knitr::include_graphics("PSDN_int_effects.png")
 
 ```
 
@@ -305,7 +306,7 @@ knitr::include_graphics("C:/GitHub/EconAnalysis/Figures/PSDN_int_effects.png")
 # Results: Interaction effects on MSQD
 
 ```{r int_msqd, echo=FALSE, out.width = '75%'}
-knitr::include_graphics("C:/GitHub/EconAnalysis/Figures/MSQD_int_effects.png")
+knitr::include_graphics("MSQD_int_effects.png")
 
 ```
 
@@ -314,7 +315,7 @@ knitr::include_graphics("C:/GitHub/EconAnalysis/Figures/MSQD_int_effects.png")
 # Results: Interaction effects on NANC
 
 ```{r int_nanc, echo=FALSE, out.width = '75%'}
-knitr::include_graphics("C:/GitHub/EconAnalysis/Figures/NANC_int_effects.png")
+knitr::include_graphics("NANC_int_effects.png")
 
 ```
 
@@ -324,7 +325,7 @@ knitr::include_graphics("C:/GitHub/EconAnalysis/Figures/NANC_int_effects.png")
 # Results: Pacific sardine closure
 
 ```{r closure, echo=FALSE, out.width = '75%'}
-knitr::include_graphics("C:/GitHub/EconAnalysis/Figures/closure.png")
+knitr::include_graphics("closure.png")
 
 ```
 
