@@ -58,9 +58,10 @@ class: center, middle, inverse, title-slide
 .pull-left[
 
 1. Unique ecosystem
-  + Ecosystem services,
-  + Sustains commercial and recreational fisheries
-  + Protected species.
+  + Provide many ecosystem services,
+  + Sustains commercial and recreational fisheries,
+  + Protected species,
+  + **Forage species (e.g. Coastal Pelagics).**
 2. Climate is changing: 
 &lt;img src="climate.png" width="100%" style="display: block; margin: auto;" /&gt;
 ]
@@ -75,15 +76,25 @@ class: center, middle, inverse, title-slide
 
 ---
 # Research Question
+
 * **Big picture:**
   + How will climate change impact fishing communities?
   
 * **Specific question:** 
   + How does changes in species distribution and regulations (i.e. closures) will affect catch composition and  landings in the *Coastal Pelagic Species (CPS)* fishery? 
   
+ 
+---
+# Methodology
+
 * **Two approaches:**
-  + Landing model (result for the public aggregate data):
+  + Landing model (result for the public aggregate data).
   + Participation model (no results yet). 
+
+* **Data:**
+  + Fish tickets from The Pacific Fisheries Information Network (PacFIN)
+  + Current and projected species distribution ([Muhling et al, 2020](https://doi.org/10.3389/fmars.2020.00589)). 
+  + Fishing locations from logbooks (maybe Global Fishing Watch)
 
 ---
 class: inverse, center, middle
@@ -101,9 +112,9 @@ name: landingmodel
 
 * Hierarchical Bayesian Hurdle model
   + Uncertainty from modeling and observation.  All parameters are random variables 
-  + Multilevel effects (i.e. hierarchical effects by ports).
-  + Incorporate previous knowledge as a prior [(Smith et al., 2020)](https://onlinelibrary.wiley.com/doi/10.1111/fog.12529).
-  + Hurdle part allows to model the zeros.
+  + **Multilevel effects (i.e. hierarchical effects by ports/vessel)**.
+  + Incorporate previous knowledge as a prior ([Smith et al, 2020](https://onlinelibrary.wiley.com/doi/10.1111/fog.12529)).
+  + Hurdle allows to model the zeros.
 
 ---
 
@@ -187,7 +198,7 @@ name: landingmodel
 &amp; + \beta_5 HHI_i + \beta_6 Percent.revenue_j + \beta_7 LCG_i + \beta_8 LI_i \\
 &amp; + \beta_9 Year.fished. 
 \end{align*}$$`
-+ From [(Richerson &amp; Holland, 2017)](https://doi.org/10.1093/icesjms/fsx093):
++ From [Richerson &amp; Holland (2017)](https://doi.org/10.1093/icesjms/fsx093):
   + HHI = Diversification measurement 
   + Percent.revenue = Dependence on the species in consideration
   + Latitudinal center of gravity (LCG) = Typical landings location 
@@ -277,6 +288,7 @@ name: future-work
 
 + Incorporate individual data for landings.
   + Vessels landings? or port landings?
+  + Vessel/port heriarchal effects. 
 + Estimate participation model.
 + Forecast using SDM projections.
 + Study changes on effort? (number of trips by species)

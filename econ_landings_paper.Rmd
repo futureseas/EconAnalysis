@@ -138,6 +138,19 @@ Before Pacific sardine closure in 2015, landings in the CPS fishery have been ma
 
 <!-- <<<ISAAC: Need some more details on anchovy and herring fisheries, these I believe are constrained by management and geography, so may not be real "choices" for the substitution. >>>  -->
 
+```{r change_names, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+names(PacFIN_data_port)[names(PacFIN_data_port) == "LANDING_YEAR"              ] <- "Year"
+names(PacFIN_data_port)[names(PacFIN_data_port) == "PACFIN_SPECIES_CODE"       ] <- "Species_code"
+names(PacFIN_data_port)[names(PacFIN_data_port) == "PACFIN_SPECIES_COMMON_NAME"] <- "Species_name"
+names(PacFIN_data_port)[names(PacFIN_data_port) == "LANDED_WEIGHT_MTONS"       ] <- "Landings"
+names(PacFIN_data_port)[names(PacFIN_data_port) == "EXVESSEL_REVENUE"          ] <- "Revenue"
+names(PacFIN_data_port)[names(PacFIN_data_port) == "LANDED_WEIGHT_PPP"         ] <- "Price"
+names(PacFIN_data_port)[names(PacFIN_data_port) == "AGENCY_CODE"               ] <- "State"
+names(PacFIN_data_port)[names(PacFIN_data_port) == "MANAGEMENT_GROUP_CODE"     ] <- "Management_group"
+
+```
+
+
 ```{r avg_landings, echo=FALSE, fig.cap="Average annual landing and revenues for the CPS fishery by species.\\label{fig:avg_lan_rev}", message=FALSE, warning=FALSE}
 landings <- summaryBy(Landings ~ Species_code + Landing_year + Management_group, FUN=sumfun, data=PacFIN_dat) %>%
   filter(Management_group == "CPEL") %>%
@@ -257,7 +270,32 @@ ggplot(collapse, aes(y=Landings, x=Landing_year, color=Species_code, group=Speci
              "PHRG" = "Pacific Herring", "PSDN" = "Pacific Sardine"))
 ```
 
-```{r ts_n_vessels, fig.cap = "Total number of vessel by species. 2000 - 2020.\\label{fig:ts_n_vessels}", echo=FALSE, message=FALSE, warning=FALSE}
+
+```{r ts_by_port_price,  fig.cap = "Total annual landing by port area. 2000 - 2020. \\textit{Notes:} CLO = Columbia River (OR); LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara; SFA = San Francisco.\\label{fig:ts_price_by_ports}" , echo=FALSE, message=FALSE, warning=FALSE}
+
+collapse <- PacFIN_dat %>%
+    filter(Port == "CLO" | Port == "LAA" | Port == "MNA" | Port == "SBA" | Port == "SFA") %>%
+    filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | 
+             Species_name == "MARKET SQUID") %>%
+    mutate(Port = fct_relevel(Port, "LAA", "SBA", "MNA", "SFA", "CLO")) %>%
+  filter(Landing_year >= 2000 & Landing_year <= 2020)
+
+
+port_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara", `MNA` = "Monterrey",
+                            `SFA` = "San Francisco", `CLO` = "Columbia River (OR)"))
+     
+ggplot(collapse, aes(y=Price, x=Landing_year, color=Species_code, group=Species_code)) +
+  geom_line(size=1) + xlab("Port areas") + ylab("Price ($/tons)") + 
+  facet_wrap(~ Port, labeller = port_names) +
+  theme(legend.position="bottom") + 
+  theme(axis.text.x = element_text(angle=90)) +
+  guides(color=guide_legend(title="Species: ")) +
+  scale_color_brewer(palette="Set2", labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
+             "PHRG" = "Pacific Herring", "PSDN" = "Pacific Sardine"))
+```
+
+
+```{r ts_n_vessels, echo=FALSE, fig.cap="Total number of vessel by species. 2000 - 2020.\\label{fig:ts_n_vessels}", message=FALSE, warning=FALSE}
 collapse <- PacFIN_dat %>%
   filter(Management_group == "CPEL") %>%
   filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | 
