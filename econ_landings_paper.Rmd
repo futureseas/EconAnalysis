@@ -71,8 +71,9 @@ library(zoo)
 ```
 
 ```{r read_data, include=FALSE} 
-PacFIN_dat <- read.csv(file = here::here("Data", "PacFin.csv"))
-sapply(PacFIN_dat, class) 
+PacFIN_yearly <- read.csv(file = here::here("Data", "PacFin_yearly.csv"))
+PacFIN_month <- read.csv(file = here::here("Data", "PacFin_monthly.csv"))
+sapply(PacFIN_month, class) 
 ```
 
 ```{r functions, include=FALSE}
@@ -91,19 +92,19 @@ sum_mean_fun <- function(x, ...){
 
 port_by_state <- function(state_name) {
   if (state_name == "SOME") {
-    collapse <- PacFIN_dat %>%
+    collapse <- PacFIN_yearly %>%
     filter(Port == "CLO" | Port == "LAA" | Port == "MNA" | Port == "SBA" | Port == "SFA") %>%
     filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") %>%
     mutate(Port = fct_relevel(Port, "LAA", "SBA", "MNA", "SFA", "CLO"))
   }
   if (state_name == "ALL") {
-    collapse <- PacFIN_dat %>%
+    collapse <- PacFIN_yearly %>%
     filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
     filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") %>%
     mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
   }
   else {
-    collapse <- PacFIN_dat %>%
+    collapse <- PacFIN_yearly %>%
     filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
     filter(State == state_name & (Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING")) %>%
     mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
@@ -131,6 +132,21 @@ The remainder of the paper is organized as follows: Section \ref{coastal-pelagic
 
 
 # Coastal Pelagic Species fishery 
+```{r landing_rev_by_gear}
+
+PacFIN.CPS <- PacFIN_month %>% 
+  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "JMCK", "CMCK", "PSDN", "NANC", "PBNT", "UMCK", "PHRG", "RHRG")) %>%
+  filter( LANDING_YEAR >= 2010 )
+
+round( xtabs(LANDED_WEIGHT_LBS.sum ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE, data = PacFIN.CPS )/2204.6, 0 )
+
+```
+
+
+
+
+
+
 
 Before Pacific sardine closure in 2015, landings in the CPS fishery have been mainly dominated by Pacific sardine and market squid, as is shown in panel (a) in Figure \ref{fig:avg_lan_rev}. Low average landings for Pacific herring and Northern anchovy could be related with geography and regulatory constraint that restrict vessels to exploit them. Nevertheless, this lower levels compare with Market squid and Pacific sardine could be reflecting lower economics incentives for its exploitation. In terms of revenue, we can observe in panel (b) that market squid have the largest revenue, while Pacific sardine lost relevance due to the low prices received by fishers.
 
@@ -139,22 +155,22 @@ Before Pacific sardine closure in 2015, landings in the CPS fishery have been ma
 <!-- <<<ISAAC: Need some more details on anchovy and herring fisheries, these I believe are constrained by management and geography, so may not be real "choices" for the substitution. >>>  -->
 
 ```{r change_names, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-names(PacFIN_data_port)[names(PacFIN_data_port) == "LANDING_YEAR"              ] <- "Year"
-names(PacFIN_data_port)[names(PacFIN_data_port) == "PACFIN_SPECIES_CODE"       ] <- "Species_code"
-names(PacFIN_data_port)[names(PacFIN_data_port) == "PACFIN_SPECIES_COMMON_NAME"] <- "Species_name"
-names(PacFIN_data_port)[names(PacFIN_data_port) == "LANDED_WEIGHT_MTONS"       ] <- "Landings"
-names(PacFIN_data_port)[names(PacFIN_data_port) == "EXVESSEL_REVENUE"          ] <- "Revenue"
-names(PacFIN_data_port)[names(PacFIN_data_port) == "LANDED_WEIGHT_PPP"         ] <- "Price"
-names(PacFIN_data_port)[names(PacFIN_data_port) == "AGENCY_CODE"               ] <- "State"
-names(PacFIN_data_port)[names(PacFIN_data_port) == "MANAGEMENT_GROUP_CODE"     ] <- "Management_group"
+names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "LANDING_YEAR"              ] <- "Year"
+names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "PACFIN_SPECIES_CODE"       ] <- "Species_code"
+names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "PACFIN_SPECIES_COMMON_NAME"] <- "Species_name"
+names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "LANDED_WEIGHT_MTONS"       ] <- "Landings"
+names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "EXVESSEL_REVENUE"          ] <- "Revenue"
+names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "LANDED_WEIGHT_PPP"         ] <- "Price"
+names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "AGENCY_CODE"               ] <- "State"
+names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "MANAGEMENT_GROUP_CODE"     ] <- "Management_group"
 
 ```
 
 
 ```{r avg_landings, echo=FALSE, fig.cap="Average annual landing and revenues for the CPS fishery by species.\\label{fig:avg_lan_rev}", message=FALSE, warning=FALSE}
-landings <- summaryBy(Landings ~ Species_code + Landing_year + Management_group, FUN=sumfun, data=PacFIN_dat) %>%
+landings <- summaryBy(Landings ~ Species_code + Landing_year + Management_group, FUN=sumfun, data=PacFIN_yearly) %>%
   filter(Management_group == "CPEL") %>%
-  filter(Species_code != "PBNT" & Species_code != "CMCK" & 
+  filter(Species_code != "PBNT" & Species_code != "CMCK" & Species_code != "PHRG" &   
            Species_code != "JMCK" & Species_code != "RHRG" & Species_code != "UMCK")
 
 landings <- summaryBy(Landings.sum ~ Species_code, FUN=meanfun, data=landings)
@@ -163,13 +179,12 @@ g1 <- ggplot(landings, aes(Species_code, Landings.sum.mean)) +
   geom_col(width=0.4) + ggtitle("(a) Landings") + 
   theme(plot.title = element_text(size=9, face="bold.italic")) +
   xlab("Species") + ylab("Landings (tons)") + 
-  scale_x_discrete(labels=c("MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
-                            "PHRG" = "Pacific\nHerring", "PSDN" = "Pacific\nSardine"))
+  scale_x_discrete(labels=c("MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy", "PSDN" = "Pacific\nSardine"))
 
 
-revenue <- summaryBy(Revenue ~ Species_code + Landing_year + Management_group, FUN=sumfun, data=PacFIN_dat) %>%
+revenue <- summaryBy(Revenue ~ Species_code + Landing_year + Management_group, FUN=sumfun, data=PacFIN_yearly) %>%
   filter(Management_group == "CPEL") %>%
-  filter(Species_code != "PBNT" & Species_code != "CMCK" & 
+  filter(Species_code != "PBNT" & Species_code != "CMCK" & Species_code != "PHRG" & 
            Species_code != "JMCK" & Species_code != "RHRG" & Species_code != "UMCK") 
 
 revenue <- summaryBy(Revenue.sum ~ Species_code, FUN=meanfun, data=revenue)
@@ -179,14 +194,13 @@ g2 <- ggplot(revenue, aes(Species_code, Revenue.sum.mean)) +
   geom_col(width=0.4) + ggtitle("(b) Revenue") + 
   theme(plot.title = element_text(size=9, face="bold.italic")) +
   xlab("Species") + ylab("Revenues (USD)") + 
-  scale_x_discrete(labels=c("MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
-                            "PHRG" = "Pacific\nHerring", "PSDN" = "Pacific\nSardine"))
+  scale_x_discrete(labels=c("MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy", "PSDN" = "Pacific\nSardine"))
 
 
 g1 + g2
 ```
 ```{r ts_landings, eval=FALSE, fig.cap="Total annual landing by CPS species.\\label{fig:ts_landings}", message=FALSE, warning=FALSE, include=FALSE}
-collapse <- PacFIN_dat %>%
+collapse <- PacFIN_yearly %>%
   filter(Management_group == "CPEL") %>%
   filter(Species_code != "PBNT" & Species_code != "CMCK" & Species_code != "JMCK" & Species_code != "RHRG" & Species_code != "UMCK")
 
@@ -199,7 +213,7 @@ ggplot(collapse, aes(x = Landing_year, y = Landings.sum, group= Species_name, co
 ```
 
 ```{r ts_landings_vessels, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-collapse <- PacFIN_dat %>%
+collapse <- PacFIN_yearly %>%
   filter(Management_group == "CPEL") %>%
   filter(Species_code != "PBNT" & Species_code != "RHRG" & Species_code != "UMCK")
 
@@ -221,7 +235,7 @@ scale_y_continuous(name = "Landings (M Tons)",
 Landings composition varies geographically. We show in Figure \ref{fig:avg_landings_by_ports} average annual landings by ports areas. We can observe that market squid is mostly landed in the southern ports located in Los Angeles, Santa Barbara and Monterrey areas, while Pacific sardine is mainly landed in Los Angeles and Monterrey areas in California, and also in the Columbia river area in Oregon. Substitution between species seems to be more likely in Los Angeles, Monterrey and Santa Barbara area ports (and in some lower scale at San Francisco area) as positive values for market squid, Pacific sardine and Northern anchovy landings are observed. 
 
 ```{r avg_landings_by_port, echo=FALSE, fig.cap="Annual average landings by port area.\\label{fig:avg_landings_by_ports}", message=FALSE, warning=FALSE}
-collapse <- summaryBy(Landings ~ Species_name + Species_code + Port + State, FUN=meanfun, data=PacFIN_dat) %>%
+collapse <- summaryBy(Landings ~ Species_name + Species_code + Port + State, FUN=meanfun, data=PacFIN_yearly) %>%
   filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
   filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") %>%
   mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
@@ -249,7 +263,7 @@ To analyze substitution more in detail, we compute total annual landing by port 
 
 ```{r ts_by_port,  fig.cap = "Total annual landing by port area. 2000 - 2020. \\textit{Notes:} CLO = Columbia River (OR); LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara; SFA = San Francisco.\\label{fig:ts_landings_by_ports}" , echo=FALSE, message=FALSE, warning=FALSE}
 
-collapse <- PacFIN_dat %>%
+collapse <- PacFIN_yearly %>%
     filter(Port == "CLO" | Port == "LAA" | Port == "MNA" | Port == "SBA" | Port == "SFA") %>%
     filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | 
              Species_name == "MARKET SQUID") %>%
@@ -273,7 +287,7 @@ ggplot(collapse, aes(y=Landings, x=Landing_year, color=Species_code, group=Speci
 
 ```{r ts_by_port_price,  fig.cap = "Total annual landing by port area. 2000 - 2020. \\textit{Notes:} CLO = Columbia River (OR); LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara; SFA = San Francisco.\\label{fig:ts_price_by_ports}" , echo=FALSE, message=FALSE, warning=FALSE}
 
-collapse <- PacFIN_dat %>%
+collapse <- PacFIN_yearly %>%
     filter(Port == "CLO" | Port == "LAA" | Port == "MNA" | Port == "SBA" | Port == "SFA") %>%
     filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | 
              Species_name == "MARKET SQUID") %>%
@@ -296,7 +310,7 @@ ggplot(collapse, aes(y=Price, x=Landing_year, color=Species_code, group=Species_
 
 
 ```{r ts_n_vessels, echo=FALSE, fig.cap="Total number of vessel by species. 2000 - 2020.\\label{fig:ts_n_vessels}", message=FALSE, warning=FALSE}
-collapse <- PacFIN_dat %>%
+collapse <- PacFIN_yearly %>%
   filter(Management_group == "CPEL") %>%
   filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | 
            Species_name == "MARKET SQUID") %>%
@@ -333,7 +347,7 @@ Figure \ref{fig:sdm_land_by_port} show the relationship between the probability 
 
 ```{r SDM_land_by_port, echo=FALSE, fig.cap="Landings v/s probability of presence by port area. \\textit{Notes:} LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE}
 
-collapse <- PacFIN_dat %>%
+collapse <- PacFIN_yearly %>%
   filter(Species_code == "PSDN" | Species_code == "MSQD"  | Species_code == "NANC") %>%
   dplyr::select(Landing_year, Port, PSDN_SDM_60, MSQD_SDM_90, NANC_SDM_20, Landings, Species_code) %>% 
   filter(Port == "LAA" | Port == "MNA" | Port == "SBA") %>%
@@ -386,7 +400,7 @@ g1 / g2 / g3
 
 ```{r SDM_land_by_port_NANC, eval=FALSE, fig.cap="Landings v/s probability of presence by port area. \\textit{Notes:} LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE, include=FALSE}
 
-collapse <- PacFIN_dat %>%
+collapse <- PacFIN_yearly %>%
   filter(Species_code == "NANC") %>%
   dplyr::select(Landing_year, Port, NANC_SDM_20_sep_dec, Landings, Species_code) %>% 
   filter(Port == "MNA") %>% mutate(Port = fct_relevel(Port, "MNA")) %>% 
@@ -467,8 +481,8 @@ We include the Annual Catch Limit (ACL) for the Pacific sardine model as an addi
 
 ```{r desc_table, echo=FALSE, results='asis'}
 # Clean dataset
-PacFIN_dat = PacFIN_dat[,!grepl("*_LE_",names(PacFIN_dat))]
-PacFIN_dat <- PacFIN_dat %>%
+PacFIN_yearly = PacFIN_yearly[,!grepl("*_LE_",names(PacFIN_yearly))]
+PacFIN_yearly <- PacFIN_yearly %>%
   filter(Species_code == "PSDN" | Species_code == "MSQD"  | Species_code == "NANC") %>%
   dplyr::select(Landing_year, Port, PSDN_SDM_60, MSQD_SDM_90, NANC_SDM_20, ACL_PSDN.sum,
          Landings, Price, Revenue, Species_code) %>% 
@@ -481,7 +495,7 @@ PacFIN_dat <- PacFIN_dat %>%
   dplyr::rename(ACL_PSDN = PSDN_ACL_PSDN.sum) %>%
   filter(Landing_year >= 2000 & Landing_year <= 2018)
   
-est_data = subset(PacFIN_dat, select = -c(MSQD_PSDN_SDM_60, MSQD_NANC_SDM_20, MSQD_ACL_PSDN.sum, 
+est_data = subset(PacFIN_yearly, select = -c(MSQD_PSDN_SDM_60, MSQD_NANC_SDM_20, MSQD_ACL_PSDN.sum, 
                                           NANC_PSDN_SDM_60, NANC_MSQD_SDM_90, NANC_ACL_PSDN.sum,
                                           PSDN_MSQD_SDM_90, PSDN_NANC_SDM_20))
 

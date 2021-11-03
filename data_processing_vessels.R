@@ -57,11 +57,22 @@ PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020
 PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
 
 # Obtain monthly data by vessels #
-PacFIN_monthly <- summaryBy(LANDED_WEIGHT_LBS  + PRICE_PER_POUND + EXVESSEL_REVENUE + 
+PacFIN_monthly <- summaryBy(LANDED_WEIGHT_LBS + PRICE_PER_POUND + EXVESSEL_REVENUE + 
                               VESSEL_LENGTH + VESSEL_WEIGHT + VESSEL_HORSEPOWER + NUM_OF_DAYS_FISHED 
-                            ~ VESSEL_NUM + VESSEL_NAME + PORT_CODE + PORT_NAME + LANDING_YEAR + LANDING_MONTH +
-                              PACFIN_SPECIES_CODE + PACFIN_SPECIES_COMMON_NAME, 
-                            FUN=sum_mean_fun, data=PacFIN)
+                            ~ VESSEL_NUM + PORT_NAME + LANDING_YEAR + LANDING_MONTH +
+                              PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE, FUN=sum_mean_fun, data=PacFIN)
+
+### Check data
+
+PacFIN_monthly.CPS <- PacFIN_monthly %>% 
+  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "JMCK", "CMCK", "PSDN", "NANC", "PBNT", "UMCK", "PHRG", "RHRG")) %>%
+  filter( LANDING_YEAR >= 2010 )
+DC <- PacFIN %>% 
+  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "JMCK", "CMCK", "PSDN", "NANC", "PBNT", "UMCK", "PHRG", "RHRG")) %>%
+  filter( LANDING_YEAR >= 2010 )
+
+round( xtabs( LANDED_WEIGHT_LBS.sum ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE, data = PacFIN_monthly.CPS  )/2204.6, 0 )
+round( xtabs( LANDED_WEIGHT_LBS ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE, data = DC  )/2204.6, 0 )
 
 
 # ####################
@@ -159,6 +170,4 @@ PacFIN_monthly <- summaryBy(LANDED_WEIGHT_LBS  + PRICE_PER_POUND + EXVESSEL_REVE
 ####################
 
 sapply(PacFIN_monthly, class) 
-
-
 write.csv(PacFIN_monthly,"Data\\PacFin_monthly.csv", row.names = FALSE)
