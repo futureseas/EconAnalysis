@@ -1,11 +1,11 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.8.30)  1 NOV 2021 20:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.11.1)  4 NOV 2021 12:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **econ_landings_paper.tex
 (./econ_landings_paper.tex
 LaTeX2e <2021-06-01> patch level 1
-L3 programming layer <2021-08-27>
+L3 programming layer <2021-10-18>
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/article.cl
 s
 Document Class: article 2021/02/12 v1.4n Standard LaTeX document class
@@ -168,24 +168,31 @@ Package: textcomp 2020/02/02 v2.0n Standard LaTeX package
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/microtype/micro
 type.sty
-Package: microtype 2021/03/14 v2.8c Micro-typographical refinements (RS)
+Package: microtype 2021/10/31 v3.0 Micro-typographical refinements (RS)
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/graphics/keyval
 .sty
 Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
 \KV@toks@=\toks23
 )
+(c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/etoolbox/etoolb
+ox.sty
+Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count268
+)
 \MT@toks=\toks24
-\MT@count=\count268
-LaTeX Info: Redefining \textls on input line 790.
-\MT@outer@kern=\dimen148
-LaTeX Info: Redefining \textmicrotypecontext on input line 1374.
-\MT@listname@count=\count269
+\MT@count=\count269
+\MT@tempbox=\box52
+\MT@leftmarginkern=\dimen148
+\MT@rightmarginkern=\dimen149
+LaTeX Info: Redefining \textls on input line 1114.
+\MT@outer@kern=\dimen150
+LaTeX Info: Redefining \textmicrotypecontext on input line 1700.
+\MT@listname@count=\count270
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/microtype/micro
 type-pdftex.def
-File: microtype-pdftex.def 2021/03/14 v2.8c Definitions specific to pdftex (RS)
-
+File: microtype-pdftex.def 2021/10/31 v3.0 Definitions specific to pdftex (RS)
 LaTeX Info: Redefining \lsstyle on input line 915.
 LaTeX Info: Redefining \lslig on input line 915.
 \MT@outer@space=\skip52
@@ -194,31 +201,31 @@ Package microtype Info: Loading configuration file microtype.cfg.
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/microtype/micro
 type.cfg
-File: microtype.cfg 2021/03/14 v2.8c microtype main configuration file (RS)
+File: microtype.cfg 2021/10/31 v3.0 microtype main configuration file (RS)
 ))
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/xcolor/xcolor.s
 ty
-Package: xcolor 2016/05/11 v2.12 LaTeX color extensions (UK)
+Package: xcolor 2021/10/31 v2.13 LaTeX color extensions (UK)
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/graphics-cfg/co
 lor.cfg
 File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
-Package xcolor Info: Driver file: pdftex.def on input line 225.
+Package xcolor Info: Driver file: pdftex.def on input line 227.
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/graphics-def/pd
 ftex.def
 File: pdftex.def 2020/10/05 v1.2a Graphics/color driver for pdftex
 )
-Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1348.
-Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1352.
-Package xcolor Info: Model `RGB' extended on input line 1364.
-Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1366.
-Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1367.
-Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1368.
-Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1369.
-Package xcolor Info: Model `Gray' substituted by `gray' on input line 1370.
-Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1352.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1356.
+Package xcolor Info: Model `RGB' extended on input line 1368.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1370.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1371.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1372.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1373.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1374.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1375.
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/graphics/dvipsn
 am.def
@@ -226,11 +233,11 @@ File: dvipsnam.def 2016/06/17 v3.0m Driver-dependent file (DPC,SPQR)
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/xcolor/svgnam.d
 ef
-File: svgnam.def 2016/05/11 v2.12 Predefined colors according to SVG 1.1 (UK)
+File: svgnam.def 2021/10/31 v2.13 Predefined colors according to SVG 1.1 (UK)
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/xcolor/x11nam.d
 ef
-File: x11nam.def 2016/05/11 v2.12 Predefined colors according to Unix/X11 (UK)
+File: x11nam.def 2021/10/31 v2.13 Predefined colors according to Unix/X11 (UK)
 ))
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/hyperref/hyperr
 ef.sty
@@ -281,9 +288,9 @@ Package: auxhook 2019-12-17 v1.6 Hooks for auxiliary files (HO)
 ions.sty
 Package: kvoptions 2020-10-07 v3.14 Key value format for package options (HO)
 )
-\@linkdim=\dimen149
-\Hy@linkcounter=\count270
-\Hy@pagecounter=\count271
+\@linkdim=\dimen151
+\Hy@linkcounter=\count271
+\Hy@pagecounter=\count272
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc
 .def
@@ -304,7 +311,7 @@ Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 cmds.sty
 Package: etexcmds 2019/12/15 v1.7 Avoid name clashes with e-TeX commands (HO)
 )
-\Hy@SavedSpaceFactor=\count272
+\Hy@SavedSpaceFactor=\count273
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/hyperref/puenc.
 def
@@ -320,13 +327,13 @@ Package hyperref Info: Plain pages OFF on input line 4207.
 Package hyperref Info: Backreferencing OFF on input line 4212.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4445.
-\c@Hy@tempcnt=\count273
+\c@Hy@tempcnt=\count274
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip17
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4804.
-\XeTeXLinkMargin=\dimen150
+\XeTeXLinkMargin=\dimen152
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/bitset/bitset
 .sty
@@ -337,9 +344,9 @@ gintcalc.sty
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
 )
 ))
-\Fld@menulength=\count274
-\Field@Width=\dimen151
-\Fld@charsize=\dimen152
+\Fld@menulength=\count275
+\Field@Width=\dimen153
+\Fld@charsize=\dimen154
 Package hyperref Info: Hyper figures OFF on input line 6076.
 Package hyperref Info: Link nesting OFF on input line 6081.
 Package hyperref Info: Hyper index ON on input line 6084.
@@ -355,9 +362,9 @@ tx.sty
 Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
 package with kernel methods
 )
-\Hy@abspage=\count275
-\c@Item=\count276
-\c@Hfootnote=\count277
+\Hy@abspage=\count276
+\c@Item=\count277
+\c@Hfootnote=\count278
 )
 Package hyperref Info: Driver (autodetected): hpdftex.
 
@@ -371,8 +378,8 @@ Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atvery packag
 e
 with kernel methods
 )
-\Fld@listcount=\count278
-\c@bookmark@seq@number=\count279
+\Fld@listcount=\count279
+\c@bookmark@seq@number=\count280
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/rerunfilecheck/
 rerunfilecheck.sty
@@ -397,17 +404,17 @@ Package: geometry 2020/01/02 v5.9 Page Geometry
 sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 )
-\Gm@cnth=\count280
-\Gm@cntv=\count281
-\c@Gm@tempcnt=\count282
-\Gm@bindingoffset=\dimen153
-\Gm@wd@mp=\dimen154
-\Gm@odd@mp=\dimen155
-\Gm@even@mp=\dimen156
-\Gm@layoutwidth=\dimen157
-\Gm@layoutheight=\dimen158
-\Gm@layouthoffset=\dimen159
-\Gm@layoutvoffset=\dimen160
+\Gm@cnth=\count281
+\Gm@cntv=\count282
+\c@Gm@tempcnt=\count283
+\Gm@bindingoffset=\dimen155
+\Gm@wd@mp=\dimen156
+\Gm@odd@mp=\dimen157
+\Gm@even@mp=\dimen158
+\Gm@layoutwidth=\dimen159
+\Gm@layoutheight=\dimen160
+\Gm@layouthoffset=\dimen161
+\Gm@layoutvoffset=\dimen162
 \Gm@dimlist=\toks25
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/graphics/graphi
@@ -428,23 +435,23 @@ File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
 Package graphics Info: Driver file: pdftex.def on input line 107.
 )
-\Gin@req@height=\dimen161
-\Gin@req@width=\dimen162
+\Gin@req@height=\dimen163
+\Gin@req@width=\dimen164
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/mathtools/matht
 ools.sty
 Package: mathtools 2021/04/12 v1.27 mathematical typesetting tools
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/tools/calc.sty
 Package: calc 2017/05/25 v4.3 Infix arithmetic (KKT,FJ)
-\calc@Acount=\count283
-\calc@Bcount=\count284
-\calc@Adimen=\dimen163
-\calc@Bdimen=\dimen164
+\calc@Acount=\count284
+\calc@Bcount=\count285
+\calc@Adimen=\dimen165
+\calc@Bdimen=\dimen166
 \calc@Askip=\skip54
 \calc@Bskip=\skip55
 LaTeX Info: Redefining \setlength on input line 80.
 LaTeX Info: Redefining \addtolength on input line 81.
-\calc@Ccount=\count285
+\calc@Ccount=\count286
 \calc@Cskip=\skip56
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/mathtools/mhset
@@ -455,17 +462,17 @@ LaTeX Info: Thecontrolsequence`\('isalreadyrobust on input line 130.
 LaTeX Info: Thecontrolsequence`\)'isalreadyrobust on input line 130.
 LaTeX Info: Thecontrolsequence`\['isalreadyrobust on input line 130.
 LaTeX Info: Thecontrolsequence`\]'isalreadyrobust on input line 130.
-\g_MT_multlinerow_int=\count286
-\l_MT_multwidth_dim=\dimen165
+\g_MT_multlinerow_int=\count287
+\l_MT_multwidth_dim=\dimen167
 \origjot=\skip57
-\l_MT_shortvdotswithinadjustabove_dim=\dimen166
-\l_MT_shortvdotswithinadjustbelow_dim=\dimen167
-\l_MT_above_intertext_sep=\dimen168
-\l_MT_below_intertext_sep=\dimen169
-\l_MT_above_shortintertext_sep=\dimen170
-\l_MT_below_shortintertext_sep=\dimen171
-\xmathstrut@box=\box52
-\xmathstrut@dim=\dimen172
+\l_MT_shortvdotswithinadjustabove_dim=\dimen168
+\l_MT_shortvdotswithinadjustbelow_dim=\dimen169
+\l_MT_above_intertext_sep=\dimen170
+\l_MT_below_intertext_sep=\dimen171
+\l_MT_above_shortintertext_sep=\dimen172
+\l_MT_below_shortintertext_sep=\dimen173
+\xmathstrut@box=\box53
+\xmathstrut@dim=\dimen174
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/tcolorbox/tcolo
 rbox.sty
@@ -478,14 +485,14 @@ gfrcs.sty
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/utilities
 /pgfutil-common.tex
 \pgfutil@everybye=\toks26
-\pgfutil@tempdima=\dimen173
-\pgfutil@tempdimb=\dimen174
+\pgfutil@tempdima=\dimen175
+\pgfutil@tempdimb=\dimen176
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/utilities
 /pgfutil-common-lists.tex))
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/utilities
 /pgfutil-latex.def
-\pgfutil@abb=\box53
+\pgfutil@abb=\box54
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/utilities
 /pgfrcs.code.tex
@@ -512,26 +519,26 @@ Package: pgfsys 2021/05/15 v3.1.9a (3.1.9a)
 /pgfkeysfiltered.code.tex
 \pgfkeys@tmptoks=\toks29
 ))
-\pgf@x=\dimen175
-\pgf@y=\dimen176
-\pgf@xa=\dimen177
-\pgf@ya=\dimen178
-\pgf@xb=\dimen179
-\pgf@yb=\dimen180
-\pgf@xc=\dimen181
-\pgf@yc=\dimen182
-\pgf@xd=\dimen183
-\pgf@yd=\dimen184
+\pgf@x=\dimen177
+\pgf@y=\dimen178
+\pgf@xa=\dimen179
+\pgf@ya=\dimen180
+\pgf@xb=\dimen181
+\pgf@yb=\dimen182
+\pgf@xc=\dimen183
+\pgf@yc=\dimen184
+\pgf@xd=\dimen185
+\pgf@yd=\dimen186
 \w@pgf@writea=\write3
 \r@pgf@reada=\read2
-\c@pgf@counta=\count287
-\c@pgf@countb=\count288
-\c@pgf@countc=\count289
-\c@pgf@countd=\count290
+\c@pgf@counta=\count288
+\c@pgf@countb=\count289
+\c@pgf@countc=\count290
+\c@pgf@countd=\count291
 \t@pgf@toka=\toks30
 \t@pgf@tokb=\toks31
 \t@pgf@tokc=\toks32
-\pgf@sys@id@count=\count291
+\pgf@sys@id@count=\count292
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/systemlay
 er/pgf.cfg
@@ -550,8 +557,8 @@ File: pgfsys-common-pdf.def 2021/05/15 v3.1.9a (3.1.9a)
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/systemlay
 er/pgfsyssoftpath.code.tex
 File: pgfsyssoftpath.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgfsyssoftpath@smallbuffer@items=\count292
-\pgfsyssoftpath@bigbuffer@items=\count293
+\pgfsyssoftpath@smallbuffer@items=\count293
+\pgfsyssoftpath@bigbuffer@items=\count294
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/systemlay
 er/pgfsysprotocol.code.tex
@@ -569,9 +576,9 @@ athcalc.code.tex
 athutil.code.tex)
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/math/pgfm
 athparser.code.tex
-\pgfmath@dimen=\dimen185
-\pgfmath@count=\count294
-\pgfmath@box=\box54
+\pgfmath@dimen=\dimen187
+\pgfmath@count=\count295
+\pgfmath@box=\box55
 \pgfmath@toks=\toks33
 \pgfmath@stack@operand=\toks34
 \pgfmath@stack@operation=\toks35
@@ -596,59 +603,59 @@ athfunctions.misc.code.tex)
 athfunctions.integerarithmetics.code.tex)))
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/math/pgfm
 athfloat.code.tex
-\c@pgfmathroundto@lastzeros=\count295
+\c@pgfmathroundto@lastzeros=\count296
 ))
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/math/pgfi
 nt.code.tex)
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcorepoints.code.tex
 File: pgfcorepoints.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgf@picminx=\dimen186
-\pgf@picmaxx=\dimen187
-\pgf@picminy=\dimen188
-\pgf@picmaxy=\dimen189
-\pgf@pathminx=\dimen190
-\pgf@pathmaxx=\dimen191
-\pgf@pathminy=\dimen192
-\pgf@pathmaxy=\dimen193
-\pgf@xx=\dimen194
-\pgf@xy=\dimen195
-\pgf@yx=\dimen196
-\pgf@yy=\dimen197
-\pgf@zx=\dimen198
-\pgf@zy=\dimen199
+\pgf@picminx=\dimen188
+\pgf@picmaxx=\dimen189
+\pgf@picminy=\dimen190
+\pgf@picmaxy=\dimen191
+\pgf@pathminx=\dimen192
+\pgf@pathmaxx=\dimen193
+\pgf@pathminy=\dimen194
+\pgf@pathmaxy=\dimen195
+\pgf@xx=\dimen196
+\pgf@xy=\dimen197
+\pgf@yx=\dimen198
+\pgf@yy=\dimen199
+\pgf@zx=\dimen256
+\pgf@zy=\dimen257
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcorepathconstruct.code.tex
 File: pgfcorepathconstruct.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgf@path@lastx=\dimen256
-\pgf@path@lasty=\dimen257
+\pgf@path@lastx=\dimen258
+\pgf@path@lasty=\dimen259
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcorepathusage.code.tex
 File: pgfcorepathusage.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgf@shorten@end@additional=\dimen258
-\pgf@shorten@start@additional=\dimen259
+\pgf@shorten@end@additional=\dimen260
+\pgf@shorten@start@additional=\dimen261
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcorescopes.code.tex
 File: pgfcorescopes.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgfpic=\box55
-\pgf@hbox=\box56
-\pgf@layerbox@main=\box57
-\pgf@picture@serial@count=\count296
+\pgfpic=\box56
+\pgf@hbox=\box57
+\pgf@layerbox@main=\box58
+\pgf@picture@serial@count=\count297
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcoregraphicstate.code.tex
 File: pgfcoregraphicstate.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgflinewidth=\dimen260
+\pgflinewidth=\dimen262
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcoretransformations.code.tex
 File: pgfcoretransformations.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgf@pt@x=\dimen261
-\pgf@pt@y=\dimen262
-\pgf@pt@temp=\dimen263
+\pgf@pt@x=\dimen263
+\pgf@pt@y=\dimen264
+\pgf@pt@temp=\dimen265
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcorequick.code.tex
@@ -665,14 +672,14 @@ File: pgfcorepathprocessing.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcorearrows.code.tex
 File: pgfcorearrows.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgfarrowsep=\dimen264
+\pgfarrowsep=\dimen266
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcoreshade.code.tex
 File: pgfcoreshade.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgf@max=\dimen265
-\pgf@sys@shading@range@num=\count297
-\pgf@shadingcount=\count298
+\pgf@max=\dimen267
+\pgf@sys@shading@range@num=\count298
+\pgf@shadingcount=\count299
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcoreimage.code.tex
@@ -681,7 +688,7 @@ File: pgfcoreimage.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcoreexternal.code.tex
 File: pgfcoreexternal.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgfexternal@startupbox=\box58
+\pgfexternal@startupbox=\box59
 ))
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/basiclaye
 r/pgfcorelayers.code.tex
@@ -702,7 +709,7 @@ File: pgfcorerdf.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/modules/p
 gfmoduleshapes.code.tex
 File: pgfmoduleshapes.code.tex 2021/05/15 v3.1.9a (3.1.9a)
-\pgfnodeparttextbox=\box59
+\pgfnodeparttextbox=\box60
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pgf/modules/p
 gfmoduleplot.code.tex
@@ -711,8 +718,8 @@ File: pgfmoduleplot.code.tex 2021/05/15 v3.1.9a (3.1.9a)
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/pgf/compatibili
 ty/pgfcomp-version-0-65.sty
 Package: pgfcomp-version-0-65 2021/05/15 v3.1.9a (3.1.9a)
-\pgf@nodesepstart=\dimen266
-\pgf@nodesepend=\dimen267
+\pgf@nodesepstart=\dimen268
+\pgf@nodesepend=\dimen269
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/pgf/compatibili
 ty/pgfcomp-version-1-18.sty
@@ -733,30 +740,25 @@ Package: environ 2014/05/04 v0.3 A new way to define environments
 spaces.sty
 Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 ))
-(c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/etoolbox/etoolb
-ox.sty
-Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count299
-)
-\tcb@titlebox=\box60
-\tcb@upperbox=\box61
-\tcb@lowerbox=\box62
-\tcb@phantombox=\box63
+\tcb@titlebox=\box61
+\tcb@upperbox=\box62
+\tcb@lowerbox=\box63
+\tcb@phantombox=\box64
 \c@tcbbreakpart=\count300
 \c@tcblayer=\count301
 \c@tcolorbox@number=\count302
-\tcb@temp=\box64
 \tcb@temp=\box65
 \tcb@temp=\box66
 \tcb@temp=\box67
+\tcb@temp=\box68
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \c@float@type=\count303
 \float@exts=\toks38
-\float@box=\box68
+\float@box=\box69
 \@float@everytoks=\toks39
-\@floatcapt=\box69
+\@floatcapt=\box70
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/psnfss/times.st
 y
@@ -769,23 +771,23 @@ Package: setspace 2011/12/19 v6.7a set line spacing
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/booktabs/bookta
 bs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
-\heavyrulewidth=\dimen268
-\lightrulewidth=\dimen269
-\cmidrulewidth=\dimen270
-\belowrulesep=\dimen271
-\belowbottomsep=\dimen272
-\aboverulesep=\dimen273
-\abovetopsep=\dimen274
-\cmidrulesep=\dimen275
-\cmidrulekern=\dimen276
-\defaultaddspace=\dimen277
+\heavyrulewidth=\dimen270
+\lightrulewidth=\dimen271
+\cmidrulewidth=\dimen272
+\belowrulesep=\dimen273
+\belowbottomsep=\dimen274
+\aboverulesep=\dimen275
+\abovetopsep=\dimen276
+\cmidrulesep=\dimen277
+\cmidrulekern=\dimen278
+\defaultaddspace=\dimen279
 \@cmidla=\count304
 \@cmidlb=\count305
-\@aboverulesep=\dimen278
-\@belowrulesep=\dimen279
+\@aboverulesep=\dimen280
+\@belowrulesep=\dimen281
 \@thisruleclass=\count306
 \@lastruleclass=\count307
-\@thisrulewidth=\dimen280
+\@thisrulewidth=\dimen282
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/tools/longtable
 .sty
@@ -795,12 +797,12 @@ Package: longtable 2021-05-07 v4.16 Multi-page Table package (DPC)
 \LTpre=\skip60
 \LTpost=\skip61
 \LTchunksize=\count308
-\LTcapwidth=\dimen281
-\LT@head=\box70
-\LT@firsthead=\box71
-\LT@foot=\box72
-\LT@lastfoot=\box73
-\LT@gbox=\box74
+\LTcapwidth=\dimen283
+\LT@head=\box71
+\LT@firsthead=\box72
+\LT@foot=\box73
+\LT@lastfoot=\box74
+\LT@gbox=\box75
 \LT@cols=\count309
 \LT@rows=\count310
 \c@LT@tables=\count311
@@ -809,13 +811,13 @@ Package: longtable 2021-05-07 v4.16 Multi-page Table package (DPC)
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/tools/array.sty
 Package: array 2021/04/20 v2.5e Tabular extension package (FMi)
-\col@sep=\dimen282
-\ar@mcellbox=\box75
-\extrarowheight=\dimen283
+\col@sep=\dimen284
+\ar@mcellbox=\box76
+\extrarowheight=\dimen285
 \NC@list=\toks41
 \extratabsurround=\skip62
 \backup@length=\skip63
-\ar@cellbox=\box76
+\ar@cellbox=\box77
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/multirow/multir
 ow.sty
@@ -823,14 +825,14 @@ Package: multirow 2021/03/15 v2.8 Span multiple rows of a table
 \multirow@colwidth=\skip64
 \multirow@cntb=\count313
 \multirow@dima=\skip65
-\bigstrutjot=\dimen284
+\bigstrutjot=\dimen286
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/wrapfig/wrapfig
 .sty
-\wrapoverhang=\dimen285
-\WF@size=\dimen286
+\wrapoverhang=\dimen287
+\WF@size=\dimen288
 \c@WF@wrappedlines=\count314
-\WF@box=\box77
+\WF@box=\box78
 \WF@everypar=\toks42
 Package: wrapfig 2003/01/31  v 3.6
 )
@@ -855,10 +857,10 @@ Package: tabu 2019/01/11 v2.9 - flexible LaTeX tabulars (FC+tabu-fixed)
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/varwidth/varwid
 th.sty
 Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
-\@vwid@box=\box78
+\@vwid@box=\box79
 \sift@deathcycles=\count315
-\@vwid@loff=\dimen287
-\@vwid@roff=\dimen288
+\@vwid@loff=\dimen289
+\@vwid@roff=\dimen290
 )
 \c@taburow=\count316
 \tabu@nbcols=\count317
@@ -866,27 +868,27 @@ Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
 \tabu@Xcol=\count319
 \tabu@alloc=\count320
 \tabu@nested=\count321
-\tabu@target=\dimen289
-\tabu@spreadtarget=\dimen290
-\tabu@naturalX=\dimen291
-\tabucolX=\dimen292
-\tabu@Xsum=\dimen293
-\extrarowdepth=\dimen294
-\abovetabulinesep=\dimen295
-\belowtabulinesep=\dimen296
-\tabustrutrule=\dimen297
+\tabu@target=\dimen291
+\tabu@spreadtarget=\dimen292
+\tabu@naturalX=\dimen293
+\tabucolX=\dimen294
+\tabu@Xsum=\dimen295
+\extrarowdepth=\dimen296
+\abovetabulinesep=\dimen297
+\belowtabulinesep=\dimen298
+\tabustrutrule=\dimen299
 \tabu@thebody=\toks44
 \tabu@footnotes=\toks45
-\tabu@box=\box79
-\tabu@arstrutbox=\box80
-\tabu@hleads=\box81
-\tabu@vleads=\box82
+\tabu@box=\box80
+\tabu@arstrutbox=\box81
+\tabu@hleads=\box82
+\tabu@vleads=\box83
 \tabu@cellskip=\skip67
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/threeparttable/
 threeparttable.sty
 Package: threeparttable 2003/06/13  v 3.0
-\@tempboxb=\box83
+\@tempboxb=\box84
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/threeparttablex
 /threeparttablex.sty
@@ -894,21 +896,21 @@ Package: threeparttablex 2013/07/23 v0.3 by daleif
 \TPTL@width=\skip68
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/ulem/ulem.sty
-\UL@box=\box84
-\UL@hyphenbox=\box85
+\UL@box=\box85
+\UL@hyphenbox=\box86
 \UL@skip=\skip69
 \UL@hook=\toks46
-\UL@height=\dimen298
+\UL@height=\dimen300
 \UL@pe=\count322
-\UL@pixel=\dimen299
-\ULC@box=\box86
+\UL@pixel=\dimen301
+\ULC@box=\box87
 Package: ulem 2019/11/18
-\ULdepth=\dimen300
+\ULdepth=\dimen302
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/makecell/makece
 ll.sty
 Package: makecell 2009/08/03 V0.1e Managing of Tab Column Heads and Cells
-\rotheadsize=\dimen301
+\rotheadsize=\dimen303
 \c@nlinenum=\count323
 \TeXr@lab=\toks47
 )
@@ -928,11 +930,14 @@ File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/l3backend/l3bac
 kend-pdftex.def
-File: l3backend-pdftex.def 2021-08-04 L3 backend support: PDF output (pdfTeX)
+File: l3backend-pdftex.def 2021-10-18 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count325
-\l__pdf_internal_box=\box87
+\l__pdf_internal_box=\box88
+) (./econ_landings_paper.aux
+
+LaTeX Warning: Label `fig:sdmeffects' multiply defined.
+
 )
-No file econ_landings_paper.aux.
 \openout1 = `econ_landings_paper.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 93.
@@ -954,6 +959,10 @@ LaTeX Font Info:    ... okay on input line 93.
 LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 93.
 LaTeX Font Info:    ... okay on input line 93.
 LaTeX Info: Redefining \microtypecontext on input line 93.
+Package microtype Info: Applying patch `item' on input line 93.
+Package microtype Info: Applying patch `toc' on input line 93.
+Package microtype Info: Applying patch `eqnum' on input line 93.
+Package microtype Info: Applying patch `footnote' on input line 93.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using protrusion set `basicmath'.
@@ -999,6 +1008,7 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 93.
 LaTeX Info: Redefining \pageref on input line 93.
 LaTeX Info: Redefining \nameref on input line 93.
+(./econ_landings_paper.out) (./econ_landings_paper.out)
 \@outlinefile=\write4
 \openout4 = `econ_landings_paper.out'.
 
@@ -1095,214 +1105,306 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <7> on input line 115.
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <5> on input line 115.
-
-Package natbib Warning: Citation `kasperski2013' on page 1 undefined on input l
-ine 128.
-
-
-Package natbib Warning: Citation `kasperski2013' on page 1 undefined on input l
-ine 137.
-
-
-Package natbib Warning: Citation `vermard2008' on page 1 undefined on input lin
-e 149.
-
-
-Package natbib Warning: Citation `richerson2017' on page 1 undefined on input l
-ine 151.
-
-
-Package natbib Warning: Citation `zhang2011' on page 1 undefined on input line 
-157.
-
-
-Package natbib Warning: Citation `richerson2017' on page 1 undefined on input l
-ine 162.
-
 [1
 
 {c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pd
 ftex.map}]
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 20
+1.
 
-Package natbib Warning: Citation `smith2021potential' on page 2 undefined on in
-put line 169.
-
-
-Package natbib Warning: Citation `richerson2017' on page 2 undefined on input l
-ine 181.
-
-
-LaTeX Warning: Reference `coastal-pelagic-species-fishery' on page 2 undefined 
-on input line 191.
-
-
-LaTeX Warning: Reference `methods' on page 2 undefined on input line 192.
+(c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/psnfss/t1pcr.fd
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+) [2]
+Overfull \hbox (118.24498pt too wide) in paragraph at lines 210--210
+[]\T1/pcr/m/n/10 ## MSQD & 32.00 & 18308.00 & 1.00 & 1.00 & 8.00 & 11506.00 & 3
+7.00 & 742189.00 & 110.00 & 11.00 \\[] 
+ []
 
 
-LaTeX Warning: Reference `results' on page 2 undefined on input line 193.
+Overfull \hbox (82.24498pt too wide) in paragraph at lines 211--211
+[]\T1/pcr/m/n/10 ##   NANC & 0.00 & 13.00 & 0.00 & 0.00 & 0.00 & 6176.00 & 0.00
+ & 87980.00 & 18.00 & 31.00 \\[] 
+ []
 
 
-LaTeX Warning: Reference `conclusions' on page 2 undefined on input line 195.
+Overfull \hbox (76.24498pt too wide) in paragraph at lines 212--212
+[]\T1/pcr/m/n/10 ##   PHRG & 2.00 & 17.00 & 9232.00 & 0.00 & 476.00 & 2470.00 &
+ 8.00 & 1.00 & 0.00 & 7.00 \\[] 
+ []
 
 
-LaTeX Warning: Reference `fig:avg_lan_rev' on page 2 undefined on input line 20
-3.
+Overfull \hbox (94.24498pt too wide) in paragraph at lines 213--213
+[]\T1/pcr/m/n/10 ##   PSDN & 0.00 & 47.00 & 1.00 & 2.00 & 12.00 & 110742.00 & 0
+.00 & 198910.00 & 0.00 & 0.00 \\[] 
+ []
 
-[2]
-<econ_landings_paper_files/figure-latex/avg_landings-1.pdf, id=23, 469.755pt x 
-325.215pt>
+
+LaTeX Warning: Reference `fig:avg_lan_rev' on page 3 undefined on input line 22
+1.
+
+<econ_landings_paper_files/figure-latex/avg_landings-1.pdf, id=115, 469.755pt x
+ 325.215pt>
 File: econ_landings_paper_files/figure-latex/avg_landings-1.pdf Graphic file (t
 ype pdf)
 <use econ_landings_paper_files/figure-latex/avg_landings-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/avg_landings-1.
-pdf  used on input line 214.
+pdf  used on input line 230.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+<econ_landings_paper_files/figure-latex/ts_landings-1.pdf, id=116, 469.755pt x 
+325.215pt>
+File: econ_landings_paper_files/figure-latex/ts_landings-1.pdf Graphic file (ty
+pe pdf)
+<use econ_landings_paper_files/figure-latex/ts_landings-1.pdf>
+Package pdftex.def Info: econ_landings_paper_files/figure-latex/ts_landings-1.p
+df  used on input line 231.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 
-LaTeX Warning: Reference `fig:avg_landings_by_ports' on page 3 undefined on inp
-ut line 220.
+Underfull \hbox (badness 10000) in paragraph at lines 230--232
+[][]
+ []
 
-<econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf, id=24, 469.
-755pt x 325.215pt>
+[3] [4 <./econ_landings_paper_files/figure-latex/avg_landings-1.pdf>]
+<econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf, id=133, 469
+.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf Graphic
  file (type pdf)
 <use econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/avg_landings_by
-_port-1.pdf  used on input line 232.
+_port-1.pdf  used on input line 246.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[3pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) 
-has been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.236 
-       <./econ_landings_paper_files/figure-latex/avg_landings-1.pdf>]
-
-LaTeX Warning: Reference `fig:ts_landings_by_ports' on page 4 undefined on inpu
-t line 238.
-
-
-LaTeX Warning: Reference `fig:ts_landings_by_ports' on page 4 undefined on inpu
-t line 241.
-
-
-LaTeX Warning: Reference `fig:ts_n_vessels' on page 4 undefined on input line 2
-49.
-
-
-Package natbib Warning: Citation `richerson2017' on page 4 undefined on input l
-ine 251.
-
-<econ_landings_paper_files/figure-latex/ts_by_port-1.pdf, id=37, 469.755pt x 32
-5.215pt>
+[5 <./econ_landings_paper_files/figure-latex/ts_landings-1.pdf>]
+<econ_landings_paper_files/figure-latex/ts_by_port-1.pdf, id=150, 469.755pt x 3
+25.215pt>
 File: econ_landings_paper_files/figure-latex/ts_by_port-1.pdf Graphic file (typ
 e pdf)
 <use econ_landings_paper_files/figure-latex/ts_by_port-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/ts_by_port-1.pd
-f  used on input line 255.
+f  used on input line 269.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[4pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) 
+[6pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.260 
+l.274 
        <./econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf>]
-<econ_landings_paper_files/figure-latex/ts_by_port_price-1.pdf, id=48, 469.755p
-t x 325.215pt>
+<econ_landings_paper_files/figure-latex/ts_by_port_price-1.pdf, id=164, 469.755
+pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/ts_by_port_price-1.pdf Graphic fil
 e (type pdf)
 <use econ_landings_paper_files/figure-latex/ts_by_port_price-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/ts_by_port_pric
-e-1.pdf  used on input line 263.
+e-1.pdf  used on input line 277.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[5pdfTeX warning (ext4): destination with the same identifier (name{figure.3}) 
+[7pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.268 
+l.282 
        <./econ_landings_paper_files/figure-latex/ts_by_port-1.pdf>]
-<econ_landings_paper_files/figure-latex/ts_n_vessels-1.pdf, id=60, 469.755pt x 
-325.215pt>
+<econ_landings_paper_files/figure-latex/ts_n_vessels-1.pdf, id=176, 469.755pt x
+ 325.215pt>
 File: econ_landings_paper_files/figure-latex/ts_n_vessels-1.pdf Graphic file (t
 ype pdf)
 <use econ_landings_paper_files/figure-latex/ts_n_vessels-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/ts_n_vessels-1.
-pdf  used on input line 271.
+pdf  used on input line 285.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[6pdfTeX warning (ext4): destination with the same identifier (name{figure.4}) 
+[8pdfTeX warning (ext4): destination with the same identifier (name{figure.3}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.275 
-       <./econ_landings_paper_files/figure-latex/ts_by_port_price-1.pdf>] [7pdf
-TeX warning (ext4): destination with the same identifier (name{figure.5}) has b
+l.289 
+       <./econ_landings_paper_files/figure-latex/ts_by_port_price-1.pdf>] [9pdf
+TeX warning (ext4): destination with the same identifier (name{figure.4}) has b
 een already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.305 
+l.319 
        <./econ_landings_paper_files/figure-latex/ts_n_vessels-1.pdf>]
-
-Package natbib Warning: Citation `selden2020' on page 8 undefined on input line
- 311.
-
-
-Package natbib Warning: Citation `selden2020' on page 8 undefined on input line
- 313.
-
-
-Package natbib Warning: Citation `smith2021potential' on page 8 undefined on in
-put line 313.
-
-
-Package natbib Warning: Citation `smith2021potential' on page 8 undefined on in
-put line 314.
-
-
-Package natbib Warning: Citation `selden2020' on page 8 undefined on input line
- 326.
-
-
-LaTeX Warning: Reference `fig:sdm_land_by_port' on page 8 undefined on input li
-ne 333.
-
-
-Package natbib Warning: Citation `smith2021potential' on page 8 undefined on in
-put line 338.
-
-<econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf, id=91, 469.755p
-t x 325.215pt>
+<econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf, id=216, 469.755
+pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf Graphic fil
 e (type pdf)
 <use econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf>
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/SDM_land_by_por
-t-1.pdf  used on input line 348.
+t-1.pdf  used on input line 362.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-[8]
-
-Package natbib Warning: Citation `smith2021potential' on page 9 undefined on in
-put line 363.
-
-
-Package natbib Warning: Citation `hobbs2015' on page 9 undefined on input line 
-378.
-
-[9pdfTeX warning (ext4): destination with the same identifier (name{figure.6}) 
-has been already used, duplicate ignored
+[10] [11pdfTeX warning (ext4): destination with the same identifier (name{figur
+e.5}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.380 \begin{equation}
-                       <./econ_landings_paper_files/figure-latex/SDM_land_by_po
-rt-1.pdf>]
-! Missing $ inserted.
-<inserted text> 
-                $
-l.383 \left[1-p_{it}\right] \text{gamma_i}
-                                           \left(q_{it} | \frac{\mu_{it}^2}{...
- 
+l.393 \[
+         f\left(q_{it} | \theta_i \right) = <./econ_landings_paper_files/figure
+-latex/SDM_land_by_port-1.pdf>] [12pdfTeX warning (ext4): destination with the 
+same identifier (name{table.1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.461 
+      ]
+Package textcomp Info: Symbol \textasciiacute not provided by
+(textcomp)             font family ptm in TS1 encoding.
+(textcomp)             Default family used instead on input line 501.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 5
+13.
+
+(c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/psnfss/ts1ptm.f
+d
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
+) [13] [14]
+<econ_landings_paper_files/figure-latex/y_rep-1.pdf, id=297, 469.755pt x 325.21
+5pt>
+File: econ_landings_paper_files/figure-latex/y_rep-1.pdf Graphic file (type pdf
+)
+<use econ_landings_paper_files/figure-latex/y_rep-1.pdf>
+Package pdftex.def Info: econ_landings_paper_files/figure-latex/y_rep-1.pdf  us
+ed on input line 617.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+[15pdfTeX warning (ext4): destination with the same identifier (name{figure.6})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.629 ...}\label{own-species-distribution-effect}}
+                                                   <./econ_landings_paper_files
+/figure-latex/y_rep-1.pdf>]
+<econ_landings_paper_files/figure-latex/by_port_sdm-1.pdf, id=317, 469.755pt x 
+325.215pt>
+File: econ_landings_paper_files/figure-latex/by_port_sdm-1.pdf Graphic file (ty
+pe pdf)
+<use econ_landings_paper_files/figure-latex/by_port_sdm-1.pdf>
+Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_sdm-1.p
+df  used on input line 645.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+[16pdfTeX warning (ext4): destination with the same identifier (name{figure.7})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.664 
+       <./econ_landings_paper_files/figure-latex/by_port_sdm-1.pdf>]
+<econ_landings_paper_files/figure-latex/int_effect_PSDN_by_port_PLOT-1.pdf, id=
+337, 469.755pt x 325.215pt>
+File: econ_landings_paper_files/figure-latex/int_effect_PSDN_by_port_PLOT-1.pdf
+ Graphic file (type pdf)
+<use econ_landings_paper_files/figure-latex/int_effect_PSDN_by_port_PLOT-1.pdf>
+
+Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_PSDN
+_by_port_PLOT-1.pdf  used on input line 680.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+<econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port_PLOT-1.pdf, id=
+339, 469.755pt x 325.215pt>
+File: econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port_PLOT-1.pdf
+ Graphic file (type pdf)
+<use econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port_PLOT-1.pdf>
+
+Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_MSQD
+_by_port_PLOT-1.pdf  used on input line 693.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+[17pdfTeX warning (ext4): destination with the same identifier (name{figure.8})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.697 
+       <./econ_landings_paper_files/figure-latex/int_effect_PSDN_by_port_PLOT-1
+.pdf>]
+<econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1.pdf, id=
+352, 469.755pt x 325.215pt>
+File: econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1.pdf
+ Graphic file (type pdf)
+<use econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1.pdf>
+
+Package pdftex.def Info: econ_landings_paper_files/figure-latex/int_effect_NANC
+_by_port_PLOT-1.pdf  used on input line 710.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+[18pdfTeX warning (ext4): destination with the same identifier (name{figure.9})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.714 
+       <./econ_landings_paper_files/figure-latex/int_effect_MSQD_by_port_PLOT-1
+.pdf>]
+<econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf, id=363, 469.
+755pt x 325.215pt>
+File: econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf Graphic 
+file (type pdf)
+<use econ_landings_paper_files/figure-latex/by_port_msqd_dclose-1.pdf>
+Package pdftex.def Info: econ_landings_paper_files/figure-latex/by_port_msqd_dc
+lose-1.pdf  used on input line 729.
+(pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
+[19pdfTeX warning (ext4): destination with the same identifier (name{figure.10}
+) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.733 
+       <./econ_landings_paper_files/figure-latex/int_effect_NANC_by_port_PLOT-1
+.pdf>] (./econ_landings_paper.bbl [20pdfTeX warning (ext4): destination with th
+e same identifier (name{figure.11}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.13 ...asperski and Holland(2013)]{kasperski2013}
+                                                   <./econ_landings_paper_files
+/figure-latex/by_port_msqd_dclose-1.pdf>]) [21] (./econ_landings_paper.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: There were multiply-defined labels.
+
+Package rerunfilecheck Info: File `econ_landings_paper.out' has not changed.
+(rerunfilecheck)             Checksum: 5021389A385AEB7ADD0A5EE9A3688124;2550.
+ ) 
 Here is how much of TeX's memory you used:
- 23946 strings out of 480559
- 431429 string characters out of 5901528
- 759309 words of memory out of 5000000
- 40821 multiletter control sequences out of 15000+600000
- 479952 words of font info for 235 fonts, out of 8000000 for 9000
+ 24344 strings out of 480539
+ 440430 string characters out of 5900885
+ 778122 words of memory out of 5000000
+ 41125 multiletter control sequences out of 15000+600000
+ 495037 words of font info for 258 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 83i,11n,83p,581b,350s stack positions out of 5000i,500n,10000p,200000b,80000s
-!  ==> Fatal error occurred, no output PDF file produced!
+ 83i,11n,83p,1016b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
+pdfTeX warning (dest): name{Hfootnote.6} has been referenced but does not exi
+st, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.5} has been referenced but does not exist
+, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.4} has been referenced but does not exist
+, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.3} has been referenced but does not exist
+, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.2} has been referenced but does not exist
+, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exist
+, replaced by a fixed one
+
+ <c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/
+ec/tcrm1000.600pk>{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/e
+nc/dvips/lm/lm-rm.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fon
+ts/enc/dvips/lm/lm-mathit.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-
+dist/fonts/enc/dvips/lm/lm-mathex.enc}{c:/Users/fequezad/AppData/Roaming/TinyTe
+X/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{c:/Users/fequezad/AppData/Roamin
+g/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}<c:/Users/fequezad/AppData/Roa
+ming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb><c:/Users/fequezad/App
+Data/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx7.pfb><c:/Users/feque
+zad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb><c:/Use
+rs/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb
+><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lm
+mi5.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/publi
+c/lm/lmmi7.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type
+1/public/lm/lmr10.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fon
+ts/type1/public/lm/lmr5.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-di
+st/fonts/type1/public/lm/lmr7.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/te
+xmf-dist/fonts/type1/public/lm/lmsy10.pfb><c:/Users/fequezad/AppData/Roaming/Ti
+nyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb><c:/Users/feque
+zad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb><c:/U
+sers/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.p
+fb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/
+utmr8a.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/ur
+w/times/utmri8a.pfb>
+Output written on econ_landings_paper.pdf (21 pages, 635970 bytes).
+PDF statistics:
+ 495 PDF objects out of 1000 (max. 8388607)
+ 410 compressed objects within 5 object streams
+ 85 named destinations out of 1000 (max. 500000)
+ 55502 words of extra memory for PDF output out of 61914 (max. 10000000)
+

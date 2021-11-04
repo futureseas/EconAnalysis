@@ -65,10 +65,10 @@ PacFIN_monthly <- summaryBy(LANDED_WEIGHT_LBS + PRICE_PER_POUND + EXVESSEL_REVEN
 ### Check data
 
 PacFIN_monthly.CPS <- PacFIN_monthly %>% 
-  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "JMCK", "CMCK", "PSDN", "NANC", "PBNT", "UMCK", "PHRG", "RHRG")) %>%
+  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG")) %>%
   filter( LANDING_YEAR >= 2010 )
 DC <- PacFIN %>% 
-  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "JMCK", "CMCK", "PSDN", "NANC", "PBNT", "UMCK", "PHRG", "RHRG")) %>%
+  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG")) %>%
   filter( LANDING_YEAR >= 2010 )
 
 round( xtabs( LANDED_WEIGHT_LBS.sum ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE, data = PacFIN_monthly.CPS  )/2204.6, 0 )

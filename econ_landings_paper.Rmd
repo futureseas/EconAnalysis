@@ -74,7 +74,18 @@ library(zoo)
 PacFIN_yearly <- read.csv(file = here::here("Data", "PacFin_yearly.csv"))
 PacFIN_month <- read.csv(file = here::here("Data", "PacFin_monthly.csv"))
 sapply(PacFIN_month, class) 
+
+# names(PacFIN_yearly)[names(PacFIN_yearly) == "LANDING_YEAR"              ] <- "Year"
+# names(PacFIN_yearly)[names(PacFIN_yearly) == "PACFIN_SPECIES_CODE"       ] <- "Species_code"
+# names(PacFIN_yearly)[names(PacFIN_yearly) == "PACFIN_SPECIES_COMMON_NAME"] <- "Species_name"
+# names(PacFIN_yearly)[names(PacFIN_yearly) == "LANDED_WEIGHT_MTONS"       ] <- "Landings"
+# names(PacFIN_yearly)[names(PacFIN_yearly) == "EXVESSEL_REVENUE"          ] <- "Revenue"
+# names(PacFIN_yearly)[names(PacFIN_yearly) == "LANDED_WEIGHT_PPP"         ] <- "Price"
+# names(PacFIN_yearly)[names(PacFIN_yearly) == "AGENCY_CODE"               ] <- "State"
+# names(PacFIN_yearly)[names(PacFIN_yearly) == "MANAGEMENT_GROUP_CODE"     ] <- "Management_group"
+
 ```
+
 
 ```{r functions, include=FALSE}
 
@@ -135,16 +146,14 @@ The remainder of the paper is organized as follows: Section \ref{coastal-pelagic
 ```{r landing_rev_by_gear}
 
 PacFIN.CPS <- PacFIN_month %>% 
-  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "JMCK", "CMCK", "PSDN", "NANC", "PBNT", "UMCK", "PHRG", "RHRG")) %>%
+  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG")) %>% 
+  filter( PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "CLP", "GLN", "LGL", "MDT", "POL", "USP", "TRL")) %>%
   filter( LANDING_YEAR >= 2010 )
 
-round( xtabs(LANDED_WEIGHT_LBS.sum ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE, data = PacFIN.CPS )/2204.6, 0 )
+
+print(xtable(round(xtabs(LANDED_WEIGHT_LBS.sum ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE, data = PacFIN.CPS )/2204.6, 0 ), type = "latex"))
 
 ```
-
-
-
-
 
 
 
@@ -154,17 +163,6 @@ Before Pacific sardine closure in 2015, landings in the CPS fishery have been ma
 
 <!-- <<<ISAAC: Need some more details on anchovy and herring fisheries, these I believe are constrained by management and geography, so may not be real "choices" for the substitution. >>>  -->
 
-```{r change_names, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "LANDING_YEAR"              ] <- "Year"
-names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "PACFIN_SPECIES_CODE"       ] <- "Species_code"
-names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "PACFIN_SPECIES_COMMON_NAME"] <- "Species_name"
-names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "LANDED_WEIGHT_MTONS"       ] <- "Landings"
-names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "EXVESSEL_REVENUE"          ] <- "Revenue"
-names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "LANDED_WEIGHT_PPP"         ] <- "Price"
-names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "AGENCY_CODE"               ] <- "State"
-names(PacFIN_yearlya_port)[names(PacFIN_yearlya_port) == "MANAGEMENT_GROUP_CODE"     ] <- "Management_group"
-
-```
 
 
 ```{r avg_landings, echo=FALSE, fig.cap="Average annual landing and revenues for the CPS fishery by species.\\label{fig:avg_lan_rev}", message=FALSE, warning=FALSE}
@@ -199,17 +197,43 @@ g2 <- ggplot(revenue, aes(Species_code, Revenue.sum.mean)) +
 
 g1 + g2
 ```
-```{r ts_landings, eval=FALSE, fig.cap="Total annual landing by CPS species.\\label{fig:ts_landings}", message=FALSE, warning=FALSE, include=FALSE}
-collapse <- PacFIN_yearly %>%
+```{r ts_landings, echo=FALSE, fig.cap="Total annual landing by CPS species.\\label{fig:ts_landings}", message=FALSE, warning=FALSE}
+collapse <- PacFIN_yearly %>% filter(Landing_year <= 2020) %>%
   filter(Management_group == "CPEL") %>%
-  filter(Species_code != "PBNT" & Species_code != "CMCK" & Species_code != "JMCK" & Species_code != "RHRG" & Species_code != "UMCK")
+  filter(Species_code != "PBNT" & Species_code != "CMCK" & Species_code != "JMCK" & Species_code != "PHRG"
+         & Species_code != "RHRG" & Species_code != "UMCK")
 
-collapse <- summaryBy(Landings + Price ~ Species_name  + Landing_year, FUN=sumfun, data=collapse) %>%
-  dplyr::select(Landing_year, Price.sum, Landings.sum, Species_name) 
+collapse <- summaryBy(Landings + Price + N_vessels ~ Species_name  + Landing_year, FUN=sum_mean_fun, data=collapse) %>%
+  dplyr::select(Landing_year, Price.mean, Landings.sum, N_vessels.mean, Species_name) 
 
-ggplot(collapse, aes(x = Landing_year, y = Landings.sum, group= Species_name, colour =  Species_name)) + 
-  geom_line(size=1.5) +
-  scale_y_continuous(name = "Landings (M Tons)")
+
+g1 <- ggplot(collapse, aes(x = Landing_year, y = Landings.sum, group= Species_name, colour =  Species_name)) + 
+  geom_line(size=1) + scale_x_continuous(name = element_blank()) +
+  scale_y_continuous(name = "Landings (MTons)") + 
+  theme(legend.position = "right", plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("(a) Landings") +   guides(colour=guide_legend(title="Species: ")) + 
+  scale_color_brewer(palette="Set2", labels=c("MARKET SQUID" = "Market Squid", 
+                                              "NORTHERN ANCHOVY" = "Northern Anchovy", 
+                                              "PACIFIC SARDINE" = "Pacific Sardine"))
+  
+g2 <- ggplot(collapse, aes(x = Landing_year, y = Price.mean, group= Species_name, colour =  Species_name)) + 
+  geom_line(size=1) + scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "Price ($/Lbs)")  + 
+   scale_color_brewer(palette="Set2") +  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("(b) Prices")
+
+g3 <- ggplot(collapse, aes(x = Landing_year, y = N_vessels.mean, group= Species_name, colour =  Species_name)) + 
+  geom_line(size=1) + scale_x_continuous(name = element_blank()) +
+  scale_y_continuous(name = "# of vessels") +   theme(legend.position="none")  + 
+   scale_color_brewer(palette="Set2") +  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("(c) Number of vessels")
+
+g1 / (g2 + g3)
+
+
 ```
 
 ```{r ts_landings_vessels, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
@@ -370,26 +394,28 @@ g1 <- ggplot(collapse) +
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
   ggtitle("(a) Pacific sardine")
 
+coeff2 <- 150000
 g2 <- ggplot(collapse) + 
   geom_line(mapping = aes(x = Landing_year, y = Landings_MSQD),
             size = 0.5, color = "grey") +
-  geom_line(mapping = aes(x = Landing_year, y = MSQD_SDM_90*coeff), 
+  geom_line(mapping = aes(x = Landing_year, y = MSQD_SDM_90*coeff2), 
             size = 0.5, color = "blue", linetype = "dashed") + 
   facet_wrap(~ Port) + 
   scale_x_continuous(name = element_blank(), labels = NULL) +
-  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff, name = "P(presence)")) +
+  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff2, name = "P(presence)")) +
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
   ggtitle("(b) Market squid")
 
+coeff3 <- 16000
 g3 <- ggplot(collapse) + 
   geom_line(mapping = aes(x = Landing_year, y = Landings_NANC, color = "Landings"),
             size = 0.5) +
-  geom_line(mapping = aes(x = Landing_year, y = NANC_SDM_20*coeff, color = "Probability of presence"), 
+  geom_line(mapping = aes(x = Landing_year, y = NANC_SDM_20*coeff3, color = "Probability of presence"), 
             size = 0.5, linetype = "dashed") + 
   facet_wrap(~ Port) + 
-  scale_x_continuous(name = "Year", labels = NULL) +
-  scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff, name = element_blank())) +
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff3, name = element_blank())) +
   theme(legend.position="bottom", plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
   ggtitle("(c) Northern anchovy") +  scale_color_manual(name = "Variable: ", 
@@ -455,17 +481,14 @@ write_xlsx(collapse,"Data\\monterrey_NANC_sdm_landings.xlsx")
 We use a Hierarchical Bayesian Hurdle model to estimate the effect of species distribution on fish landings. We estimate a separate model for the three species in consideration. We use a Bayesian framework for several reasons. First, it allows us to consider uncertainty from modeling the process as well as from the imperfect observation of the process, assuming that all parameters are random variables. Second, it allows us to incorporate multilevel effects (i.e. hierarchical effects). Finally, it allow us to incorporate previous knowledge as a prior. For instance, we can include a prior the results obtained in @smith2021potential for the Pacific sardine landing equation. 
 
 Specifically, we fit a hierarchical Bayesian hurdle model to model the zeros included in our landing data. We observe a zero when no landings occur in a specific time period (landings observations with "NA" were transformed to zero). This zero could mean that there was no incentives for the fleet/vessel to harvest the species in consideration.  In general, our Bayesian models have the following structure:
-\begin{align*}
-[\theta_i | q_{it}] &  \varpropto f\left(q_{it} | \theta_i\right) \times [\theta_i] 
-\end{align*} 
+$$
+[\theta_i | q_{it}] \varpropto f\left(q_{it} | \theta_i\right) \times [\theta_i]
+$$
 where $q_{it}$ is the observed landings of the corresponding species in port $i \in (1,\ldots,L)$ at year $t$, $L$ is the total number of port, and $\theta_i$ are the parameters (i.e. random-coefficients) to be estimated at the port level. The latter give the name of hierarchical to our model.^[For more details about Hierarchichal models, see \cite{hobbs2015}.] 
 The distribution $f\left(q_{it} | \theta_i\right)$ can be rewritten as:
-\begin{equation}
-f\left(q_{it} | \theta_i \right) = \begin{cases}
-p_{it} & \text{if} \quad q_{it} = 0  \\ 
-\left[1-p_{it}\right] \text{gamma_i} \left(q_{it} | \frac{\mu_{it}^2}{\sigma^2}, \frac{\mu_{it}}{\sigma^2} \right) & \text{if} \quad q_{it} > 0. 
-\end{cases}
-\end{equation}
+$$ f\left(q_{it} | \theta_i \right) = 
+\begin{cases} p_{it} & \text{if} \quad q_{it} = 0  \\
+\left[1-p_{it}\right] \text{gamma} \left(q_{it} | \frac{\mu_{it}^2}{\sigma^2}, \frac{\mu_{it}}{\sigma^2} \right) & \text{if} \quad q_{it} > 0. \end{cases} $$
 where $\text{logit}(p_{it}) = \bf{X}\gamma_i$ and $\mu_{it} = \bf{X}\beta_i$. Specifically $\mu_{it}$ is defined as the following: 
 \begin{equation}
 \mu_{it} = \beta_{0,i} + \beta_{1,i} P(Precense.PSDN)_{it} + \beta_{2,i} + P(Precense.MSQD)_{it} + \beta_{3,i} P(Precense.NANC)_{it}.
