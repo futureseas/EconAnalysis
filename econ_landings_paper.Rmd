@@ -13,7 +13,7 @@ institute:
   - ucsc: Institute of Marine Sciences, University of California Santa Cruz
   - noaa: NOAA Southwest Fisheries Science Center
 date: "`r format(Sys.time(), '%B %e, %Y')`"
-abstract: "Fisher do not only catch one species. They have a set of possible choices, called 'fishing portfolio' and allow them to diversify as a way to reduce income risk. Some species are easier to shift as gear and method used are similar between them. Therefore, the cost of shifting between species is low and fishers could adapt quickly to a shift in fish species spatial distributions in response to climate change. Nevertheless, it is not clear whether actually this substitution happen as other constraint may be in play. Port constraints, as well as market characteristics and regulation could reduce substitution between species. In this study we analyze how changing in spatial distribution and the closure of Pacific sardine fishery  affects landing subtitution between three coastal pelagic species: Pacific sardine, market squid and Northern anchovy. Moreover, we study how spatial distribution and closure affects vessels participation decisions in the CPS fishery using a discrete choice modelling approach. We use species distribution projection to see how landings and participations change under different future climate change scenarios."
+abstract: "Many fisheries are not single but multispecies fisheries. Fisher does not only catch one species. They have a set of possible choices, called fishing portfolios, that allow them to diversify and reduce income risk. For some species, switching between them is more accessible as they share similar gear and methods for fishing. Then, fishers could adapt quickly to changes in species spatial distributions as a consequence of climate change. However, regulations and other constraints (e.g., port constraints for landing) may reduce the degree of substitution we observe. In this study, we analyze how changing species distribution over time, and the closure of the  Pacific sardine fishery affects landing substitution between three coastal pelagic species: Pacific sardine, market squid, and Northern anchovy. Using a discrete choice modeling approach, we also study how spatial distribution and closure affect the CPS fishery's participation decisions. We use species distribution model projections to study how landings and participations change under different future climate change scenarios. Our results show strong substitution between market squid and Pacific sardine, and the Pacific sardine closure in 2015 reduced market squid landings."
 header-includes:
   \usepackage{mathtools}
   \usepackage{tcolorbox}
@@ -223,78 +223,39 @@ print(xtable(table, caption = 'Number of days fishing by species and gear used',
 
 
 
-```{r landing_rev_by_gear, echo=FALSE, echo=FALSE, results='asis'}
-
-PacFIN.CPS <- PacFIN_month %>% filter( LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% unique()
+```{r n_species_by_gear, echo=FALSE, echo=FALSE, results='asis'}
 
 # Create dummy of whether a vessel harvest MSQD, NANC OR PSDN 
-PacFIN.CPS.3 <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% select(VESSEL_NUM) %>% unique() %>%
-  mutate(CPS_landing = 1) 
-
-PacFIN.CPS.n_species <- PacFIN.CPS %>% merge(PacFIN.CPS.3, by = "VESSEL_NUM", all.x = TRUE) %>%
-  filter(CPS_landing == 1) %>% unique() %>% group_by(VESSEL_NUM) %>% 
-  summarise(N_species_landed = sum(CPS_landing)) 
-
-summary(PacFIN.CPS.n_species$N_species_landed)
-
-# By gear?
-
-# Create dummy of whether a vessel harvest MSQD, NANC OR PSDN 
-PacFIN.CPS.3 <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% select(VESSEL_NUM, PACFIN_GEAR_CODE) %>% unique() %>%
-  mutate(CPS_landing = 1) 
-
-### Does a vessel can change between gear? Easy between nets???
-
-PacFIN.CPS <- PacFIN_month %>% filter( LANDING_YEAR >= 2010) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% unique()
-PacFIN.CPS.n_species <- PacFIN.CPS %>% inner_join(PacFIN.CPS.3, by = c("VESSEL_NUM", "PACFIN_GEAR_CODE")) %>%
-  filter(CPS_landing == 1) %>% unique() %>% group_by(VESSEL_NUM, PACFIN_GEAR_CODE) %>% 
-  summarise(N_species_landed = sum(CPS_landing)) 
-
-summary(PacFIN.CPS.n_species$N_species_landed)
-
-table <- xtabs(N_species_landed ~ PACFIN_GEAR_CODE, aggregate(N_species_landed ~ PACFIN_GEAR_CODE, PacFIN.CPS.n_species, mean))
+PacFIN.CPS <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
+  unique() %>%  mutate(Species = 1) %>%
+  group_by(VESSEL_NUM, PACFIN_GEAR_CODE) %>% 
+  summarise(N_Species_landed = sum(Species)) 
+  summary(PacFIN.CPS$N_Species_landed)
+  
+table <- xtabs(N_Species_landed ~ PACFIN_GEAR_CODE, aggregate(N_Species_landed ~ PACFIN_GEAR_CODE, PacFIN.CPS, mean))
 table
-rownames(table) = c("Market squid", "Northern Anchovy", "Pacific Herring", "Pacific Sardine") 
-colnames(table) = c("Dip Net", "Gill Net", "Midwater Trawl", "Other Net Gear", "Seine") 
-print(xtable(table, caption = 'Gear used in the CPS fishery.', type = "latex"), comment=FALSE,  caption.placement = "top")
+# rownames(table) = c("Crab & Lobster Pot", "Danish/Scottish Seine", "Dip Net", "Diving Gear" , "Flatfish Trawl", "Fish Pot", "Selective Flatfish Trawl", "Ground Fish Trawl < 8 inches", "Ground Fish Trawl (Otter)", "Gill Net", "Longline", "Midwater Trawl", "Other Net Gear", "Pole", "Roller Trawl",  "Seine", "Shrimp Trawl") 
+
+print(xtable(table, caption = 'Average number of Species landed by a vessel by gear used.', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 ```
 
 
-```{r n_gear_used, echo=FALSE, echo=FALSE, results='asis'}
+
+```{r n_species_CPS_by_gear, echo=FALSE, echo=FALSE, results='asis'}
 
 # Create dummy of whether a vessel harvest MSQD, NANC OR PSDN 
-PacFIN.CPS.3 <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_GEAR_CODE) %>% 
-  unique() 
-
-PacFIN.CPS.n_gear <- PacFIN.CPS.3 %>% mutate(N_gear = 1) %>% group_by(VESSEL_NUM) %>%
-  summarise(N_gear= sum(N_gear)) 
-
-summary(PacFIN.CPS.n_gear$N_gear)
-
-
-### If I have use SEINE, how many other gear I use?
-
-
-PacFIN.CPS <- PacFIN_month %>% filter( LANDING_YEAR >= 2010) %>%  select(VESSEL_NUM, PACFIN_GEAR_CODE) %>% unique()
-
-PacFIN.CPS.seine <- PacFIN_month %>% filter( LANDING_YEAR >= 2010) %>% 
-  select(VESSEL_NUM, PACFIN_GEAR_CODE) %>% filter(PACFIN_GEAR_CODE == "SEN") %>% mutate(D_Seine = 1) %>% select(VESSEL_NUM, D_Seine)  %>% unique() 
-
-PacFIN.CPS.n_gear <- PacFIN.CPS %>% inner_join(PacFIN.CPS.seine, by = c("VESSEL_NUM")) %>%
-  filter(D_Seine == 1) %>% unique() %>% group_by(VESSEL_NUM) %>% 
-  summarise(N_gear= sum(D_Seine)) 
-
-summary(PacFIN.CPS.n_gear$N_gear)
-
-table <- xtabs(N_species_landed ~ PACFIN_GEAR_CODE, aggregate(N_species_landed ~ PACFIN_GEAR_CODE, PacFIN.CPS.n_species, mean))
+PacFIN.CPS <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN", "MSQD", "NANC", "PHRG")) %>%  mutate(CPS_species = 1) %>%
+  group_by(VESSEL_NUM, PACFIN_GEAR_CODE) %>% 
+  summarise(N_CPS_landed = sum(CPS_species)) 
+  summary(PacFIN.CPS$N_CPS_landed)
+  
+table <- xtabs(N_CPS_landed ~ PACFIN_GEAR_CODE, aggregate(N_CPS_landed ~ PACFIN_GEAR_CODE, PacFIN.CPS, mean))
 table
-rownames(table) = c("Market squid", "Northern Anchovy", "Pacific Herring", "Pacific Sardine") 
-colnames(table) = c("Dip Net", "Gill Net", "Midwater Trawl", "Other Net Gear", "Seine") 
-print(xtable(table, caption = 'Gear used in the CPS fishery.', type = "latex"), comment=FALSE,  caption.placement = "top")
+# rownames(table) = c("Crab & Lobster Pot", "Danish/Scottish Seine", "Dip Net", "Diving Gear" , "Flatfish Trawl", "Fish Pot", "Selective Flatfish Trawl", "Ground Fish Trawl < 8 inches", "Ground Fish Trawl (Otter)", "Gill Net", "Longline", "Midwater Trawl", "Other Net Gear", "Pole", "Roller Trawl",  "Seine", "Shrimp Trawl") 
+
+print(xtable(table, caption = 'Average number of CPS species landed by a vessel by gear used.', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 ```
 
