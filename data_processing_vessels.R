@@ -66,9 +66,9 @@ gc()
 
 # Create monthly data 
   PacFIN.month <- summaryBy(LANDED_WEIGHT_MTONS + AFI_PRICE_PER_KG + AFI_EXVESSEL_REVENUE 
-                            + VESSEL_LENGTH + VESSEL_WEIGHT + VESSEL_HORSEPOWER
+                            + VESSEL_LENGTH + VESSEL_WEIGHT + VESSEL_HORSEPOWER + NUM_OF_DAYS_FISHED
                           ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE + PACFIN_PORT_CODE 
-                          + LANDING_YEAR + LANDING_MONTH + VESSEL_NUM, 
+                          + LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + AGENCY_CODE, 
                           FUN=sum_mean_fun, data=PacFIN) 
 
 # All species monthly data and CPS species daily data.

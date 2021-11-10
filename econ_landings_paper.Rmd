@@ -38,8 +38,8 @@ urlcolor: blue
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-rm(list = ls(all.names = TRUE)) 
-# gc()
+# rm(list = ls(all.names = TRUE)) 
+gc()
 # load("PacFIN.RData")
 
 library(bookdown)
@@ -191,7 +191,8 @@ g1 <- ggplot(landing.price.year,
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
   ggtitle("(a) Landings") +   guides(colour=guide_legend(title="Species: ")) + 
   scale_color_brewer(palette="Set2", labels=c("MSQD" = "Market Squid", 
-                                              "NANC" = "Northern Anchovy", 
+                                              "NANC" = "Northern Anchovy",
+                                              "PSDN" = "Pacific Herring",
                                               "PSDN" = "Pacific Sardine"))
   
 g2 <- ggplot(landing.price.year,
@@ -229,7 +230,9 @@ coeff <- 100000
     theme(legend.position="none") + scale_x_continuous(name = element_blank()) + 
     theme(plot.title = element_text(size=9, face="bold.italic"), 
           axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
-      ggtitle("(a) Market Squid")  +  scale_color_brewer(palette="Set2")
+      ggtitle("(a) Market Squid")  +  
+    scale_color_brewer(palette="Set2",
+                       limits = c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_KG.mean.mean"))
 
 coeff <- 100000
   df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "PSDN")
@@ -241,7 +244,9 @@ coeff <- 100000
     theme(legend.position="none") + scale_x_continuous(name = "") +
     theme(plot.title = element_text(size=9, face="bold.italic"), 
           axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
-      ggtitle("(b) Pacific Sardine")  +  scale_color_brewer(palette="Set2")
+      ggtitle("(b) Pacific Sardine")  +  
+    scale_color_brewer(palette="Set2",
+                       limits = c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_KG.mean.mean"))
 
 coeff <- 1500
   df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "PHRG")
@@ -253,7 +258,8 @@ coeff <- 1500
   theme(legend.position="none") + scale_x_continuous(name = "Year") +
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-    ggtitle("(c) Pacific Herring")  +  scale_color_brewer(palette="Set2")
+    ggtitle("(c) Pacific Herring")  +  scale_color_brewer(palette="Set2",
+                       limits = c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_KG.mean.mean"))
 
 coeff <- 30000
   df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "NANC")
@@ -266,10 +272,12 @@ coeff <- 30000
     theme(plot.title = element_text(size=9, face="bold.italic"), 
           axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
     ggtitle("(d) Northern Anchovy") + guides(colour=guide_legend(title="Variables: ")) + 
-  scale_color_brewer(palette="Set2", labels=c("AFI_PRICE_PER_KG.mean.mean" = "Price", 
-                                              "LANDED_WEIGHT_MTONS.sum.sum" = "Landings"))
+  scale_color_brewer(palette="Set2",
+                     limits = c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_KG.mean.mean"),
+                     labels=c("AFI_PRICE_PER_KG.mean.mean" = "Price", "LANDED_WEIGHT_MTONS.sum.sum" = "Landings"))
   
 (g1 + g2) / (g3 + g4)
+  rm(landing.price.year.sel)
 
 ```
 
@@ -279,72 +287,79 @@ landing.nvessels.year.sel <- landing.price.year %>%
   select("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel", "PACFIN_SPECIES_CODE", "LANDING_YEAR")
 
 # Graph landing v/s number of  vessels
-coeff <- 0.001
+coeff <- 1000
   df <- landing.nvessels.year.sel %>% filter(PACFIN_SPECIES_CODE == "MSQD")
-  df$LANDED_WEIGHT_MTONS.sum.sum <- df$LANDED_WEIGHT_MTONS.sum.sum * coeff 
+  df$n_vessel <- df$n_vessel * coeff 
   df <- gather(df, key = Variable, value = value,
-               c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
+               c("n_vessel", "LANDED_WEIGHT_MTONS.sum.sum"))
   g1 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
-    scale_y_continuous(name = "Number of Vessels", sec.axis = sec_axis(~./coeff, name = "")) +
+    scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff, name = "")) +
     theme(legend.position="none") + scale_x_continuous(name = element_blank()) + 
     theme(plot.title = element_text(size=9, face="bold.italic"), 
           axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
-      ggtitle("(a) Market Squid")  +  scale_color_brewer(palette="Set2")
+      ggtitle("(a) Market Squid")  +  
+    scale_color_brewer(palette="Set2", limits = c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
 
-coeff <- 0.001
+coeff <- 1000
   df <- landing.nvessels.year.sel %>% filter(PACFIN_SPECIES_CODE == "PSDN")
-  df$LANDED_WEIGHT_MTONS.sum.sum <- df$LANDED_WEIGHT_MTONS.sum.sum * coeff 
+  df$n_vessel <- df$n_vessel * coeff 
   df <- gather(df, key = Variable, value = value,
                c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
   g2 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
-    scale_y_continuous(name = "", sec.axis = sec_axis(~./coeff, name = "Landings (M Tons)")) + 
+    scale_y_continuous(name = "", sec.axis = sec_axis(~./coeff, name = "Number of vessels")) + 
     theme(legend.position="none") + scale_x_continuous(name = "") +
     theme(plot.title = element_text(size=9, face="bold.italic"), 
           axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
-      ggtitle("(b) Pacific Sardine")  +  scale_color_brewer(palette="Set2")
+      ggtitle("(b) Pacific Sardine")  +  
+    scale_color_brewer(palette="Set2", limits = c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
 
-coeff <- 0.05
+coeff <- 30
   df <- landing.nvessels.year.sel %>% filter(PACFIN_SPECIES_CODE == "PHRG")
-  df$LANDED_WEIGHT_MTONS.sum.sum <- df$LANDED_WEIGHT_MTONS.sum.sum * coeff 
+  df$n_vessel <- df$n_vessel * coeff 
   df <- gather(df, key = Variable, value = value,
                c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
   g3 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
-  scale_y_continuous(name = "Number of Vessels", sec.axis = sec_axis(~./coeff, name = "")) +
+  scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff, name = "")) +
   theme(legend.position="none") + scale_x_continuous(name = "Year") +
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-    ggtitle("(c) Pacific Herring")  +  scale_color_brewer(palette="Set2")
+    ggtitle("(c) Pacific Herring")  + 
+    scale_color_brewer(palette="Set2", limits = c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
 
-coeff <- 0.001
+coeff <- 500
   df <- landing.nvessels.year.sel %>% filter(PACFIN_SPECIES_CODE == "NANC")
-  df$LANDED_WEIGHT_MTONS.sum.sum <- df$LANDED_WEIGHT_MTONS.sum.sum * coeff 
+  df$n_vessel <- df$n_vessel * coeff 
   df <- gather(df, key = Variable, value = value,
                c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
   g4 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
-    scale_y_continuous(name = "", sec.axis = sec_axis(~./coeff, name = "Landings (M Tons)")) +
+    scale_y_continuous(name = "", sec.axis = sec_axis(~./coeff, name = "Number of vessels")) +
     theme(legend.position="bottom") + scale_x_continuous(name = "Year") + 
     theme(plot.title = element_text(size=9, face="bold.italic"), 
           axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
     ggtitle("(d) Northern Anchovy") + guides(colour=guide_legend(title="Variables: ")) + 
-  scale_color_brewer(palette="Set2", labels=c("n_vessel" = "Number of vessels", 
-                                              "LANDED_WEIGHT_MTONS.sum.sum" = "Landings"))
+  scale_color_brewer(palette="Set2", limits = c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"),
+                     labels=c("n_vessel" = "Number of vessels", "LANDED_WEIGHT_MTONS.sum.sum" = "Landings"))
   
   
 (g1 + g2) / (g3 + g4)
+rm(g1, g2, g3, g4, df, landing.nvessels.year.sel)
   
 ```
 
 ## Gear
 
-Substitution between species is likely to be related with the gear that a vessel or fisher have already invest for their fishing activities. However, a vessel is not restricted to an specific gear. They can switch between different alternatives. In average a vessel use 2.96 gears for their fishing activities ir out sample data, with an standard deviation of 1.96. If we only focus in CPS species, a vessel switch between 1.39 gears in average to harvest market squid, 1.1 gears in average to harvest Northern anchovy, 1.18 gears in average to harvest Pacific herring and 1.21 in average to harvest Pacific sardine. In terms of gears, midwater trawl and seine allow for the highest level of sustitution between CPS species. In average, a vessel using midwater trawl harvest 2.37 CPS species, while a vessel using seine harvest in average 1.92 CPS species (see Table \ref{n_CPS_gear})
+Substitution between species is likely to be related with the gear that a vessel or fisher have already invest for their fishing activities. However, a vessel is not restricted to an specific gear. They can switch between different alternatives. In average a vessel use 1.4 gears for their fishing activities in out sample data, with an standard deviation of 0.72. If we only focus in CPS species, a vessel switch between 1.42 gears in average to harvest market squid, 1.16 gears in average to harvest Northern anchovy, 1.16 gears in average to harvest Pacific herring and 1.28 in average to harvest Pacific sardine. In terms of gears, midwater trawl and seine allow for the highest level of substitution between CPS species. In average, a vessel using midwater trawl harvest 2.36 CPS species, while a vessel using seine harvest in average 1.91 CPS species (see Table \ref{n_CPS_gear})
 
-```{r n_gear_used_vessels, eval=FALSE, include=FALSE}
+```{r n_gears_used_vessels, eval=FALSE, include=FALSE}
 # How many gears a vessel use in the dataset
-PacFIN.CPS.unique.gear <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_GEAR_CODE) %>% 
-  unique() 
-  PacFIN.CPS.n_gear <- PacFIN.CPS.unique.gear %>% mutate(N_gear = 1) %>% group_by(VESSEL_NUM) %>% summarise(N_gear= sum(N_gear)) 
-  summary(PacFIN.CPS.n_gear$N_gear)
-  sd(PacFIN.CPS.n_gear$N_gear)
+PacFIN.CPS.unique.gear <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_GEAR_CODE) %>% unique()
+
+
+PacFIN.CPS.n_gears <- PacFIN.CPS.unique.gear %>% mutate(n_gears = 1) %>% group_by(VESSEL_NUM) %>% 
+  summarise(n_gears= sum(n_gears)) 
+  summary(PacFIN.CPS.n_gears$n_gears)
+  sd(PacFIN.CPS.n_gears$n_gears)
 
 # ### If I have used SEINE, how many other gear I use?
 # PacFIN.Base <- PacFIN_month %>% filter( LANDING_YEAR >= 2010) %>%  select(VESSEL_NUM, PACFIN_GEAR_CODE) %>% unique()
@@ -358,21 +373,29 @@ PacFIN.CPS.unique.gear <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% sele
 ```
 
 ```{r n_gear_CPS, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
-PacFIN.Gear.PSDN <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% mutate(N_gear = 1) %>%  group_by(VESSEL_NUM) %>% 
-  summarise(N_gear = sum(N_gear)) %>% mutate(Species = "PSDN")
-PacFIN.Gear.MSQD <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% mutate(N_gear = 1) %>%  group_by(VESSEL_NUM) %>% 
-  summarise(N_gear = sum(N_gear)) %>% mutate(Species = "MSQD")
-PacFIN.Gear.NANC <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("NANC")) %>% mutate(N_gear = 1) %>%  group_by(VESSEL_NUM) %>% 
-  summarise(N_gear = sum(N_gear)) %>% mutate(Species = "NANC")
-PacFIN.Gear.PHRG <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PHRG")) %>% mutate(N_gear = 1) %>%  group_by(VESSEL_NUM) %>% 
-  summarise(N_gear = sum(N_gear)) %>% mutate(Species = "PHRG")
+PacFIN.Gear.PSDN <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% unique() %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% mutate(n_gears = 1) %>%  
+  group_by(VESSEL_NUM) %>% summarise(n_gears = sum(n_gears)) %>% mutate(Species = "PSDN")
+
+PacFIN.Gear.MSQD <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% unique() %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% mutate(n_gears = 1) %>%  
+  group_by(VESSEL_NUM) %>% summarise(n_gears = sum(n_gears)) %>% mutate(Species = "MSQD")
+
+PacFIN.Gear.NANC <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% unique() %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("NANC")) %>% mutate(n_gears = 1) %>%  
+  group_by(VESSEL_NUM) %>% summarise(n_gears = sum(n_gears)) %>% mutate(Species = "NANC")
+
+PacFIN.Gear.PHRG <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% unique() %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("PHRG")) %>% mutate(n_gears = 1) %>%  
+  group_by(VESSEL_NUM) %>% summarise(n_gears = sum(n_gears)) %>% mutate(Species = "PHRG")
+
 PacFIN.Gear <- rbind.data.frame(PacFIN.Gear.PSDN, PacFIN.Gear.NANC, PacFIN.Gear.MSQD, PacFIN.Gear.PHRG)
 
-table <- xtabs(N_gear ~ Species, aggregate(N_gear ~ Species, PacFIN.Gear, mean))
+table <- xtabs(n_gears ~ Species, aggregate(n_gears ~ Species, PacFIN.Gear, mean))
 #table
 rownames(table) = c("Market squid", "Northern Anchovy", "Pacific Herring", "Pacific sardine") 
 print(xtable(table, caption = 'Average number of gear used to catch a CPS species.', type = "latex"), comment=FALSE,  caption.placement = "top")
@@ -382,13 +405,13 @@ print(xtable(table, caption = 'Average number of gear used to catch a CPS specie
 ```{r n_species_CPS_by_gear, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
 # Create dummy of whether a vessel harvest MSQD, NANC OR PSDN 
-PacFIN.CPS <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
+PacFIN.CPS <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
   unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN", "MSQD", "NANC", "PHRG")) %>%  
-  filter(PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>% mutate(CPS_species = 1) %>%
+  filter(PACFIN_GEAR_CODE %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>% mutate(CPS_species = 1) %>%
   group_by(VESSEL_NUM, PACFIN_GEAR_CODE) %>% 
-  summarise(N_CPS_landed = sum(CPS_species)) 
+  summarise(n_CPS_landed = sum(CPS_species)) 
 
-table <- xtabs(N_CPS_landed ~ PACFIN_GEAR_CODE, aggregate(N_CPS_landed ~ PACFIN_GEAR_CODE, PacFIN.CPS, mean))
+table <- xtabs(n_CPS_landed ~ PACFIN_GEAR_CODE, aggregate(n_CPS_landed ~ PACFIN_GEAR_CODE, PacFIN.CPS, mean))
 #table
 rownames(table) = c("Dip Net", "Gill Net", "Midwater Trawl", "Other Net Gear", "Pole", "Seine") 
 
@@ -396,37 +419,45 @@ print(xtable(table, caption = 'Average number of CPS species landed by a vessel 
 
 ```
 
-Seine is the most used gear to harvest Pacific sardine, Northern anchovy and Market squid. From Table \ref{Table:n_vess_gear} we can observe that 35\% vessels have used seine to harvest Market squid, 52\% to harvest Pacific sardine and 56\% to harvest Northern anchovy. In the case of Pacific herring, vessels prefer to use gill net or midwater trawl for their harvest. Similar patter is observed when we compute the total landed weight for these four species during the period 2000-2020, presented in Table \ref{table:landing_by_gears}.
+Seine is the most used gear to harvest Pacific sardine, Northern anchovy and Market squid. From Table \ref{Table:n_vess_gear} we can observe that 41\% of vessels have used seine to harvest Market squid since the year 2000, 57\% to harvest Pacific sardine and 51\% to harvest Northern anchovy. In the case of Pacific herring, half of the vessel observed during the period 2000-2020 use gill net for their harvest instead of seine, where only 7\% of vessels have used this gear. Similar patter is observed when we compute the total landed weight for these four species during the period 2000-2020, presented in Table \ref{table:landing_by_gears}.
 
 ```{r n_vessels_using_gear, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
-PacFIN.Gear.PSDN <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% mutate(N_vessels = 1) %>%  group_by(PACFIN_GEAR_CODE) %>% 
-  summarise(N_vessels = sum(N_vessels)) %>% mutate(Species = "PSDN") %>% filter(PACFIN_GEAR_CODE %in% 
-   c("DPN", "GLN", "MDT", "ONT", "POL", "SEN"))
+PacFIN.Gear.PSDN <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
+  mutate(n_vessels = 1) %>% group_by(PACFIN_GEAR_CODE) %>% 
+  summarise(n_vessels = sum(n_vessels)) %>% mutate(Species = "PSDN") %>% 
+  filter(PACFIN_GEAR_CODE %in% c("DPN", "GLN", "MDT", "ONT", "POL", "SEN"))
 
-PacFIN.Gear.MSQD <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% mutate(N_vessels = 1) %>%  group_by(PACFIN_GEAR_CODE) %>% 
-  summarise(N_vessels = sum(N_vessels)) %>% mutate(Species = "MSQD") %>% filter(PACFIN_GEAR_CODE %in% 
-   c("DPN", "GLN", "MDT", "ONT", "POL", "SEN"))
+PacFIN.Gear.MSQD <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
+  mutate(n_vessels = 1) %>% group_by(PACFIN_GEAR_CODE) %>% 
+  summarise(n_vessels = sum(n_vessels)) %>% mutate(Species = "MSQD") %>% 
+  filter(PACFIN_GEAR_CODE %in% c("DPN", "GLN", "MDT", "ONT", "POL", "SEN"))
 
-PacFIN.Gear.PHRG <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PHRG")) %>% mutate(N_vessels = 1) %>%  group_by(PACFIN_GEAR_CODE) %>% 
-  summarise(N_vessels = sum(N_vessels)) %>% mutate(Species = "PHRG") %>% filter(PACFIN_GEAR_CODE %in% 
-   c("DPN", "GLN", "MDT", "ONT", "POL", "SEN"))
+PacFIN.Gear.PHRG <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PHRG")) %>% 
+  mutate(n_vessels = 1) %>% group_by(PACFIN_GEAR_CODE) %>% 
+  summarise(n_vessels = sum(n_vessels)) %>% mutate(Species = "PHRG") %>% 
+  filter(PACFIN_GEAR_CODE %in% c("DPN", "GLN", "MDT", "ONT", "POL", "SEN"))
 
-PacFIN.Gear.NANC <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("NANC")) %>% mutate(N_vessels = 1) %>%  group_by(PACFIN_GEAR_CODE) %>% 
-  summarise(N_vessels = sum(N_vessels)) %>% mutate(Species = "NANC") %>% filter(PACFIN_GEAR_CODE %in% 
-   c("DPN", "GLN", "MDT", "ONT", "POL", "SEN"))
+PacFIN.Gear.NANC <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE %in% c("NANC")) %>% 
+  mutate(n_vessels = 1) %>% group_by(PACFIN_GEAR_CODE) %>% 
+  summarise(n_vessels = sum(n_vessels)) %>% mutate(Species = "NANC") %>% 
+  filter(PACFIN_GEAR_CODE %in% c("DPN", "GLN", "MDT", "ONT", "POL", "SEN"))
 
 # sum(PacFIN.Gear.PSDN$N_vessels) // 258 vessels
 # sum(PacFIN.Gear.MSQD$N_vessels) // 411 vessels
-PacFIN.Gear.PSDN$N_vessels <- PacFIN.Gear.PSDN$N_vessels/sum(PacFIN.Gear.PSDN$N_vessels)
-  PacFIN.Gear.MSQD$N_vessels <- PacFIN.Gear.MSQD$N_vessels/sum(PacFIN.Gear.MSQD$N_vessels)
-  PacFIN.Gear.NANC$N_vessels <- PacFIN.Gear.NANC$N_vessels/sum(PacFIN.Gear.NANC$N_vessels)
-  PacFIN.Gear.PHRG$N_vessels <- PacFIN.Gear.PHRG$N_vessels/sum(PacFIN.Gear.PHRG$N_vessels)
+PacFIN.Gear.PSDN$n_vessels <- PacFIN.Gear.PSDN$n_vessels/sum(PacFIN.Gear.PSDN$n_vessels)
+PacFIN.Gear.MSQD$n_vessels <- PacFIN.Gear.MSQD$n_vessels/sum(PacFIN.Gear.MSQD$n_vessels)
+PacFIN.Gear.NANC$n_vessels <- PacFIN.Gear.NANC$n_vessels/sum(PacFIN.Gear.NANC$n_vessels)
+PacFIN.Gear.PHRG$n_vessels <- PacFIN.Gear.PHRG$n_vessels/sum(PacFIN.Gear.PHRG$n_vessels)
   PacFIN.Gear <- rbind.data.frame(PacFIN.Gear.PSDN, PacFIN.Gear.NANC, PacFIN.Gear.MSQD, PacFIN.Gear.PHRG)
-  table <- xtabs(N_vessels ~ PACFIN_GEAR_CODE + Species, PacFIN.Gear)
+  table <- xtabs(n_vessels ~ PACFIN_GEAR_CODE + Species, PacFIN.Gear)
 
 #table
 colnames(table) = c("Market squid", "Northern anchovy", "Pacific Herring", "Pacific sardine") 
@@ -439,41 +470,36 @@ print(xtable(table,
 ```
 
 ```{r landing_by_gear, echo=FALSE, results='asis'}
+PacFIN.CPS <- PacFIN.month %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG")) %>% 
+  filter(PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>%
+  filter(LANDING_YEAR >= 2010)
 
-PacFIN.CPS <- PacFIN_month %>% 
-  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG")) %>% 
-  filter( PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>%
-  filter( LANDING_YEAR >= 2010 )
-
-table <- round(xtabs(LANDED_WEIGHT_LBS.sum ~  PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE, data = PacFIN.CPS )/2204.6, 0 )
-# table
+table <- round(xtabs(LANDED_WEIGHT_MTONS.sum ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE, 
+                     data = PacFIN.CPS ), 0 )
 
 colnames(table) = c("Market squid", "Northern Anchovy", "Pacific Herring", "Pacific Sardine") 
 rownames(table) = c("Dip Net", "Gill Net", "Midwater Trawl", "Other Net Gear", "Pole", "Seine") 
-print(xtable(table, caption = 'Landings of CPS species by gear used. \\label{table:landing_by_gears}', type = "latex"), comment=FALSE,  caption.placement = "top")
+  print(xtable(table, caption = 'Landings of CPS species by gear used. \\label{table:landing_by_gears}', 
+             type = "latex"), comment=FALSE,  caption.placement = "top")
 
 ```
 
-
-
-
-
-
 ## Port landings
 
-In average, a vessel land in 4.19 ports, with an standard deviation of 3.39. 
+In average, a vessel land in 4.8 ports, with an standard deviation of 3.94. 
 
 ```{r n_ports_vessels, eval=FALSE, include=FALSE}
 # How many gears a vessel use in the dataset
-PacFIN.CPS.unique.port <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PORT_NAME) %>% 
-  unique() 
-  PacFIN.CPS.n_ports <- PacFIN.CPS.unique.port %>% mutate(N_ports = 1) %>% group_by(VESSEL_NUM) %>% summarise(N_ports= sum(N_ports)) 
-  summary(PacFIN.CPS.n_ports$N_ports)
-  sd(PacFIN.CPS.n_ports$N_ports)
+PacFIN.CPS.unique.port <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_PORT_CODE) %>% unique() 
+  PacFIN.CPS.n_ports <- PacFIN.CPS.unique.port %>% mutate(n_ports = 1) %>% group_by(VESSEL_NUM) %>% summarise(n_ports= sum(n_ports)) 
+  summary(PacFIN.CPS.n_ports$n_ports)
+  sd(PacFIN.CPS.n_ports$n_ports)
 
 # ### If I have used SEINE, how many other gear I use?
-# PacFIN.Base <- PacFIN_month %>% filter( LANDING_YEAR >= 2010) %>%  select(VESSEL_NUM, PACFIN_GEAR_CODE) %>% unique()
-#   PacFIN.only.seine <- PacFIN_month %>% filter( LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_GEAR_CODE) %>%
+# PacFIN.Base <- PacFIN.month %>% filter( LANDING_YEAR >= 2010) %>%  select(VESSEL_NUM, PACFIN_GEAR_CODE) %>% unique()
+#   PacFIN.only.seine <- PacFIN.month %>% filter( LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_GEAR_CODE) %>%
 #     filter(PACFIN_GEAR_CODE == "SEN") %>% mutate(D_Seine = 1) %>% select(VESSEL_NUM, D_Seine) %>% unique() 
 #   PacFIN.CPS.n_gear <- PacFIN.Base %>% inner_join(PacFIN.only.seine, by = c("VESSEL_NUM")) %>% filter(D_Seine == 1) %>% 
 #     unique() %>% group_by(VESSEL_NUM) %>% summarise(N_gear= sum(D_Seine)) 
@@ -483,18 +509,30 @@ PacFIN.CPS.unique.port <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% sele
 ```
 
 ```{r n_ports_CPS, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
-PacFIN.Gear.PSDN <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PORT_NAME) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% mutate(N_port = 1) %>%  group_by(VESSEL_NUM) %>% 
+PacFIN.Gear.PSDN <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_PORT_CODE) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
+  mutate(N_port = 1) %>% group_by(VESSEL_NUM) %>% 
   summarise(N_port = sum(N_port)) %>% mutate(Species = "PSDN")
-PacFIN.Gear.MSQD <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PORT_NAME) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% mutate(N_port = 1) %>%  group_by(VESSEL_NUM) %>% 
+
+PacFIN.Gear.MSQD <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_PORT_CODE) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
+  mutate(N_port = 1) %>% group_by(VESSEL_NUM) %>% 
   summarise(N_port = sum(N_port)) %>% mutate(Species = "MSQD")
-PacFIN.Gear.NANC <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PORT_NAME) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("NANC")) %>% mutate(N_port = 1) %>%  group_by(VESSEL_NUM) %>% 
+
+PacFIN.Gear.NANC <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_PORT_CODE) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("NANC")) %>% 
+  mutate(N_port = 1) %>% group_by(VESSEL_NUM) %>% 
   summarise(N_port = sum(N_port)) %>% mutate(Species = "NANC")
-PacFIN.Gear.PHRG <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PORT_NAME) %>% 
-  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PHRG")) %>% mutate(N_port = 1) %>%  group_by(VESSEL_NUM) %>% 
+
+PacFIN.Gear.PHRG <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_PORT_CODE) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PHRG")) %>% 
+  mutate(N_port = 1) %>%  group_by(VESSEL_NUM) %>% 
   summarise(N_port = sum(N_port)) %>% mutate(Species = "PHRG")
+
 PacFIN.Port <- rbind.data.frame(PacFIN.Gear.PSDN, PacFIN.Gear.NANC, PacFIN.Gear.MSQD, PacFIN.Gear.PHRG)
 
 table <- xtabs(N_port ~ Species, aggregate(N_port ~ Species, PacFIN.Port, mean))
@@ -502,32 +540,41 @@ table <- xtabs(N_port ~ Species, aggregate(N_port ~ Species, PacFIN.Port, mean))
 rownames(table) = c("Market squid", "Northern Anchovy", "Pacific Herring", "Pacific sardine") 
 print(xtable(table, caption = 'Average number of ports where a vessel landed their CPS species catch.', type = "latex"), comment=FALSE,  caption.placement = "top")
 
+rm(PacFIN.Gear.PSDN, PacFIN.Gear.MSQD, PacFIN.Gear.PHRG, PacFIN.Gear.NANC)
+
 ```
 
 
 Composition varies geographically. We show in Figure \ref{fig:avg_landings_by_ports} average annual landings by ports areas. We can observe that market squid is mostly landed in the southern ports located in Los Angeles, Santa Barbara and Monterrey areas, while Pacific sardine is mainly landed in Los Angeles and Monterrey areas in California, and also in the Columbia river area in Oregon. Substitution between species seems to be more likely in Los Angeles, Monterrey and Santa Barbara area ports (and in some lower scale at San Francisco area) as positive values for market squid, Pacific sardine and Northern anchovy landings are observed. 
 
 ```{r avg_landings_by_port, echo=FALSE, fig.cap="Annual average landings by port area.\\label{fig:avg_landings_by_ports}", message=FALSE, warning=FALSE}
-collapse <- summaryBy(Landings ~ Species_name + Species_code + Port + State, FUN=meanfun, data=PacFIN_yearly) %>%
-  filter(Port == "BDA" | Port == "CBA" | Port == "CCA" | Port == "CLO" | Port == "ERA" | Port == "LAA" | Port == "MNA" | Port == "MRA" | Port == "NPA" | Port == "NPS" | Port == "SBA" | Port == "SDA" | Port == "SFA") %>%
-  filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING") %>%
-  mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
+landings.by.port.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ 
+  PACFIN_SPECIES_CODE + PACFIN_PORT_CODE + LANDING_YEAR + AGENCY_CODE, FUN=sumfun, data=PacFIN.month.CPS)
+  landings.by.port.avg.year <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE + PACFIN_PORT_CODE 
+    + AGENCY_CODE, FUN=meanfun, data=landings.by.port.year) %>%
+    filter(PACFIN_PORT_CODE == "AST" | PACFIN_PORT_CODE == "HNM" | PACFIN_PORT_CODE == "SP" |
+             PACFIN_PORT_CODE == "VEN" | PACFIN_PORT_CODE == "TRM" | PACFIN_PORT_CODE == "MOS" | 
+             PACFIN_PORT_CODE == "WTP" | PACFIN_PORT_CODE == "MNT" | PACFIN_PORT_CODE == "LWC" | 
+             PACFIN_PORT_CODE == "SF"  | PACFIN_PORT_CODE == "PRN" | PACFIN_PORT_CODE == "SLT") %>%
+    mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, "SP", "TRM", "HNM", "VEN", "MNT", "MOS", "PRN", "SF", "SLT", "AST", "LWC"))
 
-states_names <- as_labeller(
-     c(`C` = "California", `O` = "Oregon",`W` = "Washington"))
-
-ggplot(collapse, aes(fill=Species_code, y=Landings.mean, x=Port)) +
+states_names <- as_labeller(c(`C` = "California", `O` = "Oregon",`W` = "Washington"))
+  ggplot(landings.by.port.avg.year, aes(fill=PACFIN_SPECIES_CODE, 
+                                      y=LANDED_WEIGHT_MTONS.sum.sum.mean, x=PACFIN_PORT_CODE)) +
   geom_bar(position="dodge", stat="identity") + 
-  facet_grid(~ State, scale="free", space="free_x", labeller = states_names) + 
-  theme(strip.text.x = element_text(size = 6)) +
+  facet_grid(~ AGENCY_CODE, scale="free", space="free_x", labeller = states_names) + 
+  theme(strip.text.x = element_text(size = 7)) +
   theme(legend.position="bottom") + 
   scale_fill_viridis(discrete = T, labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
-                               "PHRG" = "Pacific Herring", "PSDN" = "Pacific Sardine")) + 
-  theme(axis.text.x = element_text(angle=90, hjust=0.95, vjust=0.45)) + 
-  xlab("Port areas") + ylab("Landings (tons)") +
-  guides(fill=guide_legend(title="Species: "))   + 
-  scale_x_discrete(labels=c("SDA" = "San\nDiego", "LAA" = "Los\nAngeles", "SBA" = "Santa\nBarbara", "MNA" = "Monterrey", "MRA" = "Morro\nBay", "SFA" = "San\nFrancisco", "BDA" = "Bodega\nBay", "ERA" = "Eureka", "CCA" = "Crescent\nCity", "CBA" = "Coos\nBay", "NPA" = "Newport", "CLO" = "Columbia\nRiver (OR)", "NPS" = "North\nPuget\nSound")) + 
-   scale_color_brewer(palette="Set2")
+                               "PHRG" = "Pacific Herring", "PSDN" = "Pacific Sardine")) +
+  theme(axis.text.x = element_text(angle=90, hjust=0.95, vjust=0.45)) + xlab("Ports") + 
+  ylab("Landings (tons)") + guides(fill=guide_legend(title="Species: "))  + 
+    scale_x_discrete(labels=c("SP" = "San\nPedro", "HNM" = "Hueneme", "MNT" = "Monterrey", "MOS" = "Moss\nLanding", 
+                              "LWC" = "Ilwaco /\nChinook", "AST" = "Astoria", 
+                              "PRN" = "Princeton/\nHalf Moon\nBay", "SF" = "San\nFrancisco", 
+                              "SLT" = "Sausalito", "TRM" = "Terminal\nIsland",
+                              "VEN" = "Ventura")) +
+    scale_color_brewer(palette="Set2")
 
 ```
 
@@ -536,73 +583,22 @@ To analyze substitution more in detail, we compute total annual landing by port 
 
 ```{r ts_by_port,  fig.cap = "Total annual landing by port area. 2000 - 2020. \\textit{Notes:} CLO = Columbia River (OR); LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara; SFA = San Francisco.\\label{fig:ts_landings_by_ports}" , echo=FALSE, message=FALSE, warning=FALSE}
 
-collapse <- PacFIN_yearly %>%
-    filter(Port == "CLO" | Port == "LAA" | Port == "MNA" | Port == "SBA" | Port == "SFA") %>%
-    filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | 
-             Species_name == "MARKET SQUID") %>%
-    mutate(Port = fct_relevel(Port, "LAA", "SBA", "MNA", "SFA", "CLO")) %>%
-  filter(Landing_year >= 2000 & Landing_year <= 2020)
+landings.by.sel.ports <- landings.by.port.year %>% filter(PACFIN_PORT_CODE == "SP" | PACFIN_PORT_CODE == "TRM" | PACFIN_PORT_CODE == "MOS" | PACFIN_PORT_CODE == "MNT") %>% 
+  mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, "SP", "TRM", "HNM", "MNT", "MOS"))
 
-
-port_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara", `MNA` = "Monterrey",
-                            `SFA` = "San Francisco", `CLO` = "Columbia River (OR)"))
+port_names <- as_labeller(c(`SP` = "San Pedro", `TRM` = "Terminal Island", 
+                            `MOS` = "Moss Landing", `MNT` = "Monterrey"))
      
-ggplot(collapse, aes(y=Landings, x=Landing_year, color=Species_code, group=Species_code)) +
-  geom_line(size=1) + xlab("Port areas") + ylab("Landings (tons)") + 
-  facet_wrap(~ Port, labeller = port_names) +
+
+ggplot(landings.by.sel.ports, aes(y=LANDED_WEIGHT_MTONS.sum.sum, 
+                                  x=LANDING_YEAR, color=PACFIN_SPECIES_CODE, group=PACFIN_SPECIES_CODE)) +
+  geom_line(size=1) + xlab("Year") + ylab("Landings (tons)") + 
+  facet_wrap(~ PACFIN_PORT_CODE, labeller = port_names) +
   theme(legend.position="bottom") + 
   theme(axis.text.x = element_text(angle=90)) +
   guides(color=guide_legend(title="Species: ")) +
   scale_color_brewer(palette="Set2", labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
              "PHRG" = "Pacific Herring", "PSDN" = "Pacific Sardine"))
-```
-
-
-```{r ts_by_port_price,  fig.cap = "Total annual landing by port area. 2000 - 2020. \\textit{Notes:} CLO = Columbia River (OR); LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara; SFA = San Francisco.\\label{fig:ts_price_by_ports}" , echo=FALSE, message=FALSE, warning=FALSE}
-
-collapse <- PacFIN_yearly %>%
-    filter(Port == "CLO" | Port == "LAA" | Port == "MNA" | Port == "SBA" | Port == "SFA") %>%
-    filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | 
-             Species_name == "MARKET SQUID") %>%
-    mutate(Port = fct_relevel(Port, "LAA", "SBA", "MNA", "SFA", "CLO")) %>%
-  filter(Landing_year >= 2000 & Landing_year <= 2020)
-
-
-port_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara", `MNA` = "Monterrey",
-                            `SFA` = "San Francisco", `CLO` = "Columbia River (OR)"))
-     
-ggplot(collapse, aes(y=Price, x=Landing_year, color=Species_code, group=Species_code)) +
-  geom_line(size=1) + xlab("Port areas") + ylab("Price ($/tons)") + 
-  facet_wrap(~ Port, labeller = port_names) +
-  theme(legend.position="bottom") + 
-  theme(axis.text.x = element_text(angle=90)) +
-  guides(color=guide_legend(title="Species: ")) +
-  scale_color_brewer(palette="Set2", labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
-             "PHRG" = "Pacific Herring", "PSDN" = "Pacific Sardine"))
-```
-
-
-```{r ts_n_vessels, echo=FALSE, fig.cap="Total number of vessel by species. 2000 - 2020.\\label{fig:ts_n_vessels}", message=FALSE, warning=FALSE}
-collapse <- PacFIN_yearly %>%
-  filter(Management_group == "CPEL") %>%
-  filter(Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | 
-           Species_name == "MARKET SQUID") %>%
-  filter(Landing_year >= 2000 & Landing_year <= 2020)
-
-collapse <- summaryBy(N_vessels ~ Species_name  + Landing_year, FUN=meanfun, data=collapse) 
-
-species_names <- as_labeller(c(`MARKET SQUID` = "Market Squid", 
-                               `PACIFIC SARDINE` = "Pacific Sardine", 
-                               `NORTHERN ANCHOVY` = "Northern Anchovy"))
-
-# Plot
-ggplot(collapse, aes(x=Landing_year, y = N_vessels.mean,  colour = Species_name)) + 
-  geom_line(size=1) +
-  scale_y_continuous(name = "Number of vessels") +
-  facet_wrap(~Species_name, labeller = species_names) + theme(legend.position="bottom") +
-  guides(colour=guide_legend(title="Species: ")) +
-  scale_color_brewer(palette="Set2") + theme(axis.text.x = element_text(angle=90)) +
-  theme(legend.position="none") + xlab("Year") 
 ```
 
 **<< SHOULD WE STUDY HOW FISHING GROUNDS CHANGE FROM PORTS (THUS DISTANCE TO FISHING GROUNDS AND WEATHER VARIABLES AFFECTED), LIKE SELDEN (2020) AND PAPAIOANNOU (2021)??? IN BOTH MODELS? >>**
@@ -615,10 +611,10 @@ There is heterogeneity on vessel characteristics depending on the gear and targe
 
 ```{r lenght_by_species_gear, echo=FALSE, results='asis'}
 
-PacFIN.CPS <- PacFIN_month %>% 
-  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG"))  %>% 
-  filter( PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>%
-  filter( LANDING_YEAR >= 2010 )
+PacFIN.CPS <- PacFIN.month %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG"))  %>% 
+  filter(PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>%
+  filter(LANDING_YEAR >= 2010 )
 
 table <- xtabs(VESSEL_LENGTH.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE,
                aggregate(VESSEL_LENGTH.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE, PacFIN.CPS, mean))
@@ -634,10 +630,10 @@ print(xtable(table, caption = 'Vessel lenght used in the CPS fishery by gear use
 
 ```{r fishing_days, echo=FALSE, results='asis'}
 
-PacFIN.CPS <- PacFIN_month %>% 
-  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG"))  %>% 
-  filter( PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>%
-  filter( LANDING_YEAR >= 2010 )
+PacFIN.CPS <- PacFIN.month %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG"))  %>% 
+  filter(PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>%
+  filter(LANDING_YEAR >= 2010 )
 
 table <- xtabs(NUM_OF_DAYS_FISHED.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE,
                aggregate(NUM_OF_DAYS_FISHED.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE, PacFIN.CPS, mean))
