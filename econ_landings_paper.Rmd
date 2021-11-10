@@ -5,10 +5,13 @@ author:
     email: felipe.quezada@noaa.gov
     institute: [ucsc, noaa]
     correspondence: true
-  # - name: Desiree Tommasi
-  #   institute: [ucsc, noaa]
+  # - name: Isaac Kaplan
+  #   institute: noaa
   # - name: Stephen Stohs
   #   institute: noaa
+  # - name: Desiree Tommasi
+  #   institute: [ucsc, noaa]
+
 institute:
   - ucsc: Institute of Marine Sciences, University of California Santa Cruz
   - noaa: NOAA Southwest Fisheries Science Center
@@ -36,8 +39,8 @@ urlcolor: blue
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 rm(list = ls(all.names = TRUE)) 
-gc()
-load("stan_fit.RData")
+# gc()
+# load("PacFIN.RData")
 
 library(bookdown)
 library(brms)
@@ -70,37 +73,22 @@ library(xtable)
 library(zoo)
 ```
 
-```{r read_data, include=FALSE} 
-PacFIN_yearly <- read.csv(file = here::here("Data", "PacFin_yearly.csv"))
-PacFIN_month <- read.csv(file = here::here("Data", "PacFin_monthly.csv"))
-sapply(PacFIN_month, class) 
-
-# names(PacFIN_yearly)[names(PacFIN_yearly) == "LANDING_YEAR"              ] <- "Year"
-# names(PacFIN_yearly)[names(PacFIN_yearly) == "PACFIN_SPECIES_CODE"       ] <- "Species_code"
-# names(PacFIN_yearly)[names(PacFIN_yearly) == "PACFIN_SPECIES_COMMON_NAME"] <- "Species_name"
-# names(PacFIN_yearly)[names(PacFIN_yearly) == "LANDED_WEIGHT_MTONS"       ] <- "Landings"
-# names(PacFIN_yearly)[names(PacFIN_yearly) == "EXVESSEL_REVENUE"          ] <- "Revenue"
-# names(PacFIN_yearly)[names(PacFIN_yearly) == "LANDED_WEIGHT_PPP"         ] <- "Price"
-# names(PacFIN_yearly)[names(PacFIN_yearly) == "AGENCY_CODE"               ] <- "State"
-# names(PacFIN_yearly)[names(PacFIN_yearly) == "MANAGEMENT_GROUP_CODE"     ] <- "Management_group"
+```{r read_data, include=FALSE}
+PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
+PacFIN.month.CPS <- PacFIN.month %>% filter(PACFIN_SPECIES_CODE %in% c("PSDN", "MSQD", "NANC", "PHRG"))
 
 ```
 
-
 ```{r functions, include=FALSE}
-
 meanfun <- function(x, ...){
   c(mean=mean(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
 }
-
 sumfun <- function(x, ...){
   c(sum=sum(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
 }
-
 sum_mean_fun <- function(x, ...){
   c(mean=mean(x, na.rm=TRUE, ...), sum=sum(x, na.rm=TRUE, ...)) #, l=length(x))
 }
-
 port_by_state <- function(state_name) {
   if (state_name == "SOME") {
     collapse <- PacFIN_yearly %>%
@@ -120,7 +108,6 @@ port_by_state <- function(state_name) {
     filter(State == state_name & (Species_name == "PACIFIC SARDINE" | Species_name == "NORTHERN ANCHOVY" | Species_name == "MARKET SQUID" | Species_name == "PACIFIC HERRING")) %>%
     mutate(Port = fct_relevel(Port, "SDA", "LAA", "SBA", "MNA", "MRA", "SFA", "BDA", "ERA", "CCA", "CBA", "NPA", "CLO", "NPS"))
   }
-  
   ggplot(collapse, aes(y=Landings, x=Landing_year, color=Species_code, group=Species_code)) +
   geom_line(size=1) + 
   facet_wrap(~ Port) +
@@ -149,69 +136,74 @@ The remainder of the paper is organized as follows: Section \ref{coastal-pelagic
 Before Pacific sardine closure in 2015, landings in the CPS fishery have been mainly dominated by Pacific sardine and market squid, as is shown in panel (a) in Figure \ref{fig:avg_lan_rev}. Low average landings for Pacific herring and Northern anchovy could be related with geography and regulatory constraint that restrict vessels to exploit them. Nevertheless, this lower levels compared with Market squid and Pacific sardine could be reflecting lower economics incentives for its exploitation. In terms of revenue, we can observe in panel (b) that market squid have the largest revenue, while Pacific sardine lost relevance due to the low prices received by fishers.
 
 
-```{r avg_landings, echo=FALSE, fig.cap="Average annual landing and revenues for the CPS fishery by species.\\label{fig:avg_lan_rev}", message=FALSE, warning=FALSE}
-landings <- summaryBy(Landings ~ Species_code + Landing_year + Management_group, FUN=sumfun, data=PacFIN_yearly) %>%
-  filter(Management_group == "CPEL") %>%
-  filter(Species_code != "PBNT" & Species_code != "CMCK" & Species_code != "PHRG" &   
-           Species_code != "JMCK" & Species_code != "RHRG" & Species_code != "UMCK")
+```{r avg_landings, echo=FALSE, fig.cap="Average annual landings and revenues by species.\\label{fig:avg_lan_rev}", message=FALSE, warning=FALSE}
 
-landings <- summaryBy(Landings.sum ~ Species_code, FUN=meanfun, data=landings)
+## Landings chart
+landings.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sumfun, data=PacFIN.month.CPS)
+landings.avg.year <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE, FUN=meanfun, data=landings.year)
 
-g1 <- ggplot(landings, aes(Species_code, Landings.sum.mean)) +
+g1 <- ggplot(landings.avg.year, aes(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS.sum.sum.mean)) +
   geom_col(width=0.4) + ggtitle("(a) Landings") + 
   theme(plot.title = element_text(size=9, face="bold.italic")) +
   xlab("Species") + ylab("Landings (tons)") + 
-  scale_x_discrete(labels=c("MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy", "PSDN" = "Pacific\nSardine"))
+  scale_x_discrete(labels=c("MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy", 
+                            "PHRG" = "Pacific\nHerring", "PSDN" = "Pacific\nSardine"))
 
+## Revenue chart
 
-revenue <- summaryBy(Revenue ~ Species_code + Landing_year + Management_group, FUN=sumfun, data=PacFIN_yearly) %>%
-  filter(Management_group == "CPEL") %>%
-  filter(Species_code != "PBNT" & Species_code != "CMCK" & Species_code != "PHRG" & 
-           Species_code != "JMCK" & Species_code != "RHRG" & Species_code != "UMCK") 
+revenue.year <- summaryBy(AFI_EXVESSEL_REVENUE.sum ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sumfun, data=PacFIN.month.CPS)
+revenue.avg.year <- summaryBy(AFI_EXVESSEL_REVENUE.sum.sum ~ PACFIN_SPECIES_CODE, FUN=meanfun, data=revenue.year)
 
-revenue <- summaryBy(Revenue.sum ~ Species_code, FUN=meanfun, data=revenue)
-
-
-g2 <- ggplot(revenue, aes(Species_code, Revenue.sum.mean)) +
+g2 <- ggplot(revenue.avg.year, aes(PACFIN_SPECIES_CODE, AFI_EXVESSEL_REVENUE.sum.sum.mean)) +
   geom_col(width=0.4) + ggtitle("(b) Revenue") + 
   theme(plot.title = element_text(size=9, face="bold.italic")) +
-  xlab("Species") + ylab("Revenues (USD)") + 
-  scale_x_discrete(labels=c("MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy", "PSDN" = "Pacific\nSardine"))
+  xlab("Species") + ylab("Revenues (Millions of USD)") +  scale_y_continuous(labels = label_number(scale = 1e-6)) +
+  scale_x_discrete(labels=c("MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy", 
+                            "PHRG" = "Pacific\nHerring", "PSDN" = "Pacific\nSardine"))
 
 g1 + g2
 
 ```
 
 
-```{r ts_landings, echo=FALSE, fig.cap="Total annual landing by CPS species.\\label{fig:ts_landings}", message=FALSE, warning=FALSE}
-collapse <- PacFIN_yearly %>% filter(Landing_year <= 2020) %>%
-  filter(Management_group == "CPEL") %>%
-  filter(Species_code != "PBNT" & Species_code != "CMCK" & Species_code != "JMCK" & Species_code != "PHRG"
-         & Species_code != "RHRG" & Species_code != "UMCK")
+```{r ts_landings, echo=FALSE, fig.cap="Total annual landing by CPS species (1981 - 2020).\\label{fig:ts_landings}", message=FALSE, warning=FALSE}
+PacFIN.month.CPS.noPHRG <- PacFIN.month %>% filter(PACFIN_SPECIES_CODE %in% c("PSDN", "MSQD", "NANC"))
+# 
+# PacFIN.month.CPS.noPHRG$Date <- zoo::as.yearmon(paste(PacFIN.month.CPS$LANDING_YEAR, PacFIN.month.CPS$LANDING_MONTH), "%Y %m")
 
-collapse <- summaryBy(Landings + Price + N_vessels ~ Species_name  + Landing_year, FUN=sum_mean_fun, data=collapse) %>%
-  dplyr::select(Landing_year, Price.mean, Landings.sum, N_vessels.mean, Species_name) 
+# Calculate number of vessels by species per month # 
+nvessel.year <- PacFIN.month.CPS %>% 
+  dplyr::select(PACFIN_SPECIES_CODE, LANDING_YEAR, VESSEL_NUM) %>% unique() %>% 
+  mutate(n_vessel = 1) %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
+  summarise(n_vessel = sum(n_vessel))
 
+# Calculate average price and total landings by species per month #
+landing.price.year <- summaryBy(LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PER_KG.mean ~ 
+                                  PACFIN_SPECIES_CODE + LANDING_YEAR, 
+                      FUN=sum_mean_fun, data=PacFIN.month.CPS) 
+ 
 
-g1 <- ggplot(collapse, aes(x = Landing_year, y = Landings.sum, group= Species_name, colour =  Species_name)) + 
-  geom_line(size=1) + scale_x_continuous(name = element_blank()) +
+g1 <- ggplot(landing.price.year, 
+             aes(x = LANDING_YEAR, y = LANDED_WEIGHT_MTONS.sum.sum, group = PACFIN_SPECIES_CODE, colour = PACFIN_SPECIES_CODE)) + 
+  geom_line(size=1) + scale_x_continuous(name = "Year") +
   scale_y_continuous(name = "Landings (MTons)") + 
   theme(legend.position = "right", plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
   ggtitle("(a) Landings") +   guides(colour=guide_legend(title="Species: ")) + 
-  scale_color_brewer(palette="Set2", labels=c("MARKET SQUID" = "Market Squid", 
-                                              "NORTHERN ANCHOVY" = "Northern Anchovy", 
-                                              "PACIFIC SARDINE" = "Pacific Sardine"))
+  scale_color_brewer(palette="Set2", labels=c("MSQD" = "Market Squid", 
+                                              "NANC" = "Northern Anchovy", 
+                                              "PSDN" = "Pacific Sardine"))
   
-g2 <- ggplot(collapse, aes(x = Landing_year, y = Price.mean, group= Species_name, colour =  Species_name)) + 
+g2 <- ggplot(landing.price.year,
+             aes(x = LANDING_YEAR, y = AFI_PRICE_PER_KG.mean.mean, group = PACFIN_SPECIES_CODE, colour = PACFIN_SPECIES_CODE)) + 
   geom_line(size=1) + scale_x_continuous(name = "Year") +
-  scale_y_continuous(name = "Price ($/Lbs)")  + 
+  scale_y_continuous(name = "Price ($/Kg)")  + 
    scale_color_brewer(palette="Set2") +  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
   ggtitle("(b) Prices")
 
-g3 <- ggplot(collapse, aes(x = Landing_year, y = N_vessels.mean, group= Species_name, colour =  Species_name)) + 
-  geom_line(size=1) + scale_x_continuous(name = element_blank()) +
+g3 <- ggplot(nvessel.year, aes(x = LANDING_YEAR, y = n_vessel, group = PACFIN_SPECIES_CODE, colour = PACFIN_SPECIES_CODE)) + 
+  geom_line(size=1) + scale_x_continuous(name = "Year") +
   scale_y_continuous(name = "# of vessels") +   theme(legend.position="none")  + 
    scale_color_brewer(palette="Set2") +  theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
@@ -222,25 +214,124 @@ g1 / (g2 + g3)
 
 ```
 
-```{r ts_landings_vessels, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-collapse <- PacFIN_yearly %>%
-  filter(Management_group == "CPEL") %>%
-  filter(Species_code != "PBNT" & Species_code != "RHRG" & Species_code != "UMCK")
+```{r ts_landing_price, echo=FALSE, message=FALSE, warning=FALSE}
+landing.price.year.sel <- landing.price.year %>% 
+  select("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_KG.mean.mean", "PACFIN_SPECIES_CODE", "LANDING_YEAR")
 
-collapse <- summaryBy(Landings + Price + N_vessels ~ Species_name  + Landing_year, FUN=sum_mean_fun, data=collapse) %>%
-  dplyr::select(Landing_year, Landings.sum, N_vessels.mean, Species_name) 
-coeff <- 1000
-collapse$N_vessels.mean <- collapse$N_vessels.mean * coeff 
-df <- gather(collapse, key = Variable, value = value,
-             c("Landings.sum", "N_vessels.mean"))
+# Graph landing v/s number of  vessels
+coeff <- 100000
+  df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "MSQD")
+  df$AFI_PRICE_PER_KG.mean.mean <- df$AFI_PRICE_PER_KG.mean.mean * coeff 
+  df <- gather(df, key = Variable, value = value,
+               c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_KG.mean.mean"))
+  g1 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+    scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff, name = "")) +
+    theme(legend.position="none") + scale_x_continuous(name = element_blank()) + 
+    theme(plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+      ggtitle("(a) Market Squid")  +  scale_color_brewer(palette="Set2")
 
-# Plot
-ggplot(df, aes(x=Landing_year, y = value, group = Variable, colour = Variable)) + 
-geom_line(size=1) +
-scale_y_continuous(name = "Landings (M Tons)", 
-                   sec.axis = sec_axis(~./coeff, name = "Number of Vessels")) +
-  facet_wrap(~Species_name)
+coeff <- 100000
+  df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "PSDN")
+  df$AFI_PRICE_PER_KG.mean.mean <- df$AFI_PRICE_PER_KG.mean.mean * coeff 
+  df <- gather(df, key = Variable, value = value,
+               c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_KG.mean.mean"))
+  g2 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+    scale_y_continuous(name = "", sec.axis = sec_axis(~./coeff, name = "Price per kilogram")) + 
+    theme(legend.position="none") + scale_x_continuous(name = "") +
+    theme(plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+      ggtitle("(b) Pacific Sardine")  +  scale_color_brewer(palette="Set2")
 
+coeff <- 1500
+  df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "PHRG")
+  df$AFI_PRICE_PER_KG.mean.mean <- df$AFI_PRICE_PER_KG.mean.mean * coeff 
+  df <- gather(df, key = Variable, value = value,
+               c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_KG.mean.mean"))
+  g3 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+  scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff, name = "")) +
+  theme(legend.position="none") + scale_x_continuous(name = "Year") +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+    ggtitle("(c) Pacific Herring")  +  scale_color_brewer(palette="Set2")
+
+coeff <- 30000
+  df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "NANC")
+  df$AFI_PRICE_PER_KG.mean.mean <- df$AFI_PRICE_PER_KG.mean.mean * coeff 
+  df <- gather(df, key = Variable, value = value,
+               c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_KG.mean.mean"))
+  g4 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+    scale_y_continuous(name = "", sec.axis = sec_axis(~./coeff, name = "Price per kilogram")) +
+    theme(legend.position="bottom") + scale_x_continuous(name = "Year") + 
+    theme(plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+    ggtitle("(d) Northern Anchovy") + guides(colour=guide_legend(title="Variables: ")) + 
+  scale_color_brewer(palette="Set2", labels=c("AFI_PRICE_PER_KG.mean.mean" = "Price", 
+                                              "LANDED_WEIGHT_MTONS.sum.sum" = "Landings"))
+  
+(g1 + g2) / (g3 + g4)
+
+```
+
+```{r ts_landings_vessels, echo=FALSE, message=FALSE, warning=FALSE}
+landing.nvessels.year.sel <- landing.price.year %>% 
+  inner_join(nvessel.year, by = c("PACFIN_SPECIES_CODE", "LANDING_YEAR")) %>%
+  select("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel", "PACFIN_SPECIES_CODE", "LANDING_YEAR")
+
+# Graph landing v/s number of  vessels
+coeff <- 0.001
+  df <- landing.nvessels.year.sel %>% filter(PACFIN_SPECIES_CODE == "MSQD")
+  df$LANDED_WEIGHT_MTONS.sum.sum <- df$LANDED_WEIGHT_MTONS.sum.sum * coeff 
+  df <- gather(df, key = Variable, value = value,
+               c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
+  g1 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+    scale_y_continuous(name = "Number of Vessels", sec.axis = sec_axis(~./coeff, name = "")) +
+    theme(legend.position="none") + scale_x_continuous(name = element_blank()) + 
+    theme(plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+      ggtitle("(a) Market Squid")  +  scale_color_brewer(palette="Set2")
+
+coeff <- 0.001
+  df <- landing.nvessels.year.sel %>% filter(PACFIN_SPECIES_CODE == "PSDN")
+  df$LANDED_WEIGHT_MTONS.sum.sum <- df$LANDED_WEIGHT_MTONS.sum.sum * coeff 
+  df <- gather(df, key = Variable, value = value,
+               c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
+  g2 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+    scale_y_continuous(name = "", sec.axis = sec_axis(~./coeff, name = "Landings (M Tons)")) + 
+    theme(legend.position="none") + scale_x_continuous(name = "") +
+    theme(plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+      ggtitle("(b) Pacific Sardine")  +  scale_color_brewer(palette="Set2")
+
+coeff <- 0.05
+  df <- landing.nvessels.year.sel %>% filter(PACFIN_SPECIES_CODE == "PHRG")
+  df$LANDED_WEIGHT_MTONS.sum.sum <- df$LANDED_WEIGHT_MTONS.sum.sum * coeff 
+  df <- gather(df, key = Variable, value = value,
+               c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
+  g3 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+  scale_y_continuous(name = "Number of Vessels", sec.axis = sec_axis(~./coeff, name = "")) +
+  theme(legend.position="none") + scale_x_continuous(name = "Year") +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+    ggtitle("(c) Pacific Herring")  +  scale_color_brewer(palette="Set2")
+
+coeff <- 0.001
+  df <- landing.nvessels.year.sel %>% filter(PACFIN_SPECIES_CODE == "NANC")
+  df$LANDED_WEIGHT_MTONS.sum.sum <- df$LANDED_WEIGHT_MTONS.sum.sum * coeff 
+  df <- gather(df, key = Variable, value = value,
+               c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
+  g4 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+    scale_y_continuous(name = "", sec.axis = sec_axis(~./coeff, name = "Landings (M Tons)")) +
+    theme(legend.position="bottom") + scale_x_continuous(name = "Year") + 
+    theme(plot.title = element_text(size=9, face="bold.italic"), 
+          axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+    ggtitle("(d) Northern Anchovy") + guides(colour=guide_legend(title="Variables: ")) + 
+  scale_color_brewer(palette="Set2", labels=c("n_vessel" = "Number of vessels", 
+                                              "LANDED_WEIGHT_MTONS.sum.sum" = "Landings"))
+  
+  
+(g1 + g2) / (g3 + g4)
+  
 ```
 
 ## Gear
@@ -370,7 +461,49 @@ print(xtable(table, caption = 'Landings of CPS species by gear used. \\label{tab
 
 ## Port landings
 
-<!-- 2) How many ports vessel land their harvest -->
+In average, a vessel land in 4.19 ports, with an standard deviation of 3.39. 
+
+```{r n_ports_vessels, eval=FALSE, include=FALSE}
+# How many gears a vessel use in the dataset
+PacFIN.CPS.unique.port <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PORT_NAME) %>% 
+  unique() 
+  PacFIN.CPS.n_ports <- PacFIN.CPS.unique.port %>% mutate(N_ports = 1) %>% group_by(VESSEL_NUM) %>% summarise(N_ports= sum(N_ports)) 
+  summary(PacFIN.CPS.n_ports$N_ports)
+  sd(PacFIN.CPS.n_ports$N_ports)
+
+# ### If I have used SEINE, how many other gear I use?
+# PacFIN.Base <- PacFIN_month %>% filter( LANDING_YEAR >= 2010) %>%  select(VESSEL_NUM, PACFIN_GEAR_CODE) %>% unique()
+#   PacFIN.only.seine <- PacFIN_month %>% filter( LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_GEAR_CODE) %>%
+#     filter(PACFIN_GEAR_CODE == "SEN") %>% mutate(D_Seine = 1) %>% select(VESSEL_NUM, D_Seine) %>% unique() 
+#   PacFIN.CPS.n_gear <- PacFIN.Base %>% inner_join(PacFIN.only.seine, by = c("VESSEL_NUM")) %>% filter(D_Seine == 1) %>% 
+#     unique() %>% group_by(VESSEL_NUM) %>% summarise(N_gear= sum(D_Seine)) 
+#   summary(PacFIN.CPS.n_gear$N_gear)
+#   sd(PacFIN.CPS.n_gear$N_gear)
+
+```
+
+```{r n_ports_CPS, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+PacFIN.Gear.PSDN <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PORT_NAME) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% mutate(N_port = 1) %>%  group_by(VESSEL_NUM) %>% 
+  summarise(N_port = sum(N_port)) %>% mutate(Species = "PSDN")
+PacFIN.Gear.MSQD <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PORT_NAME) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% mutate(N_port = 1) %>%  group_by(VESSEL_NUM) %>% 
+  summarise(N_port = sum(N_port)) %>% mutate(Species = "MSQD")
+PacFIN.Gear.NANC <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PORT_NAME) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("NANC")) %>% mutate(N_port = 1) %>%  group_by(VESSEL_NUM) %>% 
+  summarise(N_port = sum(N_port)) %>% mutate(Species = "NANC")
+PacFIN.Gear.PHRG <- PacFIN_month %>% filter(LANDING_YEAR >= 2010) %>% select(VESSEL_NUM, PACFIN_SPECIES_CODE, PORT_NAME) %>% 
+  unique() %>% filter(PACFIN_SPECIES_CODE  %in% c("PHRG")) %>% mutate(N_port = 1) %>%  group_by(VESSEL_NUM) %>% 
+  summarise(N_port = sum(N_port)) %>% mutate(Species = "PHRG")
+PacFIN.Port <- rbind.data.frame(PacFIN.Gear.PSDN, PacFIN.Gear.NANC, PacFIN.Gear.MSQD, PacFIN.Gear.PHRG)
+
+table <- xtabs(N_port ~ Species, aggregate(N_port ~ Species, PacFIN.Port, mean))
+#table
+rownames(table) = c("Market squid", "Northern Anchovy", "Pacific Herring", "Pacific sardine") 
+print(xtable(table, caption = 'Average number of ports where a vessel landed their CPS species catch.', type = "latex"), comment=FALSE,  caption.placement = "top")
+
+```
+
 
 Composition varies geographically. We show in Figure \ref{fig:avg_landings_by_ports} average annual landings by ports areas. We can observe that market squid is mostly landed in the southern ports located in Los Angeles, Santa Barbara and Monterrey areas, while Pacific sardine is mainly landed in Los Angeles and Monterrey areas in California, and also in the Columbia river area in Oregon. Substitution between species seems to be more likely in Los Angeles, Monterrey and Santa Barbara area ports (and in some lower scale at San Francisco area) as positive values for market squid, Pacific sardine and Northern anchovy landings are observed. 
 

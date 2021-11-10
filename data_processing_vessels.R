@@ -52,27 +52,36 @@ sum_mean_fun <- function(x, ...){
 # Read PacFIN data by vessels for different decades #
 PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
+  PacFIN_1990_1999 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_1990_1999.csv")
+  PacFIN_1981_1989 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_1981_1989.csv")
 
 # Merge different decades of data #
-PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
+PacFIN <- rbind.data.frame(PacFIN_1981_1989, PacFIN_1990_1999, PacFIN_2000_2009, PacFIN_2010_2020)
+rm(PacFIN_1981_1989, PacFIN_1990_1999, PacFIN_2000_2009, PacFIN_2010_2020)
+gc()
 
-# Obtain monthly data by vessels #
-PacFIN_monthly <- summaryBy(LANDED_WEIGHT_LBS + PRICE_PER_POUND + EXVESSEL_REVENUE + 
-                              VESSEL_LENGTH + VESSEL_WEIGHT + VESSEL_HORSEPOWER + NUM_OF_DAYS_FISHED 
-                            ~ VESSEL_NUM + PORT_NAME + LANDING_YEAR + LANDING_MONTH +
-                              PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE, FUN=sum_mean_fun, data=PacFIN)
+# Include price per kilogram 
+  PacFIN$AFI_PRICE_PER_KG <- PacFIN$AFI_PRICE_PER_POUND * 2.20462 
 
-### Check data
 
-PacFIN_monthly.CPS <- PacFIN_monthly %>% 
-  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG")) %>%
-  filter( LANDING_YEAR >= 2010 )
-DC <- PacFIN %>% 
-  filter( PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG")) %>%
-  filter( LANDING_YEAR >= 2010 )
+# Create monthly data 
+  PacFIN.month <- summaryBy(LANDED_WEIGHT_MTONS + AFI_PRICE_PER_KG + AFI_EXVESSEL_REVENUE 
+                            + VESSEL_LENGTH + VESSEL_WEIGHT + VESSEL_HORSEPOWER
+                          ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE + PACFIN_PORT_CODE 
+                          + LANDING_YEAR + LANDING_MONTH + VESSEL_NUM, 
+                          FUN=sum_mean_fun, data=PacFIN) 
 
-round( xtabs( LANDED_WEIGHT_LBS.sum ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE, data = PacFIN_monthly.CPS  )/2204.6, 0 )
-round( xtabs( LANDED_WEIGHT_LBS ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE, data = DC  )/2204.6, 0 )
+# All species monthly data and CPS species daily data.
+
+
+####################
+### Save DATASET ###
+####################
+
+sapply(PacFIN.month, class) 
+write.csv(PacFIN.month,"C:\\Data\\PacFIN data\\PacFIN_month.csv", row.names = FALSE)
+
+
 
 
 # ####################
@@ -164,10 +173,3 @@ round( xtabs( LANDED_WEIGHT_LBS ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE, data =
 #   dplyr::rename(ACL_PSDN = ACL_PSDN.sum) %>%
 #   dplyr::rename(ACT_PSDN = ACT_PSDN.sum) %>%
 #   dplyr::rename(ACL_MSQD = ACL_MSQD.mean)
-
-####################
-### Save DATASET ###
-####################
-
-sapply(PacFIN_monthly, class) 
-write.csv(PacFIN_monthly,"Data\\PacFin_monthly.csv", row.names = FALSE)
