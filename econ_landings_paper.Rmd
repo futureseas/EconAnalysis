@@ -633,7 +633,7 @@ print(xtable(table, caption = 'Vessel lenght used in the CPS fishery by gear use
 PacFIN.CPS <- PacFIN.month %>% 
   filter(PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG"))  %>% 
   filter(PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>%
-  filter(LANDING_YEAR >= 2010 )
+  filter(LANDING_YEAR >= 2000 )
 
 table <- xtabs(NUM_OF_DAYS_FISHED.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE,
                aggregate(NUM_OF_DAYS_FISHED.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE, PacFIN.CPS, mean))
