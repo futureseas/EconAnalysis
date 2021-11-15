@@ -12,13 +12,15 @@ SDM_port <- tibble(LANDING_YEAR = integer(),
                    SDM_60 = numeric())
 
 # Load base to choose ports
+PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
 PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
+PacFIN_2000_2020 <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
+
 
 # Obtain port names used to land species of interest
-port_codes_PSDN <- PacFIN_2010_2020 %>% filter(PACFIN_SPECIES_CODE %in% c("PSDN")) %>%
-  select("PORT_NAME") %>% unique()
-port_codes <- PacFIN_2010_2020 %>% filter(PACFIN_SPECIES_CODE %in% c("PSDN", "MSQD", "NANC")) %>%
-  select("PORT_NAME", "PACFIN_PORT_CODE") %>% unique() %>% anti_join(port_codes_PSDN, by = "PORT_NAME")
+port_codes <- PacFIN_2000_2020 %>% filter(PACFIN_SPECIES_CODE %in% c("PSDN", "MSQD", "NANC")) %>%
+  select("PORT_NAME", "PACFIN_PORT_CODE") %>% unique()
+    # %>% anti_join(port_codes, by = "PORT_NAME")
 
 # Load port coordinates
 ports_coord <- read_excel(here::here("Data", "Ports", "port_coord.xlsx"), "port_names") %>%
@@ -85,21 +87,13 @@ for (y in 1998:2018) {
   }
   
   # Save database each year
-  write_csv(SDM_port, file = "data/SDM_port_month.csv")
+  write_csv(SDM_port, file = "data/SDM/PSDN_SDM_port_month_14new.csv")
 }
  
 
 ##################
   # Year 2019 #
 ##################
-  
-# Obtain port names used to land species of interest
-port_codes <- PacFIN_2010_2020 %>% filter(PACFIN_SPECIES_CODE %in% c("PSDN", "MSQD", "NANC")) %>%
-    select("PORT_NAME", "PACFIN_PORT_CODE") %>% unique() 
-  
-# Merge coordinates with selected ports
-ports <- merge(x=port_codes,y=ports_coord, by="PORT_NAME",all.x=TRUE, all.y=FALSE)
-  ports <- ports %>% filter(PACFIN_PORT_CODE != "OWA")
   
 # Run iteration to obtain SDM by ports for year 2019
    for (m in 1:8) {
@@ -155,6 +149,13 @@ ports <- merge(x=port_codes,y=ports_coord, by="PORT_NAME",all.x=TRUE, all.y=FALS
    }
    
    # Save database each year
-   write_csv(SDM_port, file = "data/SDM_port_2019_month.csv")
+   write_csv(SDM_port, file = "data/SDM/PSDN_SDM_port_month.csv")
  
- 
+   # #
+   # PSDN_SDM_port_month_v1 <- read.csv(file = "data/SDM/PSDN_SDM_port_month_v1.csv")
+   # PSDN_SDM_port_month_v2 <- read.csv(file = "data/SDM/PSDN_SDM_port_month_v2.csv")
+   # PSDN_SDM_port_month_v3 <- read.csv(file = "data/SDM/PSDN_SDM_port_month_v3.csv")
+
+   # PSDN_SDM_port_month <- rbind.data.frame(PSDN_SDM_port_month_v1, PSDN_SDM_port_month_v2, PSDN_SDM_port_month_v3)
+   
+   # write_csv(PSDN_SDM_port_month, file = "data/SDM/PSDN_SDM_port_month.csv")

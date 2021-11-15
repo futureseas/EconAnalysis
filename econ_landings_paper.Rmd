@@ -124,9 +124,49 @@ Fishing portfolios are an important mechanism to safeguard fishers livelihood. D
 
 In this study we analyze how changing in spatial distribution as well as the implementation of a fishery's closure affects landing and fisher participation of three coastal pelagic species (CPS) harvested in U.S. West Coast: Pacific sardine (PSDN), market squid (MSQD) and Northern anchovy (NANC). Fisheries closures are a interesting policy instrument in a multispecies framework as give us the opportunity to study a quasi-experiment. However, fewer studies have study the effect of one fishery closure in other fishery outcomes. SOme examples are @vermard2008 study the effect of an anchovy closure in trip choices conducted by the Bay of Biscai pelagic fleet, and <!-- They use their estimate pre-closure to simulate the anchovy closure and compare with actual data. --> @richerson2017 who study the effect of salmon closures in vessel participation on salmon fishery, but also in other fisheries. In this paper, we study the effect of the 2015 Pacific sardine closure implemented  after the overxplotation of the fishery. The answer to this questions is not straightforward as different response can be observed to the same conditions as fishers and vessel are heterogeneous [@zhang2011]. Moreover, we have to consider that species are interconnected, at least economically if not ecologically, so a multispecies framework that considering interrelation between them is necessary. Our research give a step further and analyze the CPS as a multispecies fishery. This is in line with recent literature that start to consider multiple species in their analysis [@richerson2017]. Our goal is to understand how changing in species distribution and closure of Pacific sardine affect vessel responses in landing amount and participation, the substitution between species, and to what extent future projected climate will affect landings, catch composition and participation of fishers.
 
+Some communities are more vulnerable to change than other as the set of species choices is reduced by port constraints in capacity and switching capacity due to heterogeinety of fleets (FROM CPS Workshop). Processor constraints may also reduce switching capacity. " But there is a limit to how far its profitable to truck
+fish. Between Coos Bay and San Francisco there is very little opportunity for large
+volume (squid) landings. If the squid biomass shifted north 200-300 miles, a lack of
+infrastructure could mean that squid goes unharvested." (CPS Workshop)
+
+"Spoilage of CPS is rapid, so vessels remain as close to a port as possible and usually return within one day; there could be large impacts if CPS move into areas where there is no nearby infrastructure to land catches" (CPS Workshop)
+
+"NW and SW communities differents" (Workshop)
+
+
+
+
 Our papers builds on the model developed by @smith2021potential for sardine landings.  We expand their model including a landing equation for all of the three species analyzed and estimating a multilevel Bayesian model in order to incorporate heterogeneity between fleets and ports. Moreover, we use the probability of presence obtained from Species Distribution Models (SDM) as explanatory variable instead of landing by species. This allows us to project landing over time using SDM predictions for different climate scenarios. We analyze how species distribution interact between each others. We expect that this additions allows us to characterize better how fishers portfolio is composed, and also to understand better species interactions on catch rates. Additionally, we also estimate a multiple species participation model based on @richerson2017 who study the effect of salmon closure on annual fishers participation, expanding their analysis to the CPS fishery in monthly basis, allowing to understand seasonality within fishing season. For this, we develop a Random Utility Model (RUM) to model monthly vessel participation in targeting a specific species in the CPS fishery as a function of... **fisher characteristics including revenue level, diversification, dependence on the species and spatial variables of area and range..** 
 
 The remainder of the paper is organized as follows: Section \ref{coastal-pelagic-species-fishery} provides background on the CPS fishery in the US west coast. In Section \ref{methods} we discusses our data set and empirical strategy. Section \ref{results} presents the results of the estimations, and we conclude in Section \ref{conclusions}.
+
+
+
+<!-- JON in CPS's Workshop: -->
+<!-- " This part of the discussion was devoted to some of the decision making that goes on to determine -->
+<!-- fishing locations and target species of the CPS fleet, and some of the key discussion points were: -->
+<!-- ● The decisions of where and when to fish and what to target can depend on whether the -->
+<!-- vessel is ‘owner-operated’ or ‘company-owned’. The owner-operator vessels have more -->
+<!-- agency to decide what and when. CPS vessels (sardine and anchovy, and to a lesser -->
+<!-- extent squid), are largely limited to staying out for 1 day. Regardless of vessel ownership, -->
+<!-- much of the CPS fishing is driven by market order. The boats will have a port and -->
+<!-- processor lined up before they go fishing. The relationship between the markets and -->
+<!-- fishers is important. Coastal tunas are important to the catch and income for CPS boats. -->
+<!-- For the NW fleet, most vessels leave from Astoria, but can land elsewhere. They can hire -->
+<!-- a pilot to look for fish, and the WA and OR fleet will use this information to decide where -->
+<!-- to fish, before returning to their arranged port. Spotter planes are frequently used. -->
+<!-- ● Key ports for CPS landings are: San Pedro, Ventura, Morro Bay, Monterey, Half Moon -->
+<!-- Bay, and San Francisco. Important to know if some smaller ports, such as Astoria, can -->
+<!-- remain viable. Most plants in OR are permanent, but temporary landings can be set up, -->
+<!-- particularly for squid, with trucks taking landings to regular plants. -->
+<!-- ● A seine boat needs options, so OR boats often have CA permits, or they could switch -->
+<!-- gears. They try to be very flexible. Historically, NW fishing can stop due to weather, and -->
+<!-- in the SW more likely due to allocation and quota. -->
+<!-- ● Price and market order drive what is targeted. Prices can also very by port, for example -->
+<!-- anchovy is worth more at Monterey. What are the key forces driving price? There are -->
+<!-- different markets for different species, so it’s complex. International markets and their -->
+<!-- supply and demand are important for price. Building the domestic market is hard, lots -->
+<!-- still exported. Tariffs are having a bit of an impact" -->
 
 
 # Coastal Pelagic Species fishery 
@@ -214,6 +254,12 @@ g1 / (g2 + g3)
 
 
 ```
+
+Fom the 1st WORKSHOP with Stakeholder about Sardine: "There was a discussion on fisher behavior and what other species sardine vessels target, particularly when the sardine fishery is closed. A participant stated that in California, to lessen the impact of the sardine closure, many vessels switched to market squid." However, this is nit reflected in the graph, and participation may decline... MAybe also relative prices with other species. The workshop say that substitution may happen also with mackerel, tuna, or anchovy **<<Should we include tuna and mackerel in the analysis??>>** 
+
+Also the workshop say that squid is now more year around after pacific sardine closure. We can test this....
+
+
 
 ```{r ts_landing_price, echo=FALSE, message=FALSE, warning=FALSE}
 landing.price.year.sel <- landing.price.year %>% 
@@ -604,7 +650,6 @@ ggplot(landings.by.sel.ports, aes(y=LANDED_WEIGHT_MTONS.sum.sum,
 **<< SHOULD WE STUDY HOW FISHING GROUNDS CHANGE FROM PORTS (THUS DISTANCE TO FISHING GROUNDS AND WEATHER VARIABLES AFFECTED), LIKE SELDEN (2020) AND PAPAIOANNOU (2021)??? IN BOTH MODELS? >>**
 
 
-
 ## Vessel Heterogeneity
 <!-- 1) What are the characteristics of a vessel depending on gear, and also on Species -->
 There is heterogeneity on vessel characteristics depending on the gear and target species. In general, vessel harvesting Pacific herring tends to be smaller in length (see Table \ref{Table:length}), except for vessels using pole. Vessels using seine and harvesting Market squid, Pacific sardine and Northern anchovy have similar length, suggesting easier substitution between these species. About fishing days...
@@ -643,6 +688,10 @@ rownames(table) = c("Dip Net", "Midwater Trawl", "Other Net Gear", "Seine")
 print(xtable(table, caption = 'Number of days fishing by species and gear used', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 ```
+
+## Management
+"Pacific sardine is managed under a permit and quota management system, with a HG controlling commercial catch of sardine biomass."
+<< DOES FISHER HAVE TO BUY OR SELL QUOTA LIKE IN AN ITQ SYSTEM? IS THERE A FINE FOR EXCEDING THE QUOTA, IT IS INDIVIDUAL QUOTA >>
 
 
 # Methods
@@ -782,7 +831,9 @@ where $\text{logit}(p_{it}) = \bf{X}\gamma_i$ and $\mu_{it} = \bf{X}\beta_i$. Sp
 $\text{logit}(p_{it})$ follows the same structure, but coefficient $\beta_i$ are replaced by $\gamma_i$. 
 
 
-Beside the biological stock, landings are affected by socio-economics conditions. Some of them are harvest cost, prices received by species and their substitutes, and regulations imposed by the authorities. In our data we include as a proxy of harvest cost average distances traveled by vessel from the port of origin *(TO BE INCLUDED USING GLOBAL FISHING WATCH...)* and fuel cost *(TO BE INCLUDED...)*. Own price was included and it was obtained from PacFIN landings dataset. When price was missing, we replace this value for the average price of the species in all ports for the corresponding year. 
+Beside the biological stock, landings are affected by socio-economics conditions. Some of them are harvest cost, prices received by species and their substitutes, and regulations imposed by the authorities. In our data we include as a proxy of harvest cost average distances traveled by vessel from the port of origin *(TO BE INCLUDED USING GLOBAL FISHING WATCH...)* and fuel cost *(TO BE INCLUDED...)*. Own price was included and it was obtained from PacFIN landings dataset. When price was missing, we replace this value for the average price of the species in all ports for the corresponding year.
+
+WEATHER ALSO. BAD WEATHER REDUCE FISHING DECISION, Become risky, but also this is compare to revenue and how risk averse is a fishermenr (see Lisa's work)
 
 <!-- ISAAC's comments: Is this the ACL, or the remaining part of the ACL (accounting for previous catch). R: In the annual case doesn't matter, but in a monthly model I should consider this. -->
 

@@ -93,6 +93,34 @@ getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
 
 # Introduction
 
+<!-- JON in CPS's Workshop: -->
+<!-- " This part of the discussion was devoted to some of the decision making that goes on to determine -->
+<!-- fishing locations and target species of the CPS fleet, and some of the key discussion points were: -->
+<!-- ● The decisions of where and when to fish and what to target can depend on whether the -->
+<!-- vessel is ‘owner-operated’ or ‘company-owned’. The owner-operator vessels have more -->
+<!-- agency to decide what and when. CPS vessels (sardine and anchovy, and to a lesser -->
+<!-- extent squid), are largely limited to staying out for 1 day. Regardless of vessel ownership, -->
+<!-- much of the CPS fishing is driven by market order. The boats will have a port and -->
+<!-- processor lined up before they go fishing. The relationship between the markets and -->
+<!-- fishers is important. Coastal tunas are important to the catch and income for CPS boats. -->
+<!-- For the NW fleet, most vessels leave from Astoria, but can land elsewhere. They can hire -->
+<!-- a pilot to look for fish, and the WA and OR fleet will use this information to decide where -->
+<!-- to fish, before returning to their arranged port. Spotter planes are frequently used. -->
+<!-- ● Key ports for CPS landings are: San Pedro, Ventura, Morro Bay, Monterey, Half Moon -->
+<!-- Bay, and San Francisco. Important to know if some smaller ports, such as Astoria, can -->
+<!-- remain viable. Most plants in OR are permanent, but temporary landings can be set up, -->
+<!-- particularly for squid, with trucks taking landings to regular plants. -->
+<!-- ● A seine boat needs options, so OR boats often have CA permits, or they could switch -->
+<!-- gears. They try to be very flexible. Historically, NW fishing can stop due to weather, and -->
+<!-- in the SW more likely due to allocation and quota. -->
+<!-- ● Price and market order drive what is targeted. Prices can also very by port, for example -->
+<!-- anchovy is worth more at Monterey. What are the key forces driving price? There are -->
+<!-- different markets for different species, so it’s complex. International markets and their -->
+<!-- supply and demand are important for price. Building the domestic market is hard, lots -->
+<!-- still exported. Tariffs are having a bit of an impact" -->
+
+
+
 High variability on forage fisheries could encourage fisher to have complex fishers portfolio, using diversification as a tool for reducing risk [@kasperski2013]. This diversification can allow for species-specific environmental shocks affect other non-related fisheries through "harvest" arbitrage [@richerson2017]. Hetoregeneity must be considerate as fleet that differ by specific characteristics may have different responses to changes in policy and environmental conditions [@zhang2011]. We capture vessel heterogeneity estimating a Mixed Logit model. 
 
 Because we have access to vessel characteristics, we can estimate a sorting model with observable heterogeneity following @zhang2011.
