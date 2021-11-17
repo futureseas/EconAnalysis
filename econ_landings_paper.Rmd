@@ -178,14 +178,6 @@ The remainder of the paper is organized as follows: Section \ref{coastal-pelagic
 
 # Coastal Pelagic Species fishery 
 
-
-
-
-<!-- - Graficar número de barcos que desembarcan especies de CPS durante cada mes.  -->
-<!-- - Graficar porcentaje de barcos que desembarcan squid condicional a que desembarcan sardina durante un año (o meses). (Y otras combinaciones) -->
-<!-- - Desagregado por puerto? -->
-<!-- - Pre and Post closure -->
-
 <!-- <<<ISAAC: Need some more details on anchovy and herring fisheries, these I believe are constrained by management and geography, so may not be real "choices" for the substitution. >>>  -->
 
 Before Pacific sardine closure in 2015, landings in the CPS fishery have been mainly dominated by Pacific sardine and market squid, as is shown in panel (a) in Figure \ref{fig:avg_lan_rev}. Low average landings for Pacific herring and Northern anchovy could be related with geography and regulatory constraint that restrict vessels to exploit them. Nevertheless, this lower levels compared with Market squid and Pacific sardine could be reflecting lower economics incentives for its exploitation. In terms of revenue, we can observe in panel (b) that market squid have the largest revenue, while Pacific sardine lost relevance due to the low prices received by fishers.
@@ -576,6 +568,191 @@ rownames(table) = c("Dip Net", "Gill Net", "Midwater Trawl", "Other Net Gear", "
 
 ```
 
+## Switching behavior
+<!-- - Graficar número de barcos que desembarcan especies de CPS durante cada año/mes.  -->
+<!-- - Graficar porcentaje de barcos que desembarcan squid condicional a que desembarcan sardina durante un año (o meses). (Y otras combinaciones) -->
+<!-- - Desagregado por puerto? -->
+<!-- - Pre and Post closure -->
+
+
+
+```{r switching}
+psdn.by.year <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
+  unique() %>% mutate(harv.psdn = 1)
+msqd.by.year <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
+  unique() %>% mutate(harv.msqd = 1)
+
+# If a vessel harvest Pacific sardine in a year, how many also harvest squid.
+squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% merge(psdn.by.year, 
+                        by = c("VESSEL_NUM", "LANDING_YEAR"), all.y = TRUE) %>% 
+  filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique()
+
+# Calculate number of vessels harvesting sardine and squid and percentage per year
+n_vessel_psdn <- psdn.by.year %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_psdn = sum(harv.psdn))
+n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_msqd = sum(harv.psdn))
+  df <- n_vessel_msqd_c_psdn %>% mutate(perc = n_vessel_psdn$n_vessel_psdn) %>%
+    mutate(n_vessel_only_psdn = perc) %>%  # - n_vessel_msqd
+    mutate(perc = (n_vessel_msqd / perc)) 
+  
+coeff = 115
+ggplot(df) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_only_psdn,
+                          color = "# of vessels landing sardine"), size = 1) +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_msqd,
+                          color = "# of vessels landing squid (c/ landing sardine)"), size = 1) +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = perc*coeff, 
+                          color = "% of vessels landing squid (c/ landings sardine)"),
+            size = 1, linetype = "dashed") + scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "Number of vessels", 
+                     sec.axis = sec_axis(~./coeff, name = "Percetage of vessel harvesting squid" )) +
+  theme(axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +  scale_color_manual(name = "Variables: ", 
+                     values = c("# of vessels landing sardine" = "green", 
+                                "# of vessels landing squid (c/ landing sardine)" = "blue",
+                               "% of vessels landing squid (c/ landings sardine)" = "grey")) + 
+  theme(legend.position="right")
+
+```
+
+```{r switching_msqd}
+msqd.by.year <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2020) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
+  unique() %>% mutate(harv.msqd = 1)
+
+# If a vessel harvest Pacific sardine in a year, how many also harvest squid.
+psdn.cond.msqd <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2020) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% merge(msqd.by.year, 
+                        by = c("VESSEL_NUM", "LANDING_YEAR"), all.y = TRUE) %>% 
+  filter(harv.msqd == 1) %>% filter(PACFIN_SPECIES_CODE.x == "PSDN") %>% unique()
+
+# Calculate number of vessels harvesting sardine and squid and percentage per year
+n_vessel_msqd <- msqd.by.year %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_msqd = sum(harv.msqd))
+n_vessel_psdn_c_msqd <- psdn.cond.msqd %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_psdn = sum(harv.msqd))
+  df <- n_vessel_psdn_c_msqd %>%  mutate(n_vessel_msqd = n_vessel_msqd$n_vessel_msqd) %>%
+    mutate(perc = n_vessel_psdn / n_vessel_msqd) 
+  
+coeff = 200
+ggplot(df) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_msqd,
+                          color = "# of vessels landing squid"), size = 1) +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_psdns,
+                          color = "# of vessels landing sardine (c/ landing squid)"), size = 1) +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = perc*coeff, 
+                          color = "% of vessels landing sardine (c/ landings squid)"),
+            size = 1, linetype = "dashed") + scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "Number of vessels", 
+                     sec.axis = sec_axis(~./coeff, name = "Percetage of vessel harvesting squid" )) +
+  theme(axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +  scale_color_manual(name = "Variables: ", 
+                     values = c("# of vessels landing squid" = "green", 
+                                "# of vessels landing sardine (c/ landing squid)" = "blue",
+                               "% of vessels landing sardine (c/ landings squid)" = "grey")) + 
+  theme(legend.position="right")
+
+```
+
+
+```{r switching_quarter}
+psdn.by.quarter <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
+  unique() %>% mutate(harv.psdn = 1) 
+
+# If a vessel harvest Pacific sardine in a year, how many also harvest squid.
+squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter) %>% merge(psdn.by.quarter, 
+                        by = c("VESSEL_NUM", "quarter"), all.y = TRUE) %>% 
+  filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique()
+
+# Calculate number of vessels harvesting sardine and squid and percentage per year
+n_vessel_psdn <- psdn.by.quarter %>% group_by(quarter) %>% 
+  summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE))
+
+n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(quarter) %>% 
+  summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE))
+  
+df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("quarter"), all.x = TRUE) %>%
+    mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>%
+    mutate(perc = (n_vessel_msqd / n_vessel_psdn))
+
+# coeff = 79
+ggplot(df) + 
+  geom_line(mapping = aes(x = quarter, y = perc), color = "blue", size = 1) + 
+  scale_x_continuous(name = "Quarter") +
+  scale_y_continuous(name = "% of vessel harvesting squid" ) + 
+  theme(axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+  theme(legend.position="bottom")
+
+```
+
+```{r switching_quarterv2}
+psdn.by.quarter <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>% 
+  mutate(quarter2 = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = FALSE)) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter, quarter2) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
+  unique() %>% mutate(harv.psdn = 1) 
+
+# If a vessel harvest Pacific sardine in a year, how many also harvest squid.
+squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter) %>% merge(psdn.by.quarter, 
+                        by = c("VESSEL_NUM", "quarter"), all.y = TRUE) %>% 
+  filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique()
+
+# Calculate number of vessels harvesting sardine and squid and percentage per year
+n_vessel_psdn <- psdn.by.quarter %>% group_by(quarter, quarter2) %>% 
+  summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE)) %>% group_by(quarter2) %>% 
+  summarize(n_vessel_psdn = mean(n_vessel_psdn, na.rm = TRUE))
+
+n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(quarter, quarter2) %>% 
+  summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE)) %>% group_by(quarter2) %>% 
+  summarize(n_vessel_msqd = mean(n_vessel_msqd, na.rm = TRUE))
+  
+df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("quarter2"), all.x = TRUE) %>%
+    mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>%
+    mutate(perc = (n_vessel_msqd / n_vessel_psdn)) %>% select(quarter2, perc)
+
+ggplot(data=df, aes(x=quarter2, y=perc)) +
+    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
+  scale_x_continuous(name = "Quarter", breaks=1:4, labels=c("Q1","Q2","Q3","Q4")) +
+  scale_y_percent(name = "Percentage of vessels harvesting squid" )
+
+```
+
+```{r switching_month}
+psdn.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
+  unique() %>% mutate(harv.psdn = 1) 
+
+# If a vessel harvest Pacific sardine in a year, how many also harvest squid.
+squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH) %>% merge(psdn.by.month, 
+                        by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH"), all.y = TRUE) %>% 
+  filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique()
+
+# Calculate number of vessels harvesting sardine and squid and percentage per year
+n_vessel_psdn <- psdn.by.month %>% group_by(LANDING_YEAR, LANDING_MONTH) %>% 
+  summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE)) %>% group_by(LANDING_MONTH) %>% 
+  summarize(n_vessel_psdn = mean(n_vessel_psdn, na.rm = TRUE))
+
+n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR, LANDING_MONTH) %>% 
+  summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE)) %>% group_by(LANDING_MONTH) %>% 
+  summarize(n_vessel_msqd = mean(n_vessel_msqd, na.rm = TRUE))
+  
+df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("LANDING_MONTH"), all.x = TRUE) %>%
+    mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>%
+    mutate(perc = (n_vessel_msqd / n_vessel_psdn)) %>% select(LANDING_MONTH, perc)
+
+ggplot(data=df, aes(x=LANDING_MONTH, y=perc)) +
+    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
+  scale_x_continuous(name = "Month", breaks=1:12) +
+  scale_y_percent(name = "Percentage of vessels harvesting squid" )
+
+```
+
+
 ## Port landings
 
 In average, a vessel land in 4.8 ports, with an standard deviation of 3.94. 
@@ -749,59 +926,121 @@ Our main treatment variables are species probability of presence and Pacific sar
 
 Figure \ref{fig:sdm_land_by_port} show the relationship between the probability of presence and landings by species in three main port areas: Los Angeles, Monterrey and Santa Barbara areas. The graph suggest that Pacific sardine landings are positive correlated with the probability of presence of this species, similar to @smith2021potential. This is also true in Monterrey area for the Northern anchovy, In the case of market squid, we cannot distinguish correlation between landings and probability of presence. Note, however, that the evidence shown in this figure may not capturing the actual effect of the probability of presence as other effect may be in play. Our empirical strategy is designed to isolate the effect of the probability on landing in a multivariate model framework.
 
-```{r SDM_land_by_port, echo=FALSE, fig.cap="Landings v/s probability of presence by port area. \\textit{Notes:} LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE}
+```{r SDM_land, echo=FALSE, fig.cap="Landings v/s probability of presence by port area. \\textit{Notes:} LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE}
 
 sdm.by.species <- PacFIN.month.CPS %>%
-  dplyr::select(LANDING_YEAR, LANDING_MONTH, PORT_NAME, PSDN_SDM_60, MSQD_SDM_90, NANC_SDM_20, 
-                LANDED_WEIGHT_MTONS.sum, PACFIN_SPECIES_CODE) %>% filter(LANDING_YEAR >= 1998 & LANDING_YEAR <= 2019) %>%
-  group_by(LANDING_YEAR, LANDING_MONTH, PORT_NAME, PACFIN_SPECIES_CODE) %>% 
+  dplyr::select(LANDING_YEAR, PSDN_SDM_60, MSQD_SDM_90, NANC_SDM_20, LANDED_WEIGHT_MTONS.sum, PACFIN_SPECIES_CODE) %>% 
+  filter(LANDING_YEAR >= 1998 & LANDING_YEAR <= 2019) %>%
+  group_by(LANDING_YEAR, PACFIN_SPECIES_CODE) %>% 
   summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
             NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
             MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
-            LANDED_WEIGHT_MTONS = sum(LANDED_WEIGHT_MTONS.sum)) %>%
+            LANDED_WEIGHT_MTONS = sum(LANDED_WEIGHT_MTONS.sum, na.rm = TRUE)) %>%
   spread(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS) %>% 
   dplyr::rename(Landings_PSDN = PSDN) %>% dplyr::rename(Landings_MSQD = MSQD) %>% 
-  dplyr::rename(Landings_NANC = NANC) %>% dplyr::rename(Landings_PHRG = PHRG)
+  dplyr::rename(Landings_NANC = NANC) %>% dplyr::rename(Landings_PHRG = PHRG) %>%
+  group_by(LANDING_YEAR) %>% 
+  summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
+            NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
+            MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
+            Landings_PSDN = sum(Landings_PSDN, na.rm = TRUE), Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE),
+            Landings_NANC = sum(Landings_NANC, na.rm = TRUE), Landings_PHRG = sum(Landings_PHRG, na.rm = TRUE)) 
+  # sdm.by.species$Date <- zoo::as.yearmon(paste(sdm.by.species$LANDING_YEAR, sdm.by.species$LANDING_MONTH, sep='-'))
 
-
-  # filter(Port == "LAA" | Port == "MNA" | Port == "SBA") %>%
-  #     mutate(Port = fct_relevel(Port, "LAA", "SBA", "MNA")) %>% 
-
-  
 # Plot
-coeff <- 50000
-g1 <- ggplot(collapse) + 
-  geom_line(mapping = aes(x = Landing_year, y = Landings_PSDN),
-            size = 0.5, color = "grey") +
-  geom_line(mapping = aes(x = Landing_year, y = PSDN_SDM_60*coeff), 
-            size = 0.5, color = "blue", linetype = "dashed") + 
-  facet_wrap(~ Port) + 
+coeff <- 200000
+g1 <-  ggplot(sdm.by.species) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_PSDN, color = "Landings"), size = 0.5) +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = PSDN_SDM_60*coeff, color = "Probability of presence"), 
+            size = 0.5, linetype = "dashed") + 
   scale_x_continuous(name = element_blank(), labels = NULL) +
   scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff, name = "")) +
-  theme(plot.title = element_text(size=9, face="bold.italic"), 
+  theme(legend.position="right", plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
-  ggtitle("(a) Pacific sardine")
+  ggtitle("(a) Pacific sardine") +  scale_color_manual(name = "Variable: ", 
+                     values = c("Landings" = "grey", "Probability of presence" = "blue"))
 
-coeff2 <- 150000
-g2 <- ggplot(collapse) + 
-  geom_line(mapping = aes(x = Landing_year, y = Landings_MSQD),
-            size = 0.5, color = "grey") +
-  geom_line(mapping = aes(x = Landing_year, y = MSQD_SDM_90*coeff2), 
+coeff2 <- 300000
+g2 <- ggplot(sdm.by.species) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD), size = 0.5, color = "grey") +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SDM_90*coeff2), 
             size = 0.5, color = "blue", linetype = "dashed") + 
-  facet_wrap(~ Port) + 
   scale_x_continuous(name = element_blank(), labels = NULL) +
   scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff2, name = "P(presence)")) +
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
   ggtitle("(b) Market squid")
 
-coeff3 <- 16000
-g3 <- ggplot(collapse) + 
-  geom_line(mapping = aes(x = Landing_year, y = Landings_NANC, color = "Landings"),
-            size = 0.5) +
-  geom_line(mapping = aes(x = Landing_year, y = NANC_SDM_20*coeff3, color = "Probability of presence"), 
+coeff3 <- 30000
+g3 <- ggplot(sdm.by.species) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_NANC), size = 0.5, color = "grey") +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = NANC_SDM_20*coeff3),
+            size = 0.5, color = "blue", linetype = "dashed") + 
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff3, name = element_blank())) +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("(c) Northern anchovy") 
+
+g1 / g2 / g3
+```
+
+
+```{r SDM_land_by_port, echo=FALSE, fig.cap="Landings v/s probability of presence by port area. \\textit{Notes:} LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE}
+
+sdm.by.species <- PacFIN.month.CPS %>%
+  dplyr::select(LANDING_YEAR, PORT_NAME, PSDN_SDM_60, MSQD_SDM_90, NANC_SDM_20, 
+                LANDED_WEIGHT_MTONS.sum, PACFIN_SPECIES_CODE, PACFIN_PORT_CODE) %>% 
+  filter(LANDING_YEAR >= 1998 & LANDING_YEAR <= 2019) %>%
+  group_by(LANDING_YEAR, PORT_NAME, PACFIN_PORT_CODE, PACFIN_SPECIES_CODE) %>% 
+  summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
+            NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
+            MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
+            LANDED_WEIGHT_MTONS = sum(LANDED_WEIGHT_MTONS.sum, na.rm = TRUE)) %>%
+  spread(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS) %>% 
+  dplyr::rename(Landings_PSDN = PSDN) %>% dplyr::rename(Landings_MSQD = MSQD) %>% 
+  dplyr::rename(Landings_NANC = NANC) %>% dplyr::rename(Landings_PHRG = PHRG) %>%
+  filter(PACFIN_PORT_CODE == "SP" | PACFIN_PORT_CODE == "TRM" | PACFIN_PORT_CODE == "MOS") %>% 
+  mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, "SP", "TRM", "MOS")) %>%
+  group_by(LANDING_YEAR, PORT_NAME, PACFIN_PORT_CODE) %>% 
+  summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
+            NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
+            MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
+            Landings_PSDN = sum(Landings_PSDN, na.rm = TRUE), Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE),
+            Landings_NANC = sum(Landings_NANC, na.rm = TRUE), Landings_PHRG = sum(Landings_PHRG, na.rm = TRUE)) 
+  # sdm.by.species$Date <- zoo::as.yearmon(paste(sdm.by.species$LANDING_YEAR, sdm.by.species$LANDING_MONTH, sep='-'))
+
+# Plot
+coeff <- 60000
+g1 <-  ggplot(sdm.by.species) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_PSDN), size = 0.5, color = "grey") +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = PSDN_SDM_60*coeff), 
+            size = 0.5, color = "blue", linetype = "dashed") + 
+  facet_wrap(~ PORT_NAME) + 
+  scale_x_continuous(name = element_blank(), labels = NULL) +
+  scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff, name = "")) +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("(a) Pacific sardine")
+
+coeff2 <- 90000
+g2 <- ggplot(sdm.by.species) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD), size = 0.5, color = "grey") +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SDM_90*coeff2), 
+            size = 0.5, color = "blue", linetype = "dashed") + 
+  facet_wrap(~ PORT_NAME) + 
+  scale_x_continuous(name = element_blank(), labels = NULL) +
+  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff2, name = "P(presence)")) +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("(b) Market squid")
+
+coeff3 <- 10000
+g3 <- ggplot(sdm.by.species) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_NANC, color = "Landings"), size = 0.5) +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = NANC_SDM_20*coeff3, color = "Probability of presence"),
             size = 0.5, linetype = "dashed") + 
-  facet_wrap(~ Port) + 
+  facet_wrap(~ PORT_NAME) + 
   scale_x_continuous(name = "Year") +
   scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff3, name = element_blank())) +
   theme(legend.position="bottom", plot.title = element_text(size=9, face="bold.italic"), 
@@ -894,8 +1133,8 @@ We include the Annual Catch Limit (ACL) for the Pacific sardine model as an addi
 
 ```{r desc_table, echo=FALSE, results='asis'}
 # Clean dataset
-PacFIN_yearly = PacFIN_yearly[,!grepl("*_LE_",names(PacFIN_yearly))]
-PacFIN_yearly <- PacFIN_yearly %>%
+PacFIN.month.desc = PacFIN.month[,!grepl("*_LE_",names(PacFIN.month))]
+PacFIN.month.desc <- PacFIN.month.desc %>%
   filter(Species_code == "PSDN" | Species_code == "MSQD"  | Species_code == "NANC") %>%
   dplyr::select(Landing_year, Port, PSDN_SDM_60, MSQD_SDM_90, NANC_SDM_20, ACL_PSDN.sum,
          Landings, Price, Revenue, Species_code) %>% 
