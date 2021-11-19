@@ -93,6 +93,12 @@ getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
 
 # Introduction
 
+<!--  handling vessel participation -- decisions such as: fish or not fish; switch target species; switch ports.?
+See Birkenbach et al. MRE (Norwegian paper, discrete choice modeling -->
+
+<!-- Beth -- logbook data and other data allowed her to bin them into vessels that are more traditional vs exploratory.  Metier analysis will highlight some of these . Explorers have high year-to-year variance, but high long term means.  Multivariate stats on long-time-scale logbook data can identify these fishing or business strategies.  -->
+
+
 <!-- JON in CPS's Workshop: -->
 <!-- " This part of the discussion was devoted to some of the decision making that goes on to determine -->
 <!-- fishing locations and target species of the CPS fleet, and some of the key discussion points were: -->
