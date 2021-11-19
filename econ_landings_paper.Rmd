@@ -1149,29 +1149,32 @@ WEATHER ALSO. BAD WEATHER REDUCE FISHING DECISION, Become risky, but also this i
 
 We include the Annual Catch Limit (ACL) for the Pacific sardine model as an additional explanatory variable in both $\mu_i$ and $\text{logit}(p_i)$ equations. ACL variable is the total quota allocated each year for this fishery and was obtained from the [CPS Fisheries Management Plan](pcouncil.org)???.  For this species, we restrict our data set to the period when the fishery was open (2000-2015). We only consider ports where landing have occur at least once in our sample period. Thus, we avoid to deal with ports where infrastructure to land Pacific sardine is nonexistent. 
 
-```{r desc_table, echo=FALSE, results='asis'}
+```{r dataset_and_desc, echo=FALSE, results='asis'}
 # Clean dataset
-PacFIN.month.desc = PacFIN.month[,!grepl("*_LE_",names(PacFIN.month))]
-PacFIN.month.desc <- PacFIN.month.desc %>%   filter(LANDING_YEAR >= 2000 & LANDING_YEAR <= 2018) %>%
+PacFIN.month.dataset = PacFIN.month[,!grepl("*_LE_",names(PacFIN.month))]
+PacFIN.month.dataset <- PacFIN.month.dataset %>%   filter(LANDING_YEAR >= 2000 & LANDING_YEAR <= 2018) %>%
   filter(PACFIN_SPECIES_CODE == "PSDN" | PACFIN_SPECIES_CODE == "MSQD"  | PACFIN_SPECIES_CODE == "NANC") %>%
   dplyr::select(LANDING_YEAR, LANDING_MONTH, PORT_NAME, VESSEL_NUM, PSDN_SDM_60, MSQD_SDM_90, NANC_SDM_20, ACL_PSDN,
-         LANDED_WEIGHT_MTONS.sum, AFI_PRICE_PER_KG.mean, PACFIN_SPECIES_CODE)
-
-## Make price zero N/A
-
-%>% 
+         LANDED_WEIGHT_MTONS.sum, AFI_PRICE_PER_KG.mean, PACFIN_SPECIES_CODE) %>% 
+  mutate(AFI_PRICE_PER_KG.mean = na_if(AFI_PRICE_PER_KG.mean, 0)) %>% 
   melt(id.vars=c("LANDING_YEAR", "LANDING_MONTH", "VESSEL_NUM",  "PORT_NAME", "PACFIN_SPECIES_CODE")) %>% 
-  dcast(LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_NAME ~ PACFIN_SPECIES_CODE + variable, fun.aggregate=mean) %>%
+  dcast(LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_NAME ~ PACFIN_SPECIES_CODE + variable, fun.aggregate=mean) 
+  PacFIN.month.dataset[PacFIN.month.dataset == "NaN"] <- NA
+  PacFIN.month.dataset <- PacFIN.month.dataset %>%
   mutate(port_num = as.numeric(as.factor(PORT_NAME))) %>%
   mutate(PSDN_SDM_60 = rowMeans(cbind(PSDN_PSDN_SDM_60, MSQD_PSDN_SDM_60, NANC_PSDN_SDM_60), na.rm = T)) %>%
   mutate(MSQD_SDM_90 = rowMeans(cbind(PSDN_MSQD_SDM_90, MSQD_MSQD_SDM_90, NANC_MSQD_SDM_90), na.rm = T)) %>%
   mutate(NANC_SDM_20 = rowMeans(cbind(PSDN_NANC_SDM_20, MSQD_NANC_SDM_20, NANC_NANC_SDM_20), na.rm = T)) %>%
   mutate(ACL_PSDN = rowMeans(cbind(PSDN_ACL_PSDN, MSQD_ACL_PSDN, NANC_ACL_PSDN), na.rm = T))
 
+  
+# Create dataset for estimations
 dataset = subset(PacFIN.month.desc, select = -c(PSDN_PSDN_SDM_60, MSQD_PSDN_SDM_60, NANC_PSDN_SDM_60,
-                                                PSDN_MSQD_SDM_90, MSQD_MSQD_SDM_90, NANC_MSQD_SDM_90,
-                                                PSDN_NANC_SDM_20, MSQD_NANC_SDM_20, NANC_NANC_SDM_20, 
-                                                PSDN_ACL_PSDN, MSQD_ACL_PSDN, NANC_ACL_PSDN))
+                  PSDN_MSQD_SDM_90, MSQD_MSQD_SDM_90, NANC_MSQD_SDM_90, PSDN_NANC_SDM_20, MSQD_NANC_SDM_20, 
+                  NANC_NANC_SDM_20, PSDN_ACL_PSDN, MSQD_ACL_PSDN, NANC_ACL_PSDN))
+              rm(PacFIN.month.dataset)
+
+
 
 # Calculate year price for N/A's
 price.year.PSDN <- aggregate(x= est_data$PSDN_Price, by = list(est_data$Landing_year), FUN = mean, na.rm=T)
