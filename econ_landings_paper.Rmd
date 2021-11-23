@@ -113,10 +113,112 @@ The remainder of the paper is organized as follows: Section \ref{coastal-pelagic
 
 
 # Coastal Pelagic Species fishery 
+***<<< Note: I got this information from an Excel file that desiree sent me about Annual Catch Limits and Limted entry for sardine and squid, and I complement with the CPS FMP document and random notes that I have >>>***
+
+Before 2000, the only fishery under a Fisheries Management Plan (FMP) was the Northern anchovy. In March, 1995 the Pacific Fishery Management Council (PFMC) decided to expand the FMP to include the entire CPS species (Pacific sardine, northern anchovy, Pacific (chub) mackerel, jack mackerel, and market squid) along the U.S. west coast. through the Amendment 8. The FMP for the CPS fishery was finally implemented in January, 2000. 
+
+The Pacific sardine fishery in California was close in 1967 due to the collapse of the fishery. It reopened in 1986 with a precautionary quota of 906 metric tons. Since 2000, the Pacific sardine is managed under a permit and quota management system, with a Harvest Guideline (HG) controlling commercial catch of sardine biomass ***<<< DOES FISHER HAVE TO BUY OR SELL QUOTA LIKE IN AN ITQ SYSTEM? IS THERE A FINE FOR EXCEDING THE QUOTA, IT IS INDIVIDUAL QUOTA >>>*** In the states of Oregon and Washington, the development of the fishery did not happen until the years 2000s. In 1999, a fishery for Pacific sardine started to operate in both states targeting larger sardine to be sold as bait to longliners. In Oregon, it was a developmental fishery until 2005. In 2006, the first Limited Entry (LE) permits were issued at 26, and its expand to human consumption during this year. In Washignton,  the PAcific sardine fishery was a trial fishery from 2000-2002 with a state HG of 15,000 metric tons. From 2003 to 2009, the fishery was an experimental fishery  with permits capped at 25. Finally, in 2009, the Washington's Pacific sardine fishery it was designated as a commercial fishery in with a Limited Entry (LE) program that allocated 16 permanent permits and 10 temporary ones. Fishing for sardine is prohibited from January 1st to March 31st, and it have been closed since 2015 as the biomass was below the cutoff point of 150,000 metric tons. 
+
+Regarding market squid, the fishery was unregulated under open access until permits became required in 1998. However, there were no limits to the number of permits issued by the authorities. In 2001 was the first time a Harvest Guideline (HG) was implemented for this fishery to 125,000 U.S. tons. Later, in 2005, the California Fishery and Wildlife Division's Market Squid Fisheries Management Plan (CFWD MSFMP) reduced the fleet to a maximum of 55 vessels and 18 brail vessels, and limits the number of light boats to 34. Also, it reduce the HG to 118,000 U.S. tons. Oregon's market squid fishery just started in 2014, while in Washington there is no directed landings of market squid. In 2019 two permits were isssued but with the intention to allow the possibility to deliver Oregon's market squid catch to Washington ports. The market squid fishery has a weekend closure.
+
+The fishing season for Pacific sardine in California have a peak in landings during the early summer to fall in the area of Monterrey, specifically in Moss Landing, and in Southern California, specifically in San Pedro and Terminal Port occurs during the winter. Fishing season are for Pacific sardine are shown in Panel (a) of Figure \ref{{fig:fish_season}}. In Oregon and Washington state, at Astoria and Ilwako/Chinook ports, respectively, the fishing season mostly happen in summer and early fall. Panel (b) shows that market squid fishing season in Southern California, specifically in San Pedro, Terminal Port and Ventura, goes from fall to winter, while in Northern California, specifically in Moss Landing and Monterrey, the season goes from late spring to summer. 
+ 
+<!-- ```{r psdn_month} -->
+<!-- q.psdn.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% -->
+<!--   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%   -->
+<!--   group_by(LANDING_YEAR, LANDING_MONTH, PORT_NAME, AGENCY_CODE) %>%  -->
+<!--   summarise(Landings_PSDN = sum(LANDED_WEIGHT_MTONS.sum))  -->
+<!-- ggplot(data=q.psdn.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) + -->
+<!--     geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) +  -->
+<!--   scale_x_continuous(name = "Month", breaks=1:12) + -->
+<!--   scale_y_continuous(name = "Landing of sardine" ) +  -->
+<!--   facet_grid(~ AGENCY_CODE) -->
+<!-- rm(q.psdn.by.month) -->
+<!-- ```   -->
+
+```{r psdn__msqd_month, echo=FALSE, fig.cap="Fishing season for Pacific sardine and Market squid (average monthly total harvest for the period 2000-2014).", message=FALSE, warning=FALSE}
+
+port_names <- as_labeller(c("SP" = "San Pedro", "HNM" = "Hueneme", "MNT" = "Monterrey", "MOS" = "Moss Landing", 
+                               "LWC" = "Ilwaco / Chinook", "AST" = "Astoria", 
+                               "PRN" = "Princeton/ Half Moon\nBay", "SF" = "San Francisco", 
+                               "SLT" = "Sausalito", "TRM" = "Terminal Island",
+                               "VEN" = "Ventura"))
+
+q.psdn.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+  filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%  
+  group_by(LANDING_YEAR, LANDING_MONTH, PACFIN_PORT_CODE) %>% 
+  summarise(Landings_PSDN = sum(LANDED_WEIGHT_MTONS.sum)) %>%  
+  group_by(LANDING_MONTH, PACFIN_PORT_CODE) %>% 
+  summarise(Landings_PSDN = mean(Landings_PSDN)) %>%
+    filter(PACFIN_PORT_CODE == "AST" | PACFIN_PORT_CODE == "SP" |
+             PACFIN_PORT_CODE == "TRM" | PACFIN_PORT_CODE == "MOS" | 
+             PACFIN_PORT_CODE == "LWC") %>%
+    mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, "SP", "TRM", "MOS", "AST", "LWC"))
+  
+g1 <- ggplot(data=q.psdn.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) +
+    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
+  scale_x_continuous(name = "Month", breaks=1:12) +
+  scale_y_continuous(name = "Landings (M tons)" ) + 
+  facet_grid(~ PACFIN_PORT_CODE, labeller = port_names) + ggtitle("(a) Pacific sardine") + 
+  theme(plot.title = element_text(size=9, face="bold.italic"))
+
+q.msqd.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+  filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>%  
+  group_by(LANDING_YEAR, LANDING_MONTH, PACFIN_PORT_CODE) %>% 
+  summarise(Landings_PSDN = sum(LANDED_WEIGHT_MTONS.sum)) %>%  
+  group_by(LANDING_MONTH, PACFIN_PORT_CODE) %>% 
+  summarise(Landings_PSDN = mean(Landings_PSDN)) %>%
+    filter( PACFIN_PORT_CODE == "SP" | PACFIN_PORT_CODE == "VEN" | PACFIN_PORT_CODE == "TRM" | 
+              PACFIN_PORT_CODE == "MOS" | PACFIN_PORT_CODE == "MNT") %>%
+    mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, "SP", "TRM", "VEN", "MNT", "MOS"))
+
+# PACFIN_PORT_CODE == "HNM"
+
+g2 <- ggplot(data=q.msqd.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) +
+    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
+  scale_x_continuous(name = "Month", breaks=1:12) +
+  scale_y_continuous(name = "Landings (M tons)" ) + 
+  facet_grid(~ PACFIN_PORT_CODE, labeller = port_names) + ggtitle("(b) Market squid") + 
+  theme(plot.title = element_text(size=9, face="bold.italic"))
+
+g1 / g2
+
+rm(g1, g2, q.psdn.by.month, q.msqd.by.month)
+```
+
+
+```{r msqd_month_2015, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+port_names <- as_labeller(c("SP" = "San Pedro", "HNM" = "Hueneme", "MNT" = "Monterrey", "MOS" = "Moss Landing", 
+                               "LWC" = "Ilwaco / Chinook", "AST" = "Astoria", 
+                               "PRN" = "Princeton/ Half Moon\nBay", "SF" = "San Francisco", 
+                               "SLT" = "Sausalito", "TRM" = "Terminal Island",
+                               "VEN" = "Ventura"))
+
+q.msqd.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2015) %>%
+  filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>%  
+  group_by(LANDING_YEAR, LANDING_MONTH, PACFIN_PORT_CODE) %>% 
+  summarise(Landings_PSDN = sum(LANDED_WEIGHT_MTONS.sum)) %>%  
+  group_by(LANDING_MONTH, PACFIN_PORT_CODE) %>% 
+  summarise(Landings_PSDN = mean(Landings_PSDN)) %>%
+    filter( PACFIN_PORT_CODE == "SP" | PACFIN_PORT_CODE == "VEN" | PACFIN_PORT_CODE == "TRM" | 
+              PACFIN_PORT_CODE == "MOS" | PACFIN_PORT_CODE == "MNT") %>%
+    mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, "SP", "TRM", "VEN", "MNT", "MOS"))
+
+ggplot(data=q.msqd.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) +
+    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
+  scale_x_continuous(name = "Month", breaks=1:12) +
+  scale_y_continuous(name = "Landings (M tons)" ) + 
+  facet_grid(~ PACFIN_PORT_CODE, labeller = port_names) + ggtitle("(b) Market squid") + 
+  theme(plot.title = element_text(size=9, face="bold.italic"))
+
+rm(q.msqd.by.month)
+
+```
 
 <!-- <<<ISAAC: Need some more details on anchovy and herring fisheries, these I believe are constrained by management and geography, so may not be real "choices" for the substitution. >>>  -->
 
-Landings in the CPS fishery have been mainly dominated by Pacific sardine and market squid during the period 1981-2014, before the closure of the Pacific sardine fishery, as is shown in panel (a) in Figure \ref{fig:avg_lan_rev}. As prices are similar between species, except for market squid as is shown in panel (b), low average annual landings observed for Pacific herring and Northern anchovy could be related with geography and regulatory constraint that restrict vessels to exploit them. In terms of revenue, we can observe in panel (c) that market squid have the largest revenue, while Pacific sardine is not as relevant under this comparison due to the low prices received by fishers.
+Landings in the CPS fishery have been mainly dominated by Pacific sardine and market squid during the period 1981-2014 as is shown in Panel (a) in Figure \ref{fig:avg_lan_rev}. Average anual prices arw shown in Panel (b). As prices are similar between species, except for market squid, low average annual landings observed for Pacific herring and Northern anchovy could be related with geography and regulatory constraint that restrict vessels to exploit them. In terms of revenue, we can observe in Panel (c) that market squid have the largest revenue, while Pacific sardine is not as relevant under this comparison due to the low prices received by fishers.
 
 
 ```{r avg_landings, echo=FALSE, fig.cap="Average annual landings, message=FALSE, warning=FALSE, prices and revenues by species (1981-2020).\\label{fig:avg_lan_rev}"}
@@ -316,101 +418,10 @@ coeff <- 1000
           axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +  
     scale_color_brewer(palette="Set2", limits = c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"))
 
-# rm(g1, g2, g3, g4, df, landing.nvessels.year.sel, landing.price.year, nvessel.year, coeff)
+rm(g1, g2, g3, g4, df, landing.nvessels.year.sel, landing.price.year, nvessel.year, coeff)
   
 ```
 
-
-## Regulation
-
-Before 2000, the only fishery under a Fisheries Management Plan (FMP) was the Northern anchovy.In March, 1995 the Pacific Fishery Management Council (PFMC) decided to expand the FMP to include the entire CPS species (Pacific sardine, northern anchovy, Pacific (chub) mackerel, jack mackerel, and market squid) along the U.S. west coast. through the Amendment 8. The FMP for the CPS fishery was finally implemented in January, 2000. 
-
-<!-- * The FMP implementation include for the first time federal harvest guidelines.  -->
-<!-- * Implmentation of the CA squid management plan in 2005 reduced the fleet to a max of 73 (55 vessels and 18 brail vessels,  also permits limits light boats to 34).  -->
-<!--   + The fishery was unregulated and open access until permit became required in 1998, but no entry limits until 2005. A HG was first implemented in 2001 -->
-<!-- * In 2005 saridne allocation was modified from area-based to a coast-wide seasonal release -->
-<!--     + Note that in CDFW MSFMP, the HG in reported in short tons (125000 in 2001 and 118000 in 2004) -->
-<!--     + Since 1999 a fishery for sardine has operated in OR/WA targeting larger sardine sold as bait to longliners, in 2006 fishery     expanded into human consumption markets -->
-<!--     + CA moratorium on sardine in 1967 following collapse, only reopened in 1986 with a very precautionary 907 mt quota -->
-<!--     + HG information for sardine from SAFE reports (2000 onwards) and Wolf 1992 for 1981-1992 and Barnes et al. 1996 for 1996 -->
-<!--     + Squid information from CDFW MSFMP -->
-<!--     + OR sardine fishery was a developmental fishery from 1999 to 2005, in 2006 first LE permits issued -->
-<!--     + WA sardine fishery was a trial fishery from 2000-2002 with a state HG of 15000 mt, from 2003-2009 it was experimental with     permits capped at 25. It was designated a commercial fishery in 2009 with a LE program with 16 permanent permits and 10 temporary     ones.  -->
-<!--     + Fishign for sardine is prohibited Jan 1 - MArch 31, but fishing is limited in winter anyways because of weather and low fish    availability -->
-<!--     + First OR market squid fishery post CPS FMP implementation in 2000 occured in 2014, but some landings in 1980s following El Nino    events -->
-<!--     + Never directed landings of squid in WA but in 2019 two permits were issued (interest was not in directed catch but in ability to deliver OR squid to WA ports) -->
-
- The market squid fishery has a weekend closure.
-
-## Fishing season
-
-The fishing season in California have a peak in landings during the early summer to fall in the area of Monterrey, specifically in Moss Landing, and in southern California, specifically in San Pedro and Terminal Port occurs during the winter. Market squid season goes from late fall and early winter. 
- 
-<!-- ```{r psdn_month} -->
-<!-- q.psdn.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% -->
-<!--   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%   -->
-<!--   group_by(LANDING_YEAR, LANDING_MONTH, PORT_NAME, AGENCY_CODE) %>%  -->
-<!--   summarise(Landings_PSDN = sum(LANDED_WEIGHT_MTONS.sum))  -->
-
-<!-- ggplot(data=q.psdn.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) + -->
-<!--     geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) +  -->
-<!--   scale_x_continuous(name = "Month", breaks=1:12) + -->
-<!--   scale_y_continuous(name = "Landing of sardine" ) +  -->
-<!--   facet_grid(~ AGENCY_CODE) -->
-
-
-<!-- rm(q.psdn.by.month) -->
-<!-- ```   -->
-
-```{r psdn_month}
-q.psdn.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
-  filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%  
-  group_by(LANDING_YEAR, LANDING_MONTH, PACFIN_PORT_CODE) %>% 
-  summarise(Landings_PSDN = sum(LANDED_WEIGHT_MTONS.sum)) %>%  
-  group_by(LANDING_MONTH, PACFIN_PORT_CODE) %>% 
-  summarise(Landings_PSDN = mean(Landings_PSDN)) %>%
-     filter(PACFIN_PORT_CODE == "AST" | PACFIN_PORT_CODE == "SP" |
-              PACFIN_PORT_CODE == "TRM" | PACFIN_PORT_CODE == "MOS") %>% 
-  mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, "SP", "TRM", "MOS", "AST"))
-  
-g1 <- ggplot(data=q.psdn.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) +
-    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
-  scale_x_continuous(name = "Month", breaks=1:12) +
-  scale_y_continuous(name = "Landing of sardine" ) + 
-  facet_grid(~ PACFIN_PORT_CODE)
-
-q.msqd.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
-  filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>%  
-  group_by(LANDING_YEAR, LANDING_MONTH, PACFIN_PORT_CODE) %>% 
-  summarise(Landings_PSDN = sum(LANDED_WEIGHT_MTONS.sum)) %>%  
-  group_by(LANDING_MONTH, PACFIN_PORT_CODE) %>% 
-  summarise(Landings_PSDN = mean(Landings_PSDN)) %>%
-  filter(PACFIN_PORT_CODE == "HNM" | PACFIN_PORT_CODE == "SP" | 
-           PACFIN_PORT_CODE == "VEN" | PACFIN_PORT_CODE == "TRM") %>% 
-  mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, "SP", "TRM", "MOS", "AST"))
-  
-g2 <- ggplot(data=q.msqd.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) +
-    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
-  scale_x_continuous(name = "Month", breaks=1:12) +
-  scale_y_continuous(name = "Landing of sardine" ) + 
-  facet_grid(~ PACFIN_PORT_CODE)
-
-g1 / g2
-
-
-rm(q.psdn.by.month)
-```
-
-
-
-
-<!-- Peak Fishing Season (to be checked when data arrives)				 -->
-<!-- 	           Spring	   Summer	 Fall	Winter  -->
-<!-- WA	         Sardine	Sardine		            -->
-<!-- OR	         Sardine	Sardine		            -->
-<!-- Monterey		           Squid	Sardine	      -->
-<!-- Southern CA			             Squid	Squid -->
-<!-- Southern CA			            Sardine	Sardine -->
 
 
 ## Switching behavior
@@ -424,8 +435,6 @@ rm(q.psdn.by.month)
 <!-- volume (squid) landings. If the squid biomass shifted north 200-300 miles, a lack of -->
 <!-- infrastructure could mean that squid goes unharvested." (CPS Workshop) "Spoilage of CPS is rapid, so vessels remain as close to a port as possible and usually return within one day; there could be large impacts if CPS move into areas where there is no nearby infrastructure to land catches" (CPS Workshop) -->
 <!-- "NW and SW communities differents" (Workshop) -->
-
-<!-- MSQD is now more year around after pacific sardine closure. -->
 
 Projecting the effect on climate change on the CPS fishery is not straightforward. Some fishers communities are more vulnerable to others to changes in species abuandance. Port constraints and fleet heterogeneity reduce the set of species that fishers are able to choose for harvest (**FROM CPS WORKSHOP**), while fixed contracts with processor also reduce switching capacity between species in the short-run. Our paper... ***HOW WE SOLVE THIS?*** 
 
@@ -944,9 +953,6 @@ rm(table, PacFIN.CPS)
 
 ```
 
-## Management
-"Pacific sardine is managed under a permit and quota management system, with a HG controlling commercial catch of sardine biomass."
-<< DOES FISHER HAVE TO BUY OR SELL QUOTA LIKE IN AN ITQ SYSTEM? IS THERE A FINE FOR EXCEDING THE QUOTA, IT IS INDIVIDUAL QUOTA >>
 
 
 ## Other determinants of behavior
