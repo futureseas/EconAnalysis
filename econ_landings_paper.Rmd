@@ -113,7 +113,7 @@ The remainder of the paper is organized as follows: Section \ref{coastal-pelagic
 
 
 # Coastal Pelagic Species fishery 
-***<<< Note: I got this information from an Excel file that desiree sent me about Annual Catch Limits and Limted entry for sardine and squid, and I complement with the CPS FMP document and random notes that I have >>>***
+***<<< Note: I got this information from an Excel file that desiree sent me about Annual Catch Limits and Limted entry for sardine and squid, and I will start to complement with the CPS FMP document and random notes that I have >>>***
 
 Before 2000, the only fishery under a Fisheries Management Plan (FMP) was the Northern anchovy. In March, 1995 the Pacific Fishery Management Council (PFMC) decided to expand the FMP to include the entire CPS species (Pacific sardine, northern anchovy, Pacific (chub) mackerel, jack mackerel, and market squid) along the U.S. west coast. through the Amendment 8. The FMP for the CPS fishery was finally implemented in January, 2000. 
 
@@ -423,6 +423,45 @@ rm(g1, g2, g3, g4, df, landing.nvessels.year.sel, landing.price.year, nvessel.ye
 ```
 
 
+## Clusters within CPS fleet
+
+```{r only_psdn, include=FALSE}
+psdn.hist <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
+  unique() %>% mutate(harv.psdn = 1)
+
+msqd.hist <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
+  unique() %>% mutate(harv.msqd = 1)
+
+# Which are the vessel that harvest both PSDN and MSQD?
+squid.and.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% merge(psdn.hist, 
+                        by = c("VESSEL_NUM"), all.y = TRUE) %>% filter(harv.psdn == 1) %>%
+  filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique() %>% select(VESSEL_NUM) %>%
+  mutate(d_PSDN_and_MSQD = 1)
+
+# Which are the vessel that harvest only MSQD?
+only.squid <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>%
+  filter(PACFIN_SPECIES_CODE == "MSQD") %>% filter(is.na(d_PSDN_and_MSQD)) %>% unique() %>% select(VESSEL_NUM) %>%
+  mutate(d_onlyMSQD = 1)
+
+# Which are the vessel that harvest only PSDN?
+only.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>%
+  filter(PACFIN_SPECIES_CODE == "PSDN") %>% filter(is.na(d_PSDN_and_MSQD)) %>% unique() %>% select(VESSEL_NUM) %>%
+  mutate(d_onlyPSDN = 1)
+
+
+
+## Characterize vessel that harvest both PSDN and MSQD. 
+df <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>% filter(d_PSDN_and_MSQD == 1) 
+
+# rm(psdn.hist, squid.hist, only.squid, only.psdn, squid.and.psdn)
+
+```
 
 ## Switching behavior
 <!-- - Graficar número de barcos que desembarcan especies de CPS durante cada año/mes.  -->
@@ -437,6 +476,7 @@ rm(g1, g2, g3, g4, df, landing.nvessels.year.sel, landing.price.year, nvessel.ye
 <!-- "NW and SW communities differents" (Workshop) -->
 
 Projecting the effect on climate change on the CPS fishery is not straightforward. Some fishers communities are more vulnerable to others to changes in species abuandance. Port constraints and fleet heterogeneity reduce the set of species that fishers are able to choose for harvest (**FROM CPS WORKSHOP**), while fixed contracts with processor also reduce switching capacity between species in the short-run. Our paper... ***HOW WE SOLVE THIS?*** 
+
 
 
 ```{r switching, include=FALSE}
@@ -521,78 +561,41 @@ rm(msqd.by.year, psdn.cond.msqd, n_vessel_msqd, n_vessel_psdn_c_msqd, df, coeff,
 
 ```
 
+<!-- ```{r switching_quarter, eval=FALSE, include=FALSE} -->
+<!-- psdn.by.quarter <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!--   mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>%  -->
+<!--   select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%  -->
+<!--   unique() %>% mutate(harv.psdn = 1)  -->
 
-```{r switching_quarter}
-psdn.by.quarter <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
-  unique() %>% mutate(harv.psdn = 1) 
+<!-- # If a vessel harvest Pacific sardine in a year, how many also harvest squid. -->
+<!-- squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!--   mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>%  -->
+<!--   select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter) %>% merge(psdn.by.quarter,  -->
+<!--                         by = c("VESSEL_NUM", "quarter"), all.y = TRUE) %>%  -->
+<!--   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique() -->
 
-# If a vessel harvest Pacific sardine in a year, how many also harvest squid.
-squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter) %>% merge(psdn.by.quarter, 
-                        by = c("VESSEL_NUM", "quarter"), all.y = TRUE) %>% 
-  filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique()
+<!-- # Calculate number of vessels harvesting sardine and squid and percentage per year -->
+<!-- n_vessel_psdn <- psdn.by.quarter %>% group_by(quarter) %>%  -->
+<!--   summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE)) -->
 
-# Calculate number of vessels harvesting sardine and squid and percentage per year
-n_vessel_psdn <- psdn.by.quarter %>% group_by(quarter) %>% 
-  summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE))
+<!-- n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(quarter) %>%  -->
+<!--   summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE)) -->
 
-n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(quarter) %>% 
-  summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE))
-  
-df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("quarter"), all.x = TRUE) %>%
-    mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>%
-    mutate(perc = (n_vessel_msqd / n_vessel_psdn))
+<!-- df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("quarter"), all.x = TRUE) %>% -->
+<!--     mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>% -->
+<!--     mutate(perc = (n_vessel_msqd / n_vessel_psdn)) -->
 
-# coeff = 79
-ggplot(df) + 
-  geom_line(mapping = aes(x = quarter, y = perc), color = "blue", size = 1) + 
-  scale_x_continuous(name = "Quarter") +
-  scale_y_continuous(name = "% of vessel harvesting squid" ) + 
-  theme(axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-  theme(legend.position="bottom")
+<!-- # coeff = 79 -->
+<!-- ggplot(df) +  -->
+<!--   geom_line(mapping = aes(x = quarter, y = perc), color = "blue", size = 1) +  -->
+<!--   scale_x_continuous(name = "Quarter") + -->
+<!--   scale_y_continuous(name = "% of vessel harvesting squid" ) +  -->
+<!--   theme(axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + -->
+<!--   theme(legend.position="bottom") -->
 
-rm(psdn.by.quarter, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df)
+<!-- rm(psdn.by.quarter, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df) -->
 
-```
-
-```{r switching_quarterv2}
-psdn.by.quarter <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>% 
-  mutate(quarter2 = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = FALSE)) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter, quarter2) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
-  unique() %>% mutate(harv.psdn = 1) 
-
-# If a vessel harvest Pacific sardine in a year, how many also harvest squid.
-squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter) %>% merge(psdn.by.quarter, 
-                        by = c("VESSEL_NUM", "quarter"), all.y = TRUE) %>% 
-  filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique()
-
-# Calculate number of vessels harvesting sardine and squid and percentage per year
-n_vessel_psdn <- psdn.by.quarter %>% group_by(quarter, quarter2) %>% 
-  summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE)) %>% group_by(quarter2) %>% 
-  summarize(n_vessel_psdn = mean(n_vessel_psdn, na.rm = TRUE))
-
-n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(quarter, quarter2) %>% 
-  summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE)) %>% group_by(quarter2) %>% 
-  summarize(n_vessel_msqd = mean(n_vessel_msqd, na.rm = TRUE))
-  
-df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("quarter2"), all.x = TRUE) %>%
-    mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>%
-    mutate(perc = (n_vessel_msqd / n_vessel_psdn)) %>% select(quarter2, perc)
-
-ggplot(data=df, aes(x=quarter2, y=perc)) +
-    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
-  scale_x_continuous(name = "Quarter", breaks=1:4, labels=c("Q1","Q2","Q3","Q4")) +
-  scale_y_percent(name = "Percentage of vessels harvesting squid" )
-
-rm(psdn.by.quarter, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df)
-
-```
+<!-- ``` -->
 
 ```{r switching_month}
 psdn.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
@@ -607,15 +610,14 @@ squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(
 
 # Calculate number of vessels harvesting sardine and squid and percentage per year
 n_vessel_psdn <- psdn.by.month %>% group_by(LANDING_YEAR, LANDING_MONTH) %>% 
-  summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE)) %>% group_by(LANDING_MONTH) %>% 
-  summarize(n_vessel_psdn = mean(n_vessel_psdn, na.rm = TRUE))
+  summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE)) 
 
 n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR, LANDING_MONTH) %>% 
-  summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE)) %>% group_by(LANDING_MONTH) %>% 
-  summarize(n_vessel_msqd = mean(n_vessel_msqd, na.rm = TRUE))
+  summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE))
   
-df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("LANDING_MONTH"), all.x = TRUE) %>%
-    mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>%
+df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) %>%
+    mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>% group_by(LANDING_MONTH) %>% 
+    summarize(n_vessel_msqd = sum(n_vessel_msqd, na.rm = TRUE), n_vessel_psdn = sum(n_vessel_psdn, na.rm = TRUE)) %>%
     mutate(perc = (n_vessel_msqd / n_vessel_psdn)) %>% select(LANDING_MONTH, perc)
 
 ggplot(data=df, aes(x=LANDING_MONTH, y=perc)) +
@@ -628,7 +630,56 @@ rm(psdn.by.month, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df)
 
 ```
 
+```{r switching_day, echo=FALSE}
+# PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
+#   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
+# 
+#   # Merge different decades of data #
+# PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
+#   rm(PacFIN_2000_2009, PacFIN_2010_2020)
+#   gc()
+# 
+# psdn.by.day <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>% 
+#   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
+#   unique() %>% mutate(harv.psdn = 1) 
+# 
+# # If a vessel harvest Pacific sardine in a year, how many also harvest squid.
+# squid.cond.psdn <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>% 
+#   merge(psdn.by.day, by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>% 
+#   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique()
+# 
+# # Calculate number of vessels harvesting sardine and squid and percentage per year
+# n_vessel_psdn <- psdn.by.day %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>% 
+#   summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE)) 
+# # %>% group_by(LANDING_MONTH, LANDING_DAY) %>% 
+# #   summarize(n_vessel_psdn = mean(n_vessel_psdn, na.rm = TRUE))
+# 
+# n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>% 
+#   summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE)) 
+# # %>% group_by(LANDING_MONTH, LANDING_DAY) %>% 
+# #   summarize(n_vessel_msqd = mean(n_vessel_msqd, na.rm = TRUE))
+#   
+# df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>%
+#     mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>% group_by(LANDING_MONTH, LANDING_DAY) %>% 
+#     summarize(n_vessel_msqd = sum(n_vessel_msqd, na.rm = TRUE), n_vessel_psdn = sum(n_vessel_psdn, na.rm = TRUE)) %>%
+#     mutate(perc = (n_vessel_msqd / n_vessel_psdn)) %>% select(LANDING_MONTH, LANDING_DAY, perc)
+# 
+# df$MonthDay <- paste( month.abb[df$LANDING_MONTH], df$LANDING_DAY, sep="-" )
+# 
+# write.csv(df,"C:\\Data\\day_switch.csv", row.names = FALSE)
+df <- read.csv(file = "C:\\Data\\day_switch.csv")
 
+ggplot(data=df, aes(x=MonthDay, y=perc)) +
+    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
+  scale_x_discrete(name = "Day", breaks=1:366) +
+  scale_y_percent(name = "Percentage of vessels harvesting squid" )
+
+rm(df)
+
+
+```
 
 ## Gear
 
