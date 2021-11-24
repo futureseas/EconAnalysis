@@ -423,51 +423,83 @@ rm(g1, g2, g3, g4, df, landing.nvessels.year.sel, landing.price.year, nvessel.ye
 ```
 
 
-## Clusters within CPS fleet
+## Switching behavior
+
+Before continuing our analysis, we have to verify whether there is actually exist switching behavior between CPS species. First, we observe how many vessel participate in both the Pacific sardine and market squid fishery. To do this, we first have to define what we understand as participation. Following @richerson2017, we consider a vessel participate in a specific fishery if they met the following criteria:
+
+1. Harvest the species during the period 2000-2014 (before the Pacific sardine closure) 
+2. Total annual revenue from the species averaged at least 1000 USD per year over 2000–2014. This calculation exclude years where the vessel did not fish.
+3. Revenue from the species at least 5% of total vessel revenue per year over 2000–2014.
+4. The vessel fished at least 3 of 15 years in 2000–2014.
+
 
 ```{r only_psdn, include=FALSE}
-psdn.hist <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
-  unique() %>% mutate(harv.psdn = 1)
+### Vessel that participate in Pacific sardine.
+total.revenue <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(year_revenue = sum(AFI_EXVESSEL_REVENUE.sum)) 
 
-msqd.hist <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
-  unique() %>% mutate(harv.msqd = 1)
+psdn.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
+  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_psdn = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+    merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>% 
+  filter(revenue_psdn > 0) %>% group_by(VESSEL_NUM) %>% 
+  summarise(anual_revenue_psdn = mean(revenue_psdn), anual_revenue_all = mean(year_revenue), n_year_fishing = n()) %>%  
+  mutate(perc_psdn_rev = anual_revenue_psdn/anual_revenue_all) %>% 
+  filter(anual_revenue_psdn >= 1000) %>% 
+  filter(perc_psdn_rev >= 0.05) %>% 
+  filter(n_year_fishing >= 3) %>%
+  select(VESSEL_NUM) %>% unique() %>% mutate(d_PSDN_fleet = 1)
+
+msqd.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
+  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_specie = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+    merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>% 
+  filter(revenue_specie > 0) %>% group_by(VESSEL_NUM) %>% 
+  summarise(anual_revenue_specie = mean(revenue_specie), anual_revenue_all = mean(year_revenue), n_year_fishing = n()) %>%  
+  mutate(perc_specie_rev = anual_revenue_specie/anual_revenue_all) %>% 
+  filter(anual_revenue_specie >= 1000) %>% 
+  filter(perc_specie_rev >= 0.05) %>% 
+  filter(n_year_fishing >= 3) %>%
+  select(VESSEL_NUM) %>% unique() %>% mutate(d_MSQD_fleet = 1)
+
 
 # Which are the vessel that harvest both PSDN and MSQD?
-squid.and.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% merge(psdn.hist, 
-                        by = c("VESSEL_NUM"), all.y = TRUE) %>% filter(harv.psdn == 1) %>%
-  filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique() %>% select(VESSEL_NUM) %>%
-  mutate(d_PSDN_and_MSQD = 1)
+squid.and.psdn <- merge(psdn.fleet, msqd.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = FALSE) %>%
+  select(VESSEL_NUM) %>% unique() %>%  mutate(d_PSDN_and_MSQD = 1)
 
 # Which are the vessel that harvest only MSQD?
-only.squid <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>%
-  filter(PACFIN_SPECIES_CODE == "MSQD") %>% filter(is.na(d_PSDN_and_MSQD)) %>% unique() %>% select(VESSEL_NUM) %>%
-  mutate(d_onlyMSQD = 1)
+only.msqd <- msqd.fleet %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>% 
+  filter(is.na(d_PSDN_and_MSQD)) %>% select(VESSEL_NUM) %>% unique() %>% mutate(d_onlyMSQD = 1)
 
 # Which are the vessel that harvest only PSDN?
-only.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>%
-  filter(PACFIN_SPECIES_CODE == "PSDN") %>% filter(is.na(d_PSDN_and_MSQD)) %>% unique() %>% select(VESSEL_NUM) %>%
-  mutate(d_onlyPSDN = 1)
+only.psdn <- psdn.fleet %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>% 
+  filter(is.na(d_PSDN_and_MSQD)) %>% select(VESSEL_NUM) %>% unique() %>% mutate(d_onlyPSDN = 1)
 
-
-
-## Characterize vessel that harvest both PSDN and MSQD. 
-df <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>% filter(d_PSDN_and_MSQD == 1) 
-
-# rm(psdn.hist, squid.hist, only.squid, only.psdn, squid.and.psdn)
+rm(total.revenue)
 
 ```
 
-## Switching behavior
-<!-- - Graficar número de barcos que desembarcan especies de CPS durante cada año/mes.  -->
-<!-- - Graficar porcentaje de barcos que desembarcan squid condicional a que desembarcan sardina durante un año (o meses). (Y otras combinaciones) -->
-<!-- - Desagregado por puerto? -->
-<!-- - Pre and Post closure -->
+From 2000 to 2014, there are 74 vessels that participate in both Pacific sardine and market squid fisheries, while 26 vessel participate in the Pacific sardine but not in the market squid fishery, and  82 vessels participate in the market squid fishery but not in the Pacific sardine fishery. From this calculation, we can infer that it is more likely that a vessel that harvest Pacific sardine will also harvest market squid, instead of the opposite. This is also reflected in Figure \ref{fig:switching}, which shows the number of vessel that harvest squid in a year conditional they also harvest sardine, and the number of vessel that harvest sardine in a year conditional that they also harvest squid. 
+
+
+<!-- ```{r dataframe_with_dummies, include=FALSE} -->
+
+<!-- ## Characterize vessel that harvest both PSDN and MSQD.  -->
+
+<!-- df <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!--   merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>%  -->
+<!--   merge(only.msqd, by = c("VESSEL_NUM"), all.x = TRUE) %>%  -->
+<!--   merge(only.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>%  -->
+<!--   filter(d_PSDN_and_MSQD == 1 | d_onlyPSDN == 1 | d_onlyMSQD == 1) %>% -->
+<!--   mutate(d_PSDN_and_MSQD = if_else(is.na(d_PSDN_and_MSQD), 0, d_PSDN_and_MSQD)) %>% -->
+<!--   mutate(d_onlyPSDN = if_else(is.na(d_onlyPSDN), 0, d_onlyPSDN)) %>% -->
+<!--   mutate(d_onlyMSQD = if_else(is.na(d_onlyMSQD), 0, d_onlyMSQD)) -->
+
+<!-- # rm(df) -->
+
+<!-- ``` -->
+
+
 
 <!--"SPECIFICS: But there is a limit to how far its profitable to truck -->
 <!-- fish. Between Coos Bay and San Francisco there is very little opportunity for large -->
@@ -475,7 +507,7 @@ df <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2
 <!-- infrastructure could mean that squid goes unharvested." (CPS Workshop) "Spoilage of CPS is rapid, so vessels remain as close to a port as possible and usually return within one day; there could be large impacts if CPS move into areas where there is no nearby infrastructure to land catches" (CPS Workshop) -->
 <!-- "NW and SW communities differents" (Workshop) -->
 
-Projecting the effect on climate change on the CPS fishery is not straightforward. Some fishers communities are more vulnerable to others to changes in species abuandance. Port constraints and fleet heterogeneity reduce the set of species that fishers are able to choose for harvest (**FROM CPS WORKSHOP**), while fixed contracts with processor also reduce switching capacity between species in the short-run. Our paper... ***HOW WE SOLVE THIS?*** 
+<!-- Projecting the effect on climate change on the CPS fishery is not straightforward. Some fishers communities are more vulnerable to others to changes in species abuandance. Port constraints and fleet heterogeneity reduce the set of species that fishers are able to choose for harvest (**FROM CPS WORKSHOP**), while fixed contracts with processor also reduce switching capacity between species in the short-run. Our paper... ***HOW WE SOLVE THIS?***  -->
 
 
 
@@ -521,7 +553,7 @@ g1 <- ggplot(df) +
 rm(psdn.by.year, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df, coeff)
 ```
 
-```{r switching_msqd}
+```{r switching_graph, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Switching between Pacific sardine and market squid.\\label{fig:switching}"}
 msqd.by.year <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2020) %>% 
   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
   unique() %>% mutate(harv.msqd = 1)
