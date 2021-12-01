@@ -102,7 +102,7 @@ library(geosphere)
 library(lubridate)
 
 # Load port georeferenced data
-ports <- read_csv("data/port_names.csv")
+ports <- read_csv("Data/Ports/port_names.csv")
 
 # Compare port distances
 ports_dist <- ports %>%
@@ -118,6 +118,38 @@ library(lwgeom)
 ports.sf <- sf::st_as_sf(ports, coords = c("lon", "lat"), crs = 4326, na.fail = FALSE)
 dist_port <- as.data.frame(st_distance(ann.effort.sf.ocean, ports.sf))
 ann.effort.sf.ocean$min_dist <- apply(dist_port, 1, FUN=min) / 1000
+ann.effort.sp.ocean <- as_Spatial(ann.effort.sf.ocean)
+
+
+
+# -------------------------------------------------------
+# Create Kernel Density Map
+library(sp)
+library(spatstat)
+library(rspatial)
+library(maptools)
+
+## Define working region 
+city <- sp_data('city')
+OceanOwin <- as.owin(city)
+
+## Create SpatialPointDataFrame
+str(dat)
+dat <- as.data.frame(ann.effort.sf.ocean)
+coordinates(dat) <- ~X+Y
+
+## Create....
+p <- ppp(dat[,1], dat[,2], window=OceanOwin)
+
+# Unweighted KDE (spatial locations only)				
+pt.kde <- sp.kde(x = dat, bw = 1000, standardize = TRUE, 
+                 nr=104, nc=78, scale.factor = 10000 )
+
+# Plot results
+plot(pt.kde, main="Unweighted kde")
+points(meuse, pch=20, col="red") 
+
+#---------------------------------------------------------
 
 # Assumes 20 km/hr and 22 hours for traveling there and back and 2 hours for fishing (Rose et al)
 # ann.effort.sf.ocean <- ann.effort.sf.ocean %>%
