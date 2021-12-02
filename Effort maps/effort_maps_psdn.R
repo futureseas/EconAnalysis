@@ -122,35 +122,6 @@ ann.effort.sp.ocean <- as_Spatial(ann.effort.sf.ocean)
 
 
 
-# -------------------------------------------------------
-# Create Kernel Density Map
-library(sp)
-library(spatstat)
-library(rspatial)
-library(maptools)
-
-## Define working region 
-city <- sp_data('city')
-OceanOwin <- as.owin(city)
-
-## Create SpatialPointDataFrame
-str(dat)
-dat <- as.data.frame(ann.effort.sf.ocean)
-coordinates(dat) <- ~X+Y
-
-## Create....
-p <- ppp(dat[,1], dat[,2], window=OceanOwin)
-
-# Unweighted KDE (spatial locations only)				
-pt.kde <- sp.kde(x = dat, bw = 1000, standardize = TRUE, 
-                 nr=104, nc=78, scale.factor = 10000 )
-
-# Plot results
-plot(pt.kde, main="Unweighted kde")
-points(meuse, pch=20, col="red") 
-
-#---------------------------------------------------------
-
 # Assumes 20 km/hr and 22 hours for traveling there and back and 2 hours for fishing (Rose et al)
 # ann.effort.sf.ocean <- ann.effort.sf.ocean %>%
 #   filter(min_dist <= 220)

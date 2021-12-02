@@ -65,7 +65,7 @@ library(zoo)
 
 ```{r read_data, include=FALSE} 
 disc.choice.dat <- read.csv(file = here("Data", "discrete_choice_data.csv"))
-logbooks.dat <- read.csv(file = here("Data", "logbooks_merged.csv"))
+logbooks.dat <- read.csv(file = "C:/Data/logbooks_merged.csv")
 
 ```
 
@@ -301,11 +301,11 @@ ggplot(hist_data, aes(measurement, fill = condition)) +  geom_density(alpha = 0.
 ```{r convex_hull, echo=FALSE, fig.cap="Histogram for standard deviation of latitude", message=FALSE, warning=FALSE}
 ### Minimum convex polygon (or convex hull) It is the smallest polygon in which no internal angle exceeds 180 degrees and which contains all sites. 
 
-logbooks.dat.sp <- logbooks.dat %>% tidyr::unite('fleet', fleet_name:species, remove = FALSE) %>% 
-  group_by(drvid) %>% mutate(count = n()) %>% dplyr::filter(count>=5) 
-logbooks.sp <- logbooks.dat.sp[, c("drvid", "set_long", "set_lat")] 
+logbooks.dat.sp <- logbooks.dat %>% tidyr::unite('fleet', c(fleet_name, species), remove = FALSE) %>% 
+  group_by(drvid) %>% mutate(count = n()) %>% filter(count > 5)
+  logbooks.sp <- logbooks.dat.sp[, c("drvid", "set_long", "set_lat")] 
 
-
+# %>% dplyr::filter(count>=5) 
 # Create a SpatialPointsDataFrame by defining the coordinates
 library(sp)
 coordinates(logbooks.sp) <- c("set_long", "set_lat")
@@ -325,9 +325,108 @@ plot(logbooks.mcp, col = alpha(1:5, 0.5), add = TRUE)
 convex.hull <- logbooks.dat %>% tidyr::unite('fleet', fleet_name:species, remove = FALSE) %>% 
   dplyr::select("drvid", "fleet") %>% unique() %>% dplyr::rename(id = drvid) 
   convex.hull <- merge(convex.hull, logbooks.convex.hull, by=c('id'), all.x = TRUE)
-  ggplot(convex.hull, aes(area)) +  geom_density() + facet_wrap(~fleet, scales = "free") +
-    labs(x = "Convex hull area (hectares)", y = "Density")
+  # ggplot(convex.hull, aes(area)) +  geom_density() + facet_wrap(~fleet, scales = "free") +
+  #   labs(x = "Convex hull area (hectares)", y = "Density")
 
 
 ```
 
+
+## Convex hull estimation
+
+```{r convex_hull, echo=FALSE, fig.cap="Histogram for standard deviation of latitude", message=FALSE, warning=FALSE}
+
+# Create dataset 
+
+library(sp)
+logbooks.fleet <- logbooks.dat.sp[, c("fleet", "set_long", "set_lat")] 
+sf::sf_use_s2(FALSE)
+
+ocean.shp <- sf::read_sf(here::here("Data", "ne_10m_ocean", "ne_10m_ocean.shp"), as_tibble = TRUE)
+logbooks.sf.fleet <- sf::st_as_sf(logbooks.fleet, coords = c("set_long", "set_lat"), crs = CRS("+proj=longlat"), na.fail = FALSE)
+logbooks.sf.fleet <- logbooks.sf.fleet[ocean.shp, ]
+logbooks.sp.fleet <- as(logbooks.sf.fleet, Class = "Spatial")
+
+# ## Create a SpatialPointsDataFrame by defining the coordinates
+# coordinates(logbooks.sp.fleet) <- c("set_long", "set_lat")
+
+## Set the coordinate reference system (CRS)
+proj4string(logbooks.sp.fleet) <- CRS("+proj=longlat")
+
+
+
+# Calculate MCPs for each vessel
+
+library(adehabitatHR) # Load library to estimate "home range estimation" (used in ecology I guess)
+logbooks.mcp <- mcp(logbooks.sp.fleet, percent = 80, unin = c("km"), unout = c("ha"))
+
+# Plot
+## Convert SpatialPointsDataFrames and SpatialPolygonsDataFrames into lat/long
+logbooks.spgeo <- sp::spTransform(logbooks.sp.fleet, CRS("+proj=longlat"))
+logbooks.mcpgeo <- sp::spTransform(logbooks.mcp, CRS("+proj=longlat"))
+
+# Download tiles using ggmap
+library(ggmap)
+mybasemap <- get_stamenmap(bbox = c(left = -126, bottom = 32, right = -117, top = 48), zoom = 5,  maptype = "terrain")
+
+# Turn the spatial data frame of points into just a dataframe for plotting in ggmap
+logbooks.geo <- data.frame(logbooks.spgeo@coords, 
+                          id = logbooks.spgeo@data$fleet)
+
+ggmap(mybasemap) + 
+  geom_polygon(data = fortify(logbooks.mcpgeo),  
+               # Polygon layer needs to be "fortified" to add geometry to the dataframe
+              aes(long, lat, colour = id, fill = id),
+              alpha = 0.5) +
+  theme(legend.position = "right") +
+  labs(x = "Longitude", y = "Latitude") +
+  scale_colour_manual(name = "Fleet", 
+                      values = c("red", "blue", "purple", "green", "orange"),
+                      breaks = c("T001", "T002", "T003", "T004", "T005"))   
+
+```
+
+
+```{r kernel_density, eval=FALSE, include=FALSE}
+# -------------------------------------------------------
+# Create Kernel Density Map
+
+library(sp,sf,maptools,rgdal,rgeos,raster,adehabitatHR, tmap)
+
+## Load the CCS shapfile
+Output.Areas <- sf::st_read("C:/Users/fequezad/Downloads/lme/lme.shp")
+library(spatstat)
+  Output.Areas <- sf::st_transform(Output.Areas, crs = CRS("+init=EPSG:32610"))
+  C <- as.owin(Output.Areas$geometry)
+  W<- as.mask(C, eps = 100)
+  # Output.Areas <- sf:::as_Spatial(Output.Areas$geom) # This works
+
+
+## Create SpatialPointDataFrame for the year 2002
+Effort.Points <- as.data.frame(ann.effort.sf.ocean) %>% 
+  filter(year == 2003) %>%
+  dplyr::select(c("X", "Y"))
+
+point <- ppp(Effort.Points$X,Effort.Points$Y, window = W)
+marks(point) <- NULL
+plot(point)
+  # coordinates(Effort.Points) <- ~X+Y
+  
+  
+  # sigma <- bw.diggle(point)
+  
+  
+## Runs the kernel density estimation
+  memory.size(260000)
+  d <- density.ppp(point, sigma=1000)
+  plot(d) 
+  # kde.output <- kernelUD(Effort.Points, h="href", grid = 2000)
+  # plot(kde.output)
+
+# ### Converts to raster
+# kde <- raster(kde.output)
+  
+  Window(point) <- W
+  plot(point, main=NULL, cols=rgb(0,0,0,.2), pch=20)
+
+```
