@@ -674,6 +674,36 @@ rm(psdn.by.month, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df)
 
 ```
 
+```{r switching_day_landings, echo=FALSE}
+# PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
+#   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
+# 
+#   # Merge different decades of data #
+# PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
+#   rm(PacFIN_2000_2009, PacFIN_2010_2020)
+#   gc()
+# 
+# psdn.landings.by.day.vessel <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, LANDED_WEIGHT_MTONS) %>%
+#   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%
+#   group_by(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+#   summarise(Landed_PSDN = sum(LANDED_WEIGHT_MTONS)) %>% mutate(harv.psdn = 1)
+# 
+# # If a vessel harvest Pacific sardine in a year, how many also harvest squid.
+# squid.cond.psdn <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, LANDED_WEIGHT_MTONS) %>%
+#   merge(psdn.landings.by.day.vessel, by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>%
+#   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>%
+#   mutate(perc_land_squid = LANDED_WEIGHT_MTONS / (LANDED_WEIGHT_MTONS + Landed_PSDN)) 
+# 
+# write.csv(squid.cond.psdn,"C:\\Data\\day_switch_land.csv", row.names = FALSE)
+df <- read.csv(file = "C:\\Data\\day_switch_land.csv")
+hist(df$perc_land_squid, col = 'skyblue3', breaks = 10)
+plot.ecdf(df$perc_land_squid)
+
+```
+
+
 ```{r switching_day, echo=FALSE}
 # PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
 #   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
@@ -714,15 +744,11 @@ rm(psdn.by.month, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df)
 # 
 # write.csv(df,"C:\\Data\\day_switch.csv", row.names = FALSE)
 df <- read.csv(file = "C:\\Data\\day_switch.csv")
-
 ggplot(data=df, aes(x=MonthDay, y=perc)) +
     geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
   scale_x_discrete(name = "Day", breaks=1:366) +
   scale_y_percent(name = "Percentage of vessels harvesting squid" )
-
 rm(df)
-
-
 ```
 
 ## Gear
@@ -882,6 +908,19 @@ rm(PacFIN.CPS, table)
 ## Port landings
 
 In average, a vessel land in 4.8 ports, with an standard deviation of 3.94. 
+
+
+```{r n_ports_species, eval=FALSE, include=FALSE}
+# How many gears a vessel use in the dataset
+PacFIN.CPS.unique.port <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+  select(PACFIN_SPECIES_CODE, PACFIN_PORT_CODE) %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC"))  %>% unique() %>% 
+  mutate(n_ports = 1) %>% group_by(PACFIN_SPECIES_CODE) %>% summarise(n_ports= sum(n_ports)) 
+
+# 40, 39 and 42 PORTS WHERE MSQD, NANC and PSDN is landed.   
+rm(PacFIN.CPS.unique.port, PacFIN.CPS.n_ports)
+
+```
 
 ```{r n_ports_vessels, eval=FALSE, include=FALSE}
 # How many gears a vessel use in the dataset
