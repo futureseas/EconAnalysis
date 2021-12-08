@@ -146,6 +146,35 @@ The fishing season for Pacific sardine in California have a peak in landings dur
 <!-- rm(q.psdn.by.month) -->
 <!-- ```   -->
 
+We conduct a cluster analysis to categorize better the different portfolio that fisher manage during a year.
+```{r cluster-analysis, include=FALSE}
+## Calculate share of revenue of species by vessel during a month ##
+PacFIN.spread <- PacFIN.month.CPS %>% filter(LANDING_YEAR >=2000) %>%  filter(LANDING_YEAR < 2015) %>%
+  select(LANDING_YEAR, LANDING_MONTH, VESSEL_NUM, PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS.sum) %>% 
+  group_by(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% 
+  summarise(Landings = sum(LANDED_WEIGHT_MTONS.sum)) %>%
+  spread(PACFIN_SPECIES_CODE, Landings)
+  PacFIN.spread[is.na(PacFIN.spread)] <- 0
+  PacFIN.spread <- PacFIN.spread %>%
+    mutate(Total = MSQD + NANC + PHRG + PSDN) %>%
+    mutate(MSQD = MSQD / Total * 100) %>% 
+    mutate(NANC = NANC / Total * 100) %>% 
+    mutate(PHRG = PHRG / Total * 100) %>% 
+    mutate(PSDN = PSDN / Total * 100)
+
+set.seed(20)
+speciesCluster <- kmeans(PacFIN.spread[, 2:5], 7)
+speciesCluster
+
+# From this first cluster analysis, I should not include PHRG in the model. However, the number of cluster here is arbitrary. 
+
+## Let now conduct a hierarchical clustering analysis ##
+
+
+
+```
+
+
 ```{r psdn__msqd_month, echo=FALSE, fig.cap="Fishing season for Pacific sardine and Market squid (average monthly total harvest for the period 2000-2014).", message=FALSE, warning=FALSE}
 
 port_names <- as_labeller(c("SP" = "San Pedro", "HNM" = "Hueneme", "MNT" = "Monterrey", "MOS" = "Moss Landing", 
