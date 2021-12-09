@@ -146,7 +146,8 @@ The fishing season for Pacific sardine in California have a peak in landings dur
 <!-- rm(q.psdn.by.month) -->
 <!-- ```   -->
 
-We conduct a cluster analysis to categorize better the different portfolio that fisher manage during a year.
+We conduct a cluster analysis to categorize better the different portfolio that fisher manage during a year. For this we use a hierarchical clustering. This technique have been used before in fisheries... This approach do not require to define de number of cluster as is chosen within the algorithm. 
+
 ```{r cluster-analysis, include=FALSE}
 ## Calculate share of revenue of species by vessel during a month ##
 PacFIN.spread <- PacFIN.month.CPS %>% filter(LANDING_YEAR >=2000) %>%  filter(LANDING_YEAR < 2015) %>%
@@ -170,6 +171,14 @@ speciesCluster
 
 ## Let now conduct a hierarchical clustering analysis ##
 
+PacFIN.spread[is.na(PacFIN.spread)] <- 0
+clusters <- hclust(dist(PacFIN.spread[, 2:5]), method = 'average')
+plot(clusters)
+clusterCut <- as.data.frame(cutree(clusters, 4))
+PacFIN.spread$cluster <- clusterCut$`cutree(clusters, 4)`
+  PacFIN.clusters <- PacFIN.spread %>% group_by(cluster) %>%
+    summarise(mean.MSQD = mean(MSQD), mean.NANC = mean(NANC), 
+              mean.PSDN = mean(PSDN), mean.PHRG = mean(PHRG), count = n())
 
 
 ```
