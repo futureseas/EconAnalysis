@@ -84,8 +84,11 @@ library(zoo)
 port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_codes.csv"))
   PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
   PacFIN.month <- PacFIN.month %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
-  PacFIN.month.CPS <- PacFIN.month %>% dplyr::filter(PACFIN_SPECIES_CODE %in% c("PSDN", "MSQD", "NANC", "PHRG"))
-rm(port_area)
+  PacFIN.month.select <- PacFIN.month %>% 
+    dplyr::filter(PACFIN_SPECIES_CODE %in% 
+    c("PHRG", "CMCK", "JMCK", "MSQD", "NANC", "PBNT", "PSDN", "UMCK", "DCRB", "ALBC", "BTNA", "ETNA", "STNA", "UTNA"))
+    
+  rm(port_area)
   
 ```
 
@@ -146,7 +149,7 @@ The fishing season for Pacific sardine in California have a peak in landings dur
 <!-- rm(q.psdn.by.month) -->
 <!-- ```   -->
 
-We conduct a cluster analysis to categorize better the different portfolio that fisher manage during a year. For this we use a hierarchical clustering. This technique have been used before in fisheries... This approach do not require to define de number of cluster as is chosen within the algorithm. 
+We conduct a cluster analysis to categorize better the different portfolio that fisher manage during a year. For this we use a hierarchical clustering. This technique have been used before in fisheries. This approach do not require to define de number of cluster as is chosen within the algorithm. There are different method to compute the distance between two clusters and conduct the algorithm. We use the Ward's method in our study similar to XXX. The goal of this method is to reduce the within-cluster variance. The algorithm start with all observation in a cluster and then merge in each step the two cluster with the minimum distance between-cluster.   
 
 ```{r cluster-analysis, include=FALSE}
 ## Calculate share of revenue of species by vessel during a month ##
@@ -172,14 +175,31 @@ speciesCluster
 ## Let now conduct a hierarchical clustering analysis ##
 
 PacFIN.spread[is.na(PacFIN.spread)] <- 0
-clusters <- hclust(dist(PacFIN.spread[, 2:5]), method = 'average')
-plot(clusters)
-clusterCut <- as.data.frame(cutree(clusters, 4))
-PacFIN.spread$cluster <- clusterCut$`cutree(clusters, 4)`
+clusters <- hclust(dist(PacFIN.spread[, 2:5]), method = "ward.D")
+plot(clusters, cex = 0.1, hang = -1)
+clusterCut <- as.data.frame(cutree(clusters, 5))
+PacFIN.spread$cluster <- clusterCut$`cutree(clusters, 5)`
   PacFIN.clusters <- PacFIN.spread %>% group_by(cluster) %>%
     summarise(mean.MSQD = mean(MSQD), mean.NANC = mean(NANC), 
               mean.PSDN = mean(PSDN), mean.PHRG = mean(PHRG), count = n())
 
+  
+  
+##-------------------------------
+# Compute Agglomerative coefficient
+  
+# Compute with agnes (make sure you have the package cluster)
+library(cluster)
+hc2 <- agnes(PacFIN.spread[, 2:5], method = "ward")
+hc2$ac
+## 0.9995197
+
+# Make graph
+library(factoextra)
+fviz_cluster(list(data = cbind.data.frame(PacFIN.spread$MSQD, PacFIN.spread$PSDN), cluster = cutree(clusters, 5)))  ## from ‘factoextra’ package 
+
+pltree(hc2, hang=-1, cex = 0.6)
+rect.hclust(hc2, k = 5, border = 2:10)
 
 ```
 
