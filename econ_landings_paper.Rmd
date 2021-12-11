@@ -84,9 +84,9 @@ library(zoo)
 port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_codes.csv"))
   PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
   PacFIN.month <- PacFIN.month %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
-  PacFIN.month.select <- PacFIN.month %>% 
+  PacFIN.month.CPS <- PacFIN.month %>% 
     dplyr::filter(PACFIN_SPECIES_CODE %in% 
-    c("PHRG", "CMCK", "JMCK", "MSQD", "NANC", "PBNT", "PSDN", "UMCK", "DCRB", "ALBC", "BTNA", "ETNA", "STNA", "UTNA"))
+    c("PHRG", "CMCK", "JMCK", "MSQD", "NANC", "PBNT", "PSDN", "UMCK", "BTNA", "DCRB", "ALBC", "ETNA", "STNA", "UTNA"))
     
   rm(port_area)
   
@@ -118,7 +118,7 @@ The remainder of the paper is organized as follows: Section \ref{coastal-pelagic
 # Coastal Pelagic Species fishery 
 ***<<< Note: I got this information from an Excel file that desiree sent me about Annual Catch Limits and Limted entry for sardine and squid, and I will start to complement with the CPS FMP document, SAFE report, and random notes that I have >>>***
 
-Before 2000, the only fishery under a Fisheries Management Plan (FMP) was the Northern anchovy. The development of the Northern anchovy FMP started in 1977 and the final draft approved and implemented in 1978 [@CPSFMP2021]. During these times, and for many year so on, the Northern anchovy was harvested for reduction. This fleet was called "wetfish" and they also fisher for other CPS species such as Pacific sardine,  market squid, Pacific mackerel, jack mackerel, Pacific bonito and Pacific bluefin tuna [@SAFE2020]. In March, 1995 the Pacific Fishery Management Council (PFMC) decided to expand the FMP to include the entire CPS species (Pacific sardine, northern anchovy, Pacific (chub) mackerel, jack mackerel, and market squid) along the U.S. west coast. through the Amendment 8. This amendment was partially approved on June 1999, and final regulations were published on December 1999. Finally, the FMP was implemented on January 1, 2000. 
+Before 2000, the only fishery under a Fisheries Management Plan (FMP) was the Northern anchovy. The development of the Northern anchovy FMP started in 1977 and the final draft approved and implemented in 1978 [@CPSFMP2021]. During these times, and for many year so on, the Northern anchovy was harvested for reduction. This fleet was called "wetfish" and they also fisher for other CPS species such as Pacific sardine,  market squid, Pacific mackerel, Jack mackerel, Pacific bonito and Pacific bluefin tuna [@SAFE2020]. In March, 1995 the Pacific Fishery Management Council (PFMC) decided to expand the FMP to include the entire CPS species (Pacific sardine, northern anchovy, Pacific (chub) mackerel, jack mackerel, and market squid) along the U.S. west coast. through the Amendment 8. This amendment was partially approved on June 1999, and final regulations were published on December 1999. Finally, the FMP was implemented on January 1, 2000. 
 
 Nowadays, there is no reduction capacity for the Northern anchovy fishery in California and is principally harvest in Monterrey area as substitute of sardine and squid when both are not available [@SAFE2020]. In Oregon, the Northern anchovy fishery was in a developmental stage between 1995 and 2009. Only 4 of the 15 developmental permits were issued for this fishery. The developmental program was suspended in 2009. The reason it was there were no fundings to support it [@SAFE2020]. Currently the Oregon Northern anchovy fishery is under open-access, but limited by gear [@SAFE2020]. A significant fishery start to growth in 2015 and 2016, but there were no landings in Oregon in 2018. In Washington, there are restricting Northern anchovy fishery to develop to a high-volume fishery to protect the traditional bait fishery. Some of these regulations are limiting catch and limiting the percentage of the catch allocated to reduction.
 
@@ -151,7 +151,7 @@ The fishing season for Pacific sardine in California have a peak in landings dur
 
 We conduct a cluster analysis to categorize better the different portfolio that fisher manage during a year. For this we use a hierarchical clustering. This technique have been used before in fisheries. This approach do not require to define de number of cluster as is chosen within the algorithm. There are different method to compute the distance between two clusters and conduct the algorithm. We use the Ward's method in our study similar to XXX. The goal of this method is to reduce the within-cluster variance. The algorithm start with all observation in a cluster and then merge in each step the two cluster with the minimum distance between-cluster.   
 
-```{r cluster-analysis, include=FALSE}
+```{r cluster_analysis, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 ## Calculate share of revenue of species by vessel during a month ##
 PacFIN.spread <- PacFIN.month.CPS %>% filter(LANDING_YEAR >=2000) %>%  filter(LANDING_YEAR < 2015) %>%
   select(LANDING_YEAR, LANDING_MONTH, VESSEL_NUM, PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS.sum) %>% 
@@ -159,47 +159,55 @@ PacFIN.spread <- PacFIN.month.CPS %>% filter(LANDING_YEAR >=2000) %>%  filter(LA
   summarise(Landings = sum(LANDED_WEIGHT_MTONS.sum)) %>%
   spread(PACFIN_SPECIES_CODE, Landings)
   PacFIN.spread[is.na(PacFIN.spread)] <- 0
-  PacFIN.spread <- PacFIN.spread %>%
-    mutate(Total = MSQD + NANC + PHRG + PSDN) %>%
-    mutate(MSQD = MSQD / Total * 100) %>% 
-    mutate(NANC = NANC / Total * 100) %>% 
-    mutate(PHRG = PHRG / Total * 100) %>% 
-    mutate(PSDN = PSDN / Total * 100)
+   
+  PacFIN.spread.perc <- PacFIN.spread %>% select("CMCK", "MSQD", "NANC", "PBNT", 
+                                                 "PSDN", "BTNA", "JMCK") %>%
+    mutate(Total = CMCK + MSQD + NANC + PBNT + PSDN + BTNA + JMCK) %>%
+    filter(Total > 0) %>%
+    mutate(CMCK = CMCK / Total * 100) %>% mutate(MSQD = MSQD / Total * 100) %>% 
+    mutate(NANC = NANC / Total * 100) %>% mutate(PBNT = PBNT / Total * 100) %>% 
+    mutate(PSDN = PSDN / Total * 100) %>% mutate(BTNA = BTNA / Total * 100) %>% 
+    mutate(JMCK = JMCK / Total * 100) 
 
-set.seed(20)
-speciesCluster <- kmeans(PacFIN.spread[, 2:5], 7)
-speciesCluster
+# set.seed(21)
+# speciesCluster <- kmeans(PacFIN.spread[, 2:5], 30)
+# speciesCluster
 
 # From this first cluster analysis, I should not include PHRG in the model. However, the number of cluster here is arbitrary. 
 
 ## Let now conduct a hierarchical clustering analysis ##
 
-PacFIN.spread[is.na(PacFIN.spread)] <- 0
-clusters <- hclust(dist(PacFIN.spread[, 2:5]), method = "ward.D")
-plot(clusters, cex = 0.1, hang = -1)
-clusterCut <- as.data.frame(cutree(clusters, 5))
-PacFIN.spread$cluster <- clusterCut$`cutree(clusters, 5)`
-  PacFIN.clusters <- PacFIN.spread %>% group_by(cluster) %>%
-    summarise(mean.MSQD = mean(MSQD), mean.NANC = mean(NANC), 
-              mean.PSDN = mean(PSDN), mean.PHRG = mean(PHRG), count = n())
+col <- (ncol(PacFIN.spread.perc)-1)  
+  
+PacFIN.spread.perc[is.na(PacFIN.spread.perc)] <- 0
+clusters <- hclust(dist(PacFIN.spread.perc[, 2:col]), method = "ward.D")
+# plot(clusters, cex = 0.1, hang = -1)
+clusterCut <- as.data.frame(cutree(clusters, 9))
 
+PacFIN.spread.perc$cluster <- clusterCut$`cutree(clusters, 9)`
+  PacFIN.clusters <- PacFIN.spread.perc %>% group_by(cluster) %>%
+    summarise(mean.CMCK = mean(CMCK), mean.MSQD = mean(MSQD), mean.NANC = mean(NANC), mean.JMCK = mean(JMCK), 
+              mean.PBNT = mean(PBNT), mean.PSDN = mean(PSDN), mean.BTNA = mean(BTNA), count = n())
+
+xtable(PacFIN.clusters)
   
   
 ##-------------------------------
 # Compute Agglomerative coefficient
   
-# Compute with agnes (make sure you have the package cluster)
-library(cluster)
-hc2 <- agnes(PacFIN.spread[, 2:5], method = "ward")
-hc2$ac
-## 0.9995197
+# # Compute with agnes (make sure you have the package cluster)
+# library(cluster)
+# hc2 <- agnes(PacFIN.spread.perc[, 2:col], method = "ward")
+# hc2$ac
+# ## 0.9995197
 
-# Make graph
-library(factoextra)
-fviz_cluster(list(data = cbind.data.frame(PacFIN.spread$MSQD, PacFIN.spread$PSDN), cluster = cutree(clusters, 5)))  ## from ‘factoextra’ package 
-
-pltree(hc2, hang=-1, cex = 0.6)
-rect.hclust(hc2, k = 5, border = 2:10)
+# # Make graph
+# library(factoextra)
+# fviz_cluster(list(data = cbind.data.frame(PacFIN.spread.perc$MSQD, PacFIN.spread.perc$PSDN), 
+#                   cluster = cutree(clusters, 8)))  ## from ‘factoextra’ package 
+# 
+# pltree(hc2, hang=-1, cex = 0.6)
+# rect.hclust(hc2, k = 8, border = 2:9)
 
 ```
 
