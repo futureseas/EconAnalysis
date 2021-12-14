@@ -420,7 +420,10 @@ These trends does not coincide with the perception that stalkholders have about 
 
 ## Switching behavior
 
-Before continuing our analysis, we have to verify whether there is actually switching behavior between CPS species. We conduct a cluster analysis to categorize the different portfolio that fisher manage during a year. For this we conduct our cluster analysis using a hierarchical clustering method. This method have been used before in fisheries to define *metiers* in discrete choice models [@vermard2008]. This approach do not require to define de number of cluster as is chosen within the algorithm. There are different method to compute the distance between two clusters and conduct the algorithm. We use the Ward's method in our study similar to XXX. The goal of this method is to reduce the within-cluster variance. The algorithm start with all observation in a cluster and then merge in each step the two cluster with the minimum distance between-cluster. The analysis include commercial vessels that have harvest CPS species or have used gear that the CPS generally use at least one during the period 2000-2015.  This fleet was called "wetfish" and they also fisher for other CPS species such as Pacific sardine,  market squid, Pacific mackerel, Jack mackerel, Pacific bonito and Pacific bluefin tuna [@SAFE2020]
+Before continuing our analysis, we have to verify whether there is actually switching behavior between CPS species. We conduct a cluster analysis to categorize the different portfolio that fisher manage during a year. For this we conduct our cluster analysis using a hierarchical clustering method. This method have been used before in fisheries to define *metiers* in discrete choice models [@vermard2008]. This approach do not require to define de number of cluster as is chosen within the algorithm. There are different method to compute the distance between two clusters and conduct the algorithm. We use the Ward's method in our study similar to XXX. The goal of this method is to reduce the within-cluster variance. The algorithm start with all observation in a cluster and then merge in each step the two cluster with the minimum distance between-cluster. The analysis include commercial vessels that have harvest CPS species or have used gear that the CPS generally use at least one during the period 2000-2015. 
+
+We start our analysis including Pacific sardine, market squid, Pacific mackerel, Jack mackerel, Pacific bonito and Bluefin tuna as species where substitution is likely [@SAFE2020].
+
 
 
 ```{r cluster_analysis, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
@@ -439,34 +442,26 @@ PacFIN.spread <- PacFIN.month.CPS %>% filter(LANDING_YEAR >=2000) %>%  filter(LA
     mutate(CMCK = CMCK / Total * 100) %>% mutate(MSQD = MSQD / Total * 100) %>% 
     mutate(NANC = NANC / Total * 100) %>% mutate(PBNT = PBNT / Total * 100) %>% 
     mutate(PSDN = PSDN / Total * 100) %>% mutate(BTNA = BTNA / Total * 100) %>% 
-    mutate(JMCK = JMCK / Total * 100) %>% mutate(JMCK = UMCK / Total * 100)  
+    mutate(JMCK = JMCK / Total * 100) %>% mutate(UMCK = UMCK / Total * 100)  
 
 # set.seed(21)
 # speciesCluster <- kmeans(PacFIN.spread[, 2:5], 30)
 # speciesCluster
 
-# From this first cluster analysis, I should not include PHRG in the model. However, the number of cluster here is arbitrary. 
-
-## Let now conduct a hierarchical clustering analysis ##
-
+## Hierarchical clustering analysis ##
 col <- (ncol(PacFIN.spread.perc)-1)  
-  
-PacFIN.spread.perc[is.na(PacFIN.spread.perc)] <- 0
-clusters <- hclust(dist(PacFIN.spread.perc[, 2:col]), method = "ward.D")
-plot(clusters, cex = 0.1, hang = -1)
+  PacFIN.spread.perc[is.na(PacFIN.spread.perc)] <- 0
+  clusters <- hclust(dist(PacFIN.spread.perc[, 2:col]), method = "ward.D")
+  # plot(clusters, cex = 0.1, hang = -1)
 
-
-
+## Construct table ##  
 clusterCut <- as.data.frame(cutree(clusters, 10))
-
-PacFIN.spread.perc$cluster <- clusterCut$`cutree(clusters, 10)`
-  PacFIN.clusters <- PacFIN.spread.perc %>% group_by(cluster) %>%
-    summarise(mean.CMCK = mean(CMCK), mean.MSQD = mean(MSQD), mean.NANC = mean(NANC), mean.JMCK = mean(JMCK), 
-              mean.PBNT = mean(PBNT), mean.PSDN = mean(PSDN), mean.BTNA = mean(BTNA), mean.UMCK = mean(UMCK),
-              count = n())
-
-xtable(PacFIN.clusters)
-  
+  PacFIN.spread.perc$cluster <- clusterCut$`cutree(clusters, 10)`
+    PacFIN.clusters <- PacFIN.spread.perc %>% group_by(cluster) %>%
+      summarise(mean.CMCK = mean(CMCK), mean.MSQD = mean(MSQD), mean.NANC = mean(NANC), mean.JMCK = mean(JMCK), 
+                mean.PBNT = mean(PBNT), mean.PSDN = mean(PSDN), mean.BTNA = mean(BTNA), mean.UMCK = mean(UMCK),
+                count = n())
+    xtable(PacFIN.clusters)
   
 ##-------------------------------
 # Compute Agglomerative coefficient
@@ -487,64 +482,44 @@ xtable(PacFIN.clusters)
 
 ```
 
-First, we observe how many vessel participate in both the Pacific sardine and market squid fishery. To do this, we first have to define what we understand as participation. Following @richerson2017, we consider a vessel participate in a specific fishery if they met the following criteria:
-
-1. Harvest the species during the period 2000-2014 (before the Pacific sardine closure) 
-2. Total annual revenue from the species averaged at least 1000 USD per year over 2000–2014. This calculation exclude years where the vessel did not fish.
-3. Revenue from the species at least 5% of total vessel revenue per year over 2000–2014.
-4. The vessel fished at least 3 of 15 years in 2000–2014.
+Clearly, there is a subgroup of vessel where we observe substitution between species. 
 
 
-```{r only_psdn, include=FALSE}
-### Vessel that participate in Pacific sardine.
-total.revenue <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(year_revenue = sum(AFI_EXVESSEL_REVENUE.sum)) 
 
-psdn.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_psdn = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-    merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>% 
-  filter(revenue_psdn > 0) %>% group_by(VESSEL_NUM) %>% 
-  summarise(anual_revenue_psdn = mean(revenue_psdn), anual_revenue_all = mean(year_revenue), n_year_fishing = n()) %>%  
-  mutate(perc_psdn_rev = anual_revenue_psdn/anual_revenue_all) %>% 
-  filter(anual_revenue_psdn >= 1000) %>% 
-  filter(perc_psdn_rev >= 0.05) %>% 
-  filter(n_year_fishing >= 3) %>%
-  select(VESSEL_NUM) %>% unique() %>% mutate(d_PSDN_fleet = 1)
+```{r cluster_analysis_selec, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+## Calculate share of revenue of species by vessel during a month ##
+PacFIN.spread <- PacFIN.month.CPS %>% filter(LANDING_YEAR >=2000) %>%  filter(LANDING_YEAR < 2015) %>%
+  select(LANDING_YEAR, LANDING_MONTH, VESSEL_NUM, PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS.sum) %>% 
+  group_by(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% 
+  summarise(Landings = sum(LANDED_WEIGHT_MTONS.sum)) %>%
+  spread(PACFIN_SPECIES_CODE, Landings)
+  PacFIN.spread[is.na(PacFIN.spread)] <- 0
+   
+  PacFIN.spread.perc <- PacFIN.spread %>% select("CMCK", "MSQD", "NANC", "PSDN") %>%
+    mutate(Total = CMCK + MSQD + NANC + PSDN) %>%
+    filter(Total > 0) %>%
+    mutate(CMCK = CMCK / Total * 100) %>% mutate(MSQD = MSQD / Total * 100) %>% 
+    mutate(NANC = NANC / Total * 100) %>% mutate(PSDN = PSDN / Total * 100) 
+  
+# set.seed(21)
+# speciesCluster <- kmeans(PacFIN.spread[, 2:5], 30)
+# speciesCluster
 
-msqd.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_specie = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-    merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>% 
-  filter(revenue_specie > 0) %>% group_by(VESSEL_NUM) %>% 
-  summarise(anual_revenue_specie = mean(revenue_specie), anual_revenue_all = mean(year_revenue), n_year_fishing = n()) %>%  
-  mutate(perc_specie_rev = anual_revenue_specie/anual_revenue_all) %>% 
-  filter(anual_revenue_specie >= 1000) %>% 
-  filter(perc_specie_rev >= 0.05) %>% 
-  filter(n_year_fishing >= 3) %>%
-  select(VESSEL_NUM) %>% unique() %>% mutate(d_MSQD_fleet = 1)
+## Hierarchical clustering analysis ##
+col <- (ncol(PacFIN.spread.perc)-1)  
+  PacFIN.spread.perc[is.na(PacFIN.spread.perc)] <- 0
+  clusters <- hclust(dist(PacFIN.spread.perc[, 2:col]), method = "ward.D")
+  plot(clusters, cex = 0.1, hang = -1)
 
-
-# Which are the vessel that harvest both PSDN and MSQD?
-squid.and.psdn <- merge(psdn.fleet, msqd.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = FALSE) %>%
-  select(VESSEL_NUM) %>% unique() %>%  mutate(d_PSDN_and_MSQD = 1)
-
-# Which are the vessel that harvest only MSQD?
-only.msqd <- msqd.fleet %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>% 
-  filter(is.na(d_PSDN_and_MSQD)) %>% select(VESSEL_NUM) %>% unique() %>% mutate(d_onlyMSQD = 1)
-
-# Which are the vessel that harvest only PSDN?
-only.psdn <- psdn.fleet %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>% 
-  filter(is.na(d_PSDN_and_MSQD)) %>% select(VESSEL_NUM) %>% unique() %>% mutate(d_onlyPSDN = 1)
-
-rm(total.revenue)
+## Construct table ##  
+clusterCut <- as.data.frame(cutree(clusters, 5))
+  PacFIN.spread.perc$cluster <- clusterCut$`cutree(clusters, 5)`
+    PacFIN.clusters <- PacFIN.spread.perc %>% group_by(cluster) %>%
+      summarise(mean.CMCK = mean(CMCK), mean.MSQD = mean(MSQD), mean.NANC = mean(NANC), mean.PSDN = mean(PSDN),
+                count = n())
+    xtable(PacFIN.clusters)
 
 ```
-
-From 2000 to 2014, there are 74 vessels that participate in both Pacific sardine and market squid fisheries, while 26 vessel participate in the Pacific sardine but not in the market squid fishery, and  82 vessels participate in the market squid fishery but not in the Pacific sardine fishery. From this calculation, we can infer that it is more likely that a vessel that harvest Pacific sardine will also harvest market squid, instead of the opposite. This is also reflected in Figure \ref{fig:switching}, which shows the number of vessel that harvest squid in a year conditional they also harvest sardine, and the number of vessel that harvest sardine in a year conditional that they also harvest squid. 
-
-<!-- WORKSHOP: though there is less target switching in the northern CCS. -->
-
 
 <!-- ```{r dataframe_with_dummies, include=FALSE} -->
 
@@ -562,6 +537,12 @@ From 2000 to 2014, there are 74 vessels that participate in both Pacific sardine
 <!-- # rm(df) -->
 
 <!-- ``` -->
+
+
+<!-- WORKSHOP: though there is less target switching in the northern CCS. -->
+
+
+
 
 
 
@@ -657,41 +638,6 @@ rm(msqd.by.year, psdn.cond.msqd, n_vessel_msqd, n_vessel_psdn_c_msqd, df, coeff,
 
 ```
 
-<!-- ```{r switching_quarter, eval=FALSE, include=FALSE} -->
-<!-- psdn.by.quarter <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
-<!--   mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>%  -->
-<!--   select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%  -->
-<!--   unique() %>% mutate(harv.psdn = 1)  -->
-
-<!-- # If a vessel harvest Pacific sardine in a year, how many also harvest squid. -->
-<!-- squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
-<!--   mutate(quarter = quarter(zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH, sep='-')), with_year = TRUE)) %>%  -->
-<!--   select(VESSEL_NUM, PACFIN_SPECIES_CODE, quarter) %>% merge(psdn.by.quarter,  -->
-<!--                         by = c("VESSEL_NUM", "quarter"), all.y = TRUE) %>%  -->
-<!--   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique() -->
-
-<!-- # Calculate number of vessels harvesting sardine and squid and percentage per year -->
-<!-- n_vessel_psdn <- psdn.by.quarter %>% group_by(quarter) %>%  -->
-<!--   summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE)) -->
-
-<!-- n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(quarter) %>%  -->
-<!--   summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE)) -->
-
-<!-- df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("quarter"), all.x = TRUE) %>% -->
-<!--     mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>% -->
-<!--     mutate(perc = (n_vessel_msqd / n_vessel_psdn)) -->
-
-<!-- # coeff = 79 -->
-<!-- ggplot(df) +  -->
-<!--   geom_line(mapping = aes(x = quarter, y = perc), color = "blue", size = 1) +  -->
-<!--   scale_x_continuous(name = "Quarter") + -->
-<!--   scale_y_continuous(name = "% of vessel harvesting squid" ) +  -->
-<!--   theme(axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + -->
-<!--   theme(legend.position="bottom") -->
-
-<!-- rm(psdn.by.quarter, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df) -->
-
-<!-- ``` -->
 
 ```{r switching_month}
 psdn.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
@@ -1989,6 +1935,69 @@ Should we study also the desicion to leave or stay the CPS fishery? I think in i
 <!-- We can extend our analysis and infer cases in which a vessel do not longer participate in the fish industry after a the closure. For this, we can use Global Fishing Watch and observe whether a vessel that stop harvesting CPS species still actively fishing other species.  -->
 
 <!-- Soould I include expected catch???  (Peña et al have some ideas how to use expected catch and cost. It could be the month average...) -->
+
+
+
+
+
+First, we observe how many vessel participate in both the Pacific sardine and market squid fishery. To do this, we first have to define what we understand as participation. Following @richerson2017, we consider a vessel participate in a specific fishery if they met the following criteria:
+
+1. Harvest the species during the period 2000-2014 (before the Pacific sardine closure) 
+2. Total annual revenue from the species averaged at least 1000 USD per year over 2000–2014. This calculation exclude years where the vessel did not fish.
+3. Revenue from the species at least 5% of total vessel revenue per year over 2000–2014.
+4. The vessel fished at least 3 of 15 years in 2000–2014.
+
+
+```{r only_psdn, include=FALSE}
+### Vessel that participate in Pacific sardine ###
+total.revenue <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(year_revenue = sum(AFI_EXVESSEL_REVENUE.sum)) 
+
+psdn.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
+  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_psdn = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+    merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>% 
+  filter(revenue_psdn > 0) %>% group_by(VESSEL_NUM) %>% 
+  summarise(anual_revenue_psdn = mean(revenue_psdn), anual_revenue_all = mean(year_revenue), n_year_fishing = n()) %>%  
+  mutate(perc_psdn_rev = anual_revenue_psdn/anual_revenue_all) %>% 
+  filter(anual_revenue_psdn >= 1000) %>% 
+  filter(perc_psdn_rev >= 0.05) %>% 
+  filter(n_year_fishing >= 3) %>%
+  select(VESSEL_NUM) %>% unique() %>% mutate(d_PSDN_fleet = 1)
+
+
+### Vessel that participate in Pacific sardine ###
+msqd.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
+  filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
+  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_specie = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+    merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>% 
+  filter(revenue_specie > 0) %>% group_by(VESSEL_NUM) %>% 
+  summarise(anual_revenue_specie = mean(revenue_specie), anual_revenue_all = mean(year_revenue), n_year_fishing = n()) %>%  
+  mutate(perc_specie_rev = anual_revenue_specie/anual_revenue_all) %>% 
+  filter(anual_revenue_specie >= 1000) %>% 
+  filter(perc_specie_rev >= 0.05) %>% 
+  filter(n_year_fishing >= 3) %>%
+  select(VESSEL_NUM) %>% unique() %>% mutate(d_MSQD_fleet = 1)
+
+
+# Which are the vessel that harvest both PSDN and MSQD?
+squid.and.psdn <- merge(psdn.fleet, msqd.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = FALSE) %>%
+  select(VESSEL_NUM) %>% unique() %>%  mutate(d_PSDN_and_MSQD = 1)
+
+# Which are the vessel that harvest only MSQD?
+only.msqd <- msqd.fleet %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>% 
+  filter(is.na(d_PSDN_and_MSQD)) %>% select(VESSEL_NUM) %>% unique() %>% mutate(d_onlyMSQD = 1)
+
+# Which are the vessel that harvest only PSDN?
+only.psdn <- psdn.fleet %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>% 
+  filter(is.na(d_PSDN_and_MSQD)) %>% select(VESSEL_NUM) %>% unique() %>% mutate(d_onlyPSDN = 1)
+
+rm(total.revenue)
+
+```
+
+From 2000 to 2014, there are 74 vessels that participate in both Pacific sardine and market squid fisheries, while 26 vessel participate in the Pacific sardine but not in the market squid fishery, and  82 vessels participate in the market squid fishery but not in the Pacific sardine fishery. From this calculation, we can infer that it is more likely that a vessel that harvest Pacific sardine will also harvest market squid, instead of the opposite. This is also reflected in Figure \ref{fig:switching}, which shows the number of vessel that harvest squid in a year conditional they also harvest sardine, and the number of vessel that harvest sardine in a year conditional that they also harvest squid. 
+
 
 ## Effort susbsitution ## 
 
