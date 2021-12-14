@@ -31,6 +31,8 @@ header-includes:
   \floatplacement{figure}{H}
   \usepackage{times}
   \usepackage{setspace}
+  \usepackage{rotating}
+  \clearpage
   \setstretch{1.5}
 output:
   pdf_document:
@@ -422,9 +424,7 @@ These trends does not coincide with the perception that stalkholders have about 
 
 Before continuing our analysis, we have to verify whether there is actually switching behavior between CPS species. We conduct a cluster analysis to categorize the different portfolio that fisher manage during a year. For this we conduct our cluster analysis using a hierarchical clustering method. This method have been used before in fisheries to define *metiers* in discrete choice models [@vermard2008]. This approach do not require to define de number of cluster as is chosen within the algorithm. There are different method to compute the distance between two clusters and conduct the algorithm. We use the Ward's method in our study similar to XXX. The goal of this method is to reduce the within-cluster variance. The algorithm start with all observation in a cluster and then merge in each step the two cluster with the minimum distance between-cluster. The analysis include commercial vessels that have harvest CPS species or have used gear that the CPS generally use at least one during the period 2000-2015. 
 
-We start our analysis including Pacific sardine, market squid, Pacific mackerel, Jack mackerel, Pacific bonito and Bluefin tuna as species where substitution is likely [@SAFE2020].
-
-
+We start our analysis including Pacific sardine, market squid, Pacific mackerel, Jack mackerel, Pacific bonito and Bluefin tuna as species where substitution is likely [@SAFE2020]. The results for clustering are presented in Table \ref{Table:cluster_all}. Many of vessel belong to cluster that can be considered as single-species. For instance vessel belonging to Cluster 1 in average 99.48% of the total landings correspond to market squid. Thus, this vessel only focused on this species. An interesting cluster is Cluster 8. In average, 61.42\% of of the total landing registered for vessel associated to this cluster comes from market squid, 26.07\% from Pacific sardine, 5.92\% from Pacific mackerel, 3.5\% from Northern anchovy and the remaining 3\% comes from Jack mackerel, Pacific bonito, Bluefin tuna and Unspecified mackerel.
 
 ```{r cluster_analysis, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 ## Calculate share of revenue of species by vessel during a month ##
@@ -461,7 +461,14 @@ clusterCut <- as.data.frame(cutree(clusters, 10))
       summarise(mean.CMCK = mean(CMCK), mean.MSQD = mean(MSQD), mean.NANC = mean(NANC), mean.JMCK = mean(JMCK), 
                 mean.PBNT = mean(PBNT), mean.PSDN = mean(PSDN), mean.BTNA = mean(BTNA), mean.UMCK = mean(UMCK),
                 count = n())
-    xtable(PacFIN.clusters)
+    
+PacFIN.clusters <- PacFIN.clusters[,-1]
+colnames(PacFIN.clusters) = c("Pacific\nmackerel", "Market squid", "Northern anchovy", 
+                              "Jack\nmakerel", "Pacific bonito", "Pacific sardine", 
+                              "Bluefin tuna", "Unspecified mackerel", "Obs.") 
+    
+print(xtable(PacFIN.clusters, caption = 'Cluster by percentage of landings by species.\\label{Table:cluster_all}',
+             type = "latex"), floating = TRUE, floating.environment = "sidewaystable", comment=FALSE,  caption.placement = "top")
   
 ##-------------------------------
 # Compute Agglomerative coefficient
@@ -482,9 +489,7 @@ clusterCut <- as.data.frame(cutree(clusters, 10))
 
 ```
 
-Clearly, there is a subgroup of vessel where we observe substitution between species. 
-
-
+Let us just focus on a subgroup of species identified in Cluster 8: Pacific mackerel, market squid, Northern anchovy and Pacific sardine. The clustering results is presented on Table \ref{Table:clust_sel}. The first four clusters correspond to vessels that focus their effort on single species. Cluster 5 despict vessel where substituion happen between CPS species, mostly between market squid and Pacific sardine. 
 
 ```{r cluster_analysis_selec, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 ## Calculate share of revenue of species by vessel during a month ##
@@ -509,7 +514,7 @@ PacFIN.spread <- PacFIN.month.CPS %>% filter(LANDING_YEAR >=2000) %>%  filter(LA
 col <- (ncol(PacFIN.spread.perc)-1)  
   PacFIN.spread.perc[is.na(PacFIN.spread.perc)] <- 0
   clusters <- hclust(dist(PacFIN.spread.perc[, 2:col]), method = "ward.D")
-  plot(clusters, cex = 0.1, hang = -1)
+  # plot(clusters, cex = 0.1, hang = -1)
 
 ## Construct table ##  
 clusterCut <- as.data.frame(cutree(clusters, 5))
@@ -517,7 +522,13 @@ clusterCut <- as.data.frame(cutree(clusters, 5))
     PacFIN.clusters <- PacFIN.spread.perc %>% group_by(cluster) %>%
       summarise(mean.CMCK = mean(CMCK), mean.MSQD = mean(MSQD), mean.NANC = mean(NANC), mean.PSDN = mean(PSDN),
                 count = n())
-    xtable(PacFIN.clusters)
+ 
+    
+PacFIN.clusters <- PacFIN.clusters[,-1]
+colnames(PacFIN.clusters) = c("Pacific mackerel", "Market squid", "Northern anchovy", 
+                              "Pacific sardine", "Obs.") 
+
+print(xtable(PacFIN.clusters, caption = 'Cluster by percentage of landings by species (main species).\\label{Table:clust_sel}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 ```
 
@@ -538,22 +549,7 @@ clusterCut <- as.data.frame(cutree(clusters, 5))
 
 <!-- ``` -->
 
-
-<!-- WORKSHOP: though there is less target switching in the northern CCS. -->
-
-
-
-
-
-
-<!--"SPECIFICS: But there is a limit to how far its profitable to truck -->
-<!-- fish. Between Coos Bay and San Francisco there is very little opportunity for large -->
-<!-- volume (squid) landings. If the squid biomass shifted north 200-300 miles, a lack of -->
-<!-- infrastructure could mean that squid goes unharvested." (CPS Workshop) "Spoilage of CPS is rapid, so vessels remain as close to a port as possible and usually return within one day; there could be large impacts if CPS move into areas where there is no nearby infrastructure to land catches" (CPS Workshop) -->
-<!-- "NW and SW communities differents" (Workshop) -->
-
-<!-- Projecting the effect on climate change on the CPS fishery is not straightforward. Some fishers communities are more vulnerable to others to changes in species abuandance. Port constraints and fleet heterogeneity reduce the set of species that fishers are able to choose for harvest (**FROM CPS WORKSHOP**), while fixed contracts with processor also reduce switching capacity between species in the short-run. Our paper... ***HOW WE SOLVE THIS?***  -->
-
+Using the cluster analysis we can identify the characteristic of the vessels that are likely to switch and the vessel that are historically single-species focused. 
 
 
 ```{r switching, include=FALSE}
@@ -748,6 +744,21 @@ ggplot(data=df, aes(x=MonthDay, y=perc)) +
   scale_y_percent(name = "Percentage of vessels harvesting squid" )
 rm(df)
 ```
+
+
+It is well known that substitution between Pacific sardine and market squid is more likely in the south of the California Current System as there is a fishery for both species, while in the north there is less target switching (CPS Workshop).
+
+
+<!--"SPECIFICS: But there is a limit to how far its profitable to truck -->
+<!-- fish. Between Coos Bay and San Francisco there is very little opportunity for large -->
+<!-- volume (squid) landings. If the squid biomass shifted north 200-300 miles, a lack of -->
+<!-- infrastructure could mean that squid goes unharvested." (CPS Workshop) "Spoilage of CPS is rapid, so vessels remain as close to a port as possible and usually return within one day; there could be large impacts if CPS move into areas where there is no nearby infrastructure to land catches" (CPS Workshop) -->
+<!-- "NW and SW communities differents" (Workshop) -->
+
+<!-- Projecting the effect on climate change on the CPS fishery is not straightforward. Some fishers communities are more vulnerable to others to changes in species abuandance. Port constraints and fleet heterogeneity reduce the set of species that fishers are able to choose for harvest (**FROM CPS WORKSHOP**), while fixed contracts with processor also reduce switching capacity between species in the short-run. Our paper... ***HOW WE SOLVE THIS?***  -->
+
+
+
 
 ## Gear
 
