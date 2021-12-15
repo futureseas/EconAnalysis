@@ -112,7 +112,8 @@ Fishing portfolios are an important mechanism to safeguard fishers livelihood. D
 
 In this study we analyze how changing in spatial distribution as well as the implementation of a fishery's closure affects landing and fisher participation of the two more important (in terms of landings and revenue) coastal pelagic species (CPS) harvested in U.S. West Coast: Pacific sardine and market squid. Fisheries closures are a interesting policy instrument when fisher target more than one species as give us the opportunity to study how fisher change behavior under the exclusion of one alternative. However, fewer studies have study the effect of one fishery closure in other fishery outcomes. An example is @vermard2008 that study the effect of an anchovy closure in trip choices conducted by the Bay of Biscai pelagic fleet, <!-- They use their estimate pre-closure to simulate the anchovy closure and compare with actual data. -->. Another example is  @richerson2017 who study the effect of salmon closures in vessel participation on salmon fishery and other fisheries. In this paper, we study the effect of the 2015 Pacific sardine closure implemented after the over-exploitation of the fishery, as well as the effect of seasonal closures after reaching a catch limit target. 
 
-Studying the effect of closures and changes in species distribution is not straightforward as different response can be observed to the same conditions as fishers and vessel are heterogeneous [@zhang2011]. Moreover, we have to consider that species are interconnected, at least economically if not ecologically, so a multiple species framework that considering interrelation between them is necessary. Our research give a step further and analyze the CPS fishery as one where fisher can target multiple species in line with recent literature that consider this setting in their analysis [@richerson2017]. Our goal is to understand how changing in species distribution, seasonal and total closures affect vessel responses in landing amount and participation, the substitution between species, and to what extent future projected climate will affect landings, catch composition and participation of fishers.
+Studying the effect of closures and changes in species distribution is not straightforward as different response can be observed to the same conditions as fishers and vessel are heterogeneous [@zhang2011]. Moreover, vessel heterogeneity and port constraint will dictate the possible set of species that a fisher is able to choose.
+Species are also interconnected, at least economically if not ecologically. Thus, any regulation or ecological disruption that affect one species would affect fisher's target decision in other species. Therefore, a multiple targeting species framework that considering interrelation between them it is necessary to further undertand the CPS fishery. Our research give a step further and analyze the CPS fishery as one where fisher can target multiple species in line with recent literature that consider this setting in their analysis [@richerson2017]. Our goal is to understand how changing in species distribution, seasonal and total closures affect vessel responses in landing amount and participation, the substitution between species, and to what extent future projected climate will affect landings, catch composition and participation of fishers.
 
 Our papers builds on the model developed by @smith2021potential for sardine landings. We expand their model including a landing equation for the four species analyzed in this study and estimating a multilevel Bayesian model in order to incorporate heterogeneity between fleets and ports areas. Moreover, we use the probability of presence obtained from Species Distribution Models (SDM) as explanatory variable instead of landing by species. This allows us to project landing over time using SDM predictions for different climate scenarios incorporating projected substitution between species. We analyze how species distribution interact between each others. We expect that this additions allows us to characterize better how fishers portfolio is composed, and also to understand better species interactions on catch rates. Additionally, we also estimate a multiple species participation model based on @richerson2017, expanding their analysis to the CPS fishery 
 <!-- in monthly basis, allowing to understand seasonality within fishing season -->
@@ -138,19 +139,6 @@ Coast-wide, the commercial fishery is currently have been closed since 2015 as t
 Regarding market squid, the fishery was unregulated under open access until permits became required in 1998. However, there were no limits to the number of permits issued by the authorities. In 2001 was the first time a Harvest Guideline (HG) was implemented for this fishery to 125,000 U.S. tons. Later, in 2005, the California Fish and Game Commission (CFGC) implemented the Market Squid Fisheries Management Plan (MSFMP), which reduced the fleet to a maximum of 73 vessels, limits the number of light boats to 34, reduced the HG to 118,000 U.S. tons and incorporate a weekend closure to allow for period of uninterrupted spawning [@SAFE2020]^[Vessel permits allow vessels to attract squid with light and use purse seine for harvest, Brail permits allow to attract squid with light and use brail gear, and light boat permits only allows to attract squid with lights] Oregon's market squid fishery just started in 2014 with few vessel targeting squid (15 in 2016 ans 11 in 2018), while in Washington there is no directed landings of market squid. In 2019 two permits were issued but with the intention to allow the possibility to deliver Oregon's market squid catch to Washington ports. 
 
 The fishing season for Pacific sardine in California have a peak in landings during the early summer to fall in the area of Monterrey, specifically in Moss Landing, while in Southern California, specifically in San Pedro and Terminal Island, occurs during the winter. Fishing seasons for Pacific sardine are shown in Panel (a) of Figure \ref{{fig:fish_season}}. In Oregon and Washington state, at Astoria and Ilwako/Chinook ports, respectively, the fishing season mostly happen in summer and early fall. Panel (b) shows that market squid fishing season in Southern California, specifically in San Pedro, Terminal Island and Ventura, goes from fall to winter, while in Northern California, specifically in Moss Landing and Monterrey, the season goes from late spring to summer. 
-
-<!-- ```{r psdn_month_by_state} -->
-<!-- q.psdn.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% -->
-<!--   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% -->
-<!--   group_by(LANDING_YEAR, LANDING_MONTH, PORT_NAME, AGENCY_CODE) %>% -->
-<!--   summarise(Landings_PSDN = sum(LANDED_WEIGHT_MTONS.sum)) -->
-<!-- ggplot(data=q.psdn.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) + -->
-<!--     geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + -->
-<!--   scale_x_continuous(name = "Month", breaks=1:12) + -->
-<!--   scale_y_continuous(name = "Landing of sardine" ) + -->
-<!--   facet_grid(~ AGENCY_CODE) -->
-<!-- rm(q.psdn.by.month) -->
-<!-- ``` -->
 
 ```{r psdn_msqd_month_by_port, echo=FALSE, fig.cap="Fishing season for Pacific sardine and Market squid (average monthly total harvest for the period 2000-2014).", message=FALSE, warning=FALSE}
 
@@ -201,35 +189,6 @@ g1 / g2
 
 rm(g1, g2, q.psdn.by.month, q.msqd.by.month)
 ```
-
-<!-- ```{r msqd_month_2015, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE} -->
-
-<!-- port_names <- as_labeller(c("SP" = "San Pedro", "HNM" = "Hueneme", "MNT" = "Monterrey", "MOS" = "Moss Landing",  -->
-<!--                                "LWC" = "Ilwaco / Chinook", "AST" = "Astoria",  -->
-<!--                                "PRN" = "Princeton/ Half Moon\nBay", "SF" = "San Francisco",  -->
-<!--                                "SLT" = "Sausalito", "TRM" = "Terminal Island", -->
-<!--                                "VEN" = "Ventura")) -->
-
-<!-- q.msqd.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2015) %>% -->
-<!--   filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>%   -->
-<!--   group_by(LANDING_YEAR, LANDING_MONTH, PACFIN_PORT_CODE) %>%  -->
-<!--   summarise(Landings_PSDN = sum(LANDED_WEIGHT_MTONS.sum)) %>%   -->
-<!--   group_by(LANDING_MONTH, PACFIN_PORT_CODE) %>%  -->
-<!--   summarise(Landings_PSDN = mean(Landings_PSDN)) %>% -->
-<!--     filter( PACFIN_PORT_CODE == "SP" | PACFIN_PORT_CODE == "VEN" | PACFIN_PORT_CODE == "TRM" |  -->
-<!--               PACFIN_PORT_CODE == "MOS" | PACFIN_PORT_CODE == "MNT") %>% -->
-<!--     mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, "SP", "TRM", "VEN", "MNT", "MOS")) -->
-
-<!-- ggplot(data=q.msqd.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) + -->
-<!--     geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) +  -->
-<!--   scale_x_continuous(name = "Month", breaks=1:12) + -->
-<!--   scale_y_continuous(name = "Landings (M tons)" ) +  -->
-<!--   facet_grid(~ PACFIN_PORT_CODE, labeller = port_names) + ggtitle("(b) Market squid") +  -->
-<!--   theme(plot.title = element_text(size=9, face="bold.italic")) -->
-
-<!-- rm(q.msqd.by.month) -->
-
-<!-- ``` -->
 
 
 # Data analysis
@@ -289,6 +248,7 @@ g3 <- ggplot(revenue.avg.year, aes(PACFIN_SPECIES_CODE, AFI_EXVESSEL_REVENUE.sum
 rm(g1, g2, g3, landings.year, landings.avg.year, revenue.year, revenue.avg.year, price.year, price.avg.year)
 
 ```
+
 ```{r datasets_year, include=FALSE}
 # Calculate number of vessels by species per month # 
 nvessel.year <- PacFIN.month.CPS %>% 
@@ -380,42 +340,41 @@ rm(g1, g2, g3, g4, df, landing.nvessels.year.sel, coeff)
 ```
 
 
-<!-- ```{r ts_Q_P_V, eval=FALSE, fig.cap="Yearly total landing, warning=FALSE, average price and total number of vessel by CPS species (1981 - 2020).\\label{fig:ts_landings}", message=FALSE, include=FALSE} -->
+```{r ts_Q_P_n, eval=FALSE, fig.cap="Yearly total landing, warning=FALSE, average price and total number of vessel by CPS species (1981 - 2020).\\label{fig:ts_landings}", message=FALSE, include=FALSE}
 
-<!-- g1 <- ggplot(landing.price.year,  -->
-<!--              aes(x = LANDING_YEAR, y = LANDED_WEIGHT_MTONS.sum.sum, group = PACFIN_SPECIES_CODE, colour = PACFIN_SPECIES_CODE)) +  -->
-<!--   geom_line(size=1) + scale_x_continuous(name = "Year") + -->
-<!--   scale_y_continuous(name = "Landings (MTons)") +  -->
-<!--   theme(legend.position = "right", plot.title = element_text(size=9, face="bold.italic"),  -->
-<!--         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +  -->
-<!--   ggtitle("(a) Landings") +   guides(colour=guide_legend(title="Species: ")) +  -->
-<!--   scale_color_brewer(palette="Set2", labels=c("MSQD" = "Market Squid",  -->
-<!--                                               "NANC" = "Northern Anchovy", -->
-<!--                                               "PSDN" = "Pacific Herring", -->
-<!--                                               "PSDN" = "Pacific Sardine")) -->
+g1 <- ggplot(landing.price.year,
+             aes(x = LANDING_YEAR, y = LANDED_WEIGHT_MTONS.sum.sum, group = PACFIN_SPECIES_CODE, colour = PACFIN_SPECIES_CODE)) +
+  geom_line(size=1) + scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "Landings (MTons)") +
+  theme(legend.position = "right", plot.title = element_text(size=9, face="bold.italic"),
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+  ggtitle("(a) Landings") +   guides(colour=guide_legend(title="Species: ")) +
+  scale_color_brewer(palette="Set2", labels=c("MSQD" = "Market Squid",
+                                              "NANC" = "Northern Anchovy",
+                                              "PSDN" = "Pacific Herring",
+                                              "PSDN" = "Pacific Sardine"))
 
-<!-- g2 <- ggplot(landing.price.year, -->
-<!--              aes(x = LANDING_YEAR, y = AFI_PRICE_PER_KG.mean.mean, group = PACFIN_SPECIES_CODE, colour = PACFIN_SPECIES_CODE)) +  -->
-<!--   geom_line(size=1) + scale_x_continuous(name = "Year") + -->
-<!--   scale_y_continuous(name = "Price ($/Kg)")  +  -->
-<!--    scale_color_brewer(palette="Set2") +  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"),  -->
-<!--         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +  -->
-<!--   ggtitle("(b) Prices") -->
+g2 <- ggplot(landing.price.year,
+             aes(x = LANDING_YEAR, y = AFI_PRICE_PER_KG.mean.mean, group = PACFIN_SPECIES_CODE, colour = PACFIN_SPECIES_CODE)) +
+  geom_line(size=1) + scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "Price ($/Kg)")  +
+   scale_color_brewer(palette="Set2") +  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"),
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+  ggtitle("(b) Prices")
 
 
-<!-- g3 <- ggplot(nvessel.year, aes(x = LANDING_YEAR, y = n_vessel, group = PACFIN_SPECIES_CODE, colour = PACFIN_SPECIES_CODE)) +  -->
-<!--   geom_line(size=1) + scale_x_continuous(name = "Year") + -->
-<!--   scale_y_continuous(name = "# of vessels") +   theme(legend.position="none")  +  -->
-<!--    scale_color_brewer(palette="Set2") +  theme(plot.title = element_text(size=9, face="bold.italic"),  -->
-<!--         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +  -->
-<!--   ggtitle("(c) Number of vessels") -->
+g3 <- ggplot(nvessel.year, aes(x = LANDING_YEAR, y = n_vessel, group = PACFIN_SPECIES_CODE, colour = PACFIN_SPECIES_CODE)) +
+  geom_line(size=1) + scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "# of vessels") +   theme(legend.position="none")  +
+   scale_color_brewer(palette="Set2") +  theme(plot.title = element_text(size=9, face="bold.italic"),
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+  ggtitle("(c) Number of vessels")
 
-<!-- (g2 + g1) / g3 -->
+(g2 + g1) / g3
 
-<!-- rm(g1, g2, g3) -->
+rm(g1, g2, g3)
 
-<!-- ``` -->
-
+```
 
 These trends does not coincide with the perception that stalkholders have about switching behavior. They claim that after the Pacific sardine closure many vessels in California switch to market squid.^[This was stated by a participant from a workshop that reunite U.S. West Coast fishery stalkholders.] Another hypothesis that could explain the lower landings levels observed  for market squid in the last decade could be changing in species availability and substitution to another species more profitable than market squid. According to the stalkholders, substitution of Pacific sardine may occur with other species such as mackerel, tuna, or anchovy. Our empirical strategy is designed to address various concerns about omitted variables to obtain clean causal effect of a set of explanatory variables.
 
@@ -746,21 +705,10 @@ rm(df)
 ```
 
 
-It is well known that substitution between Pacific sardine and market squid is more likely in the south of the California Current System as there is a fishery for both species, while in the north there is less target switching (CPS Workshop).
-
-
-<!--"SPECIFICS: But there is a limit to how far its profitable to truck -->
-<!-- fish. Between Coos Bay and San Francisco there is very little opportunity for large -->
-<!-- volume (squid) landings. If the squid biomass shifted north 200-300 miles, a lack of -->
-<!-- infrastructure could mean that squid goes unharvested." (CPS Workshop) "Spoilage of CPS is rapid, so vessels remain as close to a port as possible and usually return within one day; there could be large impacts if CPS move into areas where there is no nearby infrastructure to land catches" (CPS Workshop) -->
-<!-- "NW and SW communities differents" (Workshop) -->
-
-<!-- Projecting the effect on climate change on the CPS fishery is not straightforward. Some fishers communities are more vulnerable to others to changes in species abuandance. Port constraints and fleet heterogeneity reduce the set of species that fishers are able to choose for harvest (**FROM CPS WORKSHOP**), while fixed contracts with processor also reduce switching capacity between species in the short-run. Our paper... ***HOW WE SOLVE THIS?***  -->
 
 
 
-
-## Gear
+### Gear
 
 Substitution between species is likely to be related with the gear that a vessel or fisher have already invest for their fishing activities. However, a vessel is not restricted to an specific gear. They can switch between different alternatives. In average a vessel use 1.4 gears for their fishing activities in out sample data, with an standard deviation of 0.72. If we only focus in CPS species, a vessel switch between 1.42 gears in average to harvest market squid, 1.16 gears in average to harvest Northern anchovy, 1.16 gears in average to harvest Pacific herring and 1.28 in average to harvest Pacific sardine. In terms of gears, midwater trawl and seine allow for the highest level of substitution between CPS species. In average, a vessel using midwater trawl harvest 2.36 CPS species, while a vessel using seine harvest in average 1.91 CPS species (see Table \ref{n_CPS_gear})
 
@@ -902,6 +850,16 @@ rm(PacFIN.CPS, table)
 
 
 ## Port landings
+
+
+It is well known that substitution between Pacific sardine and market squid is more likely in the south of the California Current System as there is a fishery for both species, while in the north there is less target switching (CPS Workshop). Within California boundaries, between Coos Bay and San Francisco, there are ports with little opportunity to handle large volumes of market squid landings due to a lack of infrastructure. It is possible to truck landings to processor from these ports, but due to transport cost this is unlikely to be profitable. Thus, a shifting north of the fishing ground of market squid could imply that market squid is not targeted, independently of its biomass levels (CPS workshop)
+
+
+<!-- "Spoilage of CPS is rapid, so vessels remain as close to a port as possible and usually return within one day; there could be large impacts if CPS move into areas where there is no nearby infrastructure to land catches" (CPS Workshop) -->
+<!-- "NW and SW communities differents" (Workshop) -->
+
+
+
 
 In average, a vessel land in 4.8 ports, with an standard deviation of 3.94. 
 
