@@ -195,9 +195,7 @@ rm(g1, g2, q.psdn.by.month, q.msqd.by.month)
 
 ## Landing, prices and revenue
 
-Landings in the CPS fishery have been mainly dominated by Pacific sardine and market squid during the period 1981-2014 as is shown in Panel (a) in Figure \ref{fig:avg_lan_rev}. Average annual prices are shown in Panel (b). Average prices are low for all CPS species in comparison to bluefin tuna. Pacific bonito is the only one between CPS 
-species that it prices is above 1.5 USD. This lower price means that revenue are mainly determined by ladings levels. Therefore, similar to what we observe in Panel (a), we can observe in Panel (c) that market squid and Pacific sardine are the principal species in terms of revenue.
-
+Pacific sardine and market squid mainly dominated landings in the CPS fishery during the period 1981-2014, as is shown in Panel (a) in Figure \ref{fig:avg_lan_rev}. Panel (b) shows average annual prices. Average prices are low for all CPS species in comparison to bluefin tuna. Pacific bonito is the only one between CPS species whose average price is above 1.5 USD. This lower average price means that ladings levels mainly determine revenue. Therefore, similar to what we observe in Panel (a), we can observe in Panel (c) that market squid and Pacific sardine are the principal species in terms of revenue.
 
 ```{r avg_land_rev_price, echo=FALSE, fig.cap="Average annual landings, message=FALSE, warning=FALSE, prices and revenues by species (1981-2020).\\label{fig:avg_lan_rev}"}
 ## Landings chart
@@ -265,7 +263,7 @@ landing.price.year <- summaryBy(LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PER_KG.mean 
 
 <!-- <<<ISAAC: Need some more details on anchovy and herring fisheries, these I believe are constrained by management and geography, so may not be real "choices" for the substitution. >>>  -->
 
-Figure \ref{fig:ts_landings_price} shows the evolution of landings and prices and vessel participation by species during the period 1981-2020. We can observe in panel (a) that real prices for market squid have been increasing during the last two decades. Incentives should be high for landing market squid. However, we observe a sharp decline on market squid landings in the last decade.^[Prices for forage species are likely to be determined in the world market, as the California current landings for forage species correspond to a small share of the total landings in the world]. Regarding Pacific sardine, we observe that the price have been stable after 1990, while landing reached a peak in 2008 and there is a posterior decline in landing until the fishery close in 2015. This trend suggest that Pacific sardibe landing are mostly determine by abundance.
+Figure \ref{fig:ts_landings_price} shows the evolution of landings and prices and vessel participation by species during the period 1981-2020. In Panel (a), we can observe that real prices for market squid have been increasing during the last two decades. Incentives should be high for landing market squid. However, we observe a sharp decline in market squid landings in the last decade.^[Prices for forage species are likely to be determined in the world market, as the California current landings for forage species correspond to a small share of the total landings in the world]. Regarding Pacific sardine, we observe that the price has been stable after 1990, while landing peaked in 2008, and there is a posterior decline in landing until the fishery closed in 2015. This trend suggests that abundance primarily determines Pacific sardine landings.
 
 ```{r ts_landing_price, echo=FALSE, fig.cap="Yearly total landing v/s, warning=FALSE, average price by CPS species (1981 - 2020).\\label{fig:ts_landings_price}", message=FALSE}
 landing.price.year.sel <- landing.price.year %>% 
@@ -307,7 +305,7 @@ coeff <- 100000
   
 ```
 
-A potential hypothesis for the observed decline in market squid landings could be that the lower abundance and the consequently closure of the Pacific sardine fishery also affect vessels' decision to participate in the market squid fishery. Maybe fishers stop fishing at all as the exclusion of Pacific sardine from their portfolio reduce the ability of fisher to overcome income risk through diversification [@kasperski2013]. We have some suggestive evidence from this in Figure \ref{fig:ts_landings}, which shows the evolution of Pacific sardine landings and number of vessels landing market squid during the period 1981-2020. In the first year of Pacific sardine closure, we observe that the number of vessel landings Market squid decrease from 99 vessels in 2014 to 74 vessel in 2015. After this abrupt decline, we observe a slightly recovery, reaching 109 vessels in 2020. Nevertheless, this number is below the levels observed in 2012 with 139 vessels landings market squid. 
+A potential hypothesis for the observed decline in market squid landings could be that the lower abundance and the consequent closure of the Pacific sardine fishery also affect vessels' decision to participate in the market squid fishery. Maybe fishers stop fishing at all as the exclusion of Pacific sardine from their portfolio reduces fisher's ability to overcome income risk through diversification [@kasperski2013]. We have some suggestive evidence from this in Figure \ref{fig:ts_landings}, which shows the evolution of Pacific sardine landings and the number of vessels landing market squid during the period 1981-2020. In the first year of the Pacific sardine closure, we observe that the number of vessels that lands Market squid decreased from 99 vessels in 2014 to 74 vessels in 2015. After this abrupt decline, we observe a slight recovery, reaching 109 vessels in 2020. Nevertheless, the level observed in 2020 is below the levels observed in 2012 with 139 vessels landings market squid during that year. 
 
 ```{r ts_landings_vessels, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Landing of Pacific sardine v/s Number of vessel landing market squid.\\label{fig:ts_landings}"}
 landing.nvessels.year.sel <- landing.price.year %>%
@@ -375,16 +373,16 @@ rm(g1, g2, g3)
 
 ```
 
-These trends does not coincide with the perception that stalkholders have about switching behavior. They claim that after the Pacific sardine closure many vessels in California switch to market squid.^[This was stated by a participant from a workshop that reunite U.S. West Coast fishery stalkholders.] Another hypothesis that could explain the lower landings levels observed  for market squid in the last decade could be changing in species availability and substitution to another species more profitable than market squid. According to the stalkholders, substitution of Pacific sardine may occur with other species such as mackerel, tuna, or anchovy. Our empirical strategy is designed to address various concerns about omitted variables to obtain clean causal effect of a set of explanatory variables.
+These trends do not coincide with stakeholders' perceptions about switching behavior. They claim that many vessels in California switched to market squid after the Pacific sardine closure.^[Stalkholders state this during their participation in a workshop that reunited U.S. West Coast fishery .] Another hypothesis that could explain the lower landings levels observed for market squid in the last decade could be the reduction in market squid's species availability and, therefore, the substitution to another species more profitable than market squid. According to the stakeholders, Pacific sardine's substitution may occur with other species such as mackerel, tuna, or anchovy. We design our empirical strategy to address various concerns about omitted variables to obtain clean causal effects of a set of explanatory variables.
 
 
 ## Switching behavior
 
 ### Cluster analysis
 
-Before continuing our analysis, we have to verify whether there is actually switching behavior between CPS species. We conduct a cluster analysis to categorize the different portfolio that fisher manage during a year. For this we conduct our cluster analysis using a hierarchical clustering method. This method have been used before in fisheries to define *metiers* in discrete choice models [@vermard2008]. This approach do not require to define de number of cluster as is chosen within the algorithm. There are different method to compute the distance between two clusters and conduct the algorithm. We use the Ward's method in our study similar to XXX. The goal of this method is to reduce the within-cluster variance. The algorithm start with all observation in a cluster and then merge in each step the two cluster with the minimum distance between-cluster. The analysis include commercial vessels that have harvest CPS species or have used gear that the CPS generally use at least one during the period 2000-2015. 
+Before continuing our analysis, we have to verify whether there is switching behavior between CPS species. We conduct a cluster analysis to categorize the different portfolios fishers manage during a year. For this, we conduct our cluster analysis using a hierarchical clustering method. This method has been used before in fisheries to define *metiers* in discrete choice models [@vermard2008]. This approach does not require defining the number of clusters chosen within the algorithm. There are different methods to compute the distance between two clusters and conduct the algorithm. We use Ward's method in our study, similar to [@vermard2008]. The goal of this method is to reduce the within-cluster variance. The algorithm starts with all observation in a cluster and then merge in each step the two cluster with the minimum distance between cluster. The analysis includes commercial vessels that have harvested CPS species or used gear that the CPS generally uses at least one during 2000-2015. 
 
-We start our analysis including Pacific sardine, market squid, Pacific mackerel, Jack mackerel, Pacific bonito and Bluefin tuna as species where substitution is likely [@SAFE2020]. The results for clustering are presented in Table \ref{Table:cluster_all}. Many of vessel belong to cluster that can be considered as single-species. For instance vessel belonging to Cluster 1 in average 99.48% of the total landings correspond to market squid. Thus, this vessel only focused on this species. An interesting cluster is Cluster 8. In average, 61.42\% of of the total landing registered for vessel associated to this cluster comes from market squid, 26.07\% from Pacific sardine, 5.92\% from Pacific mackerel, 3.5\% from Northern anchovy and the remaining 3\% comes from Jack mackerel, Pacific bonito, Bluefin tuna and Unspecified mackerel.
+We start our analysis including Pacific sardine, market squid, Pacific mackerel, Jack mackerel, Pacific bonito, and Bluefin tuna as species where substitution is likely [@SAFE2020].  Table \ref{Table:cluster_all} present the results for the clustering analysis. Many vessels belong to a cluster that describes a portfolio considered as single-species. For instance, a vessel belonging to Cluster 1 in average 99.48% of the total landings correspond to market squid. Thus, this vessel only focused on this species. An exciting cluster is Cluster 8. On average, 61.42\% of the total landing registered for vessels associated with this cluster comes from market squid, 26.07\% from Pacific sardine, 5.92\% from Pacific mackerel, 3.5\% from Northern anchovy, and the remaining 3\% comes from Jack mackerel, Pacific bonito, Bluefin tuna, and Unspecified mackerel.
 
 ```{r cluster_analysis, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 ## Calculate share of revenue of species by vessel during a month ##
@@ -449,7 +447,7 @@ print(xtable(PacFIN.clusters, caption = 'Cluster by percentage of landings by sp
 
 ```
 
-Let us just focus on a subgroup of species identified in Cluster 8: Pacific mackerel, market squid, Northern anchovy and Pacific sardine. The clustering results is presented on Table \ref{Table:clust_sel}. The first four clusters correspond to vessels that focus their effort on single species. Cluster 5 depict vessel where substitution happen between CPS species, mostly between market squid and Pacific sardine. 
+Let us focus on a subgroup of species identified in Cluster 8: Pacific mackerel, market squid, Northern anchovy, and Pacific sardine. Table \ref{Table:clust_sel} present the result from the clustering analysis using this subgroup of species. The first four clusters correspond to vessels that focus on single species. In contrast, Cluster 5 depicts vessel' portfolios where substitution happens between CPS species, mostly between market squid and Pacific sardine. Specifically, on average, 55.41\% of the total landings come from market squid, 30.57\% comes from Pacific sardine, 9.89\% comes from Pacific mackerel, and 4.12\% comes from Northern anchovy. Clustering our data allow us to identify the characteristic of the vessels that are likely to switch between species. In the following subsections, we study gear used and port landed by vessel depending on the species landed and the vessel's cluster. 
 
 ```{r cluster_analysis_selec, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 ## Calculate share of revenue of species by vessel during a month ##
@@ -494,8 +492,6 @@ rm(PacFIN.spread, col, clusters, clusterCut, PacFIN.clusters)
 
 ```
 
-Using the cluster analysis we can identify the characteristic of the vessels that are likely to switch and the vessel that are historically single-species focused. 
-
 ```{r dataframe_cluster, include=FALSE}
 
 PacFIN.month.cluster <- PacFIN.spread.perc %>% select('VESSEL_NUM', 'cluster') %>% unique() %>%
@@ -507,7 +503,7 @@ rm(PacFIN.spread.perc)
 
 ## Fleet characteristics
 
-<!-- "Peer groups of vessels from the same port and using the same gear type are often subject to a common set of spatial constraints (for example, shared local ecological knowledge, vessel mobility) and, as a result, typically exhibit distinct and relatively enduring spatial patterns of ocean use. The ‘communities-at-sea’ concept11 recognizes that shared patterns of ocean" Rogers -->
+Substitution between species is likely to be related to the gear that a vessel or fisher have invested in for their fishing activities and the port they commonly land. These two characteristics will dictate the potential species choices that a vessel has to choose. @richerson2017 call species choices and other spatial patterns of ocean use as spatial constraints. Vessels that share the same spatial constraints share local ecological knowledge and vessel mobility [@richerson2017]. Nevertheless, vessels are not restricted to a specific gear and port. In theory, they can switch between different gear alternatives and choose different ports to land. Therefore, they can modify the spatial constraints that they face. Nevertheless, switching between gears that are entirely different could be costly, and landing in a port without the infrastructure to land the targeted is unlikely. We analyze our data to understand better how gears and ports are related to switching between species and whether individual vessels actually switch gears and ports during the historical data.  
 
 ### Gear use
 
@@ -517,7 +513,8 @@ nrow(PacFIN.species)
 
 ```
 
-Substitution between species is likely to be related with the gear that a vessel or fisher have already invest for their fishing activities. However, a vessel is not restricted to an specific gear. They can switch between different alternatives. In average a vessel use 1.4 gears for their fishing activities in our sample data, with an standard deviation of 0.72. If we only focus in CPS species, a vessel switch between 1.42 gears in average to harvest market squid, 1.16 gears in average to harvest Northern anchovy, 1.16 gears in average to harvest Pacific herring and 1.28 in average to harvest Pacific sardine. In terms of gears, midwater trawl and seine allow for the highest level of substitution between CPS species. In average, a vessel using midwater trawl harvest 2.36 CPS species, while a vessel using seine harvest in average 1.91 CPS species (see Table \ref{n_CPS_gear})
+On average, in our sample data, a vessel uses 1.4 gears for its fishing activities, with a standard deviation of 0.72. If we only focus on the CPS fleet, a vessel switches between 1.42 gears on average to harvest market squid, 1.16 gears on average to harvest Northern anchovy, and 1.16 gears on average to harvest Pacific herring 1.28 in average to harvest Pacific sardine. In terms of gears, midwater trawl and seine allow for the highest substitution level between CPS species. On average, a vessel using midwater trawl harvests 2.36 CPS species, while a vessel using seine harvest in average 1.91 CPS species (see Table \ref{n_CPS_gear})
+
 
 ```{r n_gears_used_vessels, eval=FALSE, include=FALSE}
 # How many gears a vessel use in the dataset
@@ -823,129 +820,130 @@ rm(port_names, landings.by.sel.ports, landings.by.port.year)
 **<< SHOULD WE STUDY HOW FISHING GROUNDS CHANGE FROM PORTS (THUS DISTANCE TO FISHING GROUNDS AND WEATHER VARIABLES AFFECTED), LIKE SELDEN (2020) AND PAPAIOANNOU (2021)??? IN BOTH MODELS? >>**
 
 
-### Vessel lenght 
-<!-- 1) What are the characteristics of a vessel depending on gear, and also on Species -->
-There is heterogeneity on vessel characteristics depending on the gear and target species. In general, vessel harvesting Pacific herring tends to be smaller in length (see Table \ref{Table:length}), except for vessels using pole. Vessels using seine and harvesting Market squid, Pacific sardine and Northern anchovy have similar length, suggesting easier substitution between these species. About fishing days...
+<!-- ### Vessel lenght  -->
+<!-- <!-- 1) What are the characteristics of a vessel depending on gear, and also on Species --> -->
+<!-- There is heterogeneity on vessel characteristics depending on the gear and target species. In general, vessel harvesting Pacific herring tends to be smaller in length (see Table \ref{Table:length}), except for vessels using pole. Vessels using seine and harvesting Market squid, Pacific sardine and Northern anchovy have similar length, suggesting easier substitution between these species. About fishing days... -->
 
-```{r lenght_by_species_gear, echo=FALSE, results='asis'}
+<!-- ```{r lenght_by_species_gear, echo=FALSE, results='asis'} -->
 
-PacFIN.CPS <- PacFIN.month %>% 
-  filter(PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG"))  %>% 
-  filter(PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>%
-  filter(LANDING_YEAR >= 2010 )
+<!-- PacFIN.CPS <- PacFIN.month %>%  -->
+<!--   filter(PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG"))  %>%  -->
+<!--   filter(PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>% -->
+<!--   filter(LANDING_YEAR >= 2010 ) -->
 
-table <- xtabs(VESSEL_LENGTH.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE,
-               aggregate(VESSEL_LENGTH.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE, PacFIN.CPS, mean))
-# table
-colnames(table) = c("Market squid", "Northern Anchovy", "Pacific Herring", "Pacific Sardine") 
-rownames(table) = c("Dip Net", "Gill Net", "Midwater Trawl", "Other Net Gear", "Pole", "Seine") 
-print(xtable(table, caption = 'Vessel lenght used in the CPS fishery by gear used.\\label{Table:lenght}', type = "latex"), comment=FALSE,  caption.placement = "top")
+<!-- table <- xtabs(VESSEL_LENGTH.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE, -->
+<!--                aggregate(VESSEL_LENGTH.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE, PacFIN.CPS, mean)) -->
+<!-- # table -->
+<!-- colnames(table) = c("Market squid", "Northern Anchovy", "Pacific Herring", "Pacific Sardine")  -->
+<!-- rownames(table) = c("Dip Net", "Gill Net", "Midwater Trawl", "Other Net Gear", "Pole", "Seine")  -->
+<!-- print(xtable(table, caption = 'Vessel lenght used in the CPS fishery by gear used.\\label{Table:lenght}', type = "latex"), comment=FALSE,  caption.placement = "top") -->
 
-rm(table, PacFIN.CPS)
+<!-- rm(table, PacFIN.CPS) -->
 
-```
+<!-- ``` -->
 
 
-### Fishing days
+<!-- ### Fishing days -->
 
-```{r fishing_days, echo=FALSE, results='asis'}
+<!-- ```{r fishing_days, echo=FALSE, results='asis'} -->
 
-PacFIN.CPS <- PacFIN.month %>% 
-  filter(PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG"))  %>% 
-  filter(PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>%
-  filter(LANDING_YEAR >= 2000 )
+<!-- PacFIN.CPS <- PacFIN.month %>%  -->
+<!--   filter(PACFIN_SPECIES_CODE  %in% c("MSQD", "PSDN", "NANC", "PHRG"))  %>%  -->
+<!--   filter(PACFIN_GEAR_CODE  %in% c("DPN", "ONT", "SEN", "GLN", "MDT", "POL")) %>% -->
+<!--   filter(LANDING_YEAR >= 2000 ) -->
 
-table <- xtabs(NUM_OF_DAYS_FISHED.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE,
-               aggregate(NUM_OF_DAYS_FISHED.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE, PacFIN.CPS, mean))
- # table
-colnames(table) = c("Northern Anchovy", "Pacific Herring", "Pacific Sardine") 
-rownames(table) = c("Dip Net", "Midwater Trawl", "Other Net Gear", "Seine")
-print(xtable(table, caption = 'Number of days fishing by species and gear used', type = "latex"), comment=FALSE,  caption.placement = "top")
+<!-- table <- xtabs(NUM_OF_DAYS_FISHED.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE, -->
+<!--                aggregate(NUM_OF_DAYS_FISHED.mean ~ PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE, PacFIN.CPS, mean)) -->
+<!--  # table -->
+<!-- colnames(table) = c("Northern Anchovy", "Pacific Herring", "Pacific Sardine")  -->
+<!-- rownames(table) = c("Dip Net", "Midwater Trawl", "Other Net Gear", "Seine") -->
+<!-- print(xtable(table, caption = 'Number of days fishing by species and gear used', type = "latex"), comment=FALSE,  caption.placement = "top") -->
 
-rm(table, PacFIN.CPS)
+<!-- rm(table, PacFIN.CPS) -->
 
-```
+<!-- ``` -->
 
 <!-- ### Switching during a day -->
 
-```{r switching_day_landings, eval=FALSE, include=FALSE}
-# PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
-#   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
-# 
-#   # Merge different decades of data #
-# PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
-#   rm(PacFIN_2000_2009, PacFIN_2010_2020)
-#   gc()
-# 
-# psdn.landings.by.day.vessel <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
-#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, LANDED_WEIGHT_MTONS) %>%
-#   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%
-#   group_by(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
-#   summarise(Landed_PSDN = sum(LANDED_WEIGHT_MTONS)) %>% mutate(harv.psdn = 1)
-# 
-# # If a vessel harvest Pacific sardine in a year, how many also harvest squid.
-# squid.cond.psdn <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
-#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, LANDED_WEIGHT_MTONS) %>%
-#   merge(psdn.landings.by.day.vessel, by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>%
-#   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>%
-#   mutate(perc_land_squid = LANDED_WEIGHT_MTONS / (LANDED_WEIGHT_MTONS + Landed_PSDN)) 
-# 
-# write.csv(squid.cond.psdn,"C:\\Data\\day_switch_land.csv", row.names = FALSE)
-df <- read.csv(file = "C:\\Data\\day_switch_land.csv")
-hist(df$perc_land_squid, col = 'skyblue3', breaks = 10)
-plot.ecdf(df$perc_land_squid)
+<!-- ```{r switching_day_landings, eval=FALSE, include=FALSE} -->
+<!-- # PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv") -->
+<!-- #   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv") -->
+<!-- #  -->
+<!-- #   # Merge different decades of data # -->
+<!-- # PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020) -->
+<!-- #   rm(PacFIN_2000_2009, PacFIN_2010_2020) -->
+<!-- #   gc() -->
+<!-- #  -->
+<!-- # psdn.landings.by.day.vessel <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% -->
+<!-- #   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, LANDED_WEIGHT_MTONS) %>% -->
+<!-- #   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% -->
+<!-- #   group_by(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>% -->
+<!-- #   summarise(Landed_PSDN = sum(LANDED_WEIGHT_MTONS)) %>% mutate(harv.psdn = 1) -->
+<!-- #  -->
+<!-- # # If a vessel harvest Pacific sardine in a year, how many also harvest squid. -->
+<!-- # squid.cond.psdn <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% -->
+<!-- #   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, LANDED_WEIGHT_MTONS) %>% -->
+<!-- #   merge(psdn.landings.by.day.vessel, by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>% -->
+<!-- #   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% -->
+<!-- #   mutate(perc_land_squid = LANDED_WEIGHT_MTONS / (LANDED_WEIGHT_MTONS + Landed_PSDN))  -->
+<!-- #  -->
+<!-- # write.csv(squid.cond.psdn,"C:\\Data\\day_switch_land.csv", row.names = FALSE) -->
+<!-- df <- read.csv(file = "C:\\Data\\day_switch_land.csv") -->
+<!-- hist(df$perc_land_squid, col = 'skyblue3', breaks = 10) -->
+<!-- plot.ecdf(df$perc_land_squid) -->
 
-```
+<!-- ``` -->
 
-```{r switching_day, eval=FALSE, include=FALSE}
-# PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
-#   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
-# 
-#   # Merge different decades of data #
-# PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
-#   rm(PacFIN_2000_2009, PacFIN_2010_2020)
-#   gc()
-# 
-# psdn.by.day <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>% 
-#   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
-#   unique() %>% mutate(harv.psdn = 1) 
-# 
-# # If a vessel harvest Pacific sardine in a year, how many also harvest squid.
-# squid.cond.psdn <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>% 
-#   merge(psdn.by.day, by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>% 
-#   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique()
-# 
-# # Calculate number of vessels harvesting sardine and squid and percentage per year
-# n_vessel_psdn <- psdn.by.day %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>% 
-#   summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE)) 
-# # %>% group_by(LANDING_MONTH, LANDING_DAY) %>% 
-# #   summarize(n_vessel_psdn = mean(n_vessel_psdn, na.rm = TRUE))
-# 
-# n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>% 
-#   summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE)) 
-# # %>% group_by(LANDING_MONTH, LANDING_DAY) %>% 
-# #   summarize(n_vessel_msqd = mean(n_vessel_msqd, na.rm = TRUE))
-#   
-# df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>%
-#     mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>% group_by(LANDING_MONTH, LANDING_DAY) %>% 
-#     summarize(n_vessel_msqd = sum(n_vessel_msqd, na.rm = TRUE), n_vessel_psdn = sum(n_vessel_psdn, na.rm = TRUE)) %>%
-#     mutate(perc = (n_vessel_msqd / n_vessel_psdn)) %>% select(LANDING_MONTH, LANDING_DAY, perc)
-# 
-# df$MonthDay <- paste( month.abb[df$LANDING_MONTH], df$LANDING_DAY, sep="-" )
-# 
-# write.csv(df,"C:\\Data\\day_switch.csv", row.names = FALSE)
-df <- read.csv(file = "C:\\Data\\day_switch.csv")
-ggplot(data=df, aes(x=MonthDay, y=perc)) +
-    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
-  scale_x_discrete(name = "Day", breaks=1:366) +
-  scale_y_percent(name = "Percentage of vessels harvesting squid" )
-rm(df)
-```
+<!-- ```{r switching_day, eval=FALSE, include=FALSE} -->
+<!-- # PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv") -->
+<!-- #   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv") -->
+<!-- #  -->
+<!-- #   # Merge different decades of data # -->
+<!-- # PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020) -->
+<!-- #   rm(PacFIN_2000_2009, PacFIN_2010_2020) -->
+<!-- #   gc() -->
+<!-- #  -->
+<!-- # psdn.by.day <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!-- #   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%  -->
+<!-- #   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%  -->
+<!-- #   unique() %>% mutate(harv.psdn = 1)  -->
+<!-- #  -->
+<!-- # # If a vessel harvest Pacific sardine in a year, how many also harvest squid. -->
+<!-- # squid.cond.psdn <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!-- #   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%  -->
+<!-- #   merge(psdn.by.day, by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>%  -->
+<!-- #   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique() -->
+<!-- #  -->
+<!-- # # Calculate number of vessels harvesting sardine and squid and percentage per year -->
+<!-- # n_vessel_psdn <- psdn.by.day %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%  -->
+<!-- #   summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE))  -->
+<!-- # # %>% group_by(LANDING_MONTH, LANDING_DAY) %>%  -->
+<!-- # #   summarize(n_vessel_psdn = mean(n_vessel_psdn, na.rm = TRUE)) -->
+<!-- #  -->
+<!-- # n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%  -->
+<!-- #   summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE))  -->
+<!-- # # %>% group_by(LANDING_MONTH, LANDING_DAY) %>%  -->
+<!-- # #   summarize(n_vessel_msqd = mean(n_vessel_msqd, na.rm = TRUE)) -->
+<!-- #    -->
+<!-- # df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>% -->
+<!-- #     mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>% group_by(LANDING_MONTH, LANDING_DAY) %>%  -->
+<!-- #     summarize(n_vessel_msqd = sum(n_vessel_msqd, na.rm = TRUE), n_vessel_psdn = sum(n_vessel_psdn, na.rm = TRUE)) %>% -->
+<!-- #     mutate(perc = (n_vessel_msqd / n_vessel_psdn)) %>% select(LANDING_MONTH, LANDING_DAY, perc) -->
+<!-- #  -->
+<!-- # df$MonthDay <- paste( month.abb[df$LANDING_MONTH], df$LANDING_DAY, sep="-" ) -->
+<!-- #  -->
+<!-- # write.csv(df,"C:\\Data\\day_switch.csv", row.names = FALSE) -->
+<!-- df <- read.csv(file = "C:\\Data\\day_switch.csv") -->
+<!-- ggplot(data=df, aes(x=MonthDay, y=perc)) + -->
+<!--     geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) +  -->
+<!--   scale_x_discrete(name = "Day", breaks=1:366) + -->
+<!--   scale_y_percent(name = "Percentage of vessels harvesting squid" ) -->
+<!-- rm(df) -->
+<!-- ``` -->
 
 
 ## Other determinants of behavior
+
 
 <!-- JON in CPS's Workshop: -->
 <!-- " This part of the discussion was devoted to some of the decision making that goes on to determine -->
