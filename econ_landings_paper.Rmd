@@ -1046,24 +1046,28 @@ rm(PacFIN.Gear.PSDN, PacFIN.Gear.MSQD, PacFIN.Gear.NANC, PacFIN.Port)
 On average, vessels land their catch in 4.8 ports, with a standard deviation of 3.94. If we only consider CPS landings, vessels land in 2.1 ports on average, with a standard deviation of 2.17. If we disaggregate this information by species, vessels land on average market squid in 2.25 ports, Pacific sardine in 2.25 ports, Northern anchovy in 1.61 ports, and Pacific mackerel in 1.51 ports. 
 
 **<<<<<<<<<<<CONTINUE HERE>>>>>>>>>>>>> **
-The ability to switch using seine as gear is confirmed when we analyze the most common gears used by different clusters (see Table \ref{Table:cluster_gear}). In Cluster 5, the cluster where we observe substitution, 88\% of the cluster's total landings correspond to catches using seine as a gear. Only 7\% and 3\% of the cluster's total landings correspond to catches using other net gear and midwater trawl, respectively.
+<!-- The ability to switch using seine as gear is confirmed when we analyze the most common gears used by different clusters (see Table \ref{Table:cluster_port}). In Cluster 5, the cluster where we observe substitution, 88\% of the cluster's total landings correspond to catches using seine as a gear. Only 7\% and 3\% of the cluster's total landings correspond to catches using other net gear and midwater trawl, respectively. -->
 
 ```{r port_by_cluster, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
 # Create dummy of whether a vessel harvest MSQD, NANC OR PSDN 
 PacFIN.cluster <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
-  group_by(cluster, PACFIN_GEAR_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
+  group_by(cluster, PACFIN_PORT_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
   group_by(cluster) %>% mutate(perc = landings / sum(landings)) %>% 
   unique() %>% filter(cluster != is.na(cluster)) %>% 
-  filter(PACFIN_GEAR_CODE %in% 
-           c("MDT", "SEN", "TRL", "ONT", "RLT"))
+  filter(PACFIN_PORT_CODE %in% 
+      c("SP", "TRM", "HNM", "VEN", "MNT", "MOS", "AST", "LWC", "WPT")) %>%
+  mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, 
+      "SP", "TRM", "HNM", "VEN", "MNT", "MOS", "AST", "LWC", "WPT"))
     
-table <- xtabs(perc ~  PACFIN_GEAR_CODE + cluster, PacFIN.cluster)
-#table
-rownames(table) = c("Midwater Trawl", "Other Net Gear", "Roller Trawl", "Seine", "Troll")
+table <- xtabs(perc ~  PACFIN_PORT_CODE + cluster, PacFIN.cluster)
+table
+rownames(table) = c("San Pedro", "Terminal Island", "Hueneme", "Ventura", "Monterrey", "Moss Landing", 
+                    "Astoria", "Ilwaco / Chinook", "Westport")
+  
 colnames(table) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")
 
-print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
+print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_port}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table)
 
