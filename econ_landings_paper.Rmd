@@ -696,84 +696,6 @@ Substitution between Pacific sardine and market squid is more likely in the sout
 Vessel traveling considerable distances to catch CPS species is unlikely. Because CPS spoils quickly, fishers stay close to ports and usually come back to port on the same day. Therefore, ports constraints could have consequences if species distribution shifts north due to climate conditions. Probably, fishers will not target market squid, independently of its biomass levels, if fishing grounds move north,  as there is no close infrastructure for its landing (CPS workshop). Nevertheless, there is uncertainty about this assumption as it would depend on the speed that ports can anticipate and adjust their landings capacity and infrastructure in the future. In this section, we analyze our dataset to understand better how gears and ports are related to switching between species and whether individual vessels switch gears and ports during the historical data.
 
 
-<!-- ### Switching during a day -->
-
-<!-- ```{r switching_day_landings, eval=FALSE, include=FALSE} -->
-<!-- # PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv") -->
-<!-- #   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv") -->
-<!-- #  -->
-<!-- #   # Merge different decades of data # -->
-<!-- # PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020) -->
-<!-- #   rm(PacFIN_2000_2009, PacFIN_2010_2020) -->
-<!-- #   gc() -->
-<!-- #  -->
-<!-- # psdn.landings.by.day.vessel <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% -->
-<!-- #   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, LANDED_WEIGHT_MTONS) %>% -->
-<!-- #   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% -->
-<!-- #   group_by(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>% -->
-<!-- #   summarise(Landed_PSDN = sum(LANDED_WEIGHT_MTONS)) %>% mutate(harv.psdn = 1) -->
-<!-- #  -->
-<!-- # # If a vessel harvest Pacific sardine in a year, how many also harvest squid. -->
-<!-- # squid.cond.psdn <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% -->
-<!-- #   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, LANDED_WEIGHT_MTONS) %>% -->
-<!-- #   merge(psdn.landings.by.day.vessel, by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>% -->
-<!-- #   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% -->
-<!-- #   mutate(perc_land_squid = LANDED_WEIGHT_MTONS / (LANDED_WEIGHT_MTONS + Landed_PSDN))  -->
-<!-- #  -->
-<!-- # write.csv(squid.cond.psdn,"C:\\Data\\day_switch_land.csv", row.names = FALSE) -->
-<!-- df <- read.csv(file = "C:\\Data\\day_switch_land.csv") -->
-<!-- hist(df$perc_land_squid, col = 'skyblue3', breaks = 10) -->
-<!-- plot.ecdf(df$perc_land_squid) -->
-
-<!-- ``` -->
-
-<!-- ```{r switching_day, eval=FALSE, include=FALSE} -->
-<!-- # PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv") -->
-<!-- #   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv") -->
-<!-- #  -->
-<!-- #   # Merge different decades of data # -->
-<!-- # PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020) -->
-<!-- #   rm(PacFIN_2000_2009, PacFIN_2010_2020) -->
-<!-- #   gc() -->
-<!-- #  -->
-<!-- # psdn.by.day <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
-<!-- #   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%  -->
-<!-- #   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%  -->
-<!-- #   unique() %>% mutate(harv.psdn = 1)  -->
-<!-- #  -->
-<!-- # # If a vessel harvest Pacific sardine in a year, how many also harvest squid. -->
-<!-- # squid.cond.psdn <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
-<!-- #   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%  -->
-<!-- #   merge(psdn.by.day, by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>%  -->
-<!-- #   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique() -->
-<!-- #  -->
-<!-- # # Calculate number of vessels harvesting sardine and squid and percentage per year -->
-<!-- # n_vessel_psdn <- psdn.by.day %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%  -->
-<!-- #   summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE))  -->
-<!-- # # %>% group_by(LANDING_MONTH, LANDING_DAY) %>%  -->
-<!-- # #   summarize(n_vessel_psdn = mean(n_vessel_psdn, na.rm = TRUE)) -->
-<!-- #  -->
-<!-- # n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%  -->
-<!-- #   summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE))  -->
-<!-- # # %>% group_by(LANDING_MONTH, LANDING_DAY) %>%  -->
-<!-- # #   summarize(n_vessel_msqd = mean(n_vessel_msqd, na.rm = TRUE)) -->
-<!-- #    -->
-<!-- # df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>% -->
-<!-- #     mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>% group_by(LANDING_MONTH, LANDING_DAY) %>%  -->
-<!-- #     summarize(n_vessel_msqd = sum(n_vessel_msqd, na.rm = TRUE), n_vessel_psdn = sum(n_vessel_psdn, na.rm = TRUE)) %>% -->
-<!-- #     mutate(perc = (n_vessel_msqd / n_vessel_psdn)) %>% select(LANDING_MONTH, LANDING_DAY, perc) -->
-<!-- #  -->
-<!-- # df$MonthDay <- paste( month.abb[df$LANDING_MONTH], df$LANDING_DAY, sep="-" ) -->
-<!-- #  -->
-<!-- # write.csv(df,"C:\\Data\\day_switch.csv", row.names = FALSE) -->
-<!-- df <- read.csv(file = "C:\\Data\\day_switch.csv") -->
-<!-- ggplot(data=df, aes(x=MonthDay, y=perc)) + -->
-<!--     geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) +  -->
-<!--   scale_x_discrete(name = "Day", breaks=1:366) + -->
-<!--   scale_y_percent(name = "Percentage of vessels harvesting squid" ) -->
-<!-- rm(df) -->
-<!-- ``` -->
-
 ### Switching by gear used
 
 ```{r n_species, eval=FALSE, include=FALSE}
@@ -977,7 +899,7 @@ rm(table)
 
 ```
 
-### Switching by port landinded
+### Switching by port landed
 
 
 ```{r n_ports_vessels, eval=FALSE, include=FALSE}
@@ -1043,10 +965,24 @@ rm(PacFIN.Gear.PSDN, PacFIN.Gear.MSQD, PacFIN.Gear.NANC, PacFIN.Port)
 
 ```
 
-On average, vessels land their catch in 4.8 ports, with a standard deviation of 3.94. If we only consider CPS landings, vessels land in 2.1 ports on average, with a standard deviation of 2.17. If we disaggregate this information by species, vessels land on average market squid in 2.25 ports, Pacific sardine in 2.25 ports, Northern anchovy in 1.61 ports, and Pacific mackerel in 1.51 ports. 
+On average, vessels land their catch in 4.8 ports, with a standard deviation of 3.94. If we only consider CPS landings, vessels land in 2.1 ports on average, with a standard deviation of 2.17. When we disaggregate this information by species, vessels land on average market squid in 2.25 ports, Pacific sardine in 2.25 ports, Northern anchovy in 1.61 ports, and Pacific mackerel in 1.51 ports. 
 
-**<<<<<<<<<<<CONTINUE HERE>>>>>>>>>>>>> **
-<!-- The ability to switch using seine as gear is confirmed when we analyze the most common gears used by different clusters (see Table \ref{Table:cluster_port}). In Cluster 5, the cluster where we observe substitution, 88\% of the cluster's total landings correspond to catches using seine as a gear. Only 7\% and 3\% of the cluster's total landings correspond to catches using other net gear and midwater trawl, respectively. -->
+Using the results from the cluster analysis, we can identify how many ports, on average, a vessel that belongs to a cluster lands. On average, vessels belonging to Cluster 1 land in 2.23 ports, Cluster 2 land in 1.35 ports, Cluster 3 land in 2.35 ports, Cluster 4 land in 1.46 ports, and Cluster 5 land in 6.32 ports. Thus, vessels with a multiple species portfolio (Cluster 5) on average land in more ports than vessels that only focus on one species. 
+
+```{r n_ports_CPS_cluster, eval=FALSE, include=FALSE}
+# How many gears a vessel use in the dataset
+PacFIN.CPS.unique.port <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
+  filter(PACFIN_SPECIES_CODE %in% c("CMCK", "MSQD", "NANC", "PSDN")) %>%
+  select(VESSEL_NUM, PACFIN_PORT_CODE, cluster) %>% unique() 
+  PacFIN.CPS.n_ports <- PacFIN.CPS.unique.port %>% mutate(n_ports = 1) %>% 
+    group_by(VESSEL_NUM, cluster) %>% summarise(n_ports= sum(n_ports)) %>% 
+    group_by(cluster) %>% summarise(n_ports = mean(n_ports))
+  
+rm(PacFIN.CPS.unique.port, PacFIN.CPS.n_ports)
+
+```
+
+California concentrates the most significant percentage of landings from Cluster 5, adding up to 86\% of the total catch, mainly in the south (see Table \ref{Table:cluster_port}). The percentage of the total catch made by Cluster 5 in San Pedro is 22\%, 19\% in Terminal Island, 19\% in Moss Landing, 13\% in Hueneme, 8\% in Ventura, 7\% in Astoria, 5\% in Monterrey, and 1\% in Ilwaco/Chinook. If we aggregate by areas, 41\% is landed in Los Angeles area port, 21\% in Santa Barbara area ports, and 24\% in Monterrey area.
 
 ```{r port_by_cluster, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
@@ -1061,19 +997,16 @@ PacFIN.cluster <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>%
       "SP", "TRM", "HNM", "VEN", "MNT", "MOS", "AST", "LWC", "WPT"))
     
 table <- xtabs(perc ~  PACFIN_PORT_CODE + cluster, PacFIN.cluster)
-table
 rownames(table) = c("San Pedro", "Terminal Island", "Hueneme", "Ventura", "Monterrey", "Moss Landing", 
                     "Astoria", "Ilwaco / Chinook", "Westport")
   
 colnames(table) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")
 
-print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_port}', type = "latex"), comment=FALSE,  caption.placement = "top")
+print(xtable(table, caption = 'Percentage of cluster total landings by port.\\label{Table:cluster_port}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table)
 
 ```
-
-<< CHECK PORT BY CLUSTER >>
 
 <!-- ### Vessel lenght  -->
 <!-- <!-- 1) What are the characteristics of a vessel depending on gear, and also on Species -->
@@ -1123,32 +1056,86 @@ rm(table)
 
 ### Other determinants of behavior
 
+Switching behavior might depend on whether a vessel is owner-operated or company-owned (CPS Workshop). Owner-operated vessels can freely choose what to harvest (and when and where), while company-owned vessels are restricted by what the company dictates.  However, regardless of vessel ownership, most fishing behavior would be determined by market order (CPS workshop). Vessels will already have contracts with processors before fishing (CPS workshop), having already decided on the target species. Prices will affect target decisions, which in general varies by port. 
 
-<!-- JON in CPS's Workshop: -->
-<!-- " This part of the discussion was devoted to some of the decision making that goes on to determine -->
-<!-- fishing locations and target species of the CPS fleet, and some of the key discussion points were: -->
-<!-- ● The decisions of where and when to fish and what to target can depend on whether the -->
-<!-- vessel is ‘owner-operated’ or ‘company-owned’. The owner-operator vessels have more -->
-<!-- agency to decide what and when. CPS vessels (sardine and anchovy, and to a lesser -->
-<!-- extent squid), are largely limited to staying out for 1 day. Regardless of vessel ownership, -->
-<!-- much of the CPS fishing is driven by market order. The boats will have a port and -->
-<!-- processor lined up before they go fishing. The relationship between the markets and -->
-<!-- fishers is important. Coastal tunas are important to the catch and income for CPS boats. -->
-<!-- For the NW fleet, most vessels leave from Astoria, but can land elsewhere. They can hire -->
-<!-- a pilot to look for fish, and the WA and OR fleet will use this information to decide where -->
-<!-- to fish, before returning to their arranged port. Spotter planes are frequently used. -->
-<!-- ● Key ports for CPS landings are: San Pedro, Ventura, Morro Bay, Monterey, Half Moon -->
-<!-- Bay, and San Francisco. Important to know if some smaller ports, such as Astoria, can -->
-<!-- remain viable. Most plants in OR are permanent, but temporary landings can be set up, -->
-<!-- particularly for squid, with trucks taking landings to regular plants. -->
-<!-- ● A seine boat needs options, so OR boats often have CA permits, or they could switch -->
-<!-- gears. They try to be very flexible. Historically, NW fishing can stop due to weather, and -->
-<!-- in the SW more likely due to allocation and quota. -->
-<!-- ● Price and market order drive what is targeted. Prices can also very by port, for example -->
-<!-- anchovy is worth more at Monterey. What are the key forces driving price? There are -->
-<!-- different markets for different species, so it’s complex. International markets and their -->
-<!-- supply and demand are important for price. Building the domestic market is hard, lots -->
-<!-- still exported. Tariffs are having a bit of an impact" -->
+Another determinant of behavior that vessels face is the perishability of the catch. CPS vessels are limited to staying at sea for one day because CPS species can perish if stored for longer. It does not mean that vessels cannot target different species in one day. Some vessels harvest market squid and Pacific sardine during the same day. 
+
+
+```{r switching_day_landings, eval=FALSE, include=FALSE}
+# PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
+#   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
+#
+#   # Merge different decades of data #
+# PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
+#   rm(PacFIN_2000_2009, PacFIN_2010_2020)
+#   gc()
+#
+# psdn.landings.by.day.vessel <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, LANDED_WEIGHT_MTONS) %>%
+#   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%
+#   group_by(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+#   summarise(Landed_PSDN = sum(LANDED_WEIGHT_MTONS)) %>% mutate(harv.psdn = 1)
+#
+# # If a vessel harvest Pacific sardine in a year, how many also harvest squid.
+# squid.cond.psdn <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, LANDED_WEIGHT_MTONS) %>%
+#   merge(psdn.landings.by.day.vessel, by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>%
+#   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>%
+#   mutate(perc_land_squid = LANDED_WEIGHT_MTONS / (LANDED_WEIGHT_MTONS + Landed_PSDN))
+#
+# write.csv(squid.cond.psdn,"C:\\Data\\day_switch_land.csv", row.names = FALSE)
+df <- read.csv(file = "C:\\Data\\day_switch_land.csv")
+hist(df$perc_land_squid, col = 'skyblue3', breaks = 10)
+plot.ecdf(df$perc_land_squid)
+
+```
+
+```{r switching_day, eval=FALSE, include=FALSE}
+# PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
+#   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
+#
+#   # Merge different decades of data #
+# PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
+#   rm(PacFIN_2000_2009, PacFIN_2010_2020)
+#   gc()
+#
+# psdn.by.day <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+#   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%
+#   unique() %>% mutate(harv.psdn = 1)
+#
+# # If a vessel harvest Pacific sardine in a year, how many also harvest squid.
+# squid.cond.psdn <- PacFIN %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+#   merge(psdn.by.day, by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>%
+#   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique()
+#
+# # Calculate number of vessels harvesting sardine and squid and percentage per year
+# n_vessel_psdn <- psdn.by.day %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+#   summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE))
+# # %>% group_by(LANDING_MONTH, LANDING_DAY) %>%
+# #   summarize(n_vessel_psdn = mean(n_vessel_psdn, na.rm = TRUE))
+#
+# n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+#   summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE))
+# # %>% group_by(LANDING_MONTH, LANDING_DAY) %>%
+# #   summarize(n_vessel_msqd = mean(n_vessel_msqd, na.rm = TRUE))
+#
+# df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"), all.x = TRUE) %>%
+#     mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>% group_by(LANDING_MONTH, LANDING_DAY) %>%
+#     summarize(n_vessel_msqd = sum(n_vessel_msqd, na.rm = TRUE), n_vessel_psdn = sum(n_vessel_psdn, na.rm = TRUE)) %>%
+#     mutate(perc = (n_vessel_msqd / n_vessel_psdn)) %>% select(LANDING_MONTH, LANDING_DAY, perc)
+#
+# df$MonthDay <- paste( month.abb[df$LANDING_MONTH], df$LANDING_DAY, sep="-" )
+#
+# write.csv(df,"C:\\Data\\day_switch.csv", row.names = FALSE)
+df <- read.csv(file = "C:\\Data\\day_switch.csv")
+ggplot(data=df, aes(x=MonthDay, y=perc)) +
+    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) +
+  scale_x_discrete(name = "Day", breaks=1:366) +
+  scale_y_percent(name = "Percentage of vessels harvesting squid" )
+rm(df)
+```
 
 
 
