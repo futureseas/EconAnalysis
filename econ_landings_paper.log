@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.12.14)  20 DEC 2021 15:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.12.14)  20 DEC 2021 16:26
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1133,7 +1133,7 @@ File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 LaTeX Warning: Reference `{fig:fish_season}' on page 4 undefined on input line 
 309.
 
-<econ_landings_paper_files/figure-latex/psdn_msqd_month_by_port-1.pdf, id=164, 
+<econ_landings_paper_files/figure-latex/psdn_msqd_month_by_port-1.pdf, id=152, 
 469.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/psdn_msqd_month_by_port-1.pdf Grap
 hic file (type pdf)
@@ -1142,7 +1142,7 @@ Package pdftex.def Info: econ_landings_paper_files/figure-latex/psdn_msqd_month
 _by_port-1.pdf  used on input line 318.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [4]
-<econ_landings_paper_files/figure-latex/avg_land_rev_price-1.pdf, id=172, 469.7
+<econ_landings_paper_files/figure-latex/avg_land_rev_price-1.pdf, id=159, 469.7
 55pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/avg_land_rev_price-1.pdf Graphic f
 ile (type pdf)
@@ -1157,7 +1157,7 @@ has been already used, duplicate ignored
 l.346 
        <./econ_landings_paper_files/figure-latex/psdn_msqd_month_by_port-1.pdf>
 ]
-<econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf, id=191, 469
+<econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf, id=179, 469
 .755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf Graphic
  file (type pdf)
@@ -1171,7 +1171,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.367 
        <./econ_landings_paper_files/figure-latex/avg_land_rev_price-1.pdf>]
-<econ_landings_paper_files/figure-latex/ts_by_port-1.pdf, id=207, 469.755pt x 3
+<econ_landings_paper_files/figure-latex/ts_by_port-1.pdf, id=195, 469.755pt x 3
 25.215pt>
 File: econ_landings_paper_files/figure-latex/ts_by_port-1.pdf Graphic file (typ
 e pdf)
@@ -1185,7 +1185,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.392 
        <./econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf>]
-<econ_landings_paper_files/figure-latex/ts_landing_price-1.pdf, id=222, 469.755
+<econ_landings_paper_files/figure-latex/ts_landing_price-1.pdf, id=210, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/ts_landing_price-1.pdf Graphic fil
 e (type pdf)
@@ -1199,7 +1199,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.411 
        <./econ_landings_paper_files/figure-latex/ts_by_port-1.pdf>]
-<econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf, id=237, 469.755
+<econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf, id=225, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf Graphic fil
 e (type pdf)
@@ -1213,7 +1213,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.436 
        <./econ_landings_paper_files/figure-latex/ts_landing_price-1.pdf>]
-<econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf, id=254, 469.
+<econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf, id=242, 469.
 755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf Graphic 
 file (type pdf)
@@ -1233,77 +1233,69 @@ been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.500 
        <./econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf>] [1
-2] [13] [14] [15] [16]
-Package textcomp Info: Symbol \textasciiacute not provided by
-(textcomp)             font family ptm in TS1 encoding.
-(textcomp)             Default family used instead on input line 910.
+2] [13] [14] [15]
+
+LaTeX Warning: Reference `fig:posteriors' on page 16 undefined on input line 90
+1.
+
+[16]
+
+LaTeX Warning: Reference `fig:sdmeffects' on page 17 undefined on input line 92
+3.
+
+
+LaTeX Warning: Reference `fig:sdm_int_psdn' on page 17 undefined on input line 
+947.
+
+
+LaTeX Warning: Reference `fig:sdmeffects' on page 17 undefined on input line 95
+0.
+
 [17]
 
-LaTeX Warning: Reference `fig:switching' on page 18 undefined on input line 998
-.
+LaTeX Warning: Reference `fig:sdm_int_msqd' on page 18 undefined on input line 
+960.
 
-
-LaTeX Warning: Reference `fig:posteriors' on page 18 undefined on input line 10
-51.
-
-[18]
-
-LaTeX Warning: Reference `fig:sdmeffects' on page 19 undefined on input line 10
-73.
-
-
-LaTeX Warning: Reference `fig:sdm_int_psdn' on page 19 undefined on input line 
-1097.
-
-
-LaTeX Warning: Reference `fig:sdmeffects' on page 19 undefined on input line 11
-00.
-
-
-LaTeX Warning: Reference `fig:sdm_int_msqd' on page 19 undefined on input line 
-1110.
-
-[19] (./econ_landings_paper.bbl [20]) [21] [22pdfTeX warning (ext4): destinatio
-n with the same identifier (name{table.1}) has been already used, duplicate ign
-ored
+(./econ_landings_paper.bbl [18]) [19] [20pdfTeX warning (ext4): destination wit
+h the same identifier (name{table.1}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1160 \end{document}
-                     ] [23pdfTeX warning (ext4): destination with the same iden
+l.1010 \end{document}
+                     ] [21pdfTeX warning (ext4): destination with the same iden
 tifier (name{table.2}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1160 \end{document}
+l.1010 \end{document}
                      pdfTeX warning (ext4): destination with the same identifie
 r (name{table.3}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1160 \end{document}
+l.1010 \end{document}
                      pdfTeX warning (ext4): destination with the same identifie
 r (name{table.4}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1160 \end{document}
+l.1010 \end{document}
                      pdfTeX warning (ext4): destination with the same identifie
 r (name{table.5}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1160 \end{document}
+l.1010 \end{document}
                      ] (./econ_landings_paper.aux)
 
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `econ_landings_paper.out' has not changed.
-(rerunfilecheck)             Checksum: 9BC6100536F763CE9395E217B4D0C19C;3767.
+(rerunfilecheck)             Checksum: FFD9EC390E0B88CFE39E967513DBFC15;3284.
  ) 
 Here is how much of TeX's memory you used:
- 25264 strings out of 480313
- 470174 string characters out of 5895527
- 796293 words of memory out of 5000000
- 42241 multiletter control sequences out of 15000+600000
- 494944 words of font info for 264 fonts, out of 8000000 for 9000
+ 25222 strings out of 480313
+ 469670 string characters out of 5895527
+ 792140 words of memory out of 5000000
+ 42229 multiletter control sequences out of 15000+600000
+ 493272 words of font info for 253 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 83i,11n,80p,1016b,461s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 83i,11n,80p,1016b,457s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{Hfootnote.9} has been referenced but does not exi
 st, replaced by a fixed one
 
@@ -1331,33 +1323,31 @@ pdfTeX warning (dest): name{Hfootnote.2} has been referenced but does not exist
 pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exist
 , replaced by a fixed one
 
- <c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/
-ec/tcrm1000.600pk>{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/e
-nc/dvips/lm/lm-rm.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fon
-ts/enc/dvips/lm/lm-mathit.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-
-dist/fonts/enc/dvips/lm/lm-mathex.enc}{c:/Users/fequezad/AppData/Roaming/TinyTe
-X/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{c:/Users/fequezad/AppData/Roamin
-g/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}<c:/Users/fequezad/AppData/Roa
-ming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb><c:/Users/fequezad/App
-Data/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx7.pfb><c:/Users/feque
-zad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb><c:/Use
-rs/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb
-><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lm
-mi5.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/publi
-c/lm/lmmi7.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type
-1/public/lm/lmr10.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fon
-ts/type1/public/lm/lmr5.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-di
-st/fonts/type1/public/lm/lmr7.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/te
-xmf-dist/fonts/type1/public/lm/lmsy10.pfb><c:/Users/fequezad/AppData/Roaming/Ti
-nyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb><c:/Users/feque
-zad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/Use
-rs/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb
-><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/ut
-mri8a.pfb>
-Output written on econ_landings_paper.pdf (23 pages, 305369 bytes).
+{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.
+enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm
+-mathit.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvi
+ps/lm/lm-mathex.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts
+/enc/dvips/lm/lm-mathsy.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-di
+st/fonts/enc/dvips/base/8r.enc}<c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf
+-dist/fonts/type1/public/lm/lmbx10.pfb><c:/Users/fequezad/AppData/Roaming/TinyT
+eX/texmf-dist/fonts/type1/public/lm/lmbx7.pfb><c:/Users/fequezad/AppData/Roamin
+g/TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb><c:/Users/fequezad/AppDat
+a/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb><c:/Users/fequeza
+d/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb><c:/Users/
+fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb><c:
+/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.
+pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm
+/lmr5.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/pub
+lic/lm/lmr7.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/typ
+e1/public/lm/lmsy10.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/f
+onts/type1/public/amsfonts/symbols/msam10.pfb><c:/Users/fequezad/AppData/Roamin
+g/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/Users/fequezad/AppDat
+a/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><c:/Users/fequeza
+d/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on econ_landings_paper.pdf (21 pages, 288126 bytes).
 PDF statistics:
- 534 PDF objects out of 1000 (max. 8388607)
- 461 compressed objects within 5 object streams
- 110 named destinations out of 1000 (max. 500000)
- 55528 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 477 PDF objects out of 1000 (max. 8388607)
+ 407 compressed objects within 5 object streams
+ 95 named destinations out of 1000 (max. 500000)
+ 55504 words of extra memory for PDF output out of 61914 (max. 10000000)
 

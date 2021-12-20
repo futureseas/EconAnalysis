@@ -1054,12 +1054,11 @@ rm(table)
 
 
 
-### Other determinants of behavior
+### Other determinants switching of behavior
 
 Switching behavior might depend on whether a vessel is owner-operated or company-owned (CPS Workshop). Owner-operated vessels can freely choose what to harvest (and when and where), while company-owned vessels are restricted by what the company dictates.  However, regardless of vessel ownership, most fishing behavior would be determined by market order (CPS workshop). Vessels will already have contracts with processors before fishing (CPS workshop), having already decided on the target species. Prices will affect target decisions, which in general varies by port. 
 
-Another determinant of behavior that vessels face is the perishability of the catch. CPS vessels are limited to staying at sea for one day because CPS species can perish if stored for longer. It does not mean that vessels cannot target different species in one day. Some vessels harvest market squid and Pacific sardine during the same day. 
-
+<!-- Another determinant of behavior that vessels face is the perishability of the catch. CPS vessels are limited to staying at sea for one day because CPS species can perish if stored for longer. It does not mean that vessels cannot target different species in one day. Some vessels harvest market squid and Pacific sardine during the same day.  -->
 
 ```{r switching_day_landings, eval=FALSE, include=FALSE}
 # PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
@@ -1803,241 +1802,241 @@ save.image (file = "stan_fit.RData")
 ```
 
 
-##  Multispecies participation model
-For the multispecies participation model, we follow a similar methodology than @richerson2017. We estimate a discrete choice model for probability that a vessel participate in a particular species fishery during a specific month. This approach allows us to further understand how a closure or abrupt weather/abundance changes restructure fisher's portfolios. 
+<!-- ##  Multispecies participation model -->
+<!-- For the multispecies participation model, we follow a similar methodology than @richerson2017. We estimate a discrete choice model for probability that a vessel participate in a particular species fishery during a specific month. This approach allows us to further understand how a closure or abrupt weather/abundance changes restructure fisher's portfolios.  -->
 
-In the participation model, our outcome variable is a categorical variable that indicate whether a vessel participate in a specific fishery. It ranges from 0 to 4 where: 0 = "No fishing during the month", 1 = "Pacific sardine", 2 = "Market Squid", 3 = "Northern Anchovy", and 4 = "Other". **<<Can I combine Anchovy + sardine in category 5? What if in the same month a vessel harvest two different species. Should we maybe assume 1 for the principal species, zero to the second one?>>** **<< We can use the approach of metier, where a choice is created from data (see Andersen, 2012, ICES). Here would be a combination of target species>>** **<<Other option is to estimate separately a binary model>>** To select vessels in or database, they should met the following criteria:
+<!-- In the participation model, our outcome variable is a categorical variable that indicate whether a vessel participate in a specific fishery. It ranges from 0 to 4 where: 0 = "No fishing during the month", 1 = "Pacific sardine", 2 = "Market Squid", 3 = "Northern Anchovy", and 4 = "Other". **<<Can I combine Anchovy + sardine in category 5? What if in the same month a vessel harvest two different species. Should we maybe assume 1 for the principal species, zero to the second one?>>** **<< We can use the approach of metier, where a choice is created from data (see Andersen, 2012, ICES). Here would be a combination of target species>>** **<<Other option is to estimate separately a binary model>>** To select vessels in or database, they should met the following criteria: -->
 
-  1. Vessel active at least **XX%** of the sample. 
-  2. Total revenue at least **XX%** of CPS fishery.
-  3. Total annual revenue average for two or more species listed of at least **XXX**.
-  
-We expect that using monthly **<<Should I use Yearly data???>>** data allows us to observe seasonality in fishers´ behavior and to reduce the risk to not loosing general behavior when we dissagregate data in a finer scale.
+<!--   1. Vessel active at least **XX%** of the sample.  -->
+<!--   2. Total revenue at least **XX%** of CPS fishery. -->
+<!--   3. Total annual revenue average for two or more species listed of at least **XXX**. -->
 
-According @richerson2017, fishers participation decision should depend, in general terms, on profitability, species distribution and regulations. Specifically, based on different studies [@richerson2017] (MORE REF), variables that can explain fishery participation on a particular fishery in a month are:
+<!-- We expect that using monthly **<<Should I use Yearly data???>>** data allows us to observe seasonality in fishers´ behavior and to reduce the risk to not loosing general behavior when we dissagregate data in a finer scale. -->
 
-<!-- see if these are relevant:  -->
-<!-- Holland D. S.. A bioeconomic model of marine sanctuaries on Georges Bank, Canadian Journal of Fisheries and Aquatic Sciences, 2000, vol. 57 (pg. 1307-1319) -->
+<!-- According @richerson2017, fishers participation decision should depend, in general terms, on profitability, species distribution and regulations. Specifically, based on different studies [@richerson2017] (MORE REF), variables that can explain fishery participation on a particular fishery in a month are: -->
 
-<!-- Holland D. S.,  Herrera G. E.. Flexible catch-balancing policies for multispecies individual fishery quotas, Canadian Journal of Fisheries and Aquatic Sciences, 2006, vol. 63 (pg. 1669-1685)10.1139/f06-066 -->
+<!-- <!-- see if these are relevant:  --> -->
+<!-- <!-- Holland D. S.. A bioeconomic model of marine sanctuaries on Georges Bank, Canadian Journal of Fisheries and Aquatic Sciences, 2000, vol. 57 (pg. 1307-1319) --> -->
 
-<!-- Toft J. E.,  Punt A. E.,  Little L. R.. Modelling the economic and ecological impacts of the transition to individual transferable quotas in the multispecies US west coast groundfish trawl fleet, ICES Journal of Marine Science, 2011, vol. 68 (pg. 1566-1579)10.1093/icesjms/fsr095 -->
+<!-- <!-- Holland D. S.,  Herrera G. E.. Flexible catch-balancing policies for multispecies individual fishery quotas, Canadian Journal of Fisheries and Aquatic Sciences, 2006, vol. 63 (pg. 1669-1685)10.1139/f06-066 --> -->
 
-* Previous revenues
-* Expected catch: 
-    + We calculate expected revenue as a function of average outputs of the SDMs. Using SDM outputs instead of catch to compute expected revenues allow us to project fishers decision on time using SDM's projections. Moreover, using catch to compute expected revenue as a regress in a discrete choice model could incorporate endogeneity as it can be correlated with unobservables not captured by the choice constant. 
-* Closure: Whether or not the Pacific sardine fishery was closed.
-* Diversification using HHI (measurement of diversification, from @richerson2017)
-* Dependence on the species in consideration (historical % of the revenue from the species considered)
-* Typical landings location: Latitudinal center of gravity (LCG) index from [@richerson2017]
-* Dispersion around centre of gravity: Latitude inertia (LI) index from [@richerson2017]
-* Years in the sample that the vessel have participate in the fishery.
+<!-- <!-- Toft J. E.,  Punt A. E.,  Little L. R.. Modelling the economic and ecological impacts of the transition to individual transferable quotas in the multispecies US west coast groundfish trawl fleet, ICES Journal of Marine Science, 2011, vol. 68 (pg. 1566-1579)10.1093/icesjms/fsr095 --> -->
 
-We model the probability $p_{ijm}$ that vessel $i$ fishes species $j$ in month $y$ as:
-\begin{align*}
-\text{logit}(p_{ijy}) = & \beta_1 + \beta_2  Closure + \beta_3 Mean.revenue_j + \beta_4 ExpectedCatch_j \\
-& + \beta_5 HHI_i + \beta_6 Percent.revenue_j + \beta_7 LCG_i + \beta_8 LI_i + \beta_9 Year.fished. 
-\end{align*}
-Note that we are not able to observe if a vessel leave the CPS fishery for another resource or actually exit fishing entirely. Therefore, the outside option include is interpreted as "No fishing in any of the CPS fishery".
+<!-- * Previous revenues -->
+<!-- * Expected catch:  -->
+<!--     + We calculate expected revenue as a function of average outputs of the SDMs. Using SDM outputs instead of catch to compute expected revenues allow us to project fishers decision on time using SDM's projections. Moreover, using catch to compute expected revenue as a regress in a discrete choice model could incorporate endogeneity as it can be correlated with unobservables not captured by the choice constant.  -->
+<!-- * Closure: Whether or not the Pacific sardine fishery was closed. -->
+<!-- * Diversification using HHI (measurement of diversification, from @richerson2017) -->
+<!-- * Dependence on the species in consideration (historical % of the revenue from the species considered) -->
+<!-- * Typical landings location: Latitudinal center of gravity (LCG) index from [@richerson2017] -->
+<!-- * Dispersion around centre of gravity: Latitude inertia (LI) index from [@richerson2017] -->
+<!-- * Years in the sample that the vessel have participate in the fishery. -->
 
-Should we study also the desicion to leave or stay the CPS fishery? I think in implicit in the participation model. Can we test this using the prediction from that model?
+<!-- We model the probability $p_{ijm}$ that vessel $i$ fishes species $j$ in month $y$ as: -->
+<!-- \begin{align*} -->
+<!-- \text{logit}(p_{ijy}) = & \beta_1 + \beta_2  Closure + \beta_3 Mean.revenue_j + \beta_4 ExpectedCatch_j \\ -->
+<!-- & + \beta_5 HHI_i + \beta_6 Percent.revenue_j + \beta_7 LCG_i + \beta_8 LI_i + \beta_9 Year.fished.  -->
+<!-- \end{align*} -->
+<!-- Note that we are not able to observe if a vessel leave the CPS fishery for another resource or actually exit fishing entirely. Therefore, the outside option include is interpreted as "No fishing in any of the CPS fishery". -->
 
-<!-- We can extend our analysis and infer cases in which a vessel do not longer participate in the fish industry after a the closure. For this, we can use Global Fishing Watch and observe whether a vessel that stop harvesting CPS species still actively fishing other species.  -->
+<!-- Should we study also the desicion to leave or stay the CPS fishery? I think in implicit in the participation model. Can we test this using the prediction from that model? -->
 
-<!-- Soould I include expected catch???  (Peña et al have some ideas how to use expected catch and cost. It could be the month average...) -->
+<!-- <!-- We can extend our analysis and infer cases in which a vessel do not longer participate in the fish industry after a the closure. For this, we can use Global Fishing Watch and observe whether a vessel that stop harvesting CPS species still actively fishing other species.  --> -->
 
-
-
-
-
-First, we observe how many vessel participate in both the Pacific sardine and market squid fishery. To do this, we first have to define what we understand as participation. Following @richerson2017, we consider a vessel participate in a specific fishery if they met the following criteria:
-
-1. Harvest the species during the period 2000-2014 (before the Pacific sardine closure) 
-2. Total annual revenue from the species averaged at least 1000 USD per year over 2000–2014. This calculation exclude years where the vessel did not fish.
-3. Revenue from the species at least 5% of total vessel revenue per year over 2000–2014.
-4. The vessel fished at least 3 of 15 years in 2000–2014.
-
-
-```{r only_psdn, include=FALSE}
-### Vessel that participate in Pacific sardine ###
-total.revenue <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(year_revenue = sum(AFI_EXVESSEL_REVENUE.sum)) 
-
-psdn.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_psdn = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-    merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>% 
-  filter(revenue_psdn > 0) %>% group_by(VESSEL_NUM) %>% 
-  summarise(anual_revenue_psdn = mean(revenue_psdn), anual_revenue_all = mean(year_revenue), n_year_fishing = n()) %>%  
-  mutate(perc_psdn_rev = anual_revenue_psdn/anual_revenue_all) %>% 
-  filter(anual_revenue_psdn >= 1000) %>% 
-  filter(perc_psdn_rev >= 0.05) %>% 
-  filter(n_year_fishing >= 3) %>%
-  select(VESSEL_NUM) %>% unique() %>% mutate(d_PSDN_fleet = 1)
-
-
-### Vessel that participate in Pacific sardine ###
-msqd.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_specie = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-    merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>% 
-  filter(revenue_specie > 0) %>% group_by(VESSEL_NUM) %>% 
-  summarise(anual_revenue_specie = mean(revenue_specie), anual_revenue_all = mean(year_revenue), n_year_fishing = n()) %>%  
-  mutate(perc_specie_rev = anual_revenue_specie/anual_revenue_all) %>% 
-  filter(anual_revenue_specie >= 1000) %>% 
-  filter(perc_specie_rev >= 0.05) %>% 
-  filter(n_year_fishing >= 3) %>%
-  select(VESSEL_NUM) %>% unique() %>% mutate(d_MSQD_fleet = 1)
-
-
-# Which are the vessel that harvest both PSDN and MSQD?
-squid.and.psdn <- merge(psdn.fleet, msqd.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = FALSE) %>%
-  select(VESSEL_NUM) %>% unique() %>%  mutate(d_PSDN_and_MSQD = 1)
-
-# Which are the vessel that harvest only MSQD?
-only.msqd <- msqd.fleet %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>% 
-  filter(is.na(d_PSDN_and_MSQD)) %>% select(VESSEL_NUM) %>% unique() %>% mutate(d_onlyMSQD = 1)
-
-# Which are the vessel that harvest only PSDN?
-only.psdn <- psdn.fleet %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>% 
-  filter(is.na(d_PSDN_and_MSQD)) %>% select(VESSEL_NUM) %>% unique() %>% mutate(d_onlyPSDN = 1)
-
-rm(total.revenue)
-
-```
-
-From 2000 to 2014, there are 74 vessels that participate in both Pacific sardine and market squid fisheries, while 26 vessel participate in the Pacific sardine but not in the market squid fishery, and  82 vessels participate in the market squid fishery but not in the Pacific sardine fishery. From this calculation, we can infer that it is more likely that a vessel that harvest Pacific sardine will also harvest market squid, instead of the opposite. This is also reflected in Figure \ref{fig:switching}, which shows the number of vessel that harvest squid in a year conditional they also harvest sardine, and the number of vessel that harvest sardine in a year conditional that they also harvest squid. 
-
-```{r switching_graph, eval=FALSE, fig.cap="Switching", message=FALSE, warning=FALSE, include=FALSE}
-psdn.by.year <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
-  unique() %>% mutate(harv.psdn = 1)
-msqd.by.year <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
-  unique() %>% mutate(harv.msqd = 1)
-
-# If a vessel harvest Pacific sardine in a year, how many also harvest squid.
-squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% merge(psdn.by.year, 
-                        by = c("VESSEL_NUM", "LANDING_YEAR"), all.y = TRUE) %>% 
-  filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique()
-
-# Calculate number of vessels harvesting sardine and squid and percentage per year
-n_vessel_psdn <- psdn.by.year %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_psdn = sum(harv.psdn))
-n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_msqd = sum(harv.psdn))
-  df <- n_vessel_msqd_c_psdn %>% mutate(perc = n_vessel_psdn$n_vessel_psdn) %>%
-    mutate(n_vessel_only_psdn = perc) %>%  # - n_vessel_msqd
-    mutate(perc = (n_vessel_msqd / perc)) 
-  
-coeff = 115
-g1 <- ggplot(df) + 
-  geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_only_psdn,
-                          color = "# of vessels landing sardine"), size = 1) +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_msqd,
-                          color = "# of vessels landing squid (c/ landing sardine)"), size = 1) +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = perc*coeff, 
-                          color = "% of vessels landing squid (c/ landings sardine)"),
-            size = 1, linetype = "dashed") + scale_x_continuous(name = "Year") +
-  scale_y_continuous(name = "Number of vessels", 
-                     sec.axis = sec_axis(~./coeff, name = "% vessels harvesting squid" )) +
-  theme(axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +  scale_color_manual(name = "Variables: ", 
-                     values = c("# of vessels landing sardine" = "green", 
-                                "# of vessels landing squid (c/ landing sardine)" = "blue",
-                               "% of vessels landing squid (c/ landings sardine)" = "grey")) + 
-  theme(legend.position="right")
-
-  rm(psdn.by.year, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df, coeff)
-
-msqd.by.year <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2020) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>% 
-  unique() %>% mutate(harv.msqd = 1)
-
-# If a vessel harvest Pacific sardine in a year, how many also harvest squid.
-psdn.cond.msqd <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2020) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% merge(msqd.by.year, 
-                        by = c("VESSEL_NUM", "LANDING_YEAR"), all.y = TRUE) %>% 
-  filter(harv.msqd == 1) %>% filter(PACFIN_SPECIES_CODE.x == "PSDN") %>% unique()
-
-# Calculate number of vessels harvesting sardine and squid and percentage per year
-n_vessel_msqd <- msqd.by.year %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_msqd = sum(harv.msqd))
-n_vessel_psdn_c_msqd <- psdn.cond.msqd %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_psdn = sum(harv.msqd))
-  df <- n_vessel_psdn_c_msqd %>%  mutate(n_vessel_msqd = n_vessel_msqd$n_vessel_msqd) %>%
-    mutate(perc = n_vessel_psdn / n_vessel_msqd) 
-  
-coeff = 200
-g2 <- ggplot(df) + 
-  geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_msqd,
-                          color = "# of vessels landing squid"), size = 1) +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_psdn,
-                          color = "# of vessels landing sardine (c/ landing squid)"), size = 1) +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = perc*coeff, 
-                          color = "% of vessels landing sardine (c/ landings squid)"),
-            size = 1, linetype = "dashed") + scale_x_continuous(name = "Year") +
-  scale_y_continuous(name = "Number of vessels", 
-                     sec.axis = sec_axis(~./coeff, name = "% vessels harvesting squid" )) +
-  theme(axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +  scale_color_manual(name = "Variables: ", 
-                     values = c("# of vessels landing squid" = "green", 
-                                "# of vessels landing sardine (c/ landing squid)" = "blue",
-                               "% of vessels landing sardine (c/ landings squid)" = "grey")) + 
-  theme(legend.position="right")
-
-g1 / g2
-
-rm(msqd.by.year, psdn.cond.msqd, n_vessel_msqd, n_vessel_psdn_c_msqd, df, coeff, g1, g2)
-
-```
-
-```{r switching_month, eval=FALSE, include=FALSE}
-psdn.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>% 
-  unique() %>% mutate(harv.psdn = 1) 
-
-# If a vessel harvest Pacific sardine in a year, how many also harvest squid.
-squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH) %>% merge(psdn.by.month, 
-                        by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH"), all.y = TRUE) %>% 
-  filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique()
-
-# Calculate number of vessels harvesting sardine and squid and percentage per year
-n_vessel_psdn <- psdn.by.month %>% group_by(LANDING_YEAR, LANDING_MONTH) %>% 
-  summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE)) 
-
-n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR, LANDING_MONTH) %>% 
-  summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE))
-  
-df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) %>%
-    mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>% group_by(LANDING_MONTH) %>% 
-    summarize(n_vessel_msqd = sum(n_vessel_msqd, na.rm = TRUE), n_vessel_psdn = sum(n_vessel_psdn, na.rm = TRUE)) %>%
-    mutate(perc = (n_vessel_msqd / n_vessel_psdn)) %>% select(LANDING_MONTH, perc)
-
-ggplot(data=df, aes(x=LANDING_MONTH, y=perc)) +
-    geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
-  scale_x_continuous(name = "Month", breaks=1:12) +
-  scale_y_percent(name = "Percentage of vessels harvesting squid" )
-
-rm(psdn.by.month, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df)
-
-
-```
+<!-- <!-- Soould I include expected catch???  (Peña et al have some ideas how to use expected catch and cost. It could be the month average...) --> -->
 
 
 
 
-## Effort susbsitution ## 
 
-* Time series of number of trips (as a proxy for effort) for all the species
-* @richerson2017 use a method identify the nature of the outliers in an ARMA time series model (read more if interested) 
-    + I propose to estimate a system of simultaneous equations (VECM model) to study equilibrium of effort and short-run and long-run effects of the closure (structural breaks)
-    + Have a long-run equation for each species (simultaneously estimated) and test for structural break in this long-run relationship.
-    
-    
-## Seasonality changes ##
+<!-- First, we observe how many vessel participate in both the Pacific sardine and market squid fishery. To do this, we first have to define what we understand as participation. Following @richerson2017, we consider a vessel participate in a specific fishery if they met the following criteria: -->
 
-* Seasonality can be studied calculating monthly share of total trips by species, regress it using month dummiues and see any is there any structural change after the closure [@richerson2017]. 
+<!-- 1. Harvest the species during the period 2000-2014 (before the Pacific sardine closure)  -->
+<!-- 2. Total annual revenue from the species averaged at least 1000 USD per year over 2000–2014. This calculation exclude years where the vessel did not fish. -->
+<!-- 3. Revenue from the species at least 5% of total vessel revenue per year over 2000–2014. -->
+<!-- 4. The vessel fished at least 3 of 15 years in 2000–2014. -->
 
 
+<!-- ```{r only_psdn, include=FALSE} -->
+<!-- ### Vessel that participate in Pacific sardine ### -->
+<!-- total.revenue <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!--   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(year_revenue = sum(AFI_EXVESSEL_REVENUE.sum))  -->
 
-<!-- Shall we study also effort as number of trips, and seasonality using time series -->
+<!-- psdn.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!--   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%  -->
+<!--   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_psdn = sum(AFI_EXVESSEL_REVENUE.sum)) %>% -->
+<!--     merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%  -->
+<!--   filter(revenue_psdn > 0) %>% group_by(VESSEL_NUM) %>%  -->
+<!--   summarise(anual_revenue_psdn = mean(revenue_psdn), anual_revenue_all = mean(year_revenue), n_year_fishing = n()) %>%   -->
+<!--   mutate(perc_psdn_rev = anual_revenue_psdn/anual_revenue_all) %>%  -->
+<!--   filter(anual_revenue_psdn >= 1000) %>%  -->
+<!--   filter(perc_psdn_rev >= 0.05) %>%  -->
+<!--   filter(n_year_fishing >= 3) %>% -->
+<!--   select(VESSEL_NUM) %>% unique() %>% mutate(d_PSDN_fleet = 1) -->
+
+
+<!-- ### Vessel that participate in Pacific sardine ### -->
+<!-- msqd.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!--   filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>%  -->
+<!--   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_specie = sum(AFI_EXVESSEL_REVENUE.sum)) %>% -->
+<!--     merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%  -->
+<!--   filter(revenue_specie > 0) %>% group_by(VESSEL_NUM) %>%  -->
+<!--   summarise(anual_revenue_specie = mean(revenue_specie), anual_revenue_all = mean(year_revenue), n_year_fishing = n()) %>%   -->
+<!--   mutate(perc_specie_rev = anual_revenue_specie/anual_revenue_all) %>%  -->
+<!--   filter(anual_revenue_specie >= 1000) %>%  -->
+<!--   filter(perc_specie_rev >= 0.05) %>%  -->
+<!--   filter(n_year_fishing >= 3) %>% -->
+<!--   select(VESSEL_NUM) %>% unique() %>% mutate(d_MSQD_fleet = 1) -->
+
+
+<!-- # Which are the vessel that harvest both PSDN and MSQD? -->
+<!-- squid.and.psdn <- merge(psdn.fleet, msqd.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = FALSE) %>% -->
+<!--   select(VESSEL_NUM) %>% unique() %>%  mutate(d_PSDN_and_MSQD = 1) -->
+
+<!-- # Which are the vessel that harvest only MSQD? -->
+<!-- only.msqd <- msqd.fleet %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>%  -->
+<!--   filter(is.na(d_PSDN_and_MSQD)) %>% select(VESSEL_NUM) %>% unique() %>% mutate(d_onlyMSQD = 1) -->
+
+<!-- # Which are the vessel that harvest only PSDN? -->
+<!-- only.psdn <- psdn.fleet %>% merge(squid.and.psdn, by = c("VESSEL_NUM"), all.x = TRUE) %>%  -->
+<!--   filter(is.na(d_PSDN_and_MSQD)) %>% select(VESSEL_NUM) %>% unique() %>% mutate(d_onlyPSDN = 1) -->
+
+<!-- rm(total.revenue) -->
+
+<!-- ``` -->
+
+<!-- From 2000 to 2014, there are 74 vessels that participate in both Pacific sardine and market squid fisheries, while 26 vessel participate in the Pacific sardine but not in the market squid fishery, and  82 vessels participate in the market squid fishery but not in the Pacific sardine fishery. From this calculation, we can infer that it is more likely that a vessel that harvest Pacific sardine will also harvest market squid, instead of the opposite. This is also reflected in Figure \ref{fig:switching}, which shows the number of vessel that harvest squid in a year conditional they also harvest sardine, and the number of vessel that harvest sardine in a year conditional that they also harvest squid.  -->
+
+<!-- ```{r switching_graph, eval=FALSE, fig.cap="Switching", message=FALSE, warning=FALSE, include=FALSE} -->
+<!-- psdn.by.year <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!--   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%  -->
+<!--   unique() %>% mutate(harv.psdn = 1) -->
+<!-- msqd.by.year <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!--   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>%  -->
+<!--   unique() %>% mutate(harv.msqd = 1) -->
+
+<!-- # If a vessel harvest Pacific sardine in a year, how many also harvest squid. -->
+<!-- squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!--   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% merge(psdn.by.year,  -->
+<!--                         by = c("VESSEL_NUM", "LANDING_YEAR"), all.y = TRUE) %>%  -->
+<!--   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique() -->
+
+<!-- # Calculate number of vessels harvesting sardine and squid and percentage per year -->
+<!-- n_vessel_psdn <- psdn.by.year %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_psdn = sum(harv.psdn)) -->
+<!-- n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_msqd = sum(harv.psdn)) -->
+<!--   df <- n_vessel_msqd_c_psdn %>% mutate(perc = n_vessel_psdn$n_vessel_psdn) %>% -->
+<!--     mutate(n_vessel_only_psdn = perc) %>%  # - n_vessel_msqd -->
+<!--     mutate(perc = (n_vessel_msqd / perc))  -->
+
+<!-- coeff = 115 -->
+<!-- g1 <- ggplot(df) +  -->
+<!--   geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_only_psdn, -->
+<!--                           color = "# of vessels landing sardine"), size = 1) + -->
+<!--   geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_msqd, -->
+<!--                           color = "# of vessels landing squid (c/ landing sardine)"), size = 1) + -->
+<!--   geom_line(mapping = aes(x = LANDING_YEAR, y = perc*coeff,  -->
+<!--                           color = "% of vessels landing squid (c/ landings sardine)"), -->
+<!--             size = 1, linetype = "dashed") + scale_x_continuous(name = "Year") + -->
+<!--   scale_y_continuous(name = "Number of vessels",  -->
+<!--                      sec.axis = sec_axis(~./coeff, name = "% vessels harvesting squid" )) + -->
+<!--   theme(axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +  scale_color_manual(name = "Variables: ",  -->
+<!--                      values = c("# of vessels landing sardine" = "green",  -->
+<!--                                 "# of vessels landing squid (c/ landing sardine)" = "blue", -->
+<!--                                "% of vessels landing squid (c/ landings sardine)" = "grey")) +  -->
+<!--   theme(legend.position="right") -->
+
+<!--   rm(psdn.by.year, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df, coeff) -->
+
+<!-- msqd.by.year <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2020) %>%  -->
+<!--   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>%  -->
+<!--   unique() %>% mutate(harv.msqd = 1) -->
+
+<!-- # If a vessel harvest Pacific sardine in a year, how many also harvest squid. -->
+<!-- psdn.cond.msqd <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2020) %>%  -->
+<!--   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR) %>% merge(msqd.by.year,  -->
+<!--                         by = c("VESSEL_NUM", "LANDING_YEAR"), all.y = TRUE) %>%  -->
+<!--   filter(harv.msqd == 1) %>% filter(PACFIN_SPECIES_CODE.x == "PSDN") %>% unique() -->
+
+<!-- # Calculate number of vessels harvesting sardine and squid and percentage per year -->
+<!-- n_vessel_msqd <- msqd.by.year %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_msqd = sum(harv.msqd)) -->
+<!-- n_vessel_psdn_c_msqd <- psdn.cond.msqd %>% group_by(LANDING_YEAR) %>% summarize(n_vessel_psdn = sum(harv.msqd)) -->
+<!--   df <- n_vessel_psdn_c_msqd %>%  mutate(n_vessel_msqd = n_vessel_msqd$n_vessel_msqd) %>% -->
+<!--     mutate(perc = n_vessel_psdn / n_vessel_msqd)  -->
+
+<!-- coeff = 200 -->
+<!-- g2 <- ggplot(df) +  -->
+<!--   geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_msqd, -->
+<!--                           color = "# of vessels landing squid"), size = 1) + -->
+<!--   geom_line(mapping = aes(x = LANDING_YEAR, y = n_vessel_psdn, -->
+<!--                           color = "# of vessels landing sardine (c/ landing squid)"), size = 1) + -->
+<!--   geom_line(mapping = aes(x = LANDING_YEAR, y = perc*coeff,  -->
+<!--                           color = "% of vessels landing sardine (c/ landings squid)"), -->
+<!--             size = 1, linetype = "dashed") + scale_x_continuous(name = "Year") + -->
+<!--   scale_y_continuous(name = "Number of vessels",  -->
+<!--                      sec.axis = sec_axis(~./coeff, name = "% vessels harvesting squid" )) + -->
+<!--   theme(axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +  scale_color_manual(name = "Variables: ",  -->
+<!--                      values = c("# of vessels landing squid" = "green",  -->
+<!--                                 "# of vessels landing sardine (c/ landing squid)" = "blue", -->
+<!--                                "% of vessels landing sardine (c/ landings squid)" = "grey")) +  -->
+<!--   theme(legend.position="right") -->
+
+<!-- g1 / g2 -->
+
+<!-- rm(msqd.by.year, psdn.cond.msqd, n_vessel_msqd, n_vessel_psdn_c_msqd, df, coeff, g1, g2) -->
+
+<!-- ``` -->
+
+<!-- ```{r switching_month, eval=FALSE, include=FALSE} -->
+<!-- psdn.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!--   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH) %>% filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%  -->
+<!--   unique() %>% mutate(harv.psdn = 1)  -->
+
+<!-- # If a vessel harvest Pacific sardine in a year, how many also harvest squid. -->
+<!-- squid.cond.psdn <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%  -->
+<!--   select(VESSEL_NUM, PACFIN_SPECIES_CODE, LANDING_YEAR, LANDING_MONTH) %>% merge(psdn.by.month,  -->
+<!--                         by = c("VESSEL_NUM", "LANDING_YEAR", "LANDING_MONTH"), all.y = TRUE) %>%  -->
+<!--   filter(harv.psdn == 1) %>% filter(PACFIN_SPECIES_CODE.x == "MSQD") %>% unique() -->
+
+<!-- # Calculate number of vessels harvesting sardine and squid and percentage per year -->
+<!-- n_vessel_psdn <- psdn.by.month %>% group_by(LANDING_YEAR, LANDING_MONTH) %>%  -->
+<!--   summarize(n_vessel_psdn = sum(harv.psdn, na.rm = TRUE))  -->
+
+<!-- n_vessel_msqd_c_psdn <- squid.cond.psdn %>% group_by(LANDING_YEAR, LANDING_MONTH) %>%  -->
+<!--   summarize(n_vessel_msqd = sum(harv.psdn, na.rm = TRUE)) -->
+
+<!-- df <- merge(n_vessel_psdn, n_vessel_msqd_c_psdn, by=c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) %>% -->
+<!--     mutate(n_vessel_msqd = if_else(is.na(n_vessel_msqd), 0, n_vessel_msqd)) %>% group_by(LANDING_MONTH) %>%  -->
+<!--     summarize(n_vessel_msqd = sum(n_vessel_msqd, na.rm = TRUE), n_vessel_psdn = sum(n_vessel_psdn, na.rm = TRUE)) %>% -->
+<!--     mutate(perc = (n_vessel_msqd / n_vessel_psdn)) %>% select(LANDING_MONTH, perc) -->
+
+<!-- ggplot(data=df, aes(x=LANDING_MONTH, y=perc)) + -->
+<!--     geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) +  -->
+<!--   scale_x_continuous(name = "Month", breaks=1:12) + -->
+<!--   scale_y_percent(name = "Percentage of vessels harvesting squid" ) -->
+
+<!-- rm(psdn.by.month, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df) -->
+
+
+<!-- ``` -->
+
+
+
+
+<!-- ## Effort susbsitution ##  -->
+
+<!-- * Time series of number of trips (as a proxy for effort) for all the species -->
+<!-- * @richerson2017 use a method identify the nature of the outliers in an ARMA time series model (read more if interested)  -->
+<!--     + I propose to estimate a system of simultaneous equations (VECM model) to study equilibrium of effort and short-run and long-run effects of the closure (structural breaks) -->
+<!--     + Have a long-run equation for each species (simultaneously estimated) and test for structural break in this long-run relationship. -->
+
+
+<!-- ## Seasonality changes ## -->
+
+<!-- * Seasonality can be studied calculating monthly share of total trips by species, regress it using month dummiues and see any is there any structural change after the closure [@richerson2017].  -->
+
+
+
+<!-- <!-- Shall we study also effort as number of trips, and seasonality using time series --> -->
 
 
 # Results
