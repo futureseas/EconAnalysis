@@ -1212,7 +1212,7 @@ PacFIN.month.dataset <- PacFIN.month.dataset %>%   filter(LANDING_YEAR >= 2000) 
           PACFIN_SPECIES_CODE + variable, fun.aggregate=mean) 
   PacFIN.month.dataset[PacFIN.month.dataset == "NaN"] <- NA
   PacFIN.month.dataset <- PacFIN.month.dataset %>%
-    mutate(PORT_ID = as.numeric(as.factor(PORT_NAME))) %>%
+    mutate(PORT_ID = as.numeric(as.factor(PORT_NAME))) %>% ### Here is the port ID
     mutate(PSDN_SDM_60 = rowMeans(cbind(PSDN_PSDN_SDM_60, MSQD_PSDN_SDM_60), na.rm = T)) %>%
     mutate(MSQD_SDM_90 = rowMeans(cbind(PSDN_MSQD_SDM_90, MSQD_MSQD_SDM_90), na.rm = T)) %>%
     mutate(ACL_PSDN = rowMeans(cbind(PSDN_ACL_PSDN, MSQD_ACL_PSDN), na.rm = T))
@@ -1459,6 +1459,7 @@ dataset = subset(dataset, select =
 Besides the biological stock, landings are affected by economic conditions. Some of them are harvest cost, prices received by species and their substitutes, and regulations imposed by the authorities. Our dataset includes <!-- average distances traveled by vessel from the port of origin *(TO BE INCLUDED USING GLOBAL FISHING WATCH)* and fuel cost *(TO BE INCLUDED...)* as proxies of harvest cost. We also include  --> the average species' price that a vessel receives in a port during a month, obtained from the PacFIN landings dataset. When prices were missing, we replaced this value with the average species' price in the port for all vessels in the corresponding year. If we still have missing values, we use the average price during the month at the port code, then at the port area, then at the state, and then considering the whole U.S. west coast (excluding Alaska). <!-- We should also include weather variables. Bad weather should reduce fishers' decision to go to sea. Ir becomes risky, but also this is compared to revenue and how risk-averse is a fisher (see Lisa's work): "Weather and tides are major factors in fishing operations and timing of vessels transiting in and out of the Columbia River." SAFE --> We include the Annual Catch Limit (ACL) for the Pacific sardine model as an additional explanatory variable in both $\mu_i$ and $\text{logit}(p_i)$ equations. ACL variable is the total quota allocated each year for this fishery. We obtained this information from the CPS Fisheries Management Plan [@CPSFMP2021] and the Stock Assessment and Fishery Evaluation for 2019 document [@SAFE2020].  We restrict our data set to the period when the fishery was open (2000-2015) for this species. <!-- ISAAC's comments: Is this the ACL or the remaining part of the ACL (accounting for the previous catch). R: In the annual case does not matter, but in a monthly model, I should consider this. --> In the case of market squid, our database comprises the period between 2000 and 2018. We do not include ACL as an explanatory variable as this variable has no variation between years. To capture any change in fishers' behavior when the Pacific sardine fishery is closed, we include a binary variable called **dClose** that takes the value "1" when the Pacific sardine fishery is closed and takes the value "0" when the Pacific sardine fishery is open. Concerning the Pacific sardine probability of presence, this variable takes the value of zero when the fishery is closed. Thus, the effect of this variable is only relevant to capture potential substitution between targets when the Pacific sardine fishery is open. We show a summary statistics of our data set in Table \ref{tab:sum_stats}.
 
 ```{r desc, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
 # Rename Price and landing variables #
 dataset <- dataset %>% 
   dplyr::rename(PSDN_Price = PSDN_AFI_PRICE_PER_KG.mean) %>%
@@ -1496,6 +1497,34 @@ sjlabelled::set_label(desc_data$PSDN_Price)    <- "Price: PSDN"
 sjlabelled::set_label(desc_data$ACL_PSDN)      <- "Annual Catch Limit: PSDN"
 
 
+# Exclude port without MSQD and PSDN landings (they have to have both)
+Tot.landings.ports.PSDN <- as.data.frame(cbind(
+  rowsum(dataset$PSDN_Landings, dataset$PORT_NAME, na.rm = TRUE)))
+  Tot.landings.ports.PSDN <- Tot.landings.ports.PSDN %>% mutate(dTotalPSDN = ifelse(V1>0, 1, 0)) %>% 
+    mutate(PORT_NAME = rownames(Tot.landings.ports.PSDN)) %>%  dplyr::select(PORT_NAME, dTotalPSDN)
+
+Tot.landings.ports.MSQD <- as.data.frame(cbind(
+  rowsum(dataset$MSQD_Landings, dataset$PORT_NAME, na.rm = TRUE)))
+  Tot.landings.ports.MSQD <- Tot.landings.ports.MSQD %>% mutate(dTotalMSQD = ifelse(V1>0, 1, 0)) %>% 
+    mutate(PORT_NAME = rownames(Tot.landings.ports.MSQD)) %>%  dplyr::select(PORT_NAME, dTotalMSQD)
+
+Tot.landings.ports <- Tot.landings.ports.PSDN %>% 
+  merge(Tot.landings.ports.MSQD, by = c("PORT_NAME")) %>% 
+   mutate(nSpecies = dTotalPSDN + dTotalMSQD)
+
+rm(Tot.landings.ports.PSDN, Tot.landings.ports.MSQD)
+  
+
+# Select ports that at least they have landing PSDN once, and drop N/A #
+## Select data for estimation, replace N/A landings to zero #
+### NOTE: If I use drop_na, some ports without MSQD landings are excluded. ###
+
+dataset <- dataset %>% 
+  merge(Tot.landings.ports, by = "PORT_NAME", all.x = TRUE, all.y = FALSE) %>% 
+  filter(nSpecies==2) 
+
+# Compute descriptive statistics #
+
 desc_data <- desc_data[c("PSDN_SDM_60", "MSQD_SDM_90", "PSDN_Landings", "MSQD_Landings",
                          "PSDN_Price", "MSQD_Price", "ACL_PSDN")]
                                  
@@ -1510,48 +1539,30 @@ rm(desc_data)
 
 ```{r dataset_psdn, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
 
-Tot.landings.ports.PSDN <- as.data.frame(cbind(rowsum(dataset$PSDN_Landings, dataset$PORT_AREA_CODE, na.rm = TRUE)))
-  Tot.landings.ports.PSDN <- Tot.landings.ports.PSDN %>% mutate(dTotalPSDN = ifelse(V1>0, 1, 0)) %>% 
-    mutate(PORT_AREA_CODE = rownames(Tot.landings.ports.PSDN)) %>%  dplyr::select(PORT_AREA_CODE, dTotalPSDN)
-
-Tot.landings.ports.MSQD <- as.data.frame(cbind(rowsum(dataset$MSQD_Landings, dataset$PORT_AREA_CODE, na.rm = TRUE)))
-  Tot.landings.ports.MSQD <- Tot.landings.ports.MSQD %>% mutate(dTotalMSQD = ifelse(V1>0, 1, 0)) %>% 
-    mutate(PORT_AREA_CODE = rownames(Tot.landings.ports.MSQD)) %>%  dplyr::select(PORT_AREA_CODE, dTotalMSQD)
-
-
-Tot.landings.ports <- Tot.landings.ports.PSDN %>% 
-  merge(Tot.landings.ports.MSQD, by = c("PORT_AREA_CODE")) %>% 
-   mutate(nSpecies = dTotalPSDN + dTotalMSQD)
-
-rm(Tot.landings.ports.PSDN, Tot.landings.ports.MSQD)
-  
-
-# Select ports that at least they have landing PSDN once, and drop N/A #
 ## Select data for estimation, replace N/A landings to zero #
 ### NOTE: If I use drop_na, some ports without MSQD landings are excluded. ###
 
 dataset_psdn <- dataset %>% 
-  dplyr::select(PSDN_SDM_60, PSDN_Landings, PSDN_Price, ACL_PSDN,
-                MSQD_SDM_90, PORT_ID, PACFIN_PORT_CODE, PORT_AREA_CODE, LANDING_YEAR, LANDING_MONTH) %>% 
+  dplyr::select(PSDN_SDM_60, PSDN_Landings, PSDN_Price, ACL_PSDN, MSQD_SDM_90,
+                PORT_ID, PACFIN_PORT_CODE, PORT_AREA_CODE, LANDING_YEAR, LANDING_MONTH) %>% 
   filter(LANDING_YEAR >= 2000 & LANDING_YEAR < 2015) %>% 
-  dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>%
-  merge(Tot.landings.ports, by = "PORT_AREA_CODE", all.x = TRUE, all.y = FALSE) %>% 
-  filter(dTotalPSDN==1) %>% filter(dTotalMSQD==1) %>% drop_na()
+  dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>% 
+  drop_na() ## Just 2 observations are dropped
 
 # Create matrices and vectors to run STAN model #
-year_id <- as.vector(cbind(as.numeric(factor(dataset_psdn$LANDING_YEAR))))
+# year_id <- as.vector(cbind(as.numeric(factor(dataset_psdn$LANDING_YEAR))))
 dataset_psdn$port_ID <- as.factor(
-  udpipe::unique_identifier(dataset_psdn, fields = "PORT_AREA_CODE", start_from = 1))
-dataset_psdn_port_names <- dataset_psdn %>% dplyr::select(PORT_AREA_CODE, port_ID) %>% unique()
-rm(year_id, dataset_psdn_port_names)
+  udpipe::unique_identifier(dataset_psdn, fields = "PORT_ID", start_from = 1))
+  dataset_psdn_port_names <- dataset_psdn %>% dplyr::select(PORT_AREA_CODE, port_ID) %>% unique()
+  rm(year_id, dataset_psdn_port_names)
 ```
 
 ```{r psdn_estimation, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 fit_qPSDN <- brm(
-  bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_20 + PSDN_Price + s(ACL_PSDN) 
-                      + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_20 + PSDN_Price | port_ID),
-                hu ~ PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_20 + PSDN_Price + s(ACL_PSDN) 
-                      + (1 + PSDN_SDM_60 + MSQD_SDM_90 + NANC_SDM_20 + PSDN_Price | port_ID)),
+  bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + PSDN_Price + s(ACL_PSDN) 
+                      + (1 + PSDN_SDM_60 + MSQD_SDM_90 + PSDN_Price | port_ID),
+                hu ~ PSDN_SDM_60 + MSQD_SDM_90 + PSDN_Price + s(ACL_PSDN) 
+                      + (1 + PSDN_SDM_60 + MSQD_SDM_90 + PSDN_Price | port_ID)),
                           data = dataset_psdn,
                           family = hurdle_gamma(), 
                           control = list(adapt_delta = 0.999, max_treedepth = 20),
