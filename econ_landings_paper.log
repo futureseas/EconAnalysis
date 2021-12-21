@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.12.14)  20 DEC 2021 16:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.12.14)  21 DEC 2021 17:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1235,53 +1235,53 @@ l.500
        <./econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf>] [1
 2] [13] [14] [15]
 
-LaTeX Warning: Reference `fig:posteriors' on page 16 undefined on input line 90
-1.
+LaTeX Warning: Reference `fig:posteriors' on page 16 undefined on input line 84
+7.
+
+
+LaTeX Warning: Reference `fig:sdmeffects' on page 16 undefined on input line 86
+9.
 
 [16]
 
-LaTeX Warning: Reference `fig:sdmeffects' on page 17 undefined on input line 92
-3.
-
-
 LaTeX Warning: Reference `fig:sdm_int_psdn' on page 17 undefined on input line 
-947.
+893.
 
 
-LaTeX Warning: Reference `fig:sdmeffects' on page 17 undefined on input line 95
-0.
+LaTeX Warning: Reference `fig:sdmeffects' on page 17 undefined on input line 89
+6.
 
-[17]
 
-LaTeX Warning: Reference `fig:sdm_int_msqd' on page 18 undefined on input line 
-960.
+LaTeX Warning: Reference `fig:sdm_int_msqd' on page 17 undefined on input line 
+906.
 
-(./econ_landings_paper.bbl [18]) [19] [20pdfTeX warning (ext4): destination wit
-h the same identifier (name{table.1}) has been already used, duplicate ignored
+[17] (./econ_landings_paper.bbl [18]) [19] [20pdfTeX warning (ext4): destinatio
+n with the same identifier (name{table.1}) has been already used, duplicate ign
+ored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1010 \end{document}
-                     ] [21pdfTeX warning (ext4): destination with the same iden
-tifier (name{table.2}) has been already used, duplicate ignored
+l.956 \end{document}
+                    ] [21pdfTeX warning (ext4): destination with the same ident
+ifier (name{table.2}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1010 \end{document}
-                     pdfTeX warning (ext4): destination with the same identifie
-r (name{table.3}) has been already used, duplicate ignored
+l.956 \end{document}
+                    pdfTeX warning (ext4): destination with the same identifier
+ (name{table.3}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1010 \end{document}
-                     pdfTeX warning (ext4): destination with the same identifie
-r (name{table.4}) has been already used, duplicate ignored
+l.956 \end{document}
+                    pdfTeX warning (ext4): destination with the same identifier
+ (name{table.4}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1010 \end{document}
-                     pdfTeX warning (ext4): destination with the same identifie
-r (name{table.5}) has been already used, duplicate ignored
+l.956 \end{document}
+                    pdfTeX warning (ext4): destination with the same identifier
+ (name{table.5}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1010 \end{document}
-                     ] (./econ_landings_paper.aux)
+l.956 \end{document}
+                    ] (./econ_landings_paper.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -1289,13 +1289,13 @@ Package rerunfilecheck Info: File `econ_landings_paper.out' has not changed.
 (rerunfilecheck)             Checksum: FFD9EC390E0B88CFE39E967513DBFC15;3284.
  ) 
 Here is how much of TeX's memory you used:
- 25222 strings out of 480313
- 469670 string characters out of 5895527
- 792140 words of memory out of 5000000
- 42229 multiletter control sequences out of 15000+600000
- 493272 words of font info for 253 fonts, out of 8000000 for 9000
+ 25220 strings out of 480313
+ 469651 string characters out of 5895527
+ 791140 words of memory out of 5000000
+ 42228 multiletter control sequences out of 15000+600000
+ 493209 words of font info for 252 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 83i,11n,80p,1016b,457s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 83i,11n,80p,1016b,471s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{Hfootnote.9} has been referenced but does not exi
 st, replaced by a fixed one
 
@@ -1344,10 +1344,10 @@ onts/type1/public/amsfonts/symbols/msam10.pfb><c:/Users/fequezad/AppData/Roamin
 g/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/Users/fequezad/AppDat
 a/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><c:/Users/fequeza
 d/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on econ_landings_paper.pdf (21 pages, 288126 bytes).
+Output written on econ_landings_paper.pdf (21 pages, 284354 bytes).
 PDF statistics:
- 477 PDF objects out of 1000 (max. 8388607)
- 407 compressed objects within 5 object streams
+ 482 PDF objects out of 1000 (max. 8388607)
+ 412 compressed objects within 5 object streams
  95 named destinations out of 1000 (max. 500000)
  55504 words of extra memory for PDF output out of 61914 (max. 10000000)
 
