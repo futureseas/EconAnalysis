@@ -1537,9 +1537,9 @@ $$ f\left(q_{it} | \theta_i \right) =
 \left[1-p_{it}\right] \text{gamma} \left(q_{it} | \frac{\mu_{it}^2}{\sigma^2}, \frac{\mu_{it}}{\sigma^2} \right) & \text{if} \quad q_{it} > 0. \end{cases} $$
 where $\text{logit}(p_{it}) = \bf{X}\gamma_i$ and $\mu_{it} = \bf{X}\beta_i$. Specifically $\mu_{it}$ is defined as the following: 
 \begin{equation}
-\mu_{it} = \beta_{0,i} + \beta_{1,i} P(Precense.PSDN)_{it} + \beta_{2,i} + P(Precense.MSQD)_{it}.
+\mu_{it} = \beta_{0,i} + \beta_{1,i} \frac{P(Precense.PSDN)}{P(Precense.MSQD)}_{it} + \beta_{2,i} \frac{Price.PSDN}{Price.MSQD}_{it}.
 \end{equation}
-$\text{logit}(p_{it})$ follows the same structure, but coefficient $\beta_i$ are replaced by $\gamma_i$. 
+Using $\text{logit}(p_{it})$  we can model the probability that a vessel participate in a particular fishery. 
 
 
 ```{r calculate-price, include=FALSE}
@@ -1792,7 +1792,10 @@ dataset_psdn <- dataset %>%
   filter(LANDING_YEAR >= 2000 & LANDING_YEAR < 2015) %>% 
   dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>% #filter(PSDN_Landings > 0) %>% 
   mutate(PSDN_Landings = ifelse(PSDN_Landings<=0, 0 ,PSDN_Landings)) %>% 
-  drop_na() ## Just 2 observations are dropped
+  mutate(RelPrice = PSDN_Price / MSQD_Price) %>% 
+  mutate(RelSDM = PSDN_SDM_60 / MSQD_SDM_90) %>%
+  drop_na() 
+## Just 2 observations are dropped
 
 # Create matrices and vectors to run STAN model #
 # year_id <- as.vector(cbind(as.numeric(factor(dataset_psdn$LANDING_YEAR))))
@@ -1809,7 +1812,17 @@ dataset_psdn$port_ID <- as.factor(
 ### Check about substitution in supply in multispecies framwork. How is the supply curve modeled? ###
 
 
-fit_qPSDN <- brm(bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + PSDN_Price + MSQD_Price + (1 | port_ID),
+# fit_qPSDN <- brm(bf(PSDN_Landings ~ RelSDM + RelPrice + (1 | port_ID),
+#                                hu ~ (1 | port_ID)),
+#                     data = dataset_psdn,
+#                   family = hurdle_gamma(), 
+#                  control = list(adapt_delta = 0.999, max_treedepth = 20),
+#                   chains = 4, 
+#                    cores = 4)
+# 
+# save.image (file = "stan_fit.RData")
+
+fit_qPSDNv2 <- brm(bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SDM_90 + RelPrice + (1 | port_ID),
                                hu ~ (1 | port_ID)),
                     data = dataset_psdn,
                   family = hurdle_gamma(), 
