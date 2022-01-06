@@ -201,9 +201,9 @@ rm(g1, g2, q.psdn.by.month, q.msqd.by.month)
 
 ## Landing, prices and revenue
 
-Pacific sardine and market squid mainly dominated landings in the CPS fishery during the period 1981-2014, as is shown in Panel (a) in Figure \ref{fig:avg_lan_rev}. Panel (b) shows average annual prices. Average prices are low for all CPS species in comparison to bluefin tuna. Pacific bonito is the only one between CPS species whose average price is above 1.5 USD. This lower average price means that ladings levels mainly determine revenue. Therefore, similar to what we observe in Panel (a), we can observe in Panel (c) that market squid and Pacific sardine are the principal species in terms of revenue.
+Pacific sardine and market squid, followed by Pacific Mackerel and the Northern anchovy, mainly dominated the CPS fishery in terms of landings and revenue during the period 1981-2014, as is shown in Panel (a) and Panel (b) in Figure \ref{fig:avg_lan_rev}, respectively. Panel (c) shows average annual prices. Average prices are low for all CPS species, below 1 USD per kilogram. This lower average price suggests that fish availability instead of prices determine landings. 
 
-```{r avg_land_rev_price, echo=FALSE, fig.cap="Average annual landings, prices and revenues by species (1981-2020).\\label{fig:avg_lan_rev}"}
+```{r avg_land_rev_price, echo=FALSE, fig.cap="Average annual landings, prices and revenues by species (1981-2014).\\label{fig:avg_lan_rev}"}
 ## Landings chart
 landings.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sumfun, data=PacFIN.month.CPS)
   landings.year <- landings.year %>% filter(LANDING_YEAR <2015)
@@ -211,10 +211,10 @@ landings.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ PACFIN_SPECIES_CODE + LANDI
 
 g1 <- ggplot(landings.avg.year, aes(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS.sum.sum.mean)) +
   geom_col(width=0.4) + ggtitle("(a) Annual landings") + 
-  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 6), 
+  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
         axis.title = element_text(size = 8)) +
-  xlab("Species") + ylab("Landings (tons)") + 
-  scale_x_discrete(labels=c("CMCK" = "Chub\nMackerel", "JMCK" = "Jack\nMackerel",
+  xlab("") + ylab("Landings (tons)") + 
+  scale_x_discrete(labels=c("CMCK" = "Pacific\nMackerel", "JMCK" = "Jack\nMackerel",
                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
                             "PSDN" = "Pacific\nSardine", "UMCK" = "Unknown\nMackerel"))
 
@@ -224,11 +224,11 @@ price.year <- summaryBy(AFI_PRICE_PER_KG.mean ~ PACFIN_SPECIES_CODE + LANDING_YE
   price.avg.year <- summaryBy(AFI_PRICE_PER_KG.mean.mean ~ PACFIN_SPECIES_CODE, FUN=meanfun, da=price.year)
 
 g2 <- ggplot(price.avg.year, aes(PACFIN_SPECIES_CODE, AFI_PRICE_PER_KG.mean.mean.mean)) +
-  geom_col(width=0.4) + ggtitle("(b) Average annual price") + 
-  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 6), 
+  geom_col(width=0.2) + ggtitle("(c) Average annual price") + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
         axis.title = element_text(size = 8)) +
-  xlab("Species") + ylab("Price (kg)") + 
-  scale_x_discrete(labels=c("CMCK" = "Chub\nMackerel", "JMCK" = "Jack\nMackerel",
+  xlab("") + ylab("Price (kg)") + 
+  scale_x_discrete(labels=c("CMCK" = "Pacific\nMackerel", "JMCK" = "Jack\nMackerel",
                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
                             "PSDN" = "Pacific\nSardine", "UMCK" = "Unknown\nMackerel"))
 
@@ -239,15 +239,15 @@ revenue.year <- summaryBy(AFI_EXVESSEL_REVENUE.sum ~ PACFIN_SPECIES_CODE + LANDI
   revenue.avg.year <- summaryBy(AFI_EXVESSEL_REVENUE.sum.sum ~ PACFIN_SPECIES_CODE, FUN=meanfun, data=revenue.year)
 
 g3 <- ggplot(revenue.avg.year, aes(PACFIN_SPECIES_CODE, AFI_EXVESSEL_REVENUE.sum.sum.mean)) +
-  geom_col(width=0.4) + ggtitle("(c) Annual revenue") + 
-  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 8), 
+  geom_col(width=0.4) + ggtitle("(b) Annual revenue") + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
         axis.title = element_text(size = 8)) +
-  xlab("Species") + ylab("Annual revenues (Millions of USD)") +  scale_y_continuous(labels = label_number(scale = 1e-6)) +
-  scale_x_discrete(labels=c("BTNA" = "Bluefin\nTuna", "CMCK" = "Chub\nMackerel", "JMCK" = "Jack\nMackerel",
-                            "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy", "PBNT" = "Pacific\nBonito",
+  xlab("") + ylab("Annual revenues (Millions of USD)") +  scale_y_continuous(labels = label_number(scale = 1e-6)) +
+  scale_x_discrete(labels=c("CMCK" = "Pacific\nMackerel", "JMCK" = "Jack\nMackerel",
+                            "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
                             "PSDN" = "Pacific\nSardine", "UMCK" = "Unspecific\nMackerel"))
 
-(g1 + g2) / g3
+(g1 + g3) / g2
 
 rm(g1, g2, g3, landings.year, landings.avg.year, revenue.year, revenue.avg.year, price.year, price.avg.year)
 
@@ -311,7 +311,7 @@ states_names <- as_labeller(c(`C` = "California", `O` = "Oregon",`W` = "Washingt
 rm(states_names, landings.by.port.avg.year)
 ```
 
-Let us now analyze our data ver time. In Figure \ref{fig:ts_landings_by_ports} we show the total annual landing by selected ports during the 2000-2020 period for market squid and Pacific sardine. The ports selected are the ones with the highest average annual landings identified in Figure \ref{fig:avg_landings_by_ports}. There is a general conception that vessels that harvest Pacific sardine switch to market squid when the other is unavailable. However, we can notice from Figure \ref{fig:ts_landings_by_ports} that landings of market squid have been decreasing in the last five years. We would expect that the Pacific sardine fishery's closure would have increased the level of market squid landing, but the graphs show some complementary instead of substitution. Complementary does not coincide with stakeholders' perceptions about switching behavior. They claim that many vessels in California switched to market squid after the Pacific sardine closure.^[Stalkholders state this during their participation in a workshop that reunited U.S. West Coast fishery.] 
+Let us now analyze our data ver time. In Figure \ref{fig:ts_landings_by_ports} we show the total annual landing by selected ports during the 2000-2020 period for market squid and Pacific sardine. The ports selected are the ones with the highest average annual landings and substitution is likely, identified in Figure \ref{fig:avg_landings_by_ports} . There is a general conception that vessels that harvest Pacific sardine switch to market squid when the other is unavailable. However, we can notice from Figure \ref{fig:ts_landings_by_ports} that landings of market squid have been decreasing in the last five years together with Pacific sardine landings. We would expect that the Pacific sardine fishery's closure would have increased the level of market squid landing, but the graphs show some complementary instead of substitution. Complementary does not coincide with stakeholders' perceptions about switching behavior. They claim that many vessels in California switched to market squid after the Pacific sardine closure.^[Stalkholders state this during their participation in a workshop that reunited U.S. West Coast fishery.] 
 
 ```{r ts_by_port,  fig.cap = "Total annual landing by port area. 2000 - 2020.\\label{fig:ts_landings_by_ports}" , echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -340,7 +340,7 @@ rm(port_names, landings.by.sel.ports, landings.by.port.year)
 
 ```
 
-A potential hypothesis is that unfavorable market conditions (e.g., low prices) affected market squid landings in recent years, independently of the condition of the Pacific sardine fishery. Figure \ref{fig:ts_landings_price} shows the evolution of landings and prices by species during the period 1981-2020. In Panel (a), we can observe that real prices for market squid have been increasing during the last two decades. Incentives should be high for landing market squid. However, we observe a sharp decline in market squid landings in the last decade.^[Prices for forage species are likely to be determined in the world market, as the California current landings for forage species correspond to a small share of the total landings in the world].
+A potential hypothesis is that unfavorable market conditions (e.g., low prices) affected market squid landings in recent years, independently of the condition of the Pacific sardine fishery. Figure \ref{fig:ts_landings_price} shows the evolution of landings and prices by species during the period 1981-2020. In Panel (a), we can observe that real prices for market squid have been increasing during the last two decades. Incentives should be high for landing market squid, invalidating this hypothesis.^[Prices for forage species are likely to be determined in the world market, as the California current landings for forage species correspond to a small share of the total landings in the world.]
 
 <!-- Regarding Pacific sardine, we observe that the price has been stable after 1990, while landing peaked in 2008, and there is a posterior decline in landing until the fishery closed in 2015. This trend suggests that abundance primarily determines Pacific sardine landings. -->
 
@@ -420,7 +420,7 @@ rm(g1, g2, g3)
 
 ```
 
-Another hypothesis that could explain the lower landings levels observed for market squid in the last decade could be the reduction in market squid's species availability and, therefore, the substitution to another species more profitable than market squid. According to the stakeholders, Pacific sardine's substitution may occur with other species such as mackerel, tuna, or anchovy. Figure \ref{fig:sdm_land_by_port} shows the relationship between the probability of presence (obtained from Species Distribution Models) and landings by species in three main port areas: Los Angeles, Monterrey, and Santa Barbara areas. The graph suggests that Pacific sardine landings positively correlate with the probability of presence of this species, similar to @smith2021potential. However, in the case of market squid, we cannot distinguish the correlation between landings and probability of presence. Note, however, that the evidence shown in this figure may not be capturing the actual effect of the probability of presence as other effects may be in play.
+Another hypothesis that could explain the lower landings levels observed for market squid in the last decade could be the reduction in market squid's species availability and, therefore, the substitution to another species more profitable than market squid. According to a workshop conducted with stakeholders, Pacific sardine's substitution may occur with other species such as mackerel, tuna, or anchovy. Figure \ref{fig:sdm_land_by_port} shows the relationship between the probability of presence (obtained from Species Distribution Models) and landings by species in three main ports: San Pedro, Terminal Island, and Moss Landing. The graph suggests that Pacific sardine landings positively correlate with the probability of presence of this species, similar to @smith2021potential findings. However, in the case of market squid, we cannot distinguish the correlation between landings and probability of presence. Note, however, that the evidence shown in this figure and in the previous one may not be capturing the actual effect of the probability of presence as other effects may be in play.
 
 ```{r SDM_land, eval=FALSE, fig.cap="Landings v/s probability of presence by port area. \\textit{Notes:} LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE, include=FALSE}
 
@@ -746,7 +746,7 @@ rm(PacFIN.spread.perc)
 
 Substitution between species is likely related to the gear that a vessel or fisher have invested in for their fishing activities and the port they commonly land. These two characteristics will dictate the potential species choices that a vessel has to choose. @richerson2017 call species choices and other spatial patterns of ocean use as spatial constraints. Vessels with the same spatial constraints share local ecological knowledge and vessel mobility [@richerson2017]. Nevertheless, vessels are not restricted to a specific gear and port. In theory, they can switch between different gear alternatives and choose different ports to land. Therefore, they can modify the spatial constraints that they face. Nevertheless, switching between gears that are entirely different could be costly, and landing in a port without the infrastructure to land the targeted is unlikely.
 
-In the case of CPS species, vessels that use net as a gear for harvest only require to change net sizes, which is an easy task. Therefore, within this vessel that use net gears, we should observe higher substitution. Regrading to ports, substitution between Pacific sardine and market squid is more likely in the south of the California Current System (CCS) as both species have a fishery running around this area. Specifically, substitution between market squid and Pacific sardine seems more likely in Los Angeles, Monterrey, and Santa Barbara area ports as positive values for market squid and Pacific sardine are observed. Meanwhile, there is less target switching in the north of the CCS (CPS Workshop). 
+In the case of CPS species, vessels that use nets as gear for harvest only require to change net sizes, which is an easy task. Therefore, we should observe higher substitution within these vessels that uses net gears. We can even observe landing on the same day of Pacific sardine and market squid as the former is a day fishery, while the latter is a night one. Regrading to ports, substitution between Pacific sardine and market squid is more likely in the south of the California Current System (CCS) as both species have a fishery running around this area. Specifically, substitution between market squid and Pacific sardine seems more likely in Los Angeles, Monterrey, and Santa Barbara area ports as positive values for market squid and Pacific sardine are observed. Meanwhile, there is less target switching in the north of the CCS (CPS Workshop).  
 
 Vessel traveling considerable distances to catch CPS species is unlikely. Because CPS spoils quickly, fishers stay close to ports and usually come back to port on the same day. Therefore, ports constraints could have consequences if species distribution shifts north due to climate conditions. Probably, fishers will not target market squid, independently of its biomass levels, if fishing grounds move north,  as there is no close infrastructure for its landing (CPS workshop). Nevertheless, there is uncertainty about this assumption as it would depend on the speed that ports can anticipate and adjust their landings capacity and infrastructure in the future. In this section, we analyze our dataset to understand better how gears and ports are related to switching between species and whether individual vessels switch gears and ports during the historical data.
 
@@ -1111,7 +1111,7 @@ rm(table)
 
 ### Other determinants switching of behavior
 
-Switching behavior might depend on whether a vessel is owner-operated or company-owned (CPS Workshop). Owner-operated vessels can freely choose what to harvest (and when and where), while company-owned vessels are restricted by what the company dictates. However, regardless of vessel ownership, most fishing behavior would be determined by market order (CPS workshop). Vessels will already have contracts with processors before fishing (CPS workshop), having already decided on the target species and landing port. 
+Switching behavior might depend on whether a vessel is owner-operated or company-owned (CPS Workshop). Owner-operated vessels can freely choose what to harvest (and when and where), while company-owned vessels are restricted by what the company dictates. However, regardless of vessel ownership, most fishing behavior would be determined by market order (CPS workshop). Vessels will already have contracts with processors before fishing (CPS workshop), deciding on the target species and landing port ex-ante. Nevertheless, if favorable conditions arise, the skipper has some freedom to switch species. Therefore, we expect more flexibility in species substitution but more rigidity on port landings. 
 
 Within the restrictions imposed by contracts, revenues and harvest costs will affect the target decision. Price, in general, varies by port of landing and harvest cost by the distance traveled to fishing grounds. It is an empirical question whether prices and distances directly affect the decision to target a species, or fishers consider the relative prices and distance to decide with species to harvest.   
 
