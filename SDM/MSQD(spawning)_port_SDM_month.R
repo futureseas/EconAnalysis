@@ -35,10 +35,10 @@ for (y in 1998:2019) {
     for (j in 1:nrow(ports)) {
 	  		# Read netcdf
 	  		dat <- nc_open(paste0("G:/My Drive/Project/Data/SDM/squid_spawn/squidSpawn_", paste0(as.character(m), paste0("_", paste0(as.character(y),"_envelope.nc")))))
-		  	lon <- ncvar_get(dat, "lon")
+	  		lon <- ncvar_get(dat, "lon")
 		  	lat <- ncvar_get(dat, "lat")
 		  	tim <- ncvar_get(dat, "time")
-		  	predSDM <- ncvar_get(dat, "predGAM")
+		  	predSDM <- ncvar_get(dat, "pred")
 
 			# Close the netcdf
 			nc_close(dat)			
@@ -46,6 +46,7 @@ for (y in 1998:2019) {
 			# Reshape the 3D array so we can map it, change the time field to be date
 			dimnames(predSDM) <- list(lon = lon, lat = lat, tim = tim)
 			sdmMelt <- reshape2::melt(predSDM, value.name = "predSDM")
+			sdmMelt$tim <- as.integer(sdmMelt$tim)
 			sdmMelt$dt <- as.Date("1900-01-01") + days(sdmMelt$tim)			
 
 			# Optional (but recommended): trim predictions to within 300-500km of the coast

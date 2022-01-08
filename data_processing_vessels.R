@@ -94,9 +94,16 @@ SDM_port_NANC <- read.csv(file = here::here("Data", "SDM", "NANC_SDM_port_month.
   PacFIN.month <- merge(PacFIN.month, SDM_port_NANC, 
                         by = c("PORT_NAME", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
 
+  
+# Merge data with SDM Market Squid #
+SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM_port_month.csv"))
+  PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_Spawn, 
+                        by = c("PORT_NAME", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)  
+  
   PacFIN.month <- PacFIN.month %>%
     dplyr::rename(PSDN_SDM_60 = SDM_60) %>%
     dplyr::rename(MSQD_SDM_90 = SDM_90) %>%
+    dplyr::rename(MSQD_SPAWN_SDM_90 = SDM_SPAWN_90) %>%
     dplyr::rename(NANC_SDM_20 = SDM_20)
 
   
