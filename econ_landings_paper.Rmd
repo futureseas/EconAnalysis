@@ -110,18 +110,15 @@ sum_mean_fun <- function(x, ...){
 ```
 
 # Introduction
+
 Fishing portfolios are an essential mechanism to safeguard fishers' livelihood. Diversification strategies have been principally associated with reducing income variability [@kasperski2013]. For instance, when a species abundance is reduced due to environmental conditions, fishers can change targeted species to a species that requires similar gears. However, there is not always room for diversification. Switching between species can be costly if gears are pretty different between species, or a new permit is required for legal fishing. Moreover, even though fishers may have flexibility switching between species, port infrastructure, markets, and regulations that limit access to fisheries to avoid collapse of fish stocks from overfishing may impose some restrictions on this flexibility  [@kasperski2013]. Therefore, it is unclear how species distribution and regulation changes would be reflected in landings compositions and participation.
 
-In this study, we analyze how changes in spatial distribution and the implementation of fisheries closures affect landing and fisher participation of the two more important coastal pelagic species (CPS) harvested in the U.S. West Coast: Pacific sardine and market squid. Fisheries closures are an interesting policy instrument when fishers target more than one species because they allow us to study how fishers change behavior by excluding one alternative. However, fewer studies have studied one fishery closure's effect on other fishery outcomes. An example is @vermard2008 that studies the effect of an anchovy closure in trip choices conducted by the Bay of Biscay pelagic fleet, <!-- They use their estimate pre-closure to simulate the anchovy closure and compare with actual data. -->. Another example is  @richerson2017, who studies the effect of salmon closures in vessel participation on salmon fishery and other fisheries. In this paper, we study the effect of the 2015 Pacific sardine closure implemented after the over-exploitation of the fishery and the effect of seasonal closures after reaching a catch limit target. 
+In this study, we analyze how changes in spatial distribution and the implementation of fisheries closures affect landing and fisher participation of the two more important coastal pelagic species (CPS) harvested in the U.S. West Coast: Pacific sardine and market squid. Fisheries closures are an interesting policy instrument when fishers target more than one species because they allow us to study how fishers change behavior by excluding one alternative. However, fewer studies have studied one fishery closure's effect on other fishery outcomes. An example is @vermard2008, which studies an anchovy closure's effect in trip choices conducted by the Bay of Biscay pelagic fleet. Another example is  @richerson2017, who studies the effect of salmon closures in vessel participation on salmon fishery and other fisheries. In this paper, we study the effect of the 2015 Pacific sardine closure implemented after the over-exploitation of the fishery and the effect of seasonal closures after reaching a catch limit target. 
 
 Studying the effect of closures and changes in species distribution is not straightforward as the different responses can be observed to the same conditions as fishers and vessels are heterogeneous [@zhang2011]. Moreover, vessel heterogeneity and port constraint will dictate the possible set of species that a fisher can choose.
 Species are also interconnected, at least economically, if not ecologically. Thus, any regulation or ecological disruption that affects one species would affect fishers' target decision in other species. Therefore, a multiple species targeting framework that considers interrelation between species is necessary to understand the CPS fishery further. Our research gives a step further and analyzes the CPS fishery as one where fisher can target multiple species in line with recent literature that consider this setting in their analysis [@richerson2017]. Our goal is to understand how changes in species distribution, seasonal and total closures affect vessel responses in landing amount and participation, the substitution between species, and to what extent future projected climate will affect landings, catch composition, and fishers' participation.
 
-Our papers build on the model developed by @smith2021potential for sardine landings. We expand their model, including a landing equation for the two species analyzed in this study and estimating a participation model simultaneously using a multilevel Bayesian hurdle model. This method allows us to incorporate heterogeneity between fleets and ports areas. Moreover, we use the probability of presence obtained from Species Distribution Models (SDM) as an explanatory variable instead of landing by species. The inclusion of SDMs allows us to project landing and participation over time using SDM predictions for different climate scenarios incorporating projected substitution between species. We analyze how species distribution interacts with each other. We expect these additions to characterize better how the fishers portfolio is composed and better understand species interactions on catch rates and participation. 
-
-<!-- Additionally, we also estimate participation models for each species based on @richerson2017, expanding their analysis to the CPS fishery  -->
-<!-- <!-- in monthly basis, allowing to understand seasonality within fishing season -->
-<!-- . For this, we develop a Random Utility Model (RUM) to model monthly vessel participation in targeting a specific species in the CPS fishery as a function of... **fisher characteristics including revenue level, diversification, dependence on the species and spatial variables of area and range..**  -->
+Our papers build on the model developed by @smith2021potential for sardine landings. We expand their model, including a landing equation for the two species analyzed in this study and estimating a participation model simultaneously using a multilevel Bayesian hurdle model. The participation models (i.e., hurdle component) are built on the work of @richerson2017 for the salmon fishery. The Bayesian hurdle model incorporates heterogeneity between fleets and ports areas. We use the probability of presence obtained from Species Distribution Models (SDM) as an explanatory variable instead of landing by species. The inclusion of SDMs allows us to project landing and participation over time using SDM predictions for different climate scenarios incorporating projected substitution between species. We analyze how species distribution interacts with each other. We expect these additions to characterize better how the fishers portfolio is composed and better understand species interactions on catch rates and participation. 
 
 The remainder of the paper is organized as follows: Section \ref{coastal-pelagic-species-fishery} provides background on the CPS fishery in the US west coast. In Section \ref{methods} we discusses our data set and empirical strategy. Section \ref{results} presents the results of the estimations, and we conclude in Section \ref{conclusions}.
 
@@ -193,7 +190,7 @@ g2 <- ggplot(data=q.msqd.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) +
 
 g1 / g2
 
-rm(g1, g2, q.psdn.by.month, q.msqd.by.month)
+rm(g1, g2, q.psdn.by.month, q.msqd.by.month, port_names)
 ```
 
 
@@ -544,7 +541,7 @@ g1 / g2
 rm(g1, g2, g3, sdm.by.species, coeff, coeff2, coeff3)
 ```
 
-```{r SDM_land_NANC_in_MNA, eval=FALSE, fig.cap="Landings v/s probability of presence by port area. \\textit{Notes:} LAA = Los Angeles; MNA = Monterey; SBA = Santa Barbara.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE, include=FALSE}
+```{r SDM_land_NANC_in_MNA, eval=FALSE, fig.cap="Landings v/s probability of presence by port area.", message=FALSE, warning=FALSE, include=FALSE}
 
 collapse <- PacFIN_yearly %>%
   filter(Species_code == "NANC") %>%
@@ -770,33 +767,37 @@ PacFIN.month.CPS <- PacFIN.month %>%
 
 <!-- Vessels that don't substitute target species might belong in the "data sample" as well as those that do, if the interest is to explain switching behavior. MAYBE TWO SUBSAMPLES? My preference would be to not split the sample, but rather to develop an overarching model that captures the drivers of portfolio switching behavior (or the absence thereof), provided we can relevant explanatory variables. "identify relevant" -->
 
-Before continuing our analysis, we have to verify whether there is switching behavior between CPS species. Moreover, 
-categorizing vessel in different groups allows us to estimate differentiated coefficients to capture different responses to an explanatory variable. We conduct a cluster analysis to categorize the different portfolios fishers manage during a year. For this, we conduct our cluster analysis using a hierarchical clustering method. This method has been used before in fisheries to define *metiers* in discrete choice models [@vermard2008]. This approach does not require defining the number of clusters chosen within the algorithm. There are different methods to compute the distance between two clusters and conduct the algorithm. We use Ward's method in our study, similar to [@vermard2008]. The goal of this method is to reduce the within-cluster variance. The algorithm starts with all observation in a cluster and then merge in each step the two cluster with the minimum distance between cluster. The analysis includes commercial vessels that have participated at least in one CPS during 2000-2014. 
+Before continuing our analysis, we have to verify whether there is switching behavior between CPS species. Moreover, categorizing vessel in different groups allows us to estimate differentiated coefficients to capture different responses to an explanatory variable. We conduct a cluster analysis to categorize the different portfolios fishers manage during a year. For this, we conduct our cluster analysis using a hierarchical clustering method. This method has been used before in fisheries to define *metiers* in discrete choice models [@vermard2008]. This approach does not require defining the number of clusters chosen within the algorithm. There are different methods to compute the distance between two clusters and conduct the algorithm. We use Ward's method in our study, similar to [@vermard2008]. The goal of this method is to reduce the within-cluster variance. The algorithm starts with all observation in a cluster and then merge in each step the two cluster with the minimum distance between cluster. We use a cluster variable, the percentage of total landings by species during 2000-2014. The analysis includes commercial vessels that have participated at least in one CPS fishery during 2000-2014, identified in the previous section. 
 
-Table \ref{Table:cluster_all} present the results for the clustering analysis. Many vessels belong to a cluster that describes a portfolio considered as single-species. For instance, a vessel belonging to Cluster 1 in average 99.42% of the total landings correspond to market squid. Thus, these vessels only focus on this species—vessels in cluster 2 only focus on Pacific sardine, and vessels in cluster 7 only focus on Pacific mackerel. In contrast, clusters 3, 4, and 5 show substitution between market squid and Pacific sardine, while cluster 6 shows substitution between Northern anchovy and Pacific sardine. In the following subsections, we study gear used and port landed by vessel depending on the species landed and the vessel's cluster. 
+Table \ref{Table:cluster_all} present the results for the clustering analysis. Many vessels belong to Cluster 1 winch describes a portfolio that focuses only on market squid. On average, 97.10% of the total landings in this cluster correspond to market squid. The other cluster shows substitution between species. For instance, in Cluster 4, 46.5\% of the total landings correspond to market squid and 40.57\% to Pacific sardine, on average. 
+Cluster 2, 3, and 5 also show substitution, but one species has a considerable share of the total landings (more than 80\% ). 80.27\% for Market squid in Cluster 2, 83.52\% for Pacific sardine in Cluster 3, and 84.65\% for Northern anchovy in Cluster 5. In the last two clusters, 6 and 7, vessels participate in other fisheries outside the CPS group. The cluster with the highest number of observations is Cluster 1 and Cluster 4. In the following subsections, we study gear used and port landed by vessel depending on the species landed and the vessel's cluster. 
 
 ```{r cluster_analysis, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 ## Calculate share of revenue of species by vessel during a month ##
-PacFIN.spread <- PacFIN.month.CPS %>% filter(LANDING_YEAR >=2000) %>%  filter(LANDING_YEAR < 2015) %>%
+PacFIN.spread <- PacFIN.month %>% filter(LANDING_YEAR >=2000) %>%  filter(LANDING_YEAR < 2015) %>%
   select(LANDING_YEAR, LANDING_MONTH, VESSEL_NUM, PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS.sum) %>% 
   group_by(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% 
-  summarise(Landings = sum(LANDED_WEIGHT_MTONS.sum)) %>%
-  spread(PACFIN_SPECIES_CODE, Landings)
+  summarise(Landings = sum(LANDED_WEIGHT_MTONS.sum)) 
+  total.landings <- PacFIN.spread %>% group_by(VESSEL_NUM) %>% 
+  summarise(Total = sum(Landings))
+  PacFIN.spread <-  PacFIN.spread %>% dplyr::filter(PACFIN_SPECIES_CODE %in% 
+    c("CMCK", "JMCK", "MSQD", "NANC", "PSDN")) %>%
+  spread(PACFIN_SPECIES_CODE, Landings) %>%  merge(total.landings, by = ("VESSEL_NUM"))
   PacFIN.spread[is.na(PacFIN.spread)] <- 0
    
-  PacFIN.spread.perc <- PacFIN.spread %>% select("CMCK", "MSQD", "NANC", "PSDN", "JMCK", "UMCK") %>%
-    mutate(Total = CMCK + MSQD + NANC + PSDN + JMCK + UMCK) %>%
-    filter(Total > 0) %>%
+  PacFIN.spread.perc <- PacFIN.spread %>% filter(Total > 0) %>%
     mutate(CMCK = CMCK / Total * 100) %>% mutate(MSQD = MSQD / Total * 100) %>% 
     mutate(NANC = NANC / Total * 100) %>% mutate(PSDN = PSDN / Total * 100) %>%  
-    mutate(JMCK = JMCK / Total * 100) %>% mutate(UMCK = UMCK / Total * 100)  
+    mutate(JMCK = JMCK / Total * 100) %>%
+    mutate(OTHER = 100 - (CMCK + MSQD + NANC + PSDN + JMCK)) %>% select(-c('Total'))
+  
 
 # set.seed(21)
 # speciesCluster <- kmeans(PacFIN.spread[, 2:5], 30)
 # speciesCluster
 
 ## Hierarchical clustering analysis ##
-col <- (ncol(PacFIN.spread.perc)-1)  
+col <- (ncol(PacFIN.spread.perc))  
   PacFIN.spread.perc[is.na(PacFIN.spread.perc)] <- 0
   clusters <- hclust(dist(PacFIN.spread.perc[, 2:col]), method = "ward.D")
   # plot(clusters, cex = 0.1, hang = -1)
@@ -805,13 +806,13 @@ col <- (ncol(PacFIN.spread.perc)-1)
 clusterCut <- as.data.frame(cutree(clusters, 7))
   PacFIN.spread.perc$cluster <- clusterCut$`cutree(clusters, 7)`
     PacFIN.clusters <- PacFIN.spread.perc %>% group_by(cluster) %>%
-      summarise(mean.CMCK = mean(CMCK), mean.MSQD = mean(MSQD), mean.NANC = mean(NANC), mean.JMCK = mean(JMCK), 
-                mean.PSDN = mean(PSDN), mean.UMCK = mean(UMCK), count = n())
+      summarise(mean.CMCK = mean(CMCK), mean.MSQD = mean(MSQD), 
+                mean.NANC = mean(NANC), mean.JMCK = mean(JMCK), 
+                mean.PSDN = mean(PSDN), mean.OTHER = mean(OTHER), count = n())
     
 PacFIN.clusters <- PacFIN.clusters[,-1]
 colnames(PacFIN.clusters) = c("Pacific\nmackerel", "Market squid", "Northern anchovy", 
-                              "Jack\nmakerel", "Pacific sardine", 
-                              "Unspecified mackerel", "Obs.") 
+                              "Jack\nmakerel", "Pacific sardine", "Other", "Obs.") 
     
 print(xtable(PacFIN.clusters, caption = 'Cluster by percentage of landings by species.\\label{Table:cluster_all}',
              type = "latex"), floating = TRUE, comment=FALSE,  caption.placement = "top")
@@ -842,7 +843,12 @@ print(xtable(PacFIN.clusters, caption = 'Cluster by percentage of landings by sp
 PacFIN.month.cluster <- PacFIN.spread.perc %>% select('VESSEL_NUM', 'cluster') %>% unique() %>%
   merge(PacFIN.month, by = ("VESSEL_NUM"), all.y = TRUE, all.x = FALSE)
 
-rm(PacFIN.spread.perc, PacFIN.spread , clusterCut, clusters, PacFIN.cluster, PacFIN.clusters)
+# CREATE NEW PACFIN.MONTH.CPS DATASET!
+PacFIN.month.CPS.cluster <- PacFIN.month.cluster %>% 
+    dplyr::filter(PACFIN_SPECIES_CODE %in% 
+    c("CMCK", "JMCK", "MSQD", "NANC", "PSDN", "UMCK"))
+
+rm(PacFIN.spread.perc, PacFIN.spread , clusterCut, clusters, PacFIN.clusters, total.landings)
 
 ```
 
@@ -852,7 +858,7 @@ Substitution between species is likely related to the gear that a vessel or fish
 
 In the case of CPS species, vessels that use nets as gear for harvest only require to change net sizes, which is an easy task. Therefore, we should observe higher substitution within these vessels that uses net gears. We can even observe landing on the same day of Pacific sardine and market squid as the former is a day fishery, while the latter is a night one. Regrading to ports, substitution between Pacific sardine and market squid is more likely in the south of the California Current System (CCS) as both species have a fishery running around this area. Specifically, substitution between market squid and Pacific sardine seems more likely in Los Angeles, Monterrey, and Santa Barbara area ports as positive values for market squid and Pacific sardine are observed. Meanwhile, there is less target switching in the north of the CCS (CPS Workshop).  
 
-Vessel traveling considerable distances to catch CPS species is unlikely. Because CPS spoils quickly, fishers stay close to ports and usually come back to port on the same day. Therefore, ports constraints could have consequences if species distribution shifts north due to climate conditions. Probably, fishers will not target market squid, independently of its biomass levels, if fishing grounds move north,  as there is no close infrastructure for its landing (CPS workshop). Nevertheless, there is uncertainty about this assumption as it would depend on the speed that ports can anticipate and adjust their landings capacity and infrastructure in the future. In this section, we analyze our dataset to understand better how gears and ports are related to switching between species, associated to clusters 3, 4, 5, and  6, and whether individual vessels switch gears and ports during the historical data.
+Vessel traveling considerable distances to catch CPS species is unlikely. Because CPS spoils quickly, fishers stay close to ports and usually come back to port on the same day. Therefore, ports constraints could have consequences if species distribution shifts north due to climate conditions. Probably, fishers will not target market squid, independently of its biomass levels, if fishing grounds move north,  as there is no close infrastructure for its landing (CPS workshop). Nevertheless, there is uncertainty about this assumption as it would depend on the speed that ports can anticipate and adjust their landings capacity and infrastructure in the future. In this section, we analyze our dataset to understand better how gears and ports are related to switching between species and whether individual vessels switch gears and ports during the historical data.
 
 
 ### Switching by gear used
@@ -863,7 +869,7 @@ nrow(PacFIN.species)
 
 ```
 
-In our sample data, a vessel belonging to the CPS fleet uses 2.194 gears on average for its fishing activities, with a standard deviation of 1.01. <!-- If we disaggregate this information by species harvested by vessels that participate in the corresponding fishery, a vessel switches between 1.87 gears on average to harvest market squid, 1.50 gears on average to harvest Northern anchovy, 1.80 gears on average to harvest Pacific mackerel, and 1.56 on average to harvest Pacific sardine. In terms of gears,  --> Seine and other net gears (e.g., round-haul nets) allow for the highest substitution level between all CPS species harvested by the CPS fleet. A vessel using seine harvest has an average of 3.55 CPS species, while a vessel using other net gear harvests 2.95 CPS species.
+In our sample data, a vessel belonging to the CPS fleet uses 2.194 gears on average to harvest CPS species, with a standard deviation of 1.01. <!-- If we disaggregate this information by species harvested by vessels that participate in the corresponding fishery, a vessel switches between 1.87 gears on average to harvest market squid, 1.50 gears on average to harvest Northern anchovy, 1.80 gears on average to harvest Pacific mackerel, and 1.56 on average to harvest Pacific sardine. In terms of gears,  --> Seine and other net gears (e.g., round-haul nets) allow for the highest substitution level between all CPS species harvested by the CPS fleet. A vessel using seine harvest has an average of 3.55 CPS species, while a vessel using other net gear harvests 2.95 CPS species. Regarding to species, seine is the most used gear to harvest Pacific sardine, Northern anchovy, market squid, and Pacific mackerel by their corresponding fleet. 60\% of vessels have used seine to harvest Pacific mackerel since 2000,  94\% to harvest market squid, 90\% to harvest Pacific sardine, and 94\% to harvest Northern anchovy. <!-- Regarding total landings, seine is the most important gear by far. The percentage of the total landing that comes from using seine is 97\% for market squid, 96\%  for Northern anchovy and 93\%  for Pacific mackerel, and 67\% for the Pacific sardine. The other 33\% of the total landings of Pacific sardine come from other net gears -->
 
 ```{r n_gears_used_vessels, eval=FALSE, include=FALSE}
 # How many gears a vessel use in the dataset
@@ -916,7 +922,7 @@ table <- xtabs(n_gears ~ Species, aggregate(n_gears ~ Species, PacFIN.Gear, mean
 rownames(table) = c("Pacific Mackerel", "Market squid", "Northern Anchovy", "Pacific sardine") 
 print(xtable(table, caption = 'Average number of gear used to catch a CPS species.', type = "latex"), comment=FALSE,  caption.placement = "top")
 
-rm(PacFIN.Gear, PacFIN.Gear.PSDN, PacFIN.Gear.NANC, PacFIN.Gear.MSQD, PacFIN.Gear.PHRG)
+rm(PacFIN.Gear, PacFIN.Gear.PSDN, PacFIN.Gear.NANC, PacFIN.Gear.MSQD, PacFIN.Gear.PHRG, PacFIN.Gear.CMCK)
 
 ```
 
@@ -940,8 +946,6 @@ print(xtable(table, caption = 'Average number of CPS species landed by a vessel 
 rm(PacFIN.CPS, table)
 
 ```
-
-Regarding to species, seine is the most used gear to harvest Pacific sardine, Northern anchovy, market squid, and Pacific mackerel by their corresponding fleet. 60\% of vessels have used seine to harvest Pacific mackerel since 2000,  94\% to harvest market squid, 90\% to harvest Pacific sardine, and 94\% to harvest Northern anchovy. <!-- Regarding total landings, seine is the most important gear by far. The percentage of the total landing that comes from using seine is 97\% for market squid, 96\%  for Northern anchovy and 93\%  for Pacific mackerel, and 67\% for the Pacific sardine. The other 33\% of the total landings of Pacific sardine come from other net gears -->
 
 ```{r n_vessels_using_gear, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
 PacFIN.Gear.PSDN <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(d_psdn_fleet == 1) %>%
@@ -994,7 +998,8 @@ print(xtable(table,
              caption = 'Percentage of vessels using a gear to harvest CPS species.\\label{table:perc_n_vessel}', 
              type = "latex"), comment=FALSE,  caption.placement = "top")
 
-rm(PacFIN.Gear, PacFIN.Gear.PSDN, PacFIN.Gear.NANC, PacFIN.Gear.MSQD, table)
+rm(PacFIN.Gear, PacFIN.Gear.PSDN, PacFIN.Gear.NANC, PacFIN.Gear.MSQD, PacFIN.Gear.CMCK,
+   table, n_cmck, n_msqd, n_nanc, n_psdn)
 
 ```
 
@@ -1045,7 +1050,7 @@ rm(PacFIN.Gear, PacFIN.Gear.PSDN, PacFIN.Gear.NANC, PacFIN.Gear.MSQD, table)
 
 ```
 
-The ability to switch using seine as gear is confirmed when we analyze the most imnportant gears used by different clusters in terms of landings (see Table \ref{Table:cluster_gear}). Total landings of cluster where substitution is observable comes mainly from catches using seine, and in some cases from other net gears.  <!-- In Cluster 5, the cluster where we observe substitution, 88\% of the cluster's total landings correspond to catches using seine as a gear. Only 7\% and 3\% of the cluster's total landings correspond to catches using other net gear and midwater trawl, respectively. -->
+The ability to switch between CPS species using seine as gear is confirmed when we analyze the most important gears used by different clusters in terms of landings (see Table \ref{Table:cluster_gear}). Total landings of a cluster where substitution between CPS species is observable (Cluster 2 to 5) comes mainly from catches using seine, and in some cases, from other net gears. In the case of Cluster 6 and 7, where substitution is between a CPS species and a Non-CPS species, seine or Other Net Gear are not important, and other gears like Dip Net or Troll became relevant.
 
 ```{r gear_by_cluster, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
@@ -1058,31 +1063,17 @@ PacFIN.cluster <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>%
            c("DPN", "ONT", "POL", "SEN", "TRL"))
     
 table <- xtabs(perc ~  PACFIN_GEAR_CODE + cluster, PacFIN.cluster)
-table
+# table
 rownames(table) = c("Dip Net", "Other Net Gear", "Pole", "Seine", "Troll")
 colnames(table) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
 
 print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
-rm(table)
+rm(table, PacFIN.cluster)
 
 ```
 
 ### Switching by port landed
-
-
-```{r n_ports_vessels, eval=FALSE, include=FALSE}
-# How many gears a vessel use in the dataset
-PacFIN.CPS.unique.port <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
-  select(VESSEL_NUM, PACFIN_PORT_CODE) %>% unique() 
-  PacFIN.CPS.n_ports <- PacFIN.CPS.unique.port %>% mutate(n_ports = 1) %>% 
-    group_by(VESSEL_NUM) %>% summarise(n_ports= sum(n_ports)) 
-    summary(PacFIN.CPS.n_ports$n_ports)
-    sd(PacFIN.CPS.n_ports$n_ports)
-
-rm(PacFIN.CPS.unique.port, PacFIN.CPS.n_ports)
-
-```
 
 ```{r n_ports_vessels_CPS, eval=FALSE, include=FALSE}
 # How many gears a vessel use in the dataset
@@ -1130,18 +1121,17 @@ rownames(table) = c("Pacific mackerel", "Market squid", "Northern Anchovy", "Pac
 print(xtable(table, caption = 'Average number of ports where a vessel landed their CPS species catch.', 
              type = "latex"), comment=FALSE,  caption.placement = "top")
 
-rm(PacFIN.Gear.PSDN, PacFIN.Gear.MSQD, PacFIN.Gear.NANC, PacFIN.Port)
+rm(PacFIN.Gear.PSDN, PacFIN.Gear.MSQD, PacFIN.Gear.NANC, PacFIN.Gear.CMCK,  PacFIN.Port)
 
 ```
 
-On average, vessels participating in the CPS fishery land their catch in 7.74 ports, with a standard deviation of 4.79. If we only consider landings of CPS species, vessels land in 5.36 ports on average, with a standard deviation of 3.65. When we disaggregate this information by species, vessels that participate in the corresponding fishery land on average market squid in 5.37 ports, Pacific sardine in 3.96 ports, Northern anchovy in 3.17 ports, and Pacific mackerel in 2.24 ports. 
+On average, vessels participating in the CPS fishery land their CPS catch in 5.36 ports, with a standard deviation of 3.65. When we disaggregate this information by species, vessels that participate in the corresponding fishery land on average market squid in 5.37 ports, Pacific sardine in 3.96 ports, Northern anchovy in 3.17 ports, and Pacific mackerel in 2.24 ports. 
 
-Using the results from the cluster analysis, we can identify how many ports, on average, a vessel that belongs to a cluster lands. On average, vessels belonging to Cluster 1 land in 4 ports, Cluster 2 land in 2.9 ports, Cluster 3 land in 6.97 ports, Cluster 4 land in 7.33 ports, Cluster 5 land in 8.64 ports, Cluster 6 land in 3.12, and Cluster 7 land in  2.08. Thus, vessels with a multiple species portfolio (cluster 3, 4, 5 and 6) on average land in more ports than vessels that only focus on one species, specially when they switch mainly between market squid and Pacific sardine (cluster 3, 4 and 5). Cluster that show substitutions mostly land in Southern California (see Table \ref{Table:cluster_port}).
+Using the results from the cluster analysis, we can identify how many ports, on average, a vessel that belongs to a cluster lands their CPS catch. On average, vessels belonging to Cluster 1 land CPS in 4.81 ports, Cluster 2 land CPS  in 5.29 ports, Cluster 3 land CPS in 5.06 ports, Cluster 4 land CPS in 7.71 ports, Cluster 5 land in 3.5 ports, Cluster 6 land in CPS 2.88, and Cluster 7 land in CPS  2.22. Finally, Table \ref{Table:cluster_port} show the percentage of a cluster´s total CPS landing that is landed in a port.
 
 ```{r n_ports_CPS_cluster, eval=FALSE, include=FALSE}
 # How many gears a vessel use in the dataset
-PacFIN.CPS.unique.port <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
-  filter(PACFIN_SPECIES_CODE %in% c("CMCK", "MSQD", "NANC", "PSDN")) %>%
+PacFIN.CPS.unique.port <- PacFIN.month.CPS.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
   select(VESSEL_NUM, PACFIN_PORT_CODE, cluster) %>% unique() 
   PacFIN.CPS.n_ports <- PacFIN.CPS.unique.port %>% mutate(n_ports = 1) %>% 
     group_by(VESSEL_NUM, cluster) %>% summarise(n_ports= sum(n_ports)) %>% 
@@ -1150,27 +1140,30 @@ PacFIN.CPS.unique.port <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) 
 rm(PacFIN.CPS.unique.port, PacFIN.CPS.n_ports)
 
 ```
+
 ```{r port_by_cluster, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
 # Create dummy of whether a vessel harvest MSQD, NANC OR PSDN 
-PacFIN.cluster <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
+PacFIN.cluster <- PacFIN.month.CPS.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
   group_by(cluster, PACFIN_PORT_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
   group_by(cluster) %>% mutate(perc = landings / sum(landings)) %>% 
-  unique() %>% filter(cluster != is.na(cluster)) %>% 
-  filter(PACFIN_PORT_CODE %in% 
-      c("SP", "TRM", "HNM", "VEN", "MNT", "MOS", "AST", "LWC", "WPT")) %>%
-  mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, 
-      "SP", "TRM", "HNM", "VEN", "MNT", "MOS", "AST", "LWC", "WPT"))
+  unique() %>% filter(cluster != is.na(cluster)) 
+
+# %>% 
+#   filter(PACFIN_PORT_CODE %in% 
+#       c("SP", "TRM", "HNM", "VEN", "MNT", "MOS", "AST", "LWC", "WPT")) %>%
+#   mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, 
+#       "SP", "TRM", "HNM", "VEN", "MNT", "MOS", "AST", "LWC", "WPT"))
     
 table <- xtabs(perc ~  PACFIN_PORT_CODE + cluster, PacFIN.cluster)
-rownames(table) = c("San Pedro", "Terminal Island", "Hueneme", "Ventura", "Monterrey", "Moss Landing", 
-                    "Astoria", "Ilwaco / Chinook", "Westport")
+# rownames(table) = c("San Pedro", "Terminal Island", "Hueneme", "Ventura", "Monterrey", "Moss Landing", 
+#                     "Astoria", "Ilwaco / Chinook", "Westport")
   
 colnames(table) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
 
 print(xtable(table, caption = 'Percentage of cluster total landings by port.\\label{Table:cluster_port}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
-rm(table)
+rm(table, PacFIN.cluster)
 
 ```
 
@@ -1216,8 +1209,6 @@ rm(table)
 <!-- rm(table, PacFIN.CPS) -->
 
 <!-- ``` -->
-
-
 
 
 ### Other determinants switching of behavior
@@ -1417,46 +1408,59 @@ rm(psdn.by.month, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df)
 ```
 
 
-
-
-
 # Methods
 
-For our empirical model, we focus on vessels that **actively particiáte in the CPS fishery and belong to Cluster 5**, in which we observe substitution, and on vessels that land in the following area ports: Los Angeles (e.g., Terminal Island and San Pedro), Santa Barbara (e.g., Port Hueneme and Ventura), and Monterrey (e.g., Monterrey and Moss Landing). **This data subset allows us only to incorporate ports and vessels with substitution capacity**. Our data set contains variables measured at the port and vessel levels for the CPS fishery in the U.S. West Coast. In our landing model, our outcome variable is the vessel's landings in a month of a specific species. We expect that using quarterly data allows us to observe seasonality in fishers' behavior and reduce the risk of losing general behavior when we disaggregate data on a finer scale. <!-- These two different outcome variables would allow us to study the degree of flexibility that vessel has compared to ports regarding species substitution and catch composition. If vessels have firm contracts with processors associated with a port, we should observe that the substitution of vessels and port is similar.  --> We obtained daily vessel level panel data on landing by port areas from 1981 to 2020 upon request from [PacFIN](http://pacfin.psmfc.org/). 
-
-<!-- We only include ports areas where substitution could happen. In practical terms, we drop ports that have never landed either Pacific sardine or market squid during our analysis period.^[We converted missing values to zero.] We assume that this criterion would allow us to identify ports with the infrastructure to land the two species. -->
+We focus on vessels that **actively participate in at least one CPS fishery**. We only include ports areas where substitution could happen. In practical terms, we drop ports that have never landed either Pacific sardine or market squid during our analysis period.^[We converted missing values to zero.] We assume that this criterion would allow us to identify ports with the infrastructure to land the two species. We finally ended with ten port areas: San Diego Area, Los Angeles Area, Santa Barbara Area, Morro Bay Area, Monterrey Area, San Francisco Area, Bodega Bay Area, Coos Bay Area, Columbia River Area at Oregon, and North Puget Sound Area. Our data set contains variables measured at the port and vessel levels for the CPS fishery in the U.S. West Coast. Our outcome variable is the vessel's landings in a quarter of Pacific sardine or market squid. We expect that using quarterly data allows us to observe seasonality in fishers' behavior and reduce the risk of losing general behavior when we disaggregate data on a finer scale. We obtained daily vessel level panel data on landing by port areas from 1981 to 2020 upon request from [PacFIN](http://pacfin.psmfc.org/). 
 
 ```{r dataset, include=FALSE}
-# Clean dataset
+# Organize dataset
 PacFIN.month.dataset = PacFIN.month.cluster[,!grepl("*_LE_",names(PacFIN.month.cluster))]
-PacFIN.month.dataset <- PacFIN.month.dataset %>%   filter(LANDING_YEAR >= 2000) %>%
+PacFIN.month.dataset <- PacFIN.month.dataset %>% filter(LANDING_YEAR >= 2000) %>%
   filter(PACFIN_SPECIES_CODE == "PSDN" | PACFIN_SPECIES_CODE == "MSQD") %>%
-  dplyr::select(LANDING_YEAR, LANDING_MONTH, PORT_NAME, VESSEL_NUM, PSDN_SDM_60, MSQD_SDM_90, ACL_PSDN,
-         LANDED_WEIGHT_MTONS.sum, AFI_PRICE_PER_KG.mean, PACFIN_SPECIES_CODE, PACFIN_PORT_CODE, AGENCY_CODE,
-         cluster) %>% 
+  dplyr::select(LANDING_YEAR, LANDING_MONTH, PORT_NAME, VESSEL_NUM, PSDN_SDM_60, MSQD_SDM_90,
+                MSQD_SPAWN_SDM_90, ACL_PSDN, LANDED_WEIGHT_MTONS.sum, AFI_PRICE_PER_KG.mean, 
+                PACFIN_SPECIES_CODE, PACFIN_PORT_CODE, AGENCY_CODE, cluster) %>% 
   mutate(AFI_PRICE_PER_KG.mean = na_if(AFI_PRICE_PER_KG.mean, 0)) %>% 
   melt(id.vars=c("LANDING_YEAR", "LANDING_MONTH", "VESSEL_NUM",  "PORT_NAME", 
                  "PACFIN_PORT_CODE", "PACFIN_SPECIES_CODE", "AGENCY_CODE", "cluster")) %>% 
   dcast(LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_NAME + PACFIN_PORT_CODE + AGENCY_CODE + cluster ~
           PACFIN_SPECIES_CODE + variable, fun.aggregate=mean) 
-  PacFIN.month.dataset[PacFIN.month.dataset == "NaN"] <- NA
+
+# Add port area code #  
+PacFIN.month.dataset[PacFIN.month.dataset == "NaN"] <- NA
     port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_codes.csv"))
     PacFIN.month.dataset <- PacFIN.month.dataset %>% 
       merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
-      PacFIN.month.dataset <- PacFIN.month.dataset %>%
+    
+# Exclude port areas without landings of MSQD or PSDN #
+selected.ports <- PacFIN.month.dataset %>% 
+  group_by(PORT_AREA_CODE) %>% 
+  summarise(landings_PSDN = sum(PSDN_LANDED_WEIGHT_MTONS.sum, na.rm = TRUE),
+            landings_MSQD = sum(MSQD_LANDED_WEIGHT_MTONS.sum, na.rm = TRUE)) %>%
+  rowwise() %>% mutate(total = min(landings_PSDN, landings_MSQD)) %>%
+  filter(total > 0) %>% select(PORT_AREA_CODE) %>% mutate(port_included = 1)
+  PacFIN.month.dataset <- PacFIN.month.dataset %>% 
+    merge(selected.ports, by = c("PORT_AREA_CODE"), all.x = TRUE) %>%
+    filter(port_included == 1) 
+
+# Transform ID data to numeric, obtain unique SDMs and ACL, and change NaN to NA.
+PacFIN.month.dataset <- PacFIN.month.dataset %>%
         mutate(PORT_ID = as.numeric(as.factor(PORT_NAME))) %>% ### Here is the port ID
         mutate(PORT_CODE_ID = as.numeric(as.factor(PACFIN_PORT_CODE))) %>% 
         mutate(PORT_AREA_ID = as.numeric(as.factor(PORT_AREA_CODE))) %>% 
         mutate(PSDN_SDM_60 = rowMeans(cbind(PSDN_PSDN_SDM_60, MSQD_PSDN_SDM_60), na.rm = T)) %>%
         mutate(MSQD_SDM_90 = rowMeans(cbind(PSDN_MSQD_SDM_90, MSQD_MSQD_SDM_90), na.rm = T)) %>%
+        mutate(MSQD_SPAWN_SDM_90 = rowMeans(cbind(PSDN_MSQD_SPAWN_SDM_90, MSQD_MSQD_SPAWN_SDM_90), na.rm = T)) %>%
         mutate(ACL_PSDN = rowMeans(cbind(PSDN_ACL_PSDN, MSQD_ACL_PSDN), na.rm = T))
         PacFIN.month.dataset[PacFIN.month.dataset == "NaN"] <- NA
 
 # Create dataset for estimations
 dataset = subset(PacFIN.month.dataset, select = -c(PSDN_PSDN_SDM_60, MSQD_PSDN_SDM_60, 
-                  PSDN_MSQD_SDM_90, MSQD_MSQD_SDM_90, PSDN_ACL_PSDN, MSQD_ACL_PSDN))
+                  PSDN_MSQD_SDM_90, MSQD_MSQD_SDM_90, 
+                  PSDN_MSQD_SPAWN_SDM_90, MSQD_MSQD_SPAWN_SDM_90,
+                  PSDN_ACL_PSDN, MSQD_ACL_PSDN))
 
-rm(PacFIN.month.dataset, port_area)
+rm(PacFIN.month.dataset, port_area, selected.ports)
 
 ```
 
@@ -1521,13 +1525,41 @@ SDM.port.area.MSQD <- aggregate(x=dataset$MSQD_SDM_90, by = list(dataset$LANDING
         rm(SDM.port.area.MSQD)
 
 dataset = subset(dataset, select = -c(MSQD.SDM.port.code, MSQD.SDM.port.area))
+
+
+## Market squid (SPAWN)
+
+### (a) Using PacFIN port code
+SDM.port.code.MSQD_SPAWN <- aggregate(x=dataset$MSQD_SPAWN_SDM_90, by = list(dataset$LANDING_YEAR,
+  dataset$LANDING_MONTH, dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
+  SDM.port.code.MSQD_SPAWN <- SDM.port.code.MSQD_SPAWN %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+    dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PACFIN_PORT_CODE = Group.3) %>%
+    dplyr::rename(MSQD_SPAWN.SDM.port.code = x)
+    SDM.port.code.MSQD_SPAWN[SDM.port.code.MSQD_SPAWN == "NaN"] <- NA
+    dataset <- dataset %>%
+      merge(SDM.port.code.MSQD_SPAWN, by = c("LANDING_YEAR", "LANDING_MONTH", "PACFIN_PORT_CODE"), all.x = TRUE) %>%
+      mutate(MSQD_SPAWN_SDM_90 = ifelse(is.na(MSQD_SPAWN_SDM_90), MSQD_SPAWN.SDM.port.code, MSQD_SPAWN_SDM_90))
+        rm(SDM.port.code.MSQD_SPAWN)
+
+### (b) Using port area code
+SDM.port.area.MSQD_SPAWN <- aggregate(x=dataset$MSQD_SPAWN_SDM_90, by = list(dataset$LANDING_YEAR,
+  dataset$LANDING_MONTH, dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
+  SDM.port.area.MSQD_SPAWN <- SDM.port.area.MSQD_SPAWN %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+    dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PORT_AREA_CODE = Group.3) %>%
+    dplyr::rename(MSQD_SPAWN.SDM.port.area = x)
+    SDM.port.area.MSQD_SPAWN[SDM.port.area.MSQD_SPAWN == "NaN"] <- NA
+    dataset <- dataset %>%
+      merge(SDM.port.area.MSQD_SPAWN, by = c("LANDING_YEAR", "LANDING_MONTH", "PORT_AREA_CODE"), all.x = TRUE) %>%
+      mutate(MSQD_SPAWN_SDM_90 = ifelse(is.na(MSQD_SPAWN_SDM_90), MSQD_SPAWN.SDM.port.area, MSQD_SPAWN_SDM_90))
+        rm(SDM.port.area.MSQD_SPAWN)
+
+dataset = subset(dataset, select = -c(MSQD_SPAWN.SDM.port.code, MSQD_SPAWN.SDM.port.area))
      
 ```
 
+We use a Hierarchical Bayesian Hurdle model to estimate the effect of species distribution on fish landings. We estimate a separate model for the two species in consideration. We use a Bayesian framework for several reasons. First, it allows us to consider uncertainty from modeling the process and its imperfect observation, assuming that all parameters are random variables. Second, Bayesian modeling allows multilevel effects (i.e., hierarchical effects) for each parameter, estimating random coefficients at different levels, such as at the port and cluster levels. Finally, we can incorporate previous knowledge as a prior. For instance, we can include a prior for the effect of SDM's on Pacific sardine landings using the results obtained in @smith2021potential. 
 
-We use a Hierarchical Bayesian Hurdle model to estimate the effect of species distribution on fish landings. We estimate a separate model for the two species in consideration. We use a Bayesian framework for several reasons. First, it allows us to consider uncertainty from modeling the process and its imperfect observation, assuming that all parameters are random variables. Second, Bayesian modeling allows the incorporation of multilevel effects (i.e., hierarchical effects). Finally, we can incorporate previous knowledge as a prior. For instance, we can include a prior for the effect of SDM's on Pacific sardine landings using the results obtained in @smith2021potential. 
-
-Our Bayesian framework incorporates a hurdle model to model the zeros included in our landing data. We observe a zero when no landings occur in a quarter for a particular vessel (we transformed landings observations with "N/A" to zero). We assume that these zeros mean no incentives to participate in the related fishery for the vessel during a particular quarter. Therefore, the hurdle part of the model is our participation model. The hurdle model is similar to the methodology used by @richerson2017. They estimate a discrete choice model for the probability of participating in a fishery. We expand their approach, merging this model with the landing model developed by @smithpotential in a single model. <!-- According @richerson2017, fishers participation decision should depend, in general terms, on profitability, species distribution and regulations. --> Our model allows us to estimate the total effect of, for example, a closure on landings, considering any effect that the explanatory variable have on participation before considering the level of landings.  
+Our Bayesian framework incorporates a hurdle model to model the zeros included in our landing data. We observe a zero when no landings occur in a quarter for a particular vessel (we transformed landings observations with "N/A" to zero). We assume that these zeros mean no incentives to participate in the related fishery for the vessel during a particular quarter. Therefore, the hurdle part of the model is our participation model. The hurdle model is similar to the methodology used by @richerson2017. They estimate a discrete choice model for the probability of participating in a fishery. We expand their approach, merging this model with the landing model developed by @smithpotential in a single model. <!-- According @richerson2017, fishers participation decision should depend, in general terms, on profitability, species distribution, and regulations. --> Our model allows us to estimate the total effect of, for example, a closure on landings, considering any effect that the explanatory variables have on participation before considering the level of landings.   
 
 In general, our Bayesian hurdle models have the following structure:
 $$
