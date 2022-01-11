@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.12.14)  10 JAN 2022 14:58
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.12.14)  10 JAN 2022 16:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1247,33 +1247,33 @@ Package textcomp Info: Symbol \textasciiacute not provided by
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.757 \section{Methods}\label{methods}}
-                                       ] [15]
+l.757 
+      ] [15]
 
 Package natbib Warning: Citation `smithpotential' on page 16 undefined on input
- line 834.
+ line 836.
 
 [16]
 
-LaTeX Warning: Reference `fig:posteriors' on page 17 undefined on input line 92
-7.
+LaTeX Warning: Reference `fig:posteriors' on page 17 undefined on input line 93
+1.
 
 
-LaTeX Warning: Reference `fig:sdmeffects' on page 17 undefined on input line 94
-9.
+LaTeX Warning: Reference `fig:sdmeffects' on page 17 undefined on input line 95
+3.
 
 [17]
 
 LaTeX Warning: Reference `fig:sdm_int_psdn' on page 18 undefined on input line 
-973.
+977.
 
 
-LaTeX Warning: Reference `fig:sdmeffects' on page 18 undefined on input line 97
-6.
+LaTeX Warning: Reference `fig:sdmeffects' on page 18 undefined on input line 98
+0.
 
 
 LaTeX Warning: Reference `fig:sdm_int_msqd' on page 18 undefined on input line 
-986.
+990.
 
 [18] (./econ_landings_paper.bbl [19])
 
@@ -1283,12 +1283,12 @@ Package natbib Warning: There were undefined citations.
 .3}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1036 \end{document}
+l.1040 \end{document}
                      ] [22pdfTeX warning (ext4): destination with the same iden
 tifier (name{table.4}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1036 \end{document}
+l.1040 \end{document}
                      ] (./econ_landings_paper.aux)
 
 LaTeX Warning: There were undefined references.
@@ -1298,7 +1298,7 @@ Package rerunfilecheck Info: File `econ_landings_paper.out' has not changed.
  ) 
 Here is how much of TeX's memory you used:
  25247 strings out of 480313
- 469879 string characters out of 5895527
+ 469876 string characters out of 5895527
  804995 words of memory out of 5000000
  42233 multiletter control sequences out of 15000+600000
  494712 words of font info for 264 fonts, out of 8000000 for 9000
@@ -1354,7 +1354,7 @@ zad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/Use
 rs/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb
 ><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/ut
 mri8a.pfb>
-Output written on econ_landings_paper.pdf (22 pages, 284471 bytes).
+Output written on econ_landings_paper.pdf (22 pages, 287249 bytes).
 PDF statistics:
  502 PDF objects out of 1000 (max. 8388607)
  430 compressed objects within 5 object streams
