@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2021.12.14)  10 JAN 2022 16:50
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2021/W32TeX) (preloaded format=pdflatex 2022.1.11)  11 JAN 2022 16:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -477,7 +477,7 @@ LaTeX Info: Thecontrolsequence`\]'isalreadyrobust on input line 130.
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/tcolorbox/tcolo
 rbox.sty
-Package: tcolorbox 2021/06/14 version 4.51 text color boxes
+Package: tcolorbox 2022/01/07 version 5.0.2 text color boxes
 
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/pgf/basiclayer/
 pgf.sty
@@ -944,7 +944,7 @@ File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 )
 (c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/l3backend/l3bac
 kend-pdftex.def
-File: l3backend-pdftex.def 2021-10-18 L3 backend support: PDF output (pdfTeX)
+File: l3backend-pdftex.def 2021-12-14 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count327
 \l__pdf_internal_box=\box89
 ) (./econ_landings_paper.aux)
@@ -1134,7 +1134,7 @@ LaTeX Warning: Reference `{fig:fish_season}' on page 4 undefined on input line
 322.
 
 [4]
-<econ_landings_paper_files/figure-latex/psdn_msqd_month_by_port-1.pdf, id=163, 
+<econ_landings_paper_files/figure-latex/psdn_msqd_month_by_port-1.pdf, id=154, 
 469.755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/psdn_msqd_month_by_port-1.pdf Grap
 hic file (type pdf)
@@ -1142,7 +1142,7 @@ hic file (type pdf)
 Package pdftex.def Info: econ_landings_paper_files/figure-latex/psdn_msqd_month
 _by_port-1.pdf  used on input line 332.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
-<econ_landings_paper_files/figure-latex/avg_land_rev_price-1.pdf, id=165, 469.7
+<econ_landings_paper_files/figure-latex/avg_land_rev_price-1.pdf, id=156, 469.7
 55pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/avg_land_rev_price-1.pdf Graphic f
 ile (type pdf)
@@ -1157,7 +1157,7 @@ has been already used, duplicate ignored
 l.358 
        <./econ_landings_paper_files/figure-latex/psdn_msqd_month_by_port-1.pdf>
 ]
-<econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf, id=184, 469
+<econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf, id=176, 469
 .755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf Graphic
  file (type pdf)
@@ -1171,7 +1171,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.379 
        <./econ_landings_paper_files/figure-latex/avg_land_rev_price-1.pdf>]
-<econ_landings_paper_files/figure-latex/ts_by_port-1.pdf, id=200, 469.755pt x 3
+<econ_landings_paper_files/figure-latex/ts_by_port-1.pdf, id=192, 469.755pt x 3
 25.215pt>
 File: econ_landings_paper_files/figure-latex/ts_by_port-1.pdf Graphic file (typ
 e pdf)
@@ -1185,7 +1185,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.404 
        <./econ_landings_paper_files/figure-latex/avg_landings_by_port-1.pdf>]
-<econ_landings_paper_files/figure-latex/ts_landing_price-1.pdf, id=215, 469.755
+<econ_landings_paper_files/figure-latex/ts_landing_price-1.pdf, id=207, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/ts_landing_price-1.pdf Graphic fil
 e (type pdf)
@@ -1199,7 +1199,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.423 
        <./econ_landings_paper_files/figure-latex/ts_by_port-1.pdf>]
-<econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf, id=230, 469.755
+<econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf, id=222, 469.755
 pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/SDM_land_by_port-1.pdf Graphic fil
 e (type pdf)
@@ -1213,7 +1213,7 @@ has been already used, duplicate ignored
                                                   \__shipout_drop_firstpage_...
 l.447 
        <./econ_landings_paper_files/figure-latex/ts_landing_price-1.pdf>]
-<econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf, id=247, 469.
+<econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf, id=239, 469.
 755pt x 325.215pt>
 File: econ_landings_paper_files/figure-latex/ts_landings_vessels-1.pdf Graphic 
 file (type pdf)
@@ -1251,29 +1251,29 @@ l.757
       ] [15]
 
 Package natbib Warning: Citation `smithpotential' on page 16 undefined on input
- line 836.
+ line 842.
 
 [16]
 
-LaTeX Warning: Reference `fig:posteriors' on page 17 undefined on input line 93
-1.
-
-
-LaTeX Warning: Reference `fig:sdmeffects' on page 17 undefined on input line 95
+LaTeX Warning: Reference `fig:posteriors' on page 17 undefined on input line 94
 3.
 
 [17]
 
+LaTeX Warning: Reference `fig:sdmeffects' on page 18 undefined on input line 96
+5.
+
+
 LaTeX Warning: Reference `fig:sdm_int_psdn' on page 18 undefined on input line 
-977.
+989.
 
 
-LaTeX Warning: Reference `fig:sdmeffects' on page 18 undefined on input line 98
-0.
+LaTeX Warning: Reference `fig:sdmeffects' on page 18 undefined on input line 99
+2.
 
 
 LaTeX Warning: Reference `fig:sdm_int_msqd' on page 18 undefined on input line 
-990.
+1002.
 
 [18] (./econ_landings_paper.bbl [19])
 
@@ -1283,25 +1283,25 @@ Package natbib Warning: There were undefined citations.
 .3}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1040 \end{document}
+l.1043 \end{document}
                      ] [22pdfTeX warning (ext4): destination with the same iden
 tifier (name{table.4}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.1040 \end{document}
+l.1043 \end{document}
                      ] (./econ_landings_paper.aux)
 
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `econ_landings_paper.out' has not changed.
-(rerunfilecheck)             Checksum: E7EABCD67CF81D54D5FD4CD2AFD295E5;3295.
+(rerunfilecheck)             Checksum: 7223CA7723B528850A5178ACB3521975;2972.
  ) 
 Here is how much of TeX's memory you used:
- 25247 strings out of 480313
- 469876 string characters out of 5895527
- 804995 words of memory out of 5000000
- 42233 multiletter control sequences out of 15000+600000
- 494712 words of font info for 264 fonts, out of 8000000 for 9000
+ 25262 strings out of 480313
+ 470294 string characters out of 5895528
+ 805246 words of memory out of 5000000
+ 42249 multiletter control sequences out of 15000+600000
+ 494839 words of font info for 266 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  83i,11n,80p,1016b,467s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{Hfootnote.9} has been referenced but does not exi
@@ -1331,11 +1331,11 @@ pdfTeX warning (dest): name{Hfootnote.2} has been referenced but does not exist
 pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exist
 , replaced by a fixed one
 
-{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.
-enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm
--mathit.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvi
-ps/lm/lm-mathex.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts
-/enc/dvips/lm/lm-mathsy.enc} <c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-v
+{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mat
+hsy.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/l
+m/lm-rm.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvi
+ps/lm/lm-mathit.enc}{c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts
+/enc/dvips/lm/lm-mathex.enc} <c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-v
 ar/fonts/pk/ljfour/jknappen/ec/tcrm1000.600pk>{c:/Users/fequezad/AppData/Roamin
 g/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}<c:/Users/fequezad/AppData/Roa
 ming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb><c:/Users/fequezad/App
@@ -1349,15 +1349,16 @@ c/lm/lmmi7.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type
 ts/type1/public/lm/lmr5.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-di
 st/fonts/type1/public/lm/lmr7.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/te
 xmf-dist/fonts/type1/public/lm/lmsy10.pfb><c:/Users/fequezad/AppData/Roaming/Ti
-nyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb><c:/Users/feque
-zad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/Use
-rs/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb
-><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/ut
-mri8a.pfb>
-Output written on econ_landings_paper.pdf (22 pages, 287249 bytes).
+nyTeX/texmf-dist/fonts/type1/public/lm/lmsy5.pfb><c:/Users/fequezad/AppData/Roa
+ming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb><c:/User
+s/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb>
+<c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utm
+r8a.pfb><c:/Users/fequezad/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/t
+imes/utmri8a.pfb>
+Output written on econ_landings_paper.pdf (22 pages, 297763 bytes).
 PDF statistics:
- 502 PDF objects out of 1000 (max. 8388607)
- 430 compressed objects within 5 object streams
- 100 named destinations out of 1000 (max. 500000)
- 55512 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 498 PDF objects out of 1000 (max. 8388607)
+ 424 compressed objects within 5 object streams
+ 96 named destinations out of 1000 (max. 500000)
+ 55496 words of extra memory for PDF output out of 61914 (max. 10000000)
 

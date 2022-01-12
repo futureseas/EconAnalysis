@@ -106,8 +106,6 @@ SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM
     dplyr::rename(MSQD_SPAWN_SDM_90 = SDM_SPAWN_90) %>%
     dplyr::rename(NANC_SDM_20 = SDM_20)
 
-  
-  
 
 #######################
 ## Merge ACL dataset ##
