@@ -68,7 +68,7 @@ PacFIN <- rbind.data.frame(PacFIN_1981_1989, PacFIN_1990_1999, PacFIN_2000_2009,
   PacFIN.month <- summaryBy(LANDED_WEIGHT_MTONS + AFI_PRICE_PER_KG + AFI_EXVESSEL_REVENUE
                             + VESSEL_LENGTH + VESSEL_WEIGHT + VESSEL_HORSEPOWER + NUM_OF_DAYS_FISHED
                           ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE + PORT_NAME + PACFIN_PORT_CODE
-                          + LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + AGENCY_CODE,
+                          + LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + AGENCY_CODE + REMOVAL_TYPE_CODE,
                           FUN=sum_mean_fun, data=PacFIN)
 
 # PacFIN.month <- read.csv("C:\\Data\\PacFIN data\\PacFIN_month.csv")
@@ -108,55 +108,99 @@ SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM
 
 
 #######################
-## Merge ACL dataset ##
+## Merge TAC dataset ##
 #######################
+
+# Open CSV file with TAC information and landings #
+  TAC.PSDN <- read.csv(file ="C:\\GitHub\\EconAnalysis\\Data\\ACL_data\\historical_TAC.csv") %>%
+    dplyr::rename(LANDING_YEAR = Year) %>% dplyr::rename(LANDING_MONTH = Month) %>% 
+    mutate(QuotaAllocated = 1) %>% mutate(QuotaAllocationNumber = 1) %>%
+    mutate(TAC_N = ifelse(LANDING_YEAR > 2005, 0, TAC_N)) %>% 
+    mutate(TAC_S = ifelse(LANDING_YEAR > 2005, 100, TAC_S)) %>%
+    mutate(Alloc_lat = ifelse(LANDING_YEAR > 2005, 49, Alloc_lat))
   
-    
-### Read ACL data and merge with PacFIN ###
-   ## Note: Squid is straightforward as it is a constant cap, the sardine one depends on the estimated biomass.
-   ## Also when the directed fishery is closed, some incidental catch is still allowed, hence the two columns. 
-   ## Also note that the fishing season changed in 2014 from jan-Dec to Jul-Jun so they had to add an interim HC Jan-Jun 2014.
-   
-# Read the data #
-ACL_PSDN <- read.xlsx(file = here::here("Data", "ACL_data", "CPS_quotas_month.xlsx"), 
-                         sheetName = "sardine.month")
+  ## Create data base ##
+  years <- as.data.frame(2000:2019) %>% dplyr::rename("LANDING_YEAR" = "2000:2019")
+  month <- as.data.frame(1:12) %>% dplyr::rename("LANDING_MONTH" = "1:12")
+  dates <- merge(month, years,  all.x = T, all.y = T) 
+  rm(years, month)
   
-ACL_MSQD <- read.xlsx(file = here::here("Data", "ACL_data", "CPS_quotas_month.xlsx"), 
-                        sheetName = "squid.month")
+  ### Calculate total CATCH of PSDN that reduce the TAC ##
+  landings.psdn <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
+    filter(PACFIN_SPECIES_CODE == "PSDN") %>% 
+    filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D") %>%
+    group_by(LANDING_YEAR, LANDING_MONTH) %>% summarise(landings_psdn = sum(LANDED_WEIGHT_MTONS.sum))
 
-
-# Rename variables #
- ACL_PSDN <- ACL_PSDN %>%
-    dplyr::rename(ACL_PSDN = HG..directed.fishery..mt.)  %>%
-    dplyr::rename(ACT_PSDN = ACT..HG.plus.incidental..tribal.and.live.bait..mt.) %>%
-    dplyr::rename(CA_LE_PSDN = CA.Limited.entry....of.vessels..federal.CPS.permit.restricted.to.39ON.) %>%
-    dplyr::rename(OR_LE_PSDN = OR.limited.entry....of.vessels..state.) %>%
-    dplyr::rename(WA_LE_PSDN = WA.limited.entry)
-
-ACL_MSQD <- ACL_MSQD %>%
-   dplyr::rename(ACL_MSQD = Catch.limit..mt.)  %>%
-   dplyr::rename(CA_LE_MSQD = CA.Limited.entry..state.) 
-
-# Obtain Year and Month variable    
-
-ACL_PSDN$LANDING_YEAR <- as.numeric(format(ACL_PSDN$Date, format="%Y"))
-  ACL_PSDN$LANDING_MONTH <- as.numeric(format(ACL_PSDN$Date, format="%m"))
-  ACL_MSQD$LANDING_YEAR  <- as.numeric(format(ACL_MSQD$Date, format="%Y"))
-  ACL_MSQD$LANDING_MONTH <- as.numeric(format(ACL_MSQD$Date, format="%m"))
-  ACL_PSDN <- subset(ACL_PSDN, select = -Date )
-  ACL_MSQD <- subset(ACL_MSQD, select = -Date )
-
+  # Incorporate total landings in data base #
+  landings.TAC.psdn <- dates %>% merge(landings.psdn,  by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = T)
+  landings.TAC.psdn$landings_psdn[is.na(landings.TAC.psdn$landings_psdn)] = 0
+  landings.TAC.psdn <- landings.TAC.psdn %>% mutate(no_psdn_land = ifelse(landings_psdn == 0, 1, 0)) 
+  
+  # Merge TAC into database # 
+  landings.TAC.psdn <- landings.TAC.psdn %>%
+    merge(TAC.PSDN, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) %>%
+    mutate(QuotaAllocated = ifelse(is.na(QuotaAllocated), 0, QuotaAllocated))
+  landings.TAC.psdn$Alloc_lat <- na.locf(landings.TAC.psdn$Alloc_lat)
+  landings.TAC.psdn$TAC_N     <- na.locf(landings.TAC.psdn$TAC_N)
+  landings.TAC.psdn$TAC_S     <- na.locf(landings.TAC.psdn$TAC_S)
+  landings.TAC.psdn$TAC_mt    <- na.locf(landings.TAC.psdn$TAC_mt) 
+  
+  
+  # Substract accumulative landings to TAC #
+  landings.TAC.psdn$n <- (1:nrow(landings.TAC.psdn)) 
+  landings.TAC.psdn <- landings.TAC.psdn %>% mutate(QuotaAllocationNumber = QuotaAllocationNumber * n)
+  landings.TAC.psdn$QuotaAllocationNumber <- na.locf(landings.TAC.psdn$QuotaAllocationNumber)
+  landings.TAC.psdn$QuotaAllocationNumber <- as.factor(
+    udpipe::unique_identifier(landings.TAC.psdn, fields = "QuotaAllocationNumber", start_from = 1))
+  landings.TAC.psdn <- landings.TAC.psdn %>% group_by(QuotaAllocationNumber) %>% 
+    mutate(csum = cumsum(landings_psdn)) 
+  landings.TAC.psdn <- landings.TAC.psdn %>% group_by(QuotaAllocationNumber) %>%
+    arrange(n) %>%  mutate(TAC_mt_v2 = TAC_mt - shift(csum, fill = first(0))) %>% ungroup()
+  
+  # Replace negative values by zero (fishery should be closed) #
+  landings.TAC.psdn <- landings.TAC.psdn %>% mutate(TAC_mt = ifelse(TAC_mt_v2 <= 0, 0, TAC_mt_v2)) %>%
+    select(-c("n", "csum", "TAC_mt_v2", "landings_psdn", 'no_psdn_land'))
+  
+  rm(dates, landings.psdn, TAC.PSDN)
+  
+  
+  # Still landings after select just commercial fishery.
+  
+  # YEAR 2014
+  # 6966
+  # 23293
+  
+  # PERIODO 2015-2020
+  # 7000
+  # 8000
+  # 8000
+  # 7000
+  # 4000
+  # 4000
+  
 
 
 # Merge data with ACL #
-PacFIN.month.ACL <- merge(PacFIN.month,ACL_MSQD,by=c("LANDING_YEAR", "LANDING_MONTH"),all.x = TRUE)
-  PacFIN.month.ACL <- merge(PacFIN.month.ACL,ACL_PSDN,by=c("LANDING_YEAR", "LANDING_MONTH"),all.x = TRUE)
+PacFIN.month <- merge(PacFIN.month, landings.TAC.psdn,
+                          by=c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
 
-  
+### Merge latitude by ports and calculate actual quota by port ###
+port_coord <- read.csv(file = here::here("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_names.csv")) %>%
+  dplyr::rename(lat_port = lat) %>%  dplyr::rename(lon_port = lon) %>%  dplyr::rename(PORT_NAME = port_name)
+
+PacFIN.month <- merge(PacFIN.month, port_coord, by=c("PORT_NAME"), all.x = TRUE)
+
+### Assign quota according to port latitude ##
+PacFIN.month <- PacFIN.month %>% mutate(TAC = ifelse(lat_port <= Alloc_lat, (TAC_S * TAC_mt), (TAC_N * TAC_mt)))
+
+
+
+
+...
 
 ####################
 ### Save DATASET ###
 ####################
   
-sapply(PacFIN.month.ACL, class)
+sapply(PacFIN.month, class)
 write.csv(PacFIN.month.ACL,"C:\\Data\\PacFIN data\\PacFIN_month.csv", row.names = FALSE)
