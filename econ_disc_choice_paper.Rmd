@@ -93,6 +93,8 @@ getDistanceFromLatLonInKm <- function(lat1,lon1,lat2,lon2) {
 
 # Introduction
 
+<!-- DS about distances: in principle could be endogenous although i would not mention that here! endogenous since location site is a choice variable and onnce a location decisionn is made, then distance is made. note that the discrete choice literature uusing random utiolity models specifies distance as ann exogenous regressor. -->
+
 <!--  handling vessel participation -- decisions such as: fish or not fish; switch target species; switch ports.?
 See Birkenbach et al. MRE (Norwegian paper, discrete choice modeling -->
 

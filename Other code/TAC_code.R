@@ -1,6 +1,7 @@
 
 library(dplyr)
 library(zoo)
+library(data.table)
 
 # Open CSV file with TAC information and landings #
 TAC.PSDN <- read.csv(file ="C:\\GitHub\\EconAnalysis\\Data\\ACL_data\\historical_TAC.csv") %>%
@@ -52,8 +53,10 @@ landings.TAC.psdn$n <- (1:nrow(landings.TAC.psdn))
     arrange(n) %>%  mutate(TAC_mt_v2 = TAC_mt - shift(csum, fill = first(0))) %>% ungroup()
  
 # Replace negative values by zero (fishery should be closed) #
-landings.TAC.psdn <- landings.TAC.psdn %>% mutate(TAC_mt = ifelse(TAC_mt_v2 <= 0, 0, TAC_mt_v2)) %>%
+landings.TAC.psdn <- landings.TAC.psdn %>% mutate(TAC_mt_accum = ifelse(TAC_mt_v2 <= 0, 0, TAC_mt_v2)) %>%
   select(-c("n", "csum", "TAC_mt_v2", "landings_psdn", 'no_psdn_land'))
+
+write.csv(landings.TAC.psdn,"C:\\GitHub\\EconAnalysis\\Other code\\TAC_month.csv", row.names = FALSE)
   
  
 # Still landings after select just commercial fishery.

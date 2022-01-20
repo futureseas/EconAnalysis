@@ -4,6 +4,11 @@
 ##                                    ##
 ########################################
 
+
+# ###Remove records associated with landings of zero value; this is likely bycatch
+# Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
+
+
 library(bookdown)
 library(doBy)
 library(dplyr)

@@ -55,10 +55,14 @@ gc()
 
 library(bookdown)
 library(brms)
+library(cluster)
 library(cmdstanr)
+library(data.table)
+library(distances)
 library(doBy)
 library(dplyr)
 library(fastDummies)
+library(forcats)
 library(ggplot2)
 library(here)
 library(hrbrthemes)
@@ -82,6 +86,7 @@ library(tinytex)
 library(viridis)
 library(xtable)
 library(zoo)
+
 ```
 
 ```{r read_data, include=FALSE}
@@ -647,7 +652,9 @@ In our model, we only use a subsample of vessels actively participating in the C
   
 From 2000 to 2014, 156 vessels participated in the market squid fishery according to our criteria, 100 in the Pacific sardine fishery, 18 in the Northern anchovy fishery, and 25 in the Pacific, and 1 in the jack mackerel fishery. 
 
-```{r participation, include=FALSE}
+```{r participation, eval=FALSE, include=FALSE}
+
+
 total.revenue <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(year_revenue = sum(AFI_EXVESSEL_REVENUE.sum))
 
@@ -774,41 +781,27 @@ Table \ref{Table:cluster_all} present the results for the clustering analysis. M
 Cluster 2, 3, and 5 also show substitution, but one species has a considerable share of the total landings (more than 80\% ). 80.27\% for Market squid in Cluster 2, 83.52\% for Pacific sardine in Cluster 3, and 84.65\% for Northern anchovy in Cluster 5. In the last two clusters, 6 and 7, vessels participate in other fisheries outside the CPS group. The cluster with the highest number of observations is Cluster 1 and Cluster 4. In the following subsections, we study gear used and port landed by vessel depending on the species landed and the vessel's cluster. 
 
 
-```{r cluster_analysis_TIM, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+```{r cluster_analysis_TIM, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
 
 ### THANKS TO TIM FOR THIS CODE ###
 
-###Load packages and set working directory
-
-library(data.table)
-library(dplyr)
-library(distances)
-library(forcats)
-library(cluster)
-library(ggplot2)
-
-rm(list=ls())
-
-setwd("C:/Users/Tim/Desktop/PacFin_Data")
-
-
 ###Load in the data
-Tickets1<-fread("FutureSeasIII_2000_2009.csv")
-Tickets2<-fread("FutureSeasIII_2010_2020.csv")
+Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
+Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
 Tickets<-rbind(Tickets1, Tickets2)
 rm(Tickets1, Tickets2)
 
 ###Subset the data to get remove columns not relevant to this analysis. This will speed things up.
-Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, PORT_NAME, VESSEL_NUM, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE, 
-                             PACFIN_GEAR_CODE, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, VESSEL_OWNER_NAME, 
-                             VESSEL_OWNER_ADDRESS_STATE, VESSEL_OWNER_ADDRESS_STREET))
+Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, PORT_NAME, VESSEL_NUM, VESSEL_NAME, 
+                             VESSEL_LENGTH, VESSEL_WEIGHT, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE, 
+                             PACFIN_GEAR_CODE, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, 
+                             VESSEL_OWNER_NAME, VESSEL_OWNER_ADDRESS_STATE, VESSEL_OWNER_ADDRESS_STREET))
 
 ###Remove records associated with landings of zero value; this is likely bycatch
 Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
 
-
-####Find the dominant species by value of each fishing trip, presumably this is the target species. Using the logic of metiers,
-###all landings of each fishing trip should be tagged with a single identifier.
+####Find the dominant species by value of each fishing trip, presumably this is the target species. 
+####Using the logic of metiers, all landings of each fishing trip should be tagged with a single identifier.
 Boats<-dcast(Tickets, FTID ~ PACFIN_SPECIES_COMMON_NAME, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
 row.names(Boats) <- Boats$FTID
 FTID<-Boats$FTID
