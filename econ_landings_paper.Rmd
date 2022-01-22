@@ -810,6 +810,18 @@ Cluster 2, 3, and 5 also show substitution, but one species has a considerable s
 
 ### THANKS TO TIM FOR THIS CODE ###
 
+###Load packages and set working directory
+
+library(data.table)
+library(dplyr)
+library(distances)
+library(forcats)
+library(cluster)
+library(ggplot2)
+
+rm(list=ls())
+gc
+
 ###Load in the data
 Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
 Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
