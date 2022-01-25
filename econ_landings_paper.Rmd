@@ -25,7 +25,7 @@ institute:
   - noaa3: NOAA Pacific Islands Fisheries Science Center
   
 date: "`r format(Sys.time(), '%B %e, %Y')`"
-abstract: "Fishers for forage species typically face a set of possible species to choose that allow them to diversify their portfolio and reduce income risk. Switching among species is more feasible for vessels that share similar gear and methods for fishing. More diverse portfolios may increase fisher resilience to climate-driven changes in target species’ spatial distributions and availability. However, regulations and other constraints (e.g., port constraints on where landings of a particular species may occur, or permit requirements) may reduce the degree of substitution we observe. This study analyzes how historical changes in forage species distribution and the closure of the  Pacific sardine fishery affected landing substitution between two coastal pelagic species: Pacific sardine (*Sardinops sagax*) and market squid (*Doryteuthis opalescens*). Using a hurdle model, we also study how spatial distribution and closure affected the coastal pelagic species fisheries' participation decisions over the 2000-2019 period. Our preliminary results show strong substitution between market squid and Pacific sardine when both were available, while the Pacific sardine closure in 2015 was associated with reduced market squid landings suggesting lower fishers’ participation in this fishery."
+abstract: "Fishers often target a diverse set of species. These fishing portfolios allow them to reduce income risk. More diverse portfolios may increase fisher resilience to climate-driven changes in target species’ spatial distributions and availability. Therefore, evaluations of climate risk to a particular fishery need to consider climate impacts on the availability of multiple target species and how such changes may impact substitution behaviour. Regulations and other constraints (e.g., port infrastructure constraints on where landings of a particular species may occur, or permit requirements) may also reduce the degree of substitution we observe. However, what factors influence diversification and how climate driven changes in target species distribution may interact with other constraints to affect changes in substitution behaviour remains unclear for many fisheries. In this study, we analyze how historical changes in forage species distribution and the closure of the Pacific sardine fishery affected landing substitution between two coastal pelagic species: Pacific sardine (*Sardinops sagax*) and market squid (*Doryteuthis opalescens*), that are targeted by the US West Coast Coastal Pelagic Fleet. Using a discrete choice modeling approach embedded in our landing model, we also study how spatial distribution and closure affected the coastal pelagic species fisheries' participation decisions over the 2000-2019 period. Our preliminary results show strong substitution between market squid and Pacific sardine when both were available, while the Pacific sardine closure in 2015 was associated with reduced market squid landings suggesting lower fishers’ participation in this fishery."
 header-includes:
   \usepackage{mathtools}
   \usepackage{tcolorbox}
@@ -114,50 +114,7 @@ sum_mean_fun <- function(x, ...){
 
 ```
 
-# Introduction
-
-<!-- Isaac's comment: 
-
-1. "To my understanding, this figure is really important and maybe could even frame the Introduction a bit -- do you agree? Essentially,  Sardine fishery is closed, squid price is up, but squid landings are down... understanding why, and how this varies at a port level, is essential to helping us predict CPS fishery responses to changing abundance and opportunity under climate variability and change."
-
-2. "I think the story overall really benefits as you describe the port-level differences -- this is a great thing to emphasize throughout the paper, and in the context of port-level response to change." -->
-
-
-Fishing portfolios are an essential mechanism to safeguard fishers' livelihood. Diversification strategies have been principally associated with reducing income variability [@kasperski2013]. For instance, when a species abundance is reduced due to environmental conditions, fishers can change targeted species to a species that requires similar gears. However, there is not always room for diversification. Switching between species can be costly if gears are different between species, or a new permit is required for legal fishing. Moreover, even though fishers may have flexibility switching between species, port infrastructure, markets, and regulations that limit access to fisheries to avoid collapse of fish stocks from overfishing may impose some restrictions on this flexibility  [@kasperski2013]. Therefore, it is unclear how species distribution and regulation changes would be reflected in landings compositions and participation.
-
-In this study, we analyze how changes in spatial distribution and the implementation of fisheries closures affect landings and fisher participation of the two most important coastal pelagic species (CPS) harvested on the U.S. West Coast: Pacific sardine (*Sardinops sagax*) and market squid (*Doryteuthis opalescens*). Fisheries closures are an interesting policy instrument when fishers target more than one species because they allow us to study how fishers change behavior by excluding one alternative. However, fewer studies have studied one fishery closure's effect on other fishery outcomes. An example is @vermard2008, which studies the effect of the European anchovy (*engraulis encrasicolus*) fishery closure in trip choices conducted by the Bay of Biscay pelagic fleet. Another example is  @richerson2017, who studied the effect of US West Coast salmon fishery closures on vessel participation. In this paper, we study the effect of the 2015 Pacific sardine closure implemented after the over-exploitation of the fishery and the effect of seasonal closures after reaching a catch limit target. 
-
-Studying the effect of closures and changes in species distribution is not straightforward as different responses can be observed in response to the same conditions, as fishers and vessels are heterogeneous [@zhang2011]. Moreover, vessel heterogeneity and port constraints will dictate the possible set of species that a fisher can choose.
-Species are also interconnected, at least economically, if not ecologically. Thus, any regulation or ecological disruption that affects one species would affect fishers' decision to target another species. Therefore, a multiple species targeting framework that considers interrelation between species is necessary to understand the CPS fishery further. Our research goes a step further and analyzes the CPS fishery as one where fishers can target multiple species in line with recent literature [@richerson2017]. Our goal is to understand how changes in species distribution, seasonal and total closures affect vessel responses with respect to landing amount and participation, and the substitution between species.
-
-Our papers build on the model developed by @smith2021potential for sardine landings. We expand their model, including a landing equation for the two species analyzed in this study and estimating a participation model simultaneously using a multilevel Bayesian hurdle model. The participation models (i.e., hurdle component) are built on the work of @richerson2017 for the US West Coast salmon troll fishery. The Bayesian hurdle model incorporates heterogeneity between fleets and ports areas. We use the probability of presence obtained from Species Distribution Models (SDM) as an explanatory variable instead of landing by species. Including the spatial distribution of different species to explain landings allows us to understand how interactions between species availability would affect fishers target decisions. We expect these additions to better characterize how the fishers portfolio is composed and better understand the effects of species interactions on catch rates and participation. Moreover, an additional benefits of including SDM in our model as explanatory variable is that it  could allow researcher and resource managers to project landing and participation over time using SDM predictions for different climate scenarios. 
-
-The remainder of the paper is organized as follows: Section \ref{coastal-pelagic-species-fishery} provides background on the CPS fishery on the U.S. West Coast. In Section \ref{methods} we discusses our data set and empirical strategy. Section \ref{results} presents the results of the estimations, and we conclude in Section \ref{conclusions}.
-
-
-
-# Coastal Pelagic Species fishery 
-
-<!-- Isaac Comment: "I suspect that most target journals would want us to summarize this section in the main text, tightening it around the main questions, then move some text to the Appendix." -->
-
-The Pacific Fishery Management Council (PFMC) is responsible for the CPS species management through a Fisheries Management Plan (FMP). Before 2000, the only fishery under a FMP was the fishery for Northern anchovy (*Engraulis mordax*). The Northern anchovy FMP started to be developed in 1977, and the final draft was approved and implemented in 1978 [@CPSFMP2021]. During these times, and for many years, the Northern anchovy was harvested for reduction. This fleet was referred to as the *wetfish* fleet, and also fished for other CPS such as Pacific sardine(*Sardinops sagax*), market squid (*Doryteuthis opalescens*), Pacific mackerel (*Scomber japonicus*), Jack mackerel (*Trachurus symmetricus*), Pacific bonito (*Sarda lineolata*), and Pacific bluefin tuna (*Thunnus orientalis*) [@SAFE2020]. In March 1995, the PFMC decided to expand the FMP through Amendment 8 to include the entire CPS complex (Pacific sardine, northern anchovy, Pacific (chub) mackerel, jack mackerel, and market squid) along the U.S. west coast. The PFMC partially approved this amendment in June 1999, and they published the final regulations in December 1999. Finally, the PFMC implemented the FMP on January 1st, 2000. 
-
-In recent years, there is no reduction capacity for the Northern anchovy fishery in California, and it is principally harvested in the Monterrey area as a substitute for sardine and squid when both are not available [@SAFE2020]. The Northern anchovy fishery has lost its importance within the CPS complex after the decline of the reduction market. However, in some particular ports like Monterrey, it is the only species that fishers can harvest when market squid is unavailable and the Pacific sardine fishery is closed [@SAFE2020]. In Oregon, the Northern anchovy fishery was categorized as "developmental fishery" between 1995 and 2009. Only 4 of the 15 developmental permits were issued for this fishery. The developmental program was suspended in 2009, as there were no funds to support it [@SAFE2020]. The Oregon Northern anchovy fishery is currently under an open-access regime but limited by gear [@SAFE2020]. A significant fishery started to grow in 2015 and 2016, but no landings was observed in Oregon during the year 2018. In Washington, the Northern anchovy fishery is restricted from developing to a high-volume fishery to protect the traditional bait fishery. Some of these regulations limit catch and limit the catch percentage allocated to reduction.
-
-In the 60s, the Pacific sardine fishery in California closed due to the fishery's collapse. The fishery reopened in 1986 with a precautionary quota of 906 metric tons. The Pacific sardine fishery was considered as fully recovered in 1998 
-with an estimated biomass of over one million metric tons [@SAFE2020]. Since 2000, after implementing the CPS FMP, the Pacific sardine has been managed under a limited entry (LE) permit with a quota management system, or Harvest Guideline (HG), that controls commercial catch of sardine biomass. If harvests are over the HG, then the commercial fishery is closed for the rest of the season. Permits are transferable and cumulative, but they are required to match the vessel tonnage, and it is uncommon to see vessels and permits sold separately. LE permits are only required if a vessel lands more than 5 tons of all CPS finfish combined in a trip. The CPS LE fleet is composed of 65 permits and 55 vessels. The LE permits program is federal but only applies south of Point Arena, California (39°N). This geographical point divides the coast into two areas which were used to allocate the total HG for the Pacific sardine during a season (changed from 35°40'N to 39°N in 2003). In 2005, the quota allocation for Pacific sardine was modified from area-based to coast-wide seasonal release that follows an allocation formula: 
-
-1. 35\% of the HG to be allocated coastwide on January 1st.
-2. 40\% of the HG, plus any portion not harvested from the initial allocation, will be reallocated coastwide on July 1st.
-3. 25\% of the HG, plus any portion not harvested from earlier allocations, will be reallocated coastwide on September 15th.
-
-The commercial fishery has been closed for the whole U.S. west coast since 2015 as the spawning stock biomass (SSB) is estimated to be below the cutoff point of 150,000 metric tons. This total closure came after many years of seasonal closures.
-
-North of 39°N, vessels do not require federal permits. However, Oregon and Washington have implemented state permits for sardine. In Oregon and Washington, the fishery did not develop until the 2000s. In 1999, a fishery for the Pacific sardine started to operate in both states targeting larger sardines to be sold as bait to Asian longline tuna fisheries [@SAFE2020]. Then, in 2006 the fishery expanded in both states to supply the market for human consumption. In Oregon, the Pacific sardine fishery was categorized as a "developmental fishery" until 2005, and the first LE permits were issued in this state in 2006, capped at 26 (currently, there are 24 LE permits for this fishery in Oregon). In Washington, the Pacific sardine fishery was a "trial fishery" from 2000-2002 with a state HG of 15,000 metric tons (i.e., no limits on the number of participants). Later, from 2003 to 2009, the fishery was under an "experimental fishery" category, with experimental permits capped at 25. Finally, in 2009, Washington's Pacific sardine fishery was designated as a "commercial fishery" with a LE program that allocated 16 permanent permits and ten temporary ones. In Washington, fishing for sardine is prohibited from January 1st to March 31st, and directed commercial harvest is prohibited within state waters (0 to 3 miles). 
-
-The market squid fishery was unregulated and open access until permits became required in California in 1998. However, there were no limits to the number of permits issued by the authorities. In 2001, a HG was implemented at 125,000 U.S. tons for this fishery. Later, in 2005, the California Fish and Game Commission (CFGC) implemented the Market Squid Fisheries Management Plan, which reduced the fleet to a maximum of 73 vessels, limits the number of light boats to 34, reduced the HG to 118,000 U.S. tons and incorporated a weekend closure to allow for a period of uninterrupted spawning [@SAFE2020].^[Vessel permits allow vessels to attract squid with light and use purse seine for harvest, Brail permits allow vessels to attract squid with light and use brail gear, and light boat permits only allows to attract squid with lights] Oregon's market squid fishery started in 2014 with few vessels targeting squid (15 in 2016 and 11 in 2018), while in Washington, there are no directed landings of market squid. In 2019 two permits were issued to allow market squid catch from Oregon to be delivered to Washington ports.
-
-Pacific sardine fishing season in California has a peak in landings during the early summer to fall in the Monterrey area, specifically in Moss Landing, while in Southern California, specifically in San Pedro and Terminal Island, peak landings occur during the winter. Fishing seasons for Pacific sardine are shown in Panel (a) of Figure \ref{fig:fish_season}. In Oregon and Washington state, specifically at Astoria and Ilwaco/Chinook ports, the fishing season is primarily during summer and early fall. Panel (b) shows that market squid fishing season in Southern California, specifically in San Pedro, Terminal Island, and Ventura, goes from fall to winter, while in Northern California, specifically in Moss Landing and Monterrey, the season goes from late spring to summer.   
+# Descriptive figures 
 
 ```{r psdn_msqd_month_by_port, echo=FALSE, fig.cap="Fishing season for Pacific sardine and Market squid (average monthly total harvest for the period 2000-2014, before the Pacific sardine closure).\\label{fig:fish_season}", message=FALSE, warning=FALSE}
 
@@ -208,15 +165,6 @@ g1 / g2
 
 rm(g1, g2, q.psdn.by.month, q.msqd.by.month, port_names)
 ```
-
-
-# Data analysis
-
-## Landing, prices and revenue
-
-Pacific sardine and market squid, followed by Pacific Mackerel and the Northern anchovy, mainly dominated the CPS fishery in terms of landings (Figure \ref{fig:avg_lan_rev}, Panel a) and revenue (Figure \ref{fig:avg_lan_rev}, Panel b) during the period 1981-2014. Average prices are low for all CPS species, below 1 USD per kilogram (Figure \ref{fig:avg_lan_rev}, Panel c). However, if we compare the price between the two main CPS species landed, Pacific sardine and Market squid, the price received for market squid is approximately 50\% higher than the price received for Pacific sardine.  
-
-<!-- Barb's comment: "I'm not an economist, but market squid prices per kg are still a fair bit higher than sardine. I think I've heard fishers say before that they would prefer to catch squid when it's available due to the higher prices? Perhaps check this" -->
 
 ```{r avg_land_rev_price, echo=FALSE, fig.cap="Average annual landings, prices and revenues by species (1981-2014).\\label{fig:avg_lan_rev}"}
 ## Landings chart
@@ -282,8 +230,6 @@ landing.price.year <- summaryBy(LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PER_KG.mean 
 
 ```
 
-The composition of the catch varies geographically (Figure \ref{fig:avg_landings_by_ports}). Market squid is mostly landed in the southern ports of California located around Los Angeles, Santa Barbara, and Monterrey areas. In contrast, Pacific sardine is mainly landed in California in Los Angeles and Monterey areas and Oregon in the Columbia River area. Between Coos Bay and San Francisco, there are ports with little opportunity to handle large volumes of market squid landings because of a lack of infrastructure capacity. It is possible to truck landings to processors from these ports, but this is unlikely to be profitable due to transport costs. 
-
 ```{r avg_landings_by_port, echo=FALSE, fig.cap="Annual average landings by port area.\\label{fig:avg_landings_by_ports}", message=FALSE, warning=FALSE}
 landings.by.port.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ 
   PACFIN_SPECIES_CODE + PACFIN_PORT_CODE + LANDING_YEAR + AGENCY_CODE, FUN=sumfun, data=PacFIN.month.CPS)
@@ -326,11 +272,6 @@ states_names <- as_labeller(c(`C` = "California", `O` = "Oregon",`W` = "Washingt
 rm(states_names, landings.by.port.avg.year)
 ```
 
-
-
-<!-- Let us now analyze our data over time.  -->
-There is a general conception that vessels that harvest Pacific sardine appear to switch to market squid when sardine are unavailable. However, landings of market squid have been decreasing in the past five years along with those for Pacific sardine (Figure \ref{fig:avg_landings_by_ports}) . We would expect that the Pacific sardine fishery's closure would have increased the level of market squid landing, but the graphs show some complementary instead of substitution. Complementary does not coincide with stakeholders' perceptions about switching behavior. They claim that many vessels in California switched to market squid after the Pacific sardine closure.^[Stalkholders state this during their participation in a workshop that reunited U.S. West Coast fishery.<!-- "Can we cite the workshop report here?" -->] 
-
 ```{r ts_by_port,  fig.cap = "Total annual landing by selected ports during the period 2000 - 2020 for market squid and Pacific sardine. The ports selected are the ones with the highest average annual landings and substitution is likely.\\label{fig:ts_landings_by_ports}", echo=FALSE, message=FALSE, warning=FALSE}
 
 landings.by.sel.ports <- landings.by.port.year %>% 
@@ -357,10 +298,6 @@ ggplot(landings.by.sel.ports, aes(y=LANDED_WEIGHT_MTONS.sum.sum,
 rm(port_names, landings.by.sel.ports, landings.by.port.year)
 
 ```
-
-A potential hypothesis is that unfavorable market conditions (e.g., low prices) affected market squid landings in recent years, independently of the condition of the Pacific sardine fishery. Real prices for market squid have been increasing during the last two decades (Figure \ref{fig:ts_landings_price}, Panel a). Incentives should be high for landing market squid, invalidating this hypothesis.^[Prices for forage species are likely to be determined in the world market, as the California current landings for forage species correspond to a small share of the total landings in the world.]
-
-<!-- Regarding Pacific sardine, we observe that the price has been stable after 1990, while landing peaked in 2008, and there is a posterior decline in landing until the fishery closed in 2015. This trend suggests that abundance primarily determines Pacific sardine landings. -->
 
 ```{r ts_landing_price, echo=FALSE, fig.cap="Evolution of annual total landings and average annual prices by CPS species during the period 1981-2020.\\label{fig:ts_landings_price}", message=FALSE}
 landing.price.year.sel <- landing.price.year %>% 
@@ -438,8 +375,6 @@ rm(g1, g2, g3)
 
 ```
 
-Another hypothesis that could explain the lower landings levels observed for market squid in the last decade could be the reduction in market squid's species availability and, therefore, the substitution to another species more profitable than market squid. According to a workshop conducted with stakeholders, Pacific sardine catches may be substituted with other species such as mackerel, tuna, or anchovy. Pacific sardine landings positively correlate with the probability of presence of this species (Figure \ref{fig:sdm_land_by_port}), similar to @smith2021potential findings. In the case of market squid, there is a high correlation between the probability of presence and landings in Moss Landing after 2003 (Figure \ref{fig:sdm_land_by_port}). However, this correlation is not observed in other ports, suggesting that other variables might, together with the probability of presence, be in play.
-
 ```{r SDM_land, eval=FALSE, fig.cap="Relationship between the probability of presence (from SDMs) and landings by CPS species in three main ports: San Pedro, Terminal Island, and Moss Landing.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE, include=FALSE}
 
 sdm.by.species <- PacFIN.month.CPS %>%
@@ -490,14 +425,6 @@ g1 / g2
 rm(g1, g2, sdm.by.species, coeff, coeff2, coeff3)
 
 ```
-
-
-<!-- Barb's comments:  -->
-<!-- 1. Squid landings were pretty low in the south in 1998 and 2015, coincident with strong El Ninos (this phenomenon has been published on quite a bit). Interesting that the SDM does not capture this at all: whatever the mechanism is that drives lower landings in the SCB during El Nino events, the SDM is not able to replicate it -->
-
-<!-- 2. I think it would be worth comparing these to the time series shown in Chasco et al. (in press: I'll email it to you). They show an increase in squid abundance in surveys off northern CA, OR and WA since 2011. That may suggest that northwards range expansions during warm years (e.g. 2015) might drive lower local abundance in the SCB, even if environmental conditions in the SCB are suitable? -->
-
-<!-- SCB ::: The Southern California Bight (SCB) is the name given to the coastal and offshore area "between Point Conception on the Santa Barbara County coast and a point just south of the United States - Mexico border."  -->
 
 ```{r SDM_land_by_port, echo=FALSE, fig.cap="Landings v/s probability of presence by port area.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE}
 
@@ -624,10 +551,6 @@ write_xlsx(collapse,"Data\\monterrey_NANC_sdm_landings.xlsx")
 
 ```
 
-
-It could also be that the lower abundance and the consequent closure of the Pacific sardine fishery also affect vessels' decision to participate in the market squid fishery. It is possible that fishers stop fishing at all as the exclusion of Pacific sardine from their portfolio reduces fisher's ability to overcome income risk through diversification [@kasperski2013]. This hypothesis suggests an unintended consequence from a policy that aims only to affect Pacific sardine, but its effect indirectly affects other fisheries [@richerson2017]. We have some suggestive evidence from this in Figure \ref{fig:ts_landings}, which shows the evolution of Pacific sardine landings and the number of vessels landing market squid during the period 1981-2020. In the first year of the Pacific sardine closure, we observe that the number of vessels that landed market squid decreased from 99 vessels in 2014 to 74 vessels in 2015. After this abrupt decline, we observe a slight recovery, reaching 109 vessels in 2020. Nevertheless, the level observed in 2020 is below the levels observed in 2012 with 139 vessels landings market squid during that year. 
-
-
 ```{r ts_landings_vessels, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Evolution of Pacific sardine landings and the number of vessels landing market squid during the period 1981-2020.\\label{fig:ts_landings}"}
 landing.nvessels.year.sel <- landing.price.year %>%
   inner_join(nvessel.year, by = c("PACFIN_SPECIES_CODE", "LANDING_YEAR")) %>%
@@ -660,22 +583,9 @@ rm(landing.price.year, nvessel.year)
 
 ```
 
-A clear story about why market squid landings have decreased would require a more rigorous statistical analysis. We design our empirical strategy to address various concerns about omitted variables to obtain clean causal effects of a set of explanatory variables on both Pacific sardine and market squid landings.
 
 
-# Data sample
-
-## Subsample
-
-In our model, we only use a subsample of vessels actively participating in the CPS fishery. We first have to define what we understand as participation to do this. Following @richerson2017, we consider a vessel to participate in a specific fishery if they met the following criteria:
-
-  1. Harvest the species during 2000-2014 (before the Pacific sardine closure).
-  2. The species' total annual revenue averaged at least 1000 USD per year over 2000–2014. This calculation excludes years where the vessel did not fish.
-  3. Revenue from the species at least 5% of total vessel revenue per year over 2000–2014.
-  4. The vessel fished at least 3 of 15 years between 2000 and 2014.
-  
-From 2000 to 2014, 156 vessels participated in the market squid fishery according to our criteria, 100 in the Pacific sardine fishery, 18 in the Northern anchovy fishery, and 25 in the Pacific, and 1 in the jack mackerel fishery. 
-<!-- Barb's comment: "Would it be useful to state which vessels participated in both sardine and squid fisheries here?" -->
+# Participation
 
 ```{r participation, include=FALSE}
 
@@ -795,16 +705,7 @@ PacFIN.month.CPS <- PacFIN.month %>%
 ```
 
 
-
-## Cluster analysis
-
-<!-- Vessels that don't substitute target species might belong in the "data sample" as well as those that do, if the interest is to explain switching behavior. MAYBE TWO SUBSAMPLES? My preference would be to not split the sample, but rather to develop an overarching model that captures the drivers of portfolio switching behavior (or the absence thereof), provided we can relevant explanatory variables. "identify relevant" -->
-
-Before continuing our analysis, we have to verify whether there is switching behavior between CPS species. Moreover, categorizing vessel in different groups allows us to estimate differentiated coefficients to capture different responses to an explanatory variable. We conduct a cluster analysis to categorize the different portfolios fishers manage during a year. For this, we conduct our cluster analysis using a hierarchical clustering method. This method has been used before in fisheries to define *metiers* in discrete choice models [@vermard2008]. This approach does not require defining the number of clusters chosen within the algorithm. There are different methods to compute the distance between two clusters and conduct the algorithm. We use Ward's method in our study, similar to [@vermard2008]. The goal of this method is to reduce the within-cluster variance. The algorithm starts with all observation in a cluster and then merge in each step the two cluster with the minimum distance between cluster. We use a cluster variable, the percentage of total landings by species during 2000-2014. The analysis includes commercial vessels that have participated at least in one CPS fishery during 2000-2014, identified in the previous section. 
-
-Table \ref{Table:cluster_all} present the results for the clustering analysis. Many vessels belong to Cluster 1 winch describes a portfolio that focuses only on market squid. On average, 97.10% of the total landings in this cluster correspond to market squid. The other cluster shows substitution between species. For instance, in Cluster 4, 46.5\% of the total landings correspond to market squid and 40.57\% to Pacific sardine, on average. 
-Cluster 2, 3, and 5 also show substitution, but one species has a considerable share of the total landings (more than 80\% ). 80.27\% for Market squid in Cluster 2, 83.52\% for Pacific sardine in Cluster 3, and 84.65\% for Northern anchovy in Cluster 5. In the last two clusters, 6 and 7, vessels participate in other fisheries outside the CPS group. The cluster with the highest number of observations is Cluster 1 and Cluster 4. In the following subsections, we study gear used and port landed by vessel depending on the species landed and the vessel's cluster. 
-
+# Cluster analysis 
 
 ```{r cluster_analysis, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 ## Calculate share of revenue of species by vessel during a month ##
@@ -886,7 +787,13 @@ rm(PacFIN.spread.perc, PacFIN.spread , clusterCut, clusters, PacFIN.clusters, to
 
 ```
 
-## Switching behavior
+
+
+<!-- CHECK FROM HERE!!! -->
+
+
+
+# Switching behavior
 
 Substitution between species is likely related to the gear that a vessel or fisher have invested in for their fishing activities and the port they commonly land. These two characteristics will dictate the potential species choices that a vessel has to choose. @richerson2017 call species choices and other spatial patterns of ocean use as spatial constraints. Vessels with the same spatial constraints share local ecological knowledge and vessel mobility [@richerson2017]. Nevertheless, vessels are not restricted to a specific gear and port. In theory, they can switch between different gear alternatives and choose different ports to land. Therefore, they can modify the spatial constraints that they face. Nevertheless, switching between gears that are entirely different could be costly, and landing in a port without the infrastructure to land the targeted is unlikely.
 
@@ -1444,7 +1351,6 @@ rm(psdn.by.month, squid.cond.psdn, n_vessel_psdn, n_vessel_msqd_c_psdn, df)
 
 # Methods
 
-We focus on vessels that **actively participate in at least one CPS fishery**. We only include ports areas where substitution could happen. In practical terms, we drop ports that have never landed either Pacific sardine or market squid during our analysis period.^[We converted missing values to zero.] We assume that this criterion would allow us to identify ports with the infrastructure to land the two species. We finally ended with ten port areas: San Diego Area, Los Angeles Area, Santa Barbara Area, Morro Bay Area, Monterrey Area, San Francisco Area, Bodega Bay Area, Coos Bay Area, Columbia River Area at Oregon, and North Puget Sound Area. Our data set contains variables measured at the port and vessel levels for the CPS fishery in the U.S. West Coast. Our outcome variable is the vessel's landings in a quarter of Pacific sardine or market squid. We expect that using quarterly data allows us to observe seasonality in fishers' behavior and reduce the risk of losing general behavior when we disaggregate data on a finer scale. We obtained daily vessel level panel data on landing by port areas from 1981 to 2020 upon request from [PacFIN](http://pacfin.psmfc.org/). 
 
 ```{r dataset, include=FALSE}
 # Organize dataset
@@ -1512,8 +1418,6 @@ dataset <- PacFIN.month.dataset %>%
 rm(PacFIN.month.dataset, port_area, selected.ports, SDM_port_PSDN, SDM_port_MSQD, SDM_port_MSQD_Spawn)
 
 ```
-
-Our main treatment variables are the probabilities of presence and closures, either seasonal or total, by species. We obtained the probabilities of presence from Species Distribution Models (SDM). The future forecast of these variables allows us to simulate the CPS fishery in the future. The species distribution has changed relative to ports in the last decades [@selden2020], which could explain the variability observed in fish landings [@selden2020, @smith2021potential]. For instance,  @smith2021potential found a positive effect of the probability of Pacific sardine presence on Pacific sardine landings. We follow the same procedure as @smith2021potential to associate SDM's outputs with ports. We compute the average probability of presence within the same radius of 60 kilometers around the port for Pacific sardine. This radius also coincides with the average distance with two standard deviations traveled by vessels based on logbooks available for these fisheries.^[@selden2020 use the 75th quantile of the travel distances made by vessels to define the availability of a species associated to a port for multiple species and weight these distances by the catch of those species.] We set this radius to 90 for market squid based on logbooks' average distance to the fishing ground.^[To see an animation of how far vessels travel, please visit [this link](https://drive.google.com/file/d/1-PE_lcZNcXNcyILA_6xhkHyEhV3mV2TA/view?usp=sharing).] We use the quarterly average probability of presence first within a port code defined by PacFIN and second within a port area excluding ports with no information to fill the missing values. We compute two different versions of SDM outputs for market squid: with and without spawning aggregation. We compare their capacity to explain the model empirically. From communication with squid fishers, fishers seem to aggregate in spawning aggregation of squid during its harvest. Therefore, we expect that the SDM computed using spawning aggregation works better. 
 
 
 ```{r calculate-sdm, include=FALSE}
@@ -1603,22 +1507,6 @@ dataset = subset(dataset, select = -c(MSQD.SDM.port.code, MSQD.SDM.port.area))
      
 ```
 
-We use a Hierarchical Bayesian Hurdle model to estimate the effect of species distribution on fish landings. We estimate a separate model for the two species in consideration. We use a Bayesian framework for several reasons. First, it allows us to consider uncertainty from modeling the process and its imperfect observation, assuming that all parameters are random variables. Second, Bayesian modeling allows multilevel effects (i.e., hierarchical effects) for each parameter, estimating random coefficients at different levels, such as at the port and cluster levels. Finally, we can incorporate previous knowledge as a prior. For instance, we can include a prior for the effect of SDM's on Pacific sardine landings using the results obtained in @smith2021potential. 
-
-Our Bayesian framework incorporates a hurdle model to model the zeros included in our landing data. **We observe a zero when no landings occur in a quarter for a particular vessel in a port where his actively harvesting another species (we transformed landings observations with "N/A" to zero)**. Therefore, the hurdle part of the model is our participation model. The hurdle model has similar variables that @richerson2017 uses to estimate a discrete choice model for the probability of participating in a fishery. However, our analysis differs as we only consider vessels actively harvesting other CPS species in a particular port instead of not participating at all, and we use quarterly data instead of yearly. Considering vessels harvesting other CPS species during the observed period allows us not to confound the decision of what fishery to participate with the decision of whether to fish or not.
-
-Moreover, we expand their approach, merging this model with the landing model developed by @smithpotential in a single model. According to @richerson2017, fisher's participation decision should depend, in general terms, on profitability,  species distribution, and regulations. Our model allows us to estimate the total effect of, for example, a closure on landings, considering any effect that the explanatory variables have on participation before fishers considering their optimal level of landings.   
-
-In general, our Bayesian hurdle models have the following structure:
-$$
-[\theta_{c,p} | q_{i,t}] \varpropto f\left(q_{i,t} | \theta_{c,p}\right) \times [\theta_{c,p}]
-$$
-where $q_{it}$ is the observed landings of the corresponding species by vessel $i \in (1,\ldots,L)$ at year $t$, $L$ is the total number of vessels, and $\theta_i$ are the parameters (i.e., random-coefficients) to be estimated by ports $p \in (1,\ldots,P)$, where $P$ is the total number of ports, and by clusters $c \in (1,\ldots,C)$, where $C$ is the total number of clusters. The latter gives the name of hierarchical to our model.^[For more details about Hierarchical models, see \cite{hobbs2015}.] 
-The distribution $f\left(q_{i,t} | \theta_{c,p}\right)$ can be rewritten as:
-$$ f\left(q_{i,t} | \theta_{c,p} \right) = 
-\begin{cases} p_{i,t} & \text{if} \quad q_{i,t} = 0  \\
-\left[1-p_{i,t}\right] \text{gamma} \left(q_{i,t} | \frac{\mu_{i,t}^2}{\sigma^2}, \frac{\mu_{i,t}}{\sigma^2} \right) & \text{if} \quad q_{i,t} > 0. \end{cases} $$
-where $\mu_{i,t} = \bf{X}\beta_{c,p}$ and $\text{logit}(p_{i,t}) = \bf{X}\gamma_{c,p}$. Therefore, when $q_{i,t} = 0$, we estimate a discrete choice model for the decision to partipate in a fishery using a logit model.
 
 Besides the biological stock, landings are affected by economic conditions. Some of them are harvest cost, prices received by species and their substitutes, and regulations imposed by the authorities. Our dataset includes <!-- average distances traveled by vessel from the port of origin *(TO BE INCLUDED USING GLOBAL FISHING WATCH)* and fuel cost *(TO BE INCLUDED...)* as proxies of harvest cost. We also include  --> the average species' price that a vessel receives in a port during a quarter, obtained from the PacFIN landings dataset, and they enter the model as both absolute and relative values. When prices were missing, we replaced this value with the average species' price in the port for all vessels in the corresponding year. If we still have missing values, we use the average price during the month at the port code, then at the port area, then at the state, and then considering the whole U.S. west coast (excluding Alaska). <!-- We should also include weather variables. Bad weather should reduce fishers' decision to go to sea. Ir becomes risky, but also this is compared to revenue and how risk-averse is a fisher (see Lisa's work): "Weather and tides are major factors in fishing operations and timing of vessels transiting in and out of the Columbia River." SAFE --> We include the Annual Catch Limit (ACL) for the Pacific sardine model as an additional explanatory variable in the landing equation, $\mu_i$. ACL variable is the total quota allocated each year for this fishery. We obtained this information from the CPS Fisheries Management Plan [@CPSFMP2021] and the Stock Assessment and Fishery Evaluation for 2019 document [@SAFE2020]. <!-- ISAAC's comments: Is this the ACL or the remaining part of the ACL (accounting for the previous catch). R: In the annual case does not matter, but in a monthly model, I should consider this. --> Our database comprises the period between 2000 and 2018. We do not include ACL as an explanatory variable as this variable has no variation between years. To capture any change in fishers' behavior when the Pacific sardine fishery is closed, we include a binary variable called **Closure** that takes the value "1" when the Pacific sardine fishery is closed and takes the value "0" when the Pacific sardine fishery is open. Concerning the Pacific sardine probability of presence, this variable takes the value of zero when the fishery is closed. Thus, the effect of this variable is only relevant to capture potential substitution between targets when the Pacific sardine fishery is open. We show a summary statistics of our data set in Table \ref{tab:sum_stats}. Specifically $\mu_{it}$ is defined as the following: 
 $$ \begin{aligned} \mu_{i,p,t}   =  \beta^0_{p,c} &  + \beta^1_{p,c} P(Precense.PSDN)_{p,t} +  \beta^2_{p,c} P\left(Precense.PSDN\right)_{p,t} * P\left(Precense.MSQD\right)_{p,t} \\ & + \beta^3_{p,c} Price.PSDN_{p,t} + \beta^4_{p,c} ACL_{t}. \end{aligned}$$
@@ -1629,21 +1517,6 @@ $$ \begin{aligned} \text{logit}(p_{i,t}) = \gamma^0_{c,p} & + \gamma^1_{c,p} P(P
 where $ExpectedCatch_{p,t} = \frac{\sum_{k=0}^KP(Precense.PSDN)_{i,t-k}}{K}$. <!-- + \beta_2  Closure + \beta_3 Mean.revenue_j --> <!-- & + \beta_5 HHI_i + \beta_6 Percent.revenue_j + \beta_7 LCG_i + \beta_8 LI_i + \beta_9 Year.fished. --> Note that the outside option is interpreted as "No fishing in the particular fishery," which means that the vessel is participating in another fishery or is no fishing. 
 
 
-<!-- Specifically, based on different studies [@richerson2017] (MORE REF), variables that can explain fishery participation on a particular fishery in a month are: -->
-<!-- <!-- see if these are relevant:  --> 
-<!-- <!-- Holland D. S.. A bioeconomic model of marine sanctuaries on Georges Bank, Canadian Journal of Fisheries and Aquatic Sciences, 2000, vol. 57 (pg. 1307-1319) --> 
-<!-- <!-- Holland D. S.,  Herrera G. E.. Flexible catch-balancing policies for multispecies individual fishery quotas, Canadian Journal of Fisheries and Aquatic Sciences, 2006, vol. 63 (pg. 1669-1685)10.1139/f06-066 --> 
-<!-- <!-- Toft J. E.,  Punt A. E.,  Little L. R.. Modelling the economic and ecological impacts of the transition to individual transferable quotas in the multispecies US west coast groundfish trawl fleet, ICES Journal of Marine Science, 2011, vol. 68 (pg. 1566-1579)10.1093/icesjms/fsr095 -->
-<!-- * Previous revenues -->
-<!-- * Expected catch:  -->
-<!--     + We calculate expected revenue as a function of average outputs of the SDMs. Using SDM outputs instead of catch to compute expected revenues allow us to project fishers decision on time using SDM's projections. Moreover, using catch to compute expected revenue as a regress in a discrete choice model could incorporate endogeneity as it can be correlated with unobservables not captured by the choice constant.  -->
-<!-- * Closure: Whether or not the Pacific sardine fishery was closed. -->
-<!-- * Diversification using HHI (measurement of diversification, from @richerson2017) -->
-<!-- * Dependence on the species in consideration (historical % of the revenue from the species considered) -->
-<!-- * Typical landings location: Latitudinal center of gravity (LCG) index from [@richerson2017] -->
-<!-- * Dispersion around centre of gravity: Latitude inertia (LI) index from [@richerson2017] -->
-<!-- * Years in the sample that the vessel have participate in the fishery. -->
-<!-- <!-- Soould I include expected catch???  (Peña et al have some ideas how to use expected catch and cost. It could be the month average...) --> 
 
 
 ```{r calculate-price, include=FALSE}
