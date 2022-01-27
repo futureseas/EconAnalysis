@@ -57,12 +57,10 @@ sum_mean_fun <- function(x, ...){
 # Read PacFIN data by vessels for different decades #
 PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
   PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
-  PacFIN_1990_1999 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_1990_1999.csv")
-  PacFIN_1981_1989 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_1981_1989.csv")
 
 # Merge different decades of data #
-PacFIN <- rbind.data.frame(PacFIN_1981_1989, PacFIN_1990_1999, PacFIN_2000_2009, PacFIN_2010_2020)
-  rm(PacFIN_1981_1989, PacFIN_1990_1999, PacFIN_2000_2009, PacFIN_2010_2020)
+PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
+  rm(PacFIN_2000_2009, PacFIN_2010_2020)
   gc()
 
 # Include price per kilogram
@@ -83,6 +81,14 @@ PacFIN <- rbind.data.frame(PacFIN_1981_1989, PacFIN_1990_1999, PacFIN_2000_2009,
 #######################
 ## Merge SDM dataset ##
 #######################
+  
+# Create database with ports that land FF species
+Ports.landing.FF <- PacFIN.month %>% 
+    dplyr::filter(PACFIN_SPECIES_CODE %in% 
+                    c("CMCK", "JMCK", "MSQD", "NANC", "PSDN", "UMCK")) %>% 
+    select("PORT_NAME", "AGENCY_CODE") %>% unique()
+  
+  write.csv(Ports.landing.FF,"C:\\GitHub\\EconAnalysis\\Data\\Ports\\Ports.landing.FF.csv", row.names = FALSE)
 
 # Merge data with SDM Pacific Sardine #
 SDM_port_PSDN <- read.csv(file = here::here("Data", "SDM", "PSDN_SDM_port_month.csv"))

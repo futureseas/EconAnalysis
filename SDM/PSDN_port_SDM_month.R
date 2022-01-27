@@ -6,39 +6,31 @@ library(here)
 library(readxl)
 library(dplyr)
 
+rm(list=ls())
+gc()
+
 SDM_port <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
                    PORT_NAME = character(),
                    SDM_60 = numeric())
 
-# Load base to choose ports
-PacFIN_2000_2009 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
-PacFIN_2010_2020 <- read.csv(file = "C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
-PacFIN_2000_2020 <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
-
-
 # Obtain port names used to land species of interest
-port_codes <- PacFIN_2000_2020 %>% filter(PACFIN_SPECIES_CODE %in% c("PSDN", "MSQD", "NANC")) %>%
-  select("PORT_NAME", "PACFIN_PORT_CODE") %>% unique()
-    # %>% anti_join(port_codes, by = "PORT_NAME")
+port_codes <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\Ports.landing.FF.csv")
 
 # Load port coordinates
-ports_coord <- read_excel(here::here("Data", "Ports", "port_coord.xlsx"), "port_names") %>%
-  dplyr::rename(PORT_NAME = port_name)
+ports_coord <- read.csv(here::here("Data", "Ports", "port_names.csv"))
 
 # Merge coordinates with selected ports
-ports <- merge(x=port_codes,y=ports_coord, by="PORT_NAME",all.x=TRUE, all.y=FALSE)
-  ports <- ports %>% filter(PACFIN_PORT_CODE != "OWA")
- 
+ports <- merge(x=port_codes,y=ports_coord, by=c("PORT_NAME", "AGENCY_CODE"),all.x=TRUE, all.y=FALSE) %>%
+  drop_na()
 
 # Run iteration to obtain SDM by ports
-for (y in 1998:2018) {
+for (y in 2000:2018) {
   for (m in 1:12) {
     for (j in 1:nrow(ports)) {
 	  		# Read netcdf
 	  		dat <- nc_open(paste0("G:/My Drive/Project/Data/SDM/sardine/sard_", paste0(as.character(m), paste0("_", paste0(as.character(y),"_GAM.nc")))))
 		  	lon <- ncvar_get(dat, "lon")
-		  	lat <- ncvar_get(dat, "lat")
 		  	tim <- ncvar_get(dat, "time")
 		  	predSDM <- ncvar_get(dat, "predGAM")
 
@@ -63,7 +55,7 @@ for (y in 1998:2018) {
 			  summarize(exp_prob = mean(predSDM, na.rm = T))	%>%
 			  ungroup(.) %>%
 			  mutate(dist = by(., 1:nrow(.), function(row) {
-			    distHaversine(c(row$lon, row$lat), c(ports[j,]$lon, ports[j,]$lat))
+			    distHaversine(c(row$lon, row$lat), c(ports[j,]$Longitude, ports[j,]$Latitude))
 			    })) %>%
 			  mutate(dist = dist / 1000) 
 			
@@ -87,7 +79,7 @@ for (y in 1998:2018) {
   }
   
   # Save database each year
-  write_csv(SDM_port, file = "data/SDM/PSDN_SDM_port_month_14new.csv")
+  write_csv(SDM_port, file = "data/SDM/PSDN_SDM_port_month.csv")
 }
  
 
@@ -126,7 +118,7 @@ for (y in 1998:2018) {
          summarize(exp_prob = mean(predSDM, na.rm = T))	%>%
          ungroup(.) %>%
          mutate(dist = by(., 1:nrow(.), function(row) {
-           distHaversine(c(row$lon, row$lat), c(ports[j,]$lon, ports[j,]$lat))
+           distHaversine(c(row$lon, row$lat), c(ports[j,]$Longitude, ports[j,]$Latitude))
          })) %>%
          mutate(dist = dist / 1000) 
        
@@ -151,11 +143,3 @@ for (y in 1998:2018) {
    # Save database each year
    write_csv(SDM_port, file = "data/SDM/PSDN_SDM_port_month.csv")
  
-   # #
-   # PSDN_SDM_port_month_v1 <- read.csv(file = "data/SDM/PSDN_SDM_port_month_v1.csv")
-   # PSDN_SDM_port_month_v2 <- read.csv(file = "data/SDM/PSDN_SDM_port_month_v2.csv")
-   # PSDN_SDM_port_month_v3 <- read.csv(file = "data/SDM/PSDN_SDM_port_month_v3.csv")
-
-   # PSDN_SDM_port_month <- rbind.data.frame(PSDN_SDM_port_month_v1, PSDN_SDM_port_month_v2, PSDN_SDM_port_month_v3)
-   
-   # write_csv(PSDN_SDM_port_month, file = "data/SDM/PSDN_SDM_port_month.csv")

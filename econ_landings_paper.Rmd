@@ -101,6 +101,48 @@ port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_codes.csv")
   
 ```
 
+```{r read_data, include=FALSE}
+###Remove records associated with landings of zero value; this is likely bycatch
+Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
+
+
+### Find the dominant species by value of each fishing trip, presumably this is the target species. 
+### Using the logic of metiers, all landings of each fishing trip should be tagged with a single identifier.
+Boats<-dcast(Tickets, FTID ~ PACFIN_SPECIES_COMMON_NAME, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
+row.names(Boats) <- Boats$FTID
+FTID<-Boats$FTID
+Boats<-Boats[,-(1)]
+X<-as.data.frame(colnames(Boats)[apply(Boats,1,which.max)])
+colnames(X)<-"Dominant"
+Trip_Dominant<-as.data.frame(cbind(FTID,X))
+Tickets<-merge(Tickets, Trip_Dominant, by='FTID')
+
+
+###Subset to select only records where one of the forage fish species of interest was the target species
+FF_Tickets<-Tickets[which(Tickets$Dominant=="PACIFIC SARDINE" | Tickets$Dominant=="MARKET SQUID"| 
+                            Tickets$Dominant=="NORTHERN ANCHOVY"|
+                            Tickets$Dominant=="CHUB MACKEREL"),]
+FF_Tickets<-as.data.frame(FF_Tickets)
+
+
+###Find the list of unique vessels in the subset, these are the vessels we will cluster                           
+FF_Vessels<-as.data.frame(unique(FF_Tickets$VESSEL_NUM)) 
+names(FF_Vessels)[1]<-"VESSEL_NUM"
+FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM==""),])
+names(FF_Vessels)[1]<-"VESSEL_NUM"
+FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="UNKNOWN"),])
+names(FF_Vessels)[1]<-"VESSEL_NUM"
+FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="MISSING"),])
+names(FF_Vessels)[1]<-"VESSEL_NUM"
+
+###Subset from the complete data set to only retain records associated with these Vessels       
+Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]            
+Tickets<-as.data.frame(Tickets)
+```
+
+
+
+
 ```{r functions, include=FALSE}
 meanfun <- function(x, ...){
   c(mean=mean(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
