@@ -5,10 +5,6 @@
 ########################################
 
 
-# ###Remove records associated with landings of zero value; this is likely bycatch
-# Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
-
-
 library(bookdown)
 library(doBy)
 library(dplyr)
@@ -66,34 +62,38 @@ PacFIN <- rbind.data.frame(PacFIN_2000_2009, PacFIN_2010_2020)
 # Include price per kilogram
   PacFIN$AFI_PRICE_PER_KG <- PacFIN$AFI_PRICE_PER_POUND * 2.20462
 
+# Remove records associated with landings of zero value; this is likely bycatch
+  # Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
 
 # Create monthly data
   PacFIN.month <- summaryBy(LANDED_WEIGHT_MTONS + AFI_PRICE_PER_KG + AFI_EXVESSEL_REVENUE
                             + VESSEL_LENGTH + VESSEL_WEIGHT + VESSEL_HORSEPOWER + NUM_OF_DAYS_FISHED
                           ~ PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE + PORT_NAME + PACFIN_PORT_CODE
-                          + LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + AGENCY_CODE + REMOVAL_TYPE_CODE,
+                          + LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + AGENCY_CODE +
+                            REMOVAL_TYPE_CODE + PARTICIPATION_GROUP_CODE,
                           FUN=sum_mean_fun, data=PacFIN)
-
-# PacFIN.month <- read.csv("C:\\Data\\PacFIN data\\PacFIN_month.csv")
-
-
 
 #######################
 ## Merge SDM dataset ##
 #######################
   
-# Create database with ports that land FF species
-Ports.landing.FF <- PacFIN.month %>% 
-    dplyr::filter(PACFIN_SPECIES_CODE %in% 
-                    c("CMCK", "JMCK", "MSQD", "NANC", "PSDN", "UMCK")) %>% 
-    select("PORT_NAME", "AGENCY_CODE") %>% unique()
-  
-  write.csv(Ports.landing.FF,"C:\\GitHub\\EconAnalysis\\Data\\Ports\\Ports.landing.FF.csv", row.names = FALSE)
+# # Create database with ports that land FF species
+# Ports.landing.FF <- PacFIN.month %>% 
+#     dplyr::filter(PACFIN_SPECIES_CODE %in% 
+#                     c("CMCK", "JMCK", "MSQD", "NANC", "PSDN", "UMCK")) %>% 
+#     select("PORT_NAME", "AGENCY_CODE") %>% unique()
+#   
+#   write.csv(Ports.landing.FF,"C:\\GitHub\\EconAnalysis\\Data\\Ports\\Ports.landing.FF.csv", row.names = FALSE)
 
 # Merge data with SDM Pacific Sardine #
 SDM_port_PSDN <- read.csv(file = here::here("Data", "SDM", "PSDN_SDM_port_month.csv"))
   PacFIN.month <- merge(PacFIN.month, SDM_port_PSDN, 
-                        by = c("PORT_NAME", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
+                        by = c("PORT_NAME", "AGENCY_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
+
+# Merge data with SDM Market Squid #
+SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM_port_month.csv"))
+  PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_Spawn, 
+                        by = c("PORT_NAME", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) 
 
 # Merge data with SDM Market Squid #
 SDM_port_MSQD <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_month.csv"))
@@ -106,12 +106,7 @@ SDM_port_NANC <- read.csv(file = here::here("Data", "SDM", "NANC_SDM_port_month.
                         by = c("PORT_NAME", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
 
   
-# Merge data with SDM Market Squid #
-SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM_port_month.csv"))
-  PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_Spawn, 
-                        by = c("PORT_NAME", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)  
-  
-  PacFIN.month <- PacFIN.month %>%
+PacFIN.month <- PacFIN.month %>%
     dplyr::rename(PSDN_SDM_60 = SDM_60) %>%
     dplyr::rename(MSQD_SDM_90 = SDM_90) %>%
     dplyr::rename(MSQD_SPAWN_SDM_90 = SDM_SPAWN_90) %>%
@@ -196,13 +191,15 @@ PacFIN.month <- merge(PacFIN.month, landings.TAC.psdn,
                           by=c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
 
 ### Merge latitude by ports and calculate actual quota by port ###
-port_coord <- read.csv(file = here::here("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_names.csv")) %>%
-  dplyr::rename(lat_port = lat) %>%  dplyr::rename(lon_port = lon) %>%  dplyr::rename(PORT_NAME = port_name)
+port_coord <- read.csv(file = here::here("C:\\GitHub\\EconAnalysis\\Data\\Ports\\Port_names.csv")) %>% 
+  select("Latitude", "Longitude", "PORT_NAME", "AGENCY_CODE") %>%
+  dplyr::rename(lat_port = Latitude) %>% 
+  dplyr::rename(lon_port = Longitude)
 
-PacFIN.month <- merge(PacFIN.month, port_coord, by=c("PORT_NAME"), all.x = TRUE)
+PacFIN.month.ACL <- merge(PacFIN.month, port_coord, by=c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE)
 
 ### Assign quota according to port latitude ##
-PacFIN.month <- PacFIN.month %>% mutate(TAC = ifelse(lat_port <= Alloc_lat, (TAC_S * TAC_mt), (TAC_N * TAC_mt)))
+PacFIN.month.ACL <- PacFIN.month.ACL %>% mutate(TAC = ifelse(lat_port <= Alloc_lat, (TAC_S * TAC_mt), (TAC_N * TAC_mt)))
 
 
 
@@ -213,5 +210,5 @@ PacFIN.month <- PacFIN.month %>% mutate(TAC = ifelse(lat_port <= Alloc_lat, (TAC
 ### Save DATASET ###
 ####################
   
-sapply(PacFIN.month, class)
+sapply(PacFIN.month.ACL, class)
 write.csv(PacFIN.month.ACL,"C:\\Data\\PacFIN data\\PacFIN_month.csv", row.names = FALSE)
