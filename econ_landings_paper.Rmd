@@ -101,10 +101,9 @@ port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_codes.csv")
   
 ```
 
-```{r read_data, include=FALSE}
+```{r subsample, eval=FALSE, include=FALSE}
 ###Remove records associated with landings of zero value; this is likely bycatch
 Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
-
 
 ### Find the dominant species by value of each fishing trip, presumably this is the target species. 
 ### Using the logic of metiers, all landings of each fishing trip should be tagged with a single identifier.
