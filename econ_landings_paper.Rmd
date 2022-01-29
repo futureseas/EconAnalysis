@@ -1801,10 +1801,12 @@ dataset_psdn <- dataset %>%
 ```
 
 ```{r psdn_estimation, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-fit_qPSDN <- brm(bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SPAWN_SDM_90 + (1 | group + port_ID),
-                               hu ~ (1 | group + port_ID)),
-                    data = dataset_psdn, family = hurdle_gamma(), chains = 1, cores = 4,
+fit_qPSDN <- brm(bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SPAWN_SDM_90 + (1 | group)  + (1 | port_ID),
+                               hu ~ (1 | group) + (1 | port_ID)),
+                    data = dataset_psdn, family = hurdle_gamma(), chains = 4, cores = 4,
                  control = list(adapt_delta = 0.999, max_treedepth = 20))
+
+plot(fit_qPSDN)
 
 save.image (file = "stan_fit.RData")
 
