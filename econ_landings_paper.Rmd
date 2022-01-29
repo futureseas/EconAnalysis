@@ -1812,6 +1812,7 @@ fit_qPSDN <- brm(bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SPAWN_SDM_90 + (1 | clust
 
 plot(fit_qPSDN)
 plot(fit_qPSDN, pars = c("PSDN_SDM_60"))
+coef(fit_qPSDN)
 
 save.image (file = "stan_fit.RData")
 
@@ -1852,9 +1853,6 @@ g1
 
 <!-- # ## Compare models ## -->
 <!-- # loo(fit1, fit2) -->
-
-<!-- ## Check https://www.pcouncil.org/stock-assessments-and-fishery-evaluation-safe-documents/ for ACL and closures. -->
-
 
 
 <!-- ### Market squid ### -->

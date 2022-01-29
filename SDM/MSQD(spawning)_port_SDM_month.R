@@ -1,6 +1,3 @@
-
-## Add Agency code, and also within 180km radious...
-
 library(tidyverse)
 library(ncdf4)
 library(geosphere)
@@ -15,7 +12,8 @@ gc()
 SDM_port <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
                    PORT_NAME = character(),
-                   SDM_SPAWN_90 = numeric())
+                   SDM_SPAWN_90 = numeric(),
+                   SDM_SPAWN_180 = numeric())
 
 # Obtain port names used to land species of interest
 port_codes <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\Ports.landing.FF.csv")
@@ -27,8 +25,8 @@ ports_coord <- read.csv(here::here("Data", "Ports", "port_names.csv"))
 ports <- merge(x=port_codes,y=ports_coord, by=c("PORT_NAME", "AGENCY_CODE"),all.x=TRUE, all.y=FALSE) %>%
   drop_na()
 
-for (y in 2000:2019) {
-  for (m in 1:12) {
+for (y in 2000:2000) {
+  for (m in 1:1) {
     for (j in 1:nrow(ports)) {
 	  		# Read netcdf
 	  		dat <- nc_open(paste0("G:/My Drive/Project/Data/SDM/squid_spawn/squidSpawn_", paste0(as.character(m), paste0("_", paste0(as.character(y),"_envelope.nc")))))
@@ -65,15 +63,18 @@ for (y in 2000:2019) {
 			
 			
 			# Filter three different distance bands
-			
 			dat_prob_90 <- sdmMelt %>%
 			  dplyr::filter(dist <= 90)
+			dat_prob_180 <- sdmMelt %>%
+			  dplyr::filter(dist <= 180)
 			
 			SDM_SPAWN_mean_90 <- mean(dat_prob_90$exp_prob, na.rm = T)
+			SDM_SPAWN_mean_180 <- mean(dat_prob_180$exp_prob, na.rm = T)
 			
 			SDM_port <- SDM_port %>%
 			  add_row(LANDING_YEAR = y, LANDING_MONTH = m, PORT_NAME = as.character(ports[j, 1]),
-			          SDM_SPAWN_90 = SDM_SPAWN_mean_90)
+			          SDM_SPAWN_90 = SDM_SPAWN_mean_90, SDM_SPAWN_180 = SDM_SPAWN_mean_180,
+			          AGENCY_CODE = as.character(ports[j, 2]))
 	    
 	    print(y)
 	    print(m)
@@ -82,6 +83,6 @@ for (y in 2000:2019) {
 	  }
   }
   # Save database each year
-  write_csv(SDM_port, file = "data/SDM/MSQD_Spawn_SDM_port_month.csv")
+  write_csv(SDM_port, file = "data/SDM/MSQD_Spawn_SDM_port_month_v2.csv")
 }
 
