@@ -1795,18 +1795,23 @@ dataset_psdn <- dataset %>%
   mutate(RelPrice = PSDN_Price / MSQD_Price) %>% drop_na() 
   dataset_psdn$port_ID <- as.factor(
     udpipe::unique_identifier(dataset_psdn, fields = "PORT_AREA_ID", start_from = 1))
-
+  dataset_psdn$cluster <- as.factor(
+    udpipe::unique_identifier(dataset_psdn, fields = "group", start_from = 1))
 # dataset_psdn_port_names <- dataset_psdn %>% dplyr::select(PORT_AREA_CODE, port_ID) %>% unique()
 
 ```
 
 ```{r psdn_estimation, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-fit_qPSDN <- brm(bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SPAWN_SDM_90 + (1 | group)  + (1 | port_ID),
-                               hu ~ (1 | group) + (1 | port_ID)),
-                    data = dataset_psdn, family = hurdle_gamma(), chains = 4, cores = 4,
-                 control = list(adapt_delta = 0.999, max_treedepth = 20))
+fit_qPSDN <- brm(bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SPAWN_SDM_90 + (1 | cluster) + (1 | port_ID), 
+                    hu ~ (1 | cluster) + (1 | port_ID)),
+                 data = dataset_psdn, 
+                 prior = c(set_prior("cauchy(0,2)", class = "sd")),
+                 family = hurdle_gamma(), 
+                 chains = 4, cores = 4, warmup = "1000", iter = "2000",
+                 control = list(adapt_delta = 0.95))
 
 plot(fit_qPSDN)
+plot(fit_qPSDN, pars = c("PSDN_SDM_60"))
 
 save.image (file = "stan_fit.RData")
 
