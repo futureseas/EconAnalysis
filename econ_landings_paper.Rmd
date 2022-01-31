@@ -540,6 +540,74 @@ rm(g1, g2, g3, sdm.by.species, coeff, coeff2, coeff3)
 
 ```
 
+
+
+
+```{r SDM_land_by_port, echo=FALSE, fig.cap="Landings v/s probability of presence by port area.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE}
+
+sdm.by.species <- PacFIN.month.CPS %>%
+  dplyr::select(LANDING_YEAR, PORT_NAME, PSDN_SDM_60, MSQD_SDM_90, MSQD_SPAWN_SDM_90, 
+                MSQD_SPAWN_SDM_100, MSQD_SPAWN_SDM_200, MSQD_SPAWN_SDM_300, 
+                MSQD_SPAWN_SDM_5_100, NANC_SDM_20, 
+                LANDED_WEIGHT_MTONS.sum, PACFIN_SPECIES_CODE, PORT_AREA_CODE) %>% 
+  filter(LANDING_YEAR >= 2000 & LANDING_YEAR <= 2018) %>%
+  group_by(LANDING_YEAR, PORT_AREA_CODE, PACFIN_SPECIES_CODE) %>% 
+  summarize(MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
+            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=TRUE),
+            LANDED_WEIGHT_MTONS = sum(LANDED_WEIGHT_MTONS.sum, na.rm = TRUE)) %>%
+  spread(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS) %>% 
+  dplyr::rename(Landings_PSDN = PSDN) %>% dplyr::rename(Landings_MSQD = MSQD) %>% 
+  dplyr::rename(Landings_NANC = NANC) %>%
+  filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "SBA") %>% 
+  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "MNA", "SBA")) %>%
+  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
+  summarize(MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
+            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
+            Landings_PSDN = sum(Landings_PSDN, na.rm = TRUE), 
+            Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE),
+            Landings_NANC = sum(Landings_NANC, na.rm = TRUE))
+  # sdm.by.species$Date <- zoo::as.yearmon(paste(sdm.by.species$LANDING_YEAR, sdm.by.species$LANDING_MONTH, sep='-'))
+
+# Plot
+coeff2 <- 400000
+g2 <- ggplot(sdm.by.species) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD, color = "Landings"), size = 0.5) +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SPAWN_SDM_90*coeff2, color = "Probability of presence"),
+            size = 0.5, linetype = "dashed") + 
+  facet_wrap(~ PORT_AREA_CODE) + scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff2, name = "P(presence)")) +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8),
+        legend.position="none") + 
+  ggtitle("(a) Market squid (spawning biomass)") +  scale_color_manual(name = "Variable: ", 
+                     values = c("Landings" = "grey", "Probability of presence" = "blue"))
+
+coeff3 <- 200000
+g3 <- ggplot(sdm.by.species) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD, color = "Landings"), size = 0.5) +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SDM_90*coeff3, 
+                          color = "Probability of presence"),
+            size = 0.5, linetype = "dashed") + 
+  facet_wrap(~ PORT_AREA_CODE) + scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff3, name = "P(presence)")) +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8),
+        legend.position="none") + 
+  ggtitle("(b) Market squid") +  scale_color_manual(name = "Variable: ",
+           values = c("Landings" = "grey", "Probability of presence" = "blue"))
+   
+
+g2 / g3
+  
+
+
+
+
+# rm(g1, g2, g3, sdm.by.species, coeff, coeff2, coeff3)
+
+```
+
+
 ```{r SDM_land_NANC_in_MNA, eval=FALSE, fig.cap="Landings v/s probability of presence by port area.", message=FALSE, warning=FALSE, include=FALSE}
 
 collapse <- PacFIN_yearly %>%

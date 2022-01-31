@@ -90,10 +90,10 @@ SDM_port_PSDN <- read.csv(file = here::here("Data", "SDM", "PSDN_SDM_port_month.
   PacFIN.month <- merge(PacFIN.month, SDM_port_PSDN, 
                         by = c("PORT_NAME", "AGENCY_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
 
-# Merge data with SDM Market Squid #
+# Merge data with SDM Market Squid (spawn aggregation) #
 SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM_port_month.csv"))
   PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_Spawn, 
-                        by = c("PORT_NAME", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) 
+                        by = c("PORT_NAME", "AGENCY_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) 
 
 # Merge data with SDM Market Squid #
 SDM_port_MSQD <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_month.csv"))
@@ -110,6 +110,10 @@ PacFIN.month <- PacFIN.month %>%
     dplyr::rename(PSDN_SDM_60 = SDM_60) %>%
     dplyr::rename(MSQD_SDM_90 = SDM_90) %>%
     dplyr::rename(MSQD_SPAWN_SDM_90 = SDM_SPAWN_90) %>%
+    dplyr::rename(MSQD_SPAWN_SDM_100 = SDM_SPAWN_100) %>%
+    dplyr::rename(MSQD_SPAWN_SDM_200 = SDM_SPAWN_200) %>%
+    dplyr::rename(MSQD_SPAWN_SDM_300 = SDM_SPAWN_300) %>%
+    dplyr::rename(MSQD_SPAWN_SDM_5_100 = SDM_SPAWN_5_100) %>%
     dplyr::rename(NANC_SDM_20 = SDM_20)
 
 
