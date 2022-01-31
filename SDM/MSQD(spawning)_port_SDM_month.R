@@ -30,7 +30,7 @@ ports <- merge(x=port_codes,y=ports_coord, by=c("PORT_NAME", "AGENCY_CODE"),all.
   drop_na()
 
 for (y in 2000:2019) {
-  for (m in 1:1) {
+  for (m in 2:12) {
     for (j in 1:nrow(ports)) {
 	  		# Read netcdf
 	  		dat <- nc_open(paste0("G:/My Drive/Project/Data/SDM/squid_spawn/squidSpawn_", paste0(as.character(m), paste0("_", paste0(as.character(y),"_envelope.nc")))))
@@ -99,6 +99,6 @@ for (y in 2000:2019) {
 	  }
   }
   # Save database each year
-  write_csv(SDM_port, file = "data/SDM/MSQD_Spawn_SDM_port_month_v2.csv")
+  write_csv(SDM_port, file = "data/SDM/MSQD_Spawn_SDM_port_month_v3.csv")
 }
 
