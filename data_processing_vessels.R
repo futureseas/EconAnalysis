@@ -60,8 +60,8 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   
   ###Subset to select only records where one of the forage fish species of interest was the target species
   FF_Tickets<-Tickets[which(Tickets$Dominant=="PACIFIC SARDINE" | Tickets$Dominant=="MARKET SQUID"| 
-                              Tickets$Dominant=="NORTHERN ANCHOVY"| Tickets$Dominant=="CHUB MACKEREL" |
-                              Tickets$Dominant=="JACK MACKEREL"),]
+                              Tickets$Dominant=="NORTHERN ANCHOVY" | Tickets$Dominant=="CHUB MACKEREL" |
+                              Tickets$Dominant=="UNSP. MACKEREL" | Tickets$Dominant=="JACK MACKEREL"),]
   FF_Tickets<-as.data.frame(FF_Tickets)
   
   
@@ -81,15 +81,17 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
 
   rm(Boats, FF_Tickets, FF_Vessels, Trip_Dominant, X, FTID)
   
-  nrow(as.data.frame(unique(Tickets$FTID))) 
-  nrow(as.data.frame(unique(Tickets$VESSEL_NUM))) 
+  
   
   #removal
   removal.df <- Tickets %>% select("REMOVAL_TYPE_CODE") %>% mutate(n = 1) %>% 
-    group_by(REMOVAL_TYPE_CODE) %>% summarise(n_group = sum(n))
+    group_by(REMOVAL_TYPE_CODE) %>% summarise(n_group = sum(n)/651767*100) 
+  
+  Tickets <- Tickets %>% filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
 
   
-  head(as.data.frame(unique(removal.df$REMOVAL_TYPE_CODE))) 
+  nrow(as.data.frame(unique(Tickets$FTID))) 
+  nrow(as.data.frame(unique(Tickets$VESSEL_NUM))) 
 
 
 # Create monthly data
@@ -99,11 +101,10 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   
   PacFIN.month <- doBy::summaryBy(AFI_PRICE_PER_MTON + LANDED_WEIGHT_MTONS + AFI_EXVESSEL_REVENUE + 
                               VESSEL_LENGTH + VESSEL_WEIGHT + VESSEL_HORSEPOWER + NUM_OF_DAYS_FISHED 
-                            ~ VESSEL_NUM + PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE + 
-                              PORT_NAME + PACFIN_PORT_CODE + LANDING_YEAR + LANDING_MONTH +  
-                              AGENCY_CODE + REMOVAL_TYPE_CODE + PARTICIPATION_GROUP_CODE,
+                            ~ VESSEL_NUM + PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE + PORT_NAME + 
+                              PACFIN_PORT_CODE + LANDING_YEAR + LANDING_MONTH + AGENCY_CODE,
                           FUN=sum_mean_fun, data=Tickets)
-rm(Tickets)
+rm(Tickets, removal.df)
   
 #######################
 ## Merge SDM dataset ##

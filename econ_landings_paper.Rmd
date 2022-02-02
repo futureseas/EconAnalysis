@@ -281,10 +281,9 @@ landing.price.year.sel <- landing.price.year %>%
 # Graph landing v/s number of  vessels
 coeff1 <- 200
   df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "MSQD")
-  df$AFI_PRICE_PER_MTON.mean.mean <- df$AFI_PRICE_PER_MTON.mean.mean * coeff 
+  df$AFI_PRICE_PER_MTON.mean.mean <- df$AFI_PRICE_PER_MTON.mean.mean * coeff1 
   df <- gather(df, key = Variable, value = value,
                c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean"))
-
 g1 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
     scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff1, name = "Price (USD/Ton)")) +
     theme(legend.position="none") + scale_x_continuous(name = element_blank()) + 
@@ -296,7 +295,7 @@ g1 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(
 
 coeff2 <- 100
 df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "PSDN")
-  df$AFI_PRICE_PER_MTON.mean.mean <- df$AFI_PRICE_PER_MTON.mean.mean * coeff 
+  df$AFI_PRICE_PER_MTON.mean.mean <- df$AFI_PRICE_PER_MTON.mean.mean * coeff2 
   df <- gather(df, key = Variable, value = value,
                c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean"))
   g2 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
