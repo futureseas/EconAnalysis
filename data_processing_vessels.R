@@ -60,10 +60,11 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   
   ###Subset to select only records where one of the forage fish species of interest was the target species
   FF_Tickets<-Tickets[which(Tickets$Dominant=="PACIFIC SARDINE" | Tickets$Dominant=="MARKET SQUID"| 
-                              Tickets$Dominant=="NORTHERN ANCHOVY" | Tickets$Dominant=="CHUB MACKEREL" |
-                              Tickets$Dominant=="UNSP. MACKEREL" | Tickets$Dominant=="JACK MACKEREL"),]
-  FF_Tickets<-as.data.frame(FF_Tickets)
+                              Tickets$Dominant=="NORTHERN ANCHOVY"| Tickets$Dominant=="CHUB MACKEREL" | 
+                              Tickets$Dominant=="JACK MACKEREL" | Tickets$Dominant=="UNSP. MACKEREL"|
+                              Tickets$Dominant=="ROUND HERRING" | Tickets$Dominant=="PACIFIC BONITO"),]
   
+  FF_Tickets<-as.data.frame(FF_Tickets)
   
   ###Find the list of unique vessels in the subset, these are the vessels we will cluster                           
   FF_Vessels<-as.data.frame(unique(FF_Tickets$VESSEL_NUM)) 
