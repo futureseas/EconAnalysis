@@ -17,7 +17,7 @@ detach(package:raster, unload=TRUE)
 detach(package:igraph, unload=TRUE)
 
 rm(list=ls())
-setwd("C:/Data/clusteringcode")
+setwd("C:/GitHub/EconAnalysis/Clustering")
 
 
 ###Load in the data
