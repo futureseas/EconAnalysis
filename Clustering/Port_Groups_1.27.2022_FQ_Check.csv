@@ -1,0 +1,115 @@
+PACFIN_PORT_CODE,PORT_NAME,PORT_GROUP
+BDA,BODEGA BAY AREA PORTS                                     ,BODEGA BAY AREA PORTS                                     
+BDG,BODEGA BAY                                                ,BODEGA BAY AREA PORTS                                     
+BOL,BOLINAS                                                   ,BODEGA BAY AREA PORTS                                     
+OSM,OTHER SONOMA AND MARIN COUNTY OUTER COAST PORTS           ,BODEGA BAY AREA PORTS                                     
+RYS,POINT REYES                                               ,BODEGA BAY AREA PORTS                                     
+TML,TOMALES BAY                                               ,BODEGA BAY AREA PORTS                                     
+BGA,FORT BRAGG AREA PORTS                                     ,FORT BRAGG AREA PORTS                                     
+ALB,ALBION                                                    ,FORT BRAGG AREA PORTS                                     
+ARE,POINT ARENA                                               ,FORT BRAGG AREA PORTS                                     
+BRG,FORT BRAGG                                                ,FORT BRAGG AREA PORTS                                     
+OMD,OTHER MENDOCINO COUNTY PORTS                              ,FORT BRAGG AREA PORTS                                     
+CA2,OTHER OR UNKNOWN CALIFORNIA PORTS                         ,OTHER OR UNKNOWN CALIFORNIA PORTS                         
+OCA,OTHER OR UNKNOWN CALIFORNIA PORTS                         ,OTHER OR UNKNOWN CALIFORNIA PORTS                         
+CCA,CRESCENT CITY AREA PORTS                                  ,CRESCENT CITY AREA PORTS                                  
+CRS,CRESCENT CITY                                             ,CRESCENT CITY AREA PORTS                                  
+ODN,OTHER DEL NORTE COUNTY PORTS                              ,CRESCENT CITY AREA PORTS                                  
+ERA,EUREKA AREA PORTS                                         ,EUREKA AREA PORTS                                         
+ERK,EUREKA                                                    ,EUREKA AREA PORTS                                         
+FLN,FIELDS LANDING                                            ,EUREKA AREA PORTS                                         
+OHB,OTHER HUMBOLDT COUNTY PORTS                               ,EUREKA AREA PORTS                                         
+TRN,TRINIDAD                                                  ,EUREKA AREA PORTS                                         
+LAA,LOS ANGELES AREA PORTS                                    ,LOS ANGELES AREA PORTS                                    
+DNA,DANA POINT                                                ,LOS ANGELES AREA PORTS                                    
+LGB,LONG BEACH                                                ,LOS ANGELES AREA PORTS                                    
+NWB,NEWPORT BEACH                                             ,LOS ANGELES AREA PORTS                                    
+OLA,Other LA and Orange Cnty Ports                            ,LOS ANGELES AREA PORTS                                    
+SP,SAN PEDRO                                                 ,LOS ANGELES AREA PORTS                                    
+TRM,TERMINAL ISLAND                                           ,LOS ANGELES AREA PORTS                                    
+WLM,WILLMINGTON                                               ,LOS ANGELES AREA PORTS                                    
+MNA,MONTEREY AREA PORTS                                       ,MONTEREY AREA PORTS                                       
+CRZ,SANTA CRUZ                                                ,MONTEREY AREA PORTS                                       
+MNT,MONTEREY                                                  ,MONTEREY AREA PORTS                                       
+MOS,MOSS LANDING                                              ,MONTEREY AREA PORTS                                       
+OCM,OTHER SANTA CRUZ AND MONTEREY COUNTY PORTS                ,MONTEREY AREA PORTS                                       
+MRA,MORRO BAY AREA PORTS                                      ,MORRO BAY AREA PORTS                                      
+AVL,AVILA                                                     ,MORRO BAY AREA PORTS                                      
+MRO,MORRO BAY                                                 ,MORRO BAY AREA PORTS                                      
+OSL,OTHER SAN LUIS OBISPO COUNTY PORTS                        ,MORRO BAY AREA PORTS                                      
+SBA,SANTA BARBARA AREA PORTS                                  ,SANTA BARBARA AREA PORTS                                  
+HNM,PORT HUENEME                                              ,SANTA BARBARA AREA PORTS                                  
+OBV,OTHER SANTA BARBARA AND VENTURA COUNTY PORTS              ,SANTA BARBARA AREA PORTS                                  
+OXN,OXNARD                                                    ,SANTA BARBARA AREA PORTS                                  
+SB,SANTA BARBARA                                             ,SANTA BARBARA AREA PORTS                                  
+VEN,VENTURA                                                   ,SANTA BARBARA AREA PORTS                                  
+SDA,SAN DIEGO AREA PORTS                                      ,SAN DIEGO AREA PORTS                                      
+OCN,OCEANSIDE                                                 ,SAN DIEGO AREA PORTS                                      
+OSD,OTHER SAN DIEGO COUNTY PORTS                              ,SAN DIEGO AREA PORTS                                      
+SD,SAN DIEGO                                                 ,SAN DIEGO AREA PORTS                                      
+SFA,SAN FRANCISCO AREA PORTS                                  ,SAN FRANCISCO AREA PORTS                                  
+ALM,ALAMEDA                                                   ,SAN FRANCISCO AREA PORTS                                  
+BKL,BERKELEY                                                  ,SAN FRANCISCO AREA PORTS                                  
+OAK,OAKLAND                                                   ,SAN FRANCISCO AREA PORTS                                  
+OSF,OTHER S. F. BAY AND SAN MATEO COUNTY PORTS                ,SAN FRANCISCO AREA PORTS                                  
+PRN,PRINCETON / HALF MOON BAY                                 ,SAN FRANCISCO AREA PORTS                                  
+RCH,RICHMOND                                                  ,SAN FRANCISCO AREA PORTS                                  
+SF,SAN FRANCISCO                                             ,SAN FRANCISCO AREA PORTS                                  
+SLT,SAUSALITO                                                 ,SAN FRANCISCO AREA PORTS                                  
+BRA,BROOKINGS AREA PORTS                                      ,BROOKINGS AREA PORTS                                      
+BRK,BROOKINGS                                                 ,BROOKINGS AREA PORTS                                      
+GLD,GOLD BEACH                                                ,BROOKINGS AREA PORTS                                      
+ORF,PORT ORFORD                                               ,BROOKINGS AREA PORTS                                      
+CBA,COOS BAY AREA PORTS                                       ,COOS BAY AREA PORTS                                       
+BDN,BANDON                                                    ,COOS BAY AREA PORTS                                       
+COS,Charleston (Coos Bay)                                     ,COOS BAY AREA PORTS                                       
+FLR,FLORENCE                                                  ,COOS BAY AREA PORTS                                       
+WIN,WINCHESTER BAY                                            ,COOS BAY AREA PORTS                                       
+CLO,COLUMBIA RIVER PORTS (OREGON)                             ,COLUMBIA RIVER PORTS (OREGON)                             
+AST,ASTORIA                                                   ,COLUMBIA RIVER PORTS (OREGON)                             
+CBB,COLUMBIA RIVER BELOW BONNEVILLE DAM                       ,COLUMBIA RIVER PORTS (OREGON)                             
+CNB,CANNON BEACH                                              ,COLUMBIA RIVER PORTS (OREGON)                             
+CRV,PSUEDO PORT CODE FOR COLUMBIA RIVER                       ,COLUMBIA RIVER PORTS (OREGON)                             
+GSS,GEARHART - SEASIDE                                        ,COLUMBIA RIVER PORTS (OREGON)                             
+NPA,NEWPORT AREA PORTS                                        ,NEWPORT AREA PORTS                                        
+DPO,DEPOE BAY                                                 ,NEWPORT AREA PORTS                                        
+NEW,NEWPORT                                                   ,NEWPORT AREA PORTS                                        
+SLZ,SILETZ BAY                                                ,NEWPORT AREA PORTS                                        
+WLD,WALDPORT                                                  ,NEWPORT AREA PORTS                                        
+YAC,YACHATS                                                   ,NEWPORT AREA PORTS                                        
+TLA,TILLAMOOK AREA PORTS                                      ,TILLAMOOK AREA PORTS                                      
+NHL,NEHALEM BAY                                               ,TILLAMOOK AREA PORTS                                      
+NTR,NETARTS BAY                                               ,TILLAMOOK AREA PORTS                                      
+PCC,PACIFIC CITY                                              ,TILLAMOOK AREA PORTS                                      
+SRV,SALMON RIVER                                              ,TILLAMOOK AREA PORTS                                      
+TLL,TILLAMOOK/GARIBALDI                                       ,TILLAMOOK AREA PORTS                                      
+CLW,COLUMBIA RIVER PORTS (WASHINGTON)                         ,COLUMBIA RIVER PORTS (WASHINGTON)                         
+LWC,ILWACO/CHINOOK                                            ,COLUMBIA RIVER PORTS (WASHINGTON)                         
+OCR,OTHER COLUMBIA RIVER PORTS                                ,COLUMBIA RIVER PORTS (WASHINGTON)                         
+CWA,WASHINGTON COASTAL PORTS                                  ,WASHINGTON COASTAL PORTS                                  
+CPL,COPALIS BEACH                                             ,WASHINGTON COASTAL PORTS                                  
+GRH,GRAYS HARBOR                                              ,WASHINGTON COASTAL PORTS                                  
+LAP,LA PUSH                                                   ,WASHINGTON COASTAL PORTS                                  
+OWC,OTHER WASHINGTION COASTAL PORTS                           ,WASHINGTON COASTAL PORTS                                  
+WLB,WILLAPA BAY                                               ,WASHINGTON COASTAL PORTS                                  
+WPT,WESTPORT                                                  ,WASHINGTON COASTAL PORTS                                  
+NPS,NORTH PUGET SOUND PORTS                                   ,NORTH PUGET SOUND PORTS                                   
+ANA,ANACORTES                                                 ,NORTH PUGET SOUND PORTS                                   
+BLL,BELLINGHAM BAY                                            ,NORTH PUGET SOUND PORTS                                   
+BLN,BLAINE                                                    ,NORTH PUGET SOUND PORTS                                   
+FRI,FRIDAY HARBOR                                             ,NORTH PUGET SOUND PORTS                                   
+LAC,LA CONNER                                                 ,NORTH PUGET SOUND PORTS                                   
+NEA,NEAH BAY                                                  ,NORTH PUGET SOUND PORTS                                   
+ONP,OTHER NORTH PUGET SOUND PORTS                             ,NORTH PUGET SOUND PORTS                                   
+PAG,PORT ANGELES                                              ,NORTH PUGET SOUND PORTS                                   
+SEQ,SEQUIM                                                    ,NORTH PUGET SOUND PORTS                                   
+TNS,PORT TOWNSEND                                             ,NORTH PUGET SOUND PORTS                                   
+SPS,SOUTH PUGET SOUND PORTS                                   ,SOUTH PUGET SOUND PORTS                                   
+EVR,EVERETT                                                   ,SOUTH PUGET SOUND PORTS                                   
+OLY,OLYMPIA                                                   ,SOUTH PUGET SOUND PORTS                                   
+OSP,OTHER SOUTH PUGET SOUND PORTS                             ,SOUTH PUGET SOUND PORTS                                   
+SEA,SEATTLE                                                   ,SOUTH PUGET SOUND PORTS                                   
+SHL,SHELTON                                                   ,SOUTH PUGET SOUND PORTS                                   
+TAC,TACOMA                                                    ,SOUTH PUGET SOUND PORTS                                   
+WA5,OTHER OR UNKNOWN WASHINGTON PORTS                         ,OTHER OR UNKNOWN WASHINGTON PORTS                         
+OWA,OTHER OR UNKNOWN WASHINGTON PORTS                         ,OTHER OR UNKNOWN WASHINGTON PORTS                         

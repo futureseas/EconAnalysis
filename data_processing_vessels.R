@@ -49,6 +49,7 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   
 # Find the dominant species by value of each fishing trip, presumably this is the target species. 
   ## Using the logic of metiers, all landings of each fishing trip should be tagged with a single identifier.
+
   Boats<-dcast(Tickets, FTID ~ PACFIN_SPECIES_COMMON_NAME, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
   row.names(Boats) <- Boats$FTID
   FTID<-Boats$FTID
@@ -58,16 +59,29 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   Trip_Dominant<-as.data.frame(cbind(FTID,X))
   Tickets<-merge(Tickets, Trip_Dominant, by='FTID')
   
+  
   ###Subset to select only records where one of the forage fish species of interest was the target species
-  FF_Tickets<-Tickets[which(Tickets$Dominant=="PACIFIC SARDINE" | Tickets$Dominant=="MARKET SQUID"| 
-                              Tickets$Dominant=="NORTHERN ANCHOVY"| Tickets$Dominant=="CHUB MACKEREL" | 
-                              Tickets$Dominant=="JACK MACKEREL" | Tickets$Dominant=="UNSP. MACKEREL"|
+  FF_Tickets<-Tickets[which(Tickets$Dominant=="PACIFIC SARDINE" | Tickets$Dominant=="MARKET SQUID"| Tickets$Dominant=="NORTHERN ANCHOVY"|
+                              Tickets$Dominant=="CHUB MACKEREL" | Tickets$Dominant=="JACK MACKEREL" | Tickets$Dominant=="UNSP. MACKEREL"|
                               Tickets$Dominant=="ROUND HERRING" | Tickets$Dominant=="PACIFIC BONITO"),]
   
+  FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "CHUB MACKEREL"] <- "OTHER")
+  FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "JACK MACKEREL"] <- "OTHER")
+  FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "UNSP. MACKEREL"] <- "OTHER")
+  FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "ROUND HERRING"] <- "OTHER")
+  FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "PACIFIC BONITO"] <- "OTHER")
+  
+  
+  ###Creating a filter here to only retain vessels with more than 3 forage fish landings (tickets where FF is the dominant species) 
+  ###over the time period. I think 3 is appropriate if you are clustering
+  ###several years together, but if you are just clustering a single year than maybe you should drop it down to 1. 
+  FTID_Value<-aggregate(AFI_EXVESSEL_REVENUE~FTID+VESSEL_NUM, FUN=sum, data=FF_Tickets)
+  FTID_Value<-FTID_Value[FTID_Value$VESSEL_NUM %in% names(which(table(FTID_Value$VESSEL_NUM) > 3)), ]
+  FF_Tickets<-setDT(FF_Tickets)[VESSEL_NUM %chin% FTID_Value$VESSEL_NUM]    
   FF_Tickets<-as.data.frame(FF_Tickets)
   
-  ###Find the list of unique vessels in the subset, these are the vessels we will cluster                           
-  FF_Vessels<-as.data.frame(unique(FF_Tickets$VESSEL_NUM)) 
+  ###Find the list of unique vessels in the subset, these are the vessels we will cluster
+  FF_Vessels<-as.data.frame(unique(FTID_Value$VESSEL_NUM)) 
   names(FF_Vessels)[1]<-"VESSEL_NUM"
   FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM==""),])
   names(FF_Vessels)[1]<-"VESSEL_NUM"
@@ -79,10 +93,9 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   ###Subset from the complete data set to only retain records associated with these Vessels       
   Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]            
   Tickets<-as.data.frame(Tickets)
-
+  
   rm(Boats, FF_Tickets, FF_Vessels, Trip_Dominant, X, FTID)
-  
-  
+
   
   #removal
   removal.df <- Tickets %>% select("REMOVAL_TYPE_CODE") %>% mutate(n = 1) %>% 
