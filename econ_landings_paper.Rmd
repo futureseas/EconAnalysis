@@ -846,8 +846,102 @@ rm(Hierarchical_Vessel_Groups)
 
 ```
 
+```{r clu}
 
 
+
+#----------------------------------------------
+##Step 7: Look at descriptive cluster metrics
+
+###Look at the Port Groups Different Clusters are associated with based on % of total number of landings
+
+Test<-merge(Tickets, PAM_Vessel_Groups, by="VESSEL_NUM")
+Port_Groups<-read.csv("Port_Groups_1.27.2022_Check.csv")
+Test<-left_join(Test, Port_Groups, by="PACFIN_PORT_CODE")
+
+Test1<-aggregate(AFI_EXVESSEL_REVENUE~PORT_GROUP+group+FTID, data=Test, FUN=sum)
+Test2<-aggregate(AFI_EXVESSEL_REVENUE~PORT_GROUP+group, data=Test1, FUN=length)
+Test3<-aggregate(AFI_EXVESSEL_REVENUE~group, data=Test, FUN=length)
+
+Test1<-merge(Test2, Test3, by="group")
+options(scipen=999)
+Test1$Percentage<-Test1$AFI_EXVESSEL_REVENUE.x/Test1$AFI_EXVESSEL_REVENUE.y
+Test1<-Test1[order(Test1$group, -Test1$Percentage),]
+
+## Obtain two more important port areas by cluster
+Test1<-
+  Test1 %>% 
+  group_by(group) %>% 
+  filter(row_number()==1:2)
+
+# Test1<-rbind(Test2, Test3)
+Test1<-Test1[order(Test1$group, -Test1$Percentage),]
+Test1
+
+###Look at summary values for revenue and range
+RAW$VESSEL_NUM<-Vessel_IDs
+RAW<-merge(RAW, PAM_Vessel_Groups, by="VESSEL_NUM")
+RAW<-RAW[c(-1)]
+Group_Stats<-RAW%>% group_by(group) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+Group_Stats$DISTANCE_A_mean/10000
+Group_Stats$AVG_REVENUE_mean
+
+rm(Test1, Test2, Test3)
+
+
+###Look at top Coastal Pelagic Species for Each Cluster
+Test_Sub<-merge(Tickets, PAM_Vessel_Groups, by="VESSEL_NUM")
+Test_Sub<-Test_Sub[which(Test_Sub$MGRP=="CPEL"),]
+
+Test_Sub<- within(Test_Sub, Dominant[Dominant == "CHUB MACKEREL"] <- "OTHER")
+Test_Sub<- within(Test_Sub, Dominant[Dominant == "JACK MACKEREL"] <- "OTHER")
+Test_Sub<- within(Test_Sub, Dominant[Dominant == "UNSP. MACKEREL"] <- "OTHER")
+Test_Sub<- within(Test_Sub, Dominant[Dominant == "ROUND HERRING"] <- "OTHER")
+Test_Sub<- within(Test_Sub, Dominant[Dominant == "PACIFIC BONITO"] <- "OTHER")
+
+Test1<-aggregate(AFI_EXVESSEL_REVENUE~Dominant+group, data=Test_Sub, FUN=sum)
+Test2<-aggregate(AFI_EXVESSEL_REVENUE~group, data=Test_Sub, FUN=sum)
+Test1<-merge(Test1, Test2, by="group")
+options(scipen=999)
+Test1$Percentage<-Test1$AFI_EXVESSEL_REVENUE.x/Test1$AFI_EXVESSEL_REVENUE.y
+Test1<-Test1[order(Test1$group, -Test1$Percentage),]
+Test1<-
+  Test1 %>% 
+  group_by(group) %>% 
+  filter(row_number()==1:2)
+
+Test1<-Test1[order(Test1$group, -Test1$Percentage),]
+Test1
+
+###Look at top non-Coastal Pelagic Species for Each Cluster
+Test_Sub<-merge(Tickets, PAM_Vessel_Groups, by="VESSEL_NUM")
+Test_Sub<-Test_Sub[which(!Test_Sub$MGRP=="CPEL"),]
+Test1<-aggregate(AFI_EXVESSEL_REVENUE~MGRP+group, data=Test_Sub, FUN=sum)
+Test2<-aggregate(AFI_EXVESSEL_REVENUE~group, data=Test_Sub, FUN=sum)
+Test1<-merge(Test1, Test2, by="group")
+options(scipen=999)
+Test1$Percentage<-Test1$AFI_EXVESSEL_REVENUE.x/Test1$AFI_EXVESSEL_REVENUE.y
+Test1<-Test1[order(Test1$group, -Test1$Percentage),]
+Test1<-
+  Test1 %>% 
+  group_by(group) %>% 
+  filter(row_number()==1:2)
+
+Test1<-Test1[order(Test1$group, -Test1$Percentage),]
+Test1
+
+# ###Look at number of Vessels Having CPS Permits
+# CPS_Permits<-read.csv("CPS_Permits.csv")
+# CPS_Permits<-merge(CPS_Permits, PAM_Vessel_Groups, by="VESSEL_NUM", all.x=TRUE)
+# CPS_Permits<-aggregate(VESSEL_NUM~group, FUN=length, data=CPS_Permits)
+# Group_Totals<-aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups)
+# CPS_Permits<-merge(CPS_Permits, Group_Totals, by="group")
+# CPS_Permits$Percentage<-CPS_Permits$VESSEL_NUM.x/CPS_Permits$VESSEL_NUM.y
+# CPS_Permits
+
+
+
+```
 <!-- CHECK FROM HERE!!! -->
 
 

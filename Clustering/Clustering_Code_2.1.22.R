@@ -17,9 +17,14 @@ detach(package:raster, unload=TRUE)
 detach(package:igraph, unload=TRUE)
 
 rm(list=ls())
+gc()
 setwd("C:/GitHub/EconAnalysis/Clustering")
 
+#######################
+### Data processing ###
+#######################
 
+# ----------------------------------------
 ###Load in the data
 Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
 Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
@@ -49,11 +54,6 @@ Trip_Dominant<-as.data.frame(cbind(FTID,X))
 Tickets<-merge(Tickets, Trip_Dominant, by='FTID')
 
 rm(Trip_Dominant, X, Boats)
-
-###Add in the Organizational Level of Management Group
-Management_Group<-read.csv("Species_Hierarchy.csv")
-Management_Group<-Management_Group[c(1,6)]
-Tickets<-merge(Tickets, Management_Group, by="PACFIN_SPECIES_COMMON_NAME")
 
 
 ###Subset to select only records where one of the forage fish species of interest was the target species; note that previously I was excluding Pacific Herring
@@ -253,8 +253,11 @@ RAW<-merge(RAW, FF_Landings_and_Diversity, by="VESSEL_NUM")
 ###I wound up removing weight because I felt as if that and length provided redundant information; in that regard you may want to check the degree to which other
 ###cluster inputs are collinear using Variance Inflation Factors or something else (This is the approach O'Farrel et al. 2019 use)
 RAW<-RAW[c(-3)]
+rm(Vessel_Characteristics, Landings_Volume_Value, Vessel_Geography, FF_Landings_and_Diversity)
 
-###Create a scaled data frame of cluster inputs and the accompanying distance matrix
+
+###Create a scaled data frame of cluster inputs 
+## and the accompanying distance matrix
 Vessel_IDs <- RAW[,1]
 Vessels<-as.data.frame(Vessel_IDs)
 RAW<-RAW[c(-1)]
@@ -262,35 +265,41 @@ rownames(RAW)<-Vessel_IDs
 RAW_Scaled<-as.data.frame(RAW %>% scale())
 Distance_matrix<-dist(RAW_Scaled, method='euclidean')
 
-
-##Determine the Optimal Number of Clusters using NbClust (the Method O'Farrell et al. 2019 use); if you don't like the value it spits out, another defensible means
-##of choosing would be the peak of the Second differences Dindex Values (which in this case is 7)
+##Determine the Optimal Number of Clusters using NbClust (the Method O'Farrell et al. 2019 use);
+## If you don't like the value it spits out, another defensible means
+## of choosing would be the peak of the Second differences Dindex Values (which in this case is 7)
 NbClust(RAW_Scaled, distance = "euclidean", min.nc=2, max.nc=10, 
              method = "ward.D", index = "all")
 ##Visualize what the dendrogram looks like with this number of clusters
 hc <- hclust(Distance_matrix, method="ward.D")  
-fviz_dend(hc, cex = 0.5, k = 3, color_labels_by_k = TRUE)
-sub_grp <- cutree(hc, 3)
+fviz_dend(hc, cex = 0.5, k = 4, color_labels_by_k = TRUE)
+sub_grp <- cutree(hc, 4)
 ###See how many vessels are in each group
 table(sub_grp)
 Hierarchical_Vessel_Groups <- Vessels %>% mutate(cluster=sub_grp)
 names(Hierarchical_Vessel_Groups)<-c("Vessel_IDS", "group")
 
+rm(hc, sub_grp)
 
-### Determine the Optimal number of Clusters using Partitioning Around Meoids and the "Average Silhouette Method"
+write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups.csv")
 
-Ks=sapply(2:25,
-          function(i) 
-            summary(silhouette(pam((Distance_matrix), k=i)))$avg.width)
-plot(2:25,Ks, xlab="k",ylab="av.silhouette",type="b", pch=19)
-Clusters<-pam(Distance_matrix, 6)
-PAM_Vessel_Groups<-Vessels
-PAM_Vessel_Groups$group<-Clusters$clustering
-names(PAM_Vessel_Groups)[1]<-"VESSEL_NUM"
-aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
-
-###Output here once you are satisfied if you want to save this information
-##write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups_First_1.27.2022.csv")
+# ### Determine the Optimal number of Clusters using 
+# ### Partitioning Around Meoids and the "Average Silhouette Method"
+# 
+# Ks=sapply(2:25,
+#           function(i) 
+#             summary(silhouette(pam((Distance_matrix), k=i)))$avg.width)
+# plot(2:25,Ks, xlab="k",ylab="av.silhouette",type="b", pch=19)
+# Clusters<-pam(Distance_matrix, 6)
+# PAM_Vessel_Groups<-Vessels
+# PAM_Vessel_Groups$group<-Clusters$clustering
+# names(PAM_Vessel_Groups)[1]<-"VESSEL_NUM"
+# aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
+# 
+# rm(Ks, Clusters, Vessels, Distance_matrix)
+# 
+# ###Output here once you are satisfied if you want to save this information
+# write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv")
 
 
 
@@ -301,7 +310,7 @@ aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
 #----------------------------------------------
 ###Step 6: Visualize relative contribution of different cluster inputs
 RAW_Scaled$VESSEL_NUM<-Vessel_IDs
-RAW_Scaled<-merge(RAW_Scaled, PAM_Vessel_Groups, by="VESSEL_NUM")
+RAW_Scaled<-merge(RAW_Scaled, Hierarchical_Vessel_Groups, by="VESSEL_NUM")
 RAW_Scaled<-RAW_Scaled[c(-1)]
 
 Group_Stats<-RAW_Scaled%>% group_by(group) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
@@ -333,97 +342,10 @@ names(Group_FF_Months)<- c("memb", "mean", "sd", "Variable")
 
 Group_Stats_Wide<-rbind(Group_Length, Group_Avg_Weight, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity, Group_FF_Months)
 Group_Stats_Wide$memb<-as.factor(Group_Stats_Wide$memb)
+rm(Group_Length, Group_Avg_Weight, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity, Group_FF_Months)
 
 ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
   geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
   theme_classic()  + theme(axis.text.x = element_text(angle = 90))
 
-
-#----------------------------------------------
-##Step 7: Look at descriptive cluster metrics
-
-###Look at the Port Groups Different Clusters are associated with based on % of total number of landings
-
-Test<-merge(Tickets, PAM_Vessel_Groups, by="VESSEL_NUM")
-Port_Groups<-read.csv("Port_Groups_1.27.2022.csv")
-Test<-left_join(Test, Port_Groups, by="PACFIN_PORT_CODE")
-
-Test1<-aggregate(AFI_EXVESSEL_REVENUE~PORT_GROUP+group+FTID, data=Test, FUN=sum)
-Test2<-aggregate(AFI_EXVESSEL_REVENUE~PORT_GROUP+group, data=Test1, FUN=length)
-Test3<-aggregate(AFI_EXVESSEL_REVENUE~group, data=Test, FUN=length)
-
-Test1<-merge(Test2, Test3, by="group")
-options(scipen=999)
-Test1$Percentage<-Test1$AFI_EXVESSEL_REVENUE.x/Test1$AFI_EXVESSEL_REVENUE.y
-Test1<-Test1[order(Test1$group, -Test1$Percentage),]
-
-Test1<-
-  Test1 %>% 
-  group_by(group) %>% 
-  filter(row_number()==1:2)
-
-Test1<-rbind(Test2, Test3)
-Test1<-Test1[order(Test1$group, -Test1$Percentage),]
-Test1
-
-###Look at summary values for revenue and range
-RAW$VESSEL_NUM<-Vessel_IDs
-RAW<-merge(RAW, PAM_Vessel_Groups, by="VESSEL_NUM")
-RAW<-RAW[c(-1)]
-Group_Stats<-RAW%>% group_by(group) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
-Group_Stats$DISTANCE_A_mean/10000
-Group_Stats$AVG_REVENUE_mean
-
-
-###Look at top Coastal Pelagic Species for Each Cluster
-Test_Sub<-merge(Tickets, PAM_Vessel_Groups, by="VESSEL_NUM")
-Test_Sub<-Test_Sub[which(Test_Sub$MGRP=="CPEL"),]
-
-Test_Sub<- within(Test_Sub, Dominant[Dominant == "CHUB MACKEREL"] <- "OTHER")
-Test_Sub<- within(Test_Sub, Dominant[Dominant == "JACK MACKEREL"] <- "OTHER")
-Test_Sub<- within(Test_Sub, Dominant[Dominant == "UNSP. MACKEREL"] <- "OTHER")
-Test_Sub<- within(Test_Sub, Dominant[Dominant == "ROUND HERRING"] <- "OTHER")
-Test_Sub<- within(Test_Sub, Dominant[Dominant == "PACIFIC BONITO"] <- "OTHER")
-
-
-
-Test1<-aggregate(AFI_EXVESSEL_REVENUE~Dominant+group, data=Test_Sub, FUN=sum)
-Test2<-aggregate(AFI_EXVESSEL_REVENUE~group, data=Test_Sub, FUN=sum)
-Test1<-merge(Test1, Test2, by="group")
-options(scipen=999)
-Test1$Percentage<-Test1$AFI_EXVESSEL_REVENUE.x/Test1$AFI_EXVESSEL_REVENUE.y
-Test1<-Test1[order(Test1$group, -Test1$Percentage),]
-Test1<-
-  Test1 %>% 
-  group_by(group) %>% 
-  filter(row_number()==1:2)
-
-Test1<-Test1[order(Test1$group, -Test1$Percentage),]
-Test1
-
-###Look at top non-Coastal Pelagic Species for Each Cluster
-Test_Sub<-merge(Tickets, PAM_Vessel_Groups, by="VESSEL_NUM")
-Test_Sub<-Test_Sub[which(!Test_Sub$MGRP=="CPEL"),]
-Test1<-aggregate(AFI_EXVESSEL_REVENUE~MGRP+group, data=Test_Sub, FUN=sum)
-Test2<-aggregate(AFI_EXVESSEL_REVENUE~group, data=Test_Sub, FUN=sum)
-Test1<-merge(Test1, Test2, by="group")
-options(scipen=999)
-Test1$Percentage<-Test1$AFI_EXVESSEL_REVENUE.x/Test1$AFI_EXVESSEL_REVENUE.y
-Test1<-Test1[order(Test1$group, -Test1$Percentage),]
-Test1<-
-  Test1 %>% 
-  group_by(group) %>% 
-  filter(row_number()==1:2)
-
-Test1<-Test1[order(Test1$group, -Test1$Percentage),]
-Test1
-
-###Look at number of Vessels Having CPS Permits
-CPS_Permits<-read.csv("CPS_Permits.csv")
-CPS_Permits<-merge(CPS_Permits, PAM_Vessel_Groups, by="VESSEL_NUM", all.x=TRUE)
-CPS_Permits<-aggregate(VESSEL_NUM~group, FUN=length, data=CPS_Permits)
-Group_Totals<-aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups)
-CPS_Permits<-merge(CPS_Permits, Group_Totals, by="group")
-CPS_Permits$Percentage<-CPS_Permits$VESSEL_NUM.x/CPS_Permits$VESSEL_NUM.y
-CPS_Permits
-
+rm(Group_Stats_Wide, Group_Stats, Vessel_IDs, FTID)
