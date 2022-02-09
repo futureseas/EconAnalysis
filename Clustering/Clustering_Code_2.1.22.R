@@ -20,7 +20,7 @@ rm(list=ls())
 gc()
 setwd("C:/GitHub/EconAnalysis/Clustering")
 
-# Period of analysis
+# Period of analysis (all for all periods together)
 n.period = "all"
 
 #######################
@@ -47,14 +47,12 @@ if (n.period == 1) {
   min.year = 2015 
   max.year = 2020
   n.clust = 5
-} else {
+} else if (n.period == "all") {
   period = "2000-2020"
   min.year = 2000 
   max.year = 2020
   n.clust = 5
 }
-
-
 
 # ----------------------------------------
 ###Load in the data
@@ -312,24 +310,9 @@ fviz_nbclust(dbclust)
 #################################
 
 ##Visualize what the dendrogram looks like with this number of clusters
-
-if (n. <= 2004) {
-  hc <- hclust(Distance_matrix, method="ward.D")  
-  fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
-  sub_grp <- cutree(hc, n.clust)
-} else if (max.year >= 2015) {
-  hc <- hclust(Distance_matrix, method="ward.D")  
-  fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
-  sub_grp <- cutree(hc, n.clust)
-} else if (max.year < 2015 && min.year >= 2009) {
-  hc <- hclust(Distance_matrix, method="ward.D")  
-  fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
-  sub_grp <- cutree(hc, n.clust) 
-} else {
-  hc <- hclust(Distance_matrix, method="ward.D")  
-  fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
-  sub_grp <- cutree(hc, n.clust)
-}
+hc <- hclust(Distance_matrix, method="ward.D")  
+fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
+sub_grp <- cutree(hc, n.clust)
 
 ###See how many vessels are in each group
 table(sub_grp)
@@ -404,36 +387,45 @@ Group_Stats_Wide <- Group_Stats_Wide %>%
 Hierarchical_Vessel_Groups <- Hierarchical_Vessel_Groups %>%
   mutate(min_year = min.year) %>% mutate(max_year = max.year)
 
-if (max.year <= 2004) {
+if (n.period == 1) {
   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups1.csv")
-  saveRDS(Group_Stats_Wide, file = "stats_input_1.RDS")  
-} else if (max.year >= 2015) {
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups4.csv")
-  saveRDS(Group_Stats_Wide, file = "stats_input_4.RDS")  
-} else if (max.year < 2015 && min.year >= 2009) {
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups3.csv")
-  saveRDS(Group_Stats_Wide, file = "stats_input_3.RDS")  
-} else {
+  saveRDS(Group_Stats_Wide, file = "stats_input_1.RDS")
+} else if (n.period == 2) {
   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups2.csv")
   saveRDS(Group_Stats_Wide, file = "stats_input_2.RDS")  
+} else if (n.period == 3) {
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups3.csv")
+  saveRDS(Group_Stats_Wide, file = "stats_input_3.RDS")  
+} else if (n.period == 4) {
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups4.csv")
+  saveRDS(Group_Stats_Wide, file = "stats_input_4.RDS")  
+} else {
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups.csv")
+  saveRDS(Group_Stats_Wide, file = "stats_input.RDS")  
 }
 
 rm(Group_Stats_Wide, Group_Stats, Vessel_IDs, FTID)
 
 
-Group_Stats_Wide_1 <- readRDS("stats_input_1.RDS")
-Group_Stats_Wide_2 <- readRDS("stats_input_2.RDS")
-Group_Stats_Wide_3 <- readRDS("stats_input_3.RDS")
-Group_Stats_Wide_4 <- readRDS("stats_input_4.RDS")
+if (n.period == "all") {
+  Group_Stats_Wide <- readRDS("stats_input.RDS")
+  ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
+    geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
+    theme_classic()  + theme(axis.text.x = element_text(angle = 90))
+} else {
+  Group_Stats_Wide_1 <- readRDS("stats_input_1.RDS")
+  Group_Stats_Wide_2 <- readRDS("stats_input_2.RDS")
+  Group_Stats_Wide_3 <- readRDS("stats_input_3.RDS")
+  Group_Stats_Wide_4 <- readRDS("stats_input_4.RDS")
+  Group_Stats_Wide <- rbind(Group_Stats_Wide_1, Group_Stats_Wide_2, 
+                            Group_Stats_Wide_3, Group_Stats_Wide_4)
 
-Group_Stats_Wide <- rbind(Group_Stats_Wide_1, Group_Stats_Wide_2, Group_Stats_Wide_3, Group_Stats_Wide_4)
-
-
-ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
-  geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
-  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
-  theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
-
+  ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
+    geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
+    theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
+}
 
 
 
