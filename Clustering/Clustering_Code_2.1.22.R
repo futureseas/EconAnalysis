@@ -24,6 +24,12 @@ setwd("C:/GitHub/EconAnalysis/Clustering")
 ### Data processing ###
 #######################
 
+
+# Period of interest. (2000 - 2004) 3-3; (2005-2008) 7-4; (2009 - 2014) -- 8-4; (2015-2020) 3-3
+min.year = 2000 
+max.year = 2004
+
+
 # ----------------------------------------
 ###Load in the data
 Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
@@ -40,7 +46,7 @@ Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, POR
 ###Remove records associated with landings of zero value; this is likely bycatch
 Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
 ####Select the time period you want to cluster over
-Tickets<-Tickets[which(Tickets$LANDING_YEAR>=2000 & Tickets$LANDING_YEAR<2015),]
+Tickets<-Tickets[which(Tickets$LANDING_YEAR>=min.year & Tickets$LANDING_YEAR<=max.year),]
 
 ####Find the dominant species by value of each fishing trip, presumably this is the target species. Using the logic of metiers,
 ###all landings of each fishing trip should be tagged with a single identifier.
@@ -270,6 +276,12 @@ Distance_matrix<-dist(RAW_Scaled, method='euclidean')
 ## of choosing would be the peak of the Second differences Dindex Values (which in this case is 7)
 NbClust(RAW_Scaled, distance = "euclidean", min.nc=2, max.nc=10, 
              method = "ward.D", index = "all")
+
+
+#################################
+### CHOOSE NUMBER OF CLUSTERS ###
+#################################
+
 ##Visualize what the dendrogram looks like with this number of clusters
 hc <- hclust(Distance_matrix, method="ward.D")  
 fviz_dend(hc, cex = 0.5, k = 4, color_labels_by_k = TRUE)
@@ -277,11 +289,9 @@ sub_grp <- cutree(hc, 4)
 ###See how many vessels are in each group
 table(sub_grp)
 Hierarchical_Vessel_Groups <- Vessels %>% mutate(cluster=sub_grp)
-names(Hierarchical_Vessel_Groups)<-c("Vessel_IDS", "group")
+names(Hierarchical_Vessel_Groups)<-c("VESSEL_NUM", "group")
 
 rm(hc, sub_grp)
-
-write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups.csv")
 
 # ### Determine the Optimal number of Clusters using 
 # ### Partitioning Around Meoids and the "Average Silhouette Method"
@@ -344,8 +354,22 @@ Group_Stats_Wide<-rbind(Group_Length, Group_Avg_Weight, Group_Avg_Revenue, Group
 Group_Stats_Wide$memb<-as.factor(Group_Stats_Wide$memb)
 rm(Group_Length, Group_Avg_Weight, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity, Group_FF_Months)
 
-ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
-  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
-  theme_classic()  + theme(axis.text.x = element_text(angle = 90))
+Hierarchical_Vessel_Groups <- Hierarchical_Vessel_Groups %>%
+  mutate(min_year = min.year) %>% mutate(max_year = max.year)
+
+if (max.year <= 2004) {
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups1.csv")
+  g1 <- ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
+    theme_classic()  + theme(axis.text.x = element_text(angle = 90))
+} else if (max.year >= 2015) {
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups4.csv")
+} else if (max.year < 2015 && min.year >= 2009) {
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups3.csv")
+} else {
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups2.csv")
+}
 
 rm(Group_Stats_Wide, Group_Stats, Vessel_IDs, FTID)
+
+
