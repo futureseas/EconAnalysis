@@ -26,8 +26,9 @@ setwd("C:/GitHub/EconAnalysis/Clustering")
 
 
 # Period of interest. (2000 - 2004) 3-3; (2005-2008) 7-4; (2009 - 2014) -- 8-4; (2015-2020) 3-3
-min.year = 2000 
-max.year = 2004
+min.year = 2009 
+max.year = 2014
+period = "2009-2014"
 
 
 # ----------------------------------------
@@ -354,22 +355,43 @@ Group_Stats_Wide<-rbind(Group_Length, Group_Avg_Weight, Group_Avg_Revenue, Group
 Group_Stats_Wide$memb<-as.factor(Group_Stats_Wide$memb)
 rm(Group_Length, Group_Avg_Weight, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity, Group_FF_Months)
 
+Group_Stats_Wide <- Group_Stats_Wide %>%
+  mutate(time.period = period) 
 Hierarchical_Vessel_Groups <- Hierarchical_Vessel_Groups %>%
   mutate(min_year = min.year) %>% mutate(max_year = max.year)
 
 if (max.year <= 2004) {
   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups1.csv")
-  g1 <- ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
-    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
-    theme_classic()  + theme(axis.text.x = element_text(angle = 90))
+  saveRDS(Group_Stats_Wide, file = "stats_input_1.RDS")  
 } else if (max.year >= 2015) {
   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups4.csv")
+  saveRDS(Group_Stats_Wide, file = "stats_input_4.RDS")  
 } else if (max.year < 2015 && min.year >= 2009) {
   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups3.csv")
+  saveRDS(Group_Stats_Wide, file = "stats_input_3.RDS")  
 } else {
   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups2.csv")
+  saveRDS(Group_Stats_Wide, file = "stats_input_2.RDS")  
 }
 
 rm(Group_Stats_Wide, Group_Stats, Vessel_IDs, FTID)
+
+
+Group_Stats_Wide_1 <- readRDS("stats_input_1.RDS")
+Group_Stats_Wide_2 <- readRDS("stats_input_2.RDS")
+Group_Stats_Wide_3 <- readRDS("stats_input_3.RDS")
+Group_Stats_Wide_4 <- readRDS("stats_input_4.RDS")
+
+Group_Stats_Wide <- rbind(Group_Stats_Wide_1, Group_Stats_Wide_2, Group_Stats_Wide_3, Group_Stats_Wide_4)
+
+
+ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
+  geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
+  theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
+
+
+
+
 
 
