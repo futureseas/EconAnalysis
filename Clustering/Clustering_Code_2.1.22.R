@@ -20,29 +20,41 @@ rm(list=ls())
 gc()
 setwd("C:/GitHub/EconAnalysis/Clustering")
 
+# Period of analysis
+n.period = "all"
+
 #######################
 ### Data processing ###
 #######################
 
-n.period = 4
-
 if (n.period == 1) {
   period = "2000-2004"
   min.year = 2000
-  max.year = 2004
+  max.year = 2020
+  n.clust = 5
 } else if (n.period == 2) {
-  period = "2005-2020"
+  period = "2005-2008"
   min.year = 2005 
   max.year = 2008
+  n.clust = 5
 } else if (n.period == 3) {
-  period = "2015-2020"
+  period = "2009-2014"
   min.year = 2009 
   max.year = 2014
-} else {
+  n.clust = 5
+} else if (n.period == 4) {
   period = "2015-2020"
   min.year = 2015 
   max.year = 2020
+  n.clust = 5
+} else {
+  period = "2000-2020"
+  min.year = 2000 
+  max.year = 2020
+  n.clust = 5
 }
+
+
 
 # ----------------------------------------
 ###Load in the data
@@ -288,8 +300,11 @@ Distance_matrix<-dist(RAW_Scaled, method='euclidean')
 ##Determine the Optimal Number of Clusters using NbClust (the Method O'Farrell et al. 2019 use);
 ## If you don't like the value it spits out, another defensible means
 ## of choosing would be the peak of the Second differences Dindex Values (which in this case is 7)
-NbClust(RAW_Scaled, distance = "euclidean", min.nc=2, max.nc=10, 
-             method = "ward.D", index = "all")
+dbclust <- NbClust(RAW_Scaled, distance = "euclidean", min.nc=2, max.nc=9, 
+             method = "ward.D", index = "alllong")
+
+# length(unique(dbclust$Best.partition))
+fviz_nbclust(dbclust)
 
 
 #################################
@@ -298,22 +313,22 @@ NbClust(RAW_Scaled, distance = "euclidean", min.nc=2, max.nc=10,
 
 ##Visualize what the dendrogram looks like with this number of clusters
 
-if (max.year <= 2004) {
+if (n. <= 2004) {
   hc <- hclust(Distance_matrix, method="ward.D")  
-  fviz_dend(hc, cex = 0.5, k = 3, color_labels_by_k = TRUE)
-  sub_grp <- cutree(hc, 3)
+  fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
+  sub_grp <- cutree(hc, n.clust)
 } else if (max.year >= 2015) {
   hc <- hclust(Distance_matrix, method="ward.D")  
-  fviz_dend(hc, cex = 0.5, k = 3, color_labels_by_k = TRUE)
-  sub_grp <- cutree(hc, 3)
+  fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
+  sub_grp <- cutree(hc, n.clust)
 } else if (max.year < 2015 && min.year >= 2009) {
   hc <- hclust(Distance_matrix, method="ward.D")  
-  fviz_dend(hc, cex = 0.5, k = 4, color_labels_by_k = TRUE)
-  sub_grp <- cutree(hc, 4) 
+  fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
+  sub_grp <- cutree(hc, n.clust) 
 } else {
   hc <- hclust(Distance_matrix, method="ward.D")  
-  fviz_dend(hc, cex = 0.5, k = 4, color_labels_by_k = TRUE)
-  sub_grp <- cutree(hc, 4)
+  fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
+  sub_grp <- cutree(hc, n.clust)
 }
 
 ###See how many vessels are in each group
@@ -418,8 +433,6 @@ ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) +
   geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
   geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
   theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
-
-
 
 
 
