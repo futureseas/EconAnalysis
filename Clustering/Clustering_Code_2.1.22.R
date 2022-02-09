@@ -24,12 +24,25 @@ setwd("C:/GitHub/EconAnalysis/Clustering")
 ### Data processing ###
 #######################
 
+n.period = 4
 
-# Period of interest. (2000 - 2004) 3-3; (2005-2008) 7-4; (2009 - 2014) -- 8-4; (2015-2020) 3-3
-min.year = 2009 
-max.year = 2014
-period = "2009-2014"
-
+if (n.period == 1) {
+  period = "2000-2004"
+  min.year = 2000
+  max.year = 2004
+} else if (n.period == 2) {
+  period = "2005-2020"
+  min.year = 2005 
+  max.year = 2008
+} else if (n.period == 3) {
+  period = "2015-2020"
+  min.year = 2009 
+  max.year = 2014
+} else {
+  period = "2015-2020"
+  min.year = 2015 
+  max.year = 2020
+}
 
 # ----------------------------------------
 ###Load in the data
@@ -284,9 +297,25 @@ NbClust(RAW_Scaled, distance = "euclidean", min.nc=2, max.nc=10,
 #################################
 
 ##Visualize what the dendrogram looks like with this number of clusters
-hc <- hclust(Distance_matrix, method="ward.D")  
-fviz_dend(hc, cex = 0.5, k = 4, color_labels_by_k = TRUE)
-sub_grp <- cutree(hc, 4)
+
+if (max.year <= 2004) {
+  hc <- hclust(Distance_matrix, method="ward.D")  
+  fviz_dend(hc, cex = 0.5, k = 3, color_labels_by_k = TRUE)
+  sub_grp <- cutree(hc, 3)
+} else if (max.year >= 2015) {
+  hc <- hclust(Distance_matrix, method="ward.D")  
+  fviz_dend(hc, cex = 0.5, k = 3, color_labels_by_k = TRUE)
+  sub_grp <- cutree(hc, 3)
+} else if (max.year < 2015 && min.year >= 2009) {
+  hc <- hclust(Distance_matrix, method="ward.D")  
+  fviz_dend(hc, cex = 0.5, k = 4, color_labels_by_k = TRUE)
+  sub_grp <- cutree(hc, 4) 
+} else {
+  hc <- hclust(Distance_matrix, method="ward.D")  
+  fviz_dend(hc, cex = 0.5, k = 4, color_labels_by_k = TRUE)
+  sub_grp <- cutree(hc, 4)
+}
+
 ###See how many vessels are in each group
 table(sub_grp)
 Hierarchical_Vessel_Groups <- Vessels %>% mutate(cluster=sub_grp)
