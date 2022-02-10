@@ -60,7 +60,10 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   Tickets<-merge(Tickets, Trip_Dominant, by='FTID')
   
   
-  ###Subset to select only records where one of the forage fish species of interest was the target species
+  ###Subset to select only records where one of the forage fish species of interest was the target species; note that previously I was excluding Pacific Herring
+  ###(which to me makes sense), but also "Round Herring" & "Pacific Bonito". Here I've made an edit, thinking it would probably be most defensible to exclude Pacific Herring and 
+  ##then lump "Round Herring", "Pacific Bonito", "Chub Mackerel", "Jack Mackerel" and "UNSP. Mackerel" together into an "Other" column.
+  
   FF_Tickets<-Tickets[which(Tickets$Dominant=="PACIFIC SARDINE" | Tickets$Dominant=="MARKET SQUID"| Tickets$Dominant=="NORTHERN ANCHOVY"|
                               Tickets$Dominant=="CHUB MACKEREL" | Tickets$Dominant=="JACK MACKEREL" | Tickets$Dominant=="UNSP. MACKEREL"|
                               Tickets$Dominant=="ROUND HERRING" | Tickets$Dominant=="PACIFIC BONITO"),]
@@ -96,10 +99,10 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   
   rm(Boats, FF_Tickets, FF_Vessels, Trip_Dominant, X, FTID)
 
-  
   #removal
+  nrow_tickets <- nrow(Tickets)
   removal.df <- Tickets %>% select("REMOVAL_TYPE_CODE") %>% mutate(n = 1) %>% 
-    group_by(REMOVAL_TYPE_CODE) %>% summarise(n_group = sum(n)/651767*100) 
+    group_by(REMOVAL_TYPE_CODE) %>% summarise(n_group = sum(n)/nrow_tickets*100) 
   
   Tickets <- Tickets %>% filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
 
@@ -108,6 +111,8 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   nrow(as.data.frame(unique(Tickets$VESSEL_NUM))) 
 
 
+  
+  
 # Create monthly data
   
   sum_mean_fun <- function(x, ...){
