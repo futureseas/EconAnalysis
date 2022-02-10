@@ -451,7 +451,7 @@ g2 <- ggplot(sdm.by.species) +
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8),
         legend.position="bottom") + 
-  ggtitle("(b) Market squid (Spawning biomass within 90 km radious)") +  scale_color_manual(name = "Variable: ", 
+  ggtitle("(b) Market squid (Spawning aggregation model within 90 km radious)") +  scale_color_manual(name = "Variable: ", 
                      values = c("Landings" = "grey", "Probability of presence" = "blue"))
 
 g1 / g2
@@ -765,88 +765,69 @@ PacFIN.month.CPS <- PacFIN.month %>%
 
 # Clustering
 
-```{r cluster_analysis, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
-## Calculate share of revenue of species by vessel during a month ##
-PacFIN.spread <- PacFIN.month %>% filter(LANDING_YEAR >=2000) %>%  filter(LANDING_YEAR < 2015) %>%
-  select(LANDING_YEAR, LANDING_MONTH, VESSEL_NUM, PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS.sum) %>% 
-  group_by(VESSEL_NUM, PACFIN_SPECIES_CODE) %>% 
-  summarise(Landings = sum(LANDED_WEIGHT_MTONS.sum)) 
-  total.landings <- PacFIN.spread %>% group_by(VESSEL_NUM) %>% 
-  summarise(Total = sum(Landings))
-  PacFIN.spread <-  PacFIN.spread %>% dplyr::filter(PACFIN_SPECIES_CODE %in% 
-    c("CMCK", "JMCK", "MSQD", "NANC", "PSDN")) %>%
-  spread(PACFIN_SPECIES_CODE, Landings) %>%  merge(total.landings, by = ("VESSEL_NUM"))
-  PacFIN.spread[is.na(PacFIN.spread)] <- 0
-   
-  PacFIN.spread.perc <- PacFIN.spread %>% filter(Total > 0) %>%
-    mutate(CMCK = CMCK / Total * 100) %>% mutate(MSQD = MSQD / Total * 100) %>% 
-    mutate(NANC = NANC / Total * 100) %>% mutate(PSDN = PSDN / Total * 100) %>%  
-    mutate(JMCK = JMCK / Total * 100) %>%
-    mutate(OTHER = 100 - (CMCK + MSQD + NANC + PSDN + JMCK)) %>% select(-c('Total'))
-  
-
-# set.seed(21)
-# speciesCluster <- kmeans(PacFIN.spread[, 2:5], 30)
-# speciesCluster
-
-## Hierarchical clustering analysis ##
-col <- (ncol(PacFIN.spread.perc))  
-  PacFIN.spread.perc[is.na(PacFIN.spread.perc)] <- 0
-  clusters <- hclust(dist(PacFIN.spread.perc[, 2:col]), method = "ward.D")
-  # plot(clusters, cex = 0.1, hang = -1)
-
-## Construct table ##  
-clusterCut <- as.data.frame(cutree(clusters, 7))
-  PacFIN.spread.perc$cluster <- clusterCut$`cutree(clusters, 7)`
-    PacFIN.clusters <- PacFIN.spread.perc %>% group_by(cluster) %>%
-      summarise(mean.CMCK = mean(CMCK), mean.MSQD = mean(MSQD), 
-                mean.NANC = mean(NANC), mean.JMCK = mean(JMCK), 
-                mean.PSDN = mean(PSDN), mean.OTHER = mean(OTHER), count = n())
-    
-PacFIN.clusters <- PacFIN.clusters[,-1]
-colnames(PacFIN.clusters) = c("Pacific\nmackerel", "Market squid", "Northern anchovy", 
-                              "Jack\nmakerel", "Pacific sardine", "Other", "Obs.") 
-    
-print(xtable(PacFIN.clusters, caption = 'Cluster by percentage of landings by species.\\label{Table:cluster_all}',
-             type = "latex"), floating = TRUE, comment=FALSE,  caption.placement = "top")
-
-# floating.environment = "sidewaystable"
-  
-##-------------------------------
-# Compute Agglomerative coefficient
-  
-# # Compute with agnes (make sure you have the package cluster)
-# library(cluster)
-# hc2 <- agnes(PacFIN.spread.perc[, 2:col], method = "ward")
-# hc2$ac
-# ## 0.9995197
-# 
-# # Make graph
-# library(factoextra)
-# fviz_cluster(list(data = cbind.data.frame(PacFIN.spread.perc$MSQD, PacFIN.spread.perc$PSDN),
-#                   cluster = cutree(clusters, 7)))  ## from ‘factoextra’ package
-# 
-# pltree(hc2, hang=-1, cex = 0.6)
-# rect.hclust(hc2, k = 8, border = 2:9)
-
-```
-
 ```{r dataframe_cluster, include=FALSE}
 
-Hierarchical_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Hierarchical_Vessel_Groups.csv")
-  PacFIN.month.cluster <- merge(PacFIN.month, Hierarchical_Vessel_Groups,
-                              by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+Hierarchical_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups.csv")
+# Hierarchical_Vessel_Groups1 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups1.csv")
+# Hierarchical_Vessel_Groups2 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups2.csv")
+# Hierarchical_Vessel_Groups3 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups3.csv")
+# Hierarchical_Vessel_Groups4 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups4.csv")
 
-# CREATE NEW PACFIN.MONTH.CPS DATASET!
-PacFIN.month.CPS.cluster <- PacFIN.month.cluster %>% 
-    dplyr::filter(PACFIN_SPECIES_CODE %in% 
-    c("CMCK", "JMCK", "MSQD", "NANC", "PSDN", "UMCK"))
+PacFIN.month.cluster <- merge(PacFIN.month, Hierarchical_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups1, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups2, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups3, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups4, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 
-rm(Hierarchical_Vessel_Groups)
+rm(Hierarchical_Vessel_Groups, Hierarchical_Vessel_Groups1, Hierarchical_Vessel_Groups2, 
+   Hierarchical_Vessel_Groups3, Hierarchical_Vessel_Groups4,)
 
 ```
 
-```{r clu}
+```{r cluster_descriptive}
+library("googlesheets4")
+
+
+gs4_auth(
+    email = gargle::gargle_oauth_email(),
+    path = NULL,
+    scopes = "https://www.googleapis.com/auth/spreadsheets",
+    cache = gargle::gargle_oauth_cache(),
+    use_oob = gargle::gargle_oob_default(),
+    token = NULL
+)
+
+
+### How gear are used by clusters??? ###
+options(scipen=999)
+cluster.gear <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
+  group_by(group_all, PACFIN_GEAR_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
+  group_by(group_all) %>% mutate(Percentage = landings / sum(landings)) %>% 
+  unique() %>% filter(group_all != is.na(group_all))
+
+cluster.gear <- cluster.gear[order(cluster.gear$group_all, -cluster.gear$Percentage),]
+
+# cluster.gear %>% 
+#   group_by(group_all) %>% 
+#   filter(row_number()==1:2)
+
+cluster.gear <- cluster.gear %>%
+  filter(PACFIN_GEAR_CODE %in% c("DPN", "ONT", "SEN", "CLP"))
+    
+
+
+
+table <- as.data.frame(xtabs(Percentage ~  PACFIN_GEAR_CODE + group_all, cluster.gear ))
+table <- table %>%
+  spread(key = group_all, value = Freq)
+
+# table = table[,-1]
+# rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
+colnames(table) = c("Gear", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
+gs4_create("Table1", sheets = table)
+# print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
+
+rm(table, PacFIN.cluster)
 
 
 
@@ -855,16 +836,8 @@ rm(Hierarchical_Vessel_Groups)
 
 ###Look at the Port Groups Different Clusters are associated with based on % of total number of landings
 
-Test<-merge(Tickets, PAM_Vessel_Groups, by="VESSEL_NUM")
-Port_Groups<-read.csv("Port_Groups_1.27.2022_Check.csv")
-Test<-left_join(Test, Port_Groups, by="PACFIN_PORT_CODE")
-
-Test1<-aggregate(AFI_EXVESSEL_REVENUE~PORT_GROUP+group+FTID, data=Test, FUN=sum)
-Test2<-aggregate(AFI_EXVESSEL_REVENUE~PORT_GROUP+group, data=Test1, FUN=length)
-Test3<-aggregate(AFI_EXVESSEL_REVENUE~group, data=Test, FUN=length)
-
 Test1<-merge(Test2, Test3, by="group")
-options(scipen=999)
+options(scipen=999) ## Avoid scientifi notation
 Test1$Percentage<-Test1$AFI_EXVESSEL_REVENUE.x/Test1$AFI_EXVESSEL_REVENUE.y
 Test1<-Test1[order(Test1$group, -Test1$Percentage),]
 
@@ -1145,27 +1118,6 @@ rm(PacFIN.Gear, PacFIN.Gear.PSDN, PacFIN.Gear.NANC, PacFIN.Gear.MSQD, table)
 ```
 
 The ability to switch between CPS species using seine as gear is confirmed when we analyze the most important gears used by different clusters in terms of landings (see Table \ref{Table:cluster_gear}). Total landings of a cluster where substitution between CPS species is observable (Cluster 2 to 5) comes mainly from catches using seine, and in some cases, from other net gears. In the case of Cluster 6 and 7, where substitution is between a CPS species and a Non-CPS species, seine or Other Net Gear are not important, and other gears like Dip Net or Troll became relevant.
-
-```{r gear_by_cluster, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
-
-# Create dummy of whether a vessel harvest MSQD, NANC OR PSDN 
-PacFIN.cluster <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
-  group_by(group, PACFIN_GEAR_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
-  group_by(group) %>% mutate(perc = landings / sum(landings)) %>% 
-  unique() %>% filter(group != is.na(group)) %>% 
-  filter(PACFIN_GEAR_CODE %in% 
-           c("DPN", "ONT", "POL", "SEN", "TRL"))
-    
-table <- xtabs(perc ~  PACFIN_GEAR_CODE + group, PacFIN.cluster)
-# table
-rownames(table) = c("Dip Net", "Other Net Gear", "Pole", "Seine", "Troll")
-colnames(table) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5")
-
-print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
-
-rm(table, PacFIN.cluster)
-
-```
 
 ### Switching by port landed
 

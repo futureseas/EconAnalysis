@@ -20,8 +20,8 @@ rm(list=ls())
 gc()
 setwd("C:/GitHub/EconAnalysis/Clustering")
 
-# Period of analysis (all for all periods together)
-n.period = "all"
+# Period of analysis (all for all periods together). "5" for whole sample set.
+n.period = 5
 
 #######################
 ### Data processing ###
@@ -47,11 +47,11 @@ if (n.period == 1) {
   min.year = 2015 
   max.year = 2020
   n.clust = 5
-} else if (n.period == "all") {
+} else if (n.period == 5) {
   period = "2000-2020"
   min.year = 2000 
   max.year = 2020
-  n.clust = 5
+  n.clust = 7
 }
 
 # ----------------------------------------
@@ -319,6 +319,23 @@ table(sub_grp)
 Hierarchical_Vessel_Groups <- Vessels %>% mutate(cluster=sub_grp)
 names(Hierarchical_Vessel_Groups)<-c("VESSEL_NUM", "group")
 
+if (n.period == 1) {
+  names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_1"
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups1.csv", row.names = FALSE)
+} else if (n.period == 2) {
+  names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_2"
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups2.csv", row.names = FALSE)
+} else if (n.period == 3) {
+  names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_3"
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups3.csv", row.names = FALSE)
+} else if (n.period == 4) {
+  names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_4"
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups4.csv", row.names = FALSE)
+} else if (n.period == 5) {
+  names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_all"
+  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups.csv", row.names = FALSE)
+}
+
 rm(hc, sub_grp)
 
 # ### Determine the Optimal number of Clusters using 
@@ -384,30 +401,23 @@ rm(Group_Length, Group_Avg_Weight, Group_Avg_Revenue, Group_LAT, Group_Inertia, 
 
 Group_Stats_Wide <- Group_Stats_Wide %>%
   mutate(time.period = period) 
-Hierarchical_Vessel_Groups <- Hierarchical_Vessel_Groups %>%
-  mutate(min_year = min.year) %>% mutate(max_year = max.year)
 
 if (n.period == 1) {
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups1.csv")
   saveRDS(Group_Stats_Wide, file = "stats_input_1.RDS")
 } else if (n.period == 2) {
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups2.csv")
   saveRDS(Group_Stats_Wide, file = "stats_input_2.RDS")  
 } else if (n.period == 3) {
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups3.csv")
   saveRDS(Group_Stats_Wide, file = "stats_input_3.RDS")  
 } else if (n.period == 4) {
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups4.csv")
   saveRDS(Group_Stats_Wide, file = "stats_input_4.RDS")  
-} else {
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups.csv")
+} else if (n.period == 5) {
   saveRDS(Group_Stats_Wide, file = "stats_input.RDS")  
 }
 
 rm(Group_Stats_Wide, Group_Stats, Vessel_IDs, FTID)
 
 
-if (n.period == "all") {
+if (n.period == 5) {
   Group_Stats_Wide <- readRDS("stats_input.RDS")
   ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
     geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
@@ -420,12 +430,8 @@ if (n.period == "all") {
   Group_Stats_Wide_4 <- readRDS("stats_input_4.RDS")
   Group_Stats_Wide <- rbind(Group_Stats_Wide_1, Group_Stats_Wide_2, 
                             Group_Stats_Wide_3, Group_Stats_Wide_4)
-
   ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
     geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
     geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
     theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
 }
-
-
-
