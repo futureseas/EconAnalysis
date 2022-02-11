@@ -521,7 +521,7 @@ rm(g2, g3, sdm.by.species, coeff1, coeff2, coeff3)
 
 ```
 
-```{r SDM_land_NANC_in_MNA, eval=FALSE, fig.cap="Landings v/s probability of presence by port area.", message=FALSE, warning=FALSE, include=FALSE}
+```{r SDM_land_NANC_in_MNA, eval=FALSE, include=FALSE}
 
 collapse <- PacFIN_yearly %>%
   filter(Species_code == "NANC") %>%
@@ -574,7 +574,7 @@ write_xlsx(collapse,"Data\\monterrey_NANC_sdm_landings.xlsx")
 
 ```
 
-```{r ts_landings_vessels, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Evolution of Pacific sardine landings and the number of vessels landing market squid during the period 1981-2020.\\label{fig:ts_landings}"}
+```{r ts_landings_vessels, echo=FALSE}
 landing.nvessels.year.sel <- landing.price.year %>%
   inner_join(nvessel.year, by = c("PACFIN_SPECIES_CODE", "LANDING_YEAR")) %>%
   dplyr::select("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel", "PACFIN_SPECIES_CODE", "LANDING_YEAR")
@@ -606,8 +606,7 @@ coeff <- 1500
 
 ```
 
-
-```{r ts_by_port,  fig.cap = "Total annual landing by selected ports during the period 2000 - 2020 for market squid and Pacific sardine. The ports selected are the ones with the highest average annual landings and substitution is likely.\\label{fig:ts_landings_by_ports}", echo=FALSE, message=FALSE, warning=FALSE}
+```{r ts_by_port, echo=FALSE}
 
 landings.by.sel.ports <- landings.by.port.year %>% 
   filter(PACFIN_PORT_CODE == "SP" | PACFIN_PORT_CODE == "TRM" | 
@@ -1308,18 +1307,6 @@ dataset = subset(dataset, select = -c(MSQD.SDM.port.code, MSQD.SDM.port.area))
      
 ```
 
-
-Besides the biological stock, landings are affected by economic conditions. Some of them are harvest cost, prices received by species and their substitutes, and regulations imposed by the authorities. Our dataset includes <!-- average distances traveled by vessel from the port of origin *(TO BE INCLUDED USING GLOBAL FISHING WATCH)* and fuel cost *(TO BE INCLUDED...)* as proxies of harvest cost. We also include  --> the average species' price that a vessel receives in a port during a quarter, obtained from the PacFIN landings dataset, and they enter the model as both absolute and relative values. When prices were missing, we replaced this value with the average species' price in the port for all vessels in the corresponding year. If we still have missing values, we use the average price during the month at the port code, then at the port area, then at the state, and then considering the whole U.S. west coast (excluding Alaska). <!-- We should also include weather variables. Bad weather should reduce fishers' decision to go to sea. Ir becomes risky, but also this is compared to revenue and how risk-averse is a fisher (see Lisa's work): "Weather and tides are major factors in fishing operations and timing of vessels transiting in and out of the Columbia River." SAFE --> We include the Annual Catch Limit (ACL) for the Pacific sardine model as an additional explanatory variable in the landing equation, $\mu_i$. ACL variable is the total quota allocated each year for this fishery. We obtained this information from the CPS Fisheries Management Plan [@CPSFMP2021] and the Stock Assessment and Fishery Evaluation for 2019 document [@SAFE2020]. <!-- ISAAC's comments: Is this the ACL or the remaining part of the ACL (accounting for the previous catch). R: In the annual case does not matter, but in a monthly model, I should consider this. --> Our database comprises the period between 2000 and 2018. We do not include ACL as an explanatory variable as this variable has no variation between years. To capture any change in fishers' behavior when the Pacific sardine fishery is closed, we include a binary variable called **Closure** that takes the value "1" when the Pacific sardine fishery is closed and takes the value "0" when the Pacific sardine fishery is open. Concerning the Pacific sardine probability of presence, this variable takes the value of zero when the fishery is closed. Thus, the effect of this variable is only relevant to capture potential substitution between targets when the Pacific sardine fishery is open. We show a summary statistics of our data set in Table \ref{tab:sum_stats}. Specifically $\mu_{it}$ is defined as the following: 
-$$ \begin{aligned} \mu_{i,p,t}   =  \beta^0_{p,c} &  + \beta^1_{p,c} P(Precense.PSDN)_{p,t} +  \beta^2_{p,c} P\left(Precense.PSDN\right)_{p,t} * P\left(Precense.MSQD\right)_{p,t} \\ & + \beta^3_{p,c} Price.PSDN_{p,t} + \beta^4_{p,c} ACL_{t}. \end{aligned}$$
-
-In the case of $\text{logit}(p_{ijt}) = \bf{X}\gamma_p$  we can model the probability $p_{ijm}$ that vessel $i$ participate in a particular fishery at port $p$ in quarter $t$ specifically as: 
-$$ \begin{aligned} \text{logit}(p_{i,t}) = \gamma^0_{c,p} & + \gamma^1_{c,p} P(Precense.PSDN)_{i,t} + \gamma^2_{c,p} P\left(Precense.PSDN\right)_{i,t}*P\left(Precense.MSQD\right)_{i,t} \\ & + \gamma^3_{c,p} Closure_t.\end{aligned}$$
-
-where $ExpectedCatch_{p,t} = \frac{\sum_{k=0}^KP(Precense.PSDN)_{i,t-k}}{K}$. <!-- + \beta_2  Closure + \beta_3 Mean.revenue_j --> <!-- & + \beta_5 HHI_i + \beta_6 Percent.revenue_j + \beta_7 LCG_i + \beta_8 LI_i + \beta_9 Year.fished. --> Note that the outside option is interpreted as "No fishing in the particular fishery," which means that the vessel is participating in another fishery or is no fishing. 
-
-
-
-
 ```{r calculate-price, include=FALSE}
 
 # Calculate year price for N/A's using PacFIN port code, port area code, state and year/month.
@@ -1679,14 +1666,11 @@ g2 <- pp_check(fit_qMSQD_price) + ggtitle('(b) Market Squid') +
 
 
 ### Graphical posterior predictive
-Before presenting the results for the three species in consideration, we check graphically whether the posterior distribution is able to predict the actual distribution. We exclude zero in our graph to avoid plotting different data generation processes. In Figure \ref{fig:posteriors} we show a posterior sample compare with the true sample distribution for the three species in analysis. Some deviation from the true sample distribution is observed in the three models, but still the posterior sample follow a similar shape than the actual curve. Moreover, our pacific sardine sample do well in predicting probabilities at lower landing levels. 
 
 ```{r y_rep, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 g1 
 
 ```
-
-In addition to a posterior predictive check, we also check divergence and treedepth.^[Explain what are these concepts...] In all three models, we did not have any divergent step in our estimation. The maximum treedepth was 11 for the Pacific sardine model, while in the others it was 10.   
 
 ```{r shinystan, eval=FALSE, include=FALSE}
 shinystan::launch_shinystan(fit_qPSDN_price) 
@@ -1731,9 +1715,6 @@ comp %>%
 
 
 ### Own species distribution effect
-
-The inclusion of hierarchical effects by port allows us to analyze the effects of the probability of presence on landings disaggregated by ports. We only focus our analysis in owns probability of presence effects, as other probability are analyzed as interaction (see next subsection). We can observe in Figure \ref{fig:sdmeffects} that the effects of the own probability of presence on landings are not strong (maybe I should use logs...). However, it is clear that it have a positive effect on landings, specially on port areas such as Columbia River at Oregon for Pacific sardine, and Monterrey for Northern anchovy, while a more moderate effect is observed at Santa Barbara Area for Northern anchovy.
-
 
 ```{r by_port_sdm, eval=FALSE, fig.cap=, include=FALSE}
 # PSDN plots
@@ -1791,12 +1772,6 @@ g1 + g2 + g3
 
 ### Interaction effects
 
-To study the effect of other species distribution on landings, we compute the conditional effects of the interaction between probabilities of presence. Let denote species A the species which we are analysing its landings, and species B and C the other species included in the model for species A landings. For each species, we compute the effect on landing of the interaction between the probability of presences of: 
-  + Species A and species B, 
-  + Species A versus species C,
-  + Species B versus species C.
-For example, for the Pacific sardine equation, we compute these results for the probability of presence effect between Pacific sardine and market squid, Pacific sardine and Northern anchovy, and market squid and Northern anchovy. 
-
 ```{r int_effect_PSDN_by_port, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 c_eff_int_psdn_msqd <- (conditional_effects(fit_qPSDN_price, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, 
                                             conditions = conditions_psdn, re_formula = NULL))
@@ -1836,8 +1811,6 @@ g3_PSDN <-  plot(c_eff_int_msqd_nanc, plot = FALSE)[[1]] + ggtitle('(c) Northern
         scale_x_continuous(name = "P(Pres): MSQD") + scale_y_continuous(name = "P(Pres): NANC") 
 save.image (file = "stan_fit.RData")
 ```
-
-Let first analyze the interaction effect of the probability of presences on Pacific sardine landings, presented in Figure \ref{fig:sdm_int_psdn}. We only shows results for the main three port where Pacific sardine is landed (Columbia River at Oregon, Los Angeles Area  and Monterrey Area). As we already commented in Figure \ref{fig:sdmeffects}, the effects the Pacific sardine's own probability of presence is positive, changing color from left to right in panels (a) and (b). Market squid seems to be an stronger substitute for Pacific sardine than Northern anchovy. This is suggested by the different slopes between panel (a) and panel (b). For instane, in Columbia River, an increase in the probability of presence for anchovy does decrease Pacific sardine landings as much as an increase in the probability of presece of market squid. 
 
 ```{r int_effect_PSDN_by_port_PLOT, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
 g1_PSDN / g2_PSDN
@@ -1883,12 +1856,9 @@ g3_MSQD <-  plot(c_eff_int_psdn_nanc, plot = FALSE)[[1]] + ggtitle('(c) Pacific 
 save.image (file = "stan_fit.RData")
 ```
 
-We found some similar findings for market squid in Figure \ref{fig:sdm_int_msqd}. Pacific sardine it is a strong substitute of market squid. In regard to Norther anchovy, there is some complementarity with market squid. We observe that when Northern anchovy presence increase, there is also an increase in market squid landings. 
-
 ```{r int_effect_MSQD_by_port_PLOT, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
 g1_MSQD / g2_MSQD 
 ```
-
 
 ```{r int_effect_NANC_by_port, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 conditions_nanc <- conditions_nanc %>% filter(port_ID == 3  | port_ID == 5)
@@ -1932,15 +1902,11 @@ g3_NANC <-  plot(c_eff_int_psdn_msqd, plot = FALSE)[[1]] + ggtitle('(c) Pacific 
 save.image (file = "stan_fit.RData")
 ```
 
-However, this complementary is not observed for Northern anchovy landings. When market squid presence increase, we observe a decrease in Northern anchovy landings. An interesting case is observed for Pacific sardine and Northern anchovy, in particular at Monterrey area. For small levels of Pacific sardine presence, Pacific sardine is a complement with Northern anchovy. However, after certain threshold, Pacific sardine is no longer complement and Pacific sardine become a substitute, reducing Northern anchovy landings when the probability of presence for Pacific sardine increase.
-
 ```{r int_effect_NANC_by_port_PLOT, eval=FALSE, fig.cap=, message=FALSE, warning=FALSE, include=FALSE}
 g1_NANC / g2_NANC 
 ```
 
-
 ### Pacific sardine closure
-Finally, lets analyze the effect of the Pacific sardine closure on market squid and Northern anchovy landings. We do not find significant results in the case of Northern anchovy. In the case of market squid, we found a decrease in the level of landing after the closure was implemented. It seems that some fisher exit the CPS fishery after the closure of Pacific sardine, reducing their participation in the market squid fishery. Our participation model results give us more details about what happen after the Pacific sardine closure.
 
 ```{r by_port_msqd_dclose, eval=FALSE, fig.cap=, include=FALSE}
 # conditions_dClose <- data.frame(port_ID = unique(est_data_msqd$dClose))
@@ -1962,11 +1928,7 @@ g2 <- plot(c_eff_close_nanc, plot = FALSE)[[1]] + ggtitle('(b) Northern anchovy'
 g1 / g2
 ```
 
-# Conclusions
-A possible extension of our research is to consider spatial autocorrelations between ports.^[See \cite{morris2019bayesian} for an application of a spatial model in a Bayesian framework.] Ports landing maybe correlated as vessel have the incentives to choose the port of landing, conditional on whether the port have the infrastructure for this. It is likely that they just land wherever is closer to the area they are fishing. Nevertheless, differential in prices could encourage them to travel a little further for higher prices. 
-
-
-
+# OTHER CODE
 
 <!-- ```{r int_effect_sep, eval=FALSE, include=FALSE} -->
 
