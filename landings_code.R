@@ -54,7 +54,7 @@ sum_mean_fun <- function(x, ...){
 }
 
 #---------------------------
-### Read monthly data created in "data_processing_vessels.R" ###
+### Read monthly data created in "~\data_processing_vessels.R" ###
 port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
 PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
 PacFIN.month.CPS.expand <- PacFIN.month %>% 
@@ -135,20 +135,25 @@ rm(g1, g2, q.psdn.by.month, q.msqd.by.month, port_names)
 
 ## Figure 2. Average annual landings, prices and revenues by species ##
 
+# Landings
 landings.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sumfun, data=PacFIN.month)
-landings.year <- landings.year %>% filter(LANDING_YEAR <2015)
-landings.avg.year <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE, FUN=meanfun, da=landings.year)
+landings.year.2000_2014 <- landings.year %>% filter(LANDING_YEAR <2015) %>% mutate(period="2000-2014")
+landings.year.2015_2020 <- landings.year %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
+landings.avg.year.2000_2014 <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE + period, FUN=meanfun, da=landings.year.2000_2014)
+landings.avg.year.2015_2020 <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE + period, FUN=meanfun, da=landings.year.2015_2020)
+landings.avg.year <- rbind.data.frame(landings.avg.year.2015_2020,landings.avg.year.2000_2014)
 
-g1 <- ggplot(landings.avg.year, aes(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS.sum.sum.mean)) +
-  geom_col(width=0.4) + ggtitle("(a) Annual landings") + 
+
+g1 <- ggplot(landings.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=LANDED_WEIGHT_MTONS.sum.sum.mean)) +
+  geom_bar(position="dodge", stat="identity") + ggtitle("(a) Annual landings") + 
   theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
-        axis.title = element_text(size = 8)) +
-  xlab("") + ylab("Landings (tons)") + 
+        axis.title = element_text(size = 8)) + guides(fill=guide_legend(title="Period: ")) +
+  xlab("") + ylab("Landings (tons)") +
   scale_x_discrete(labels=c("OCPS" = "Other\nCPEL\nSpecies", "OTHER" = "Other\nnon-CPEL\nSpecies",
                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
-                            "PSDN" = "Pacific\nSardine"))
+                            "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
 
-# Landings chart
+# Price
 price.year <- summaryBy(AFI_PRICE_PER_MTON.mean ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=meanfun, da=PacFIN.month)
 price.year <- price.year %>% filter(LANDING_YEAR <2015)
 price.avg.year <- summaryBy(AFI_PRICE_PER_MTON.mean.mean ~ PACFIN_SPECIES_CODE, FUN=meanfun, da=price.year)
@@ -162,7 +167,7 @@ g2 <- ggplot(price.avg.year, aes(PACFIN_SPECIES_CODE, AFI_PRICE_PER_MTON.mean.me
                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
                             "PSDN" = "Pacific\nSardine"))
 
-# Revenue chart
+# Revenue
 revenue.year <- summaryBy(AFI_EXVESSEL_REVENUE.sum ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sumfun, data=PacFIN.month)
 revenue.year <- revenue.year %>% filter(LANDING_YEAR <2015)
 revenue.avg.year <- summaryBy(AFI_EXVESSEL_REVENUE.sum.sum ~ PACFIN_SPECIES_CODE, FUN=meanfun, data=revenue.year)
@@ -176,7 +181,21 @@ g3 <- ggplot(revenue.avg.year, aes(PACFIN_SPECIES_CODE, AFI_EXVESSEL_REVENUE.sum
                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
                             "PSDN" = "Pacific\nSardine"))
 
-(g1 + g3) / g2
+# Number of vessels
+revenue.year <- summaryBy(AFI_EXVESSEL_REVENUE.sum ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sumfun, data=PacFIN.month)
+revenue.year <- revenue.year %>% filter(LANDING_YEAR <2015)
+revenue.avg.year <- summaryBy(AFI_EXVESSEL_REVENUE.sum.sum ~ PACFIN_SPECIES_CODE, FUN=meanfun, data=revenue.year)
+
+g4 <- ggplot(revenue.avg.year, aes(PACFIN_SPECIES_CODE, AFI_EXVESSEL_REVENUE.sum.sum.mean)) +
+  geom_col(width=0.4) + ggtitle("(b) Annual number of vessels") + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
+        axis.title = element_text(size = 8)) +
+  xlab("") + ylab("Annual revenues (Millions of USD)") +  scale_y_continuous(labels = label_number(scale = 1e-6)) +
+  scale_x_discrete(labels=c("OCPS" = "Other\nCPEL\nSpecies", "OTHER" = "Other\nnon-CPEL\nSpecies",
+                            "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
+                            "PSDN" = "Pacific\nSardine"))
+
+(g1 + g3) / (g2 + g4)
 
 rm(g1, g2, g3, landings.year, landings.avg.year, revenue.year, revenue.avg.year, price.year, price.avg.year)
 
@@ -184,27 +203,27 @@ rm(g1, g2, g3, landings.year, landings.avg.year, revenue.year, revenue.avg.year,
 
 ## Figure 3. Annual average landings by port area ##
 
-# Calculate number of vessels by species per month 
-nvessel.year <- PacFIN.month %>% 
-  dplyr::select(PACFIN_SPECIES_CODE, LANDING_YEAR, VESSEL_NUM) %>% unique() %>% 
-  mutate(n_vessel = 1) %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
-  summarise(n_vessel = sum(n_vessel))
-
-# Calculate average price and total landings by species per month
-landing.price.year <- summaryBy(LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PER_MTON.mean ~ 
-                                  PACFIN_SPECIES_CODE + LANDING_YEAR, 
-                                FUN=sum_mean_fun, data=PacFIN.month) 
+# # Calculate number of vessels by species per month 
+# nvessel.year <- PacFIN.month %>% 
+#   dplyr::select(PACFIN_SPECIES_CODE, LANDING_YEAR, VESSEL_NUM) %>% unique() %>% 
+#   mutate(n_vessel = 1) %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
+#   summarise(n_vessel = sum(n_vessel))
+# 
+# # Calculate average price and total landings by species per month
+# landing.price.year <- summaryBy(LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PER_MTON.mean ~ 
+#                                   PACFIN_SPECIES_CODE + LANDING_YEAR, 
+#                                 FUN=sum_mean_fun, data=PacFIN.month) 
 
 # Calculate landings by port and year
 landings.by.port.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ 
                                      PACFIN_SPECIES_CODE + PACFIN_PORT_CODE + LANDING_YEAR + AGENCY_CODE, FUN=sumfun, data=PacFIN.month)
+landings.by.port.year <- landings.by.port.year %>% filter(LANDING_YEAR <2015)
 landings.by.port.avg.year <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE + PACFIN_PORT_CODE 
                                        + AGENCY_CODE, FUN=meanfun, data=landings.by.port.year) %>%
   filter(PACFIN_PORT_CODE == "AST" | PACFIN_PORT_CODE == "HNM" | PACFIN_PORT_CODE == "SP" |
            PACFIN_PORT_CODE == "VEN" | PACFIN_PORT_CODE == "TRM" | PACFIN_PORT_CODE == "MOS" |
            PACFIN_PORT_CODE == "WPT" | PACFIN_PORT_CODE == "MNT" | PACFIN_PORT_CODE == "LWC" | 
-           PACFIN_PORT_CODE == "PRN" | PACFIN_PORT_CODE == "NEW" | PACFIN_PORT_CODE == "WIN" |
-           PACFIN_PORT_CODE == "ERK" ) %>%
+           PACFIN_PORT_CODE == "PRN" | PACFIN_PORT_CODE == "ERK" ) %>%
   mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, 
                                         "SP", "WLM", "TRM", "HNM", "VEN", "MNT", "MOS", "PRN", 
                                         "SF", "SLT", "ERK", "WIN", "NEW", "AST", "LWC", "WPT"))
@@ -530,126 +549,132 @@ rm(df, landing.price.year, nvessel.year, coeff, coeff1)
 # rm(port_names, landings.by.sel.ports, landings.by.port.year)
 
 
+
+
+
 # -----------------------------------------------------------------
 ### Participation (excluded from paper, enougth to use cluster) ###
 
-total.revenue <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(year_revenue = sum(AFI_EXVESSEL_REVENUE.sum))
+# total.revenue <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(year_revenue = sum(AFI_EXVESSEL_REVENUE.sum))
+# 
+# ### Vessel that participate in Pacific sardine fishery ###
+# psdn.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%
+#   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_psdn = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+#   merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
+#   filter(revenue_psdn > 0) %>% group_by(VESSEL_NUM) %>%
+#   summarise(anual_revenue_psdn = mean(revenue_psdn), 
+#             anual_revenue_all = mean(year_revenue), 
+#             n_year_fishing = n()) %>%
+#   mutate(perc_psdn_rev = anual_revenue_psdn/anual_revenue_all) %>%
+#   filter(anual_revenue_psdn >= 1000) %>%
+#   filter(perc_psdn_rev >= 0.05) %>%
+#   filter(n_year_fishing >= 3) %>%
+#   select(VESSEL_NUM) %>% unique() %>% mutate(d_psdn_fleet = 1)
+# 
+# ### Vessel that participate in Market squid fishery ###
+# msqd.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>%
+#   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_msqd = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+#   merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
+#   filter(revenue_msqd > 0) %>% group_by(VESSEL_NUM) %>%
+#   summarise(anual_revenue_msqd = mean(revenue_msqd), 
+#             anual_revenue_all = mean(year_revenue), 
+#             n_year_fishing = n()) %>%
+#   mutate(perc_msqd_rev = anual_revenue_msqd/anual_revenue_all) %>%
+#   filter(anual_revenue_msqd >= 1000) %>%
+#   filter(perc_msqd_rev >= 0.05) %>%
+#   filter(n_year_fishing >= 3) %>%
+#   select(VESSEL_NUM) %>% unique() %>% mutate(d_msqd_fleet = 1)
+# 
+# ### Vessel that participate in Northen anchovy fishery ###
+# nanc.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   filter(PACFIN_SPECIES_CODE  %in% c("NANC")) %>%
+#   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_nanc = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+#   merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
+#   filter(revenue_nanc > 0) %>% group_by(VESSEL_NUM) %>%
+#   summarise(anual_revenue_nanc = mean(revenue_nanc), 
+#             anual_revenue_all = mean(year_revenue), 
+#             n_year_fishing = n()) %>%
+#   mutate(perc_nanc_rev = anual_revenue_nanc/anual_revenue_all) %>%
+#   filter(anual_revenue_nanc >= 1000) %>%
+#   filter(perc_nanc_rev >= 0.05) %>%
+#   filter(n_year_fishing >= 3) %>%
+#   select(VESSEL_NUM) %>% unique() %>% mutate(d_nanc_fleet = 1)
+# 
+# ### Vessel that participate in Pacific mackerel fishery ###
+# cmck.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   filter(PACFIN_SPECIES_CODE  %in% c("CMCK")) %>%
+#   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_cmck = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+#   merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
+#   filter(revenue_cmck > 0) %>% group_by(VESSEL_NUM) %>%
+#   summarise(anual_revenue_cmck = mean(revenue_cmck), 
+#             anual_revenue_all = mean(year_revenue), 
+#             n_year_fishing = n()) %>%
+#   mutate(perc_cmck_rev = anual_revenue_cmck/anual_revenue_all) %>%
+#   filter(anual_revenue_cmck >= 1000) %>%
+#   filter(perc_cmck_rev >= 0.05) %>%
+#   filter(n_year_fishing >= 3) %>%
+#   select(VESSEL_NUM) %>% unique() %>% mutate(d_cmck_fleet = 1)
+# 
+# ### Vessel that participate in Jack mackerel fishery ###
+# jmck.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   filter(PACFIN_SPECIES_CODE  %in% c("JMCK")) %>%
+#   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_jmck = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+#   merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
+#   filter(revenue_jmck > 0) %>% group_by(VESSEL_NUM) %>%
+#   summarise(anual_revenue_jmck = mean(revenue_jmck), 
+#             anual_revenue_all = mean(year_revenue), 
+#             n_year_fishing = n()) %>%
+#   mutate(perc_jmck_rev = anual_revenue_jmck/anual_revenue_all) %>%
+#   filter(anual_revenue_jmck >= 1000) %>%
+#   filter(perc_jmck_rev >= 0.05) %>%
+#   filter(n_year_fishing >= 3) %>%
+#   select(VESSEL_NUM) %>% unique() %>% mutate(d_jmck_fleet = 1)
+# 
+# ### Vessel that participate in Unknown mackerel fishery ###
+# umck.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+#   filter(PACFIN_SPECIES_CODE  %in% c("UMCK")) %>%
+#   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_umck = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+#   merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
+#   filter(revenue_umck > 0) %>% group_by(VESSEL_NUM) %>%
+#   summarise(anual_revenue_umck = mean(revenue_umck), 
+#             anual_revenue_all = mean(year_revenue), 
+#             n_year_fishing = n()) %>%
+#   mutate(perc_umck_rev = anual_revenue_umck/anual_revenue_all) %>%
+#   filter(anual_revenue_umck >= 1000) %>%
+#   filter(perc_umck_rev >= 0.05) %>%
+#   filter(n_year_fishing >= 3) %>%
+#   select(VESSEL_NUM) %>% unique() %>% mutate(d_umck_fleet = 1)
+# 
+# 
+# # Select vessel that participate in the CPS fishery. 
+# PacFIN.month <- PacFIN.month %>% 
+#   merge(psdn.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = TRUE) %>%
+#   merge(msqd.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = TRUE) %>%
+#   merge(nanc.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = TRUE) %>%
+#   merge(cmck.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = TRUE) %>%
+#   merge(jmck.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = TRUE) %>% 
+#   filter(d_psdn_fleet == 1 | d_msqd_fleet == 1 | d_nanc_fleet == 1 | d_cmck_fleet == 1 | d_jmck_fleet == 1) %>%
+#   rowwise() %>% 
+#   mutate(d_fleet_CPS = sum(d_psdn_fleet, d_msqd_fleet, d_nanc_fleet, d_cmck_fleet, d_jmck_fleet, na.rm = TRUE))
+# 
+# rm(total.revenue, psdn.fleet, msqd.fleet, nanc.fleet, cmck.fleet, jmck.fleet, umck.fleet)
+# 
+# # CREATE NEW PACFIN.MONTH.CPS DATASET!
+# PacFIN.month.CPS <- PacFIN.month %>% 
+#   dplyr::filter(PACFIN_SPECIES_CODE %in% 
+#                   c("CMCK", "JMCK", "MSQD", "NANC", "PSDN", "UMCK"))
 
-### Vessel that participate in Pacific sardine fishery ###
-psdn.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
-  filter(PACFIN_SPECIES_CODE  %in% c("PSDN")) %>%
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_psdn = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-  merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
-  filter(revenue_psdn > 0) %>% group_by(VESSEL_NUM) %>%
-  summarise(anual_revenue_psdn = mean(revenue_psdn), 
-            anual_revenue_all = mean(year_revenue), 
-            n_year_fishing = n()) %>%
-  mutate(perc_psdn_rev = anual_revenue_psdn/anual_revenue_all) %>%
-  filter(anual_revenue_psdn >= 1000) %>%
-  filter(perc_psdn_rev >= 0.05) %>%
-  filter(n_year_fishing >= 3) %>%
-  select(VESSEL_NUM) %>% unique() %>% mutate(d_psdn_fleet = 1)
-
-### Vessel that participate in Market squid fishery ###
-msqd.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
-  filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>%
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_msqd = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-  merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
-  filter(revenue_msqd > 0) %>% group_by(VESSEL_NUM) %>%
-  summarise(anual_revenue_msqd = mean(revenue_msqd), 
-            anual_revenue_all = mean(year_revenue), 
-            n_year_fishing = n()) %>%
-  mutate(perc_msqd_rev = anual_revenue_msqd/anual_revenue_all) %>%
-  filter(anual_revenue_msqd >= 1000) %>%
-  filter(perc_msqd_rev >= 0.05) %>%
-  filter(n_year_fishing >= 3) %>%
-  select(VESSEL_NUM) %>% unique() %>% mutate(d_msqd_fleet = 1)
-
-### Vessel that participate in Northen anchovy fishery ###
-nanc.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
-  filter(PACFIN_SPECIES_CODE  %in% c("NANC")) %>%
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_nanc = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-  merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
-  filter(revenue_nanc > 0) %>% group_by(VESSEL_NUM) %>%
-  summarise(anual_revenue_nanc = mean(revenue_nanc), 
-            anual_revenue_all = mean(year_revenue), 
-            n_year_fishing = n()) %>%
-  mutate(perc_nanc_rev = anual_revenue_nanc/anual_revenue_all) %>%
-  filter(anual_revenue_nanc >= 1000) %>%
-  filter(perc_nanc_rev >= 0.05) %>%
-  filter(n_year_fishing >= 3) %>%
-  select(VESSEL_NUM) %>% unique() %>% mutate(d_nanc_fleet = 1)
-
-### Vessel that participate in Pacific mackerel fishery ###
-cmck.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
-  filter(PACFIN_SPECIES_CODE  %in% c("CMCK")) %>%
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_cmck = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-  merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
-  filter(revenue_cmck > 0) %>% group_by(VESSEL_NUM) %>%
-  summarise(anual_revenue_cmck = mean(revenue_cmck), 
-            anual_revenue_all = mean(year_revenue), 
-            n_year_fishing = n()) %>%
-  mutate(perc_cmck_rev = anual_revenue_cmck/anual_revenue_all) %>%
-  filter(anual_revenue_cmck >= 1000) %>%
-  filter(perc_cmck_rev >= 0.05) %>%
-  filter(n_year_fishing >= 3) %>%
-  select(VESSEL_NUM) %>% unique() %>% mutate(d_cmck_fleet = 1)
-
-### Vessel that participate in Jack mackerel fishery ###
-jmck.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
-  filter(PACFIN_SPECIES_CODE  %in% c("JMCK")) %>%
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_jmck = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-  merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
-  filter(revenue_jmck > 0) %>% group_by(VESSEL_NUM) %>%
-  summarise(anual_revenue_jmck = mean(revenue_jmck), 
-            anual_revenue_all = mean(year_revenue), 
-            n_year_fishing = n()) %>%
-  mutate(perc_jmck_rev = anual_revenue_jmck/anual_revenue_all) %>%
-  filter(anual_revenue_jmck >= 1000) %>%
-  filter(perc_jmck_rev >= 0.05) %>%
-  filter(n_year_fishing >= 3) %>%
-  select(VESSEL_NUM) %>% unique() %>% mutate(d_jmck_fleet = 1)
-
-### Vessel that participate in Unknown mackerel fishery ###
-umck.fleet <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
-  filter(PACFIN_SPECIES_CODE  %in% c("UMCK")) %>%
-  group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(revenue_umck = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-  merge(total.revenue, by = c("VESSEL_NUM", "LANDING_YEAR"), all.x = TRUE) %>%
-  filter(revenue_umck > 0) %>% group_by(VESSEL_NUM) %>%
-  summarise(anual_revenue_umck = mean(revenue_umck), 
-            anual_revenue_all = mean(year_revenue), 
-            n_year_fishing = n()) %>%
-  mutate(perc_umck_rev = anual_revenue_umck/anual_revenue_all) %>%
-  filter(anual_revenue_umck >= 1000) %>%
-  filter(perc_umck_rev >= 0.05) %>%
-  filter(n_year_fishing >= 3) %>%
-  select(VESSEL_NUM) %>% unique() %>% mutate(d_umck_fleet = 1)
 
 
-# Select vessel that participate in the CPS fishery. 
-PacFIN.month <- PacFIN.month %>% 
-  merge(psdn.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = TRUE) %>%
-  merge(msqd.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = TRUE) %>%
-  merge(nanc.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = TRUE) %>%
-  merge(cmck.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = TRUE) %>%
-  merge(jmck.fleet, by = c("VESSEL_NUM"), all.y = FALSE, all.x = TRUE) %>% 
-  filter(d_psdn_fleet == 1 | d_msqd_fleet == 1 | d_nanc_fleet == 1 | d_cmck_fleet == 1 | d_jmck_fleet == 1) %>%
-  rowwise() %>% 
-  mutate(d_fleet_CPS = sum(d_psdn_fleet, d_msqd_fleet, d_nanc_fleet, d_cmck_fleet, d_jmck_fleet, na.rm = TRUE))
 
-rm(total.revenue, psdn.fleet, msqd.fleet, nanc.fleet, cmck.fleet, jmck.fleet, umck.fleet)
 
-# CREATE NEW PACFIN.MONTH.CPS DATASET!
-PacFIN.month.CPS <- PacFIN.month %>% 
-  dplyr::filter(PACFIN_SPECIES_CODE %in% 
-                  c("CMCK", "JMCK", "MSQD", "NANC", "PSDN", "UMCK"))
+#-----------------
+### Clustering ###
 
-```
-
-# Clustering
-
-```{r dataframe_cluster, include=FALSE}
+## Merge PacFIN data with results from clustering (~\Clustering\Clustering_Code_2.1.22)
 
 Hierarchical_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups.csv")
 # Hierarchical_Vessel_Groups1 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups1.csv")
@@ -666,19 +691,20 @@ PacFIN.month.cluster <- merge(PacFIN.month, Hierarchical_Vessel_Groups, by = ("V
 # rm(Hierarchical_Vessel_Groups, Hierarchical_Vessel_Groups1, Hierarchical_Vessel_Groups2, 
 #    Hierarchical_Vessel_Groups3, Hierarchical_Vessel_Groups4)
 
-```
 
-```{r cluster_descriptive_gear}
+
+## Descriptive statistics
+
+# Gear
+
 library("googlesheets4")
-
 gs4_auth(
   email = gargle::gargle_oauth_email(),
   path = NULL,
   scopes = "https://www.googleapis.com/auth/spreadsheets",
   cache = gargle::gargle_oauth_cache(),
   use_oob = gargle::gargle_oob_default(),
-  token = NULL
-)
+  token = NULL)
 
 
 ### How gear are used by clusters??? ###
@@ -707,11 +733,9 @@ colnames(table) = c("Gear", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", 
 
 rm(table, PacFIN.cluster)
 
-```
 
-```{r cluster_descriptive_ports}
 
-### In whoch port each cluster land? ###
+### In which port each cluster land? ###
 options(scipen=999)
 cluster.port <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
   group_by(group_all, PACFIN_PORT_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
@@ -738,11 +762,8 @@ gs4_create("Table2", sheets = table)
 
 rm(table, cluster.port)
 
-```
 
-```{r cluster_descriptive_ports_area}
-
-### In whoch port each cluster land? ###
+### In which port each cluster land? ###
 options(scipen=999)
 cluster.port.area <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
   group_by(group_all, PORT_AREA_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
