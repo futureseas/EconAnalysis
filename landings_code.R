@@ -57,7 +57,7 @@ sum_mean_fun <- function(x, ...){
 ### Read monthly data created in "data_processing_vessels.R" ###
 port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
 PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
-PacFIN.month.forage <- PacFIN.month %>% 
+PacFIN.month.CPS.expand <- PacFIN.month %>% 
   dplyr::filter(PACFIN_SPECIES_CODE %in% 
                   c("CMCK", "JMCK", "UMCK", "PBNT", "RHRG", "MSQD", "NANC", "PSDN"))
 
@@ -132,7 +132,7 @@ g1 / g2
 rm(g1, g2, q.psdn.by.month, q.msqd.by.month, port_names)
 
 
-## Figure 2. 
+## Figure 2. Average annual landings, prices and revenues by species 
 landings.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sumfun, data=PacFIN.month)
 landings.year <- landings.year %>% filter(LANDING_YEAR <2015)
 landings.avg.year <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE, FUN=meanfun, da=landings.year)
@@ -146,7 +146,7 @@ g1 <- ggplot(landings.avg.year, aes(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS.sum
                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
                             "PSDN" = "Pacific\nSardine"))
 
-## Landings chart
+# Landings chart
 price.year <- summaryBy(AFI_PRICE_PER_MTON.mean ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=meanfun, da=PacFIN.month)
 price.year <- price.year %>% filter(LANDING_YEAR <2015)
 price.avg.year <- summaryBy(AFI_PRICE_PER_MTON.mean.mean ~ PACFIN_SPECIES_CODE, FUN=meanfun, da=price.year)
@@ -160,8 +160,7 @@ g2 <- ggplot(price.avg.year, aes(PACFIN_SPECIES_CODE, AFI_PRICE_PER_MTON.mean.me
                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
                             "PSDN" = "Pacific\nSardine"))
 
-## Revenue chart
-
+# Revenue chart
 revenue.year <- summaryBy(AFI_EXVESSEL_REVENUE.sum ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sumfun, data=PacFIN.month)
 revenue.year <- revenue.year %>% filter(LANDING_YEAR <2015)
 revenue.avg.year <- summaryBy(AFI_EXVESSEL_REVENUE.sum.sum ~ PACFIN_SPECIES_CODE, FUN=meanfun, data=revenue.year)
@@ -179,23 +178,24 @@ g3 <- ggplot(revenue.avg.year, aes(PACFIN_SPECIES_CODE, AFI_EXVESSEL_REVENUE.sum
 
 rm(g1, g2, g3, landings.year, landings.avg.year, revenue.year, revenue.avg.year, price.year, price.avg.year)
 
-```
 
-```{r datasets_year, include=FALSE}
-# Calculate number of vessels by species per month # 
+
+
+
+## Figure 3. Annual average landings by port area
+
+# Calculate number of vessels by species per month 
 nvessel.year <- PacFIN.month.CPS %>% 
   dplyr::select(PACFIN_SPECIES_CODE, LANDING_YEAR, VESSEL_NUM) %>% unique() %>% 
   mutate(n_vessel = 1) %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
   summarise(n_vessel = sum(n_vessel))
 
-# Calculate average price and total landings by species per month #
+# Calculate average price and total landings by species per month
 landing.price.year <- summaryBy(LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PER_MTON.mean ~ 
                                   PACFIN_SPECIES_CODE + LANDING_YEAR, 
                                 FUN=sum_mean_fun, data=PacFIN.month.CPS) 
 
-```
 
-```{r avg_landings_by_port, echo=FALSE, fig.cap="Annual average landings by port area.\\label{fig:avg_landings_by_ports}", message=FALSE, warning=FALSE}
 landings.by.port.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ 
                                      PACFIN_SPECIES_CODE + PACFIN_PORT_CODE + LANDING_YEAR + AGENCY_CODE, FUN=sumfun, data=PacFIN.month.CPS)
 landings.by.port.avg.year <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE + PACFIN_PORT_CODE 
@@ -231,6 +231,10 @@ ggplot(landings.by.port.avg.year, aes(fill=PACFIN_SPECIES_CODE,
                             "VEN" = "Ventura", "WIN" = "Winchester\nBay",
                             "WLM" = "Willmington", "WPT" = "Westport")) +
   scale_color_brewer(palette="Set2")
+
+
+
+## Figure 4
 
 
 
