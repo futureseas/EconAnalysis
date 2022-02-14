@@ -242,6 +242,9 @@ landing.price.year.sel <- landing.price.year %>%
   dplyr::select("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean",
                 "PACFIN_SPECIES_CODE", "LANDING_YEAR")
 
+
+
+
 # Graph landing v/s number of  vessels
 coeff1 <- 200
 df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "MSQD")
@@ -398,7 +401,7 @@ g1 <-  ggplot(sdm.by.species) +
   scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff2, name = "P(presence)")) +
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
-  ggtitle("(a) Pacific sardine (within 60 km radious)")
+  ggtitle("(a) Pacific sardine (60 km radius)")
 
 coeff2 <- 300000
 g2 <- ggplot(sdm.by.species) + 
@@ -410,133 +413,68 @@ g2 <- ggplot(sdm.by.species) +
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8),
         legend.position="bottom") + 
-  ggtitle("(b) Market squid (Spawning aggregation model within 90 km radious)") +  scale_color_manual(name = "Variable: ", 
+  ggtitle("(b) Market squid (Spawning aggregation model; 90 km radius)") +  scale_color_manual(name = "Variable: ", 
                                                                                                       values = c("Landings" = "grey", "Probability of presence" = "blue"))
 
 g1 / g2
 
 rm(g1, g2, g3, sdm.by.species, coeff, coeff2, coeff3)
 
-```
-
-```{r SDM_land_by_port, echo=FALSE, fig.cap="Landings v/s probability of presence by port area.\\label{fig:sdm_land_by_port}", message=FALSE, warning=FALSE}
-
-sdm.by.species <- PacFIN.month.CPS %>%
-  dplyr::select(LANDING_YEAR, PORT_NAME, PSDN_SDM_60, MSQD_SDM_90, MSQD_SPAWN_SDM_90, 
-                MSQD_SPAWN_SDM_100, MSQD_SPAWN_SDM_200, MSQD_SPAWN_SDM_300, 
-                MSQD_SPAWN_SDM_5_100, NANC_SDM_20, 
-                LANDED_WEIGHT_MTONS.sum, PACFIN_SPECIES_CODE, PORT_AREA_CODE) %>% 
-  filter(LANDING_YEAR >= 2000 & LANDING_YEAR <= 2018) %>%
-  group_by(LANDING_YEAR, PORT_AREA_CODE, PACFIN_SPECIES_CODE) %>% 
-  summarize(MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
-            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=TRUE),
-            LANDED_WEIGHT_MTONS = sum(LANDED_WEIGHT_MTONS.sum, na.rm = TRUE)) %>%
-  spread(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS) %>% 
-  dplyr::rename(Landings_PSDN = PSDN) %>% dplyr::rename(Landings_MSQD = MSQD) %>% 
-  dplyr::rename(Landings_NANC = NANC) %>%
-  filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "SBA") %>% 
-  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "MNA", "SBA")) %>%
-  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
-            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
-            Landings_PSDN = sum(Landings_PSDN, na.rm = TRUE), 
-            Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE),
-            Landings_NANC = sum(Landings_NANC, na.rm = TRUE))
-# sdm.by.species$Date <- zoo::as.yearmon(paste(sdm.by.species$LANDING_YEAR, sdm.by.species$LANDING_MONTH, sep='-'))
-
-# Plot
-coeff2 <- 400000
-g2 <- ggplot(sdm.by.species) + 
-  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD, color = "Landings"), size = 0.5) +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SPAWN_SDM_90*coeff2, color = "Probability of presence"),
-            size = 0.5, linetype = "dashed") + 
-  facet_wrap(~ PORT_AREA_CODE) + scale_x_continuous(name = "Year") +
-  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff2, name = "P(presence)")) +
-  theme(plot.title = element_text(size=9, face="bold.italic"), 
-        axis.text = element_text(size = 7), axis.title = element_text(size = 8),
-        legend.position="none") + 
-  ggtitle("(a) Market squid (spawning biomass)") +  scale_color_manual(name = "Variable: ", 
-                                                                       values = c("Landings" = "grey", "Probability of presence" = "blue"))
-
-coeff3 <- 200000
-g3 <- ggplot(sdm.by.species) + 
-  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD, color = "Landings"), size = 0.5) +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SDM_90*coeff3, 
-                          color = "Probability of presence"),
-            size = 0.5, linetype = "dashed") + 
-  facet_wrap(~ PORT_AREA_CODE) + scale_x_continuous(name = "Year") +
-  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff3, name = "P(presence)")) +
-  theme(plot.title = element_text(size=9, face="bold.italic"), 
-        axis.text = element_text(size = 7), axis.title = element_text(size = 8),
-        legend.position="none") + 
-  ggtitle("(b) Market squid") +  scale_color_manual(name = "Variable: ",
-                                                    values = c("Landings" = "grey", "Probability of presence" = "blue"))
-
-
-g2 / g3
+# ## Figure XX. SDM v/s LAnding in Monterrey ##
+# 
+# collapse <- PacFIN_yearly %>%
+#   filter(Species_code == "NANC") %>%
+#   dplyr::select(Landing_year, Port, NANC_SDM_20_sep_dec, Landings, Species_code) %>% 
+#   filter(Port == "MNA") %>% mutate(Port = fct_relevel(Port, "MNA")) %>% 
+#   spread(Species_code, Landings) %>% dplyr::rename(Landings_NANC = NANC) %>%
+#   filter(Landing_year >= 2000 & Landing_year <= 2018)
+# 
+# # Plot
+# coeff <- 50000
+# g3 <- ggplot(collapse) + 
+#   geom_line(mapping = aes(x = Landing_year, y = Landings_NANC, color = "Landings"),
+#             size = 0.5) +
+#   geom_line(mapping = aes(x = Landing_year, y = NANC_SDM_20_sep_dec*coeff, color = "Probability of presence"), 
+#             size = 0.5, linetype = "dashed") + 
+#   facet_wrap(~ Port) + 
+#   scale_x_continuous(name = "Year") +
+#   scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff, name = element_blank())) +
+#   theme(legend.position="bottom", plot.title = element_text(size=9, face="bold.italic"), 
+#         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+#   ggtitle("Northern anchovy") +  scale_color_manual(name = "Variable: ", 
+#                                                     values = c("Landings" = "grey", "Probability of presence" = "blue"))
+# 
+# g3
+# 
+# 
+# collapse2 <- as.data.frame(diff(collapse$NANC_SDM_20_sep_dec))
+# names(collapse2)[1] <- 'NANC_SDM_20_sep_dec'
+# collapse2 <- collapse2 %>% mutate(Landings_NANC = diff(collapse$Landings_NANC)) %>% mutate(Port = "MNA") %>%
+#   mutate(Landing_year = seq(2001,2018))
+# 
+# dg3 <- ggplot(collapse2) + 
+#   geom_line(mapping = aes(x = Landing_year, y = Landings_NANC, color = "diff(Landings)"),
+#             size = 0.5) +
+#   geom_line(mapping = aes(x = Landing_year, y = NANC_SDM_20_sep_dec*coeff, color = "diff(Probability of presence)"), 
+#             size = 0.5, linetype = "dashed") + 
+#   facet_wrap(~ Port) + 
+#   scale_x_continuous(name = "Year") +
+#   scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff, name = element_blank())) +
+#   theme(legend.position="bottom", plot.title = element_text(size=9, face="bold.italic"), 
+#         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+#   ggtitle("Northern anchovy (first differences)") +  scale_color_manual(name = "Variable: ", 
+#                                                                         values = c("diff(Landings)" = "grey", "diff(Probability of presence)" = "blue"))
+# 
+# dg3
+# 
+# 
+# library("writexl")
+# write_xlsx(collapse,"Data\\monterrey_NANC_sdm_landings.xlsx")
 
 
 
+## Figure 6. Evolution of Pacific sardine landings and the number of vessels landing market squid
 
-
-rm(g2, g3, sdm.by.species, coeff1, coeff2, coeff3)
-
-```
-
-```{r SDM_land_NANC_in_MNA, eval=FALSE, include=FALSE}
-
-collapse <- PacFIN_yearly %>%
-  filter(Species_code == "NANC") %>%
-  dplyr::select(Landing_year, Port, NANC_SDM_20_sep_dec, Landings, Species_code) %>% 
-  filter(Port == "MNA") %>% mutate(Port = fct_relevel(Port, "MNA")) %>% 
-  spread(Species_code, Landings) %>% dplyr::rename(Landings_NANC = NANC) %>%
-  filter(Landing_year >= 2000 & Landing_year <= 2018)
-
-# Plot
-coeff <- 50000
-g3 <- ggplot(collapse) + 
-  geom_line(mapping = aes(x = Landing_year, y = Landings_NANC, color = "Landings"),
-            size = 0.5) +
-  geom_line(mapping = aes(x = Landing_year, y = NANC_SDM_20_sep_dec*coeff, color = "Probability of presence"), 
-            size = 0.5, linetype = "dashed") + 
-  facet_wrap(~ Port) + 
-  scale_x_continuous(name = "Year") +
-  scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff, name = element_blank())) +
-  theme(legend.position="bottom", plot.title = element_text(size=9, face="bold.italic"), 
-        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
-  ggtitle("Northern anchovy") +  scale_color_manual(name = "Variable: ", 
-                                                    values = c("Landings" = "grey", "Probability of presence" = "blue"))
-
-g3
-
-
-collapse2 <- as.data.frame(diff(collapse$NANC_SDM_20_sep_dec))
-names(collapse2)[1] <- 'NANC_SDM_20_sep_dec'
-collapse2 <- collapse2 %>% mutate(Landings_NANC = diff(collapse$Landings_NANC)) %>% mutate(Port = "MNA") %>%
-  mutate(Landing_year = seq(2001,2018))
-
-dg3 <- ggplot(collapse2) + 
-  geom_line(mapping = aes(x = Landing_year, y = Landings_NANC, color = "diff(Landings)"),
-            size = 0.5) +
-  geom_line(mapping = aes(x = Landing_year, y = NANC_SDM_20_sep_dec*coeff, color = "diff(Probability of presence)"), 
-            size = 0.5, linetype = "dashed") + 
-  facet_wrap(~ Port) + 
-  scale_x_continuous(name = "Year") +
-  scale_y_continuous(name = element_blank(), sec.axis = sec_axis(~./coeff, name = element_blank())) +
-  theme(legend.position="bottom", plot.title = element_text(size=9, face="bold.italic"), 
-        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
-  ggtitle("Northern anchovy (first differences)") +  scale_color_manual(name = "Variable: ", 
-                                                                        values = c("diff(Landings)" = "grey", "diff(Probability of presence)" = "blue"))
-
-dg3
-
-
-library("writexl")
-write_xlsx(collapse,"Data\\monterrey_NANC_sdm_landings.xlsx")
-
-```
-
-```{r ts_landings_vessels, echo=FALSE}
 landing.nvessels.year.sel <- landing.price.year %>%
   inner_join(nvessel.year, by = c("PACFIN_SPECIES_CODE", "LANDING_YEAR")) %>%
   dplyr::select("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel", "PACFIN_SPECIES_CODE", "LANDING_YEAR")
@@ -563,41 +501,38 @@ ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1
                                                                         labels=c("LANDED_WEIGHT_MTONS.sum.sum" = "Landings of Pacific sardine", 
                                                                                  "n_vessel" = "Number of vessels landing market squid")) 
 
-# rm(g1, g2, g3, g4, df, landing.nvessels.year.sel, coeff)
-# rm(landing.price.year, nvessel.year)
-
-```
-
-```{r ts_by_port, echo=FALSE}
-
-landings.by.sel.ports <- landings.by.port.year %>% 
-  filter(PACFIN_PORT_CODE == "SP" | PACFIN_PORT_CODE == "TRM" | 
-           PACFIN_PORT_CODE == "MOS") %>%
-  filter(PACFIN_SPECIES_CODE == "PSDN" |  PACFIN_SPECIES_CODE == "MSQD") %>%
-  mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, "SP", "TRM", "HNM", "MNT", "MOS")) %>%
-  filter(LANDING_YEAR >= 2000)
-
-port_names <- as_labeller(c(`SP` = "San Pedro", `TRM` = "Terminal Island", 
-                            `MOS` = "Moss Landing", `MNT` = "Monterrey", `HNM` = "Hueneme"))
+rm(df, landing.price.year, nvessel.year, coeff, coeff1)
 
 
-ggplot(landings.by.sel.ports, aes(y=LANDED_WEIGHT_MTONS.sum.sum, 
-                                  x=LANDING_YEAR, color=PACFIN_SPECIES_CODE, group=PACFIN_SPECIES_CODE)) +
-  geom_line(size=1) + xlab("Year") + ylab("Landings (tons)") + 
-  facet_wrap(~ PACFIN_PORT_CODE, labeller = port_names, nrow = 3, ncol = 1) +
-  theme(legend.position="right") + 
-  theme(axis.text.x = element_text(angle=90)) +
-  guides(color=guide_legend(title="Species: ")) +
-  scale_color_brewer(palette="Set2", labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
-                                              "PHRG" = "Pacific Herring", "PSDN" = "Pacific Sardine"))
+# ## Figure XXX. Landings of squid and sardine by ports 
+# 
+# landings.by.sel.ports <- landings.by.port.year %>% 
+#   filter(PACFIN_PORT_CODE == "SP" | PACFIN_PORT_CODE == "TRM" | 
+#            PACFIN_PORT_CODE == "MOS") %>%
+#   filter(PACFIN_SPECIES_CODE == "PSDN" |  PACFIN_SPECIES_CODE == "MSQD") %>%
+#   mutate(PACFIN_PORT_CODE = fct_relevel(PACFIN_PORT_CODE, "SP", "TRM", "HNM", "MNT", "MOS")) %>%
+#   filter(LANDING_YEAR >= 2000)
+# 
+# port_names <- as_labeller(c(`SP` = "San Pedro", `TRM` = "Terminal Island", 
+#                             `MOS` = "Moss Landing", `MNT` = "Monterrey", `HNM` = "Hueneme"))
+# 
+# 
+# ggplot(landings.by.sel.ports, aes(y=LANDED_WEIGHT_MTONS.sum.sum, 
+#                                   x=LANDING_YEAR, color=PACFIN_SPECIES_CODE, group=PACFIN_SPECIES_CODE)) +
+#   geom_line(size=1) + xlab("Year") + ylab("Landings (tons)") + 
+#   facet_wrap(~ PACFIN_PORT_CODE, labeller = port_names, nrow = 3, ncol = 1) +
+#   theme(legend.position="right") + 
+#   theme(axis.text.x = element_text(angle=90)) +
+#   guides(color=guide_legend(title="Species: ")) +
+#   scale_color_brewer(palette="Set2", labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
+#                                               "PHRG" = "Pacific Herring", "PSDN" = "Pacific Sardine"))
+# 
+# rm(port_names, landings.by.sel.ports, landings.by.port.year)
 
-rm(port_names, landings.by.sel.ports, landings.by.port.year)
 
-```
+# -----------------------------------------------------------------
+### Participation (excluded from paper, enougth to use cluster) ###
 
-# Participation (excluded from paper, enougth to use cluster)
-
-```{r participation, eval=FALSE, include=FALSE}
 total.revenue <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
   group_by(VESSEL_NUM, LANDING_YEAR) %>% summarise(year_revenue = sum(AFI_EXVESSEL_REVENUE.sum))
 
