@@ -348,7 +348,7 @@ landing.price.year.sel <- summaryBy(LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PER_MTON
 
 # Graph landing v/s number of  vessels
 coeff <- 1500
-df <- landing.nvessels.year.sel %>% filter(PACFIN_SPECIES_CODE == "MSQD" | PACFIN_SPECIES_CODE == "PSDN") %>%
+df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "MSQD" | PACFIN_SPECIES_CODE == "PSDN") %>%
   mutate(n_vessel = ifelse(PACFIN_SPECIES_CODE == "MSQD", n_vessel, 0)) %>%
   mutate(LANDED_WEIGHT_MTONS.sum.sum = ifelse(PACFIN_SPECIES_CODE == "PSDN",
                                               LANDED_WEIGHT_MTONS.sum.sum, 0)) %>%
@@ -368,7 +368,7 @@ ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1
                                                                         labels=c("LANDED_WEIGHT_MTONS.sum.sum" = "Landings of Pacific sardine", 
                                                                                  "n_vessel" = "Number of vessels landing market squid")) 
 
-rm(df, landing.price.year, nvessel.year, coeff, coeff1)
+rm(df, landing.price.year.select, nvessel.year, coeff)
 
 
 
@@ -439,9 +439,6 @@ rm(g1, g2, sdm.by.species, coeff, coeff2, area_names, landing.price.year.sel)
 # I wonder if this perception is due to the fact that some vessels actually changed 
 # their catch composition, but that something else was limiting landings - perhaps availability. 
 # Could you plot annual squid landings relative to total annual landings the above for the CPS LE vessels?
-
-#----------------------------------
-## Figure 4. Evolution of annual total landings and average annual prices ##
 
 ## Calculate average price and total landings by species per month
 landing.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sum_mean_fun, data=PacFIN.month) %>% 

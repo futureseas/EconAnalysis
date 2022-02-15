@@ -40,62 +40,21 @@ Tickets <- select(Tickets, c(FTID, VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_SPECI
 ## Remove records associated with landings of zero value; this is likely bycatch 
 Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),] 
   # 80% of the total number of tickets, from 4,596,193 tickets to 3,709,040.
-nrow(as.data.frame(unique(Tickets$FTID))) 
+  nrow(as.data.frame(unique(Tickets$FTID))) 
 
   
-## Find the dominant species by value of each fishing trip, presumably this is the target species.
-
-# Using the logic of metiers, all landings of each fishing trip should be tagged with a single identifier.
-Boats<-dcast(Tickets, FTID ~ PACFIN_SPECIES_COMMON_NAME, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
-  row.names(Boats) <- Boats$FTID
-  FTID<-Boats$FTID
-  Boats<-Boats[,-(1)]
-  X<-as.data.frame(colnames(Boats)[apply(Boats,1,which.max)])
-  colnames(X)<-"Dominant"
-  Trip_Dominant<-as.data.frame(cbind(FTID,X))
-  Tickets<-merge(Tickets, Trip_Dominant, by='FTID')
-  
-  
-# Subset to select only records where one of the forage fish species of interest was the target species; 
-# Note that previously I was excluding Pacific Herring (which to me makes sense), but also "Round Herring" & "Pacific Bonito". 
-# Here I've made an edit, thinking it would probably be most defensible to exclude Pacific Herring and 
-# then lump "Round Herring", "Pacific Bonito", "Chub Mackerel", "Jack Mackerel" and "UNSP. Mackerel" together into an "Other" column.
-  
-FF_Tickets<-Tickets[which(Tickets$Dominant=="PACIFIC SARDINE" | Tickets$Dominant=="MARKET SQUID"| Tickets$Dominant=="NORTHERN ANCHOVY"|
-                          Tickets$Dominant=="CHUB MACKEREL" | Tickets$Dominant=="JACK MACKEREL" | Tickets$Dominant=="UNSP. MACKEREL"|
-                          Tickets$Dominant=="ROUND HERRING" | Tickets$Dominant=="PACIFIC BONITO"),]
-  
-  FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "CHUB MACKEREL"] <- "OTHER")
-  FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "JACK MACKEREL"] <- "OTHER")
-  FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "UNSP. MACKEREL"] <- "OTHER")
-  FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "ROUND HERRING"] <- "OTHER")
-  FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "PACIFIC BONITO"] <- "OTHER")
-  
-# Creating a filter here to only retain vessels with more than 3 forage fish landings 
-# (tickets where FF is the dominant species) over the time period. 
-# I think 3 is appropriate if you are clustering several years together, 
+## Creating a filter here to only retain vessels with more than 3 forage fish landings 
+#  (tickets where FF is the dominant species) over the time period. 
+#  I think 3 is appropriate if you are clustering several years together, 
 #  but if you are just clustering a single year than maybe you should drop it down to 1. 
-  
-  FTID_Value<-aggregate(AFI_EXVESSEL_REVENUE~FTID+VESSEL_NUM, FUN=sum, data=FF_Tickets)
-  FTID_Value<-FTID_Value[FTID_Value$VESSEL_NUM %in% names(which(table(FTID_Value$VESSEL_NUM) > 3)), ]
-  FF_Tickets<-setDT(FF_Tickets)[VESSEL_NUM %chin% FTID_Value$VESSEL_NUM]    
-  FF_Tickets<-as.data.frame(FF_Tickets)
-  
-  ###Find the list of unique vessels in the subset, these are the vessels we will cluster
-  FF_Vessels<-as.data.frame(unique(FTID_Value$VESSEL_NUM)) 
-  names(FF_Vessels)[1]<-"VESSEL_NUM"
-  FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM==""),])
-  names(FF_Vessels)[1]<-"VESSEL_NUM"
-  FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="UNKNOWN"),])
-  names(FF_Vessels)[1]<-"VESSEL_NUM"
-  FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="MISSING"),])
-  names(FF_Vessels)[1]<-"VESSEL_NUM"
-  
-  ###Subset from the complete data set to only retain records associated with these Vessels       
+
+FF_Vessels <- read.csv(file = here::here("Clustering", "FF_Vessels.csv")) 
+
+  #Subset from the complete data set to only retain records associated with these Vessels       
   Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]            
   Tickets<-as.data.frame(Tickets)
   
-  rm(Boats, FF_Vessels, Trip_Dominant, X, FTID, FTID_Value)
+  rm(FF_Vessels)
 
   #removal
   nrow_tickets <- nrow(Tickets)
@@ -106,7 +65,7 @@ FF_Tickets<-Tickets[which(Tickets$Dominant=="PACIFIC SARDINE" | Tickets$Dominant
   nrow(as.data.frame(unique(Tickets$FTID))) 
   nrow(as.data.frame(unique(Tickets$VESSEL_NUM))) 
 
-rm(removal.df, FF_Tickets, nrow_tickets)
+rm(removal.df, nrow_tickets)
 
 #----------------------
 ### Create monthly data

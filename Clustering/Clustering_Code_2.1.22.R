@@ -48,9 +48,9 @@ if (n.period == 1) {
   max.year = 2020
   n.clust = 5
 } else if (n.period == 5) {
-  period = "2000-2020"
-  min.year = 2000 
-  max.year = 2020
+  period = "2005-2014"
+  min.year = 2005 
+  max.year = 2014
   n.clust = 7
 }
 
@@ -119,6 +119,10 @@ FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="UNKNOWN"),])
 names(FF_Vessels)[1]<-"VESSEL_NUM"
 FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="MISSING"),])
 names(FF_Vessels)[1]<-"VESSEL_NUM"
+
+if (n.period == 5) {
+  write.csv(FF_Vessels, "FF_Vessels.csv", row.names = FALSE)
+}
 
 ###Subset from the complete data set to only retain records associated with these Vessels       
 Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]            
