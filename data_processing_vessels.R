@@ -9,48 +9,44 @@ library(forcats)
 library(cluster)
 library(ggplot2)
 
-
-
-###################
-### PacFIN data ###
-###################
-
-##---------------------------------
-## Create PacFIN database ##
+#-----------------------
+### Read PacFIN database
 
 rm(list=ls())
 gc()
 
-# Read PacFIN data by vessels for different decades #
+## Read PacFIN data by vessels for different decades #
 Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
 Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
 Tickets<-rbind(Tickets1, Tickets2)
 rm(Tickets1, Tickets2)
 
+## Number of fish tickets and vessels resporting it.
 nrow(as.data.frame(unique(Tickets$FTID))) 
 nrow(as.data.frame(unique(Tickets$VESSEL_NUM))) 
 
-# Include price per kilogram
-  Tickets$AFI_PRICE_PER_MTON <- Tickets$AFI_PRICE_PER_POUND * 2.20462 * 1000
+## Include price per kilogram
+Tickets$AFI_PRICE_PER_MTON <- Tickets$AFI_PRICE_PER_POUND * 2.20462 * 1000
   
-## --------------------------------  
 ## Create subsample excluding bycatch and vessels that never target a FF species
   
-#Subset the data to get remove columns not relevant to this analysis. This will speed things up.
+## Subset the data to get remove columns not relevant to this analysis. This will speed things up.
 Tickets <- select(Tickets, c(FTID, VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, 
                              AFI_PRICE_PER_MTON, LANDED_WEIGHT_MTONS, AFI_EXVESSEL_REVENUE, 
                              VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_HORSEPOWER, NUM_OF_DAYS_FISHED,
                              PACFIN_GEAR_CODE, PORT_NAME, PACFIN_PORT_CODE, LANDING_YEAR, LANDING_MONTH,  
                              AGENCY_CODE, REMOVAL_TYPE_CODE))
                
-# Remove records associated with landings of zero value; this is likely bycatch 
-Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
- # 80% of the total number of tickets, from 4,596,193 tickets to 3,709,040.
-  
-# Find the dominant species by value of each fishing trip, presumably this is the target species. 
-  ## Using the logic of metiers, all landings of each fishing trip should be tagged with a single identifier.
+## Remove records associated with landings of zero value; this is likely bycatch 
+Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),] 
+  # 80% of the total number of tickets, from 4,596,193 tickets to 3,709,040.
+nrow(as.data.frame(unique(Tickets$FTID))) 
 
-  Boats<-dcast(Tickets, FTID ~ PACFIN_SPECIES_COMMON_NAME, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
+  
+## Find the dominant species by value of each fishing trip, presumably this is the target species.
+
+# Using the logic of metiers, all landings of each fishing trip should be tagged with a single identifier.
+Boats<-dcast(Tickets, FTID ~ PACFIN_SPECIES_COMMON_NAME, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
   row.names(Boats) <- Boats$FTID
   FTID<-Boats$FTID
   Boats<-Boats[,-(1)]
@@ -60,13 +56,14 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   Tickets<-merge(Tickets, Trip_Dominant, by='FTID')
   
   
-  ###Subset to select only records where one of the forage fish species of interest was the target species; note that previously I was excluding Pacific Herring
-  ###(which to me makes sense), but also "Round Herring" & "Pacific Bonito". Here I've made an edit, thinking it would probably be most defensible to exclude Pacific Herring and 
-  ##then lump "Round Herring", "Pacific Bonito", "Chub Mackerel", "Jack Mackerel" and "UNSP. Mackerel" together into an "Other" column.
+# Subset to select only records where one of the forage fish species of interest was the target species; 
+# Note that previously I was excluding Pacific Herring (which to me makes sense), but also "Round Herring" & "Pacific Bonito". 
+# Here I've made an edit, thinking it would probably be most defensible to exclude Pacific Herring and 
+# then lump "Round Herring", "Pacific Bonito", "Chub Mackerel", "Jack Mackerel" and "UNSP. Mackerel" together into an "Other" column.
   
-  FF_Tickets<-Tickets[which(Tickets$Dominant=="PACIFIC SARDINE" | Tickets$Dominant=="MARKET SQUID"| Tickets$Dominant=="NORTHERN ANCHOVY"|
-                              Tickets$Dominant=="CHUB MACKEREL" | Tickets$Dominant=="JACK MACKEREL" | Tickets$Dominant=="UNSP. MACKEREL"|
-                              Tickets$Dominant=="ROUND HERRING" | Tickets$Dominant=="PACIFIC BONITO"),]
+FF_Tickets<-Tickets[which(Tickets$Dominant=="PACIFIC SARDINE" | Tickets$Dominant=="MARKET SQUID"| Tickets$Dominant=="NORTHERN ANCHOVY"|
+                          Tickets$Dominant=="CHUB MACKEREL" | Tickets$Dominant=="JACK MACKEREL" | Tickets$Dominant=="UNSP. MACKEREL"|
+                          Tickets$Dominant=="ROUND HERRING" | Tickets$Dominant=="PACIFIC BONITO"),]
   
   FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "CHUB MACKEREL"] <- "OTHER")
   FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "JACK MACKEREL"] <- "OTHER")
@@ -74,10 +71,11 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "ROUND HERRING"] <- "OTHER")
   FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "PACIFIC BONITO"] <- "OTHER")
   
+# Creating a filter here to only retain vessels with more than 3 forage fish landings 
+# (tickets where FF is the dominant species) over the time period. 
+# I think 3 is appropriate if you are clustering several years together, 
+#  but if you are just clustering a single year than maybe you should drop it down to 1. 
   
-  ###Creating a filter here to only retain vessels with more than 3 forage fish landings (tickets where FF is the dominant species) 
-  ###over the time period. I think 3 is appropriate if you are clustering
-  ###several years together, but if you are just clustering a single year than maybe you should drop it down to 1. 
   FTID_Value<-aggregate(AFI_EXVESSEL_REVENUE~FTID+VESSEL_NUM, FUN=sum, data=FF_Tickets)
   FTID_Value<-FTID_Value[FTID_Value$VESSEL_NUM %in% names(which(table(FTID_Value$VESSEL_NUM) > 3)), ]
   FF_Tickets<-setDT(FF_Tickets)[VESSEL_NUM %chin% FTID_Value$VESSEL_NUM]    
@@ -97,7 +95,7 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
   Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]            
   Tickets<-as.data.frame(Tickets)
   
-  rm(Boats, FF_Tickets, FF_Vessels, Trip_Dominant, X, FTID)
+  rm(Boats, FF_Vessels, Trip_Dominant, X, FTID, FTID_Value)
 
   #removal
   nrow_tickets <- nrow(Tickets)
@@ -105,15 +103,13 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
     group_by(REMOVAL_TYPE_CODE) %>% summarise(n_group = sum(n)/nrow_tickets*100) 
   
   Tickets <- Tickets %>% filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
-
-  
   nrow(as.data.frame(unique(Tickets$FTID))) 
   nrow(as.data.frame(unique(Tickets$VESSEL_NUM))) 
 
+rm(removal.df, FF_Tickets, nrow_tickets)
 
-  
-  
-# Create monthly data
+#----------------------
+### Create monthly data
   
   sum_mean_fun <- function(x, ...){
     c(mean=mean(x, na.rm=TRUE, ...), sum=sum(x, na.rm=TRUE, ...)) }
@@ -123,11 +119,11 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
                             ~ VESSEL_NUM + PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE + PORT_NAME + 
                               PACFIN_PORT_CODE + LANDING_YEAR + LANDING_MONTH + AGENCY_CODE,
                           FUN=sum_mean_fun, data=Tickets)
-rm(Tickets, removal.df)
+rm(Tickets)
   
-#######################
-## Merge SDM dataset ##
-#######################
+
+#---------------------
+### Merge SDM data set 
   
 # # Create database with ports that land FF species
 # Ports.landing.FF <- PacFIN.month %>%
@@ -169,10 +165,9 @@ PacFIN.month.SDM <- PacFIN.month %>%
     dplyr::rename(NANC_SDM_20 = SDM_20)
 
 
-# #######################
-# ## Merge TAC dataset ##
-# #######################
-# 
+#----------------------
+### Merge TAC data set 
+#
 # # Open CSV file with TAC information and landings #
 #   TAC.PSDN <- read.csv(file ="C:\\GitHub\\EconAnalysis\\Data\\ACL_data\\historical_TAC.csv") %>%
 #     dplyr::rename(LANDING_YEAR = Year) %>% dplyr::rename(LANDING_MONTH = Month) %>% 
@@ -224,8 +219,7 @@ PacFIN.month.SDM <- PacFIN.month %>%
 #     select(-c("n", "csum", "TAC_mt_v2", "landings_psdn", 'no_psdn_land'))
 #   
 #   rm(dates, landings.psdn, TAC.PSDN)
-#   
-#   
+#   #   
 #   # Still landings after select just commercial fishery.
 #   
 #   # YEAR 2014

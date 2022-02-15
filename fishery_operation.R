@@ -1,6 +1,6 @@
-###########################
-### Landings paper code ###
-###########################
+#################################
+### Fishery operation results ###
+#################################
 
 rm(list = ls(all.names = TRUE)) 
 gc()
@@ -304,11 +304,12 @@ df <- gather(df, key = Variable, value = value,
              c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean"))
 g1 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
   scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff1, name = "Price (USD/Ton)")) +
-  theme(legend.position="none") + scale_x_continuous(name = element_blank()) + 
+  theme(legend.position="bottom") + scale_x_continuous(name = element_blank()) + 
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + # ggtitle("(b) Market Squid")  +  
   scale_color_brewer(palette="Set2",
-                     limits = c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean"))
+                     limits = c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean"),
+                     labels=c("AFI_PRICE_PER_MTON.mean.mean" = "Price", "LANDED_WEIGHT_MTONS.sum.sum" = "Landings"))
 
 coeff2 <- 100
 df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "PSDN")
@@ -445,25 +446,17 @@ rm(g1, g2, sdm.by.species, coeff, coeff2, area_names, landing.price.year.sel)
 ## Calculate average price and total landings by species per month
 landing.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sum_mean_fun, data=PacFIN.month) %>% 
   dplyr::select("LANDED_WEIGHT_MTONS.sum.sum", "PACFIN_SPECIES_CODE", "LANDING_YEAR")
-  landing.year.total <- landing.year
+  landing.year.total <- landing.year %>% group_by(LANDING_YEAR) %>% summarise(total_year = sum(LANDED_WEIGHT_MTONS.sum.sum))
 
 # Graph landings v/s number of vessels
+df <- landing.year %>% merge(landing.year.total, by = c("LANDING_YEAR"), all.x = TRUE) %>% 
+  filter(PACFIN_SPECIES_CODE == "MSQD") %>% mutate(relative_landings = LANDED_WEIGHT_MTONS.sum.sum/total_year) %>%
+  dplyr::select("LANDING_YEAR", "relative_landings")
 
-df <- landing.year %>% filter(PACFIN_SPECIES_CODE == "MSQD")
+ggplot(df, aes(x=LANDING_YEAR, y = relative_landings)) + geom_line(size=1) +
+  scale_y_percent(name = "% of total landings") 
 
-df$AFI_PRICE_PER_MTON.mean.mean <- df$AFI_PRICE_PER_MTON.mean.mean
-df <- gather(df, key = Variable, value = value,
-             c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean"))
-g1 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
-  scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff1, name = "Price (USD/Ton)")) +
-  theme(legend.position="none") + scale_x_continuous(name = element_blank()) + 
-  theme(plot.title = element_text(size=9, face="bold.italic"), 
-        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + # ggtitle("(b) Market Squid")  +  
-  scale_color_brewer(palette="Set2",
-                     limits = c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean"))
-
-(g1)
-rm(df, g1, landing.price.year, landing.price.year.sel)
+rm(df, landing.year, landing.year.total)
 
 
 
