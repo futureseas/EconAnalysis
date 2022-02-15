@@ -240,8 +240,6 @@ PacFIN.month.SDM <- PacFIN.month %>%
 #   # 4000
 #   # 4000
 #   
-# 
-# 
 # # Merge data with ACL #
 # PacFIN.month <- merge(PacFIN.month, landings.TAC.psdn,
 #                           by=c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
@@ -258,10 +256,26 @@ PacFIN.month.SDM <- PacFIN.month %>%
 # PacFIN.month.ACL <- PacFIN.month.ACL %>% mutate(TAC = ifelse(lat_port <= Alloc_lat, (TAC_S * TAC_mt), (TAC_N * TAC_mt)))
 
 
+# --------------------------------------------------------------------------------------
+### Merge PacFIN data with results from clustering (~\Clustering\Clustering_Code_2.1.22)
+
+Hierarchical_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups.csv")
+# Hierarchical_Vessel_Groups1 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups1.csv")
+# Hierarchical_Vessel_Groups2 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups2.csv")
+# Hierarchical_Vessel_Groups3 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups3.csv")
+# Hierarchical_Vessel_Groups4 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups4.csv")
+
+PacFIN.month.cluster <- merge(PacFIN.month.SDM, Hierarchical_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups1, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups2, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups3, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups4, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+
+# rm(Hierarchical_Vessel_Groups, Hierarchical_Vessel_Groups1, Hierarchical_Vessel_Groups2, 
+#    Hierarchical_Vessel_Groups3, Hierarchical_Vessel_Groups4)
 
 
-####################
-### Save DATASET ###
-####################
-  
-write.csv(PacFIN.month.SDM,"C:\\Data\\PacFIN data\\PacFIN_month.csv", row.names = FALSE)
+# --------------------------------------------------------------------------------------
+### Save DATASET
+
+write.csv(PacFIN.month.cluster,"C:\\Data\\PacFIN data\\PacFIN_month.csv", row.names = FALSE)

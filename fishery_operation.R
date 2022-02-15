@@ -398,7 +398,6 @@ sdm.by.species <- PacFIN.month.CPS %>%
             Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE),
             Landings_NANC = sum(Landings_NANC, na.rm = TRUE))
 
-
 area_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara",`MNA` = "Monterey"))
 
 # Plot
@@ -432,6 +431,40 @@ g2 <- ggplot(sdm.by.species) +
 g1 / g2
 
 rm(g1, g2, sdm.by.species, coeff, coeff2, area_names, landing.price.year.sel)
+
+
+#---------------------------------------------------------------------------------------------------------
+## Figure 7?
+# I wonder if this perception is due to the fact that some vessels actually changed 
+# their catch composition, but that something else was limiting landings - perhaps availability. 
+# Could you plot annual squid landings relative to total annual landings the above for the CPS LE vessels?
+
+#----------------------------------
+## Figure 4. Evolution of annual total landings and average annual prices ##
+
+## Calculate average price and total landings by species per month
+landing.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sum_mean_fun, data=PacFIN.month) %>% 
+  dplyr::select("LANDED_WEIGHT_MTONS.sum.sum", "PACFIN_SPECIES_CODE", "LANDING_YEAR")
+  landing.year.total <- landing.year
+
+# Graph landings v/s number of vessels
+
+df <- landing.year %>% filter(PACFIN_SPECIES_CODE == "MSQD")
+
+df$AFI_PRICE_PER_MTON.mean.mean <- df$AFI_PRICE_PER_MTON.mean.mean
+df <- gather(df, key = Variable, value = value,
+             c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean"))
+g1 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+  scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff1, name = "Price (USD/Ton)")) +
+  theme(legend.position="none") + scale_x_continuous(name = element_blank()) + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + # ggtitle("(b) Market Squid")  +  
+  scale_color_brewer(palette="Set2",
+                     limits = c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean"))
+
+(g1)
+rm(df, g1, landing.price.year, landing.price.year.sel)
+
 
 
 #---------------------------------------
