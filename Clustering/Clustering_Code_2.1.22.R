@@ -342,23 +342,25 @@ if (n.period == 1) {
 
 rm(hc, sub_grp)
 
-# ### Determine the Optimal number of Clusters using 
-# ### Partitioning Around Meoids and the "Average Silhouette Method"
-# 
-# Ks=sapply(2:25,
-#           function(i) 
-#             summary(silhouette(pam((Distance_matrix), k=i)))$avg.width)
-# plot(2:25,Ks, xlab="k",ylab="av.silhouette",type="b", pch=19)
-# Clusters<-pam(Distance_matrix, 6)
-# PAM_Vessel_Groups<-Vessels
-# PAM_Vessel_Groups$group<-Clusters$clustering
-# names(PAM_Vessel_Groups)[1]<-"VESSEL_NUM"
-# aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
-# 
-# rm(Ks, Clusters, Vessels, Distance_matrix)
-# 
-# ###Output here once you are satisfied if you want to save this information
-# write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv")
+
+
+### Determine the Optimal number of Clusters using
+### Partitioning Around Meoids and the "Average Silhouette Method"
+
+Ks=sapply(2:25,
+          function(i)
+            summary(silhouette(pam((Distance_matrix), k=i)))$avg.width)
+plot(2:25,Ks, xlab="k",ylab="av.silhouette",type="b", pch=19)
+Clusters<-pam(Distance_matrix, 6)
+PAM_Vessel_Groups<-Vessels
+PAM_Vessel_Groups$group<-Clusters$clustering
+names(PAM_Vessel_Groups)[1]<-"VESSEL_NUM"
+aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
+
+rm(Ks, Clusters, Vessels, Distance_matrix)
+
+###Output here once you are satisfied if you want to save this information
+write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv")
 
 
 
@@ -381,7 +383,7 @@ if (n.period == 1) {
 } else if (n.period == 4) {
   Group_Stats<-RAW_Scaled%>% group_by(group_4) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
 } else if (n.period == 5) {
-  Group_Stats<-RAW_Scaled%>% group_by(group_5) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+  Group_Stats<-RAW_Scaled%>% group_by(group_all) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
 }
 
 
