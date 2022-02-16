@@ -16,7 +16,7 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[3]]></group>
-<x ><![CDATA[72]]></x>
+<x ><![CDATA[197]]></x>
 <y ><![CDATA[244]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
@@ -63,8 +63,8 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[706]]></x>
-<y ><![CDATA[260]]></y>
+<x ><![CDATA[685]]></x>
+<y ><![CDATA[288]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -80,6 +80,13 @@
 <notes ><![CDATA[]]></notes>
 <confidence ><![CDATA[0]]></confidence>
 <influence ><![CDATA[0.6]]></influence>
+<name ><![CDATA[]]></name>
+</relationship>
+<relationship >
+<id ><![CDATA[107026235427]]></id>
+<notes ><![CDATA[]]></notes>
+<confidence ><![CDATA[0]]></confidence>
+<influence ><![CDATA[0]]></influence>
 <name ><![CDATA[]]></name>
 </relationship>
 </relationships>
@@ -150,18 +157,11 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[558]]></x>
-<y ><![CDATA[374]]></y>
+<x ><![CDATA[554]]></x>
+<y ><![CDATA[390]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
-<relationship >
-<id ><![CDATA[151748954349]]></id>
-<notes ><![CDATA[]]></notes>
-<confidence ><![CDATA[]]></confidence>
-<influence ><![CDATA[0.5]]></influence>
-<name ><![CDATA[Fish availabity]]></name>
-</relationship>
 <relationship >
 <id ><![CDATA[179405363400]]></id>
 <notes ><![CDATA[]]></notes>
@@ -197,8 +197,8 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[2]]></group>
-<x ><![CDATA[69]]></x>
-<y ><![CDATA[46]]></y>
+<x ><![CDATA[114]]></x>
+<y ><![CDATA[67]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -210,8 +210,8 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[857]]></x>
-<y ><![CDATA[427]]></y>
+<x ><![CDATA[844]]></x>
+<y ><![CDATA[408]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -238,7 +238,7 @@
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
 <x ><![CDATA[383]]></x>
-<y ><![CDATA[437]]></y>
+<y ><![CDATA[458]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -257,8 +257,8 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[2]]></group>
-<x ><![CDATA[71]]></x>
-<y ><![CDATA[146]]></y>
+<x ><![CDATA[91]]></x>
+<y ><![CDATA[147]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -291,8 +291,8 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[1]]></group>
-<x ><![CDATA[448]]></x>
-<y ><![CDATA[155]]></y>
+<x ><![CDATA[503]]></x>
+<y ><![CDATA[162]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -331,8 +331,8 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[299]]></x>
-<y ><![CDATA[370]]></y>
+<x ><![CDATA[298]]></x>
+<y ><![CDATA[393]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -351,8 +351,8 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[370]]></x>
-<y ><![CDATA[303]]></y>
+<x ><![CDATA[414]]></x>
+<y ><![CDATA[308]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -365,6 +365,19 @@
 </relationship>
 </relationships>
 </concept>
+<concept >
+<id ><![CDATA[106923532865]]></id>
+<name ><![CDATA[WHAT IF MULTISPECIES MODEL?]]></name>
+<notes ><![CDATA[]]></notes>
+<units ><![CDATA[]]></units>
+<group ><![CDATA[4]]></group>
+<x ><![CDATA[733]]></x>
+<y ><![CDATA[464]]></y>
+<preferredState ><![CDATA[0]]></preferredState>
+<actualState ><![CDATA[0]]></actualState>
+<relationships >
+</relationships>
+</concept>
 </concepts>
 <scenarios >
 <scenario >
@@ -374,7 +387,7 @@
 <selected ><![CDATA[true]]></selected>
 <influence ><![CDATA[0]]></influence>
 <id ><![CDATA[172337972065]]></id>
-<name ><![CDATA[Harvest by CPS fleet]]></name>
+<name ><![CDATA[Vessel target decisions]]></name>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 </concept>
@@ -421,14 +434,6 @@
 <concept >
 <selected ><![CDATA[true]]></selected>
 <influence ><![CDATA[0]]></influence>
-<id ><![CDATA[150422059580]]></id>
-<name ><![CDATA[Harvesting costs]]></name>
-<preferredState ><![CDATA[0]]></preferredState>
-<actualState ><![CDATA[0]]></actualState>
-</concept>
-<concept >
-<selected ><![CDATA[true]]></selected>
-<influence ><![CDATA[0]]></influence>
 <id ><![CDATA[107026235427]]></id>
 <name ><![CDATA[Distance to fishinmg grounds]]></name>
 <preferredState ><![CDATA[0]]></preferredState>
@@ -439,14 +444,6 @@
 <influence ><![CDATA[0]]></influence>
 <id ><![CDATA[194636365023]]></id>
 <name ><![CDATA[Aquaculture production]]></name>
-<preferredState ><![CDATA[0]]></preferredState>
-<actualState ><![CDATA[0]]></actualState>
-</concept>
-<concept >
-<selected ><![CDATA[true]]></selected>
-<influence ><![CDATA[0]]></influence>
-<id ><![CDATA[134961199204]]></id>
-<name ><![CDATA[Closures]]></name>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 </concept>
@@ -473,6 +470,41 @@
 <name ><![CDATA[Fuel price]]></name>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
+</concept>
+<concept >
+<selected ><![CDATA[true]]></selected>
+<influence ><![CDATA[]]></influence>
+<id ><![CDATA[112081478355]]></id>
+<name ><![CDATA[Landings]]></name>
+<preferredState ><![CDATA[0]]></preferredState>
+</concept>
+<concept >
+<selected ><![CDATA[true]]></selected>
+<influence ><![CDATA[]]></influence>
+<id ><![CDATA[157299948290]]></id>
+<name ><![CDATA[Expected Revenue]]></name>
+<preferredState ><![CDATA[0]]></preferredState>
+</concept>
+<concept >
+<selected ><![CDATA[true]]></selected>
+<influence ><![CDATA[]]></influence>
+<id ><![CDATA[161611561654]]></id>
+<name ><![CDATA[Expected Cost]]></name>
+<preferredState ><![CDATA[0]]></preferredState>
+</concept>
+<concept >
+<selected ><![CDATA[true]]></selected>
+<influence ><![CDATA[]]></influence>
+<id ><![CDATA[179405363400]]></id>
+<name ><![CDATA[Travel cost]]></name>
+<preferredState ><![CDATA[0]]></preferredState>
+</concept>
+<concept >
+<selected ><![CDATA[true]]></selected>
+<influence ><![CDATA[]]></influence>
+<id ><![CDATA[143367075844]]></id>
+<name ><![CDATA[TAC / Closures]]></name>
+<preferredState ><![CDATA[0]]></preferredState>
 </concept>
 </concepts>
 </scenario>
