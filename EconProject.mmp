@@ -12,35 +12,21 @@
 <concepts >
 <concept >
 <id ><![CDATA[172337972065]]></id>
-<name ><![CDATA[Harvest by CPS fleet]]></name>
+<name ><![CDATA[Vessel target decisions]]></name>
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
-<group ><![CDATA[0]]></group>
-<x ><![CDATA[457]]></x>
-<y ><![CDATA[305]]></y>
+<group ><![CDATA[3]]></group>
+<x ><![CDATA[72]]></x>
+<y ><![CDATA[244]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
 <relationship >
-<id ><![CDATA[158059168261]]></id>
+<id ><![CDATA[112081478355]]></id>
 <notes ><![CDATA[]]></notes>
 <confidence ><![CDATA[]]></confidence>
-<influence ><![CDATA[0]]></influence>
-<name ><![CDATA[Prices]]></name>
-</relationship>
-<relationship >
-<id ><![CDATA[151748954349]]></id>
-<notes ><![CDATA[]]></notes>
-<confidence ><![CDATA[]]></confidence>
-<influence ><![CDATA[-0.5]]></influence>
-<name ><![CDATA[Fish availabity]]></name>
-</relationship>
-<relationship >
-<id ><![CDATA[116369103536]]></id>
-<notes ><![CDATA[]]></notes>
-<confidence ><![CDATA[]]></confidence>
-<influence ><![CDATA[0.46]]></influence>
-<name ><![CDATA[Community income]]></name>
+<influence ><![CDATA[0.5]]></influence>
+<name ><![CDATA[Landings]]></name>
 </relationship>
 </relationships>
 </concept>
@@ -49,19 +35,12 @@
 <name ><![CDATA[Prices]]></name>
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
-<group ><![CDATA[2]]></group>
-<x ><![CDATA[427]]></x>
-<y ><![CDATA[149]]></y>
+<group ><![CDATA[0]]></group>
+<x ><![CDATA[531]]></x>
+<y ><![CDATA[86]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
-<relationship >
-<id ><![CDATA[172337972065]]></id>
-<notes ><![CDATA[]]></notes>
-<confidence ><![CDATA[]]></confidence>
-<influence ><![CDATA[0.5]]></influence>
-<name ><![CDATA[CPS fleet]]></name>
-</relationship>
 <relationship >
 <id ><![CDATA[116369103536]]></id>
 <notes ><![CDATA[]]></notes>
@@ -69,6 +48,13 @@
 <influence ><![CDATA[0.4]]></influence>
 <name ><![CDATA[Community income]]></name>
 </relationship>
+<relationship >
+<id ><![CDATA[157299948290]]></id>
+<notes ><![CDATA[]]></notes>
+<confidence ><![CDATA[0]]></confidence>
+<influence ><![CDATA[0.58]]></influence>
+<name ><![CDATA[]]></name>
+</relationship>
 </relationships>
 </concept>
 <concept >
@@ -76,25 +62,25 @@
 <name ><![CDATA[Fish availabity]]></name>
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
-<group ><![CDATA[2]]></group>
-<x ><![CDATA[104]]></x>
-<y ><![CDATA[175]]></y>
+<group ><![CDATA[0]]></group>
+<x ><![CDATA[706]]></x>
+<y ><![CDATA[260]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
 <relationship >
-<id ><![CDATA[172337972065]]></id>
+<id ><![CDATA[157299948290]]></id>
 <notes ><![CDATA[]]></notes>
-<confidence ><![CDATA[]]></confidence>
-<influence ><![CDATA[0.7]]></influence>
-<name ><![CDATA[Landings by CPS fleet]]></name>
+<confidence ><![CDATA[0]]></confidence>
+<influence ><![CDATA[0.58]]></influence>
+<name ><![CDATA[]]></name>
 </relationship>
 <relationship >
-<id ><![CDATA[134961199204]]></id>
+<id ><![CDATA[143367075844]]></id>
 <notes ><![CDATA[]]></notes>
-<confidence ><![CDATA[]]></confidence>
-<influence ><![CDATA[-0.56]]></influence>
-<name ><![CDATA[Closures]]></name>
+<confidence ><![CDATA[0]]></confidence>
+<influence ><![CDATA[0.6]]></influence>
+<name ><![CDATA[]]></name>
 </relationship>
 </relationships>
 </concept>
@@ -104,17 +90,17 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[509]]></x>
-<y ><![CDATA[419]]></y>
+<x ><![CDATA[62]]></x>
+<y ><![CDATA[436]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
 <relationship >
-<id ><![CDATA[172337972065]]></id>
+<id ><![CDATA[161611561654]]></id>
 <notes ><![CDATA[]]></notes>
 <confidence ><![CDATA[]]></confidence>
-<influence ><![CDATA[-0.55]]></influence>
-<name ><![CDATA[Landings by CPS fleet]]></name>
+<influence ><![CDATA[0.55]]></influence>
+<name ><![CDATA[Cost]]></name>
 </relationship>
 </relationships>
 </concept>
@@ -124,8 +110,8 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[575]]></x>
-<y ><![CDATA[10]]></y>
+<x ><![CDATA[767]]></x>
+<y ><![CDATA[29]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -144,8 +130,8 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[807]]></x>
-<y ><![CDATA[27]]></y>
+<x ><![CDATA[792]]></x>
+<y ><![CDATA[93]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -159,49 +145,29 @@
 </relationships>
 </concept>
 <concept >
-<id ><![CDATA[150422059580]]></id>
-<name ><![CDATA[Harvesting costs]]></name>
-<notes ><![CDATA[]]></notes>
-<units ><![CDATA[]]></units>
-<group ><![CDATA[0]]></group>
-<x ><![CDATA[824]]></x>
-<y ><![CDATA[421]]></y>
-<preferredState ><![CDATA[0]]></preferredState>
-<actualState ><![CDATA[0]]></actualState>
-<relationships >
-<relationship >
-<id ><![CDATA[172337972065]]></id>
-<notes ><![CDATA[]]></notes>
-<confidence ><![CDATA[]]></confidence>
-<influence ><![CDATA[-0.56]]></influence>
-<name ><![CDATA[Landings by CPS fleet]]></name>
-</relationship>
-</relationships>
-</concept>
-<concept >
 <id ><![CDATA[107026235427]]></id>
 <name ><![CDATA[Distance to fishinmg grounds]]></name>
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[551]]></x>
-<y ><![CDATA[512]]></y>
+<x ><![CDATA[558]]></x>
+<y ><![CDATA[374]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
-<relationship >
-<id ><![CDATA[150422059580]]></id>
-<notes ><![CDATA[]]></notes>
-<confidence ><![CDATA[]]></confidence>
-<influence ><![CDATA[0.48]]></influence>
-<name ><![CDATA[Harvesting costs]]></name>
-</relationship>
 <relationship >
 <id ><![CDATA[151748954349]]></id>
 <notes ><![CDATA[]]></notes>
 <confidence ><![CDATA[]]></confidence>
 <influence ><![CDATA[0.5]]></influence>
 <name ><![CDATA[Fish availabity]]></name>
+</relationship>
+<relationship >
+<id ><![CDATA[179405363400]]></id>
+<notes ><![CDATA[]]></notes>
+<confidence ><![CDATA[]]></confidence>
+<influence ><![CDATA[0.5]]></influence>
+<name ><![CDATA[Travel cost]]></name>
 </relationship>
 </relationships>
 </concept>
@@ -211,8 +177,8 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[924]]></x>
-<y ><![CDATA[72]]></y>
+<x ><![CDATA[794]]></x>
+<y ><![CDATA[148]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -226,33 +192,13 @@
 </relationships>
 </concept>
 <concept >
-<id ><![CDATA[134961199204]]></id>
-<name ><![CDATA[Closures]]></name>
-<notes ><![CDATA[]]></notes>
-<units ><![CDATA[]]></units>
-<group ><![CDATA[0]]></group>
-<x ><![CDATA[88]]></x>
-<y ><![CDATA[438]]></y>
-<preferredState ><![CDATA[0]]></preferredState>
-<actualState ><![CDATA[0]]></actualState>
-<relationships >
-<relationship >
-<id ><![CDATA[172337972065]]></id>
-<notes ><![CDATA[]]></notes>
-<confidence ><![CDATA[]]></confidence>
-<influence ><![CDATA[-0.64]]></influence>
-<name ><![CDATA[Landings by CPS fleet]]></name>
-</relationship>
-</relationships>
-</concept>
-<concept >
 <id ><![CDATA[116369103536]]></id>
 <name ><![CDATA[Community income]]></name>
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
-<group ><![CDATA[0]]></group>
-<x ><![CDATA[885]]></x>
-<y ><![CDATA[213]]></y>
+<group ><![CDATA[2]]></group>
+<x ><![CDATA[69]]></x>
+<y ><![CDATA[46]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -264,8 +210,8 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[278]]></x>
-<y ><![CDATA[570]]></y>
+<x ><![CDATA[857]]></x>
+<y ><![CDATA[427]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
@@ -291,17 +237,131 @@
 <notes ><![CDATA[]]></notes>
 <units ><![CDATA[]]></units>
 <group ><![CDATA[0]]></group>
-<x ><![CDATA[1004]]></x>
-<y ><![CDATA[355]]></y>
+<x ><![CDATA[383]]></x>
+<y ><![CDATA[437]]></y>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 <relationships >
 <relationship >
-<id ><![CDATA[150422059580]]></id>
+<id ><![CDATA[179405363400]]></id>
 <notes ><![CDATA[]]></notes>
 <confidence ><![CDATA[]]></confidence>
 <influence ><![CDATA[0.4]]></influence>
-<name ><![CDATA[Harvesting costs]]></name>
+<name ><![CDATA[Travel cost]]></name>
+</relationship>
+</relationships>
+</concept>
+<concept >
+<id ><![CDATA[112081478355]]></id>
+<name ><![CDATA[Landings]]></name>
+<notes ><![CDATA[]]></notes>
+<units ><![CDATA[]]></units>
+<group ><![CDATA[2]]></group>
+<x ><![CDATA[71]]></x>
+<y ><![CDATA[146]]></y>
+<preferredState ><![CDATA[0]]></preferredState>
+<actualState ><![CDATA[0]]></actualState>
+<relationships >
+<relationship >
+<id ><![CDATA[116369103536]]></id>
+<notes ><![CDATA[]]></notes>
+<confidence ><![CDATA[]]></confidence>
+<influence ><![CDATA[0.5]]></influence>
+<name ><![CDATA[Community income]]></name>
+</relationship>
+<relationship >
+<id ><![CDATA[158059168261]]></id>
+<notes ><![CDATA[]]></notes>
+<confidence ><![CDATA[0]]></confidence>
+<influence ><![CDATA[-0.17]]></influence>
+<name ><![CDATA[]]></name>
+</relationship>
+<relationship >
+<id ><![CDATA[151748954349]]></id>
+<notes ><![CDATA[]]></notes>
+<confidence ><![CDATA[0]]></confidence>
+<influence ><![CDATA[-0.55]]></influence>
+<name ><![CDATA[]]></name>
+</relationship>
+</relationships>
+</concept>
+<concept >
+<id ><![CDATA[157299948290]]></id>
+<name ><![CDATA[Expected Revenue]]></name>
+<notes ><![CDATA[]]></notes>
+<units ><![CDATA[]]></units>
+<group ><![CDATA[1]]></group>
+<x ><![CDATA[448]]></x>
+<y ><![CDATA[155]]></y>
+<preferredState ><![CDATA[0]]></preferredState>
+<actualState ><![CDATA[0]]></actualState>
+<relationships >
+<relationship >
+<id ><![CDATA[172337972065]]></id>
+<notes ><![CDATA[]]></notes>
+<confidence ><![CDATA[]]></confidence>
+<influence ><![CDATA[0.5]]></influence>
+<name ><![CDATA[Vessel target decisions]]></name>
+</relationship>
+</relationships>
+</concept>
+<concept >
+<id ><![CDATA[161611561654]]></id>
+<name ><![CDATA[Expected Cost]]></name>
+<notes ><![CDATA[]]></notes>
+<units ><![CDATA[]]></units>
+<group ><![CDATA[1]]></group>
+<x ><![CDATA[76]]></x>
+<y ><![CDATA[353]]></y>
+<preferredState ><![CDATA[0]]></preferredState>
+<actualState ><![CDATA[0]]></actualState>
+<relationships >
+<relationship >
+<id ><![CDATA[172337972065]]></id>
+<notes ><![CDATA[]]></notes>
+<confidence ><![CDATA[]]></confidence>
+<influence ><![CDATA[-0.5]]></influence>
+<name ><![CDATA[Vessel target decisions]]></name>
+</relationship>
+</relationships>
+</concept>
+<concept >
+<id ><![CDATA[179405363400]]></id>
+<name ><![CDATA[Travel cost]]></name>
+<notes ><![CDATA[]]></notes>
+<units ><![CDATA[]]></units>
+<group ><![CDATA[0]]></group>
+<x ><![CDATA[299]]></x>
+<y ><![CDATA[370]]></y>
+<preferredState ><![CDATA[0]]></preferredState>
+<actualState ><![CDATA[0]]></actualState>
+<relationships >
+<relationship >
+<id ><![CDATA[161611561654]]></id>
+<notes ><![CDATA[]]></notes>
+<confidence ><![CDATA[]]></confidence>
+<influence ><![CDATA[0.5]]></influence>
+<name ><![CDATA[Cost]]></name>
+</relationship>
+</relationships>
+</concept>
+<concept >
+<id ><![CDATA[143367075844]]></id>
+<name ><![CDATA[TAC / Closures]]></name>
+<notes ><![CDATA[]]></notes>
+<units ><![CDATA[]]></units>
+<group ><![CDATA[0]]></group>
+<x ><![CDATA[370]]></x>
+<y ><![CDATA[303]]></y>
+<preferredState ><![CDATA[0]]></preferredState>
+<actualState ><![CDATA[0]]></actualState>
+<relationships >
+<relationship >
+<id ><![CDATA[172337972065]]></id>
+<notes ><![CDATA[]]></notes>
+<confidence ><![CDATA[0]]></confidence>
+<influence ><![CDATA[0.48]]></influence>
+<name ><![CDATA[]]></name>
 </relationship>
 </relationships>
 </concept>
@@ -314,7 +374,7 @@
 <selected ><![CDATA[true]]></selected>
 <influence ><![CDATA[0]]></influence>
 <id ><![CDATA[172337972065]]></id>
-<name ><![CDATA[Landings by CPS fleet]]></name>
+<name ><![CDATA[Harvest by CPS fleet]]></name>
 <preferredState ><![CDATA[0]]></preferredState>
 <actualState ><![CDATA[0]]></actualState>
 </concept>
