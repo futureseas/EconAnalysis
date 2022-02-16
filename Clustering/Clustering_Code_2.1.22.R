@@ -51,7 +51,7 @@ if (n.period == 1) {
   period = "2005-2014"
   min.year = 2005 
   max.year = 2014
-  n.clust = 7
+  n.clust = 5
 }
 
 # ----------------------------------------
@@ -372,7 +372,18 @@ RAW_Scaled$VESSEL_NUM<-Vessel_IDs
 RAW_Scaled<-merge(RAW_Scaled, Hierarchical_Vessel_Groups, by="VESSEL_NUM")
 RAW_Scaled<-RAW_Scaled[c(-1)]
 
-Group_Stats<-RAW_Scaled%>% group_by(group) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+if (n.period == 1) {
+  Group_Stats<-RAW_Scaled%>% group_by(group_1) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+} else if (n.period == 2) {
+  Group_Stats<-RAW_Scaled%>% group_by(group_2) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+} else if (n.period == 3) {
+  Group_Stats<-RAW_Scaled%>% group_by(group_3) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+} else if (n.period == 4) {
+  Group_Stats<-RAW_Scaled%>% group_by(group_4) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+} else if (n.period == 5) {
+  Group_Stats<-RAW_Scaled%>% group_by(group_5) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+}
+
 
 Group_Length<-Group_Stats[c(1,2,10)]
 Group_Length$Var<-"Length"
