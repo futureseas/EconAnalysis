@@ -56,7 +56,6 @@ sum_mean_fun <- function(x, ...){
 
 #---------------------------
 ### Read monthly data created in "~\data_processing_vessels.R" ###
-port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
 PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
 PacFIN.month.CPS.expand <- PacFIN.month %>% 
   dplyr::filter(PACFIN_SPECIES_CODE %in% 
@@ -74,7 +73,7 @@ PacFIN.month <- PacFIN.month %>% mutate(
                                              ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
 
 ### Include port area code (using PacFIN Port Code)
-PacFIN.month <- PacFIN.month %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
+
 PacFIN.month.CPS <- PacFIN.month %>% 
   dplyr::filter(PACFIN_SPECIES_CODE %in% 
                   c("OCPS", "MSQD", "NANC", "PSDN"))

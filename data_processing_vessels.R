@@ -235,4 +235,7 @@ PacFIN.month.cluster <- merge(PacFIN.month.SDM, PAM_Vessel_Groups, by = ("VESSEL
 # --------------------------------------------------------------------------------------
 ### Save DATASET
 
-write.csv(PacFIN.month.cluster,"C:\\Data\\PacFIN data\\PacFIN_month.csv", row.names = FALSE)
+port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
+PacFIN.month <- PacFIN.month.cluster %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
+
+write.csv(PacFIN.month,"C:\\Data\\PacFIN data\\PacFIN_month.csv", row.names = FALSE)
