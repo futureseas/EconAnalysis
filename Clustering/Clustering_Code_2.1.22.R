@@ -51,7 +51,7 @@ if (n.period == 1) {
   period = "2005-2014"
   min.year = 2005 
   max.year = 2014
-  n.clust = 7
+  n.clust = 6
 }
 
 # ----------------------------------------
@@ -180,8 +180,8 @@ Landings_Volume_Value<-merge(Total_Weight, Total_Revenue, by="VESSEL_NUM")
 Landings_Volume_Value<-merge(Landings_Volume_Value, Total_Years, by="VESSEL_NUM")
 Landings_Volume_Value$LANDED_WEIGHT_LBS<-Landings_Volume_Value$LANDED_WEIGHT_LBS/Landings_Volume_Value$AFI_EXVESSEL_REVENUE.y
 Landings_Volume_Value$AFI_EXVESSEL_REVENUE.x<-Landings_Volume_Value$AFI_EXVESSEL_REVENUE.x/Landings_Volume_Value$AFI_EXVESSEL_REVENUE.y
-Landings_Volume_Value<-Landings_Volume_Value[c(1,3)] # I exclude AVG_LBS as is higly correlated with revenue
-names(Landings_Volume_Value)<-c("VESSEL_NUM", "AVG_REVENUE")
+Landings_Volume_Value<-Landings_Volume_Value[c(1,2,3)] 
+names(Landings_Volume_Value)<-c("VESSEL_NUM", "AVG_LBS", "AVG_REVENUE")
 
 rm(Total_Weight, Total_Revenue, Total_Years)
 
@@ -300,90 +300,115 @@ rm(Boats, FFP, FF_Total, Total, Number, NumberM, NumberMM)
 RAW<-merge(Vessel_Characteristics, Landings_Volume_Value, by="VESSEL_NUM")
 RAW<-merge(RAW, Vessel_Geography, by="VESSEL_NUM")
 RAW<-merge(RAW, FF_Landings_and_Diversity, by="VESSEL_NUM")
-###I wound up removing weight because I felt as if that and length provided redundant information; in that regard you may want to check the degree to which other
-###cluster inputs are collinear using Variance Inflation Factors or something else (This is the approach O'Farrel et al. 2019 use)
-
-RAW<-RAW[c(-3)]
-rm(Vessel_Characteristics, Landings_Volume_Value, Vessel_Geography, FF_Landings_and_Diversity)
-
-
-###Create a scaled data frame of cluster inputs 
-## and the accompanying distance matrix
 Vessel_IDs <- RAW[,1]
 Vessels<-as.data.frame(Vessel_IDs)
 RAW<-RAW[c(-1)]
-
-cor(RAW)
-
 rownames(RAW)<-Vessel_IDs
+rm(Vessel_Characteristics, Landings_Volume_Value, Vessel_Geography, FF_Landings_and_Diversity)
+### I wound up removing weight because I felt as if that and length provided redundant information;
+RAW<-RAW[c(-2)] # Delete Weight
+RAW<-RAW[c(-2)] # Delete AVG_LBS
+RAW<-RAW[c(-7)]
+
+# Check the degree to which other cluster inputs are collinear using VIF (O'Farrel et al. 2019)
+cor(RAW)
+M <- lm(Length ~.,data=RAW)
+regclass::VIF(M)
+M <- lm(AVG_REVENUE ~.,data=RAW)
+regclass::VIF(M)
+M <- lm(LAT~.,data=RAW)   
+regclass::VIF(M)
+M <- lm(DISTANCE_A~.,data=RAW)    
+regclass::VIF(M)
+M <- lm(Percentage~.,data=RAW)     
+regclass::VIF(M)
+M <- lm(diversity~.,data=RAW) 
+regclass::VIF(M)
+
+###Create a scaled data frame of cluster inputs 
+## and the accompanying distance matrix
 RAW_Scaled<-as.data.frame(RAW %>% scale())
 Distance_matrix<-dist(RAW_Scaled, method='euclidean')
 
-##Determine the Optimal Number of Clusters using NbClust 
-## (the Method O'Farrell et al. 2019 use);
-## If you don't like the value it spits out, another defensible means
-## of choosing would be the peak of the Second differences Dindex Values
-## (which in this case is 7)
-dbclust <- NbClust(RAW_Scaled, distance = "euclidean", min.nc=2, max.nc=10, 
-             method = "ward.D", index = "alllong")
+#--------------------------------------------------------
+##Determine the Optimal Number of Clusters 
 
-# length(unique(dbclust$Best.partition))
-fviz_nbclust(dbclust)
+# ## (A) Using NbClust (the Method O'Farrell et al. 2019 use);
+# ## If you don't like the value it spits out, another defensible means
+# ## of choosing would be the peak of the Second differences Dindex Values
+# ## (which in this case is 7)
+# dbclust <- NbClust(RAW_Scaled, distance = "euclidean", min.nc=2, max.nc=9, 
+#              method = "ward.D", index = "alllong")
+#            fviz_nbclust(dbclust)
+#            # length(unique(dbclust$Best.partition))
 
-
-#################################
-### CHOOSE NUMBER OF CLUSTERS ###
-#################################
-
-##Visualize what the dendrogram looks like with this number of clusters
-hc <- hclust(Distance_matrix, method="ward.D")  
-fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
-sub_grp <- cutree(hc, n.clust)
-
-###See how many vessels are in each group
-table(sub_grp)
-Hierarchical_Vessel_Groups <- Vessels %>% mutate(cluster=sub_grp)
-names(Hierarchical_Vessel_Groups)<-c("VESSEL_NUM", "group")
-
-if (n.period == 1) {
-  names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_1"
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups1.csv", row.names = FALSE)
-} else if (n.period == 2) {
-  names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_2"
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups2.csv", row.names = FALSE)
-} else if (n.period == 3) {
-  names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_3"
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups3.csv", row.names = FALSE)
-} else if (n.period == 4) {
-  names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_4"
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups4.csv", row.names = FALSE)
-} else if (n.period == 5) {
-  names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_all"
-  write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups.csv", row.names = FALSE)
-}
-
-rm(hc, sub_grp)
-
-
-
-### Determine the Optimal number of Clusters using
-### Partitioning Around Meoids and the "Average Silhouette Method"
-
-Ks=sapply(2:25,
+## (B) Using PAM and the "Average Silhouette Method"
+Ks=sapply(2:9,
           function(i)
             summary(silhouette(pam((Distance_matrix), k=i)))$avg.width)
-plot(2:25,Ks, xlab="k",ylab="av.silhouette",type="b", pch=19)
-Clusters<-pam(Distance_matrix, 7)
+          plot(2:9,Ks, xlab="k",ylab="av.silhouette",type="b", pch=19)
+
+          n.clust = 6
+
+#--------------------------------------------------------
+# ### Heriarchical Clustering
+# 
+# ##Visualize what the dendrogram looks like with this number of clusters
+# hc <- hclust(Distance_matrix, method="ward.D")  
+# fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
+# sub_grp <- cutree(hc, n.clust)
+# 
+# ###See how many vessels are in each group
+# table(sub_grp)
+# Hierarchical_Vessel_Groups <- Vessels %>% mutate(cluster=sub_grp)
+# names(Hierarchical_Vessel_Groups)<-c("VESSEL_NUM", "group")
+# 
+# if (n.period == 1) {
+#   names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_1"
+#   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups1.csv", row.names = FALSE)
+# } else if (n.period == 2) {
+#   names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_2"
+#   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups2.csv", row.names = FALSE)
+# } else if (n.period == 3) {
+#   names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_3"
+#   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups3.csv", row.names = FALSE)
+# } else if (n.period == 4) {
+#   names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_4"
+#   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups4.csv", row.names = FALSE)
+# } else if (n.period == 5) {
+#   names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_all"
+#   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups.csv", row.names = FALSE)
+# }
+# 
+# rm(hc, sub_grp)
+
+
+#--------------------------------------------------------
+### PAM Clustering
+Clusters<-pam(Distance_matrix, n.clust)
 PAM_Vessel_Groups<-Vessels
 PAM_Vessel_Groups$group<-Clusters$clustering
 names(PAM_Vessel_Groups)[1]<-"VESSEL_NUM"
 aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
-
 rm(Ks, Clusters, Vessels, Distance_matrix)
 
 ###Output here once you are satisfied if you want to save this information
-write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv")
-
+if (n.period == 1) {
+names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_1"
+    write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups1.csv", row.names = FALSE)
+  } else if (n.period == 2) {
+    names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_2"
+    write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups2.csv", row.names = FALSE)
+  } else if (n.period == 3) {
+    names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_3"
+    write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups3.csv", row.names = FALSE)
+  } else if (n.period == 4) {
+    names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_4"
+    write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups4.csv", row.names = FALSE)
+  } else if (n.period == 5) {
+    names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
+    write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv", row.names = FALSE)
+  }
 
 
 ##############################
@@ -408,34 +433,29 @@ if (n.period == 1) {
   Group_Stats<-RAW_Scaled%>% group_by(group_all) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
 }
 
-Group_Stats<-RAW_Scaled%>% group_by(group) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
-
-
-Group_Length<-Group_Stats[c(1,2,9)]
+Group_Length<-Group_Stats[c(1,2,8)]
 Group_Length$Var<-"Length"
 names(Group_Length)<- c("memb", "mean", "sd", "Variable")
-Group_Avg_Revenue<-Group_Stats[c(1,3,10)]
+Group_Avg_Revenue<-Group_Stats[c(1,3,9)]
 Group_Avg_Revenue$Var<-"Average_Revenue"
 names(Group_Avg_Revenue)<- c("memb", "mean", "sd", "Variable")
-Group_LAT<-Group_Stats[c(1,4,11)]
+Group_LAT<-Group_Stats[c(1,4,10)]
 Group_LAT$Var<-"Latitude_COG"
 names(Group_LAT)<- c("memb", "mean", "sd", "Variable")
-Group_Inertia<-Group_Stats[c(1,5,12)]
+Group_Inertia<-Group_Stats[c(1,5,11)]
 Group_Inertia$Var<-"Inertia"
 names(Group_Inertia)<- c("memb", "mean", "sd", "Variable")
-Group_Percentage_FF<-Group_Stats[c(1,6,13)]
+Group_Percentage_FF<-Group_Stats[c(1,6,12)]
 Group_Percentage_FF$Var<-"Percentage_FF"
 names(Group_Percentage_FF)<- c("memb", "mean", "sd", "Variable")
-Group_FF_Diversity<-Group_Stats[c(1,7,14)]
+Group_FF_Diversity<-Group_Stats[c(1,7,13)]
 Group_FF_Diversity$Var<-"FF_Diversity"
 names(Group_FF_Diversity)<- c("memb", "mean", "sd", "Variable")
-Group_FF_Months<-Group_Stats[c(1,8,15)]
-Group_FF_Months$Var<-"FF_Months"
-names(Group_FF_Months)<- c("memb", "mean", "sd", "Variable")
 
-Group_Stats_Wide<-rbind(Group_Length, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity, Group_FF_Months)
+
+Group_Stats_Wide<-rbind(Group_Length, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
 Group_Stats_Wide$memb<-as.factor(Group_Stats_Wide$memb)
-rm(Group_Length, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity, Group_FF_Months)
+rm(Group_Length, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
 
 Group_Stats_Wide <- Group_Stats_Wide %>%
   mutate(time.period = period) 
@@ -453,28 +473,3 @@ if (n.period == 1) {
 }
 
 rm(Group_Stats_Wide, Group_Stats, Vessel_IDs, FTID)
-
-ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
-  geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
-  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
-  theme_classic()  + theme(axis.text.x = element_text(angle = 90))
-
-
-if (n.period == 5) {
-  Group_Stats_Wide <- readRDS("stats_input.RDS")
-  ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
-    geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
-    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
-    theme_classic()  + theme(axis.text.x = element_text(angle = 90))
-} else {
-  Group_Stats_Wide_1 <- readRDS("stats_input_1.RDS")
-  Group_Stats_Wide_2 <- readRDS("stats_input_2.RDS")
-  Group_Stats_Wide_3 <- readRDS("stats_input_3.RDS")
-  Group_Stats_Wide_4 <- readRDS("stats_input_4.RDS")
-  Group_Stats_Wide <- rbind(Group_Stats_Wide_1, Group_Stats_Wide_2, 
-                            Group_Stats_Wide_3, Group_Stats_Wide_4)
-  ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
-    geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
-    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
-    theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
-}

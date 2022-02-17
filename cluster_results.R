@@ -2,11 +2,41 @@
 ### Cluster results ###
 #######################
 
-## Descriptive statistics
+rm(list = ls(all.names = TRUE)) 
+gc()
+PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
+n.period = 5
 
-# Gear
+#----------------------------
+### Input contribution
+
+if (n.period == 5) {
+  Group_Stats_Wide <- readRDS("stats_input.RDS")
+  ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
+    geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
+    theme_classic()  + theme(axis.text.x = element_text(angle = 90))
+} else {
+  Group_Stats_Wide_1 <- readRDS("stats_input_1.RDS")
+  Group_Stats_Wide_2 <- readRDS("stats_input_2.RDS")
+  Group_Stats_Wide_3 <- readRDS("stats_input_3.RDS")
+  Group_Stats_Wide_4 <- readRDS("stats_input_4.RDS")
+  Group_Stats_Wide <- rbind(Group_Stats_Wide_1, Group_Stats_Wide_2, 
+                            Group_Stats_Wide_3, Group_Stats_Wide_4)
+  ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
+    geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
+    theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
+}
+
+
+#-----------------------------------
+### Descriptive statistics
+
+## Gear
 
 library("googlesheets4")
+library("tidyr")
 gs4_auth(
   email = gargle::gargle_oauth_email(),
   path = NULL,
@@ -15,10 +45,9 @@ gs4_auth(
   use_oob = gargle::gargle_oob_default(),
   token = NULL)
 
-
 ### How gear are used by clusters??? ###
 options(scipen=999)
-cluster.gear <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
+cluster.gear <- PacFIN.month %>% filter(LANDING_YEAR >= 2000) %>% 
   group_by(group_all, PACFIN_GEAR_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
   group_by(group_all) %>% mutate(Percentage = landings / sum(landings)) %>% 
   unique() %>% filter(group_all != is.na(group_all))
@@ -36,11 +65,11 @@ table <- table %>%
 
 # table = table[,-1]
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
-colnames(table) = c("Gear", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-# gs4_create("Table1", sheets = table)
+colnames(table) = c("Gear", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6")
+gs4_create("Table1", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
-rm(table, PacFIN.cluster)
+rm(table)
 
 
 
@@ -65,7 +94,8 @@ table <- table %>%
 
 # table = table[,-1]
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
-colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
+colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", 
+                    "Cluster 4", "Cluster 5", "Cluster 6")
 gs4_create("Table2", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
