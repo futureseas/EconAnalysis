@@ -7,6 +7,15 @@ gc()
 PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
 n.period = 5
 
+library("googlesheets4")
+gs4_auth(
+  email = gargle::gargle_oauth_email(),
+  path = NULL,
+  scopes = "https://www.googleapis.com/auth/spreadsheets",
+  cache = gargle::gargle_oauth_cache(),
+  use_oob = gargle::gargle_oob_default(),
+  token = NULL)
+
 #----------------------------
 ### Input contribution
 
@@ -29,21 +38,14 @@ if (n.period == 5) {
     theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
 }
 
+rm(Group_Stats_Wide, n.period)
 
 #-----------------------------------
 ### Descriptive statistics
 
 ## Gear
 
-library("googlesheets4")
 library("tidyr")
-gs4_auth(
-  email = gargle::gargle_oauth_email(),
-  path = NULL,
-  scopes = "https://www.googleapis.com/auth/spreadsheets",
-  cache = gargle::gargle_oauth_cache(),
-  use_oob = gargle::gargle_oob_default(),
-  token = NULL)
 
 ### How gear are used by clusters??? ###
 options(scipen=999)
@@ -71,7 +73,7 @@ colnames(table) = c("Gear", "Cluster 1", "Cluster 2", "Cluster 3",
 # gs4_create("Table3", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
-rm(table)
+rm(table, cluster.gear, cluster.gear.highest)
 
 # ### In which port each cluster land? ###
 # options(scipen=999)
@@ -127,84 +129,45 @@ table <- table %>%
 
 # table = table[,-1]
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
-colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-gs4_create("Table4", sheets = table)
+colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", 
+                    "Cluster 4", "Cluster 5", "Cluster 6")
+# gs4_create("Table4", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
-rm(table, cluster.port.area)
+rm(table, cluster.port.area, cluster.port.area.highest)
 
 
 ## Catch composition
 
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OCPS")
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OCPS")
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OCPS")
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "PBNT"] <- "OCPS")
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "RHRG"] <- "OCPS")
+PacFIN.month <- PacFIN.month %>% mutate(
+  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OCPS",PACFIN_SPECIES_CODE, 
+                               ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
+                                      ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
+                                             ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
+
 options(scipen=999)
-cluster.species <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2005) %>% 
+cluster.species <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% 
   group_by(group_all, PACFIN_SPECIES_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
   group_by(group_all) %>% mutate(Percentage = landings / sum(landings)) %>% 
   unique() %>% filter(group_all != is.na(group_all))
 
-table <- as.data.frame(xtabs(Percentage ~  PACFIN_SPECIES_CODE + group_all, cluster.port.species ))
+table <- as.data.frame(xtabs(Percentage ~  PACFIN_SPECIES_CODE + group_all, cluster.species ))
 table <- table %>%
   spread(key = group_all, value = Freq)
 
 # table = table[,-1]
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
-colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-gs4_create("Table3", sheets = table)
+colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6")
+gs4_create("Table2", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
-rm(table, cluster.port.area)
-
-
-#----------------------------------------
-## Supplementary analysis
-
-# How many gears a vessel use in the dataset
-PacFIN.CPS.unique.gear <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% 
-  select(VESSEL_NUM, PACFIN_GEAR_CODE) %>% unique()
-
-PacFIN.CPS.n_gears <- PacFIN.CPS.unique.gear %>% mutate(n_gears = 1) %>% group_by(VESSEL_NUM) %>% 
-  summarise(n_gears= sum(n_gears)) 
-summary(PacFIN.CPS.n_gears$n_gears)
-sd(PacFIN.CPS.n_gears$n_gears)
-
-rm(PacFIN.CPS.unique.gear, PacFIN.CPS.n_gears)
-
-PacFIN.CPS <- PacFIN.month.forage %>% filter(LANDING_YEAR >= 2000) %>% 
-  select(VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_GEAR_CODE) %>% 
-  unique() %>%  
-  mutate(CPS_species = 1) %>%
-  group_by(VESSEL_NUM, PACFIN_GEAR_CODE) %>% 
-  summarise(n_CPS_landed = sum(CPS_species)) 
-
-table <- xtabs(n_CPS_landed ~ PACFIN_GEAR_CODE, aggregate(n_CPS_landed ~ PACFIN_GEAR_CODE, PacFIN.CPS, mean))
-table
-
-rm(PacFIN.CPS, table)
-
-
-
-## Port landed
-
-# How many gears a vessel use in the dataset
-PacFIN.CPS.unique.port <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% 
-  select(VESSEL_NUM, PACFIN_PORT_CODE) %>% unique() 
-PacFIN.CPS.n_ports <- PacFIN.CPS.unique.port %>% mutate(n_ports = 1) %>% 
-  group_by(VESSEL_NUM) %>% summarise(n_ports= sum(n_ports)) 
-summary(PacFIN.CPS.n_ports$n_ports)
-sd(PacFIN.CPS.n_ports$n_ports)
-
-rm(PacFIN.CPS.unique.port, PacFIN.CPS.n_ports)
-
-PacFIN.CPS.unique.area <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>%
-  select(VESSEL_NUM, PORT_AREA_CODE) %>% unique() 
-PacFIN.CPS.n_ports <- PacFIN.CPS.unique.area %>% mutate(n_ports = 1) %>% 
-  group_by(VESSEL_NUM) %>% summarise(n_ports= sum(n_ports)) 
-summary(PacFIN.CPS.n_ports$n_ports)
-sd(PacFIN.CPS.n_ports$n_ports)
-
-rm(PacFIN.CPS.unique.area, PacFIN.CPS.n_ports)
-
+rm(table, cluster.species)
 
 #----------------------------------------
 ### Participation (excluded from paper, enougth to use cluster) ###
