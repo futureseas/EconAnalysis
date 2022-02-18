@@ -1,11 +1,8 @@
 #######################
 ### Cluster results ###
 #######################
-
 rm(list = ls(all.names = TRUE)) 
 gc()
-PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
-n.period = 5
 
 library("googlesheets4")
 gs4_auth(
@@ -15,6 +12,16 @@ gs4_auth(
   cache = gargle::gargle_oauth_cache(),
   use_oob = gargle::gargle_oob_default(),
   token = NULL)
+
+#----------------------------
+
+library("tidyr")
+library("dplyr")
+
+
+PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
+n.period = 5
+
 
 #----------------------------
 ### Input contribution
@@ -43,16 +50,37 @@ rm(Group_Stats_Wide, n.period)
 #-----------------------------------
 ### Descriptive statistics
 
+all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_GEAR_CODE) %>% unique() %>% mutate(merge=1)
+all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+expand <- merge(all_species, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+
+rm(all_species, all_vessels)
+
+
 ## Gear
 
-library("tidyr")
+all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_GEAR_CODE) %>% unique() %>% mutate(merge=1)
+all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+expand <- merge(all_species, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+
+rm(all_species, all_vessels)
 
 ### How gear are used by clusters??? ###
 options(scipen=999)
 cluster.gear <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% 
-  group_by(group_all, PACFIN_GEAR_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
-  group_by(group_all) %>% mutate(Percentage = landings / sum(landings)) %>% 
+  group_by(group_all, PACFIN_GEAR_CODE, VESSEL_NUM) %>% 
+  summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+  group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
+
+cluster.gear <- merge(expand, cluster.gear, by = c('VESSEL_NUM', 'PACFIN_GEAR_CODE'), all.x = TRUE) %>%
+  mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% group_by(VESSEL_NUM) %>%
+  mutate(group_all = ifelse(is.na(group_all),mean(group_all, na.rm = TRUE),group_all)) %>% 
+  group_by(group_all, PACFIN_GEAR_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
   unique() %>% filter(group_all != is.na(group_all))
 
 cluster.gear <- cluster.gear[order(cluster.gear$group_all, -cluster.gear$Percentage),]
@@ -70,7 +98,7 @@ table <- table %>%
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Gear", "Cluster 1", "Cluster 2", "Cluster 3", 
                     "Cluster 4", "Cluster 5", "Cluster 6")
-# gs4_create("Table3", sheets = table)
+gs4_create("Table3", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.gear, cluster.gear.highest)
@@ -106,24 +134,35 @@ rm(table, cluster.gear, cluster.gear.highest)
 
 ## Port area
 
-# In which port each cluster land? ###
+all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PORT_AREA_CODE) %>% unique() %>% mutate(merge=1)
+all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+expand <- merge(all_species, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+rm(all_species, all_vessels)
+
 options(scipen=999)
-cluster.port.area <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
+cluster.port <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% 
-  group_by(group_all, PORT_AREA_CODE) %>% 
-  summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
-  group_by(group_all) %>% mutate(Percentage = landings / sum(landings)) %>% 
+  group_by(group_all, PORT_AREA_CODE, VESSEL_NUM) %>% 
+  summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+  group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
+
+cluster.port <- merge(expand, cluster.port, by = c('VESSEL_NUM', 'PORT_AREA_CODE'), all.x = TRUE) %>%
+  mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% group_by(VESSEL_NUM) %>%
+  mutate(group_all = ifelse(is.na(group_all),mean(group_all, na.rm = TRUE),group_all)) %>% 
+  group_by(group_all, PORT_AREA_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
   unique() %>% filter(group_all != is.na(group_all))
 
-cluster.port.area <- cluster.port.area[order(cluster.port.area$group_all, -cluster.port.area$Percentage),]
-cluster.port.area.highest <- cluster.port.area %>%
-  group_by(group_all) %>% filter(row_number()==1:7) %>% ungroup() %>% 
+cluster.port <- cluster.port[order(cluster.port$group_all, -cluster.port$Percentage),]
+cluster.port.highest <- cluster.port %>%
+  group_by(group_all) %>% filter(row_number()==1:4) %>% ungroup() %>% 
   dplyr::select('PORT_AREA_CODE') %>% unique()
 
-cluster.port.area<-setDT(cluster.port.area)[PORT_AREA_CODE %chin% cluster.port.area.highest$PORT_AREA_CODE] 
+cluster.port<-setDT(cluster.port)[PORT_AREA_CODE %chin% cluster.port.highest$PORT_AREA_CODE] 
 
 
-table <- as.data.frame(xtabs(Percentage ~  PORT_AREA_CODE + group_all, cluster.port.area ))
+table <- as.data.frame(xtabs(Percentage ~  PORT_AREA_CODE + group_all, cluster.port))
 table <- table %>%
   spread(key = group_all, value = Freq)
 
@@ -131,14 +170,13 @@ table <- table %>%
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", 
                     "Cluster 4", "Cluster 5", "Cluster 6")
-# gs4_create("Table4", sheets = table)
+gs4_create("Table4", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
-rm(table, cluster.port.area, cluster.port.area.highest)
+rm(table, cluster.port, cluster.port.highest)
 
 
 ## Catch composition
-
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OCPS")
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OCPS")
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OCPS")
@@ -150,11 +188,25 @@ PacFIN.month <- PacFIN.month %>% mutate(
                                       ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
                                              ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
 
+
+all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique() %>% mutate(merge=1)
+all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+expand <- merge(all_species, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+rm(all_species, all_vessels)
+
 options(scipen=999)
 cluster.species <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
-  filter(LANDING_YEAR <= 2014) %>% 
-  group_by(group_all, PACFIN_SPECIES_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
-  group_by(group_all) %>% mutate(Percentage = landings / sum(landings)) %>% 
+  filter(LANDING_YEAR <= 2014) %>%
+  group_by(group_all, PACFIN_SPECIES_CODE, VESSEL_NUM) %>% 
+  summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+  group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
+                              
+cluster.species <- merge(expand, cluster.species, by = c('VESSEL_NUM', 'PACFIN_SPECIES_CODE'), all.x = TRUE) %>%
+  mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% group_by(VESSEL_NUM) %>%
+  mutate(group_all = ifelse(is.na(group_all),mean(group_all, na.rm = TRUE),group_all)) %>% 
+  group_by(group_all, PACFIN_SPECIES_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
   unique() %>% filter(group_all != is.na(group_all))
 
 table <- as.data.frame(xtabs(Percentage ~  PACFIN_SPECIES_CODE + group_all, cluster.species ))

@@ -246,14 +246,14 @@ rm(Coords, Ticket_Coords, List, Permit_ID, Permit_COG, Distance_A, Distance_B,
 ### and average number of months per year landing forage fish for each vessel
 
 ###Prepare your forage fish matrix
-FF_Tickets <-FF_Tickets[which(FF_Tickets$PACFIN_SPECIES_COMMON_NAME=="PACIFIC SARDINE"  | 
-                           FF_Tickets$PACFIN_SPECIES_COMMON_NAME=="MARKET SQUID"     | 
-                           FF_Tickets$PACFIN_SPECIES_COMMON_NAME=="NORTHERN ANCHOVY" |
-                           FF_Tickets$PACFIN_SPECIES_COMMON_NAME=="CHUB MACKEREL" | 
-                           FF_Tickets$PACFIN_SPECIES_COMMON_NAME=="JACK MACKEREL" | 
-                           FF_Tickets$PACFIN_SPECIES_COMMON_NAME=="UNSP. MACKEREL"|
-                           FF_Tickets$PACFIN_SPECIES_COMMON_NAME=="ROUND HERRING" | 
-                           FF_Tickets$PACFIN_SPECIES_COMMON_NAME=="PACIFIC BONITO"),]
+FF_Tickets <- Tickets[which(Tickets$PACFIN_SPECIES_COMMON_NAME=="PACIFIC SARDINE"  | 
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="MARKET SQUID"     | 
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="NORTHERN ANCHOVY" |
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="CHUB MACKEREL" | 
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="JACK MACKEREL" | 
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="UNSP. MACKEREL"|
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="ROUND HERRING" | 
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="PACIFIC BONITO"),]
 
 Boats<-aggregate(AFI_EXVESSEL_REVENUE~ PACFIN_SPECIES_COMMON_NAME + 
                    VESSEL_NUM, data=FF_Tickets, FUN=sum) 
@@ -451,10 +451,13 @@ names(Group_Percentage_FF)<- c("memb", "mean", "sd", "Variable")
 Group_FF_Diversity<-Group_Stats[c(1,7,13)]
 Group_FF_Diversity$Var<-"FF_Diversity"
 names(Group_FF_Diversity)<- c("memb", "mean", "sd", "Variable")
-
+# Group_FF_Months<-Group_Stats[c(1,8,15)]
+# Group_FF_Months$Var<-"FF_Months"
+# names(Group_FF_Months)<- c("memb", "mean", "sd", "Variable")
 
 Group_Stats_Wide<-rbind(Group_Length, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
 Group_Stats_Wide$memb<-as.factor(Group_Stats_Wide$memb)
+
 rm(Group_Length, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
 
 Group_Stats_Wide <- Group_Stats_Wide %>%
