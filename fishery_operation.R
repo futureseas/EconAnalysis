@@ -88,10 +88,10 @@ landings.by.port.year <- landings.by.port.year %>% filter(LANDING_YEAR <2015)
 landings.by.port.avg.year <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE + PORT_AREA_CODE 
                                        + AGENCY_CODE, FUN=meanfun, data=landings.by.port.year) %>%
   filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA" |
-           PORT_AREA_CODE == "SFA" | PORT_AREA_CODE == "ERA" | PORT_AREA_CODE == "CLO" |
+           PORT_AREA_CODE == "SFA" | PORT_AREA_CODE == "CLO" |
            PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA") %>%
   mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, 
-                                      "LAA", "SBA", "MNA", "SFA", "ERA", "CLO", "CLW", "CWA"))
+                                     "LAA", "SBA", "MNA", "SFA", "CLO", "CLW", "CWA"))
 
 # filter(PACFIN_PORT_CODE == "AST" | PACFIN_PORT_CODE == "HNM" | PACFIN_PORT_CODE == "SP" |
 #          PACFIN_PORT_CODE == "VEN" | PACFIN_PORT_CODE == "TRM" | PACFIN_PORT_CODE == "MOS" |
@@ -112,8 +112,8 @@ ggplot(landings.by.port.avg.year, aes(fill=PACFIN_SPECIES_CODE,
   theme(strip.text.x = element_text(size = 7)) +
   theme(legend.position="bottom") + 
   scale_fill_viridis(discrete = T, labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
-                                            "PSDN" = "Pacific Sardine", "OCPS" = "Other CPEL",
-                                            "OTHER" = "Non-CPEL")) +
+                                            "PSDN" = "Pacific Sardine", "OMCK" = "Mackerels",
+                                            "OTHER" = "Non-CPS")) +
   theme(axis.text.x = element_text(angle=90, hjust=0.95, vjust=0.45)) + xlab("Ports") + 
   ylab("Landings (tons)") + guides(fill=guide_legend(title="Species: "))  + 
   scale_x_discrete(labels=c(
@@ -204,7 +204,7 @@ g1 <- ggplot(landings.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=LANDED
   theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
         axis.title = element_text(size = 8)) + theme(legend.position = "none") +
   xlab("") + ylab("Landings (tons)") +
-  scale_x_discrete(labels=c("OCPS" = "Other\nCPEL\nSpecies", "OTHER" = "Other\nnon-CPEL\nSpecies",
+  scale_x_discrete(labels=c("OMCK" = "Mackerels", "OTHER" = "Non-CPS",
                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
                             "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
 
@@ -221,7 +221,7 @@ g2 <- ggplot(price.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=AFI_PRICE
   theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
         axis.title = element_text(size = 8)) + guides(fill=guide_legend(title="Period: ")) +
   xlab("") + ylab("Price (USD/ton)") + 
-  scale_x_discrete(labels=c("OCPS" = "Other\nCPEL\nSpecies", "OTHER" = "Other\nnon-CPEL\nSpecies",
+  scale_x_discrete(labels=c("OMCK" = "Mackerels", "OTHER" = "Non-CPS",
                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
                             "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
 
@@ -238,7 +238,7 @@ g3 <- ggplot(revenue.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=AFI_EXV
   theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
         axis.title = element_text(size = 8)) + theme(legend.position = "none") +
   xlab("") + ylab("Annual revenues (Millions of USD)") +  scale_y_continuous(labels = label_number(scale = 1e-6)) +
-  scale_x_discrete(labels=c("OCPS" = "Other\nCPEL\nSpecies", "OTHER" = "Other\nnon-CPEL\nSpecies",
+  scale_x_discrete(labels=c("OMCK" = "Mackerels", "OTHER" = "Non-CPS",
                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
                             "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
 
@@ -257,7 +257,7 @@ g4 <- ggplot(n_vessels.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=n_ves
   theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
         axis.title = element_text(size = 8)) + theme(legend.position = "none") +
   xlab("") + ylab("Average number of vessels") +
-  scale_x_discrete(labels=c("OCPS" = "Other\nCPEL\nSpecies", "OTHER" = "Other\nnon-CPEL\nSpecies",
+  scale_x_discrete(labels=c("OMCK" = "Mackerels", "OTHER" = "Non-CPS",
                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
                             "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
 
@@ -272,8 +272,7 @@ rm(g1, g2, g3, g4, landings.year,
    n_vessels.year.2000_2014, n_vessels.year.2015_2020, 
    revenue.avg.year, revenue.avg.year.2000_2014, revenue.avg.year.2015_2020, 
    revenue.year.2000_2014, revenue.year.2015_2020, 
-   revenue.year, revenue.avg.year, 
-   price.year, price.avg.year, n_vessels, n_vessels.year)
+   revenue.year, price.year, n_vessels, n_vessels.year)
 
 
 
