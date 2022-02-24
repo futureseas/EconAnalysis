@@ -57,17 +57,12 @@ sum_mean_fun <- function(x, ...){
 #---------------------------
 ### Read monthly data created in "~\data_processing_vessels.R" ###
 PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
-PacFIN.month.CPS.expand <- PacFIN.month %>% 
-  dplyr::filter(PACFIN_SPECIES_CODE %in% 
-                  c("CMCK", "JMCK", "UMCK", "PBNT", "RHRG", "MSQD", "NANC", "PSDN"))
 
-PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OCPS")
-PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OCPS")
-PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OCPS")
-PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "PBNT"] <- "OCPS")
-PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "RHRG"] <- "OCPS")
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
 PacFIN.month <- PacFIN.month %>% mutate(
-  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OCPS",PACFIN_SPECIES_CODE, 
+  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OMCK",PACFIN_SPECIES_CODE, 
                                ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
                                       ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
                                              ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
@@ -76,9 +71,7 @@ PacFIN.month <- PacFIN.month %>% mutate(
 
 PacFIN.month.CPS <- PacFIN.month %>% 
   dplyr::filter(PACFIN_SPECIES_CODE %in% 
-                  c("OCPS", "MSQD", "NANC", "PSDN"))
-
-rm(port_area)
+                  c("OMCK", "MSQD", "NANC", "PSDN"))
 
 
 ###########################

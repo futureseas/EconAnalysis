@@ -6,59 +6,71 @@ gc()
 
 library("googlesheets4")
 gs4_auth(
-  email = gargle::gargle_oauth_email(),
+  email = gs4_auth(),
   path = NULL,
   scopes = "https://www.googleapis.com/auth/spreadsheets",
   cache = gargle::gargle_oauth_cache(),
   use_oob = gargle::gargle_oob_default(),
   token = NULL)
 
-#----------------------------
+
+
 
 library("tidyr")
 library("dplyr")
-
 
 PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
 n.period = 5
 
 
-#----------------------------
-### Input contribution
-
-if (n.period == 5) {
-  Group_Stats_Wide <- readRDS("stats_input.RDS")
-  ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
-    geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
-    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
-    theme_classic()  + theme(axis.text.x = element_text(angle = 90))
-} else {
-  Group_Stats_Wide_1 <- readRDS("stats_input_1.RDS")
-  Group_Stats_Wide_2 <- readRDS("stats_input_2.RDS")
-  Group_Stats_Wide_3 <- readRDS("stats_input_3.RDS")
-  Group_Stats_Wide_4 <- readRDS("stats_input_4.RDS")
-  Group_Stats_Wide <- rbind(Group_Stats_Wide_1, Group_Stats_Wide_2, 
-                            Group_Stats_Wide_3, Group_Stats_Wide_4)
-  ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
-    geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
-    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
-    theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
-}
-
-rm(Group_Stats_Wide, n.period)
+### Descriptive statistics ###
 
 #-----------------------------------
-### Descriptive statistics
+## Catch composition
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
+PacFIN.month <- PacFIN.month %>% mutate(
+  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OMCK",PACFIN_SPECIES_CODE, 
+                               ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
+                                      ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
+                                             ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
+
 
 all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
-  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_GEAR_CODE) %>% unique() %>% mutate(merge=1)
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique() %>% mutate(merge=1)
 all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
 expand <- merge(all_species, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
-
 rm(all_species, all_vessels)
 
+options(scipen=999)
+cluster.species <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>%
+  group_by(group_all, PACFIN_SPECIES_CODE, VESSEL_NUM) %>% 
+  summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+  group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
 
+cluster.species <- merge(expand, cluster.species, by = c('VESSEL_NUM', 'PACFIN_SPECIES_CODE'), all.x = TRUE) %>%
+  mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% group_by(VESSEL_NUM) %>%
+  mutate(group_all = ifelse(is.na(group_all),mean(group_all, na.rm = TRUE),group_all)) %>% 
+  group_by(group_all, PACFIN_SPECIES_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
+  unique() %>% filter(group_all != is.na(group_all))
+
+table <- as.data.frame(xtabs(Percentage ~  PACFIN_SPECIES_CODE + group_all, cluster.species ))
+table <- table %>%
+  spread(key = group_all, value = Freq)
+
+# table = table[,-1]
+# rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
+colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7")
+gs4_create("Table2", sheets = table)
+# print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
+
+rm(table, cluster.species)
+
+
+#-----------------------------------
 ## Gear
 
 all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
@@ -97,41 +109,15 @@ table <- table %>%
 # table = table[,-1]
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Gear", "Cluster 1", "Cluster 2", "Cluster 3", 
-                    "Cluster 4", "Cluster 5", "Cluster 6")
+                    "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
 gs4_create("Table3", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.gear, cluster.gear.highest)
 
-# ### In which port each cluster land? ###
-# options(scipen=999)
-# cluster.port <- PacFIN.month.cluster %>% filter(LANDING_YEAR >= 2000) %>% 
-#   group_by(group_all, PACFIN_PORT_CODE) %>% summarise(landings = sum(LANDED_WEIGHT_MTONS.sum)) %>% 
-#   group_by(group_all) %>% mutate(Percentage = landings / sum(landings)) %>% 
-#   unique() %>% filter(group_all != is.na(group_all))
-# 
-# cluster.port <- cluster.port[order(cluster.port$group_all, -cluster.port$Percentage),]
-# cluster.port.highest <- cluster.port %>%
-#   group_by(group_all) %>% filter(row_number()==1:3) %>% ungroup() %>% 
-#   dplyr::select('PACFIN_PORT_CODE') %>% unique()
-# 
-# cluster.port<-setDT(cluster.port)[PACFIN_PORT_CODE %chin% cluster.port.highest$PACFIN_PORT_CODE] 
-# 
-# 
-# table <- as.data.frame(xtabs(Percentage ~  PACFIN_PORT_CODE + group_all, cluster.port ))
-# table <- table %>%
-#   spread(key = group_all, value = Freq)
-# 
-# # table = table[,-1]
-# # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
-# colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", 
-#                     "Cluster 4", "Cluster 5", "Cluster 6")
-# gs4_create("Table2", sheets = table)
-# # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
-# 
-# rm(table, cluster.port)
 
 
+#-----------------------------------
 ## Port area
 
 all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
@@ -169,57 +155,12 @@ table <- table %>%
 # table = table[,-1]
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", 
-                    "Cluster 4", "Cluster 5", "Cluster 6")
+                    "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
 gs4_create("Table4", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.port, cluster.port.highest)
 
-
-## Catch composition
-PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OCPS")
-PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OCPS")
-PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OCPS")
-PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "PBNT"] <- "OCPS")
-PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "RHRG"] <- "OCPS")
-PacFIN.month <- PacFIN.month %>% mutate(
-  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OCPS",PACFIN_SPECIES_CODE, 
-                               ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
-                                      ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
-                                             ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
-
-
-all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
-  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique() %>% mutate(merge=1)
-all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
-  filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
-expand <- merge(all_species, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
-rm(all_species, all_vessels)
-
-options(scipen=999)
-cluster.species <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
-  filter(LANDING_YEAR <= 2014) %>%
-  group_by(group_all, PACFIN_SPECIES_CODE, VESSEL_NUM) %>% 
-  summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-  group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
-                              
-cluster.species <- merge(expand, cluster.species, by = c('VESSEL_NUM', 'PACFIN_SPECIES_CODE'), all.x = TRUE) %>%
-  mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% group_by(VESSEL_NUM) %>%
-  mutate(group_all = ifelse(is.na(group_all),mean(group_all, na.rm = TRUE),group_all)) %>% 
-  group_by(group_all, PACFIN_SPECIES_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
-  unique() %>% filter(group_all != is.na(group_all))
-
-table <- as.data.frame(xtabs(Percentage ~  PACFIN_SPECIES_CODE + group_all, cluster.species ))
-table <- table %>%
-  spread(key = group_all, value = Freq)
-
-# table = table[,-1]
-# rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
-colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6")
-gs4_create("Table2", sheets = table)
-# print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
-
-rm(table, cluster.species)
 
 #----------------------------------------
 ### Participation (excluded from paper, enougth to use cluster) ###

@@ -12,6 +12,7 @@ library(ggplot2)
 library(vegan)
 library(NbClust)
 library(factoextra)
+
 ###I run these lines as well as they are packages I frequently use that can interfere with some of the processes below
 detach(package:raster, unload=TRUE)
 detach(package:igraph, unload=TRUE)
@@ -51,11 +52,11 @@ if (n.period == 1) {
   period = "2005-2014"
   min.year = 2005 
   max.year = 2014
-  n.clust = 6
+  n.clust = 7
 }
 
 # ----------------------------------------
-###Load in the data
+### Load in the data
 Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
 Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
 Tickets<-rbind(Tickets1, Tickets2)
@@ -86,19 +87,19 @@ Tickets<-merge(Tickets, Trip_Dominant, by='FTID')
 rm(Trip_Dominant, X, Boats)
 
 
-###Subset to select only records where one of the forage fish species of interest was the target species; note that previously I was excluding Pacific Herring
-###(which to me makes sense), but also "Round Herring" & "Pacific Bonito". Here I've made an edit, thinking it would probably be most defensible to exclude Pacific Herring and 
-##then lump "Round Herring", "Pacific Bonito", "Chub Mackerel", "Jack Mackerel" and "UNSP. Mackerel" together into an "Other" column.
+### Subset to select only records where one of the forage fish species of interest was the target species
+### (species in the CPS FMP; squid, sardine, mackerrels and anchovy) 
+FF_Tickets<-Tickets[which(Tickets$Dominant == "PACIFIC SARDINE"  | 
+                          Tickets$Dominant == "MARKET SQUID"     | 
+                          Tickets$Dominant == "NORTHERN ANCHOVY" | 
+                          Tickets$Dominant == "CHUB MACKEREL"    | 
+                          Tickets$Dominant == "JACK MACKEREL"    |
+                          Tickets$Dominant == "UNSP. MACKEREL"),]
 
-FF_Tickets<-Tickets[which(Tickets$Dominant=="PACIFIC SARDINE" | Tickets$Dominant=="MARKET SQUID"| Tickets$Dominant=="NORTHERN ANCHOVY"|
-                         Tickets$Dominant=="CHUB MACKEREL" | Tickets$Dominant=="JACK MACKEREL" | Tickets$Dominant=="UNSP. MACKEREL"|
-                         Tickets$Dominant=="ROUND HERRING" | Tickets$Dominant=="PACIFIC BONITO"),]
-
-FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "CHUB MACKEREL"] <- "OTHER")
-FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "JACK MACKEREL"] <- "OTHER")
-FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "UNSP. MACKEREL"] <- "OTHER")
-FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "ROUND HERRING"] <- "OTHER")
-FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "PACIFIC BONITO"] <- "OTHER")
+## Agreggate mackerrels in one category
+FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "CHUB MACKEREL"]  <- "MACKEREL")
+FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "JACK MACKEREL"]  <- "MACKEREL")
+FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "UNSP. MACKEREL"] <- "MACKEREL")
 
 
 ###Creating a filter here to only retain vessels with more than 3 forage fish landings (tickets where FF is the dominant species) 
@@ -109,7 +110,7 @@ FTID_Value<-FTID_Value[FTID_Value$VESSEL_NUM %in% names(which(table(FTID_Value$V
 FF_Tickets<-setDT(FF_Tickets)[VESSEL_NUM %chin% FTID_Value$VESSEL_NUM]    
 FF_Tickets<-as.data.frame(FF_Tickets)
 
-# FF_Tickets indicate tickets where FF are dominant, but still have tickets for other species. 
+# FF_Tickets indicate tickets where FF are dominant in the trip, but still have landings for other species. 
 
 
 ###Find the list of unique vessels in the subset, these are the vessels we will cluster                           
@@ -246,14 +247,17 @@ rm(Coords, Ticket_Coords, List, Permit_ID, Permit_COG, Distance_A, Distance_B,
 ### and average number of months per year landing forage fish for each vessel
 
 ###Prepare your forage fish matrix
-FF_Tickets <- Tickets[which(Tickets$PACFIN_SPECIES_COMMON_NAME=="PACIFIC SARDINE"  | 
-                            Tickets$PACFIN_SPECIES_COMMON_NAME=="MARKET SQUID"     | 
+FF_Tickets <- Tickets[which(Tickets$PACFIN_SPECIES_COMMON_NAME=="PACIFIC SARDINE" | 
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="MARKET SQUID" | 
                             Tickets$PACFIN_SPECIES_COMMON_NAME=="NORTHERN ANCHOVY" |
                             Tickets$PACFIN_SPECIES_COMMON_NAME=="CHUB MACKEREL" | 
                             Tickets$PACFIN_SPECIES_COMMON_NAME=="JACK MACKEREL" | 
-                            Tickets$PACFIN_SPECIES_COMMON_NAME=="UNSP. MACKEREL"|
-                            Tickets$PACFIN_SPECIES_COMMON_NAME=="ROUND HERRING" | 
-                            Tickets$PACFIN_SPECIES_COMMON_NAME=="PACIFIC BONITO"),]
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="UNSP. MACKEREL"),]
+
+FF_Tickets<- within(FF_Tickets, PACFIN_SPECIES_COMMON_NAME[PACFIN_SPECIES_COMMON_NAME == "CHUB MACKEREL"] <- "MACKEREL")
+FF_Tickets<- within(FF_Tickets, PACFIN_SPECIES_COMMON_NAME[PACFIN_SPECIES_COMMON_NAME == "JACK MACKEREL"] <- "MACKEREL")
+FF_Tickets<- within(FF_Tickets, PACFIN_SPECIES_COMMON_NAME[PACFIN_SPECIES_COMMON_NAME == "UNSP. MACKEREL"] <- "MACKEREL")
+
 
 Boats<-aggregate(AFI_EXVESSEL_REVENUE~ PACFIN_SPECIES_COMMON_NAME + 
                    VESSEL_NUM, data=FF_Tickets, FUN=sum) 
@@ -270,7 +274,7 @@ Boats<-as.data.frame(diversity(Boats, index="invsimpson"))
 Boats$VESSEL_NUM <- rownames(Boats)
 names(Boats)<-c("diversity", "VESSEL_NUM")
 
-###Calculate the percentage of revenue derived from forage fish
+###Calculate the percentage of revenue derived from CPS
 FF_Total<-aggregate(AFI_EXVESSEL_REVENUE~VESSEL_NUM, data=FF_Tickets, FUN=sum)
 Total<-aggregate(AFI_EXVESSEL_REVENUE~VESSEL_NUM, data=Tickets, FUN=sum)
 FFP<-merge(Total, FF_Total, by="VESSEL_NUM")
@@ -308,7 +312,7 @@ rm(Vessel_Characteristics, Landings_Volume_Value, Vessel_Geography, FF_Landings_
 ### I wound up removing weight because I felt as if that and length provided redundant information;
 RAW<-RAW[c(-2)] # Delete Weight
 RAW<-RAW[c(-2)] # Delete AVG_LBS
-RAW<-RAW[c(-7)]
+RAW<-RAW[c(-7)] # Delete LANDING_MONTHS
 
 # Check the degree to which other cluster inputs are collinear using VIF (O'Farrel et al. 2019)
 cor(RAW)
@@ -343,12 +347,11 @@ Distance_matrix<-dist(RAW_Scaled, method='euclidean')
 #            # length(unique(dbclust$Best.partition))
 
 ## (B) Using PAM and the "Average Silhouette Method"
-Ks=sapply(2:9,
+Ks=sapply(2:25,
           function(i)
             summary(silhouette(pam((Distance_matrix), k=i)))$avg.width)
-          plot(2:9,Ks, xlab="k",ylab="av.silhouette",type="b", pch=19)
+          plot(2:25,Ks, xlab="k",ylab="av.silhouette",type="b", pch=19)
 
-          n.clust = 6
 
 #--------------------------------------------------------
 # ### Heriarchical Clustering
@@ -476,3 +479,25 @@ if (n.period == 1) {
 }
 
 rm(Group_Stats_Wide, Group_Stats, Vessel_IDs, FTID)
+
+
+if (n.period == 5) {
+  Group_Stats_Wide <- readRDS(here::here("Clustering", "stats_input.RDS"))
+  ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
+    geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
+    theme_classic()  + theme(axis.text.x = element_text(angle = 90))
+} else {
+  Group_Stats_Wide_1 <- readRDS(here::here("Clustering", "stats_input_1.RDS"))
+  Group_Stats_Wide_2 <- readRDS(here::here("Clustering", "stats_input_2.RDS"))
+  Group_Stats_Wide_3 <- readRDS(here::here("Clustering", "stats_input_3.RDS"))
+  Group_Stats_Wide_4 <- readRDS(here::here("Clustering", "stats_input_4.RDS"))
+  Group_Stats_Wide <- rbind(Group_Stats_Wide_1, Group_Stats_Wide_2, 
+                            Group_Stats_Wide_3, Group_Stats_Wide_4)
+  ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
+    geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
+    theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
+}
+
+rm(Group_Stats_Wide, n.period)

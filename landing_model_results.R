@@ -1,8 +1,37 @@
+#####################
+### Landing model ###
+#####################
+
+#----------------------------
+# Setup #
+
+rm(list = ls(all.names = TRUE)) 
+gc()
+
+## Read packages 
+
+library("tidyr")
+library("dplyr")
+library("googlesheets4")
+
+## Google access
+gs4_auth(
+  email = "fequezad@ucsc.edu",
+  path = NULL,
+  scopes = "https://www.googleapis.com/auth/spreadsheets",
+  cache = gargle::gargle_oauth_cache(),
+  use_oob = gargle::gargle_oob_default(),
+  token = NULL)
+
+## Read PacFIN database 
+PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
+
+#---------------------------------------------------
 # Methods
 
-```{r dataset, include=FALSE}
-# Organize dataset
-PacFIN.month.dataset = PacFIN.month.cluster[,!grepl("*_LE_",names(PacFIN.month.cluster))]
+## Organize dataset
+
+# PacFIN.month.dataset = PacFIN.month.cluster[,!grepl("*_LE_",names(PacFIN.month.cluster))]
 PacFIN.month.dataset <- PacFIN.month.dataset %>% filter(LANDING_YEAR >= 2000) %>% # filter(PACFIN_SPECIES_CODE == "PSDN" | PACFIN_SPECIES_CODE == "MSQD") %>%
   dplyr::select(LANDING_YEAR, LANDING_MONTH, PORT_NAME, VESSEL_NUM, PSDN_SDM_60, MSQD_SDM_90,
                 MSQD_SPAWN_SDM_90, LANDED_WEIGHT_MTONS.sum, AFI_PRICE_PER_KG.mean, 
