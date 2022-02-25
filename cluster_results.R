@@ -189,10 +189,6 @@ gs4_create("Table5", sheets = table)
 rm(table, cluster.port, cluster.port.highest)
 
 
-
-
-
-
 #----------------------------------------
 ### Input histograms by clusters ###
 RAW_cluster_inputs <- read.csv(here::here("Clustering", "RAW_cluster_inputs.csv"))
