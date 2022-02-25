@@ -28,10 +28,15 @@ ports <- merge(x=port_codes,y=ports_coord, by=c("PORT_NAME", "AGENCY_CODE"),all.
 
 dat <- read.csv("G:\\My Drive\\Project\\Data\\SDM\\squid\\JS outputs\\Monthly_Mean_Values_Squid_Abund.csv")
 
-dat_long <- gather(dat, condition, measurement, X1998.7:X2019.8, factor_key=TRUE)
+dat_long <- gather(dat, condition, lnCPUE, X1998.7:X2019.8, factor_key=TRUE)
+  dat_long$YEAR <- as.data.frame(str_extract_all(dat_long$condition, "\\d{4}", simplify = T))
+  dat_long <- dat_long %>% group_by(Longitude, Latitude, YEAR) %>% 
+    summarise(mean.lnCPUE = mean(lnCPUE, na.rm = TRUE))
 
-# ##################################################################################
-# for (y in 2000:2018) {
+#---------------------------------------------------
+# Run loop to associate each SDM output to a port
+
+# for (y in 2000:2019) {
 #   for (m in 1:12) {
 #     for (j in 1:nrow(ports)) {
 # 	  		# Read netcdf
