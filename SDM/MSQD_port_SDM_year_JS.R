@@ -38,40 +38,27 @@ dat_long <- gather(dat, condition, lnCPUE, X1998.7:X2019.8, factor_key=TRUE)
 
 for (y in 2000:2019) {
   for (j in 1:nrow(ports)) {
-    # Read netcdf
-# 			dimnames(predSDM) <- list(lon = lon, lat = lat, tim = tim)
-# 			sdmMelt <- reshape2::melt(predSDM, value.name = "predSDM")
-# 			sdmMelt$dt <- as.Date("1900-01-01") + days(sdmMelt$tim)			
-# 
-# 			# Optional (but recommended): trim predictions to within 300-500km of the coast
-# 			if(!exists("distLand")) {
-# 			  distLand <- (read.csv(here::here("SDM", "DistLandROMSPoints.csv"), head=TRUE, sep=","))[c("lon","lat","distLand")]
-# 			}
-# 			sdmMelt <- dplyr::full_join(sdmMelt, distLand, by = c("lon", "lat"))
-# 			sdmMelt <- subset(sdmMelt, sdmMelt$distLand < 500000)			
-# 			
-# 
-# 			sdmMelt <- sdmMelt %>%
-# 			  group_by(lat, lon) %>%
-# 			  summarize(exp_prob = mean(predSDM, na.rm = T))	%>%
-# 			  ungroup(.) %>%
-# 			  mutate(dist = by(., 1:nrow(.), function(row) {
-# 			    distHaversine(c(row$lon, row$lat), c(ports[j,]$Longitude, ports[j,]$Latitude))
-# 			    })) %>%
-# 			  mutate(dist = dist / 1000) 
-# 			
-# 			
-# 			# Filter three different distance bands
-# 			
-# 			dat_prob_90 <- sdmMelt %>%
-# 			  dplyr::filter(dist <= 90)
-# 			
-# 			SDM_mean_90 <- mean(dat_prob_90$exp_prob, na.rm = T)
-# 			
-# 			SDM_port <- SDM_port %>%
-# 			  add_row(LANDING_YEAR = y, LANDING_MONTH = m, PORT_NAME = as.character(ports[j, 1]),
-# 			          SDM_90 = SDM_mean_90)
-# 	    
+    dat_long_year <- dat_long %>% filter(YEAR == y)
+    
+    dat_with_dist <- dat_long_year %>%
+			  group_by(Latitude,Longitude) %>%
+			  summarize(exp_prob = mean(mean.lnCPUE, na.rm = T))	%>%
+			  ungroup(.) %>%
+			  mutate(dist = by(., 1:nrow(.), function(row) {
+			    distHaversine(c(row$Longitude, row$Latitude), c(ports[j,]$Longitude, ports[j,]$Latitude))
+			    })) %>%
+			  mutate(dist = dist / 1000)
+
+			# Filter distance bands
+			dat_prob_90 <- dat_with_dist %>%
+			  dplyr::filter(dist <= 90)
+
+			SDM_mean_90 <- mean(dat_prob_90$exp_prob, na.rm = T)
+
+			SDM_port <- SDM_port %>%
+			  add_row(LANDING_YEAR = y, PORT_NAME = as.character(ports[j, 1]),
+			          SDM_90 = SDM_mean_90)
+			
  	    print(y)
  	    print(j)
  }
