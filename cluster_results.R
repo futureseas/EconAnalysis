@@ -75,13 +75,13 @@ rm(table, cluster.species)
 #-----------------------------------
 ## Gear
 
-all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+all_gear <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_GEAR_CODE) %>% unique() %>% mutate(merge=1)
 all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
-expand <- merge(all_species, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+expand <- merge(all_gear, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
 
-rm(all_species, all_vessels)
+rm(all_gear, all_vessels)
 
 ### How gear are used by clusters??? ###
 options(scipen=999)
@@ -122,12 +122,12 @@ rm(table, cluster.gear, cluster.gear.highest)
 #-----------------------------------
 ## Port area
 
-all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+all_ports <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(PORT_AREA_CODE) %>% unique() %>% mutate(merge=1)
 all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
-expand <- merge(all_species, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
-rm(all_species, all_vessels)
+expand <- merge(all_ports, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+rm(all_ports, all_vessels)
 
 options(scipen=999)
 cluster.port <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
@@ -162,6 +162,35 @@ colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3",
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.port, cluster.port.highest)
+
+
+
+#-----------------------------------
+## Port area (percentage of revenue that come from each cluster in a port area)
+
+options(scipen=999)
+cluster.port <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% 
+  group_by(group_all, PORT_AREA_CODE) %>% 
+  summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+  group_by(PORT_AREA_CODE) %>% mutate(Percentage = revenue / sum(revenue))
+
+table <- as.data.frame(xtabs(Percentage ~  PORT_AREA_CODE + group_all, cluster.port))
+table <- table %>%
+  spread(key = group_all, value = Freq)
+
+# table = table[,-1]
+# rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
+colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", 
+                    "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
+gs4_create("Table5", sheets = table)
+# print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
+
+rm(table, cluster.port, cluster.port.highest)
+
+
+
+
 
 
 #----------------------------------------

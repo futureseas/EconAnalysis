@@ -485,7 +485,6 @@ if (n.period == 1) {
 
 rm(Group_Stats_Wide, Group_Stats, Vessel_IDs, FTID)
 
-
 if (n.period == 5) {
   Group_Stats_Wide <- readRDS(here::here("Clustering", "stats_input.RDS"))
   ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
