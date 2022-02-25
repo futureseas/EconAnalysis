@@ -442,22 +442,22 @@ if (n.period == 1) {
 }
 
 Group_Length<-Group_Stats[c(1,2,8)]
-Group_Length$Var<-"Length"
+Group_Length$Var<-"Vessel length"
 names(Group_Length)<- c("memb", "mean", "sd", "Variable")
 Group_Avg_Revenue<-Group_Stats[c(1,3,9)]
-Group_Avg_Revenue$Var<-"Average_Revenue"
+Group_Avg_Revenue$Var<-"Average annual revenue"
 names(Group_Avg_Revenue)<- c("memb", "mean", "sd", "Variable")
 Group_LAT<-Group_Stats[c(1,4,10)]
-Group_LAT$Var<-"Latitude_COG"
+Group_LAT$Var<-"LCG"
 names(Group_LAT)<- c("memb", "mean", "sd", "Variable")
 Group_Inertia<-Group_Stats[c(1,5,11)]
 Group_Inertia$Var<-"Inertia"
 names(Group_Inertia)<- c("memb", "mean", "sd", "Variable")
 Group_Percentage_FF<-Group_Stats[c(1,6,12)]
-Group_Percentage_FF$Var<-"Percentage_FF"
+Group_Percentage_FF$Var<-"Percent of revenue from CPS"
 names(Group_Percentage_FF)<- c("memb", "mean", "sd", "Variable")
 Group_FF_Diversity<-Group_Stats[c(1,7,13)]
-Group_FF_Diversity$Var<-"FF_Diversity"
+Group_FF_Diversity$Var<-"CPS diversity index"
 names(Group_FF_Diversity)<- c("memb", "mean", "sd", "Variable")
 # Group_FF_Months<-Group_Stats[c(1,8,15)]
 # Group_FF_Months$Var<-"FF_Months"
@@ -490,8 +490,11 @@ if (n.period == 5) {
   Group_Stats_Wide <- readRDS(here::here("Clustering", "stats_input.RDS"))
   ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
     geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
-    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
-    theme_classic()  + theme(axis.text.x = element_text(angle = 90))
+    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), 
+                  width = 0.4, position=position_dodge(.9)) + 
+    theme_classic()  + theme(axis.text.x = element_text(angle = 90)) +
+    labs(x = "Cluster", y = "Mean (z)") + scale_fill_viridis(discrete = TRUE)
+    # scale_fill_brewer(palette="YlGnBu")
 } else {
   Group_Stats_Wide_1 <- readRDS(here::here("Clustering", "stats_input_1.RDS"))
   Group_Stats_Wide_2 <- readRDS(here::here("Clustering", "stats_input_2.RDS"))

@@ -169,42 +169,54 @@ rm(table, cluster.port, cluster.port.highest)
 RAW_cluster_inputs <- read.csv(here::here("Clustering", "RAW_cluster_inputs.csv"))
 library(ggplot2)
 
+cluster_names <- as_labeller(c(`1` = "Cluster 1",`2` = "Cluster 2",
+                               `3` = "Cluster 3",`4` = "Cluster 4",
+                               `5` = "Cluster 5",`6` = "Cluster 6",
+                               `7` = "Cluster 7"))
+
 
 ## Length
-ggplot(data=RAW_cluster_inputs, aes(x=Length, group=group_all, fill=group_all))+
+ggplot(data=RAW_cluster_inputs, 
+       aes(x=Length, group=group_all, fill=group_all)) +
   geom_density() + 
-  facet_wrap(~group_all, scales="free_y") +
-  theme(legend.position="none") + scale_fill_viridis()
+  facet_wrap(~group_all, scales="free_y", labeller = cluster_names) +
+  theme(legend.position="none") + labs(x = "Vessel length", y = "Density") + 
+  scale_fill_viridis()
 
 ## Average Revenue
 ggplot(data=RAW_cluster_inputs, aes(x=AVG_REVENUE, fill=group_all))+
-  geom_density(alpha = 0.5)+
+  geom_density()+
   facet_wrap(~group_all, scales="free_y") +
-  theme(legend.position="none")
+  theme(legend.position="none") + labs(x = "Average annual revenue", y = "Density") + 
+  scale_fill_viridis()
 
 ## LCG
 ggplot(data=RAW_cluster_inputs, aes(x=LAT, fill=group_all))+
-  geom_density(alpha = 0.5)+
+  geom_density()+
   facet_wrap(~group_all, scales="free_y") +
-  theme(legend.position="none")
+  theme(legend.position="none") + labs(x = "Latitudinal Center of Gravity (LCG)", y = "Density") + 
+  scale_fill_viridis()
 
 ## Inertia
 ggplot(data=RAW_cluster_inputs, aes(x=DISTANCE_A, fill=group_all))+
-  geom_density(alpha = 0.5)+
+  geom_density()+
   facet_wrap(~group_all, scales="free_y") +
-  theme(legend.position="none")
+  theme(legend.position="none") + labs(x = "Inertia", y = "Density") + 
+  scale_fill_viridis()
 
 ## Percentage revenue from CPS
 ggplot(data=RAW_cluster_inputs, aes(x=Percentage, fill=group_all))+
-  geom_density(alpha = 0.5)+
+  geom_density()+
   facet_wrap(~group_all, scales="free_y") +
-  theme(legend.position="none")
+  theme(legend.position="none") + labs(x = "Percent of revenue from CPS", y = "Density") + 
+  scale_fill_viridis()
 
 ## CPS diversity index
 ggplot(data=RAW_cluster_inputs, aes(x=diversity, fill=group_all))+
-  geom_density(alpha = 0.5)+
+  geom_density()+
   facet_wrap(~group_all, scales="free_y") +
-  theme(legend.position="none")
+  theme(legend.position="none") + labs(x = "CPS diversity index", y = "Density") + 
+  scale_fill_viridis()
 
 #----------------------------------------
 ### Participation (excluded from paper, enougth to use cluster) ###
