@@ -13,11 +13,13 @@ gs4_auth(
   use_oob = gargle::gargle_oob_default(),
   token = NULL)
 
-
-
-
-library("tidyr")
-library("dplyr")
+library(ggplot2)
+library(hrbrthemes)
+library(dplyr)
+library(tidyr)
+library(viridis)
+library(viridis)
+library(forcats)
 
 PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
 n.period = 5
@@ -64,7 +66,7 @@ table <- table %>%
 # table = table[,-1]
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7")
-gs4_create("Table2", sheets = table)
+# gs4_create("Table2", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.species)
@@ -110,7 +112,7 @@ table <- table %>%
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Gear", "Cluster 1", "Cluster 2", "Cluster 3", 
                     "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-gs4_create("Table3", sheets = table)
+# gs4_create("Table3", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.gear, cluster.gear.highest)
@@ -156,11 +158,53 @@ table <- table %>%
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", 
                     "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-gs4_create("Table4", sheets = table)
+# gs4_create("Table4", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.port, cluster.port.highest)
 
+
+#----------------------------------------
+### Input histograms by clusters ###
+RAW_cluster_inputs <- read.csv(here::here("Clustering", "RAW_cluster_inputs.csv"))
+library(ggplot2)
+
+
+## Length
+ggplot(data=RAW_cluster_inputs, aes(x=Length, group=group_all, fill=group_all))+
+  geom_density() + 
+  facet_wrap(~group_all, scales="free_y") +
+  theme(legend.position="none") + scale_fill_viridis()
+
+## Average Revenue
+ggplot(data=RAW_cluster_inputs, aes(x=AVG_REVENUE, fill=group_all))+
+  geom_density(alpha = 0.5)+
+  facet_wrap(~group_all, scales="free_y") +
+  theme(legend.position="none")
+
+## LCG
+ggplot(data=RAW_cluster_inputs, aes(x=LAT, fill=group_all))+
+  geom_density(alpha = 0.5)+
+  facet_wrap(~group_all, scales="free_y") +
+  theme(legend.position="none")
+
+## Inertia
+ggplot(data=RAW_cluster_inputs, aes(x=DISTANCE_A, fill=group_all))+
+  geom_density(alpha = 0.5)+
+  facet_wrap(~group_all, scales="free_y") +
+  theme(legend.position="none")
+
+## Percentage revenue from CPS
+ggplot(data=RAW_cluster_inputs, aes(x=Percentage, fill=group_all))+
+  geom_density(alpha = 0.5)+
+  facet_wrap(~group_all, scales="free_y") +
+  theme(legend.position="none")
+
+## CPS diversity index
+ggplot(data=RAW_cluster_inputs, aes(x=diversity, fill=group_all))+
+  geom_density(alpha = 0.5)+
+  facet_wrap(~group_all, scales="free_y") +
+  theme(legend.position="none")
 
 #----------------------------------------
 ### Participation (excluded from paper, enougth to use cluster) ###

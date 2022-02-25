@@ -413,6 +413,11 @@ names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_1"
     write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv", row.names = FALSE)
   }
 
+## Save RAW for analysis with cluster ID
+RAW$VESSEL_NUM<-Vessel_IDs
+RAW <- merge(RAW, PAM_Vessel_Groups, by="VESSEL_NUM")
+# RAW<-RAW[c(-1)]
+write.csv(RAW, "RAW_cluster_inputs.csv", row.names = FALSE)
 
 ##############################
 ### Descriptive statistics ###
@@ -500,4 +505,4 @@ if (n.period == 5) {
     theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
 }
 
-rm(Group_Stats_Wide, n.period)
+# rm(Group_Stats_Wide, n.period)
