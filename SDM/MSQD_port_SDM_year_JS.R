@@ -28,6 +28,7 @@ ports <- merge(x=port_codes,y=ports_coord, by=c("PORT_NAME", "AGENCY_CODE"),all.
 
 dat <- read.csv("G:\\My Drive\\Project\\Data\\SDM\\squid\\JS outputs\\Monthly_Mean_Values_Squid_Abund.csv")
 
+dat_long <- gather(dat, condition, measurement, X1998.7:X2019.8, factor_key=TRUE)
 
 # ##################################################################################
 # for (y in 2000:2018) {
