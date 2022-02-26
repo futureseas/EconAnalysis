@@ -12,7 +12,6 @@ rm(list=ls())
 gc()
 
 SDM_port <- tibble(LANDING_YEAR = integer(),
-                   LANDING_MONTH = integer(),
                    PORT_NAME = character(),
                    SDM_90 = numeric())
 
@@ -63,5 +62,7 @@ for (y in 2000:2019) {
  	    print(j)
  }
 }
+
+write_csv(SDM_port, file = "data/SDM/MSQD_SDM_port_year_JS.csv")
   
-  write_csv(SDM_port, file = "data/SDM/MSQD_SDM_port_year_JS.csv")
+  
