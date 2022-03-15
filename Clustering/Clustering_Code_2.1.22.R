@@ -429,6 +429,26 @@ RAW_Scaled$VESSEL_NUM<-Vessel_IDs
 RAW_Scaled<-merge(RAW_Scaled, PAM_Vessel_Groups, by="VESSEL_NUM")
 RAW_Scaled<-RAW_Scaled[c(-1)]
 
+
+### Random forrest to see importance of each data
+library(randomForest)
+library(MASS)
+set.seed(17)
+RAW_rf <- RAW[c(-1)]
+RAW_rf <- within(RAW_rf, group_all[group_all == 1]  <- "Cluster1")
+RAW_rf <- within(RAW_rf, group_all[group_all == 2]  <- "Cluster2")
+RAW_rf <- within(RAW_rf, group_all[group_all == 3]  <- "Cluster3")
+RAW_rf <- within(RAW_rf, group_all[group_all == 4]  <- "Cluster4")
+RAW_rf <- within(RAW_rf, group_all[group_all == 5]  <- "Cluster5")
+RAW_rf <- within(RAW_rf, group_all[group_all == 6]  <- "Cluster6")
+RAW_rf <- within(RAW_rf, group_all[group_all == 7]  <- "Cluster7")
+RAW_rf$group_all <- as.factor(RAW_rf$group_all, stringsAsFactors = TRUE)  
+RAW.rf <- randomForest(group_all ~ ., data = RAW_rf, importance = TRUE)
+print(RAW.rf)
+varImpPlot(RAW.rf)
+
+
+
 if (n.period == 1) {
   Group_Stats<-RAW_Scaled%>% group_by(group_1) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
 } else if (n.period == 2) {

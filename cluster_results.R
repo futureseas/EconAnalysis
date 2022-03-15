@@ -27,6 +27,24 @@ n.period = 5
 
 ### Descriptive statistics ###
 
+#----------------------------------
+## Check if Cluster 7 is a "leftover" cluster
+
+# options(scipen=999)
+# cluster7 <- PacFIN.month %>% filter(group_all == 7) %>%
+#   filter(LANDING_YEAR >= 2005) %>% 
+#   filter(LANDING_YEAR <= 2014) %>% 
+#   group_by(PRODUCT_FORM_CODE, LANDING_YEAR) %>% 
+#   summarize(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+#   group_by(LANDING_YEAR) %>% mutate(Total = sum(revenue)) %>%
+#   ungroup() %>% mutate(perc = revenue / Total) %>%
+#   group_by(PRODUCT_FORM_CODE) %>% summarize(avg_perc = mean(perc))
+
+
+cluster7 <- PacFIN.month %>% filter(group_all == 7) %>% select(VESSEL_NUM) %>% unique()
+write.csv(cluster7,"C:\\Data\\Cluster7_vessels.csv", row.names = FALSE)
+
+
 #-----------------------------------
 ## Catch composition
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
