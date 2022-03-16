@@ -29,7 +29,6 @@ setwd("C:/GitHub/EconAnalysis/Clustering")
 period = "2005-2014"
   min.year = 2005 
   max.year = 2014
-  n.clust = 7
 
 # ----------------------------------------
 ### Load in the data
@@ -122,7 +121,8 @@ Tickets$VESSEL_LENGTH<-as.factor(Tickets$VESSEL_LENGTH)
 
 ##Find the most frequently reported length for each vessel
 Dominant_Length<-Tickets %>% group_by(VESSEL_NUM) %>%
-  summarize(Length=names(which.max(table(VESSEL_LENGTH))))
+  summarize(Length=names(which.max(table(VESSEL_LENGTH)))) %>%
+  mutate(Length = ifelse(VESSEL_NUM == 1240646, 58, Length))
 
 Tickets$VESSEL_WEIGHT<-as.character(Tickets$VESSEL_WEIGHT)
 Tickets$VESSEL_WEIGHT[Tickets$VESSEL_WEIGHT==""] <- NA
@@ -134,6 +134,9 @@ Dominant_Weight<-Tickets %>% group_by(VESSEL_NUM) %>%
   summarize(Weight=names(which.max(table(VESSEL_WEIGHT))))
 
 Vessel_Characteristics<-merge(Dominant_Length, Dominant_Weight, by="VESSEL_NUM")
+
+
+
 Vessel_Characteristics$Length<-as.numeric(as.character(Vessel_Characteristics$Length))
 Vessel_Characteristics$Weight<-as.numeric(as.character(Vessel_Characteristics$Weight))
 
@@ -284,14 +287,13 @@ RAW<-RAW[c(-1)]
 rownames(RAW)<-Vessel_IDs
 rm(Vessel_Characteristics, Landings_Volume_Value, Vessel_Geography, FF_Landings_and_Diversity)
 ### I wound up removing weight because I felt as if that and length provided redundant information;
-RAW<-RAW[c(-2)] # Delete Weight
-RAW<-RAW[c(-2)] # Delete AVG_LBS
-RAW<-RAW[c(-7)] # Delete LANDING_MONTHS
+RAW<-RAW[c(-1)] # Delete Lenght
+RAW<-RAW[c(-1)] # Delete Weight
+RAW<-RAW[c(-1)] # Delete AVG_LBS
+RAW<-RAW[c(-6)] # Delete LANDING_MONTHS
 
 # Check the degree to which other cluster inputs are collinear using VIF (O'Farrel et al. 2019)
 cor(RAW)
-M <- lm(Length ~.,data=RAW)
-regclass::VIF(M)
 M <- lm(AVG_REVENUE ~.,data=RAW)
 regclass::VIF(M)
 M <- lm(LAT~.,data=RAW)   
@@ -326,14 +328,15 @@ Ks=sapply(2:25,
             summary(silhouette(pam((Distance_matrix), k=i)))$avg.width)
           plot(2:25,Ks, xlab="k",ylab="av.silhouette",type="b", pch=19)
 
+          n.clust = 7
 
 #--------------------------------------------------------
 # ### Heriarchical Clustering
 # 
-# ##Visualize what the dendrogram looks like with this number of clusters
-# hc <- hclust(Distance_matrix, method="ward.D")  
-# fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
-# sub_grp <- cutree(hc, n.clust)
+##Visualize what the dendrogram looks like with this number of clusters
+hc <- hclust(Distance_matrix, method="ward.D")
+fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
+sub_grp <- cutree(hc, n.clust)
 # 
 # ###See how many vessels are in each group
 # table(sub_grp)
@@ -349,17 +352,31 @@ Ks=sapply(2:25,
 
 #--------------------------------------------------------
 ### PAM Clustering
-Clusters<-pam(Distance_matrix, n.clust)
+Clusters<-pam(Distance_matrix, n.clust, keep.diss = TRUE)
+    Clusters$data <- RAW
+    fviz_cluster(Clusters)
+    
+## Obtain cluster outputs 
 PAM_Vessel_Groups<-Vessels
 PAM_Vessel_Groups$group<-Clusters$clustering
 names(PAM_Vessel_Groups)[1]<-"VESSEL_NUM"
 aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
 rm(Ks, Clusters, Vessels, Distance_matrix)
-
-###Output here once you are satisfied if you want to save this information
 names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
     write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv", row.names = FALSE)
 
+## Check cluster validity
+library(clv)
+intraclust = c("complete","average","centroid")
+interclust = c("single", "complete", "average","centroid", "aveToCent", "hausdorff")
+    # compute Davies-Bouldin indicies (also Dunn indicies)
+    # 1. optimal solution:
+    # compute intercluster distances and intracluster diameters
+    cls.scatt <- cls.scatt.data(RAW, as.integer(Clusters$clustering), dist="euclidean")
+    
+    
+    
+    
 ## Save RAW for analysis with cluster ID
 RAW$VESSEL_NUM<-Vessel_IDs
 RAW <- merge(RAW, PAM_Vessel_Groups, by="VESSEL_NUM")
@@ -397,32 +414,29 @@ RAW_Scaled<-merge(RAW_Scaled, PAM_Vessel_Groups, by="VESSEL_NUM")
 RAW_Scaled<-RAW_Scaled[c(-1)]
 Group_Stats<-RAW_Scaled%>% group_by(group_all) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
 
-Group_Length<-Group_Stats[c(1,2,8)]
-Group_Length$Var<-"Vessel length"
-names(Group_Length)<- c("memb", "mean", "sd", "Variable")
-Group_Avg_Revenue<-Group_Stats[c(1,3,9)]
+Group_Avg_Revenue<-Group_Stats[c(1,2,7)]
 Group_Avg_Revenue$Var<-"Average annual revenue"
 names(Group_Avg_Revenue)<- c("memb", "mean", "sd", "Variable")
-Group_LAT<-Group_Stats[c(1,4,10)]
+Group_LAT<-Group_Stats[c(1,3,8)]
 Group_LAT$Var<-"LCG"
 names(Group_LAT)<- c("memb", "mean", "sd", "Variable")
-Group_Inertia<-Group_Stats[c(1,5,11)]
+Group_Inertia<-Group_Stats[c(1,4,9)]
 Group_Inertia$Var<-"Inertia"
 names(Group_Inertia)<- c("memb", "mean", "sd", "Variable")
-Group_Percentage_FF<-Group_Stats[c(1,6,12)]
+Group_Percentage_FF<-Group_Stats[c(1,5,10)]
 Group_Percentage_FF$Var<-"Percent of revenue from CPS"
 names(Group_Percentage_FF)<- c("memb", "mean", "sd", "Variable")
-Group_FF_Diversity<-Group_Stats[c(1,7,13)]
+Group_FF_Diversity<-Group_Stats[c(1,6,11)]
 Group_FF_Diversity$Var<-"CPS diversity index"
 names(Group_FF_Diversity)<- c("memb", "mean", "sd", "Variable")
 # Group_FF_Months<-Group_Stats[c(1,8,15)]
 # Group_FF_Months$Var<-"FF_Months"
 # names(Group_FF_Months)<- c("memb", "mean", "sd", "Variable")
 
-Group_Stats_Wide<-rbind(Group_Length, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
+Group_Stats_Wide<-rbind(Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
 Group_Stats_Wide$memb<-as.factor(Group_Stats_Wide$memb)
 
-rm(Group_Length, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
+rm(Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
 
 Group_Stats_Wide <- Group_Stats_Wide %>%
   mutate(time.period = period) 

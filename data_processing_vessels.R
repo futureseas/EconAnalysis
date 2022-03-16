@@ -27,15 +27,15 @@ nrow(as.data.frame(unique(Tickets$VESSEL_NUM)))
 
 ## Include price per kilogram
 Tickets$AFI_PRICE_PER_MTON <- Tickets$AFI_PRICE_PER_POUND * 2.20462 * 1000
-  
+
 ## Create subsample excluding bycatch and vessels that never target a FF species
   
 ## Subset the data to get remove columns not relevant to this analysis. This will speed things up.
-Tickets <- select(Tickets, c(FTID, VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, 
+Tickets <- dplyr::select(Tickets, c(FTID, VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, 
                              AFI_PRICE_PER_MTON, LANDED_WEIGHT_MTONS, AFI_EXVESSEL_REVENUE, 
                              VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_HORSEPOWER, NUM_OF_DAYS_FISHED,
                              PACFIN_GEAR_CODE, PORT_NAME, PACFIN_PORT_CODE, LANDING_YEAR, LANDING_MONTH,  
-                             AGENCY_CODE, REMOVAL_TYPE_CODE))
+                             AGENCY_CODE, REMOVAL_TYPE_CODE, PRODUCT_USE_CODE))
                
 ## Remove records associated with landings of zero value; this is likely bycatch 
 Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),] 
@@ -76,7 +76,7 @@ rm(removal.df, nrow_tickets)
   PacFIN.month <- doBy::summaryBy(AFI_PRICE_PER_MTON + LANDED_WEIGHT_MTONS + AFI_EXVESSEL_REVENUE + 
                               VESSEL_LENGTH + VESSEL_WEIGHT + VESSEL_HORSEPOWER + NUM_OF_DAYS_FISHED 
                             ~ VESSEL_NUM + PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE + PORT_NAME + 
-                              PACFIN_PORT_CODE + LANDING_YEAR + LANDING_MONTH + AGENCY_CODE,
+                              PACFIN_PORT_CODE + LANDING_YEAR + LANDING_MONTH + AGENCY_CODE + PRODUCT_USE_CODE,
                           FUN=sum_mean_fun, data=Tickets)
 rm(Tickets)
   

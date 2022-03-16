@@ -1,9 +1,6 @@
 #######################
 ### Cluster results ###
 #######################
-rm(list = ls(all.names = TRUE)) 
-gc()
-
 library("googlesheets4")
 gs4_auth(
   email = gs4_auth(),
@@ -13,35 +10,76 @@ gs4_auth(
   use_oob = gargle::gargle_oob_default(),
   token = NULL)
 
+
+rm(list = ls(all.names = TRUE)) 
+gc()
+
 library(ggplot2)
 library(hrbrthemes)
 library(dplyr)
 library(tidyr)
 library(viridis)
-library(viridis)
 library(forcats)
 
+# source("C:/GitHub/EconAnalysis/data_processing_vessels.R")
 PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
+
+# ### Vessels from cluster 7 ###
+# cluster7 <- PacFIN.month %>% filter(group_all == 7) %>% dplyr::select(VESSEL_NUM) %>% unique()
+#   write.csv(cluster7,"C:\\Data\\Cluster7_vessels.csv", row.names = FALSE)
 
 
 ### Descriptive statistics ###
 
 #----------------------------------
-## Check if Cluster 7 is a "leftover" cluster
+## Product use
+all_product_use <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PRODUCT_USE_CODE) %>% unique() %>% mutate(merge=1)
+  all_product_use <- all_product_use[-c(5), ] 
+all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+expand <- merge(all_product_use, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+rm(all_product_use, all_vessels)
 
-# options(scipen=999)
-# cluster7 <- PacFIN.month %>% filter(group_all == 7) %>%
-#   filter(LANDING_YEAR >= 2005) %>% 
-#   filter(LANDING_YEAR <= 2014) %>% 
-#   group_by(PRODUCT_FORM_CODE, LANDING_YEAR) %>% 
-#   summarize(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
-#   group_by(LANDING_YEAR) %>% mutate(Total = sum(revenue)) %>%
-#   ungroup() %>% mutate(perc = revenue / Total) %>%
-#   group_by(PRODUCT_FORM_CODE) %>% summarize(avg_perc = mean(perc))
+options(scipen=999)
+cluster.use <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>%
+  group_by(group_all, PRODUCT_USE_CODE, VESSEL_NUM) %>% 
+  summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+  group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
+
+cluster.use <- merge(expand, cluster.use, by = c('VESSEL_NUM', 'PRODUCT_USE_CODE'), all.x = TRUE) %>%
+  mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% group_by(VESSEL_NUM) %>%
+  mutate(group_all = ifelse(is.na(group_all),mean(group_all, na.rm = TRUE),group_all)) 
+
+hist.bait <- cluster.use %>% filter(PRODUCT_USE_CODE == "B")
+  cluster_names <- as_labeller(c(`1` = "Cluster 1",`2` = "Cluster 2",
+                               `3` = "Cluster 3",`4` = "Cluster 4",
+                               `5` = "Cluster 5",`6` = "Cluster 6",
+                               `7` = "Cluster 7"))
+  ggplot(data=hist.bait, 
+       aes(x=Percentage, group=group_all, fill=group_all)) +
+   geom_density() + 
+    facet_wrap(~group_all, scales="free_y", labeller = cluster_names) +
+    theme(legend.position="none") + labs(x = "Percentage bait", y = "Density") + 
+    scale_fill_viridis()
 
 
-cluster7 <- PacFIN.month %>% filter(group_all == 7) %>% select(VESSEL_NUM) %>% unique()
-write.csv(cluster7,"C:\\Data\\Cluster7_vessels.csv", row.names = FALSE)
+cluster.use  <- cluster.use %>% 
+  group_by(group_all, PRODUCT_USE_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
+  unique() %>% filter(group_all != is.na(group_all))
+
+table <- as.data.frame(xtabs(Percentage ~  PRODUCT_USE_CODE + group_all, cluster.use ))
+table <- table %>%
+  spread(key = group_all, value = Freq)
+
+# table = table[,-1]
+# rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
+colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7")
+gs4_create("Table6", sheets = table)
+# print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
+
+rm(table, cluster.use)
 
 
 #-----------------------------------
@@ -83,7 +121,7 @@ table <- table %>%
 # table = table[,-1]
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7")
-# gs4_create("Table2", sheets = table)
+gs4_create("Table2", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.species)
@@ -129,7 +167,7 @@ table <- table %>%
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Gear", "Cluster 1", "Cluster 2", "Cluster 3", 
                     "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-# gs4_create("Table3", sheets = table)
+gs4_create("Table3", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.gear, cluster.gear.highest)
@@ -175,7 +213,7 @@ table <- table %>%
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", 
                     "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-# gs4_create("Table4", sheets = table)
+gs4_create("Table4", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.port, cluster.port.highest)
@@ -206,6 +244,8 @@ gs4_create("Table5", sheets = table)
 rm(table, cluster.port, cluster.port.highest)
 
 
+
+
 #----------------------------------------
 ### Input histograms by clusters ###
 RAW_cluster_inputs <- read.csv(here::here("Clustering", "RAW_cluster_inputs.csv"))
@@ -215,15 +255,6 @@ cluster_names <- as_labeller(c(`1` = "Cluster 1",`2` = "Cluster 2",
                                `3` = "Cluster 3",`4` = "Cluster 4",
                                `5` = "Cluster 5",`6` = "Cluster 6",
                                `7` = "Cluster 7"))
-
-
-## Length
-ggplot(data=RAW_cluster_inputs, 
-       aes(x=Length, group=group_all, fill=group_all)) +
-  geom_density() + 
-  facet_wrap(~group_all, scales="free_y", labeller = cluster_names) +
-  theme(legend.position="none") + labs(x = "Vessel length", y = "Density") + 
-  scale_fill_viridis()
 
 ## Average Revenue
 ggplot(data=RAW_cluster_inputs, aes(x=AVG_REVENUE, fill=group_all))+
