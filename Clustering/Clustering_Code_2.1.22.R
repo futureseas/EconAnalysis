@@ -432,7 +432,6 @@ RAW_Scaled<-RAW_Scaled[c(-1)]
 
 ### Random forrest to see importance of each data
 library(randomForest)
-library(MASS)
 set.seed(17)
 RAW_rf <- RAW[c(-1)]
 RAW_rf <- within(RAW_rf, group_all[group_all == 1]  <- "Cluster1")
@@ -442,12 +441,11 @@ RAW_rf <- within(RAW_rf, group_all[group_all == 4]  <- "Cluster4")
 RAW_rf <- within(RAW_rf, group_all[group_all == 5]  <- "Cluster5")
 RAW_rf <- within(RAW_rf, group_all[group_all == 6]  <- "Cluster6")
 RAW_rf <- within(RAW_rf, group_all[group_all == 7]  <- "Cluster7")
-RAW_rf$group_all <- as.factor(RAW_rf$group_all, stringsAsFactors = TRUE)  
-RAW.rf <- randomForest(group_all ~ ., data = RAW_rf, importance = TRUE)
+RAW_rf$group_all <- as.factor(RAW_rf$group_all)  
+str(RAW_rf)
+RAW.rf <- randomForest(group_all ~ ., data = RAW_rf, importance = TRUE, mtry=2, do.trace=100, ntree = 1000)
 print(RAW.rf)
-varImpPlot(RAW.rf)
-
-
+varImpPlot(RAW.rf) ### Should I exclude length?
 
 if (n.period == 1) {
   Group_Stats<-RAW_Scaled%>% group_by(group_1) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
@@ -461,6 +459,7 @@ if (n.period == 1) {
   Group_Stats<-RAW_Scaled%>% group_by(group_all) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
 }
 
+### Create database to plot inputs average by cluster ###
 Group_Length<-Group_Stats[c(1,2,8)]
 Group_Length$Var<-"Vessel length"
 names(Group_Length)<- c("memb", "mean", "sd", "Variable")

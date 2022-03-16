@@ -63,6 +63,6 @@ for (y in 2000:2019) {
  }
 }
 
-write_csv(SDM_port, file = "data/SDM/MSQD_SDM_port_year_JS.csv")
+write_csv(SDM_port, file = "data/SDM/MSQD_SDM_port_year_JS_prob.csv")
   
   
