@@ -22,7 +22,6 @@ library(viridis)
 library(forcats)
 
 PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
-n.period = 5
 
 
 ### Descriptive statistics ###

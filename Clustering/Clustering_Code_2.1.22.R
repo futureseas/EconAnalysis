@@ -21,39 +21,15 @@ rm(list=ls())
 gc()
 setwd("C:/GitHub/EconAnalysis/Clustering")
 
-# Period of analysis (all for all periods together). "5" for whole sample set.
-n.period = 5
 
 #######################
 ### Data processing ###
 #######################
 
-if (n.period == 1) {
-  period = "2000-2004"
-  min.year = 2000
-  max.year = 2020
-  n.clust = 5
-} else if (n.period == 2) {
-  period = "2005-2008"
-  min.year = 2005 
-  max.year = 2008
-  n.clust = 5
-} else if (n.period == 3) {
-  period = "2009-2014"
-  min.year = 2009 
-  max.year = 2014
-  n.clust = 5
-} else if (n.period == 4) {
-  period = "2015-2020"
-  min.year = 2015 
-  max.year = 2020
-  n.clust = 5
-} else if (n.period == 5) {
-  period = "2005-2014"
+period = "2005-2014"
   min.year = 2005 
   max.year = 2014
   n.clust = 7
-}
 
 # ----------------------------------------
 ### Load in the data
@@ -123,9 +99,7 @@ names(FF_Vessels)[1]<-"VESSEL_NUM"
 FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="MISSING"),])
 names(FF_Vessels)[1]<-"VESSEL_NUM"
 
-if (n.period == 5) {
-  write.csv(FF_Vessels, "FF_Vessels.csv", row.names = FALSE)
-}
+write.csv(FF_Vessels, "FF_Vessels.csv", row.names = FALSE)
 
 ###Subset from the complete data set to only retain records associated with these Vessels       
 Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]            
@@ -366,22 +340,9 @@ Ks=sapply(2:25,
 # Hierarchical_Vessel_Groups <- Vessels %>% mutate(cluster=sub_grp)
 # names(Hierarchical_Vessel_Groups)<-c("VESSEL_NUM", "group")
 # 
-# if (n.period == 1) {
-#   names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_1"
-#   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups1.csv", row.names = FALSE)
-# } else if (n.period == 2) {
-#   names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_2"
-#   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups2.csv", row.names = FALSE)
-# } else if (n.period == 3) {
-#   names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_3"
-#   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups3.csv", row.names = FALSE)
-# } else if (n.period == 4) {
-#   names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_4"
-#   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups4.csv", row.names = FALSE)
-# } else if (n.period == 5) {
-#   names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_all"
-#   write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups.csv", row.names = FALSE)
-# }
+# names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_all"
+# write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups.csv", row.names = FALSE)
+# 
 # 
 # rm(hc, sub_grp)
 
@@ -396,27 +357,12 @@ aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
 rm(Ks, Clusters, Vessels, Distance_matrix)
 
 ###Output here once you are satisfied if you want to save this information
-if (n.period == 1) {
-names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_1"
-    write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups1.csv", row.names = FALSE)
-  } else if (n.period == 2) {
-    names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_2"
-    write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups2.csv", row.names = FALSE)
-  } else if (n.period == 3) {
-    names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_3"
-    write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups3.csv", row.names = FALSE)
-  } else if (n.period == 4) {
-    names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_4"
-    write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups4.csv", row.names = FALSE)
-  } else if (n.period == 5) {
-    names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
+names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
     write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv", row.names = FALSE)
-  }
 
 ## Save RAW for analysis with cluster ID
 RAW$VESSEL_NUM<-Vessel_IDs
 RAW <- merge(RAW, PAM_Vessel_Groups, by="VESSEL_NUM")
-# RAW<-RAW[c(-1)]
 write.csv(RAW, "RAW_cluster_inputs.csv", row.names = FALSE)
 
 ##############################
@@ -425,10 +371,6 @@ write.csv(RAW, "RAW_cluster_inputs.csv", row.names = FALSE)
 
 #----------------------------------------------
 ###Step 6: Visualize relative contribution of different cluster inputs
-RAW_Scaled$VESSEL_NUM<-Vessel_IDs
-RAW_Scaled<-merge(RAW_Scaled, PAM_Vessel_Groups, by="VESSEL_NUM")
-RAW_Scaled<-RAW_Scaled[c(-1)]
-
 
 ### Random forrest to see importance of each data
 library(randomForest)
@@ -445,21 +387,16 @@ RAW_rf$group_all <- as.factor(RAW_rf$group_all)
 str(RAW_rf)
 RAW.rf <- randomForest(group_all ~ ., data = RAW_rf, importance = TRUE, mtry=2, do.trace=100, ntree = 1000)
 print(RAW.rf)
-varImpPlot(RAW.rf) ### Should I exclude length?
+varImpPlot(RAW.rf) 
+rm(RAW_rf, RAW.rf)
 
-if (n.period == 1) {
-  Group_Stats<-RAW_Scaled%>% group_by(group_1) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
-} else if (n.period == 2) {
-  Group_Stats<-RAW_Scaled%>% group_by(group_2) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
-} else if (n.period == 3) {
-  Group_Stats<-RAW_Scaled%>% group_by(group_3) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
-} else if (n.period == 4) {
-  Group_Stats<-RAW_Scaled%>% group_by(group_4) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
-} else if (n.period == 5) {
-  Group_Stats<-RAW_Scaled%>% group_by(group_all) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
-}
 
 ### Create database to plot inputs average by cluster ###
+RAW_Scaled$VESSEL_NUM<-Vessel_IDs
+RAW_Scaled<-merge(RAW_Scaled, PAM_Vessel_Groups, by="VESSEL_NUM")
+RAW_Scaled<-RAW_Scaled[c(-1)]
+Group_Stats<-RAW_Scaled%>% group_by(group_all) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+
 Group_Length<-Group_Stats[c(1,2,8)]
 Group_Length$Var<-"Vessel length"
 names(Group_Length)<- c("memb", "mean", "sd", "Variable")
@@ -489,23 +426,13 @@ rm(Group_Length, Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_F
 
 Group_Stats_Wide <- Group_Stats_Wide %>%
   mutate(time.period = period) 
-
-if (n.period == 1) {
-  saveRDS(Group_Stats_Wide, file = "stats_input_1.RDS")
-} else if (n.period == 2) {
-  saveRDS(Group_Stats_Wide, file = "stats_input_2.RDS")  
-} else if (n.period == 3) {
-  saveRDS(Group_Stats_Wide, file = "stats_input_3.RDS")  
-} else if (n.period == 4) {
-  saveRDS(Group_Stats_Wide, file = "stats_input_4.RDS")  
-} else if (n.period == 5) {
   saveRDS(Group_Stats_Wide, file = "stats_input.RDS")  
-}
 
 rm(Group_Stats_Wide, Group_Stats, Vessel_IDs, FTID)
 
-if (n.period == 5) {
-  Group_Stats_Wide <- readRDS(here::here("Clustering", "stats_input.RDS"))
+# plot
+library(viridis)
+Group_Stats_Wide <- readRDS(here::here("Clustering", "stats_input.RDS"))
   ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
     geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
     geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), 
@@ -513,17 +440,5 @@ if (n.period == 5) {
     theme_classic()  + theme(axis.text.x = element_text(angle = 90)) +
     labs(x = "Cluster", y = "Mean (z)") + scale_fill_viridis(discrete = TRUE)
     # scale_fill_brewer(palette="YlGnBu")
-} else {
-  Group_Stats_Wide_1 <- readRDS(here::here("Clustering", "stats_input_1.RDS"))
-  Group_Stats_Wide_2 <- readRDS(here::here("Clustering", "stats_input_2.RDS"))
-  Group_Stats_Wide_3 <- readRDS(here::here("Clustering", "stats_input_3.RDS"))
-  Group_Stats_Wide_4 <- readRDS(here::here("Clustering", "stats_input_4.RDS"))
-  Group_Stats_Wide <- rbind(Group_Stats_Wide_1, Group_Stats_Wide_2, 
-                            Group_Stats_Wide_3, Group_Stats_Wide_4)
-  ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
-    geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
-    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), width = 0.4, position=position_dodge(.9)) + 
-    theme_classic()  + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~time.period)
-}
-
-# rm(Group_Stats_Wide, n.period)
+  
+# rm(Group_Stats_Wide)
