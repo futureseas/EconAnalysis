@@ -313,12 +313,12 @@ Distance_matrix<-dist(RAW_Scaled, method='euclidean')
 #--------------------------------------------------------
 ##Determine the Optimal Number of Clusters 
 
-# ## (A) Using NbClust (the Method O'Farrell et al. 2019 use);
-# ## If you don't like the value it spits out, another defensible means
-# ## of choosing would be the peak of the Second differences Dindex Values
-# ## (which in this case is 7)
-# dbclust <- NbClust(RAW_Scaled, distance = "euclidean", min.nc=2, max.nc=9, 
-#              method = "ward.D", index = "alllong")
+## (A) Using NbClust (the Method O'Farrell et al. 2019 use);
+## If you don't like the value it spits out, another defensible means
+## of choosing would be the peak of the Second differences Dindex Values
+## (which in this case is 7)
+# dbclust <- NbClust(RAW_Scaled, distance = "euclidean", min.nc=2, max.nc=7,
+#              method = "ward.D", index = "all")
 #            fviz_nbclust(dbclust)
 #            # length(unique(dbclust$Best.partition))
 
@@ -361,27 +361,44 @@ PAM_Vessel_Groups<-Vessels
 PAM_Vessel_Groups$group<-Clusters$clustering
 names(PAM_Vessel_Groups)[1]<-"VESSEL_NUM"
 aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
-rm(Ks, Clusters, Vessels, Distance_matrix)
+
 names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
     write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv", row.names = FALSE)
 
 ## Check cluster validity
 library(clv)
-intraclust = c("complete","average","centroid")
-interclust = c("single", "complete", "average","centroid", "aveToCent", "hausdorff")
-    # compute Davies-Bouldin indicies (also Dunn indicies)
-    # 1. optimal solution:
-    # compute intercluster distances and intracluster diameters
+    library("googlesheets4")
+    gs4_auth(
+      email = gs4_auth(),
+      path = NULL,
+      scopes = "https://www.googleapis.com/auth/spreadsheets",
+      cache = gargle::gargle_oauth_cache(),
+      use_oob = gargle::gargle_oob_default(),
+      token = NULL)
+    
+  
+  # compute intercluster distances and intracluster diameters
     cls.scatt <- cls.scatt.data(RAW, as.integer(Clusters$clustering), dist="euclidean")
+  # Intercluster diameters
+    intradist <- rbind.data.frame(cls.scatt$intracls.complete, cls.scatt$intracls.average)
+    colnames(intradist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7")
+    rownames(intradist) = c("Complete distance", "Average distance")
     
+      gs4_create("Intradist", sheets = intradist)
     
+  # Intercluster distances
+    interdist <- as.data.frame(cls.scatt$intercls.average)
+    colnames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
+    rownames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
     
+    gs4_create("Interdist", sheets = interdist)
     
 ## Save RAW for analysis with cluster ID
 RAW$VESSEL_NUM<-Vessel_IDs
 RAW <- merge(RAW, PAM_Vessel_Groups, by="VESSEL_NUM")
 write.csv(RAW, "RAW_cluster_inputs.csv", row.names = FALSE)
 
+rm(Ks, Clusters, Vessels, Distance_matrix)
 ##############################
 ### Descriptive statistics ###
 ##############################

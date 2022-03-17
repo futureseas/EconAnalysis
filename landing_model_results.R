@@ -12,24 +12,16 @@ gc()
 
 library("tidyr")
 library("dplyr")
-library("googlesheets4")
 
-## Google access
-gs4_auth(
-  email = "fequezad@ucsc.edu",
-  path = NULL,
-  scopes = "https://www.googleapis.com/auth/spreadsheets",
-  cache = gargle::gargle_oauth_cache(),
-  use_oob = gargle::gargle_oob_default(),
-  token = NULL)
 
 ## Read PacFIN database 
 PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
 
-#---------------------------------------------------
+
 # Methods
 
-## Organize dataset
+#---------------------------------------------------
+## Construct monthly, quarterly and yearly database
 
 # PacFIN.month.dataset = PacFIN.month.cluster[,!grepl("*_LE_",names(PacFIN.month.cluster))]
 PacFIN.month.dataset <- PacFIN.month.dataset %>% filter(LANDING_YEAR >= 2000) %>% # filter(PACFIN_SPECIES_CODE == "PSDN" | PACFIN_SPECIES_CODE == "MSQD") %>%
