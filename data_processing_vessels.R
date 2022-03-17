@@ -112,17 +112,23 @@ SDM_port_NANC <- read.csv(file = here::here("Data", "SDM", "NANC_SDM_port_month.
   PacFIN.month <- merge(PacFIN.month, SDM_port_NANC, 
                         by = c("PORT_NAME", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
   
-# Merge data with SDM Market Squid #
-SDM_port_MSQD_JS <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_year_JS.csv")) %>%
-  rename(SDM_JS_90 = SDM_90)
-  PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_JS, 
+# Merge data with SDM Market Squid (JS Abundance model) #
+SDM_port_MSQD_JS_cpue <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_year_JS.csv")) %>%
+  rename(SDM_90_JS_cpue = SDM_90)
+  PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_JS_cpue, 
                         by = c("PORT_NAME", "LANDING_YEAR"), all.x = TRUE)
 
+# Merge data with SDM Market Squid (JS probability model) #
+SDM_port_MSQD_JS_prob <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_year_JS_prob.csv")) 
+  PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_JS_prob, 
+                        by = c("PORT_NAME", "LANDING_YEAR"), all.x = TRUE)
+  
   
 PacFIN.month.SDM <- PacFIN.month %>%
     dplyr::rename(PSDN_SDM_60 = SDM_60) %>%
     dplyr::rename(MSQD_SDM_90 = SDM_90) %>%
-    dplyr::rename(MSQD_SDM_JS_90 = SDM_JS_90) %>%
+    dplyr::rename(MSQD_SDM_90_JS_cpue = SDM_90_JS_cpue) %>%
+    dplyr::rename(MSQD_SDM_90_JS_prob = SDM_90_JS_prob) %>%
     dplyr::rename(MSQD_SPAWN_SDM_90 = SDM_SPAWN_90) %>%
     dplyr::rename(MSQD_SPAWN_SDM_100 = SDM_SPAWN_100) %>%
     dplyr::rename(MSQD_SPAWN_SDM_200 = SDM_SPAWN_200) %>%
@@ -218,25 +224,8 @@ PacFIN.month.SDM <- PacFIN.month %>%
 
 # --------------------------------------------------------------------------------------
 ### Merge PacFIN data with results from clustering (~\Clustering\Clustering_Code_2.1.22)
-
-Hierarchical_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups.csv")
-# Hierarchical_Vessel_Groups1 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups1.csv")
-# Hierarchical_Vessel_Groups2 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups2.csv")
-# Hierarchical_Vessel_Groups3 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups3.csv")
-# Hierarchical_Vessel_Groups4 <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\Hierarchical_Vessel_Groups4.csv")
-
-
 PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
-
-
 PacFIN.month.cluster <- merge(PacFIN.month.SDM, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
-# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups1, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
-# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups2, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
-# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups3, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
-# PacFIN.month.cluster <- merge(PacFIN.month.cluster, Hierarchical_Vessel_Groups4, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
-
-# rm(Hierarchical_Vessel_Groups, Hierarchical_Vessel_Groups1, Hierarchical_Vessel_Groups2, 
-#    Hierarchical_Vessel_Groups3, Hierarchical_Vessel_Groups4)
 
 
 # --------------------------------------------------------------------------------------

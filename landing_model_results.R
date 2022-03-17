@@ -18,98 +18,117 @@ library("dplyr")
 PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
 
 
-# Methods
-
 #---------------------------------------------------
-## Construct monthly, quarterly and yearly database
+## Construct monthly database
 
-# PacFIN.month.dataset = PacFIN.month.cluster[,!grepl("*_LE_",names(PacFIN.month.cluster))]
-PacFIN.month.dataset <- PacFIN.month.dataset %>% filter(LANDING_YEAR >= 2000) %>% # filter(PACFIN_SPECIES_CODE == "PSDN" | PACFIN_SPECIES_CODE == "MSQD") %>%
-  dplyr::select(LANDING_YEAR, LANDING_MONTH, PORT_NAME, VESSEL_NUM, PSDN_SDM_60, MSQD_SDM_90,
-                MSQD_SPAWN_SDM_90, LANDED_WEIGHT_MTONS.sum, AFI_PRICE_PER_KG.mean, 
-                PACFIN_SPECIES_CODE, PACFIN_PORT_CODE, AGENCY_CODE, group) %>% 
-  mutate(AFI_PRICE_PER_KG.mean = na_if(AFI_PRICE_PER_KG.mean, 0)) %>% 
-  filter(group != is.na(group)) %>% 
+PacFIN.month <- PacFIN.month %>% 
+  dplyr::select(LANDING_YEAR, LANDING_MONTH, PORT_NAME, VESSEL_NUM,
+                LANDED_WEIGHT_MTONS.sum, AFI_PRICE_PER_MTON.mean, 
+                PACFIN_SPECIES_CODE, PACFIN_PORT_CODE, AGENCY_CODE, group_all, PORT_AREA_CODE) %>% 
+  mutate(AFI_PRICE_PER_MTON.mean = na_if(AFI_PRICE_PER_MTON.mean, 0)) %>% 
+  filter(group_all != is.na(group_all)) 
+
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
+PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
+PacFIN.month <- PacFIN.month %>% mutate(
+  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OMCK",PACFIN_SPECIES_CODE, 
+                               ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
+                                      ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
+                                             ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
+
+PacFIN.month.dataset <- PacFIN.month %>%
   melt(id.vars=c("LANDING_YEAR", "LANDING_MONTH", "VESSEL_NUM",  "PORT_NAME", 
-                 "PACFIN_PORT_CODE", "PACFIN_SPECIES_CODE", "AGENCY_CODE", "group")) %>% 
-  dcast(LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_NAME + PACFIN_PORT_CODE + AGENCY_CODE + group ~
+                 "PACFIN_PORT_CODE", "PACFIN_SPECIES_CODE", "AGENCY_CODE", 'PORT_AREA_CODE', "group_all")) %>% 
+  dcast(LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_NAME + PACFIN_PORT_CODE + AGENCY_CODE + PORT_AREA_CODE + group_all ~
           PACFIN_SPECIES_CODE + variable, fun.aggregate=mean, rm.na = T) %>%
-  dplyr::select('LANDING_YEAR', 'LANDING_MONTH', 'VESSEL_NUM', 'PORT_NAME', 'PACFIN_PORT_CODE', 
-                'AGENCY_CODE', 'group', 'PSDN_LANDED_WEIGHT_MTONS.sum', 'MSQD_LANDED_WEIGHT_MTONS.sum', 
-                'PSDN_AFI_PRICE_PER_KG.mean', 'MSQD_AFI_PRICE_PER_KG.mean')
+  dplyr::select('LANDING_YEAR', 'LANDING_MONTH', 'PORT_NAME', 'VESSEL_NUM', 
+                'PSDN_LANDED_WEIGHT_MTONS.sum', 'MSQD_LANDED_WEIGHT_MTONS.sum', 'NANC_LANDED_WEIGHT_MTONS.sum',  
+                'PSDN_AFI_PRICE_PER_MTON.mean', 'MSQD_AFI_PRICE_PER_MTON.mean', 'NANC_AFI_PRICE_PER_MTON.mean', 
+                'PACFIN_PORT_CODE', 'AGENCY_CODE', 'PORT_AREA_CODE', 'group_all')
 
-# Add port area code #  
-PacFIN.month.dataset[PacFIN.month.dataset == "NaN"] <- NA
-port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
-PacFIN.month.dataset <- PacFIN.month.dataset %>% 
-  merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
+### Select port areas ###
+# selected.ports <- PacFIN.month.dataset %>% 
+#   group_by(PORT_AREA_CODE) %>% 
+#   summarise(landings_PSDN = sum(PSDN_LANDED_WEIGHT_MTONS.sum, na.rm = TRUE),
+#             landings_MSQD = sum(MSQD_LANDED_WEIGHT_MTONS.sum, na.rm = TRUE),
+#             landings_NANC = sum(NANC_LANDED_WEIGHT_MTONS.sum, na.rm = TRUE)) %>%
+#   rowwise() %>% mutate(total = min(landings_PSDN, landings_MSQD)) %>%
+#   filter(total > 0) %>% dplyr::select(PORT_AREA_CODE) %>% mutate(port_included = 1)
+# PacFIN.month.dataset <- PacFIN.month.dataset %>% 
+#   merge(selected.ports, by = c("PORT_AREA_CODE"), all.x = TRUE) %>%
+#   filter(port_included == 1) 
 
-# Exclude port areas without landings of MSQD or PSDN #
-selected.ports <- PacFIN.month.dataset %>% 
-  group_by(PORT_AREA_CODE) %>% 
-  summarise(landings_PSDN = sum(PSDN_LANDED_WEIGHT_MTONS.sum, na.rm = TRUE),
-            landings_MSQD = sum(MSQD_LANDED_WEIGHT_MTONS.sum, na.rm = TRUE)) %>%
-  rowwise() %>% mutate(total = min(landings_PSDN, landings_MSQD)) %>%
-  filter(total > 0) %>% select(PORT_AREA_CODE) %>% mutate(port_included = 1)
-PacFIN.month.dataset <- PacFIN.month.dataset %>% 
-  merge(selected.ports, by = c("PORT_AREA_CODE"), all.x = TRUE) %>%
-  filter(port_included == 1) 
+PacFIN.month.dataset <- PacFIN.month.dataset %>%
+  dplyr::filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA" |
+         PORT_AREA_CODE == "SFA" | PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA")
 
-# Create ID data and change NaN to NA #
 
+### Create ID data and change NaN to NA ###
 PacFIN.month.dataset <- PacFIN.month.dataset %>%
   mutate(PORT_ID = as.numeric(as.factor(PORT_NAME))) %>%
   mutate(PORT_CODE_ID = as.numeric(as.factor(PACFIN_PORT_CODE))) %>% 
   mutate(PORT_AREA_ID = as.numeric(as.factor(PORT_AREA_CODE))) 
 PacFIN.month.dataset[PacFIN.month.dataset == "NaN"] <- NA
 
-# Merge SDM and ACL by year/month/port
 
-## Merge data with SDM Pacific Sardine
+### Merge SDM by year/month/port ###
+
+#### Merge data with SDM Pacific Sardine
 SDM_port_PSDN <- read.csv(file = here::here("Data", "SDM", "PSDN_SDM_port_month.csv"))
 PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_PSDN, 
-                              by = c("PORT_NAME", "AGENCY_CODE","LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
+                      by = c("PORT_NAME", "AGENCY_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
 
-## Merge data with SDM Market Squid
-SDM_port_MSQD <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_month.csv"))
-PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_MSQD, 
-                              by = c("PORT_NAME", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
-
-## Merge data with SDM Market Squid 
+#### Merge data with SDM Market Squid (spawn aggregation) #
 SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM_port_month.csv"))
 PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_MSQD_Spawn, 
-                              by = c("PORT_NAME", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)  
+                      by = c("PORT_NAME", "AGENCY_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) 
 
-dataset <- PacFIN.month.dataset %>%
-  dplyr::rename(PSDN_SDM_60 = SDM_60) %>% dplyr::rename(MSQD_SDM_90 = SDM_90) %>%
-  dplyr::rename(MSQD_SPAWN_SDM_90 = SDM_SPAWN_90)
+#### Merge data with SDM Northern Anchovy #
+SDM_port_NANC <- read.csv(file = here::here("Data", "SDM", "NANC_SDM_port_month.csv"))
+PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_NANC, 
+                      by = c("PORT_NAME", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
+
+#### Merge data with SDM Market Squid (JS Abundance model) #
+SDM_port_MSQD_JS_cpue <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_year_JS.csv")) %>%
+  dplyr::rename(SDM_90_JS_cpue = SDM_90)
+PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_MSQD_JS_cpue, 
+                      by = c("PORT_NAME", "LANDING_YEAR"), all.x = TRUE)
+
+dataset <- PacFIN.month.dataset %>% dplyr::select(-c(SDM_SPAWN_100, SDM_SPAWN_200, SDM_SPAWN_300, SDM_SPAWN_5_100)) %>%
+  dplyr::rename(PSDN_SDM_60 = SDM_60) %>%
+  dplyr::rename(MSQD_SDM_90_JS_cpue = SDM_90_JS_cpue) %>%
+  dplyr::rename(MSQD_SPAWN_SDM_90 = SDM_SPAWN_90) %>%
+  dplyr::rename(NANC_SDM_20 = SDM_20)
 
 
-rm(PacFIN.month.dataset, port_area, selected.ports, SDM_port_PSDN, SDM_port_MSQD, SDM_port_MSQD_Spawn)
+rm(PacFIN.month.dataset, SDM_port_PSDN, SDM_port_NANC, SDM_port_MSQD_Spawn, SDM_port_MSQD_JS_cpue)
 
-```
 
-```{r calculate-sdm, include=FALSE}
-# Calculate year SDM for N/A's using PacFIN port code and port area code.
+#-----------------------------------------------------------------
+## Calculate SDM for N/A's using PacFIN port code and port area code.
 
-## Pacific sardine
+### Pacific sardine
 
-### (a) Using PacFIN port code
-SDM.port.code.PSDN <- aggregate(x=dataset$PSDN_SDM_60, by = list(dataset$LANDING_YEAR, 
-                                                                 dataset$LANDING_MONTH, dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
+#### (a) Using PacFIN port code
+SDM.port.code.PSDN <- aggregate(x=dataset$PSDN_SDM_60, 
+                                by = list(dataset$LANDING_YEAR, 
+                                          dataset$LANDING_MONTH, 
+                                          dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
 SDM.port.code.PSDN <- SDM.port.code.PSDN %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PACFIN_PORT_CODE = Group.3) %>%
   dplyr::rename(PSDN.SDM.port.code = x)
 SDM.port.code.PSDN[SDM.port.code.PSDN == "NaN"] <- NA
 dataset <- dataset %>%
-  merge(SDM.port.code.PSDN, 
-        by = c("LANDING_YEAR", "LANDING_MONTH", "PACFIN_PORT_CODE"), all.x = TRUE) %>% 
+  merge(SDM.port.code.PSDN, by = c("LANDING_YEAR", "LANDING_MONTH", "PACFIN_PORT_CODE"), all.x = TRUE) %>% 
   mutate(PSDN_SDM_60 = ifelse(is.na(PSDN_SDM_60), PSDN.SDM.port.code, PSDN_SDM_60))
 rm(SDM.port.code.PSDN)
 
-### (b) Using port area code
-SDM.port.area.PSDN <- aggregate(x=dataset$PSDN_SDM_60, by = list(dataset$LANDING_YEAR,
-                                                                 dataset$LANDING_MONTH, dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
+#### (b) Using port area code
+SDM.port.area.PSDN <- aggregate(x=dataset$PSDN_SDM_60,
+                                by = list(dataset$LANDING_YEAR,
+                                          dataset$LANDING_MONTH,
+                                          dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
 SDM.port.area.PSDN <- SDM.port.area.PSDN %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PORT_AREA_CODE = Group.3) %>%
   dplyr::rename(PSDN.SDM.port.area = x)
@@ -121,52 +140,63 @@ rm(SDM.port.area.PSDN)
 
 dataset = subset(dataset, select = -c(PSDN.SDM.port.code, PSDN.SDM.port.area))
 
-## Market squid 
 
-### (a) Using PacFIN port code
-SDM.port.code.MSQD <- aggregate(x=dataset$MSQD_SDM_90, by = list(dataset$LANDING_YEAR, 
-                                                                 dataset$LANDING_MONTH, dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
-SDM.port.code.MSQD <- SDM.port.code.MSQD %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+
+### Northern anchovy
+
+#### (a) Using PacFIN port code
+SDM.port.code.NANC <- aggregate(x=dataset$NANC_SDM_20, 
+                                by = list(dataset$LANDING_YEAR, 
+                                          dataset$LANDING_MONTH, 
+                                          dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
+SDM.port.code.NANC <- SDM.port.code.NANC %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PACFIN_PORT_CODE = Group.3) %>%
-  dplyr::rename(MSQD.SDM.port.code = x)
-SDM.port.code.MSQD[SDM.port.code.MSQD == "NaN"] <- NA
+  dplyr::rename(NANC.SDM.port.code = x)
+SDM.port.code.NANC[SDM.port.code.NANC == "NaN"] <- NA
 dataset <- dataset %>%
-  merge(SDM.port.code.MSQD, 
-        by = c("LANDING_YEAR", "LANDING_MONTH", "PACFIN_PORT_CODE"), all.x = TRUE) %>% 
-  mutate(MSQD_SDM_90 = ifelse(is.na(MSQD_SDM_90), MSQD.SDM.port.code, MSQD_SDM_90))
-rm(SDM.port.code.MSQD)
+  merge(SDM.port.code.NANC, by = c("LANDING_YEAR", "LANDING_MONTH", "PACFIN_PORT_CODE"), all.x = TRUE) %>% 
+  mutate(NANC_SDM_20 = ifelse(is.na(NANC_SDM_20), NANC.SDM.port.code, NANC_SDM_20))
+rm(SDM.port.code.NANC)
 
-### (b) Using port area code
-SDM.port.area.MSQD <- aggregate(x=dataset$MSQD_SDM_90, by = list(dataset$LANDING_YEAR,
-                                                                 dataset$LANDING_MONTH, dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
-SDM.port.area.MSQD <- SDM.port.area.MSQD %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+#### (b) Using port area code
+SDM.port.area.NANC <- aggregate(x=dataset$NANC_SDM_20,
+                                by = list(dataset$LANDING_YEAR,
+                                          dataset$LANDING_MONTH,
+                                          dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
+SDM.port.area.NANC <- SDM.port.area.NANC %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PORT_AREA_CODE = Group.3) %>%
-  dplyr::rename(MSQD.SDM.port.area = x)
-SDM.port.area.MSQD[SDM.port.area.MSQD == "NaN"] <- NA
+  dplyr::rename(NANC.SDM.port.area = x)
+SDM.port.area.NANC[SDM.port.area.NANC == "NaN"] <- NA
 dataset <- dataset %>%
-  merge(SDM.port.area.MSQD, by = c("LANDING_YEAR", "LANDING_MONTH", "PORT_AREA_CODE"), all.x = TRUE) %>%
-  mutate(MSQD_SDM_90 = ifelse(is.na(MSQD_SDM_90), MSQD.SDM.port.area, MSQD_SDM_90))
-rm(SDM.port.area.MSQD)
+  merge(SDM.port.area.NANC, by = c("LANDING_YEAR", "LANDING_MONTH", "PORT_AREA_CODE"), all.x = TRUE) %>%
+  mutate(NANC_SDM_20 = ifelse(is.na(NANC_SDM_20), NANC.SDM.port.area, NANC_SDM_20))
+rm(SDM.port.area.NANC)
 
-dataset = subset(dataset, select = -c(MSQD.SDM.port.code, MSQD.SDM.port.area))
+dataset = subset(dataset, select = -c(NANC.SDM.port.code, NANC.SDM.port.area))
 
 
-# Market squid (SPAWN)
-## (a) Using PacFIN port code
-SDM.port.code.MSQD_SPAWN <- aggregate(x=dataset$MSQD_SPAWN_SDM_90, by = list(dataset$LANDING_YEAR,
-                                                                             dataset$LANDING_MONTH, dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
+
+### Market squid (SPAWN)
+
+#### (a) Using PacFIN port code
+SDM.port.code.MSQD_SPAWN <- aggregate(x=dataset$MSQD_SPAWN_SDM_90, 
+                                      by = list(dataset$LANDING_YEAR,
+                                                dataset$LANDING_MONTH, 
+                                                dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
 SDM.port.code.MSQD_SPAWN <- SDM.port.code.MSQD_SPAWN %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PACFIN_PORT_CODE = Group.3) %>%
   dplyr::rename(MSQD_SPAWN.SDM.port.code = x)
 SDM.port.code.MSQD_SPAWN[SDM.port.code.MSQD_SPAWN == "NaN"] <- NA
 dataset <- dataset %>%
-  merge(SDM.port.code.MSQD_SPAWN,
-        by = c("LANDING_YEAR", "LANDING_MONTH", "PACFIN_PORT_CODE"), all.x = TRUE) %>%
+  merge(SDM.port.code.MSQD_SPAWN, by = c("LANDING_YEAR", "LANDING_MONTH", "PACFIN_PORT_CODE"), all.x = TRUE) %>%
   mutate(MSQD_SPAWN_SDM_90 = ifelse(is.na(MSQD_SPAWN_SDM_90), MSQD_SPAWN.SDM.port.code, MSQD_SPAWN_SDM_90))
 rm(SDM.port.code.MSQD_SPAWN)
-### (b) Using port area code
-SDM.port.area.MSQD_SPAWN <- aggregate(x=dataset$MSQD_SPAWN_SDM_90, by = list(dataset$LANDING_YEAR,
-                                                                             dataset$LANDING_MONTH, dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
+
+#### (b) Using port area code
+SDM.port.area.MSQD_SPAWN <- aggregate(x=dataset$MSQD_SPAWN_SDM_90, 
+                                      by = list(dataset$LANDING_YEAR,
+                                                dataset$LANDING_MONTH, 
+                                                dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
 SDM.port.area.MSQD_SPAWN <- SDM.port.area.MSQD_SPAWN %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PORT_AREA_CODE = Group.3) %>%
   dplyr::rename(MSQD_SPAWN.SDM.port.area = x)
@@ -177,42 +207,68 @@ dataset <- dataset %>%
 rm(SDM.port.area.MSQD_SPAWN)
 dataset = subset(dataset, select = -c(MSQD_SPAWN.SDM.port.code, MSQD_SPAWN.SDM.port.area))
 
-```
 
-```{r calculate-price, include=FALSE}
+### Market squid (JS abundance)
 
-# Calculate year price for N/A's using PacFIN port code, port area code, state and year/month.
+#### (a) Using PacFIN port code
+SDM.port.code.MSQD_JS_cpue <- aggregate(x=dataset$MSQD_SDM_90_JS_cpue, 
+                                        by = list(dataset$LANDING_YEAR,
+                                                  dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
+SDM.port.code.MSQD_JS_cpue <- SDM.port.code.MSQD_JS_cpue %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+  dplyr::rename(PACFIN_PORT_CODE = Group.2) %>%  dplyr::rename(MSQD_JS_cpue.SDM.port.code = x)
+SDM.port.code.MSQD_JS_cpue[SDM.port.code.MSQD_JS_cpue == "NaN"] <- NA
+dataset <- dataset %>%
+  merge(SDM.port.code.MSQD_JS_cpue, by = c("LANDING_YEAR", "PACFIN_PORT_CODE"), all.x = TRUE) %>%
+  mutate(MSQD_SDM_90_JS_cpue = ifelse(is.na(MSQD_SDM_90_JS_cpue), MSQD_JS_cpue.SDM.port.code, MSQD_SDM_90_JS_cpue))
+rm(SDM.port.code.MSQD_JS_cpue)
 
-## Pacific sardine
+#### (b) Using port area code
+SDM.port.area.MSQD_JS_cpue <- aggregate(x=dataset$MSQD_SDM_90_JS_cpue, 
+                                        by = list(dataset$LANDING_YEAR, 
+                                                  dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
+SDM.port.area.MSQD_JS_cpue <- SDM.port.area.MSQD_JS_cpue %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+  dplyr::rename(PORT_AREA_CODE = Group.2) %>% dplyr::rename(MSQD_JS_cpue.SDM.port.area = x)
+SDM.port.area.MSQD_JS_cpue[SDM.port.area.MSQD_JS_cpue == "NaN"] <- NA
+dataset <- dataset %>%
+  merge(SDM.port.area.MSQD_JS_cpue, by = c("LANDING_YEAR", "PORT_AREA_CODE"), all.x = TRUE) %>%
+  mutate(MSQD_SDM_90_JS_cpue = ifelse(is.na(MSQD_SDM_90_JS_cpue), MSQD_JS_cpue.SDM.port.area, MSQD_SDM_90_JS_cpue))
+rm(SDM.port.area.MSQD_JS_cpue)
+dataset = subset(dataset, select = -c(MSQD_JS_cpue.SDM.port.code, MSQD_JS_cpue.SDM.port.area))
 
-### (a) Using port name
-price.port.name.PSDN <- aggregate(x=dataset$PSDN_AFI_PRICE_PER_KG.mean, by = list(dataset$LANDING_YEAR, 
-                                                                                  dataset$LANDING_MONTH, dataset$PORT_NAME), FUN = mean, na.rm=T)
+
+#----------------------------------------------------------------------------------------------
+## Calculate year price for N/A's using PacFIN port code, port area code, state and year/month.
+
+### Pacific sardine
+
+#### (a) Using port name
+price.port.name.PSDN <- aggregate(x=dataset$PSDN_AFI_PRICE_PER_MTON.mean, 
+                         by = list(dataset$LANDING_YEAR, dataset$LANDING_MONTH, dataset$PORT_NAME), FUN = mean, na.rm=T)
 price.port.name.PSDN <- price.port.name.PSDN %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PORT_NAME = Group.3) %>%
   dplyr::rename(PSDN.price.port.name = x)
 price.port.name.PSDN[price.port.name.PSDN == "NaN"] <- NA
 dataset <- dataset %>% 
   merge(price.port.name.PSDN, by = c("LANDING_YEAR", "LANDING_MONTH", "PORT_NAME"), all.x = TRUE) %>%
-  mutate(PSDN_AFI_PRICE_PER_KG.mean = ifelse(is.na(PSDN_AFI_PRICE_PER_KG.mean), 
-                                             PSDN.price.port.name, PSDN_AFI_PRICE_PER_KG.mean))
+  mutate(PSDN_AFI_PRICE_PER_MTON.mean = ifelse(is.na(PSDN_AFI_PRICE_PER_MTON.mean), 
+                                             PSDN.price.port.name, PSDN_AFI_PRICE_PER_MTON.mean))
 rm(price.port.name.PSDN)
 
-### (b) Using PacFIN port code
-price.port.code.PSDN <- aggregate(x=dataset$PSDN_AFI_PRICE_PER_KG.mean, by = list(dataset$LANDING_YEAR, 
-                                                                                  dataset$LANDING_MONTH, dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
+#### (b) Using PacFIN port code
+price.port.code.PSDN <- aggregate(x=dataset$PSDN_AFI_PRICE_PER_MTON.mean, 
+                         by = list(dataset$LANDING_YEAR, dataset$LANDING_MONTH, dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
 price.port.code.PSDN <- price.port.code.PSDN %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PACFIN_PORT_CODE = Group.3) %>%
   dplyr::rename(PSDN.price.port.code = x)
 price.port.code.PSDN[price.port.code.PSDN == "NaN"] <- NA
 dataset <- dataset %>%
   merge(price.port.code.PSDN, by = c("LANDING_YEAR", "LANDING_MONTH", "PACFIN_PORT_CODE"), all.x = TRUE) %>% 
-  mutate(PSDN_AFI_PRICE_PER_KG.mean = ifelse(is.na(PSDN_AFI_PRICE_PER_KG.mean), 
-                                             PSDN.price.port.code, PSDN_AFI_PRICE_PER_KG.mean))
+  mutate(PSDN_AFI_PRICE_PER_MTON.mean = ifelse(is.na(PSDN_AFI_PRICE_PER_MTON.mean), 
+                                             PSDN.price.port.code, PSDN_AFI_PRICE_PER_MTON.mean))
 rm(price.port.code.PSDN)
 
-### (c) Using port area code
-price.port.area.PSDN <- aggregate(x=dataset$PSDN_AFI_PRICE_PER_KG.mean, by = list(dataset$LANDING_YEAR, 
+#### (c) Using port area code
+price.port.area.PSDN <- aggregate(x=dataset$PSDN_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
                                                                                   dataset$LANDING_MONTH, dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
 price.port.area.PSDN <- price.port.area.PSDN %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PORT_AREA_CODE = Group.3) %>%
@@ -220,12 +276,12 @@ price.port.area.PSDN <- price.port.area.PSDN %>% dplyr::rename(LANDING_YEAR = Gr
 price.port.area.PSDN[price.port.area.PSDN == "NaN"] <- NA
 dataset <- dataset %>%
   merge(price.port.area.PSDN, by = c("LANDING_YEAR", "LANDING_MONTH", "PORT_AREA_CODE"), all.x = TRUE) %>% 
-  mutate(PSDN_AFI_PRICE_PER_KG.mean = ifelse(is.na(PSDN_AFI_PRICE_PER_KG.mean), 
-                                             PSDN.price.port.area, PSDN_AFI_PRICE_PER_KG.mean))
+  mutate(PSDN_AFI_PRICE_PER_MTON.mean = ifelse(is.na(PSDN_AFI_PRICE_PER_MTON.mean), 
+                                             PSDN.price.port.area, PSDN_AFI_PRICE_PER_MTON.mean))
 rm(price.port.area.PSDN)
 
-### (d) Using state
-price.state.PSDN <- aggregate(x=dataset$PSDN_AFI_PRICE_PER_KG.mean, by = list(dataset$LANDING_YEAR, 
+#### (d) Using state
+price.state.PSDN <- aggregate(x=dataset$PSDN_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
                                                                               dataset$LANDING_MONTH, dataset$AGENCY_CODE), FUN = mean, na.rm=T)
 price.state.PSDN <- price.state.PSDN %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(AGENCY_CODE = Group.3) %>%
@@ -233,20 +289,20 @@ price.state.PSDN <- price.state.PSDN %>% dplyr::rename(LANDING_YEAR = Group.1) %
 price.state.PSDN[price.state.PSDN == "NaN"] <- NA
 dataset <- dataset %>%
   merge(price.state.PSDN, by = c("LANDING_YEAR", "LANDING_MONTH", "AGENCY_CODE"), all.x = TRUE) %>% 
-  mutate(PSDN_AFI_PRICE_PER_KG.mean = ifelse(is.na(PSDN_AFI_PRICE_PER_KG.mean), 
-                                             PSDN.price.state, PSDN_AFI_PRICE_PER_KG.mean))
+  mutate(PSDN_AFI_PRICE_PER_MTON.mean = ifelse(is.na(PSDN_AFI_PRICE_PER_MTON.mean), 
+                                             PSDN.price.state, PSDN_AFI_PRICE_PER_MTON.mean))
 rm(price.state.PSDN)
 
-### (e) Using year/month
-price.year.PSDN <- aggregate(x=dataset$PSDN_AFI_PRICE_PER_KG.mean, by = list(dataset$LANDING_YEAR, 
+#### (e) Using year/month
+price.year.PSDN <- aggregate(x=dataset$PSDN_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
                                                                              dataset$LANDING_MONTH), FUN = mean, na.rm=T)
 price.year.PSDN <- price.year.PSDN %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PSDN.price.year.month = x)
 price.year.PSDN[price.year.PSDN == "NaN"] <- NA
 dataset <- dataset %>%
   merge(price.year.PSDN, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) %>% 
-  mutate(PSDN_AFI_PRICE_PER_KG.mean = ifelse(is.na(PSDN_AFI_PRICE_PER_KG.mean), 
-                                             PSDN.price.year.month, PSDN_AFI_PRICE_PER_KG.mean))
+  mutate(PSDN_AFI_PRICE_PER_MTON.mean = ifelse(is.na(PSDN_AFI_PRICE_PER_MTON.mean), 
+                                             PSDN.price.year.month, PSDN_AFI_PRICE_PER_MTON.mean))
 rm(price.year.PSDN)
 
 dataset = subset(dataset, select = 
@@ -254,10 +310,10 @@ dataset = subset(dataset, select =
                       PSDN.price.port.area, PSDN.price.state, PSDN.price.year.month))
 
 
-## Market squid
+### Market squid
 
-### (a) Using port name
-price.port.name.MSQD <- aggregate(x=dataset$MSQD_AFI_PRICE_PER_KG.mean, by = list(dataset$LANDING_YEAR, 
+#### (a) Using port name
+price.port.name.MSQD <- aggregate(x=dataset$MSQD_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
                                                                                   dataset$LANDING_MONTH, dataset$PORT_NAME), FUN = mean, na.rm=T)
 price.port.name.MSQD <- price.port.name.MSQD %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PORT_NAME = Group.3) %>%
@@ -265,12 +321,12 @@ price.port.name.MSQD <- price.port.name.MSQD %>% dplyr::rename(LANDING_YEAR = Gr
 price.port.name.MSQD[price.port.name.MSQD == "NaN"] <- NA
 dataset <- dataset %>% 
   merge(price.port.name.MSQD, by = c("LANDING_YEAR", "LANDING_MONTH", "PORT_NAME"), all.x = TRUE) %>%
-  mutate(MSQD_AFI_PRICE_PER_KG.mean = ifelse(is.na(MSQD_AFI_PRICE_PER_KG.mean), 
-                                             MSQD.price.port.name, MSQD_AFI_PRICE_PER_KG.mean))
+  mutate(MSQD_AFI_PRICE_PER_MTON.mean = ifelse(is.na(MSQD_AFI_PRICE_PER_MTON.mean), 
+                                             MSQD.price.port.name, MSQD_AFI_PRICE_PER_MTON.mean))
 rm(price.port.name.MSQD)
 
-### (b) Using PacFIN port code
-price.port.code.MSQD <- aggregate(x=dataset$MSQD_AFI_PRICE_PER_KG.mean, by = list(dataset$LANDING_YEAR, 
+#### (b) Using PacFIN port code
+price.port.code.MSQD <- aggregate(x=dataset$MSQD_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
                                                                                   dataset$LANDING_MONTH, dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
 price.port.code.MSQD <- price.port.code.MSQD %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PACFIN_PORT_CODE = Group.3) %>%
@@ -278,12 +334,12 @@ price.port.code.MSQD <- price.port.code.MSQD %>% dplyr::rename(LANDING_YEAR = Gr
 price.port.code.MSQD[price.port.code.MSQD == "NaN"] <- NA
 dataset <- dataset %>%
   merge(price.port.code.MSQD, by = c("LANDING_YEAR", "LANDING_MONTH", "PACFIN_PORT_CODE"), all.x = TRUE) %>% 
-  mutate(MSQD_AFI_PRICE_PER_KG.mean = ifelse(is.na(MSQD_AFI_PRICE_PER_KG.mean), 
-                                             MSQD.price.port.code, MSQD_AFI_PRICE_PER_KG.mean))
+  mutate(MSQD_AFI_PRICE_PER_MTON.mean = ifelse(is.na(MSQD_AFI_PRICE_PER_MTON.mean), 
+                                             MSQD.price.port.code, MSQD_AFI_PRICE_PER_MTON.mean))
 rm(price.port.code.MSQD)
 
-### (c) Using port area code
-price.port.area.MSQD <- aggregate(x=dataset$MSQD_AFI_PRICE_PER_KG.mean, by = list(dataset$LANDING_YEAR, 
+#### (c) Using port area code
+price.port.area.MSQD <- aggregate(x=dataset$MSQD_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
                                                                                   dataset$LANDING_MONTH, dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
 price.port.area.MSQD <- price.port.area.MSQD %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PORT_AREA_CODE = Group.3) %>%
@@ -291,12 +347,12 @@ price.port.area.MSQD <- price.port.area.MSQD %>% dplyr::rename(LANDING_YEAR = Gr
 price.port.area.MSQD[price.port.area.MSQD == "NaN"] <- NA
 dataset <- dataset %>%
   merge(price.port.area.MSQD, by = c("LANDING_YEAR", "LANDING_MONTH", "PORT_AREA_CODE"), all.x = TRUE) %>% 
-  mutate(MSQD_AFI_PRICE_PER_KG.mean = ifelse(is.na(MSQD_AFI_PRICE_PER_KG.mean), 
-                                             MSQD.price.port.area, MSQD_AFI_PRICE_PER_KG.mean))
+  mutate(MSQD_AFI_PRICE_PER_MTON.mean = ifelse(is.na(MSQD_AFI_PRICE_PER_MTON.mean), 
+                                             MSQD.price.port.area, MSQD_AFI_PRICE_PER_MTON.mean))
 rm(price.port.area.MSQD)
 
-### (d) Using state
-price.state.MSQD <- aggregate(x=dataset$MSQD_AFI_PRICE_PER_KG.mean, by = list(dataset$LANDING_YEAR, 
+#### (d) Using state
+price.state.MSQD <- aggregate(x=dataset$MSQD_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
                                                                               dataset$LANDING_MONTH, dataset$AGENCY_CODE), FUN = mean, na.rm=T)
 price.state.MSQD <- price.state.MSQD %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(AGENCY_CODE = Group.3) %>%
@@ -304,39 +360,112 @@ price.state.MSQD <- price.state.MSQD %>% dplyr::rename(LANDING_YEAR = Group.1) %
 price.state.MSQD[price.state.MSQD == "NaN"] <- NA
 dataset <- dataset %>%
   merge(price.state.MSQD, by = c("LANDING_YEAR", "LANDING_MONTH", "AGENCY_CODE"), all.x = TRUE) %>% 
-  mutate(MSQD_AFI_PRICE_PER_KG.mean = ifelse(is.na(MSQD_AFI_PRICE_PER_KG.mean), 
-                                             MSQD.price.state, MSQD_AFI_PRICE_PER_KG.mean))
+  mutate(MSQD_AFI_PRICE_PER_MTON.mean = ifelse(is.na(MSQD_AFI_PRICE_PER_MTON.mean), 
+                                             MSQD.price.state, MSQD_AFI_PRICE_PER_MTON.mean))
 rm(price.state.MSQD)
 
-### (e) Using year/month
-price.year.MSQD <- aggregate(x=dataset$MSQD_AFI_PRICE_PER_KG.mean, by = list(dataset$LANDING_YEAR, 
+#### (e) Using year/month
+price.year.MSQD <- aggregate(x=dataset$MSQD_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
                                                                              dataset$LANDING_MONTH), FUN = mean, na.rm=T)
 price.year.MSQD <- price.year.MSQD %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
   dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(MSQD.price.year.month = x)
 price.year.MSQD[price.year.MSQD == "NaN"] <- NA
 dataset <- dataset %>%
   merge(price.year.MSQD, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) %>% 
-  mutate(MSQD_AFI_PRICE_PER_KG.mean = ifelse(is.na(MSQD_AFI_PRICE_PER_KG.mean), 
-                                             MSQD.price.year.month, MSQD_AFI_PRICE_PER_KG.mean))
+  mutate(MSQD_AFI_PRICE_PER_MTON.mean = ifelse(is.na(MSQD_AFI_PRICE_PER_MTON.mean), 
+                                             MSQD.price.year.month, MSQD_AFI_PRICE_PER_MTON.mean))
 rm(price.year.MSQD)
 
 dataset = subset(dataset, select = 
                    -c(MSQD.price.port.name, MSQD.price.port.code, 
                       MSQD.price.port.area, MSQD.price.state, MSQD.price.year.month))
 
-```
 
-```{r desc, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
-# Rename Price and landing variables #
+### Northern anchovy
+
+#### (a) Using port name
+price.port.name.NANC <- aggregate(x=dataset$NANC_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
+                                                                                  dataset$LANDING_MONTH, dataset$PORT_NAME), FUN = mean, na.rm=T)
+price.port.name.NANC <- price.port.name.NANC %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+  dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PORT_NAME = Group.3) %>%
+  dplyr::rename(NANC.price.port.name = x)
+price.port.name.NANC[price.port.name.NANC == "NaN"] <- NA
 dataset <- dataset %>% 
-  dplyr::rename(PSDN_Price = PSDN_AFI_PRICE_PER_KG.mean) %>%
-  dplyr::rename(MSQD_Price = MSQD_AFI_PRICE_PER_KG.mean) %>%
-  dplyr::rename(PSDN_Landings = PSDN_LANDED_WEIGHT_MTONS.sum) %>%
-  dplyr::rename(MSQD_Landings = MSQD_LANDED_WEIGHT_MTONS.sum)
+  merge(price.port.name.NANC, by = c("LANDING_YEAR", "LANDING_MONTH", "PORT_NAME"), all.x = TRUE) %>%
+  mutate(NANC_AFI_PRICE_PER_MTON.mean = ifelse(is.na(NANC_AFI_PRICE_PER_MTON.mean), 
+                                             NANC.price.port.name, NANC_AFI_PRICE_PER_MTON.mean))
+rm(price.port.name.NANC)
 
-# Label dataset
-sjlabelled::set_label(dataset$MSQD_SDM_90)         <- "Prob(presence): MSQD"
-sjlabelled::set_label(dataset$MSQD_SPAWN_SDM_90)   <- "Prob(presence): MSQD (Spawn)"
+#### (b) Using PacFIN port code
+price.port.code.NANC <- aggregate(x=dataset$NANC_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
+                                                                                  dataset$LANDING_MONTH, dataset$PACFIN_PORT_CODE), FUN = mean, na.rm=T)
+price.port.code.NANC <- price.port.code.NANC %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+  dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PACFIN_PORT_CODE = Group.3) %>%
+  dplyr::rename(NANC.price.port.code = x)
+price.port.code.NANC[price.port.code.NANC == "NaN"] <- NA
+dataset <- dataset %>%
+  merge(price.port.code.NANC, by = c("LANDING_YEAR", "LANDING_MONTH", "PACFIN_PORT_CODE"), all.x = TRUE) %>% 
+  mutate(NANC_AFI_PRICE_PER_MTON.mean = ifelse(is.na(NANC_AFI_PRICE_PER_MTON.mean), 
+                                             NANC.price.port.code, NANC_AFI_PRICE_PER_MTON.mean))
+rm(price.port.code.NANC)
+
+#### (c) Using port area code
+price.port.area.NANC <- aggregate(x=dataset$NANC_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
+                                                                                  dataset$LANDING_MONTH, dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
+price.port.area.NANC <- price.port.area.NANC %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+  dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PORT_AREA_CODE = Group.3) %>%
+  dplyr::rename(NANC.price.port.area = x)
+price.port.area.NANC[price.port.area.NANC == "NaN"] <- NA
+dataset <- dataset %>%
+  merge(price.port.area.NANC, by = c("LANDING_YEAR", "LANDING_MONTH", "PORT_AREA_CODE"), all.x = TRUE) %>% 
+  mutate(NANC_AFI_PRICE_PER_MTON.mean = ifelse(is.na(NANC_AFI_PRICE_PER_MTON.mean), 
+                                             NANC.price.port.area, NANC_AFI_PRICE_PER_MTON.mean))
+rm(price.port.area.NANC)
+
+#### (d) Using state
+price.state.NANC <- aggregate(x=dataset$NANC_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
+                                                                              dataset$LANDING_MONTH, dataset$AGENCY_CODE), FUN = mean, na.rm=T)
+price.state.NANC <- price.state.NANC %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+  dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(AGENCY_CODE = Group.3) %>%
+  dplyr::rename(NANC.price.state = x)
+price.state.NANC[price.state.NANC == "NaN"] <- NA
+dataset <- dataset %>%
+  merge(price.state.NANC, by = c("LANDING_YEAR", "LANDING_MONTH", "AGENCY_CODE"), all.x = TRUE) %>% 
+  mutate(NANC_AFI_PRICE_PER_MTON.mean = ifelse(is.na(NANC_AFI_PRICE_PER_MTON.mean), 
+                                             NANC.price.state, NANC_AFI_PRICE_PER_MTON.mean))
+rm(price.state.NANC)
+
+#### (e) Using year/month
+price.year.NANC <- aggregate(x=dataset$NANC_AFI_PRICE_PER_MTON.mean, by = list(dataset$LANDING_YEAR, 
+                                                                             dataset$LANDING_MONTH), FUN = mean, na.rm=T)
+price.year.NANC <- price.year.NANC %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+  dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(NANC.price.year.month = x)
+price.year.NANC[price.year.NANC == "NaN"] <- NA
+dataset <- dataset %>%
+  merge(price.year.NANC, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) %>% 
+  mutate(NANC_AFI_PRICE_PER_MTON.mean = ifelse(is.na(NANC_AFI_PRICE_PER_MTON.mean), 
+                                             NANC.price.year.month, NANC_AFI_PRICE_PER_MTON.mean))
+rm(price.year.NANC)
+
+dataset = subset(dataset, select = 
+                   -c(NANC.price.port.name, NANC.price.port.code, 
+                      NANC.price.port.area, NANC.price.state, NANC.price.year.month))
+
+
+#---------------------------------------
+## Summary statistics ##
+dataset <- dataset %>% 
+  dplyr::rename(PSDN_Price = PSDN_AFI_PRICE_PER_MTON.mean) %>%
+  dplyr::rename(MSQD_Price = MSQD_AFI_PRICE_PER_MTON.mean) %>%
+  dplyr::rename(NANC_Price = NANC_AFI_PRICE_PER_MTON.mean) %>%
+  dplyr::rename(PSDN_Landings = PSDN_LANDED_WEIGHT_MTONS.sum) %>%
+  dplyr::rename(MSQD_Landings = MSQD_LANDED_WEIGHT_MTONS.sum) %>%
+  dplyr::rename(NANC_Landings = NANC_LANDED_WEIGHT_MTONS.sum)
+
+### Label dataset
+sjlabelled::set_label(dataset$MSQD_SDM_90_JS_cpue)         <- "Prob(presence): MSQD (CPUE)"
+sjlabelled::set_label(dataset$MSQD_SPAWN_SDM_90)   <- "Prob(presence): MSQD (Spawning aggregations)"
+sjlabelled::set_label(dataset$NANC_SDM_20)         <- "Prob(presence): NANC"
 sjlabelled::set_label(dataset$PSDN_SDM_60)         <- "Prob(presence): PSDN"
 sjlabelled::set_label(dataset$LANDING_YEAR)     <- "Year"
 sjlabelled::set_label(dataset$LANDING_MONTH)    <- "Month"
@@ -349,9 +478,15 @@ sjlabelled::set_label(dataset$MSQD_Landings) <- "Landings: MSQD"
 sjlabelled::set_label(dataset$MSQD_Price)    <- "Price: MSQD"
 sjlabelled::set_label(dataset$PSDN_Landings) <- "Landings: PSDN"
 sjlabelled::set_label(dataset$PSDN_Price)    <- "Price: PSDN"
+sjlabelled::set_label(dataset$NANC_Landings) <- "Landings: NANC"
+sjlabelled::set_label(dataset$NANC_Price)    <- "Price: NANC"
 sjlabelled::set_label(dataset$PORT_ID)       <- "Port ID"
 
 
+
+##########################################################
+CONTINUE HERE!!!
+  
 ### Convert to quarterly??? ###
 library("zoo")
 dataset$MonthYear <- as.yearmon(paste(dataset$LANDING_YEAR, dataset$LANDING_MONTH), "%Y %m")
@@ -386,87 +521,14 @@ desc_data <- desc_data[c("PSDN_SDM_60", "MSQD_SDM_90", "MSQD_SPAWN_SDM_90", "PSD
 vtable::st(desc_data, labels = TRUE, title='Summary Statistics \\label{tab:sum_stats}', out='latex')
 rm(desc_data, Tot.landings.ports)
 
-```
 
-<!-- ############################################### -->
-  <!-- ### CREATE DATASET BY SPECIES AND RUN MODEL ### -->
-  <!-- ############################################### -->
-  
-  <!-- ### Pacific Sardine ### -->
-  
-  ```{r dataset_psdn, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
+###############################################
+### CREATE DATASET BY SPECIES AND RUN MODEL ### 
+###############################################
 
-## Select data for estimation, replace N/A landings to zero #
 
-dataset_psdn <- dataset %>% 
-  dplyr::select(VESSEL_NUM, PSDN_SDM_60, PSDN_Landings, PSDN_Price, MSQD_Price,
-                PORT_AREA_ID, LANDING_YEAR, MSQD_SDM_90, MSQD_SPAWN_SDM_90, group) %>%
-  filter(LANDING_YEAR >= 2000) %>% 
-  dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>% #filter(PSDN_Landings > 0) %>% 
-  mutate(PSDN_Landings = ifelse(PSDN_Landings<=0, 0 ,PSDN_Landings)) %>% 
-  mutate(Closure = ifelse(LANDING_YEAR >= 2015,1,0)) %>%
-  mutate(RelPrice = PSDN_Price / MSQD_Price) %>% drop_na() 
-dataset_psdn$port_ID <- as.factor(
-  udpipe::unique_identifier(dataset_psdn, fields = "PORT_AREA_ID", start_from = 1))
-dataset_psdn$cluster <- as.factor(
-  udpipe::unique_identifier(dataset_psdn, fields = "group", start_from = 1))
-# dataset_psdn_port_names <- dataset_psdn %>% dplyr::select(PORT_AREA_CODE, port_ID) %>% unique()
 
-```
-
-```{r psdn_estimation, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-fit_qPSDN <- brm(bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SPAWN_SDM_90 + (1 | cluster) + (1 | port_ID), 
-                    hu ~ (1 | cluster) + (1 | port_ID)),
-                 data = dataset_psdn, 
-                 prior = c(set_prior("cauchy(0,2)", class = "sd")),
-                 family = hurdle_gamma(), 
-                 chains = 4, cores = 4, warmup = "1000", iter = "2000",
-                 control = list(adapt_delta = 0.95))
-
-plot(fit_qPSDN)
-plot(fit_qPSDN, pars = c("PSDN_SDM_60"))
-coef(fit_qPSDN)
-
-save.image (file = "stan_fit.RData")
-
-# # work better with SDM separated. 
-# loo(fit_qPSDN, fit_qPSDNv2)
-
-```
-
-```{r pp_check_psdn, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-g1 <- pp_check(fit_qPSDN) + ggtitle('(a) Pacific sardine') + 
-  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-                     labels = c("y" = "Observed", "yrep" = "Replicated")) +  
-  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic")) +  
-  xlim(0.1, 4000) + ylab("Density")
-
-g1
-```
-
-<!-- # print summary -->
-  <!-- texreg(list(f2, f3, r2, r3), caption = 'Panel data models for Pacific Sardine landings.\\label{table:sardine_est}', caption.above = TRUE, float.pos = "h", custom.model.names = c("FE: Model 1", "FE: Model 2", "RE: Model 1", "RE: Model 2")) -->
-  
-  
-  <!-- # ##  Extract Grouo-Level estimates ## -->
-  <!-- # ranef(fit_qPSDN_gamma) -->
-  <!-- #  -->
-  <!-- # ## Check divergence and other model check ## -->
-  <!-- # shinystan::launch_shinystan(fit_qPSDN_gamma) -->
-  
-  <!-- # Investigate chain and posterior distributions.  -->
-  <!-- # https://cran.r-project.org/web/packages/bayesplot/vignettes/graphical-ppcs.html -->
-  <!-- # plot(fit_qPSDN_t2nc, pars = c("PSDN_SDM")) -->
-  
-  <!-- # ### Predictions ### -->
-  <!-- # pred_data <- data.frame(PSDN_SDM = c(0.5, 0.25), MSQD_SDM = c(0.5), Port_ID = 1) -->
-  <!-- # predict(fit_qPSDN, newdata = pred_data, re_formula = NA) -->
-  
-  <!-- # ## Compare models ## -->
-  <!-- # loo(fit1, fit2) -->
-  
-  
-  <!-- ### Market squid ### -->
+<!-- ### Market squid ### -->
   
   ```{r msqd_data, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
 # Select data for estimation, replace N/A landings to zero #
@@ -530,6 +592,77 @@ g2 <- pp_check(fit_qMSQD_price) + ggtitle('(b) Market Squid') +
 
 ```
 
+  
+### Pacific Sardine ### -->
+
+## Select data for estimation, replace N/A landings to zero #
+
+dataset_psdn <- dataset %>% 
+  dplyr::select(VESSEL_NUM, PSDN_SDM_60, PSDN_Landings, PSDN_Price, MSQD_Price,
+                PORT_AREA_ID, LANDING_YEAR, MSQD_SDM_90, MSQD_SPAWN_SDM_90, group) %>%
+  filter(LANDING_YEAR >= 2000) %>% 
+  dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>% #filter(PSDN_Landings > 0) %>% 
+  mutate(PSDN_Landings = ifelse(PSDN_Landings<=0, 0 ,PSDN_Landings)) %>% 
+  mutate(Closure = ifelse(LANDING_YEAR >= 2015,1,0)) %>%
+  mutate(RelPrice = PSDN_Price / MSQD_Price) %>% drop_na() 
+dataset_psdn$port_ID <- as.factor(
+  udpipe::unique_identifier(dataset_psdn, fields = "PORT_AREA_ID", start_from = 1))
+dataset_psdn$cluster <- as.factor(
+  udpipe::unique_identifier(dataset_psdn, fields = "group", start_from = 1))
+# dataset_psdn_port_names <- dataset_psdn %>% dplyr::select(PORT_AREA_CODE, port_ID) %>% unique()
+
+
+fit_qPSDN <- brm(bf(PSDN_Landings ~ PSDN_SDM_60 + MSQD_SPAWN_SDM_90 + (1 | cluster) + (1 | port_ID), 
+                    hu ~ (1 | cluster) + (1 | port_ID)),
+                 data = dataset_psdn, 
+                 prior = c(set_prior("cauchy(0,2)", class = "sd")),
+                 family = hurdle_gamma(), 
+                 chains = 4, cores = 4, warmup = "1000", iter = "2000",
+                 control = list(adapt_delta = 0.95))
+
+plot(fit_qPSDN)
+plot(fit_qPSDN, pars = c("PSDN_SDM_60"))
+coef(fit_qPSDN)
+
+save.image (file = "stan_fit.RData")
+
+# # work better with SDM separated. 
+# loo(fit_qPSDN, fit_qPSDNv2)
+
+```
+
+```{r pp_check_psdn, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+g1 <- pp_check(fit_qPSDN) + ggtitle('(a) Pacific sardine') + 
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) +  
+  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic")) +  
+  xlim(0.1, 4000) + ylab("Density")
+
+g1
+```
+
+<!-- # print summary -->
+  <!-- texreg(list(f2, f3, r2, r3), caption = 'Panel data models for Pacific Sardine landings.\\label{table:sardine_est}', caption.above = TRUE, float.pos = "h", custom.model.names = c("FE: Model 1", "FE: Model 2", "RE: Model 1", "RE: Model 2")) -->
+  
+  
+  <!-- # ##  Extract Grouo-Level estimates ## -->
+  <!-- # ranef(fit_qPSDN_gamma) -->
+  <!-- #  -->
+  <!-- # ## Check divergence and other model check ## -->
+  <!-- # shinystan::launch_shinystan(fit_qPSDN_gamma) -->
+  
+  <!-- # Investigate chain and posterior distributions.  -->
+  <!-- # https://cran.r-project.org/web/packages/bayesplot/vignettes/graphical-ppcs.html -->
+  <!-- # plot(fit_qPSDN_t2nc, pars = c("PSDN_SDM")) -->
+  
+  <!-- # ### Predictions ### -->
+  <!-- # pred_data <- data.frame(PSDN_SDM = c(0.5, 0.25), MSQD_SDM = c(0.5), Port_ID = 1) -->
+  <!-- # predict(fit_qPSDN, newdata = pred_data, re_formula = NA) -->
+  
+  <!-- # ## Compare models ## -->
+  <!-- # loo(fit1, fit2) -->
+  
+  
 
 
 # Results

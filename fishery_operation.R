@@ -367,77 +367,137 @@ rm(df, landing.price.year.select, nvessel.year, coeff)
 ## Figure 6. Landings v/s probability of presence by port area ##
 
 sdm.by.species <- PacFIN.month.CPS %>%
-  dplyr::select(LANDING_YEAR, PSDN_SDM_60, MSQD_SDM_90, MSQD_SDM_JS_90, MSQD_SPAWN_SDM_90, 
+  dplyr::select(LANDING_YEAR, PSDN_SDM_60, MSQD_SDM_90, MSQD_SDM_90_JS_cpue, MSQD_SDM_90_JS_prob, MSQD_SPAWN_SDM_90, 
                 NANC_SDM_20, LANDED_WEIGHT_MTONS.sum, PACFIN_SPECIES_CODE, PORT_AREA_CODE) %>% 
   filter(LANDING_YEAR >= 1998 & LANDING_YEAR <= 2019) %>%
   group_by(LANDING_YEAR, PORT_AREA_CODE, PACFIN_SPECIES_CODE) %>% 
   summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
             NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
             MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
-            MSQD_SDM_JS_90 = mean(MSQD_SDM_JS_90, na.rm = TRUE),
+            MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm = TRUE),
+            MSQD_SDM_90_JS_prob = mean(MSQD_SDM_90_JS_prob, na.rm = TRUE),
             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=TRUE),
             LANDED_WEIGHT_MTONS = sum(LANDED_WEIGHT_MTONS.sum, na.rm = TRUE)) %>%
   spread(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS) %>% 
   dplyr::rename(Landings_PSDN = PSDN) %>% dplyr::rename(Landings_MSQD = MSQD) %>% 
-  dplyr::rename(Landings_NANC = NANC) %>%
+  dplyr::rename(Landings_NANC = NANC)
+
+area_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara",
+                            `MNA` = "Monterey", `CLO` = "Columbia River (OR)"))
+
+# Create sardine plot
+sdm.by.species.PSDN <- sdm.by.species %>% 
+  filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "CLO") %>% 
+  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "MNA", "CLO")) %>%
+  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
+  summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
+            Landings_PSDN = sum(Landings_PSDN, na.rm = TRUE))
+coeff1 <- 60000
+g1 <- ggplot(sdm.by.species.PSDN) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_PSDN), size = 0.5, color = "grey") +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = PSDN_SDM_60*coeff1), 
+            size = 0.5, color = "blue", linetype = "dashed") + 
+  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "MNA", "CLO")), labeller = area_names,  ncol = 4) + 
+  scale_x_continuous(name = element_blank(), labels = NULL) +
+  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff1, name = "P(presence)")) +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("(a) Pacific sardine (60 km radius)")
+
+
+# Create anchovy plot
+sdm.by.species.NANC <- sdm.by.species %>% 
   filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
   mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "SBA", "MNA")) %>%
   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
-            NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
-            MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
-            MSQD_SDM_JS_90 = mean(MSQD_SDM_JS_90, na.rm = TRUE),
-            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
-            Landings_PSDN = sum(Landings_PSDN, na.rm = TRUE), 
-            Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE),
+  summarize(NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
             Landings_NANC = sum(Landings_NANC, na.rm = TRUE))
-
-area_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara",`MNA` = "Monterey"))
-
-# Plot
-coeff <- 60000
-g1 <-  ggplot(sdm.by.species) + 
-  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_PSDN), size = 0.5, color = "grey") +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = PSDN_SDM_60*coeff), 
-            size = 0.5, color = "blue", linetype = "dashed") + 
-  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names) + 
-  scale_x_continuous(name = element_blank(), labels = NULL) +
-  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff, name = "P(presence)")) +
-  theme(plot.title = element_text(size=9, face="bold.italic"), 
-        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
-  ggtitle("(a) Pacific sardine (60 km radius)")
-
-coeff2 <- 500000
-g2 <-  ggplot(sdm.by.species) + 
-  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD), size = 0.5, color = "grey") +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SPAWN_SDM_90*coeff2), 
-            size = 0.5, color = "blue", linetype = "dashed") + 
-  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names) + 
-  scale_x_continuous(name = element_blank(), labels = NULL) +
-  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff2, name = "P(presence)")) +
-  theme(plot.title = element_text(size=9, face="bold.italic"), 
-        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
-  ggtitle("(a) Pacific sardine (60 km radius)")
-
-coeff3 <- 7000
-g3 <- ggplot(sdm.by.species) + 
-  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD, color = "Landings"), size = 0.5) +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SDM_JS_90*coeff3, color = "Probability of presence"), 
+coeff2 <- 15000
+g2 <-  ggplot(sdm.by.species.NANC) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_NANC, color = "Landings"), size = 0.5) +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = NANC_SDM_20*coeff2, color = "Probability of presence"), 
             size = 0.5, linetype = "dashed") + 
-  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names) + 
-  scale_x_continuous(name = "Year") +
-  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff3, name = "P(presence)")) +
+  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 4) + 
+  scale_x_continuous(name = "Year")  +
+  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff2, name = "P(presence)")) +
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8),
         legend.position="bottom") + 
-  ggtitle("(b) Market squid (Justin Suca's model; 90 km radius)") +  
+  ggtitle("(b) Northern anchovy (20 km radius)") +  
   scale_color_manual(name = "Variable: ", 
                      values = c("Landings" = "grey", "Probability of presence" = "blue"))
 
-g1 / g2 / g3
+# Plot Sardine and Anchovy
+g1 / g2
 
-# rm(g1, g2, g3, sdm.by.species, coeff, coeff2, coeff3, area_names, landing.price.year.sel)
-# 
+
+# Plot all squid SDMs outputs
+sdm.by.species.MSQD <- sdm.by.species %>% 
+  filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
+  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "SBA", "MNA")) %>%
+  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
+  summarize(MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
+            MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm = TRUE),
+            MSQD_SDM_90_JS_prob = mean(MSQD_SDM_90_JS_prob, na.rm = TRUE),
+            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
+            Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE))
+
+# coeff3 <- 100000
+# g3 <-  ggplot(sdm.by.species.MSQD) + 
+#   geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD), size = 0.5, color = "grey") +
+#   geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SDM_90*coeff3), 
+#             size = 0.5, color = "blue", linetype = "dashed") + 
+#   facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 3) + 
+#   scale_x_continuous(name = element_blank(), labels = NULL) +
+#   scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff3, name = "P(presence)")) +
+#   theme(plot.title = element_text(size=9, face="bold.italic"), 
+#         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+#   ggtitle("(a) Market squid (90 km radius)")
+
+coeff4 <- 500000
+g4 <-  ggplot(sdm.by.species.MSQD) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD, color = "Landings"), size = 0.5) +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SPAWN_SDM_90*coeff4, color = "SDM output"), 
+            size = 0.5, linetype = "dashed") + 
+  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 3) + 
+  scale_x_continuous(name = "Year")  +
+  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff4, name = "P(presence)")) +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8), legend.position="bottom") + 
+  ggtitle("(b) Market squid (spawning aggregation model; 90 km radius)") +  
+  scale_color_manual(name = "Variable: ", 
+                     values = c("Landings" = "grey", "SDM output" = "blue"))
+
+coeff5 <- 7000
+g5 <-  ggplot(sdm.by.species.MSQD) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD), size = 0.5, color = "grey") +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SDM_90_JS_cpue*coeff5), 
+            size = 0.5, color = "blue", linetype = "dashed") + 
+  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 3) + 
+  scale_x_continuous(name = element_blank(), labels = NULL) +
+  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff5, name = "Abundance (CPUE)")) +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("(a) Market squid (Justin Suca's abundance; 90 km radius)")
+
+
+coeff6 <- 30000
+g6 <- ggplot(sdm.by.species.MSQD) + 
+  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD), size = 0.5, color = "grey") +
+  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SDM_90_JS_prob*coeff6), 
+            size = 0.5, color = "blue", linetype = "dashed") + 
+  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 3) + 
+  scale_x_continuous(name = element_blank(), labels = NULL) +
+  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff6, name = "P(presence)")) +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("(a) Market squid (Justin Suca's probability; 90 km radius)") 
+
+g5 / g4
+g6 / g4
+
+# rm(g1, g2, g3, g4, g5, g6, sdm.by.species, coeff1, coeff2, coeff3, coeff4, coeff5, coeff6 , area_names, landing.price.year.sel)
+#  
 
 #---------------------------------------------------------------------------------------------------------
 ## Figure 7?
