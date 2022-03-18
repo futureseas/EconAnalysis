@@ -661,14 +661,14 @@ loo(fit_qMSQD_Spawning, fit_qMSQD_CPUE)
 
 
 ##### pp_check
-pp_check(fit_qMSQD_Spawning) + ggtitle('(b) Market Squid (SDM: Spawning aggregation model') +
+pp_check(fit_qMSQD_Spawning) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model') +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"))  + 
   xlim(0.1, 15000) + xlab("Landing (tons)")
 
 
-pp_check(fit_qMSQD_CPUE) + ggtitle('(b) Market Squid (SDM: Spawning aggregation model') +
+pp_check(fit_qMSQD_CPUE) + ggtitle('(b) Market Squid (SDM: Abundance model') +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"))  + 
