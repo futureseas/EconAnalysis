@@ -605,11 +605,11 @@ rm(desc_data, table)
 
 #### Select data for estimation, replace N/A landings to zero 
 #### (exclude port outside California for comparision) #
-dataset_msqd <- dataset %>%
+dataset_msqd <- dataset_quarter %>%
   dplyr::filter(PORT_AREA_CODE != "CLO") %>% 
   dplyr::filter(PORT_AREA_CODE != "CLW") %>%
   dplyr::filter(PORT_AREA_CODE != "CWA") %>%
-  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, LANDING_MONTH,
+  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, QuarterYear,
                 MSQD_SDM_90_JS_cpue, MSQD_SPAWN_SDM_90, MSQD_Landings, MSQD_Price, 
                 PSDN_Price, NANC_Price, PSDN_SDM_60, NANC_SDM_20) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>% 
@@ -639,12 +639,12 @@ class(dataset_msqd$cluster)
 
 #### Estimate models ####
 library(brms)
-fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_Price + (1 | cluster),
-                          hu ~ PSDN.Closure + (1 | cluster)),
+fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + (1 | cluster),
+                          hu ~ PSDN.Closure),
                        data = dataset_msqd,
                        family = hurdle_gamma(),
                        control = list(adapt_delta = 0.80, max_treedepth = 15),
-                       chains = 1, cores = 4)
+                       chains = 2, cores = 4)
 
 #prior = c(set_prior("cauchy(0,2)", class = "sd")),
 # warmup = "1000", iter = "2000",
