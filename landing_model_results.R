@@ -637,23 +637,30 @@ class(dataset_msqd$PSDN.Closure)
 class(dataset_msqd$port_ID)
 class(dataset_msqd$cluster)
 
-#### Estimate models ####
+#### Estimate models 
 library(brms)
-fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + (1 | cluster),
-                          hu ~ PSDN.Closure),
+fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + (1 | cluster), hu ~ PSDN.Closure),
                        data = dataset_msqd,
                        family = hurdle_gamma(),
                        control = list(adapt_delta = 0.80, max_treedepth = 15),
                        chains = 2, cores = 4)
+                       save.image (file = "stan_fit.RData")
+                       #prior = c(set_prior("cauchy(0,2)", class = "sd")),
+                       # warmup = "1000", iter = "2000",
+                       # control = list(adapt_delta = 0.95))
+                       
+fit_qMSQD_CPUE <- brm(bf(MSQD_Landings ~ MSQD_SDM_JS_cpue + (1 | cluster), hu ~ PSDN.Closure),
+                   data = dataset_msqd,
+                   family = hurdle_gamma(),
+                   control = list(adapt_delta = 0.80, max_treedepth = 15),
+                   chains = 2, cores = 4)
+                   save.image (file = "stan_fit.RData")
 
-#prior = c(set_prior("cauchy(0,2)", class = "sd")),
-# warmup = "1000", iter = "2000",
-# control = list(adapt_delta = 0.95))
-
-# save.image (file = "stan_fit.RData")
+##### Compare models
+loo(fit_qMSQD_Spawning, fit_qMSQD_CPUE)
 
 
-### pp_check
+##### pp_check
 pp_check(fit_qMSQD_Spawning) + ggtitle('(b) Market Squid (SDM: Spawning aggregation model') +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
