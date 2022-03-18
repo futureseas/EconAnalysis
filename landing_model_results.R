@@ -533,7 +533,7 @@ dataset$MonthYear <- as.yearmon(paste(dataset$LANDING_YEAR, dataset$LANDING_MONT
 dataset$QuarterYear <- as.yearqtr(dataset$MonthYear, format = "%Y-%m")
 
 dataset_quarter <- dataset %>% 
-  group_by(QuarterYear, LANDING_YEAR, VESSEL_NUM, group_all, PORT_AREA_ID) %>%
+  group_by(QuarterYear, LANDING_YEAR, VESSEL_NUM, group_all, PORT_AREA_ID, PORT_AREA_CODE) %>%
   summarise(PSDN_Landings = sum(PSDN_Landings, na.rm=T), 
             MSQD_Landings = sum(MSQD_Landings, na.rm=T), 
             NANC_Landings = sum(NANC_Landings, na.rm=T), 
@@ -547,7 +547,7 @@ dataset_quarter <- dataset %>%
   dataset_quarter[dataset_quarter == "NaN"] <- NA
 
 desc_data <- dataset_quarter %>%
-  subset(select = -c(PORT_AREA_ID, VESSEL_NUM, group_all, LANDING_YEAR, QuarterYear))
+  subset(select = -c(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, QuarterYear))
 
 table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 1, "Landings: PSDN", vars)) %>%
@@ -566,7 +566,7 @@ rm(desc_data, table)
 
 ### Annual data ###
 dataset_annual <- dataset %>% 
-  group_by(LANDING_YEAR, VESSEL_NUM, group_all, PORT_AREA_ID) %>%
+  group_by(LANDING_YEAR, VESSEL_NUM, group_all, PORT_AREA_ID, PORT_AREA_CODE) %>%
   summarise(PSDN_Landings = sum(PSDN_Landings, na.rm=T), 
             MSQD_Landings = sum(MSQD_Landings, na.rm=T), 
             NANC_Landings = sum(NANC_Landings, na.rm=T), 
@@ -580,7 +580,7 @@ dataset_annual <- dataset %>%
   dataset_annual[dataset_annual == "NaN"] <- NA
 
 desc_data <- dataset_annual %>%
-  subset(select = -c(PORT_AREA_ID, VESSEL_NUM, group_all, LANDING_YEAR))
+  subset(select = -c(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR))
 
 table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 1, "Landings: PSDN", vars)) %>%
@@ -605,18 +605,19 @@ rm(desc_data, table)
 
 #### Select data for estimation, replace N/A landings to zero 
 #### (exclude port outside California for comparision) #
-dataset_msqd <- dataset_annual %>%
+dataset_msqd <- dataset %>%
   dplyr::filter(PORT_AREA_CODE != "CLO") %>% 
   dplyr::filter(PORT_AREA_CODE != "CLW") %>%
   dplyr::filter(PORT_AREA_CODE != "CWA") %>%
-  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, 
+  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, LANDING_MONTH,
                 MSQD_SDM_90_JS_cpue, MSQD_SPAWN_SDM_90, MSQD_Landings, MSQD_Price, 
                 PSDN_Price, NANC_Price, PSDN_SDM_60, NANC_SDM_20) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>% 
+  mutate(MSQD_Landings = ifelse(MSQD_Landings<= 0, 0, MSQD_Landings)) %>%
   dplyr::mutate(PSDN.Closure = ifelse(LANDING_YEAR >= 2015,1,0)) %>%
   dplyr::mutate(PSDN.Open = ifelse(LANDING_YEAR < 2015,1,0)) %>%
   dplyr::mutate(PSDN_SDM.Open = PSDN_SDM_60 * PSDN.Open) %>%
-  filter(LANDING_YEAR >= 2000)
+  filter(LANDING_YEAR >= 2000) %>% drop_na()
 
 #### Create new port ID and cluster variable 
 dataset_msqd$port_ID <- udpipe::unique_identifier(dataset_msqd, fields = "PORT_AREA_CODE", start_from = 1) 
@@ -641,7 +642,7 @@ library(brms)
 fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_Price + (1 | cluster) + (1 | port_ID),
                           hu ~ PSDN.Closure + (1 | cluster) + (1 | port_ID)),
                        data = dataset_msqd,
-                       family = hurdle_gamma(),
+                       family = hurdle_lognormal(),
                        control = list(adapt_delta = 0.80, max_treedepth = 15),
                        chains = 2, cores = 4)
 
