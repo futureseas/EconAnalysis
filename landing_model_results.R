@@ -605,11 +605,11 @@ rm(desc_data, table)
 
 #### Select data for estimation, replace N/A landings to zero 
 #### (exclude port outside California for comparision) #
-dataset_msqd <- dataset %>%
+dataset_msqd <- dataset_annual %>%
   dplyr::filter(PORT_AREA_CODE != "CLO") %>% 
   dplyr::filter(PORT_AREA_CODE != "CLW") %>%
   dplyr::filter(PORT_AREA_CODE != "CWA") %>%
-  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, LANDING_MONTH, 
+  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, 
                 MSQD_SDM_90_JS_cpue, MSQD_SPAWN_SDM_90, MSQD_Landings, MSQD_Price, 
                 PSDN_Price, NANC_Price, PSDN_SDM_60, NANC_SDM_20) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>% 
@@ -629,9 +629,9 @@ original_clusters_MSQD <- dataset_msqd %>%
   unique()
 
 #### Convert variables to factor
-dataset_msqd$PSDN.Closure    <- factor(dataset_msqd$PSDN.Closure)
-dataset_msqd$port_ID   <- factor(dataset_msqd$port_ID)
-dataset_msqd$cluster   <- factor(dataset_msqd$cluster)
+dataset_msqd$PSDN.Closure <- factor(dataset_msqd$PSDN.Closure)
+dataset_msqd$port_ID      <- factor(dataset_msqd$port_ID)
+dataset_msqd$cluster      <- factor(dataset_msqd$cluster)
 class(dataset_msqd$PSDN.Closure)
 class(dataset_msqd$port_ID)
 class(dataset_msqd$cluster)
@@ -639,13 +639,13 @@ class(dataset_msqd$cluster)
 #### Estimate models ####
 library(brms)
 fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_Price + (1 | cluster) + (1 | port_ID),
-                          hu ~ + (1 | cluster) + (1 | port_ID)),
+                          hu ~ PSDN.Closure + (1 | cluster) + (1 | port_ID)),
                        data = dataset_msqd,
-                       prior = c(set_prior("cauchy(0,2)", class = "sd")),
                        family = hurdle_gamma(),
-                       control = list(adapt_delta = 0.90, max_treedepth = 20),
-                       chains = 4, cores = 4)
+                       control = list(adapt_delta = 0.80, max_treedepth = 15),
+                       chains = 2, cores = 4)
 
+#prior = c(set_prior("cauchy(0,2)", class = "sd")),
 # warmup = "1000", iter = "2000",
 # control = list(adapt_delta = 0.95))
 
