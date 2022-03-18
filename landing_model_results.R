@@ -639,12 +639,12 @@ class(dataset_msqd$cluster)
 
 #### Estimate models ####
 library(brms)
-fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_Price + (1 | cluster) + (1 | port_ID),
-                          hu ~ PSDN.Closure + (1 | cluster) + (1 | port_ID)),
+fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_Price + (1 | cluster),
+                          hu ~ PSDN.Closure + (1 | cluster)),
                        data = dataset_msqd,
-                       family = hurdle_lognormal(),
+                       family = hurdle_gamma(),
                        control = list(adapt_delta = 0.80, max_treedepth = 15),
-                       chains = 2, cores = 4)
+                       chains = 1, cores = 4)
 
 #prior = c(set_prior("cauchy(0,2)", class = "sd")),
 # warmup = "1000", iter = "2000",
