@@ -649,7 +649,7 @@ fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + (1 | cluster), 
                        # warmup = "1000", iter = "2000",
                        # control = list(adapt_delta = 0.95))
                        
-fit_qMSQD_CPUE <- brm(bf(MSQD_Landings ~ MSQD_SDM_JS_cpue + (1 | cluster), hu ~ PSDN.Closure),
+fit_qMSQD_CPUE <- brm(bf(MSQD_Landings ~ MSQD_SDM_90_JS_cpue + (1 | cluster), hu ~ PSDN.Closure),
                    data = dataset_msqd,
                    family = hurdle_gamma(),
                    control = list(adapt_delta = 0.80, max_treedepth = 15),
@@ -667,6 +667,12 @@ pp_check(fit_qMSQD_Spawning) + ggtitle('(b) Market Squid (SDM: Spawning aggregat
   theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"))  + 
   xlim(0.1, 15000) + xlab("Landing (tons)")
 
+
+pp_check(fit_qMSQD_CPUE) + ggtitle('(b) Market Squid (SDM: Spawning aggregation model') +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) + 
+  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"))  + 
+  xlim(0.1, 15000) + xlab("Landing (tons)")
 
 
 
