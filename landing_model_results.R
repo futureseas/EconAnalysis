@@ -604,12 +604,12 @@ rm(desc_data, table)
 ### Market squid ###
 
 #### Select data for estimation, replace N/A landings to zero 
-#### (exclude port outside California for comparision) #
-dataset_msqd <- dataset_quarter %>%
+#### (exclude port outside California for comparison) #
+dataset_msqd <- dataset_monthly %>%
   dplyr::filter(PORT_AREA_CODE != "CLO") %>% 
   dplyr::filter(PORT_AREA_CODE != "CLW") %>%
   dplyr::filter(PORT_AREA_CODE != "CWA") %>%
-  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, QuarterYear,
+  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, LANDING_MONTH,
                 MSQD_SDM_90_JS_cpue, MSQD_SPAWN_SDM_90, MSQD_Landings, MSQD_Price, 
                 PSDN_Price, NANC_Price, PSDN_SDM_60, NANC_SDM_20) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>% 
@@ -644,7 +644,7 @@ fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + (1 | cluster), 
                        family = hurdle_gamma(),
                        control = list(adapt_delta = 0.80, max_treedepth = 15),
                        chains = 2, cores = 4)
-                       save.image (file = "stan_fit.RData")
+                       save.image (file = "stan_fit_month.RData")
                        #prior = c(set_prior("cauchy(0,2)", class = "sd")),
                        # warmup = "1000", iter = "2000",
                        # control = list(adapt_delta = 0.95))
@@ -654,7 +654,7 @@ fit_qMSQD_CPUE <- brm(bf(MSQD_Landings ~ MSQD_SDM_90_JS_cpue + (1 | cluster), hu
                    family = hurdle_gamma(),
                    control = list(adapt_delta = 0.80, max_treedepth = 15),
                    chains = 2, cores = 4)
-                   save.image (file = "stan_fit.RData")
+                   save.image (file = "stan_fit_month.RData")
 
 ##### Compare models
 loo(fit_qMSQD_Spawning, fit_qMSQD_CPUE)
@@ -673,6 +673,8 @@ pp_check(fit_qMSQD_CPUE) + ggtitle('(b) Market Squid (SDM: Abundance model') +
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"))  + 
   xlim(0.1, 5000) + xlab("Landing (tons)")
+
+
 
 
 
