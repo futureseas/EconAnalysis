@@ -14,7 +14,6 @@
 #   use_oob = gargle::gargle_oob_default(),
 #   token = NULL)
 
-
 rm(list = ls(all.names = TRUE)) 
 gc()
 
@@ -22,7 +21,7 @@ gc()
 
 library("tidyr")
 library("dplyr") 
-library("data.table")
+library("data.table") 
 library("reshape2")
 
 
@@ -527,75 +526,77 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
 # gs4_create("SummaryMonthly", sheets = table)
 rm(desc_data, table)
   
-### Quarterly data ###
-library("zoo")
-dataset$MonthYear <- as.yearmon(paste(dataset$LANDING_YEAR, dataset$LANDING_MONTH), "%Y %m")
-dataset$QuarterYear <- as.yearqtr(dataset$MonthYear, format = "%Y-%m")
 
-dataset_quarter <- dataset %>% 
-  group_by(QuarterYear, LANDING_YEAR, VESSEL_NUM, group_all, PORT_AREA_ID, PORT_AREA_CODE) %>%
-  summarise(PSDN_Landings = sum(PSDN_Landings, na.rm=T), 
-            MSQD_Landings = sum(MSQD_Landings, na.rm=T), 
-            NANC_Landings = sum(NANC_Landings, na.rm=T), 
-            PSDN_Price = mean(PSDN_Price, na.rm=T), 
-            MSQD_Price = mean(MSQD_Price, na.rm=T),
-            NANC_Price = mean(NANC_Price, na.rm=T),
-            PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm=T), 
-            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=T),
-            NANC_SDM_20 = mean(NANC_SDM_20, na.rm=T),
-            MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm=T))
-  dataset_quarter[dataset_quarter == "NaN"] <- NA
-
-desc_data <- dataset_quarter %>%
-  subset(select = -c(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, QuarterYear))
-
-table <- psych::describe(desc_data, fast=TRUE) %>%
-  mutate(vars = ifelse(vars == 1, "Landings: PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 2, "Landings: MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 3, "Landings: NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 4, "Price: PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 5, "Price: MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 6, "Price: NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 7, "Prob(presence): PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 8, "Prob(presence): MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 9, "Prob(presence): NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 10, "Abundance: MSQD", vars))
-
-# gs4_create("SummaryQuarter", sheets = table)
-rm(desc_data, table)
-
-### Annual data ###
-dataset_annual <- dataset %>% 
-  group_by(LANDING_YEAR, VESSEL_NUM, group_all, PORT_AREA_ID, PORT_AREA_CODE) %>%
-  summarise(PSDN_Landings = sum(PSDN_Landings, na.rm=T), 
-            MSQD_Landings = sum(MSQD_Landings, na.rm=T), 
-            NANC_Landings = sum(NANC_Landings, na.rm=T), 
-            PSDN_Price = mean(PSDN_Price, na.rm=T), 
-            MSQD_Price = mean(MSQD_Price, na.rm=T),
-            NANC_Price = mean(NANC_Price, na.rm=T),
-            PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm=T), 
-            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=T),
-            NANC_SDM_20 = mean(NANC_SDM_20, na.rm=T),
-            MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm=T))
-  dataset_annual[dataset_annual == "NaN"] <- NA
-
-desc_data <- dataset_annual %>%
-  subset(select = -c(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR))
-
-table <- psych::describe(desc_data, fast=TRUE) %>%
-  mutate(vars = ifelse(vars == 1, "Landings: PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 2, "Landings: MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 3, "Landings: NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 4, "Price: PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 5, "Price: MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 6, "Price: NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 7, "Prob(presence): PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 8, "Prob(presence): MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 9, "Prob(presence): NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 10, "Abundance: MSQD", vars))
-
-# gs4_create("SummaryAnnual", sheets = table)
-rm(desc_data, table)
+# ### Quarterly data ###
+# library("zoo")
+# dataset$MonthYear <- as.yearmon(paste(dataset$LANDING_YEAR, dataset$LANDING_MONTH), "%Y %m")
+# dataset$QuarterYear <- as.yearqtr(dataset$MonthYear, format = "%Y-%m")
+# 
+# dataset_quarter <- dataset %>% 
+#   group_by(QuarterYear, LANDING_YEAR, VESSEL_NUM, group_all, PORT_AREA_ID, PORT_AREA_CODE) %>%
+#   summarise(PSDN_Landings = sum(PSDN_Landings, na.rm=T), 
+#             MSQD_Landings = sum(MSQD_Landings, na.rm=T), 
+#             NANC_Landings = sum(NANC_Landings, na.rm=T), 
+#             PSDN_Price = mean(PSDN_Price, na.rm=T), 
+#             MSQD_Price = mean(MSQD_Price, na.rm=T),
+#             NANC_Price = mean(NANC_Price, na.rm=T),
+#             PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm=T), 
+#             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=T),
+#             NANC_SDM_20 = mean(NANC_SDM_20, na.rm=T),
+#             MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm=T))
+#   dataset_quarter[dataset_quarter == "NaN"] <- NA
+# 
+# desc_data <- dataset_quarter %>%
+#   subset(select = -c(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, QuarterYear))
+# 
+# table <- psych::describe(desc_data, fast=TRUE) %>%
+#   mutate(vars = ifelse(vars == 1, "Landings: PSDN", vars)) %>%
+#   mutate(vars = ifelse(vars == 2, "Landings: MSQD", vars)) %>%
+#   mutate(vars = ifelse(vars == 3, "Landings: NANC", vars)) %>%
+#   mutate(vars = ifelse(vars == 4, "Price: PSDN", vars)) %>%
+#   mutate(vars = ifelse(vars == 5, "Price: MSQD", vars)) %>%
+#   mutate(vars = ifelse(vars == 6, "Price: NANC", vars)) %>%
+#   mutate(vars = ifelse(vars == 7, "Prob(presence): PSDN", vars)) %>%
+#   mutate(vars = ifelse(vars == 8, "Prob(presence): MSQD", vars)) %>%
+#   mutate(vars = ifelse(vars == 9, "Prob(presence): NANC", vars)) %>%
+#   mutate(vars = ifelse(vars == 10, "Abundance: MSQD", vars))
+# 
+# # gs4_create("SummaryQuarter", sheets = table)
+# rm(desc_data, table)
+# 
+# 
+# ### Annual data ###
+# dataset_annual <- dataset %>% 
+#   group_by(LANDING_YEAR, VESSEL_NUM, group_all, PORT_AREA_ID, PORT_AREA_CODE) %>%
+#   summarise(PSDN_Landings = sum(PSDN_Landings, na.rm=T), 
+#             MSQD_Landings = sum(MSQD_Landings, na.rm=T), 
+#             NANC_Landings = sum(NANC_Landings, na.rm=T), 
+#             PSDN_Price = mean(PSDN_Price, na.rm=T), 
+#             MSQD_Price = mean(MSQD_Price, na.rm=T),
+#             NANC_Price = mean(NANC_Price, na.rm=T),
+#             PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm=T), 
+#             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=T),
+#             NANC_SDM_20 = mean(NANC_SDM_20, na.rm=T),
+#             MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm=T))
+#   dataset_annual[dataset_annual == "NaN"] <- NA
+# 
+# desc_data <- dataset_annual %>%
+#   subset(select = -c(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR))
+# 
+# table <- psych::describe(desc_data, fast=TRUE) %>%
+#   mutate(vars = ifelse(vars == 1, "Landings: PSDN", vars)) %>%
+#   mutate(vars = ifelse(vars == 2, "Landings: MSQD", vars)) %>%
+#   mutate(vars = ifelse(vars == 3, "Landings: NANC", vars)) %>%
+#   mutate(vars = ifelse(vars == 4, "Price: PSDN", vars)) %>%
+#   mutate(vars = ifelse(vars == 5, "Price: MSQD", vars)) %>%
+#   mutate(vars = ifelse(vars == 6, "Price: NANC", vars)) %>%
+#   mutate(vars = ifelse(vars == 7, "Prob(presence): PSDN", vars)) %>%
+#   mutate(vars = ifelse(vars == 8, "Prob(presence): MSQD", vars)) %>%
+#   mutate(vars = ifelse(vars == 9, "Prob(presence): NANC", vars)) %>%
+#   mutate(vars = ifelse(vars == 10, "Abundance: MSQD", vars))
+# 
+# # gs4_create("SummaryAnnual", sheets = table)
+# rm(desc_data, table)
 
 
 #-----------------------------------------------
@@ -605,7 +606,7 @@ rm(desc_data, table)
 
 #### Select data for estimation, replace N/A landings to zero 
 #### (exclude port outside California for comparison) #
-dataset_msqd <- dataset_monthly %>%
+dataset_msqd <- dataset %>%
   dplyr::filter(PORT_AREA_CODE != "CLO") %>% 
   dplyr::filter(PORT_AREA_CODE != "CLW") %>%
   dplyr::filter(PORT_AREA_CODE != "CWA") %>%
@@ -642,19 +643,18 @@ library(brms)
 fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + (1 | cluster), hu ~ PSDN.Closure),
                        data = dataset_msqd,
                        family = hurdle_gamma(),
-                       control = list(adapt_delta = 0.80, max_treedepth = 15),
+                       control = list(adapt_delta = 0.95, max_treedepth = 20),
+                       prior = c(set_prior("cauchy(0,2)", class = "sd")),
                        chains = 2, cores = 4)
-                       save.image (file = "stan_fit_month.RData")
-                       #prior = c(set_prior("cauchy(0,2)", class = "sd")),
-                       # warmup = "1000", iter = "2000",
-                       # control = list(adapt_delta = 0.95))
-                       
+                       # save.image (file = "stan_fit_month.RData")
+
 fit_qMSQD_CPUE <- brm(bf(MSQD_Landings ~ MSQD_SDM_90_JS_cpue + (1 | cluster), hu ~ PSDN.Closure),
                    data = dataset_msqd,
                    family = hurdle_gamma(),
-                   control = list(adapt_delta = 0.80, max_treedepth = 15),
+                   control = list(adapt_delta = 0.95, max_treedepth = 20),
+                   prior = c(set_prior("cauchy(0,2)", class = "sd")),
                    chains = 2, cores = 4)
-                   save.image (file = "stan_fit_month.RData")
+                   # save.image (file = "stan_fit_month.RData")
 
 ##### Compare models
 loo(fit_qMSQD_Spawning, fit_qMSQD_CPUE)
@@ -662,20 +662,21 @@ loo(fit_qMSQD_Spawning, fit_qMSQD_CPUE)
 
 ##### pp_check
 library(ggplot2)
-pp_check(fit_qMSQD_Spawning) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model') +
+library(patchwork)
+
+g1 <- pp_check(fit_qMSQD_Spawning) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model') +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"))  + 
-  xlim(0.1, 5000) + xlab("Landing (tons)")
+  xlim(0.1, 900) + xlab("Landing (tons)")
 
-pp_check(fit_qMSQD_CPUE) + ggtitle('(b) Market Squid (SDM: Abundance model') +
+g2 <- pp_check(fit_qMSQD_CPUE) + ggtitle('(b) Market Squid (SDM: Abundance model') +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
-  theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"))  + 
-  xlim(0.1, 5000) + xlab("Landing (tons)")
+  theme(legend.position = "right", plot.title = element_text(size=9, face="bold.italic"))  + 
+  xlim(0.1, 900) + xlab("Landing (tons)")
 
-
-
+g1 + g2
 
 
 #---------------------------------------------------------------
