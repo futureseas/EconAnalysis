@@ -24,6 +24,7 @@ ports_coord <- read.csv(here::here("Data", "Ports", "port_names.csv"))
 ports <- merge(x=port_codes,y=ports_coord, by=c("PORT_NAME", "AGENCY_CODE"),all.x=TRUE, all.y=FALSE) %>%
   drop_na()
 
+# Run iteration to obtain SDM by ports
 for (y in 2000:2018) {
   for (m in 1:12) {
     for (j in 1:nrow(ports)) {

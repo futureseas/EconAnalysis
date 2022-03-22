@@ -12,6 +12,7 @@ gc()
 SDM_port <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
                    PORT_NAME = character(),
+                   AGENCY_CODE = character(),
                    SDM_20 = numeric())
 
 # Obtain port names used to land species of interest
@@ -24,9 +25,10 @@ ports_coord <- read.csv(here::here("Data", "Ports", "port_names.csv"))
 ports <- merge(x=port_codes,y=ports_coord, by=c("PORT_NAME", "AGENCY_CODE"),all.x=TRUE, all.y=FALSE) %>%
   drop_na()
  
+# Run iteration to obtain SDM by ports
 for (y in 2000:2018) {
   for (m in 1:12) {
-    for (j in 1:nrow(ports)) {
+    for (j in 10) {
 	  		# Read netcdf
 	  		dat <- nc_open(paste0("G:/My Drive/Project/Data/SDM/anchovy/anch_", paste0(as.character(m), paste0("_", paste0(as.character(y),"_GAM.nc")))))
 		  	lon <- ncvar_get(dat, "lon")
@@ -35,20 +37,20 @@ for (y in 2000:2018) {
 		  	predSDM <- ncvar_get(dat, "predGAM")
 
 			# Close the netcdf
-			nc_close(dat)			
+			nc_close(dat)
 
 			# Reshape the 3D array so we can map it, change the time field to be date
 			dimnames(predSDM) <- list(lon = lon, lat = lat, tim = tim)
 			sdmMelt <- reshape2::melt(predSDM, value.name = "predSDM")
-			sdmMelt$dt <- as.Date("1900-01-01") + days(sdmMelt$tim)			
+			sdmMelt$dt <- as.Date("1900-01-01") + days(sdmMelt$tim)
 
 			# Optional (but recommended): trim predictions to within 300-500km of the coast
 			if(!exists("distLand")) {
 			  distLand <- (read.csv(here::here("SDM", "DistLandROMSPoints.csv"), head=TRUE, sep=","))[c("lon","lat","distLand")]
 			}
 			sdmMelt <- dplyr::full_join(sdmMelt, distLand, by = c("lon", "lat"))
-			sdmMelt <- subset(sdmMelt, sdmMelt$distLand < 50000)			
-			
+			sdmMelt <- subset(sdmMelt, sdmMelt$distLand < 50000)
+
 
 			sdmMelt <- sdmMelt %>%
 			  group_by(lat, lon) %>%
@@ -57,11 +59,11 @@ for (y in 2000:2018) {
 			  mutate(dist = by(., 1:nrow(.), function(row) {
 			    distHaversine(c(row$lon, row$lat), c(ports[j,]$Longitude, ports[j,]$Latitude))
 			    })) %>%
-			  mutate(dist = dist / 1000) 
-			
-			
+			  mutate(dist = dist / 1000)
+
+
 			# Filter three different distance bands
-			
+
 			dat_prob_20 <- sdmMelt %>%
 			  dplyr::filter(dist <= 20)
 
@@ -70,21 +72,21 @@ for (y in 2000:2018) {
 
 			SDM_port <- SDM_port %>%
 				add_row(LANDING_YEAR = y, LANDING_MONTH = m, PORT_NAME = as.character(ports[j, 1]),
-			          SDM_20 = SDM_mean_20)
+			          SDM_20 = SDM_mean_20, AGENCY_CODE = as.character(ports[j, 2]))
 
 	    print(y)
 	    print(m)
 	    print(j)
-	    	
+
 	  }
   }
   # Save database each year
-  write_csv(SDM_port, file = "data/SDM/NANC_SDM_port_month.csv")
+  write_csv(SDM_port, file = "data/SDM/NANC_SDM_port_month_CATALINA_ISLANDS.csv")
 }
 
 
 for (m in 1:8) {
-    for (j in 1:nrow(ports)) {
+    for (j in 10) {
 	  		# Read netcdf
 	  		dat <- nc_open(paste0("G:/My Drive/Project/Data/SDM/anchovy/anch_", paste0(as.character(m), paste0("_2019_GAM.nc"))))
 		  	lon <- ncvar_get(dat, "lon")
@@ -93,20 +95,20 @@ for (m in 1:8) {
 		  	predSDM <- ncvar_get(dat, "predGAM")
 
 			# Close the netcdf
-			nc_close(dat)			
+			nc_close(dat)
 
 			# Reshape the 3D array so we can map it, change the time field to be date
 			dimnames(predSDM) <- list(lon = lon, lat = lat, tim = tim)
 			sdmMelt <- reshape2::melt(predSDM, value.name = "predSDM")
-			sdmMelt$dt <- as.Date("1900-01-01") + days(sdmMelt$tim)			
+			sdmMelt$dt <- as.Date("1900-01-01") + days(sdmMelt$tim)
 
 			# Optional (but recommended): trim predictions to within 300-500km of the coast
 			if(!exists("distLand")) {
 			  distLand <- (read.csv(here::here("SDM", "DistLandROMSPoints.csv"), head=TRUE, sep=","))[c("lon","lat","distLand")]
 			}
 			sdmMelt <- dplyr::full_join(sdmMelt, distLand, by = c("lon", "lat"))
-			sdmMelt <- subset(sdmMelt, sdmMelt$distLand < 50000)			
-			
+			sdmMelt <- subset(sdmMelt, sdmMelt$distLand < 50000)
+
 
 			sdmMelt <- sdmMelt %>%
 			  group_by(lat, lon) %>%
@@ -115,11 +117,11 @@ for (m in 1:8) {
 			  mutate(dist = by(., 1:nrow(.), function(row) {
 			    distHaversine(c(row$lon, row$lat), c(ports[j,]$Longitude, ports[j,]$Latitude))
 			    })) %>%
-			  mutate(dist = dist / 1000) 
-			
-			
+			  mutate(dist = dist / 1000)
+
+
 			# Filter three different distance bands
-			
+
 			dat_prob_20 <- sdmMelt %>%
 			  dplyr::filter(dist <= 20)
 
@@ -127,13 +129,15 @@ for (m in 1:8) {
 
 
 			SDM_port <- SDM_port %>%
-				add_row(LANDING_YEAR = y, LANDING_MONTH = m, PORT_NAME = as.character(ports[j, 1]),
-			          SDM_20 = SDM_mean_20)
+				add_row(LANDING_YEAR = 2019, LANDING_MONTH = m, PORT_NAME = as.character(ports[j, 1]),
+			          SDM_20 = SDM_mean_20, AGENCY_CODE = as.character(ports[j, 2]))
 
 	    print(m)
 	    print(j)
-	    	
+
 	  }
   }
-  # Save database each year
-  write_csv(SDM_port, file = "data/SDM/NANC_SDM_port_month.csv")
+
+
+# Save database each year
+  write_csv(SDM_port, file = "data/SDM/NANC_SDM_port_month_CATALINA_ISLANDS.csv")

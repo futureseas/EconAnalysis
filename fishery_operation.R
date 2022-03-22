@@ -67,8 +67,6 @@ PacFIN.month <- PacFIN.month %>% mutate(
                                       ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
                                              ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
 
-### Include port area code (using PacFIN Port Code)
-
 PacFIN.month.CPS <- PacFIN.month %>% 
   dplyr::filter(PACFIN_SPECIES_CODE %in% 
                   c("OMCK", "MSQD", "NANC", "PSDN"))
@@ -88,10 +86,9 @@ landings.by.port.year <- landings.by.port.year %>% filter(LANDING_YEAR <2015)
 landings.by.port.avg.year <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE + PORT_AREA_CODE 
                                        + AGENCY_CODE, FUN=meanfun, data=landings.by.port.year) %>%
   filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA" |
-           PORT_AREA_CODE == "SFA" | PORT_AREA_CODE == "CLO" |
-           PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA") %>%
+           PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS") %>%
   mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, 
-                                     "LAA", "SBA", "MNA", "SFA", "CLO", "CLW", "CWA"))
+                                     "LAA", "SBA", "MNA", "CLO", "CLW", "CWA", "NPS"))
 
 # filter(PACFIN_PORT_CODE == "AST" | PACFIN_PORT_CODE == "HNM" | PACFIN_PORT_CODE == "SP" |
 #          PACFIN_PORT_CODE == "VEN" | PACFIN_PORT_CODE == "TRM" | PACFIN_PORT_CODE == "MOS" |
@@ -119,7 +116,7 @@ ggplot(landings.by.port.avg.year, aes(fill=PACFIN_SPECIES_CODE,
   scale_x_discrete(labels=c(
     "LAA" = "Los Angeles", "SBA" = "Santa Barbara", "MNA" = "Monterrey", 
     "SFA" = "San Francisco", "ERA" = "Eureka", "CLO" = "Columbia\nRiver (OR)", 
-    "CLW" = "Columbia\nRiver (WA)", "CWA" = "Washington\nCoastal Ports")) +
+    "CLW" = "Columbia\nRiver (WA)", "CWA" = "Washington\nCoastal Ports", "NPS" = "North Puget\nSound")) +
   scale_color_brewer(palette="Set2")
 
 # "SP" = "San\nPedro", "HNM" = "Hueneme", 
@@ -137,8 +134,7 @@ rm(landings.by.port.avg.year, landings.by.port.year, states_names)
 ## Figure 2. Fishing seasons ##
 
 port_area_names <- as_labeller(c("LAA" = "Los Angeles", "SBA" = "Santa Barbara", "MNA" = "Monterrey", 
-                                 "SFA" = "San Francisco", "ERA" = "Eureka", "CLO" = "Columbia\nRiver (OR)", 
-                            "CLW" = "Columbia\nRiver (WA)", "CWA" = "Washington\nCoastal Ports"))
+                                 "CLO" = "Columbia\nRiver (OR)", "CLW" = "Columbia\nRiver (WA)", "CWA" = "Washington\nCoastal Ports"))
 
 # port_names <- as_labeller(c("SP" = "San Pedro", "HNM" = "Hueneme", "MNT" = "Monterrey", "MOS" = "Moss Landing", 
 #                             "LWC" = "Ilwaco / Chinook", "AST" = "Astoria", 
@@ -153,38 +149,54 @@ q.psdn.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(
   group_by(LANDING_MONTH, PORT_AREA_CODE) %>% 
   summarise(Landings_PSDN = mean(Landings_PSDN)) %>%
   filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA" |
-           PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "CLW" | 
-           PORT_AREA_CODE == "CWA") 
+           PORT_AREA_CODE == "CLO") 
 
 g1 <- ggplot(data=q.psdn.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) +
   geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
-  scale_x_continuous(name = "Month", breaks=1:12) +
+  scale_x_continuous(name = "", breaks=1:12) +
   scale_y_continuous(name = "Landings (M tons)" ) + 
-  facet_grid(~ factor(PORT_AREA_CODE, levels=c("LAA", "MNA", "CLO", "CLW", "CWA")), 
-             labeller = port_area_names) + ggtitle("(a) Pacific sardine") + 
+  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "MNA", "CLO")), 
+             labeller = port_area_names, ncol = 1) + ggtitle("(a) Pacific sardine") + 
   theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 6))
 
 q.msqd.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
   filter(PACFIN_SPECIES_CODE  %in% c("MSQD")) %>%  
   group_by(LANDING_YEAR, LANDING_MONTH, PORT_AREA_CODE) %>% 
-  summarise(Landings_PSDN = sum(LANDED_WEIGHT_MTONS.sum)) %>%  
+  summarise(Landings_MSQD = sum(LANDED_WEIGHT_MTONS.sum)) %>%  
   group_by(LANDING_MONTH, PORT_AREA_CODE) %>% 
-  summarise(Landings_PSDN = mean(Landings_PSDN)) %>%
+  summarise(Landings_MSQD = mean(Landings_MSQD)) %>%
   filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" |
-           PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "SFA" | 
-           PORT_AREA_CODE == "ERA") 
+           PORT_AREA_CODE == "MNA") 
 
-g2 <- ggplot(data=q.msqd.by.month, aes(x=LANDING_MONTH, y=Landings_PSDN)) +
+g2 <- ggplot(data=q.msqd.by.month, aes(x=LANDING_MONTH, y=Landings_MSQD)) +
   geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
   scale_x_continuous(name = "Month", breaks=1:12) +
-  scale_y_continuous(name = "Landings (M tons)" ) + 
-  facet_grid(~factor(PORT_AREA_CODE, levels = c("LAA", "SBA", "MNA", "SFA", "ERA")), 
-             labeller = port_area_names) + ggtitle("(b) Market squid") + 
+  scale_y_continuous(name = "" ) + 
+  facet_wrap(~factor(PORT_AREA_CODE, levels = c("LAA", "SBA", "MNA")), 
+             labeller = port_area_names, ncol = 1) + ggtitle("(b) Market squid") + 
   theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 6))
 
-g1 / g2
+q.nanc.by.month <- PacFIN.month.CPS %>% filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2014) %>%
+  filter(PACFIN_SPECIES_CODE  %in% c("NANC")) %>%  
+  group_by(LANDING_YEAR, LANDING_MONTH, PORT_AREA_CODE) %>% 
+  summarise(Landings_NANC = sum(LANDED_WEIGHT_MTONS.sum)) %>%  
+  group_by(LANDING_MONTH, PORT_AREA_CODE) %>% 
+  summarise(Landings_NANC = mean(Landings_NANC)) %>%
+  filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA" |
+           PORT_AREA_CODE == "CWA") 
 
-rm(g1, g2, q.psdn.by.month, q.msqd.by.month, port_area_names)
+g3 <- ggplot(data=q.nanc.by.month, aes(x=LANDING_MONTH, y=Landings_NANC)) +
+  geom_bar(stat="identity", fill=rgb(0.1,0.4,0.5,0.7), width=0.4) + 
+  scale_x_continuous(name = "", breaks=1:12) +
+  scale_y_continuous(name = "" ) + 
+  facet_wrap(~factor(PORT_AREA_CODE, levels = c("SBA", "MNA", "CWA")), 
+             labeller = port_area_names, ncol = 1) + ggtitle("(c) Northern anchovy") + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 6))
+
+
+g1 + g2 + g3
+
+rm(g1, g2, g3, q.psdn.by.month, q.msqd.by.month, q.nanc.by.month, port_area_names)
 
 
 
@@ -383,7 +395,8 @@ sdm.by.species <- PacFIN.month.CPS %>%
   dplyr::rename(Landings_NANC = NANC)
 
 area_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara",
-                            `MNA` = "Monterey", `CLO` = "Columbia River (OR)"))
+                            `MNA` = "Monterey", `CLO` = "Columbia River (OR)", 
+                            `CWA` = "Washington Coastal Ports"))
 
 # Create sardine plot
 sdm.by.species.PSDN <- sdm.by.species %>% 
@@ -407,17 +420,17 @@ g1 <- ggplot(sdm.by.species.PSDN) +
 
 # Create anchovy plot
 sdm.by.species.NANC <- sdm.by.species %>% 
-  filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
-  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "SBA", "MNA")) %>%
+  filter(PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
+  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "SBA", "MNA", "CWA")) %>%
   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
   summarize(NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
             Landings_NANC = sum(Landings_NANC, na.rm = TRUE))
-coeff2 <- 15000
+coeff2 <- 12000
 g2 <-  ggplot(sdm.by.species.NANC) + 
   geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_NANC, color = "Landings"), size = 0.5) +
   geom_line(mapping = aes(x = LANDING_YEAR, y = NANC_SDM_20*coeff2, color = "Probability of presence"), 
             size = 0.5, linetype = "dashed") + 
-  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 4) + 
+  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("SBA", "MNA", "CWA")), labeller = area_names,  ncol = 4) + 
   scale_x_continuous(name = "Year")  +
   scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff2, name = "P(presence)")) +
   theme(plot.title = element_text(size=9, face="bold.italic"), 

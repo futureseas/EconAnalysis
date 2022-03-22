@@ -14,6 +14,7 @@ gc()
 SDM_port <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
                    PORT_NAME = character(),
+                   AGENCY_CODE = character(),
                    SDM_60 = numeric())
 
 # Obtain port names used to land species of interest
