@@ -615,7 +615,6 @@ rm(desc_data, table)
 # # gs4_create("SummaryAnnual", sheets = table)
 # rm(desc_data, table)
 
-
 #-----------------------------------------------
 ## Create dataset for estiumation and run models 
 
@@ -624,7 +623,7 @@ rm(desc_data, table)
 #### Select data for estimation, replace N/A landings to zero 
 dataset_msqd <- dataset %>%
   dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, LANDING_MONTH,
-                MSQD_SDM_90_JS_cpue, MSQD_SPAWN_SDM_90, MSQD_Landings, MSQD_Price, 
+                MSQD_SPAWN_SDM_90, MSQD_Landings, MSQD_Price, 
                 PSDN_Price, NANC_Price, PSDN_SDM_60, NANC_SDM_20) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>% 
   mutate(MSQD_Landings = ifelse(MSQD_Landings<= 0, 0, MSQD_Landings)) %>%
@@ -651,15 +650,51 @@ class(dataset_msqd$PSDN.Closure)
 class(dataset_msqd$port_ID)
 class(dataset_msqd$cluster)
 
-#### Estimate models 
+
+## Check stationarity in the panel dataset
+library("plm")
+
+dataset_msqd$Date <- zoo::as.yearmon(paste(dataset_msqd$LANDING_YEAR, dataset_msqd$LANDING_MONTH), "%Y %m")
+pDataset <- dataset_msqd %>% mutate(Unique_ID = paste(VESSEL_NUM, PORT_AREA_CODE, sep = " ")) %>%  
+  group_by(Unique_ID) %>% mutate(n_obs_group = n()) %>% ungroup() %>% filter(n_obs_group > 11) %>% drop_na()
+pDataset <- pdata.frame(pDataset, index = c('Unique_ID', 'Date'))
+
+purtest(pDataset$MSQD_Price, pmax = 4, exo = "intercept", test = "madwu")
+purtest(pDataset$PSDN_Price, pmax = 4, exo = "intercept", test = "madwu")
+purtest(pDataset$NANC_Price, pmax = 4, exo = "intercept", test = "madwu")
+purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "madwu")
+purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "madwu")
+purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "madwu")
+
+
+pDatasetV2 <- dataset_msqd %>% mutate(Unique_ID = paste(VESSEL_NUM, PORT_AREA_CODE, sep = " ")) %>% 
+  filter(MSQD_Landings > 0)  %>%  
+  group_by(Unique_ID) %>% mutate(n_obs_group = n()) %>% ungroup() %>% filter(n_obs_group > 11) %>% drop_na()
+pDatasetV2 <- pdata.frame(pDatasetV2, index = c('Unique_ID', 'Date'))
+
+purtest(pDatasetV2$MSQD_Landings, pmax = 4, exo = "intercept", test = "madwu")
+purtest(pDatasetV2$MSQD_Price, pmax = 4, exo = "intercept", test = "madwu")
+purtest(pDatasetV2$PSDN_Price, pmax = 4, exo = "intercept", test = "madwu")
+purtest(pDatasetV2$NANC_Price, pmax = 4, exo = "intercept", test = "madwu")
+purtest(pDatasetV2$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "madwu")
+purtest(pDatasetV2$NANC_SDM_20, pmax = 4, exo = "intercept", test = "madwu")
+purtest(pDatasetV2$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "madwu")
+
+# duplicate_indexes <- dataset_msqd %>% 
+#   group_by(PORT_AREA_CODE, Date, VESSEL_NUM) %>% mutate(dupe = n()>1)
+
+
+
+#### Estimate models ####
 library(brms)
-fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + PSDN_SDM_60 + NANC_SDM_20 + MSQD_Price + (1 | cluster) +  (1 | port_ID), hu ~ PSDN.Closure),
+fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_Price + (1 | cluster) +  (1 | port_ID), 
+                             hu ~ PSDN.Closure + (1 | cluster)),
                        data = dataset_msqd,
                        family = hurdle_gamma(),
                        control = list(adapt_delta = 0.95, max_treedepth = 20),
                        prior = c(set_prior("cauchy(0,2)", class = "sd")),
                        chains = 2, cores = 4)
-                       # save.image (file = "stan_fit_month.RData")
+                       save.image (file = "stan_fit_month.RData")
 
 # fit_qMSQD_CPUE <- brm(bf(MSQD_Landings ~ MSQD_SDM_90_JS_cpue + (1 | cluster) +  (1 | port_ID), hu ~ PSDN.Closure),
 #                    data = dataset_msqd,
