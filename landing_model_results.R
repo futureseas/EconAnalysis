@@ -582,21 +582,21 @@ rm(desc_data, table)
 # rm(desc_data, table)
 # 
 # 
-# ### Annual data ###
-# dataset_annual <- dataset %>% 
-#   group_by(LANDING_YEAR, VESSEL_NUM, group_all, PORT_AREA_ID, PORT_AREA_CODE) %>%
-#   summarise(PSDN_Landings = sum(PSDN_Landings, na.rm=T), 
-#             MSQD_Landings = sum(MSQD_Landings, na.rm=T), 
-#             NANC_Landings = sum(NANC_Landings, na.rm=T), 
-#             PSDN_Price = mean(PSDN_Price, na.rm=T), 
-#             MSQD_Price = mean(MSQD_Price, na.rm=T),
-#             NANC_Price = mean(NANC_Price, na.rm=T),
-#             PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm=T), 
-#             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=T),
-#             NANC_SDM_20 = mean(NANC_SDM_20, na.rm=T),
-#             MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm=T))
-#   dataset_annual[dataset_annual == "NaN"] <- NA
-# 
+### Annual data ###
+dataset_annual <- dataset %>%
+  group_by(LANDING_YEAR, VESSEL_NUM, group_all, PORT_AREA_CODE, PORT_AREA_ID) %>%
+  summarise(PSDN_Landings = sum(PSDN_Landings, na.rm=T),
+            MSQD_Landings = sum(MSQD_Landings, na.rm=T),
+            NANC_Landings = sum(NANC_Landings, na.rm=T),
+            PSDN_Price = mean(PSDN_Price, na.rm=T),
+            MSQD_Price = mean(MSQD_Price, na.rm=T),
+            NANC_Price = mean(NANC_Price, na.rm=T),
+            PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm=T),
+            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=T),
+            NANC_SDM_20 = mean(NANC_SDM_20, na.rm=T),
+            MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm=T)) %>% ungroup()
+  dataset_annual[dataset_annual == "NaN"] <- NA
+
 # desc_data <- dataset_annual %>%
 #   subset(select = -c(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR))
 # 
@@ -621,12 +621,13 @@ rm(desc_data, table)
 ### Market squid ###
 
 #### Select data for estimation, replace N/A landings to zero 
-dataset_msqd <- dataset %>%
-  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR, LANDING_MONTH,
+dataset_msqd <- dataset_annual %>%
+  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR,
                 MSQD_SPAWN_SDM_90, MSQD_Landings, MSQD_Price, 
                 PSDN_Price, NANC_Price, PSDN_SDM_60, NANC_SDM_20) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>% 
   mutate(MSQD_Landings = ifelse(MSQD_Landings<= 0, 0, MSQD_Landings)) %>%
+  mutate(MSQD_Landings = ifelse(MSQD_Landings< 0.01, 0, MSQD_Landings)) %>%
   dplyr::mutate(PSDN.Closure = ifelse(LANDING_YEAR >= 2015,1,0)) %>%
   dplyr::mutate(PSDN.Open = ifelse(LANDING_YEAR < 2015,1,0)) %>%
   dplyr::mutate(PSDN_SDM.Open = PSDN_SDM_60 * PSDN.Open) %>%
@@ -636,7 +637,7 @@ dataset_msqd <- dataset %>%
 dataset_msqd$port_ID <- udpipe::unique_identifier(dataset_msqd, fields = "PORT_AREA_CODE", start_from = 1) 
 dataset_msqd$cluster <- udpipe::unique_identifier(dataset_msqd, fields = "group_all", start_from = 1) 
 port_names_MSQD <- dataset_msqd %>%
-  dplyr::select(PORT_AREA_CODE, port_ID) %>%
+  dplyr::select('PORT_AREA_CODE', 'port_ID') %>%
   unique()
 original_clusters_MSQD <- dataset_msqd %>%
   dplyr::select(group_all, cluster) %>%
@@ -654,10 +655,11 @@ class(dataset_msqd$cluster)
 ## Check stationarity in the panel dataset
 library("plm")
 
-dataset_msqd$Date <- zoo::as.yearmon(paste(dataset_msqd$LANDING_YEAR, dataset_msqd$LANDING_MONTH), "%Y %m")
-pDataset <- dataset_msqd %>% mutate(Unique_ID = paste(VESSEL_NUM, PORT_AREA_CODE, sep = " ")) %>%  
+# dataset_msqd$Date <- zoo::as.yearmon(paste(dataset_msqd$LANDING_YEAR, dataset_msqd$LANDING_MONTH), "%Y %m")
+
+pDataset <- dataset_msqd %>% mutate(Unique_ID = paste(VESSEL_NUM, PORT_AREA_CODE, sep = " ")) %>%
   group_by(Unique_ID) %>% mutate(n_obs_group = n()) %>% ungroup() %>% filter(n_obs_group > 11) %>% drop_na()
-pDataset <- pdata.frame(pDataset, index = c('Unique_ID', 'Date'))
+pDataset <- pdata.frame(pDataset, index = c('Unique_ID', 'LANDING_YEAR'))
 
 purtest(pDataset$MSQD_Price, pmax = 4, exo = "intercept", test = "madwu")
 purtest(pDataset$PSDN_Price, pmax = 4, exo = "intercept", test = "madwu")
@@ -670,7 +672,7 @@ purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "madwu")
 pDatasetV2 <- dataset_msqd %>% mutate(Unique_ID = paste(VESSEL_NUM, PORT_AREA_CODE, sep = " ")) %>% 
   filter(MSQD_Landings > 0)  %>%  
   group_by(Unique_ID) %>% mutate(n_obs_group = n()) %>% ungroup() %>% filter(n_obs_group > 11) %>% drop_na()
-pDatasetV2 <- pdata.frame(pDatasetV2, index = c('Unique_ID', 'Date'))
+pDatasetV2 <- pdata.frame(pDatasetV2, index = c('Unique_ID', 'LANDING_YEAR'))
 
 purtest(pDatasetV2$MSQD_Landings, pmax = 4, exo = "intercept", test = "madwu")
 purtest(pDatasetV2$MSQD_Price, pmax = 4, exo = "intercept", test = "madwu")
@@ -687,14 +689,44 @@ purtest(pDatasetV2$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "madwu
 
 #### Estimate models ####
 library(brms)
-fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_Price + (1 | cluster) +  (1 | port_ID), 
+fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + PSDN_SDM_60 + (1 | cluster),
                              hu ~ PSDN.Closure + (1 | cluster)),
                        data = dataset_msqd,
                        family = hurdle_gamma(),
-                       control = list(adapt_delta = 0.95, max_treedepth = 20),
-                       prior = c(set_prior("cauchy(0,2)", class = "sd")),
+                       control = list(adapt_delta = 0.85, max_treedepth = 20),
                        chains = 2, cores = 4)
-                       save.image (file = "stan_fit_month.RData")
+                       save.image(file = "stan_fit_month.RData")
+                       
+                       # prior = c(set_prior("cauchy(0,2)", class = "sd"))
+                       # prior = c(set_prior("normal(0,5)", class = "b"),
+
+                       
+## predict response using data to estimate the model
+load("stan_fit_month.RData")
+prediction <- cbind(predict(fit_qMSQD_Spawning), dataset_msqd)
+
+meltdf <- prediction %>% 
+ select(Estimate, MSQD_Landings, LANDING_YEAR, PORT_AREA_CODE) %>%
+  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
+  summarise(Est_landings = sum(Estimate), Landings = sum(MSQD_Landings)) %>%
+  gather(key = Variable, value = value,
+            c("Est_landings", "Landings"))
+
+library(ggplot2)
+ggplot(meltdf, aes(x=LANDING_YEAR, y = value, colour = Variable)) + 
+  geom_line(size=1) + 
+  facet_wrap(~PORT_AREA_CODE)
+
+
+### Model check ###
+hypothesis(fit_qMSQD_Spawning, "MSQD_SPAWN_SDM_90 = 0")
+# print summary -->
+  #   <!-- texreg(list(f2, f3, r2, r3), caption = 'Panel data models for Pacific Sardine landings.\\label{table:sardine_est}', caption.above = TRUE, float.pos = "h", custom.model.names = c("FE: Model 1", "FE: Model 2", "RE: Model 1", "RE: Model 2")) -->
+
+#  Extract Grouo-Level estimates ## -->
+ranef(fit_qPSDN_gamma) -->
+
+                       
 
 # fit_qMSQD_CPUE <- brm(bf(MSQD_Landings ~ MSQD_SDM_90_JS_cpue + (1 | cluster) +  (1 | port_ID), hu ~ PSDN.Closure),
 #                    data = dataset_msqd,
@@ -776,12 +808,7 @@ g1 + g2
 # g1
 # ```
 # 
-# <!-- # print summary -->
-#   <!-- texreg(list(f2, f3, r2, r3), caption = 'Panel data models for Pacific Sardine landings.\\label{table:sardine_est}', caption.above = TRUE, float.pos = "h", custom.model.names = c("FE: Model 1", "FE: Model 2", "RE: Model 1", "RE: Model 2")) -->
-#   
-#   
-#   <!-- # ##  Extract Grouo-Level estimates ## -->
-#   <!-- # ranef(fit_qPSDN_gamma) -->
+#
 #   <!-- #  -->
 #   <!-- # ## Check divergence and other model check ## -->
 #   <!-- # shinystan::launch_shinystan(fit_qPSDN_gamma) -->
