@@ -878,9 +878,10 @@ pp_check(fit_qMSQD_SpawningV2) + ggtitle('(a) Market Squid (SDM: Spawning aggreg
 # 
 # # Merge plots
 # g1 + g2 + g3
-# ```
-# 
-# ### Interaction effects
+
+
+#--------------------------------------------------------- 
+## Interaction effects
 # 
 # ```{r int_effect_PSDN_by_port, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 # c_eff_int_psdn_msqd <- (conditional_effects(fit_qPSDN_price, "PSDN_SDM_60:MSQD_SDM_90", surface=TRUE, 
