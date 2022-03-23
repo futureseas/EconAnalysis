@@ -689,74 +689,116 @@ purtest(pDatasetV2$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "madwu
 
 #### Estimate models ####
 library(brms)
-fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + PSDN_SDM_60 + (1 | cluster),
+load("stan_fit_month.RData")
+fit_qMSQD_SpawningV2 <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + PSDN_SDM_60 + (1 + MSQD_SPAWN_SDM_90 | cluster),
                              hu ~ PSDN.Closure + (1 | cluster)),
                        data = dataset_msqd,
                        family = hurdle_gamma(),
                        control = list(adapt_delta = 0.85, max_treedepth = 20),
                        chains = 2, cores = 4)
                        save.image(file = "stan_fit_month.RData")
-                       
                        # prior = c(set_prior("cauchy(0,2)", class = "sd"))
                        # prior = c(set_prior("normal(0,5)", class = "b"),
 
-                       
-## predict response using data to estimate the model
-load("stan_fit_month.RData")
-prediction <- cbind(predict(fit_qMSQD_Spawning), dataset_msqd)
+# Conditional effects
+library(tibble)
+conditions <- data.frame(port_ID = unique(dataset_msqd$port_ID))
+rownames(conditions) <- unique(dataset_msqd$PORT_AREA_CODE)
+conditions_msqd <- conditions %>%
+  rownames_to_column('PORT_AREA_CODE') %>%
+  column_to_rownames('PORT_AREA_CODE')
+conditional_effects_msqd <- (conditional_effects(fit_qMSQD_SpawningV2, "MSQD_SPAWN_SDM_90", 
+                                                 surface=TRUE, conditions = conditions_msqd, re_formula = NULL))#, transform = log, method = "posterior_predict"))
 
+plot(conditional_effects_msqd, plot = FALSE, nrow = 3, ncol = 1)[[1]] + ggtitle('Market squid') +
+  theme(plot.title = element_text(size=9, face="bold.italic"),
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+  scale_x_continuous(name = "Prob(Presence)") +
+  scale_y_continuous(name = element_blank())
+                       
+# ##### Check divergence and other model check
+# shinystan::launch_shinystan(fit_qMSQD_SpawningV2)
+
+##### Model summary                        
+summary(fit_qMSQD_SpawningV2) 
+
+#####  Extract Grouo-Level estimates
+ranef(fit_qMSQD_SpawningV2)   
+plot(fit_qMSQD_SpawningV2, pars = c("MSQD_SPAWN_SDM_90")) 
+
+##### Hypothesis test
+hypothesis(fit_qMSQD_Spawning, "MSQD_SPAWN_SDM_90 = 0")
+hypothesis(fit_qMSQD_Spawning, "PSDN_SDM_60 = 0")
+                       
+##### Predictions from the model using data to estimate the model
+load("stan_fit_month.RData")
+library(ggplot2)
+
+#   
+#   <!-- # ### Predictions ### -->
+#   <!-- # pred_data <- data.frame(PSDN_SDM = c(0.5, 0.25), MSQD_SDM = c(0.5), Port_ID = 1) -->
+#   <!-- # predict(fit_qPSDN, newdata = pred_data, re_formula = NA) -->
+
+prediction <- cbind(predict(fit_qMSQD_SpawningV2), dataset_msqd)
 meltdf <- prediction %>% 
  select(Estimate, MSQD_Landings, LANDING_YEAR, PORT_AREA_CODE) %>%
   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
   summarise(Est_landings = sum(Estimate), Landings = sum(MSQD_Landings)) %>%
   gather(key = Variable, value = value,
             c("Est_landings", "Landings"))
-
-library(ggplot2)
 ggplot(meltdf, aes(x=LANDING_YEAR, y = value, colour = Variable)) + 
   geom_line(size=1) + 
   facet_wrap(~PORT_AREA_CODE)
 
-
-### Model check ###
-hypothesis(fit_qMSQD_Spawning, "MSQD_SPAWN_SDM_90 = 0")
-# print summary -->
-  #   <!-- texreg(list(f2, f3, r2, r3), caption = 'Panel data models for Pacific Sardine landings.\\label{table:sardine_est}', caption.above = TRUE, float.pos = "h", custom.model.names = c("FE: Model 1", "FE: Model 2", "RE: Model 1", "RE: Model 2")) -->
-
-#  Extract Grouo-Level estimates ## -->
-ranef(fit_qPSDN_gamma) -->
-
-                       
-
-# fit_qMSQD_CPUE <- brm(bf(MSQD_Landings ~ MSQD_SDM_90_JS_cpue + (1 | cluster) +  (1 | port_ID), hu ~ PSDN.Closure),
-#                    data = dataset_msqd,
-#                    family = hurdle_gamma(),
-#                    control = list(adapt_delta = 0.95, max_treedepth = 20),
-#                    prior = c(set_prior("cauchy(0,2)", class = "sd")),
-#                    chains = 2, cores = 4)
-#                    # save.image (file = "stan_fit_month.RData")
-
-##### Compare models
-loo(fit_qMSQD_Spawning, fit_qMSQD_CPUE)
+meltdf <- prediction %>% 
+  select(Estimate, MSQD_Landings, LANDING_YEAR, group_all) %>%
+  group_by(LANDING_YEAR, group_all) %>% 
+  summarise(Est_landings = sum(Estimate), Landings = sum(MSQD_Landings)) %>%
+  gather(key = Variable, value = value,
+         c("Est_landings", "Landings"))
+ggplot(meltdf, aes(x=LANDING_YEAR, y = value, colour = Variable)) + 
+  geom_line(size=1) + 
+  facet_wrap(~group_all)
 
 
 ##### pp_check
 library(ggplot2)
 library(patchwork)
 
-g1 <- pp_check(fit_qMSQD_Spawning) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model') +
+pp_check(fit_qMSQD_SpawningV2) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model') +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic"))  + 
-  xlim(0.1, 900) + xlab("Landing (tons)")
+  xlim(0, 2000) + xlab("Landing (tons)")
 
-g2 <- pp_check(fit_qMSQD_CPUE) + ggtitle('(b) Market Squid (SDM: Abundance model') +
-  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-                     labels = c("y" = "Observed", "yrep" = "Replicated")) + 
-  theme(legend.position = "right", plot.title = element_text(size=9, face="bold.italic"))  + 
-  xlim(0.1, 900) + xlab("Landing (tons)")
 
-g1 + g2
+
+
+# ##### Model Comparision
+# loo(fit_qMSQD_Spawning, fit_qMSQD_SpawningV2)
+#
+# fit_qMSQD <- add_criterion(fit_qMSQD, "loo")
+# fit_qMSQD_90 <- add_criterion(fit_qMSQD_90, "loo")
+# 
+# comp <- loo_compare(loo(fit_qMSQD), loo(fit_qMSQD_90)) %>%
+#   as.data.frame() %>%
+#   select(elpd_loo, elpd_diff, se_diff, p_loo, looic) %>%
+#   dplyr::rename(
+#     "ELPD-Diff" = elpd_diff, "SE-Diff" = se_diff, 
+#     "ELPD-LOO" = elpd_loo, "P-LOO" = p_loo, "LOOIC" = looic
+#   )
+# 
+# mw1 <- model_weights(fit_qMSQD, fit_qMSQD_90, weights = "loo")[rownames(comp)]
+# 
+# comp %>%
+#   cbind("Akaike-Weight" = mw1) %>%
+#   apa_table(
+#     format = "latex", booktabs = TRUE, digits = 2,
+#     caption = "Comparison of models fit1 to fit3 based on approximate leave-one-out cross-validation. Market squid landigns model.",
+#     note =  "ELPD-LOO = expected log posterior predictive density (higher is better); ELPD-DIFF = difference in ELPD values compared to the best model. SE-DIFF = standard error of the ELPD difference. P-LOO = effective number of model parameters (lower is better); LOOIC: leave-one-out information criterion (lower is better); Akaike-Weight = Model weight based on the LOOIC values (higher is better).",
+#     align = c("l", rep("r", 6))
+#   )
+
 
 
 #---------------------------------------------------------------
@@ -791,97 +833,12 @@ g1 + g2
 # plot(fit_qPSDN, pars = c("PSDN_SDM_60"))
 # coef(fit_qPSDN)
 # 
-# save.image (file = "stan_fit.RData")
-# 
-# # # work better with SDM separated. 
-# # loo(fit_qPSDN, fit_qPSDNv2)
-# 
-# ```
-# 
-# ```{r pp_check_psdn, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-# g1 <- pp_check(fit_qPSDN) + ggtitle('(a) Pacific sardine') + 
-#   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-#                      labels = c("y" = "Observed", "yrep" = "Replicated")) +  
-#   theme(legend.position = "none", plot.title = element_text(size=9, face="bold.italic")) +  
-#   xlim(0.1, 4000) + ylab("Density")
-# 
-# g1
-# ```
-# 
 #
-#   <!-- #  -->
-#   <!-- # ## Check divergence and other model check ## -->
-#   <!-- # shinystan::launch_shinystan(fit_qPSDN_gamma) -->
-#   
-#   <!-- # Investigate chain and posterior distributions.  -->
-#   <!-- # https://cran.r-project.org/web/packages/bayesplot/vignettes/graphical-ppcs.html -->
-#   <!-- # plot(fit_qPSDN_t2nc, pars = c("PSDN_SDM")) -->
-#   
-#   <!-- # ### Predictions ### -->
-#   <!-- # pred_data <- data.frame(PSDN_SDM = c(0.5, 0.25), MSQD_SDM = c(0.5), Port_ID = 1) -->
-#   <!-- # predict(fit_qPSDN, newdata = pred_data, re_formula = NA) -->
-#   
-#   <!-- # ## Compare models ## -->
-#   <!-- # loo(fit1, fit2) -->
-#   
-#   
-# 
-# 
-# # Results
-# 
-# ## Landing model
-# 
-# 
-# ### Graphical posterior predictive
-# 
-# ```{r y_rep, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-# g1 
-# 
-# ```
-# 
-# ```{r shinystan, eval=FALSE, include=FALSE}
-# shinystan::launch_shinystan(fit_qPSDN_price) 
-# shinystan::launch_shinystan(fit_qMSQD_price) 
-# shinystan::launch_shinystan(fit_qNANC_price) 
-# ```
-# 
-# ```{r y_rep_zero, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-# g1 <- pp_check(fit_qPSDN_price) + ggtitle('(a) Pacific sardine')  + theme(legend.position = "none") + xlim(0, 0.1) 
-# g2 <- pp_check(fit_qMSQD_price) + ggtitle('(b) Market Squid')     + theme(legend.position = "none") + xlim(0, 0.1) 
-# g3 <- pp_check(fit_qNANC_price) + ggtitle('(c) Northern anchovy') + theme(legend.position = "right", 
-#                                                                           plot.title = element_text(size=9, face="bold.italic")) + xlim(0, 0.1) 
-# 
-# 
-# 
-# g1 + g2 + g3
-# ```
-# 
-# ```{r model-comparision, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, results='asis'}
-# fit_qMSQD <- add_criterion(fit_qMSQD, "loo")
-# fit_qMSQD_90 <- add_criterion(fit_qMSQD_90, "loo")
-# 
-# comp <- loo_compare(loo(fit_qMSQD), loo(fit_qMSQD_90)) %>%
-#   as.data.frame() %>%
-#   select(elpd_loo, elpd_diff, se_diff, p_loo, looic) %>%
-#   dplyr::rename(
-#     "ELPD-Diff" = elpd_diff, "SE-Diff" = se_diff, 
-#     "ELPD-LOO" = elpd_loo, "P-LOO" = p_loo, "LOOIC" = looic
-#   )
-# 
-# mw1 <- model_weights(fit_qMSQD, fit_qMSQD_90, weights = "loo")[rownames(comp)]
-# 
-# comp %>%
-#   cbind("Akaike-Weight" = mw1) %>%
-#   apa_table(
-#     format = "latex", booktabs = TRUE, digits = 2,
-#     caption = "Comparison of models fit1 to fit3 based on approximate leave-one-out cross-validation. Market squid landigns model.",
-#     note =  "ELPD-LOO = expected log posterior predictive density (higher is better); ELPD-DIFF = difference in ELPD values compared to the best model. SE-DIFF = standard error of the ELPD difference. P-LOO = effective number of model parameters (lower is better); LOOIC: leave-one-out information criterion (lower is better); Akaike-Weight = Model weight based on the LOOIC values (higher is better).",
-#     align = c("l", rep("r", 6))
-#   )
-# ```
-# 
-# 
-# ### Own species distribution effect
+#------------------------------------------------------------------------ 
+# Results
+
+
+### Own species distribution effect
 # 
 # ```{r by_port_sdm, eval=FALSE, fig.cap=, include=FALSE}
 # # PSDN plots
@@ -901,21 +858,7 @@ g1 + g2
 #   scale_x_continuous(name = element_blank()) +
 #   scale_y_continuous(name = "Landings (tons)")
 # 
-# # MSQD plots
-# conditions2 <- data.frame(port_ID = unique(est_data_msqd$port_ID))
-# rownames(conditions2) <- unique(est_data_msqd$Port)
-# conditions_msqd <- conditions2 %>% 
-#   rownames_to_column('port_name') %>%
-#   filter(port_ID == 4  | port_ID == 5  | port_ID == 8) %>%
-#   column_to_rownames('port_name')
-# c_eff_msqd <- (conditional_effects
-#                (fit_qMSQD_price, "MSQD_SDM_90", surface=TRUE, conditions = conditions_msqd, re_formula = NULL))
-# #, transform = log, method = "posterior_predict"))
-# g2 <- plot(c_eff_msqd, plot = FALSE, nrow = 3, ncol = 1)[[1]] + ggtitle('(b) Market squid') + 
-#   theme(plot.title = element_text(size=9, face="bold.italic"), 
-#         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-#   scale_x_continuous(name = "Prob(Presence)") +
-#   scale_y_continuous(name = element_blank()) 
+ 
 # 
 # # NANC plots
 # conditions3 <- data.frame(port_ID = unique(est_data_nanc$port_ID))
@@ -1116,21 +1059,4 @@ g1 + g2
 #                     <!--            plot = FALSE, ask = FALSE) -->
 #   
 #   <!-- mu[[1]] + hu[[1]] + plot_layout(nrow = 2) -->
-#   
-#   <!-- ``` -->
-#   
-#   
-#   <!-- ## Effort susbsitution ##  -->
-#   
-#   <!-- * Time series of number of trips (as a proxy for effort) for all the species -->
-#   <!-- * @richerson2017 use a method identify the nature of the outliers in an ARMA time series model (read more if interested)  -->
-#   <!--     + I propose to estimate a system of simultaneous equations (VECM model) to study equilibrium of effort and short-run and long-run effects of the closure (structural breaks) -->
-#   <!--     + Have a long-run equation for each species (simultaneously estimated) and test for structural break in this long-run relationship. -->
-#   
-#   
-#   <!-- ## Seasonality changes ## -->
-#   
-#   <!-- * Seasonality can be studied calculating monthly share of total trips by species, regress it using month dummiues and see any is there any structural change after the closure [@richerson2017].  -->
-#   
-#   <!-- <!-- Shall we study also effort as number of trips, and seasonality using time series -->
 #   
