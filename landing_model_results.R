@@ -653,7 +653,7 @@ class(dataset_msqd$cluster)
 
 #### Estimate models 
 library(brms)
-fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + (1 | cluster) + + (1 | port_ID), hu ~ PSDN.Closure),
+fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + PSDN_SDM_60 + NANC_SDM_20 + MSQD_Price + (1 | cluster) +  (1 | port_ID), hu ~ PSDN.Closure),
                        data = dataset_msqd,
                        family = hurdle_gamma(),
                        control = list(adapt_delta = 0.95, max_treedepth = 20),
@@ -661,13 +661,13 @@ fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + (1 | cluster) +
                        chains = 2, cores = 4)
                        # save.image (file = "stan_fit_month.RData")
 
-fit_qMSQD_CPUE <- brm(bf(MSQD_Landings ~ MSQD_SDM_90_JS_cpue + (1 | cluster) + + (1 | port_ID), hu ~ PSDN.Closure),
-                   data = dataset_msqd,
-                   family = hurdle_gamma(),
-                   control = list(adapt_delta = 0.95, max_treedepth = 20),
-                   prior = c(set_prior("cauchy(0,2)", class = "sd")),
-                   chains = 2, cores = 4)
-                   # save.image (file = "stan_fit_month.RData")
+# fit_qMSQD_CPUE <- brm(bf(MSQD_Landings ~ MSQD_SDM_90_JS_cpue + (1 | cluster) +  (1 | port_ID), hu ~ PSDN.Closure),
+#                    data = dataset_msqd,
+#                    family = hurdle_gamma(),
+#                    control = list(adapt_delta = 0.95, max_treedepth = 20),
+#                    prior = c(set_prior("cauchy(0,2)", class = "sd")),
+#                    chains = 2, cores = 4)
+#                    # save.image (file = "stan_fit_month.RData")
 
 ##### Compare models
 loo(fit_qMSQD_Spawning, fit_qMSQD_CPUE)
