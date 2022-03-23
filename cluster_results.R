@@ -1,14 +1,14 @@
 #######################
 ### Cluster results ###
 #######################
-library("googlesheets4")
-gs4_auth(
-  email = gs4_auth(),
-  path = NULL,
-  scopes = "https://www.googleapis.com/auth/spreadsheets",
-  cache = gargle::gargle_oauth_cache(),
-  use_oob = gargle::gargle_oob_default(),
-  token = NULL)
+# library("googlesheets4")
+# gs4_auth(
+#   email = gs4_auth(),
+#   path = NULL,
+#   scopes = "https://www.googleapis.com/auth/spreadsheets",
+#   cache = gargle::gargle_oauth_cache(),
+#   use_oob = gargle::gargle_oob_default(),
+#   token = NULL)
 
 
 rm(list = ls(all.names = TRUE)) 
@@ -34,8 +34,8 @@ PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
 #----------------------------------
 ## Product use
 all_product_use <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
-  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PRODUCT_USE_CODE) %>% unique() %>% mutate(merge=1)
-  all_product_use <- all_product_use[-c(5), ] 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PRODUCT_USE_CODE, DISPOSITION_CODE) %>% unique() %>% mutate(merge=1)
+  all_product_use <- all_product_use[-c(11), ] 
 all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
 expand <- merge(all_product_use, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
@@ -44,15 +44,15 @@ rm(all_product_use, all_vessels)
 options(scipen=999)
 cluster.use <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>%
-  group_by(group_all, PRODUCT_USE_CODE, VESSEL_NUM) %>% 
+  group_by(group_all, PRODUCT_USE_CODE, DISPOSITION_CODE, VESSEL_NUM) %>% 
   summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
   group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
 
-cluster.use <- merge(expand, cluster.use, by = c('VESSEL_NUM', 'PRODUCT_USE_CODE'), all.x = TRUE) %>%
+cluster.use <- merge(expand, cluster.use, by = c('VESSEL_NUM', 'PRODUCT_USE_CODE', 'DISPOSITION_CODE'), all.x = TRUE) %>%
   mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% group_by(VESSEL_NUM) %>%
   mutate(group_all = ifelse(is.na(group_all),mean(group_all, na.rm = TRUE),group_all)) 
 
-hist.bait <- cluster.use %>% filter(PRODUCT_USE_CODE == "B")
+hist.bait <- cluster.use %>% filter(PRODUCT_USE_CODE == "B" & DISPOSITION_CODE == "B")
   cluster_names <- as_labeller(c(`1` = "Cluster 1",`2` = "Cluster 2",
                                `3` = "Cluster 3",`4` = "Cluster 4",
                                `5` = "Cluster 5",`6` = "Cluster 6",
@@ -66,10 +66,20 @@ hist.bait <- cluster.use %>% filter(PRODUCT_USE_CODE == "B")
 
 
 cluster.use  <- cluster.use %>% 
-  group_by(group_all, PRODUCT_USE_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
+  group_by(group_all, PRODUCT_USE_CODE, DISPOSITION_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
   unique() %>% filter(group_all != is.na(group_all))
 
-table <- as.data.frame(xtabs(Percentage ~  PRODUCT_USE_CODE + group_all, cluster.use ))
+
+cluster.use <- cluster.use[order(cluster.use$group_all, -cluster.use$Percentage),]
+cluster.use.highest <- cluster.use %>%
+  group_by(group_all) %>% filter(row_number()==1:3) %>% ungroup() %>% 
+  dplyr::select('PRODUCT_USE_CODE', 'DISPOSITION_CODE') %>% unique()
+
+cluster.use<-setDT(cluster.use)[PRODUCT_USE_CODE %chin% cluster.use.highest$PRODUCT_USE_CODE & 
+                                    DISPOSITION_CODE %chin% cluster.use.highest$DISPOSITION_CODE] 
+
+
+table <- as.data.frame(xtabs(Percentage ~  PRODUCT_USE_CODE + DISPOSITION_CODE + group_all, cluster.use))
 table <- table %>%
   spread(key = group_all, value = Freq)
 
