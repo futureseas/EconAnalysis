@@ -707,7 +707,23 @@ fit_qMSQD_Spawningv3 <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SD
 
 save.image(file = "stan_fit_month.RData")
 
-stanplot(fit_qMSQD_Spawningv2)
+stanplot(fit_qMSQD_Spawningv3, pars = c("^r_", "^b_", "^sd_")) +
+  theme_fivethirtyeight() +
+  theme(axis.text.y = element_text(hjust = 0))
+
+#### Compare multilevel effects ###
+post <- posterior_samples(b12.5, add_chain = T) %>%
+  ggplot(aes(x = sd_actor__Intercept)) +
+  geom_density(size = 0, fill = "orange1", alpha = 3/4) +
+  geom_density(aes(x = sd_block__Intercept), 
+               size = 0, fill = "orange4", alpha = 3/4)  +
+  scale_y_continuous(NULL, breaks = NULL) +
+  coord_cartesian(xlim = c(0, 4)) +
+  labs(title = expression(sigma)) +
+  annotate("text", x = 2/3, y = 2, label = "block", color = "orange4") +
+  annotate("text", x = 2, y = 3/4, label = "actor", color = "orange1") +
+  theme_fivethirtyeight()
+
 
 ##### Model Comparision
 loo(fit_qMSQD_Spawning, fit_qMSQD_Spawningv2)
