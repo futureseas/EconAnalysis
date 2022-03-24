@@ -647,9 +647,11 @@ MSQD_clusters <- dataset_msqd %>%
 
 #### Convert variables to factor
 dataset_msqd$PSDN.Closure <- factor(dataset_msqd$PSDN.Closure)
+dataset_msqd$PSDN.Open <- factor(dataset_msqd$PSDN.Open)
 dataset_msqd$port_ID      <- factor(dataset_msqd$port_ID)
 dataset_msqd$cluster      <- factor(dataset_msqd$cluster)
 class(dataset_msqd$PSDN.Closure)
+class(dataset_msqd$PSDN.Open)
 class(dataset_msqd$port_ID)
 class(dataset_msqd$cluster)
 
@@ -693,52 +695,111 @@ rm(pDataset, pDatasetV2)
 
 #### Estimate models ####
 library(brms)
-# fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + PSDN_SDM.Open + (1 +  PSDN_SDM.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID),
-#                                hu ~ PSDN.Closure + (1 + PSDN.Closure | cluster + port_ID)),
-#                             data = dataset_msqd,
-#                             family = hurdle_gamma(),
-#                             control = list(adapt_delta = 0.85, max_treedepth = 20),
-#                             chains = 2, cores = 4)
-# save.image(file = "stan_fit_month.RData")  
 load("stan_fit_month.RData")
 
+fit_qMSQD_Spawningv2 <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + (1 +  PSDN_SDM.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID),
+                               hu ~ PSDN.Closure + (1 + PSDN.Closure | cluster + port_ID)),
+                            data = dataset_msqd,
+                            family = hurdle_gamma(),
+                            control = list(adapt_delta = 0.95, max_treedepth = 20),
+                            chains = 2, cores = 4)
+
+# save.image(file = "stan_fit_month.RData")
+
+##### Model Comparision
+loo(fit_qMSQD_Spawning, fit_qMSQD_Spawningv2)
+fit_qMSQD_Spawning <- fit_qMSQD_Spawningv2
+
+#### Check correlation between parameters
+posterior_samples(fit_qMSQD_Spawning) %>%
+  select(-lp__) %>%
+  cor() %>%
+  round(digits = 2)
 
 ##### Model summary                        
 summary(fit_qMSQD_Spawning)
 
-# ##### Model Comparision
-loo(fit_qMSQD_SpawningV3, fit_qMSQD_SpawningV5)
 
+##### Conditional effects #####
 
-# Conditional effects
+# Conditional effects by cluster
 library(tibble)
 conditions <- data.frame(cluster = unique(dataset_msqd$cluster))
 rownames(conditions) <- unique(dataset_msqd$group_all)
-conditional_effects_msqd <- (conditional_effects(fit_qMSQD_SpawningV5, "MSQD_SPAWN_SDM_90", 
-                                                 surface=TRUE, conditions = conditions, re_formula = NULL))#, transform = log, method = "posterior_predict"))
+
+conditional_effects_msqd_sdm <- 
+  conditional_effects(
+    fit_qMSQD_Spawning, 
+    "MSQD_SPAWN_SDM_90",
+    surface=TRUE, 
+    conditions = conditions, 
+    re_formula = NULL)
 
 library(ggplot2)
-plot(conditional_effects_msqd, plot = FALSE, nrow = 3, ncol = 2)[[1]] + ggtitle('Market squid') +
+plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
+  ggtitle('Market squid availability effect on squid landings') +
+  theme(plot.title = element_text(size=9, face="bold.italic"),
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+  scale_x_continuous(name = "Prob(Presence)") +
+  scale_y_continuous(name = element_blank())
+
+conditional_effects_psdn_sdm <- 
+  conditional_effects(
+  fit_qMSQD_Spawning,
+  "PSDN_SDM_60",
+  surface=TRUE, 
+  conditions = conditions, 
+  re_formula = NULL)#, transform = log, method = "posterior_predict"))
+
+library(ggplot2)
+plot(conditional_effects_psdn_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
+  ggtitle('Pacific sardine availability effect on squid landings') +
   theme(plot.title = element_text(size=9, face="bold.italic"),
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
   scale_x_continuous(name = "Prob(Presence)") +
   scale_y_continuous(name = element_blank())
 
 
+# Conditional effects by port area
 library(tibble)
 conditions <- data.frame(cluster = unique(dataset_msqd$port_ID))
 rownames(conditions) <- unique(dataset_msqd$PORT_AREA_CODE)
-conditional_effects_msqd <- (conditional_effects(fit_qMSQD_SpawningV5, "MSQD_SPAWN_SDM_90", 
-                                                 surface=TRUE, conditions = conditions, re_formula = NULL))#, transform = log, method = "posterior_predict"))
+
+conditional_effects_msqd_sdm <-
+  conditional_effects(
+    fit_qMSQD_Spawning, 
+    "MSQD_SPAWN_SDM_90",                
+    surface=TRUE, 
+    conditions = conditions, 
+    re_formula = NULL)#, transform = log, method = "posterior_predict"))
 
 library(ggplot2)
-plot(conditional_effects_msqd, plot = FALSE, nrow = 3, ncol = 2)[[1]] + ggtitle('Market squid') +
+plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
+  ggtitle('Market squid availability effect on squid landings') +
   theme(plot.title = element_text(size=9, face="bold.italic"),
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
   scale_x_continuous(name = "Prob(Presence)") +
   scale_y_continuous(name = element_blank())
-                       
-# ##### Check divergence and other model check
+                  
+conditional_effects_psdn_sdm <-
+  conditional_effects(
+    fit_qMSQD_Spawning, 
+    "PSDN_SDM_60",                
+    surface=TRUE, 
+    conditions = conditions, 
+    re_formula = NULL)#, transform = log, method = "posterior_predict"))
+
+library(ggplot2)
+plot(conditional_effects_psdn_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
+  ggtitle('Pacific sardine availability effect on squid landings') +
+  theme(plot.title = element_text(size=9, face="bold.italic"),
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+  scale_x_continuous(name = "Prob(Presence)") +
+  scale_y_continuous(name = element_blank())
+
+rm(conditional_effects_msqd_sdm, conditional_effects_psdn_sdm, conditions)
+     
+##### Check divergence and other model check #####
 # shinystan::launch_shinystan(fit_qMSQD_SpawningV2)
 
  
@@ -746,6 +807,8 @@ plot(conditional_effects_msqd, plot = FALSE, nrow = 3, ncol = 2)[[1]] + ggtitle(
 #####  Extract Grouo-Level estimates
 ranef(fit_qMSQD_SpawningV5)   
 plot(fit_qMSQD_SpawningV5, pars = c("MSQD_SPAWN_SDM_90")) 
+coef(fit_qMSQD_Spawning)
+
 
 ##### Hypothesis test
 hypothesis(fit_qMSQD_Spawning, "MSQD_SPAWN_SDM_90 = 0")
@@ -758,13 +821,15 @@ hypothesis(fit_qMSQD_Spawning, "PSDN_SDM_60 = 0")
 #   <!-- # pred_data <- data.frame(PSDN_SDM = c(0.5, 0.25), MSQD_SDM = c(0.5), Port_ID = 1) -->
 #   <!-- # predict(fit_qPSDN, newdata = pred_data, re_formula = NA) -->
 
-prediction <- cbind(predict(fit_qMSQD_SpawningV5), dataset_msqd)
+set.seed(20)
+prediction <- cbind(predict(fit_qMSQD_Spawning), dataset_msqd)
+
 meltdf <- prediction %>% 
- select(Estimate, MSQD_Landings, LANDING_YEAR, PORT_AREA_CODE) %>%
+  select(Estimate, MSQD_Landings, LANDING_YEAR, PORT_AREA_CODE) %>%
   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
   summarise(Est_landings = sum(Estimate), Landings = sum(MSQD_Landings)) %>%
   gather(key = Variable, value = value,
-            c("Est_landings", "Landings"))
+         c("Est_landings", "Landings"))
 ggplot(meltdf, aes(x=LANDING_YEAR, y = value, colour = Variable)) + 
   geom_line(size=1) + 
   facet_wrap(~PORT_AREA_CODE)
@@ -778,6 +843,48 @@ meltdf <- prediction %>%
 ggplot(meltdf, aes(x=LANDING_YEAR, y = value, colour = Variable)) + 
   geom_line(size=1) + 
   facet_wrap(~group_all)
+
+
+# d2 %>%
+#   ggplot(aes(x = weight)) +
+#   geom_ribbon(data = pred_height, 
+#               aes(ymin = Q2.5, ymax = Q97.5),
+#               fill = "grey83") +
+#   geom_smooth(data = mu_summary,
+#               aes(y = Estimate, ymin = Q2.5, ymax = Q97.5),
+#               stat = "identity",
+#               fill = "grey70", color = "black", alpha = 1, size = 1/2) +
+#   geom_point(aes(y = height),
+#              color = "navyblue", shape = 1, size = 1.5, alpha = 2/3) +
+#   coord_cartesian(xlim = range(d2$weight),
+#                   ylim = range(d2$height)) +
+#   theme(text = element_text(family = "Times"),
+#         panel.grid = element_blank())
+
+### Predict if sardine would have been open
+# prediction_mod <- cbind(predict(fit_qMSQD_Spawning, newdata = data.frame(MSQD_Landings = dataset_msqd$MSQD_Landings,
+#                                            MSQD_SPAWN_SDM_90 = dataset_msqd$MSQD_SPAWN_SDM_90,
+#                                            PSDN_SDM.Open = dataset_msqd$PSDN_SDM.Open,
+#                                            cluster = dataset_msqd$cluster,
+#                                            port_ID = dataset_msqd$port_ID, 
+#                                            PSDN.Closure = 0), dataset_msqd) 
+# 
+
+# # NOT RUN {
+# ## fit a model
+# fit <- brm(rating ~ treat + period + carry + (1|subject), 
+#            data = inhaler)
+# 
+# ## compute expected predictions
+# fitted_values <- fitted(fit)
+# head(fitted_values)
+# 
+# ## plot expected predictions against actual response
+# dat <- as.data.frame(cbind(Y = standata(fit)$Y, fitted_values))
+# ggplot(dat) + geom_point(aes(x = Estimate, y = Y))
+# # }
+# # NOT RUN {
+# # }
 
 
 ##### pp_check
