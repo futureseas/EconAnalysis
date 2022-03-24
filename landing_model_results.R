@@ -127,7 +127,9 @@ SDM_port_MSQD_JS_cpue <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_por
 dataset <- merge(PacFIN.month.dataset, SDM_port_MSQD_JS_cpue, 
                       by = c("PORT_AREA_CODE", "LANDING_YEAR"), all.x = TRUE)
 
-rm(PacFIN.month.dataset, SDM_port_PSDN, SDM_port_NANC, SDM_port_MSQD_Spawn, SDM_port_MSQD_JS_cpue)
+rm(PacFIN.month.dataset, 
+   SDM_port_PSDN, SDM_port_NANC, SDM_port_MSQD_Spawn, SDM_port_MSQD_JS_cpue,
+   ports_area_codes)
 
 
 #-----------------------------------------------------------------
@@ -636,10 +638,10 @@ dataset_msqd <- dataset_annual %>%
 #### Create new port ID and cluster variable 
 dataset_msqd$port_ID <- udpipe::unique_identifier(dataset_msqd, fields = "PORT_AREA_CODE", start_from = 1) 
 dataset_msqd$cluster <- udpipe::unique_identifier(dataset_msqd, fields = "group_all", start_from = 1) 
-port_names_MSQD <- dataset_msqd %>%
+MSQD_port_area <- dataset_msqd %>%
   dplyr::select('PORT_AREA_CODE', 'port_ID') %>%
   unique()
-original_clusters_MSQD <- dataset_msqd %>%
+MSQD_clusters <- dataset_msqd %>%
   dplyr::select(group_all, cluster) %>%
   unique()
 
@@ -682,6 +684,8 @@ purtest(pDatasetV2$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "madwu")
 purtest(pDatasetV2$NANC_SDM_20, pmax = 4, exo = "intercept", test = "madwu")
 purtest(pDatasetV2$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "madwu")
 
+rm(pDataset, pDatasetV2)
+
 # duplicate_indexes <- dataset_msqd %>% 
 #   group_by(PORT_AREA_CODE, Date, VESSEL_NUM) %>% mutate(dupe = n()>1)
 
@@ -689,26 +693,18 @@ purtest(pDatasetV2$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "madwu
 
 #### Estimate models ####
 library(brms)
+# fit_qMSQD_Spawning <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + PSDN_SDM.Open + (1 +  PSDN_SDM.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID),
+#                                hu ~ PSDN.Closure + (1 + PSDN.Closure | cluster + port_ID)),
+#                             data = dataset_msqd,
+#                             family = hurdle_gamma(),
+#                             control = list(adapt_delta = 0.85, max_treedepth = 20),
+#                             chains = 2, cores = 4)
+# save.image(file = "stan_fit_month.RData")  
 load("stan_fit_month.RData")
-# fit_qMSQD_SpawningV3 <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + PSDN_SDM.Open + (1 +  PSDN_SDM.Open + MSQD_SPAWN_SDM_90 | cluster),
-#                              hu ~ PSDN.Closure + (1 + PSDN.Closure | cluster)),
-#                           data = dataset_msqd,
-#                           family = hurdle_gamma(),
-#                           control = list(adapt_delta = 0.85, max_treedepth = 20),
-#                           chains = 2, cores = 4)
-# save.image(file = "stan_fit_month.RData")  
 
-
-fit_qMSQD_SpawningV5 <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + PSDN_SDM.Open + (1 +  PSDN_SDM.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID),
-                               hu ~ PSDN.Closure + (1 + PSDN.Closure | cluster + port_ID)),
-                            data = dataset_msqd,
-                            family = hurdle_gamma(),
-                            control = list(adapt_delta = 0.85, max_treedepth = 20),
-                            chains = 2, cores = 4)
-# save.image(file = "stan_fit_month.RData")  
 
 ##### Model summary                        
-summary(fit_qMSQD_SpawningV5)
+summary(fit_qMSQD_Spawning)
 
 # ##### Model Comparision
 loo(fit_qMSQD_SpawningV3, fit_qMSQD_SpawningV5)
