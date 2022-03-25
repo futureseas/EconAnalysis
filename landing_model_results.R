@@ -696,9 +696,20 @@ rm(pDataset, pDatasetV2)
 #### Estimate models ####
 library(brms)
 
-fit_qMSQD_Spawningv3 <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + 
-                                 (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID),
-                               hu ~ PSDN.Closure + 
+# fit_qMSQD_SpawningV1 <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + 
+#                                  (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID),
+#                                hu ~ PSDN.Closure + 
+#                                  (1 + PSDN.Closure | cluster + port_ID)),
+#                             data = dataset_msqd,
+#                             family = hurdle_gamma(),
+#                             control = list(adapt_delta = 0.95, max_treedepth = 20),
+#                             chains = 2, cores = 4)
+
+fit_qMSQD_SpawningV2 <- brm(bf(MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open +
+                                 MSQD_SPAWN_SDM_90:NANC_SDM_20 + 
+                                 (1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open +
+                                    MSQD_SPAWN_SDM_90:NANC_SDM_20 | cluster + port_ID),
+                               hu ~ 1+ PSDN.Closure + 
                                  (1 + PSDN.Closure | cluster + port_ID)),
                             data = dataset_msqd,
                             family = hurdle_gamma(),
@@ -707,9 +718,16 @@ fit_qMSQD_Spawningv3 <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SD
 
 save.image(file = "stan_fit_month.RData")
 
-stanplot(fit_qMSQD_Spawningv3, pars = c("^r_", "^b_", "^sd_")) +
-  theme_fivethirtyeight() +
-  theme(axis.text.y = element_text(hjust = 0))
+##### Model Comparision
+loo(fit_qMSQD_SpawningV1, fit_qMSQD_SpawningV2)
+fit_qMSQD_Spawning <- fit_qMSQD_SpawningV1
+
+
+
+stanplot(fit_qMSQD_SpawningV2, pars = c("^b_")) 
+# +
+#   theme(axis.text.y = element_text(hjust = 0))
+# # theme_fivethirtyeight() +
 
 #### Compare multilevel effects ###
 post <- posterior_samples(b12.5, add_chain = T) %>%
@@ -725,9 +743,7 @@ post <- posterior_samples(b12.5, add_chain = T) %>%
   theme_fivethirtyeight()
 
 
-##### Model Comparision
-loo(fit_qMSQD_Spawning, fit_qMSQD_Spawningv2)
-fit_qMSQD_Spawning <- fit_qMSQD_Spawningv2
+
 
 # #### Check correlation between parameters
 # posterior_samples(fit_qMSQD_Spawningv2) %>%
@@ -736,7 +752,7 @@ fit_qMSQD_Spawning <- fit_qMSQD_Spawningv2
 #   round(digits = 2)
 
 ##### Model summary                        
-summary(fit_qMSQD_Spawningv2)
+summary(fit_qMSQD_Spawning)
 
 
 ##### Conditional effects #####
@@ -748,7 +764,7 @@ rownames(conditions) <- unique(dataset_msqd$group_all)
 
 conditional_effects_msqd_sdm <- 
   conditional_effects(
-    fit_qMSQD_Spawningv2, 
+    fit_qMSQD_Spawning, 
     "MSQD_SPAWN_SDM_90",
     surface=TRUE, 
     conditions = conditions, 
@@ -764,7 +780,7 @@ plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] +
 
 conditional_effects_psdn_sdm <- 
   conditional_effects(
-  fit_qMSQD_Spawningv2,
+  fit_qMSQD_Spawning,
   "PSDN_SDM_60",
   surface=TRUE, 
   conditions = conditions, 
@@ -786,7 +802,7 @@ rownames(conditions) <- unique(dataset_msqd$PORT_AREA_CODE)
 
 conditional_effects_msqd_sdm <-
   conditional_effects(
-    fit_qMSQD_Spawningv2, 
+    fit_qMSQD_Spawning, 
     "MSQD_SPAWN_SDM_90",                
     surface=TRUE, 
     conditions = conditions, 
@@ -802,7 +818,7 @@ plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] +
                   
 conditional_effects_psdn_sdm <-
   conditional_effects(
-    fit_qMSQD_Spawningv2, 
+    fit_qMSQD_Spawning, 
     "PSDN_SDM_60",                
     surface=TRUE, 
     conditions = conditions, 
@@ -840,8 +856,8 @@ hypothesis(fit_qMSQD_Spawning, "PSDN_SDM_60 = 0")
 #   <!-- # pred_data <- data.frame(PSDN_SDM = c(0.5, 0.25), MSQD_SDM = c(0.5), Port_ID = 1) -->
 #   <!-- # predict(fit_qPSDN, newdata = pred_data, re_formula = NA) -->
 
-set.seed(123)
-prediction <- cbind(predict(fit_qMSQD_Spawningv2), dataset_msqd)
+set.seed(10)
+prediction <- cbind(predict(fit_qMSQD_Spawning), dataset_msqd)
 
 meltdf <- prediction %>% 
   select(Estimate, MSQD_Landings, LANDING_YEAR, PORT_AREA_CODE) %>%
