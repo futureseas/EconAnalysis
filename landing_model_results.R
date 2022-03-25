@@ -705,28 +705,19 @@ class(dataset_msqd$cluster)
 #### Estimate models ####
 library(brms)
 
-# fit_qMSQD_SpawningV1 <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + 
-#                                  (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID),
-#                                hu ~ PSDN.Closure + 
-#                                  (1 + PSDN.Closure | cluster + port_ID)),
-#                             data = dataset_msqd,
-#                             family = hurdle_gamma(),
-#                             control = list(adapt_delta = 0.95, max_treedepth = 20),
-#                             chains = 2, cores = 4)
-
-fit_qMSQD_SpawningV2 <- brm(bf(
-  MSQD_Landings ~   1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + (1 | cluster + port_ID),
-  hu ~ 1 + PSDN.Closure + PSDN.Participation + MSQD_Price_c + (1 | cluster + port_ID)),
-  data = dataset_msqd,
-  family = hurdle_gamma(),
-  control = list(adapt_delta = 0.95, max_treedepth = 20),
-  chains = 2, 
-  cores = 4)
-
-
+fit_qMSQD_SpawningV2 <- brm(bf(MSQD_Landings ~ MSQD_SPAWN_SDM_90 + 
+                                 MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open +
+                                 (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | 
+                                    cluster + port_ID),
+                               hu ~ PSDN.Open + (1 + PSDN.Open | cluster + port_ID)),
+                            data = dataset_msqd,
+                            family = hurdle_gamma(),
+                            control = list(adapt_delta = 0.95, max_treedepth = 20),
+                            chains = 2, cores = 4)
 
 ### maybe add price centered in landings, and in hurdle. 
 ### Also, include dummies that the vessel also enter sardine, mackerels or anchovy 
+
 
 save.image(file = "stan_fit_month.RData")
 
