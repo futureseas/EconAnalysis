@@ -365,17 +365,17 @@ aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
 names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
     write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv", row.names = FALSE)
 
-## Check cluster validity
-library(clv)
-    library("googlesheets4")
-    gs4_auth(
-      email = gs4_auth(),
-      path = NULL,
-      scopes = "https://www.googleapis.com/auth/spreadsheets",
-      cache = gargle::gargle_oauth_cache(),
-      use_oob = gargle::gargle_oob_default(),
-      token = NULL)
-    
+# ## Check cluster validity
+# library(clv)
+#     library("googlesheets4")
+#     gs4_auth(
+#       email = gs4_auth(),
+#       path = NULL,
+#       scopes = "https://www.googleapis.com/auth/spreadsheets",
+#       cache = gargle::gargle_oauth_cache(),
+#       use_oob = gargle::gargle_oob_default(),
+#       token = NULL)
+#     
   
   # compute intercluster distances and intracluster diameters
     cls.scatt <- cls.scatt.data(RAW, as.integer(Clusters$clustering), dist="euclidean")
@@ -383,15 +383,15 @@ library(clv)
     intradist <- rbind.data.frame(cls.scatt$intracls.complete, cls.scatt$intracls.average)
     colnames(intradist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7")
     rownames(intradist) = c("Complete distance", "Average distance")
-    
-      gs4_create("Intradist", sheets = intradist)
+      # 
+      # gs4_create("Intradist", sheets = intradist)
     
   # Intercluster distances
     interdist <- as.data.frame(cls.scatt$intercls.average)
     colnames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
     rownames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-    
-    gs4_create("Interdist", sheets = interdist)
+    # 
+    # gs4_create("Interdist", sheets = interdist)
     
 ## Save RAW for analysis with cluster ID
 RAW$VESSEL_NUM<-Vessel_IDs
@@ -459,7 +459,7 @@ Group_Stats_Wide <- Group_Stats_Wide %>%
   mutate(time.period = period) 
   saveRDS(Group_Stats_Wide, file = "stats_input.RDS")  
 
-rm(Group_Stats_Wide, Group_Stats, Vessel_IDs, FTID)
+rm(Group_Stats_Wide, Group_Stats, FTID)
 
 # plot
 library(viridis)
@@ -473,3 +473,15 @@ Group_Stats_Wide <- readRDS(here::here("Clustering", "stats_input.RDS"))
     # scale_fill_brewer(palette="YlGnBu")
   
 # rm(Group_Stats_Wide)
+  
+
+# -------------------------------------------
+##Step 8: Look at descriptive cluster metrics
+  
+###Look at summary values for revenue and range
+RAW$VESSEL_NUM<-Vessel_IDs
+RAW<-merge(RAW, PAM_Vessel_Groups, by="VESSEL_NUM")
+RAW<-RAW[c(-1)]
+Group_Stats<-RAW %>% group_by(group_all.x) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+Group_Stats$DISTANCE_A_mean/10000
+Group_Stats$AVG_REVENUE_mean

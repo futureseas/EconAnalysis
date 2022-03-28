@@ -642,7 +642,7 @@ dataset_msqd <- dataset_annual %>%
   dplyr::mutate(PSDN.Open = ifelse(LANDING_YEAR < 2015,1,0)) %>%
   dplyr::mutate(PSDN.Participation = ifelse(PSDN_Landings > 0, 1, 0)) %>%
   dplyr::mutate(NANC.Participation = ifelse(NANC_Landings > 0, 1, 0)) %>%
-  dplyr::mutate(MSQD_Price_c = MSQD_Price - mean(MSQD_Price, na.rm = TRUE)) %>%
+  dplyr::mutate(MSQD_Price_c = (MSQD_Price - mean(MSQD_Price, na.rm = TRUE)) / sd(MSQD_Price, na.rm = TRUE)) %>%
   drop_na() 
 
 #### Create new port ID and cluster variable 
@@ -703,43 +703,38 @@ class(dataset_msqd$cluster)
 #### Estimate models ####
 library(brms)
 
-# fit_qMSQD_SpawningV2 <- brm(bf(MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + 
-#                                  MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open +
-#                                  (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | 
-#                                     cluster + port_ID),
-#                                hu ~ PSDN.Open + (1 + PSDN.Open | cluster + port_ID)),
-#                             data = dataset_msqd,
-#                             family = hurdle_gamma(),
-#                             control = list(adapt_delta = 0.95, max_treedepth = 20),
-#                             chains = 2, cores = 4)
-# 
-fit_qMSQD_SpawningV3 <- brm(bf(MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 +
-                                 MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_price_c
-                                 (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 |
-                                    cluster + port_ID),
-                               hu ~ PSDN.Open + (1 + PSDN.Open | cluster + port_ID)),
-                            data = dataset_msqd,
-                            family = hurdle_gamma(),
-                            control = list(adapt_delta = 0.95, max_treedepth = 20),
-                            chains = 2, cores = 4)
+fit_qMSQD_SpawningV4 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV4.RDS"))
+
+fit_qMSQD_SpawningV1 <- brm(bf(
+  MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + 
+    (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID),
+  hu ~ 1 + PSDN.Open + (1 + PSDN.Open | cluster + port_ID)),
+  data = dataset_msqd,
+  family = hurdle_gamma(),
+  control = list(adapt_delta = 0.95, max_treedepth = 20),
+  chains = 2, 
+  cores = 4)
+
+# saveRDS(fit_qMSQD_SpawningV4, file = here::here("Estimations", "fit_qMSQD_SpawningV4.RDS"))
+
  
-# ### Add price centered in landings (maybe in hurdle too). 
-# ### Include anchovy SDM
-# ### Include dummies that the vessel also enter Sardine
-# 
-# 
-# save.image(file = "stan_fit_month.RData")
+
 
 ##### Model Comparision
-load("stan_fit_month.RData")
-loo(fit_qMSQD_SpawningV1, fit_qMSQD_SpawningV2)
-fit_qMSQD_Spawning <- fit_qMSQD_SpawningV2
+loo(fit_qMSQD_SpawningV3, fit_qMSQD_SpawningV4)
+fit_qMSQD_Spawning <- fit_qMSQD_SpawningV4
+
+# Include dummies that the vessel also enter Sardine
+# Include year fixed-effects
+# Include anchovy SDM
 
 
 
 ##### Model summary ####                       
+stanplot(fit_qMSQD_Spawning)
 summary(fit_qMSQD_Spawning)
 
+library(ggplot2)
 library(ggthemes)
 library(sjPlot)
 library(sjlabelled)
@@ -747,6 +742,7 @@ library(sjmisc)
 theme_set(theme_sjplot())
 
 plot_model(fit_qMSQD_Spawning) + theme(axis.text.y = element_text(hjust = 0))
+
 library(patchwork)
 
 pp_check(fit_qMSQD_Spawning) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model)') +
@@ -754,6 +750,7 @@ pp_check(fit_qMSQD_Spawning) + ggtitle('(a) Market Squid (SDM: Spawning aggregat
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  + 
   xlim(0, 2000) + xlab("Landing (tons)")
+
 
 # Compare multilevel effects
 as_draws_df(fit_qMSQD_Spawning, add_chain = T) %>%
@@ -783,7 +780,7 @@ conditional_effects_msqd_sdm <-
     conditions = conditions, 
     re_formula = NULL)#, transform = log, method = "posterior_predict"))
 
-library(ggplot2)
+
 plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
   ggtitle('Market squid availability effect on squid landings') +
   theme(plot.title = element_text(size=9, face="bold.italic"),
@@ -845,7 +842,7 @@ hypothesis(fit_qMSQD_Spawning, "PSDN_SDM_60 = 0")
 #   <!-- # pred_data <- data.frame(PSDN_SDM = c(0.5, 0.25), MSQD_SDM = c(0.5), Port_ID = 1) -->
 #   <!-- # predict(fit_qPSDN, newdata = pred_data, re_formula = NA) -->
 
-set.seed(10)
+set.seed(123)
 prediction <- cbind(predict(fit_qMSQD_Spawning), dataset_msqd)
 
 meltdf <- prediction %>% 
