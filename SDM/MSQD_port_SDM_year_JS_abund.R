@@ -13,7 +13,8 @@ gc()
 
 SDM_port <- tibble(LANDING_YEAR = integer(),
                    PORT_NAME = character(),
-                   SDM_90 = numeric())
+                   AGENCY_CODE = character(),
+                   SDM_90_JS_CPUE = numeric())
 
 # Obtain port names used to land species of interest
 port_codes <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\Ports.landing.FF.csv")
@@ -25,11 +26,18 @@ ports_coord <- read.csv(here::here("Data", "Ports", "port_names.csv"))
 ports <- merge(x=port_codes,y=ports_coord, by=c("PORT_NAME", "AGENCY_CODE"),all.x=TRUE, all.y=FALSE) %>%
   drop_na()
 
-dat <- read.csv("G:\\My Drive\\Project\\Data\\SDM\\squid\\JS outputs\\Monthly_Mean_Values_Squid_Abund.csv")
+dat <- read.csv("G:\\My Drive\\Project\\Data\\SDM\\squid\\JS outputs\\Monthly_Mean_Values_Squid_Abund_220321_Lunar.csv")
 
-dat_long <- gather(dat, condition, lnCPUE, X1998.7:X2019.8, factor_key=TRUE)
-  dat_long$YEAR <- as.data.frame(str_extract_all(dat_long$condition, "\\d{4}", simplify = T))
-  dat_long <- dat_long %>% group_by(Longitude, Latitude, YEAR) %>% 
+
+df = df[df.columns.drop(list(df.filter(regex='Test')))]
+
+
+dat_long <- gather(dat, condition, lnCPUE, X1998.6:X2019.10, factor_key=TRUE)
+  dat_long <- cbind(dat_long, as.data.frame(str_extract_all(dat_long$condition, "\\d{4}", simplify = T))) %>%
+    dplyr::rename(YEAR = V1)
+  dat_long <- cbind(dat_long, as.data.frame(str_extract_all(dat_long$condition, "\\d{1}", simplify = T))) 
+  dat_long <- dat_long %>% dplyr::select(-c(7:10, 12)) %>% dplyr::rename(MONTH = V5) %>% 
+    filter(MONTH == 8 | MONTH == 9 | MONTH == 1) %>% group_by(Longitude, Latitude, YEAR) %>% 
     summarise(mean.lnCPUE = mean(lnCPUE, na.rm = TRUE))
 
 #---------------------------------------------------
@@ -56,13 +64,13 @@ for (y in 2000:2019) {
 
 			SDM_port <- SDM_port %>%
 			  add_row(LANDING_YEAR = y, PORT_NAME = as.character(ports[j, 1]),
-			          SDM_90 = SDM_mean_90)
+			          SDM_90_JS_CPUE = SDM_mean_90, AGENCY_CODE = as.character(ports[j, 2]))
 			
  	    print(y)
  	    print(j)
  }
 }
 
-write_csv(SDM_port, file = "data/SDM/MSQD_SDM_port_year_JS.csv")
+write_csv(SDM_port, file = "data/SDM/MSQD_SDM_port_year_JS_abund_V2.csv")
   
   

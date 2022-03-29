@@ -81,6 +81,10 @@ rm(removal.df, nrow_tickets)
                           FUN=sum_mean_fun, data=Tickets)
 rm(Tickets)
   
+port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
+PacFIN.month <- PacFIN.month %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
+ports_area_codes <- PacFIN.month %>% dplyr::select('PORT_NAME', 'AGENCY_CODE', 'PORT_AREA_CODE') %>% unique()
+
 
 #---------------------
 ### Merge SDM data set 
@@ -93,50 +97,48 @@ Ports.landing.FF <- PacFIN.month %>%
 
   write.csv(Ports.landing.FF,"C:\\GitHub\\EconAnalysis\\Data\\Ports\\Ports.landing.FF.csv", row.names = FALSE)
 
-# Merge data with SDM Pacific Sardine #
-SDM_port_PSDN <- read.csv(file = here::here("Data", "SDM", "PSDN_SDM_port_month.csv"))
-  PacFIN.month <- merge(PacFIN.month, SDM_port_PSDN, 
-                        by = c("PORT_NAME", "AGENCY_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
+#### Merge data with SDM Pacific Sardine
+SDM_port_PSDN <- read.csv(file = here::here("Data", "SDM", "PSDN_SDM_port_month.csv")) %>% 
+  merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
+  group_by(PORT_AREA_CODE, LANDING_MONTH, LANDING_YEAR) %>% summarize(PSDN_SDM_60 = mean(SDM_60))
+PacFIN.month <- merge(PacFIN.month, SDM_port_PSDN,
+                              by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
 
-# Merge data with SDM Market Squid (spawn aggregation) #
-SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM_port_month.csv"))
-  PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_Spawn, 
-                        by = c("PORT_NAME", "AGENCY_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) 
+#### Merge data with SDM Market Squid (spawn aggregation) #
+SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM_port_month.csv"))%>% 
+  merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
+  dplyr::filter(LANDING_MONTH == 8 | LANDING_MONTH == 9 | LANDING_MONTH == 10) %>% 
+  group_by(PORT_AREA_CODE, LANDING_YEAR) %>% summarize(MSQD_SPAWN_SDM_90_v2 = mean(SDM_SPAWN_90))
+PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_Spawn, 
+                              by = c("PORT_AREA_CODE", "LANDING_YEAR"), all.x = TRUE) 
 
-# Merge data with SDM Market Squid #
-SDM_port_MSQD <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_month.csv"))
-  PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD, 
-                        by = c("PORT_NAME", "AGENCY_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
+#### Merge data with SDM Market Squid (spawn aggregation) #
+SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM_port_month.csv"))%>% 
+  merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
+  group_by(PORT_AREA_CODE, LANDING_YEAR, LANDING_MONTH) %>% summarize(MSQD_SPAWN_SDM_90 = mean(SDM_SPAWN_90))
+PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_Spawn, 
+                      by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) 
 
-# Merge data with SDM Northern Anchovy #
-SDM_port_NANC <- read.csv(file = here::here("Data", "SDM", "NANC_SDM_port_month.csv"))
-  PacFIN.month <- merge(PacFIN.month, SDM_port_NANC, 
-                        by = c("PORT_NAME", "AGENCY_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
-  
-# Merge data with SDM Market Squid (JS Abundance model) #
-SDM_port_MSQD_JS_cpue <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_year_JS.csv")) %>%
-  dplyr::rename(SDM_90_JS_cpue = SDM_90)
-  PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_JS_cpue, 
-                        by = c("PORT_NAME", "AGENCY_CODE", "LANDING_YEAR"), all.x = TRUE)
+#### Merge data with SDM Northern Anchovy #
+SDM_port_NANC <- read.csv(file = here::here("Data", "SDM", "NANC_SDM_port_month.csv"))%>% 
+  merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
+  group_by(PORT_AREA_CODE, LANDING_MONTH, LANDING_YEAR) %>% summarize(NANC_SDM_20 = mean(SDM_20))
+PacFIN.month <- merge(PacFIN.month, SDM_port_NANC, 
+                              by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
 
-# Merge data with SDM Market Squid (JS probability model) #
-SDM_port_MSQD_JS_prob <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_year_JS_prob.csv")) 
-  PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_JS_prob, 
-                        by = c("PORT_NAME", "AGENCY_CODE", "LANDING_YEAR"), all.x = TRUE)
-  
-  
-PacFIN.month.SDM <- PacFIN.month %>%
-    dplyr::rename(PSDN_SDM_60 = SDM_60) %>%
-    dplyr::rename(MSQD_SDM_90 = SDM_90) %>%
-    dplyr::rename(MSQD_SDM_90_JS_cpue = SDM_90_JS_cpue) %>%
-    dplyr::rename(MSQD_SDM_90_JS_prob = SDM_90_JS_prob) %>%
-    dplyr::rename(MSQD_SPAWN_SDM_90 = SDM_SPAWN_90) %>%
-    dplyr::rename(MSQD_SPAWN_SDM_100 = SDM_SPAWN_100) %>%
-    dplyr::rename(MSQD_SPAWN_SDM_200 = SDM_SPAWN_200) %>%
-    dplyr::rename(MSQD_SPAWN_SDM_300 = SDM_SPAWN_300) %>%
-    dplyr::rename(MSQD_SPAWN_SDM_5_100 = SDM_SPAWN_5_100) %>%
-    dplyr::rename(NANC_SDM_20 = SDM_20)
+#### Merge data with SDM Market Squid (JS Abundance model) #
+SDM_port_MSQD_JS_cpue <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_year_JS_abund_V2.csv")) %>%
+  merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
+  group_by(PORT_AREA_CODE, LANDING_YEAR) %>% summarize(MSQD_SDM_90_JS_CPUE = mean(SDM_90_JS_CPUE))
+PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_JS_cpue, 
+                 by = c("PORT_AREA_CODE", "LANDING_YEAR"), all.x = TRUE)
 
+#### Merge data with SDM Market Squid (JS Abundance model) #
+Recruitment_port_MSQD <- read.csv(file = here::here("Data", "SDM", "MSQD_recruitmen_index.csv")) %>%
+  merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
+  group_by(PORT_AREA_CODE, LANDING_YEAR) %>% summarize(MSQD_recruitment = mean(Model_Predictions))
+PacFIN.month.SDM <- merge(PacFIN.month, Recruitment_port_MSQD, 
+                      by = c("PORT_AREA_CODE", "LANDING_YEAR"), all.x = TRUE)
 
 #----------------------
 ### Merge TAC data set 
@@ -232,7 +234,5 @@ PacFIN.month.cluster <- merge(PacFIN.month.SDM, PAM_Vessel_Groups, by = ("VESSEL
 # --------------------------------------------------------------------------------------
 ### Save DATASET
 
-port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
-PacFIN.month <- PacFIN.month.cluster %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
 
-write.csv(PacFIN.month,"C:\\Data\\PacFIN data\\PacFIN_month.csv", row.names = FALSE)
+write.csv(PacFIN.month.cluster,"C:\\Data\\PacFIN data\\PacFIN_month.csv", row.names = FALSE)

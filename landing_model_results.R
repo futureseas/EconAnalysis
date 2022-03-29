@@ -87,7 +87,8 @@ rm(PacFIN.month.aggregate)
 ### Selecting port using results from cluster analysis (15% of the revenue for at least one cluster)
 PacFIN.month.dataset <- PacFIN.month.dataset %>%
   dplyr::filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA" |
-         PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS")
+         PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | 
+           PORT_AREA_CODE == "SFA" | PORT_AREA_CODE == "SDA")
 
 
 ### Create ID data and change NaN to NA ###
@@ -97,6 +98,7 @@ PacFIN.month.dataset[PacFIN.month.dataset == "NaN"] <- NA
 
 
 ### Merge SDM by year/month/port ###
+
 
 #### Merge data with SDM Pacific Sardine
 SDM_port_PSDN <- read.csv(file = here::here("Data", "SDM", "PSDN_SDM_port_month.csv")) %>% 
@@ -108,7 +110,15 @@ PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_PSDN,
 #### Merge data with SDM Market Squid (spawn aggregation) #
 SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM_port_month.csv"))%>% 
   merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
-  group_by(PORT_AREA_CODE, LANDING_MONTH, LANDING_YEAR) %>% summarize(MSQD_SPAWN_SDM_90 = mean(SDM_SPAWN_90))
+  dplyr::filter(LANDING_MONTH == 8 | LANDING_MONTH == 9 | LANDING_MONTH == 10) %>% 
+  group_by(PORT_AREA_CODE, LANDING_YEAR) %>% summarize(MSQD_SPAWN_SDM_90_v2 = mean(SDM_SPAWN_90))
+PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_MSQD_Spawn, 
+                      by = c("PORT_AREA_CODE", "LANDING_YEAR"), all.x = TRUE) 
+
+#### Merge data with SDM Market Squid (spawn aggregation) #
+SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM_port_month.csv"))%>% 
+  merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
+  group_by(PORT_AREA_CODE, LANDING_YEAR, LANDING_MONTH) %>% summarize(MSQD_SPAWN_SDM_90 = mean(SDM_SPAWN_90))
 PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_MSQD_Spawn, 
                       by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) 
 
@@ -120,15 +130,21 @@ PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_NANC,
                       by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
 
 #### Merge data with SDM Market Squid (JS Abundance model) #
-SDM_port_MSQD_JS_cpue <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_year_JS.csv")) %>%
-  dplyr::rename(SDM_90_JS_cpue = SDM_90) %>% 
+SDM_port_MSQD_JS_cpue <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_year_JS_abund_V2.csv")) %>%
   merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
-  group_by(PORT_AREA_CODE, LANDING_YEAR) %>% summarize(MSQD_SDM_90_JS_cpue = mean(SDM_90_JS_cpue))
-dataset <- merge(PacFIN.month.dataset, SDM_port_MSQD_JS_cpue, 
+  group_by(PORT_AREA_CODE, LANDING_YEAR) %>% summarize(MSQD_SDM_90_JS_CPUE = mean(SDM_90_JS_CPUE))
+PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_MSQD_JS_cpue, 
                       by = c("PORT_AREA_CODE", "LANDING_YEAR"), all.x = TRUE)
 
+#### Merge data with Market Squid recruitment #
+Recruitment_port_MSQD <- read.csv(file = here::here("Data", "SDM", "MSQD_recruitmen_index.csv")) %>%
+  merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
+  group_by(PORT_AREA_CODE, LANDING_YEAR) %>% summarize(MSQD_recruitment = mean(Model_Predictions))
+dataset <- merge(PacFIN.month.dataset, Recruitment_port_MSQD, 
+                          by = c("PORT_AREA_CODE", "LANDING_YEAR"), all.x = TRUE)
+
 rm(PacFIN.month.dataset, 
-   SDM_port_PSDN, SDM_port_NANC, SDM_port_MSQD_Spawn, SDM_port_MSQD_JS_cpue,
+   SDM_port_PSDN, SDM_port_NANC, SDM_port_MSQD_Spawn, SDM_port_MSQD_JS_cpue, Recruitment_port_MSQD,
    ports_area_codes)
 
 
@@ -528,9 +544,11 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 5, "Price: MSQD", vars)) %>%
   mutate(vars = ifelse(vars == 6, "Price: NANC", vars)) %>%
   mutate(vars = ifelse(vars == 7, "Prob(presence): PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 8, "Prob(presence): MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 9, "Prob(presence): NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 10, "Abundance: MSQD", vars))
+  mutate(vars = ifelse(vars == 8, "Prob(presence): MSQD -- Aug-Oct", vars)) %>%
+  mutate(vars = ifelse(vars == 9, "Prob(presence): MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 10, "Prob(presence): NANC", vars)) %>%
+  mutate(vars = ifelse(vars == 11, "Abundance: MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 12, "Recruitment: MSQD", vars))
 
 
 # library("googlesheets4")
@@ -596,7 +614,9 @@ dataset_annual <- dataset %>%
             PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm=T),
             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=T),
             NANC_SDM_20 = mean(NANC_SDM_20, na.rm=T),
-            MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm=T)) %>% ungroup()
+            MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_CPUE, na.rm=T),
+            MSQD_SPAWN_SDM_90_v2 = mean(MSQD_SPAWN_SDM_90_v2, na.rm=T),
+            MSQD_recruitment = mean(MSQD_recruitment, na.rm=T)) %>% ungroup()
   dataset_annual[dataset_annual == "NaN"] <- NA
 
 # desc_data <- dataset_annual %>%
@@ -626,7 +646,9 @@ dataset_annual <- dataset %>%
 #### Select data for estimation, replace N/A landings to zero 
 dataset_msqd <- dataset_annual %>%
   dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR,
-                MSQD_SPAWN_SDM_90, MSQD_Landings, MSQD_Price, 
+                MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_v2, 
+                MSQD_recruitment, MSQD_SDM_90_JS_cpue,
+                MSQD_Landings, MSQD_Price, 
                 PSDN_Landings, NANC_Landings, PSDN_Price, NANC_Price, 
                 PSDN_SDM_60, NANC_SDM_20) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>%
@@ -658,6 +680,7 @@ MSQD_clusters <- dataset_msqd %>%
 #### Convert variables to factor
 dataset_msqd$port_ID      <- factor(dataset_msqd$port_ID)
 dataset_msqd$cluster      <- factor(dataset_msqd$cluster)
+dataset_msqd$LANDING_YEAR <- factor(dataset_msqd$LANDING_YEAR)
 class(dataset_msqd$PSDN.Open)
 class(dataset_msqd$port_ID)
 class(dataset_msqd$cluster)
@@ -702,27 +725,68 @@ class(dataset_msqd$cluster)
 
 #### Estimate models ####
 library(brms)
-
 fit_qMSQD_SpawningV4 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV4.RDS"))
 
 fit_qMSQD_SpawningV1 <- brm(bf(
-  MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + 
-    (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID),
-  hu ~ 1 + PSDN.Open + (1 + PSDN.Open | cluster + port_ID)),
-  data = dataset_msqd,
+  MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open 
+    + (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID) 
+    + (1 | LANDING_YEAR),
+  hu ~ 1 + PSDN.Open 
+    + (1 + PSDN.Open | cluster + port_ID)
+    + (1 | LANDING_YEAR)), data = dataset_msqd,
   family = hurdle_gamma(),
   control = list(adapt_delta = 0.95, max_treedepth = 20),
   chains = 2, 
   cores = 4)
 
-# saveRDS(fit_qMSQD_SpawningV4, file = here::here("Estimations", "fit_qMSQD_SpawningV4.RDS"))
+saveRDS(fit_qMSQD_SpawningV1, file = here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
 
- 
+fit_qMSQD_SpawningV2 <- brm(bf(
+  MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_v2 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open 
+    + (1 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90_v2 | cluster + port_ID) 
+    + (1 | LANDING_YEAR),
+  hu ~ 1 + PSDN.Open 
+    + (1 + PSDN.Open | cluster + port_ID)
+    + (1 | LANDING_YEAR)), data = dataset_msqd,
+  family = hurdle_gamma(),
+  control = list(adapt_delta = 0.95, max_treedepth = 20),
+  chains = 2, 
+  cores = 4)
+
+saveRDS(fit_qMSQD_SpawningV2, file = here::here("Estimations", "fit_qMSQD_SpawningV2.RDS"))
+
+fit_qMSQD_abund <- brm(bf(
+  MSQD_Landings ~ 1 +  MSQD_SDM_90_JS_cpue +  MSQD_SDM_90_JS_cpue:PSDN_SDM_60:PSDN.Open 
+  + (1 +  MSQD_SDM_90_JS_cpue:PSDN_SDM_60:PSDN.Open +  MSQD_SDM_90_JS_cpue | cluster + port_ID) 
+  + (1 | LANDING_YEAR),
+  hu ~ 1 + PSDN.Open 
+  + (1 + PSDN.Open | cluster + port_ID)
+  + (1 | LANDING_YEAR)), data = dataset_msqd,
+  family = hurdle_gamma(),
+  control = list(adapt_delta = 0.95, max_treedepth = 20),
+  chains = 2, 
+  cores = 4)
+
+saveRDS(fit_qMSQD_abund, file = here::here("Estimations", "fit_qMSQD_abund.RDS"))
+
+fit_qMSQD_recruit <- brm(bf(
+  MSQD_Landings ~ 1 +  MSQD_recruitment +  MSQD_recruitment:PSDN_SDM_60:PSDN.Open 
+  + (1 +  MSQD_recruitment:PSDN_SDM_60:PSDN.Open +  MSQD_recruitment | cluster + port_ID) 
+  + (1 | LANDING_YEAR),
+  hu ~ 1 + PSDN.Open 
+  + (1 + PSDN.Open | cluster + port_ID)
+  + (1 | LANDING_YEAR)), data = dataset_msqd,
+  family = hurdle_gamma(),
+  control = list(adapt_delta = 0.95, max_treedepth = 20),
+  chains = 2, 
+  cores = 4)
+
+saveRDS(fit_qMSQD_recruit, file = here::here("Estimations", "fit_qMSQD_recruit.RDS"))
 
 
 ##### Model Comparision
-loo(fit_qMSQD_SpawningV3, fit_qMSQD_SpawningV4)
-fit_qMSQD_Spawning <- fit_qMSQD_SpawningV4
+loo(fit_qMSQD_SpawningV1, fit_qMSQD_SpawningV4)
+fit_qMSQD <- fit_qMSQD_SpawningV1
 
 # Include dummies that the vessel also enter Sardine
 # Include year fixed-effects
@@ -731,8 +795,8 @@ fit_qMSQD_Spawning <- fit_qMSQD_SpawningV4
 
 
 ##### Model summary ####                       
-stanplot(fit_qMSQD_Spawning)
-summary(fit_qMSQD_Spawning)
+stanplot(fit_qMSQD)
+summary(fit_qMSQD)
 
 library(ggplot2)
 library(ggthemes)
@@ -741,7 +805,7 @@ library(sjlabelled)
 library(sjmisc)
 theme_set(theme_sjplot())
 
-plot_model(fit_qMSQD_Spawning) + theme(axis.text.y = element_text(hjust = 0))
+plot_model(fit_qMSQD) + theme(axis.text.y = element_text(hjust = 0))
 
 library(patchwork)
 
