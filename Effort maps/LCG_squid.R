@@ -94,6 +94,10 @@ ggplot(data = Permit_COG_mean, aes(x = Year)) +
     axis.title.y = element_text(color = InertiaColor, size=13),
     axis.title.y.right = element_text(color = LcgColor, size=13)
   ) 
+
+write.csv(Permit_COG_mean, 
+          here::here("Effort maps", "LCG_squid.csv"), 
+          row.names = FALSE)
   
 
 

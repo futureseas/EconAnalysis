@@ -75,7 +75,8 @@ rm(removal.df, nrow_tickets)
   
   PacFIN.month <- doBy::summaryBy(AFI_PRICE_PER_MTON + LANDED_WEIGHT_MTONS + AFI_EXVESSEL_REVENUE + 
                               VESSEL_LENGTH + VESSEL_WEIGHT + VESSEL_HORSEPOWER + NUM_OF_DAYS_FISHED 
-                            ~ VESSEL_NUM + PACFIN_SPECIES_CODE + PACFIN_GEAR_CODE + PORT_NAME + 
+                            ~ VESSEL_NUM + PACFIN_SPECIES_CODE + PACFIN_SPECIES_COMMON_NAME + 
+                              PACFIN_GEAR_CODE + PORT_NAME + 
                               PACFIN_PORT_CODE + LANDING_YEAR + LANDING_MONTH + AGENCY_CODE + 
                               PRODUCT_USE_CODE + DISPOSITION_CODE,
                           FUN=sum_mean_fun, data=Tickets)
