@@ -726,19 +726,19 @@ class(dataset_msqd$cluster)
 #### Estimate models ####
 library(brms)
 
-# fit_qMSQD_SpawningV1 <- brm(bf(
-#   MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open 
-#     + (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID) 
-#     + (1 | LANDING_YEAR),
-#   hu ~ 1 + PSDN.Open 
-#     + (1 + PSDN.Open | cluster + port_ID)
-#     + (1 | LANDING_YEAR)), data = dataset_msqd,
-#   family = hurdle_gamma(),
-#   control = list(adapt_delta = 0.95, max_treedepth = 20),
-#   chains = 2, 
-#   cores = 4)
-# 
-# saveRDS(fit_qMSQD_SpawningV1, file = here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
+fit_qMSQD_SpawningV1 <- brm(bf(
+  MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open
+    + (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID)
+    + (1 | LANDING_YEAR),
+  hu ~ 1 + PSDN.Open
+    + (1 + PSDN.Open | cluster + port_ID)
+    + (1 | LANDING_YEAR)), data = dataset_msqd,
+  family = hurdle_gamma(),
+  control = list(adapt_delta = 0.95, max_treedepth = 20),
+  chains = 2,
+  cores = 4)
+  saveRDS(fit_qMSQD_SpawningV1, 
+          file = here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
 
 # fit_qMSQD_SpawningV2 <- brm(bf(
 #   MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_v2 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open 
@@ -791,7 +791,7 @@ fit_qMSQD_recruit    <- readRDS(here::here("Estimations", "fit_qMSQD_recruit.RDS
 loo(fit_qMSQD_SpawningV1, fit_qMSQD_SpawningV2)
 loo(fit_qMSQD_SpawningV1, fit_qMSQD_abund)
 loo(fit_qMSQD_SpawningV1, fit_qMSQD_recruit)
-fit_qMSQD <- fit_qMSQD_SpawningV2
+fit_qMSQD <- fit_qMSQD_SpawningV1
 
 
 
