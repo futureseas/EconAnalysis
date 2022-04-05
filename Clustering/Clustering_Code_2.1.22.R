@@ -43,8 +43,9 @@ Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, POR
                              PACFIN_GEAR_CODE, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, VESSEL_OWNER_NAME, 
                              VESSEL_OWNER_ADDRESS_STATE, VESSEL_OWNER_ADDRESS_STREET))
 
-###Remove records associated with landings of zero value; this is likely bycatch
-Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
+# ###Remove records associated with landings of zero value; this is likely bycatch
+# Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
+
 ####Select the time period you want to cluster over
 Tickets<-Tickets[which(Tickets$LANDING_YEAR>=min.year & Tickets$LANDING_YEAR<=max.year),]
 
@@ -69,7 +70,9 @@ FF_Tickets<-Tickets[which(Tickets$Dominant == "PACIFIC SARDINE"  |
                           Tickets$Dominant == "NORTHERN ANCHOVY" | 
                           Tickets$Dominant == "CHUB MACKEREL"    | 
                           Tickets$Dominant == "JACK MACKEREL"    |
-                          Tickets$Dominant == "UNSP. MACKEREL"),]
+                          Tickets$Dominant == "UNSP. MACKEREL"   | 
+                          (Tickets$Dominant == "ALBACORE" & 
+                            Tickets$PACFIN_SPECIES_COMMON_NAME == "NORTHERN ANCHOVY")),]
 
 ## Agreggate mackerrels in one category
 FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "CHUB MACKEREL"]  <- "MACKEREL")
@@ -101,9 +104,9 @@ names(FF_Vessels)[1]<-"VESSEL_NUM"
 write.csv(FF_Vessels, "FF_Vessels.csv", row.names = FALSE)
 
 ###Subset from the complete data set to only retain records associated with these Vessels       
-Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]            
+Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]   
+Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
 Tickets<-as.data.frame(Tickets)
-
 rm(FF_Vessels, FTID_Value)
 
 
@@ -366,7 +369,7 @@ names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
     write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv", row.names = FALSE)
 
 # ## Check cluster validity
-# library(clv)
+library(clv)
 #     library("googlesheets4")
 #     gs4_auth(
 #       email = gs4_auth(),
