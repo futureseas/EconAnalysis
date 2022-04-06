@@ -36,13 +36,19 @@ Tickets <- dplyr::select(Tickets, c(FTID, VESSEL_NUM, PACFIN_SPECIES_CODE, PACFI
                              VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_HORSEPOWER, NUM_OF_DAYS_FISHED,
                              PACFIN_GEAR_CODE, PORT_NAME, PACFIN_PORT_CODE, LANDING_YEAR, LANDING_MONTH,  
                              AGENCY_CODE, REMOVAL_TYPE_CODE, PRODUCT_USE_CODE, DISPOSITION_CODE))
-               
-## Remove records associated with landings of zero value; this is likely bycatch 
-Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),] 
-  # 80% of the total number of tickets, from 4,596,193 tickets to 3,709,040.
-  nrow(as.data.frame(unique(Tickets$FTID))) 
 
-  
+#removal
+nrow_tickets <- nrow(Tickets)
+removal.df <- Tickets %>% dplyr:::select("REMOVAL_TYPE_CODE") %>% mutate(n = 1) %>% 
+  group_by(REMOVAL_TYPE_CODE) %>% summarise(n_group = sum(n)/nrow_tickets*100) 
+
+Tickets <- Tickets %>% filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
+nrow(as.data.frame(unique(Tickets$FTID))) 
+nrow(as.data.frame(unique(Tickets$VESSEL_NUM))) 
+
+rm(removal.df, nrow_tickets)
+
+               
 ## Creating a filter here to only retain vessels with more than 3 forage fish landings 
 #  (tickets where FF is the dominant species) over the time period. 
 #  I think 3 is appropriate if you are clustering several years together, 
@@ -50,25 +56,20 @@ Tickets <- Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
 
 FF_Vessels <- read.csv(file = here::here("Clustering", "FF_Vessels.csv")) 
 
-  #Subset from the complete data set to only retain records associated with these Vessels       
-  Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]            
+  #Subset from the complete data set to only retain records associated with these Vessels     
+  ## Remove records associated with landings of zero value; this is likely bycatch 
+  Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]     
   Tickets<-as.data.frame(Tickets)
   
   rm(FF_Vessels)
 
-  #removal
-  nrow_tickets <- nrow(Tickets)
-  removal.df <- Tickets %>% select("REMOVAL_TYPE_CODE") %>% mutate(n = 1) %>% 
-    group_by(REMOVAL_TYPE_CODE) %>% summarise(n_group = sum(n)/nrow_tickets*100) 
-  
-  Tickets <- Tickets %>% filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
-  nrow(as.data.frame(unique(Tickets$FTID))) 
-  nrow(as.data.frame(unique(Tickets$VESSEL_NUM))) 
-
-rm(removal.df, nrow_tickets)
 
 #----------------------
 ### Create monthly data
+
+
+# 80% of the total number of tickets, from 4,596,193 tickets to 3,709,040.
+  nrow(as.data.frame(unique(Tickets$FTID))) 
   
   sum_mean_fun <- function(x, ...){
     c(mean=mean(x, na.rm=TRUE, ...), sum=sum(x, na.rm=TRUE, ...)) }

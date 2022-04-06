@@ -41,13 +41,14 @@ rm(Tickets1, Tickets2)
 Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, PORT_NAME, PACFIN_PORT_CODE, VESSEL_NUM, 
                              VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE, 
                              PACFIN_GEAR_CODE, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, VESSEL_OWNER_NAME, 
-                             VESSEL_OWNER_ADDRESS_STATE, VESSEL_OWNER_ADDRESS_STREET))
-
-# ###Remove records associated with landings of zero value; this is likely bycatch
-# Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
+                             VESSEL_OWNER_ADDRESS_STATE, VESSEL_OWNER_ADDRESS_STREET, REMOVAL_TYPE_CODE))
 
 ####Select the time period you want to cluster over
 Tickets<-Tickets[which(Tickets$LANDING_YEAR>=min.year & Tickets$LANDING_YEAR<=max.year),]
+
+#### Use only tickets that the removal type is commercial ####
+Tickets <- Tickets %>% filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
+
 
 ####Find the dominant species by value of each fishing trip, presumably this is the target species. Using the logic of metiers,
 ###all landings of each fishing trip should be tagged with a single identifier.
@@ -65,12 +66,12 @@ rm(Trip_Dominant, X, Boats)
 
 ### Subset to select only records where one of the forage fish species of interest was the target species
 ### (species in the CPS FMP; squid, sardine, mackerrels and anchovy) 
-FF_Tickets<-Tickets[which(Tickets$Dominant == "PACIFIC SARDINE"  | 
-                          Tickets$Dominant == "MARKET SQUID"     | 
-                          Tickets$Dominant == "NORTHERN ANCHOVY" | 
-                          Tickets$Dominant == "CHUB MACKEREL"    | 
-                          Tickets$Dominant == "JACK MACKEREL"    |
-                          Tickets$Dominant == "UNSP. MACKEREL"   | 
+FF_Tickets<-Tickets[which((Tickets$Dominant == "PACIFIC SARDINE"  & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+                          (Tickets$Dominant == "MARKET SQUID"     & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+                          (Tickets$Dominant == "NORTHERN ANCHOVY" & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+                          (Tickets$Dominant == "CHUB MACKEREL"    & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+                          (Tickets$Dominant == "JACK MACKEREL"    & Tickets$AFI_EXVESSEL_REVENUE>0) |
+                          (Tickets$Dominant == "UNSP. MACKEREL"   & Tickets$AFI_EXVESSEL_REVENUE>0) | 
                           (Tickets$Dominant == "ALBACORE" & 
                             Tickets$PACFIN_SPECIES_COMMON_NAME == "NORTHERN ANCHOVY")),]
 
@@ -90,7 +91,6 @@ FF_Tickets<-as.data.frame(FF_Tickets)
 
 # FF_Tickets indicate tickets where FF are dominant in the trip, but still have landings for other species. 
 
-
 ###Find the list of unique vessels in the subset, these are the vessels we will cluster                           
 FF_Vessels<-as.data.frame(unique(FTID_Value$VESSEL_NUM)) 
 names(FF_Vessels)[1]<-"VESSEL_NUM"
@@ -104,9 +104,11 @@ names(FF_Vessels)[1]<-"VESSEL_NUM"
 write.csv(FF_Vessels, "FF_Vessels.csv", row.names = FALSE)
 
 ###Subset from the complete data set to only retain records associated with these Vessels       
+###Remove records associated with landings of zero value; this is likely bycatch
+# Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
 Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]   
-Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
 Tickets<-as.data.frame(Tickets)
+
 rm(FF_Vessels, FTID_Value)
 
 
@@ -227,11 +229,11 @@ rm(Coords, Ticket_Coords, List, Permit_ID, Permit_COG, Distance_A, Distance_B,
 ### and average number of months per year landing forage fish for each vessel
 
 ###Prepare your forage fish matrix
-FF_Tickets <- Tickets[which(Tickets$PACFIN_SPECIES_COMMON_NAME=="PACIFIC SARDINE" | 
-                            Tickets$PACFIN_SPECIES_COMMON_NAME=="MARKET SQUID" | 
+FF_Tickets <- Tickets[which(Tickets$PACFIN_SPECIES_COMMON_NAME=="PACIFIC SARDINE"  | 
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="MARKET SQUID"     | 
                             Tickets$PACFIN_SPECIES_COMMON_NAME=="NORTHERN ANCHOVY" |
-                            Tickets$PACFIN_SPECIES_COMMON_NAME=="CHUB MACKEREL" | 
-                            Tickets$PACFIN_SPECIES_COMMON_NAME=="JACK MACKEREL" | 
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="CHUB MACKEREL"    | 
+                            Tickets$PACFIN_SPECIES_COMMON_NAME=="JACK MACKEREL"    | 
                             Tickets$PACFIN_SPECIES_COMMON_NAME=="UNSP. MACKEREL"),]
 
 FF_Tickets<- within(FF_Tickets, PACFIN_SPECIES_COMMON_NAME[PACFIN_SPECIES_COMMON_NAME == "CHUB MACKEREL"] <- "MACKEREL")
@@ -253,6 +255,8 @@ Boats <- Boats[,-1]
 Boats<-as.data.frame(diversity(Boats, index="invsimpson"))
 Boats$VESSEL_NUM <- rownames(Boats)
 names(Boats)<-c("diversity", "VESSEL_NUM")
+Boats$diversity[which(!is.finite(Boats$diversity))] <- 0
+
 
 ###Calculate the percentage of revenue derived from CPS
 FF_Total<-aggregate(AFI_EXVESSEL_REVENUE~VESSEL_NUM, data=FF_Tickets, FUN=sum)
@@ -261,17 +265,9 @@ FFP<-merge(Total, FF_Total, by="VESSEL_NUM")
 FFP$Percentage<-FFP$AFI_EXVESSEL_REVENUE.y/FFP$AFI_EXVESSEL_REVENUE.x
 Boats<-merge(FFP, Boats, by="VESSEL_NUM")
 Boats<-Boats[c(-2,-3)]
-
-###Calculate the average number of months a vessel lands forage fish 
-Number <-aggregate(AFI_EXVESSEL_REVENUE~VESSEL_NUM+LANDING_MONTH+LANDING_YEAR, data=FF_Tickets, FUN=sum)
-NumberM <-aggregate(LANDING_MONTH~VESSEL_NUM+LANDING_YEAR, data= Number, FUN=length)
-NumberMM<-aggregate(LANDING_MONTH~VESSEL_NUM, data=NumberM, FUN=mean)
-
-###Combine all Step 4 metrics into a single data frame
-Boats<-merge(Boats, NumberMM, by="VESSEL_NUM")
 FF_Landings_and_Diversity<-Boats
 
-rm(Boats, FFP, FF_Total, Total, Number, NumberM, NumberMM)
+rm(Boats, FFP, FF_Total, Total)
 
 
 
@@ -293,7 +289,7 @@ rm(Vessel_Characteristics, Landings_Volume_Value, Vessel_Geography, FF_Landings_
 RAW<-RAW[c(-1)] # Delete Lenght
 RAW<-RAW[c(-1)] # Delete Weight
 RAW<-RAW[c(-1)] # Delete AVG_LBS
-RAW<-RAW[c(-6)] # Delete LANDING_MONTHS
+
 
 # Check the degree to which other cluster inputs are collinear using VIF (O'Farrel et al. 2019)
 cor(RAW)
@@ -331,7 +327,7 @@ Ks=sapply(2:25,
             summary(silhouette(pam((Distance_matrix), k=i)))$avg.width)
           plot(2:25,Ks, xlab="k",ylab="av.silhouette",type="b", pch=19)
 
-          n.clust = 7
+          n.clust = 8
 
 #--------------------------------------------------------
 # ### Heriarchical Clustering
@@ -357,7 +353,14 @@ sub_grp <- cutree(hc, n.clust)
 ### PAM Clustering
 Clusters<-pam(Distance_matrix, n.clust, keep.diss = TRUE)
     Clusters$data <- RAW
-    fviz_cluster(Clusters)
+    p <- fviz_cluster(Clusters, geom = "point",
+                      main = "") + 
+      scale_fill_brewer('Cluster', palette='Set2')  + 
+      scale_color_brewer('Cluster', palette='Set2') + 
+      scale_shape_manual('Cluster', values=c(1,2,3,4,5,6,7,8)) 
+    p        
+                 
+
     
 ## Obtain cluster outputs 
 PAM_Vessel_Groups<-Vessels
@@ -369,32 +372,31 @@ names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
     write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv", row.names = FALSE)
 
 # ## Check cluster validity
-library(clv)
-#     library("googlesheets4")
-#     gs4_auth(
-#       email = gs4_auth(),
-#       path = NULL,
-#       scopes = "https://www.googleapis.com/auth/spreadsheets",
-#       cache = gargle::gargle_oauth_cache(),
-#       use_oob = gargle::gargle_oob_default(),
-#       token = NULL)
-#     
+
+    # library("googlesheets4")
+    # gs4_auth(
+    #   email = gs4_auth(),
+    #   path = NULL,
+    #   scopes = "https://www.googleapis.com/auth/spreadsheets",
+    #   cache = gargle::gargle_oauth_cache(),
+    #   use_oob = gargle::gargle_oob_default(),
+    #   token = NULL)
+
   
   # compute intercluster distances and intracluster diameters
+    library(clv)
     cls.scatt <- cls.scatt.data(RAW, as.integer(Clusters$clustering), dist="euclidean")
   # Intercluster diameters
     intradist <- rbind.data.frame(cls.scatt$intracls.complete, cls.scatt$intracls.average)
-    colnames(intradist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7")
+    colnames(intradist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
     rownames(intradist) = c("Complete distance", "Average distance")
-      # 
-      # gs4_create("Intradist", sheets = intradist)
+    gs4_create("Intradist", sheets = intradist)
     
   # Intercluster distances
     interdist <- as.data.frame(cls.scatt$intercls.average)
-    colnames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-    rownames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-    # 
-    # gs4_create("Interdist", sheets = interdist)
+    colnames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
+    rownames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
+    gs4_create("Interdist", sheets = interdist)
     
 ## Save RAW for analysis with cluster ID
 RAW$VESSEL_NUM<-Vessel_IDs
@@ -420,11 +422,15 @@ RAW_rf <- within(RAW_rf, group_all[group_all == 4]  <- "Cluster4")
 RAW_rf <- within(RAW_rf, group_all[group_all == 5]  <- "Cluster5")
 RAW_rf <- within(RAW_rf, group_all[group_all == 6]  <- "Cluster6")
 RAW_rf <- within(RAW_rf, group_all[group_all == 7]  <- "Cluster7")
+RAW_rf <- within(RAW_rf, group_all[group_all == 8]  <- "Cluster8")
 RAW_rf$group_all <- as.factor(RAW_rf$group_all)  
 str(RAW_rf)
 RAW.rf <- randomForest(group_all ~ ., data = RAW_rf, importance = TRUE, mtry=2, do.trace=100, ntree = 1000)
 print(RAW.rf)
-varImpPlot(RAW.rf) 
+rownames(RAW.rf$importance) <- c("Average annual revenue", "LCG", "Inertia", 
+                                 "Percent of revenue from CPS", "CPS diversity index") 
+
+varImpPlot(RAW.rf, main = "", type = 1) 
 rm(RAW_rf, RAW.rf)
 
 

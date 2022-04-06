@@ -56,7 +56,7 @@ hist.bait <- cluster.use %>% filter(PRODUCT_USE_CODE == "B" & DISPOSITION_CODE =
   cluster_names <- as_labeller(c(`1` = "Cluster 1",`2` = "Cluster 2",
                                `3` = "Cluster 3",`4` = "Cluster 4",
                                `5` = "Cluster 5",`6` = "Cluster 6",
-                               `7` = "Cluster 7"))
+                               `7` = "Cluster 7", `8` = "Cluster 8"))
   ggplot(data=hist.bait, 
        aes(x=Percentage, group=group_all, fill=group_all)) +
    geom_density() + 
@@ -97,11 +97,11 @@ rm(table, cluster.use)
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
-PacFIN.month <- PacFIN.month %>% mutate(
-  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OMCK",PACFIN_SPECIES_CODE, 
-                               ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
-                                      ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
-                                             ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
+# PacFIN.month <- PacFIN.month %>% mutate(
+#   PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OMCK",PACFIN_SPECIES_CODE, 
+#                                ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
+#                                       ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
+#                                              ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
 
 
 all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
