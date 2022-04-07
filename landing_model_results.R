@@ -727,19 +727,19 @@ class(dataset_msqd$cluster)
 #### Estimate models ####
 library(brms)
 
-fit_qMSQD_SpawningV1_3 <- brm(bf(
-  MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open
-    + (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID)
-    + (1 | LANDING_YEAR),
-  hu ~ 1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c +
-    (1 + PSDN.Open + PSDN.Participation + MSQD_Price_c | cluster + port_ID)
-    + (1 | LANDING_YEAR)), data = dataset_msqd,
-  family = hurdle_gamma(),
-  control = list(adapt_delta = 0.95, max_treedepth = 20),
-  chains = 2,
-  cores = 4)
-  saveRDS(fit_qMSQD_SpawningV1_3,
-          file = here::here("Estimations", "fit_qMSQD_SpawningV1_3.RDS"))
+# fit_qMSQD_SpawningV1_3 <- brm(bf(
+#   MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open
+#     + (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID)
+#     + (1 | LANDING_YEAR),
+#   hu ~ 1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c +
+#     (1 + PSDN.Open + PSDN.Participation + MSQD_Price_c | cluster + port_ID)
+#     + (1 | LANDING_YEAR)), data = dataset_msqd,
+#   family = hurdle_gamma(),
+#   control = list(adapt_delta = 0.95, max_treedepth = 20),
+#   chains = 2,
+#   cores = 4)
+#   saveRDS(fit_qMSQD_SpawningV1_3,
+#           file = here::here("Estimations", "fit_qMSQD_SpawningV1_3.RDS"))
   
 ### Work to do: Include anchovy SDM, check year fixed effects, try with monthly data ###
 
@@ -788,7 +788,7 @@ fit_qMSQD_SpawningV1_3 <- brm(bf(
 
   #   prior = c(prior(lognormal(0,1), class = b, coef = "MSQD_SDM_90_JS_cpue")),
 
-
+fit_qMSQD_SpawningV1_3 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV1_3.RDS"))
 fit_qMSQD_SpawningV1_2 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV1_2.RDS"))
 fit_qMSQD_SpawningV1   <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
 fit_qMSQD_SpawningV2   <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV2.RDS"))
@@ -796,19 +796,15 @@ fit_qMSQD_abund        <- readRDS(here::here("Estimations", "fit_qMSQD_abund.RDS
 fit_qMSQD_recruit      <- readRDS(here::here("Estimations", "fit_qMSQD_recruit.RDS"))
 
 ##### Model Comparision #####
-fit_qMSQD_SpawningV1 <- add_criterion(fit_qMSQD_SpawningV1, "waic", moment_match = TRUE)
-fit_qMSQD_SpawningV2 <- add_criterion(fit_qMSQD_SpawningV2, "waic", moment_match = TRUE)
-fit_qMSQD_abund      <- add_criterion(fit_qMSQD_abund,      "waic", moment_match = TRUE)
-fit_qMSQD_recruit    <- add_criterion(fit_qMSQD_recruit,    "waic", moment_match = TRUE)
+fit_qMSQD_SpawningV1_2 <- add_criterion(fit_qMSQD_SpawningV1_2, "loo")
+fit_qMSQD_SpawningV1_3 <- add_criterion(fit_qMSQD_SpawningV1_3, "loo")
 
 w <- as.data.frame(
-  loo_compare(fit_qMSQD_SpawningV1, 
-              fit_qMSQD_SpawningV2, 
-              fit_qMSQD_abund, 
-              fit_qMSQD_recruit, 
-              criterion = "waic"))
+  loo_compare(fit_qMSQD_SpawningV1_3, 
+              fit_qMSQD_SpawningV1_2, 
+              criterion = "loo"))
 # gs4_create("WAIC", sheets = w)
-fit_qMSQD <- fit_qMSQD_SpawningV1_2
+fit_qMSQD <- fit_qMSQD_SpawningV1_3
 
 
 #----------------------------------------------------
