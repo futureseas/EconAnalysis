@@ -7,6 +7,15 @@
 rm(list = ls(all.names = TRUE)) 
 gc()
 
+library("googlesheets4")
+gs4_auth(
+  email = "fequezad@ucsc.edu",
+  path = NULL,
+  scopes = "https://www.googleapis.com/auth/spreadsheets",
+  cache = gargle::gargle_oauth_cache(),
+  use_oob = gargle::gargle_oob_default(),
+  token = NULL)
+
 ## Read packages 
 
 library("tidyr")
@@ -84,11 +93,12 @@ rm(PacFIN.month.aggregate)
 #   filter(port_included == 1) 
 
 
-### Selecting port using results from cluster analysis (15% of the revenue for at least one cluster)
+### Selecting port using results from cluster analysis (10% of the revenue for at least one cluster)
 PacFIN.month.dataset <- PacFIN.month.dataset %>%
-  dplyr::filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA" |
-         PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | 
-           PORT_AREA_CODE == "SFA" | PORT_AREA_CODE == "SDA")
+  dplyr::filter(PORT_AREA_CODE == "SDA" | PORT_AREA_CODE == "LAA" |
+                  PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA" | 
+                  PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "CLW" | 
+                  PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS")
 
 
 ### Create ID data and change NaN to NA ###
@@ -272,7 +282,7 @@ SDM.port.area.MSQD_JS_cpue <- SDM.port.area.MSQD_JS_cpue %>% dplyr::rename(LANDI
 SDM.port.area.MSQD_JS_cpue[SDM.port.area.MSQD_JS_cpue == "NaN"] <- NA
 dataset <- dataset %>%
   merge(SDM.port.area.MSQD_JS_cpue, by = c("LANDING_YEAR", "PORT_AREA_CODE"), all.x = TRUE) %>%
-  mutate(MSQD_SDM_90_JS_cpue = ifelse(is.na(MSQD_SDM_90_JS_CPUE), MSQD_JS_cpue.SDM.port.area, MSQD_SDM_90_JS_CPUE))
+  mutate(MSQD_SDM_90_JS_CPUE = ifelse(is.na(MSQD_SDM_90_JS_CPUE), MSQD_JS_cpue.SDM.port.area, MSQD_SDM_90_JS_CPUE))
 rm(SDM.port.area.MSQD_JS_cpue)
 dataset = subset(dataset, select = -c(MSQD_JS_cpue.SDM.port.area))
 
@@ -502,8 +512,9 @@ dataset <- dataset %>%
   dplyr::rename(NANC_Landings = NANC_LANDED_WEIGHT_MTONS.sum)
 
 ### Label dataset ###
-sjlabelled::set_label(dataset$MSQD_SDM_90_JS_cpue) <- "Abundance: MSQD (CPUE)"
+sjlabelled::set_label(dataset$MSQD_SDM_90_JS_CPUE) <- "Abundance: MSQD (CPUE)"
 sjlabelled::set_label(dataset$MSQD_SPAWN_SDM_90)   <- "Prob(presence): MSQD (Spawning aggregations)"
+sjlabelled::set_label(dataset$MSQD_SPAWN_SDM_90_v2)   <- "Prob(presence): MSQD (Spawning aggregations) - V2"
 sjlabelled::set_label(dataset$NANC_SDM_20)         <- "Prob(presence): NANC"
 sjlabelled::set_label(dataset$PSDN_SDM_60)         <- "Prob(presence): PSDN"
 sjlabelled::set_label(dataset$LANDING_YEAR)     <- "Year"
@@ -550,17 +561,7 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 11, "Abundance: MSQD", vars)) %>%
   mutate(vars = ifelse(vars == 12, "Recruitment: MSQD", vars))
 
-
-library("googlesheets4")
-gs4_auth(
-  email = "fequezad@ucsc.edu",
-  path = NULL,
-  scopes = "https://www.googleapis.com/auth/spreadsheets",
-  cache = gargle::gargle_oauth_cache(),
-  use_oob = gargle::gargle_oob_default(),
-  token = NULL)
-# 
-# gs4_create("SummaryMonthly", sheets = table)
+gs4_create("SummaryMonthly", sheets = table)
 rm(desc_data, table)
   
 
@@ -614,7 +615,7 @@ dataset_annual <- dataset %>%
             PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm=T),
             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=T),
             NANC_SDM_20 = mean(NANC_SDM_20, na.rm=T),
-            MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_CPUE, na.rm=T),
+            MSQD_SDM_90_JS_CPUE = mean(MSQD_SDM_90_JS_CPUE, na.rm=T),
             MSQD_SPAWN_SDM_90_v2 = mean(MSQD_SPAWN_SDM_90_v2, na.rm=T),
             MSQD_recruitment = mean(MSQD_recruitment, na.rm=T)) %>% ungroup()
   dataset_annual[dataset_annual == "NaN"] <- NA
@@ -647,7 +648,7 @@ dataset_annual <- dataset %>%
 dataset_msqd <- dataset_annual %>%
   dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, LANDING_YEAR,
                 MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_v2, 
-                MSQD_recruitment, MSQD_SDM_90_JS_cpue,
+                MSQD_recruitment, MSQD_SDM_90_JS_CPUE,
                 MSQD_Landings, MSQD_Price, 
                 PSDN_Landings, NANC_Landings, PSDN_Price, NANC_Price, 
                 PSDN_SDM_60, NANC_SDM_20) %>% 
@@ -726,19 +727,19 @@ class(dataset_msqd$cluster)
 #### Estimate models ####
 library(brms)
 
-# fit_qMSQD_SpawningV1_2 <- brm(bf(
-#   MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open
-#     + (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID)
-#     + (1 | LANDING_YEAR),
-#   hu ~ 1 + PSDN.Open + PSDN.Participation + MSQD_Price_c +
-#     (1 + PSDN.Open + PSDN.Participation + MSQD_Price_c | cluster + port_ID)
-#     + (1 | LANDING_YEAR)), data = dataset_msqd,
-#   family = hurdle_gamma(),
-#   control = list(adapt_delta = 0.95, max_treedepth = 20),
-#   chains = 2,
-#   cores = 4)
-#   saveRDS(fit_qMSQD_SpawningV1_2,
-#           file = here::here("Estimations", "fit_qMSQD_SpawningV1_2.RDS"))
+fit_qMSQD_SpawningV1_2 <- brm(bf(
+  MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open
+    + (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID)
+    + (1 | LANDING_YEAR),
+  hu ~ 1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c +
+    (1 + PSDN.Open + PSDN.Participation + MSQD_Price_c | cluster + port_ID)
+    + (1 | LANDING_YEAR)), data = dataset_msqd,
+  family = hurdle_gamma(),
+  control = list(adapt_delta = 0.95, max_treedepth = 20),
+  chains = 2,
+  cores = 4)
+  saveRDS(fit_qMSQD_SpawningV1_2,
+          file = here::here("Estimations", "fit_qMSQD_SpawningV1_2.RDS"))
 
 # fit_qMSQD_SpawningV2 <- brm(bf(
 #   MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_v2 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open 
@@ -786,41 +787,34 @@ library(brms)
   #   prior = c(prior(lognormal(0,1), class = b, coef = "MSQD_SDM_90_JS_cpue")),
 
 
-##### Model Comparision
 fit_qMSQD_SpawningV1_2 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV1_2.RDS"))
 fit_qMSQD_SpawningV1 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
 fit_qMSQD_SpawningV2 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV2.RDS"))
 fit_qMSQD_abund      <- readRDS(here::here("Estimations", "fit_qMSQD_abund.RDS"))
 fit_qMSQD_recruit    <- readRDS(here::here("Estimations", "fit_qMSQD_recruit.RDS"))
 
-
+##### Model Comparision #####
 fit_qMSQD_SpawningV1 <- add_criterion(fit_qMSQD_SpawningV1, "waic", moment_match = TRUE)
 fit_qMSQD_SpawningV2 <- add_criterion(fit_qMSQD_SpawningV2, "waic", moment_match = TRUE)
 fit_qMSQD_abund      <- add_criterion(fit_qMSQD_abund,      "waic", moment_match = TRUE)
 fit_qMSQD_recruit    <- add_criterion(fit_qMSQD_recruit,    "waic", moment_match = TRUE)
 
-w <- loo_compare(fit_qMSQD_SpawningV1, fit_qMSQD_SpawningV2, fit_qMSQD_abund, fit_qMSQD_recruit, criterion = "waic")
-print(w, simplify = F) 
-gs4_create("WAIC", sheets = w)
-
-
-# loo(fit_qMSQD_SpawningV1, fit_qMSQD_abund)
+w <- as.data.frame(
+  loo_compare(fit_qMSQD_SpawningV1, 
+              fit_qMSQD_SpawningV2, 
+              fit_qMSQD_abund, 
+              fit_qMSQD_recruit, 
+              criterion = "waic"))
+# gs4_create("WAIC", sheets = w)
 fit_qMSQD <- fit_qMSQD_SpawningV1_2
 
-# Include dummies that the vessel also enter Sardine
 # Include year fixed-effects
 # Include anchovy SDM
 
 
-
-# ##### Model summary ####
-# stanplot(fit_qMSQD)
-# stanplot(fit_qMSQD_SpawningV1)
-# stanplot(fit_qMSQD_SpawningV2)
-# stanplot(fit_qMSQD_abund)
-# stanplot(fit_qMSQD_recruit)   
-
- 
+###### Model summary ######
+library(patchwork)
+library(dplyr)
 library(ggplot2)
 library(ggthemes)
 library(sjPlot)
@@ -828,6 +822,18 @@ library(sjlabelled)
 library(sjmisc)
 theme_set(theme_sjplot())
 
+
+### Posterior predictive check ###
+pp_check(fit_qMSQD) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model)') +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) + 
+  theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  + 
+  xlim(0, 2000) + xlab("Landing (tons)")
+
+
+
+### Population parameters ###
+summary(fit_qMSQD)
 mcmc_plot(fit_qMSQD, variable = "^b_", regex = TRUE) +
   theme(axis.text.y = element_text(hjust = 0)) + scale_y_discrete(
   labels = c(
@@ -839,17 +845,13 @@ mcmc_plot(fit_qMSQD, variable = "^b_", regex = TRUE) +
     "b_hu_PSDN.Open"    = "Participation: PSDN open",
     "b_hu_PSDN.Participation" = "Participation: PSDN participation"))
 
-summary(fit_qMSQD)
+### Plot by port ID ###
 
-brmstools::coefplot(fit_qMSQD, 
-                    pars = "MSQD_SPAWN_SDM_90",
-                    grouping = "port_ID",
-                    r_intervals = TRUE,
-                    r_col = "firebrick")
-
-library(dplyr)
-
-
+# brmstools::coefplot(fit_qMSQD, 
+#                     pars = "MSQD_SPAWN_SDM_90",
+#                     grouping = "port_ID",
+#                     r_intervals = TRUE,
+#                     r_col = "firebrick")
 coeff_port_sdm <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2] %>%
   as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
   ggplot(coeff_port_sdm, aes(x=port_ID, y=Estimate)) +
@@ -885,18 +887,6 @@ coeff_cluster_int <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 3] %>%
   width=.2, position=position_dodge(0.05)) + ggtitle("Squid SDM x Sardine SDM") + 
     xlab("Coefficient") + ylab("Cluster")  
   
-  
-
-
-plot_model(fit_qMSQD) 
-
-library(patchwork)
-
-pp_check(fit_qMSQD) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model)') +
-  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-                     labels = c("y" = "Observed", "yrep" = "Replicated")) + 
-  theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  + 
-  xlim(0, 2000) + xlab("Landing (tons)")
 
 
 # Compare multilevel effects
