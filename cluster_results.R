@@ -1,14 +1,15 @@
 #######################
 ### Cluster results ###
 #######################
-# library("googlesheets4")
-# gs4_auth(
-#   email = gs4_auth(),
-#   path = NULL,
-#   scopes = "https://www.googleapis.com/auth/spreadsheets",
-#   cache = gargle::gargle_oauth_cache(),
-#   use_oob = gargle::gargle_oob_default(),
-#   token = NULL)
+library("googlesheets4")
+gs4_auth(
+  email = "fequezad@ucsc.edu",
+  path = NULL,
+  scopes = "https://www.googleapis.com/auth/spreadsheets",
+  cache = gargle::gargle_oauth_cache(),
+  use_oob = gargle::gargle_oob_default(),
+  token = NULL
+)
 
 
 rm(list = ls(all.names = TRUE)) 
@@ -84,12 +85,9 @@ table <- table %>%
   spread(key = group_all, value = Freq)
 
 # table = table[,-1]
-# rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
-colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7")
-gs4_create("Table6", sheets = table)
-# print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
-
-rm(table, cluster.use)
+colnames(table) = c("Product Use", "Disposition", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
+#gs4_create("Table6", sheets = table)
+rm(table, cluster.use, cluster.use.highest, hist.bait)
 
 
 #-----------------------------------
@@ -97,13 +95,16 @@ rm(table, cluster.use)
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
-# PacFIN.month <- PacFIN.month %>% mutate(
-#   PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OMCK",PACFIN_SPECIES_CODE, 
-#                                ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
-#                                       ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
-#                                              ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
+PacFIN.month <- PacFIN.month %>% mutate(
+  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OMCK",PACFIN_SPECIES_CODE,
+                               ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE,
+                                      ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE,
+                                             ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE,
+                                                    ifelse(PACFIN_SPECIES_CODE == "ALBC", PACFIN_SPECIES_CODE,
+                                                           ifelse(PACFIN_SPECIES_CODE == "DCRB", PACFIN_SPECIES_CODE,
+                                                                  ifelse(PACFIN_SPECIES_CODE == "LOBS", PACFIN_SPECIES_CODE, "OTHER"))))))))
 
-
+                                      
 all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique() %>% mutate(merge=1)
 all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
@@ -124,17 +125,21 @@ cluster.species <- merge(expand, cluster.species, by = c('VESSEL_NUM', 'PACFIN_S
   group_by(group_all, PACFIN_SPECIES_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
   unique() %>% filter(group_all != is.na(group_all))
 
-table <- as.data.frame(xtabs(Percentage ~  PACFIN_SPECIES_CODE + group_all, cluster.species ))
+# cluster.species <- cluster.species[order(cluster.species$group_all, -cluster.species$Percentage),]
+# cluster.species.highest <- cluster.species %>%
+#   group_by(group_all) %>% filter(row_number()==1:5) %>% ungroup() %>% 
+#   dplyr::select('PACFIN_SPECIES_CODE') %>% unique()
+# cluster.species <- setDT(cluster.species)[PACFIN_SPECIES_CODE %chin% cluster.species.highest$PACFIN_SPECIES_CODE] 
+
+table <- as.data.frame(xtabs(Percentage ~  PACFIN_SPECIES_CODE + group_all, cluster.species))
 table <- table %>%
   spread(key = group_all, value = Freq)
 
 # table = table[,-1]
-# rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
-colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7")
-gs4_create("Table2", sheets = table)
-# print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
+colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7", "Cluster 8")
+# gs4_create("Table2", sheets = table)
 
-rm(table, cluster.species)
+rm(table, cluster.species, cluster.species.highest)
 
 
 #-----------------------------------
@@ -176,8 +181,8 @@ table <- table %>%
 # table = table[,-1]
 # rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Gear", "Cluster 1", "Cluster 2", "Cluster 3", 
-                    "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-gs4_create("Table3", sheets = table)
+                    "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
+# gs4_create("Table3", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.gear, cluster.gear.highest)
@@ -209,7 +214,7 @@ cluster.port <- merge(expand, cluster.port, by = c('VESSEL_NUM', 'PORT_AREA_CODE
 
 cluster.port <- cluster.port[order(cluster.port$group_all, -cluster.port$Percentage),]
 cluster.port.highest <- cluster.port %>%
-  group_by(group_all) %>% filter(row_number()==1:4) %>% ungroup() %>% 
+  group_by(group_all) %>% filter(Percentage >= 0.1) %>% ungroup() %>% 
   dplyr::select('PORT_AREA_CODE') %>% unique()
 
 cluster.port<-setDT(cluster.port)[PORT_AREA_CODE %chin% cluster.port.highest$PORT_AREA_CODE] 
@@ -220,10 +225,9 @@ table <- table %>%
   spread(key = group_all, value = Freq)
 
 # table = table[,-1]
-# rownames(table) = c("Crab and Lobster Pot", "Dip Net", "Other Net Gear", "Seine")
 colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", 
-                    "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7")
-gs4_create("Table4", sheets = table)
+                    "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
+# gs4_create("Table4", sheets = table)
 # print(xtable(table, caption = 'Percentage of cluster total langings by gear used.\\label{Table:cluster_gear}', type = "latex"), comment=FALSE,  caption.placement = "top")
 
 rm(table, cluster.port, cluster.port.highest)
@@ -264,7 +268,7 @@ library(ggplot2)
 cluster_names <- as_labeller(c(`1` = "Cluster 1",`2` = "Cluster 2",
                                `3` = "Cluster 3",`4` = "Cluster 4",
                                `5` = "Cluster 5",`6` = "Cluster 6",
-                               `7` = "Cluster 7"))
+                               `7` = "Cluster 7",`8` = "Cluster 8"))
 
 ## Average Revenue
 ggplot(data=RAW_cluster_inputs, aes(x=AVG_REVENUE, fill=group_all))+
