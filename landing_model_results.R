@@ -727,7 +727,7 @@ class(dataset_msqd$cluster)
 #### Estimate models ####
 library(brms)
 
-fit_qMSQD_SpawningV1_2 <- brm(bf(
+fit_qMSQD_SpawningV1_3 <- brm(bf(
   MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open
     + (1 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID)
     + (1 | LANDING_YEAR),
@@ -738,8 +738,10 @@ fit_qMSQD_SpawningV1_2 <- brm(bf(
   control = list(adapt_delta = 0.95, max_treedepth = 20),
   chains = 2,
   cores = 4)
-  saveRDS(fit_qMSQD_SpawningV1_2,
-          file = here::here("Estimations", "fit_qMSQD_SpawningV1_2.RDS"))
+  saveRDS(fit_qMSQD_SpawningV1_3,
+          file = here::here("Estimations", "fit_qMSQD_SpawningV1_3.RDS"))
+  
+### Work to do: Include anchovy SDM, check year fixed effects, try with monthly data ###
 
 # fit_qMSQD_SpawningV2 <- brm(bf(
 #   MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_v2 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open 
@@ -788,10 +790,10 @@ fit_qMSQD_SpawningV1_2 <- brm(bf(
 
 
 fit_qMSQD_SpawningV1_2 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV1_2.RDS"))
-fit_qMSQD_SpawningV1 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
-fit_qMSQD_SpawningV2 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV2.RDS"))
-fit_qMSQD_abund      <- readRDS(here::here("Estimations", "fit_qMSQD_abund.RDS"))
-fit_qMSQD_recruit    <- readRDS(here::here("Estimations", "fit_qMSQD_recruit.RDS"))
+fit_qMSQD_SpawningV1   <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
+fit_qMSQD_SpawningV2   <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV2.RDS"))
+fit_qMSQD_abund        <- readRDS(here::here("Estimations", "fit_qMSQD_abund.RDS"))
+fit_qMSQD_recruit      <- readRDS(here::here("Estimations", "fit_qMSQD_recruit.RDS"))
 
 ##### Model Comparision #####
 fit_qMSQD_SpawningV1 <- add_criterion(fit_qMSQD_SpawningV1, "waic", moment_match = TRUE)
@@ -808,11 +810,9 @@ w <- as.data.frame(
 # gs4_create("WAIC", sheets = w)
 fit_qMSQD <- fit_qMSQD_SpawningV1_2
 
-# Include year fixed-effects
-# Include anchovy SDM
 
-
-###### Model summary ######
+#----------------------------------------------------
+## Model summary ##
 library(patchwork)
 library(dplyr)
 library(ggplot2)
@@ -831,7 +831,6 @@ pp_check(fit_qMSQD) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model
   xlim(0, 2000) + xlab("Landing (tons)")
 
 
-
 ### Population parameters ###
 summary(fit_qMSQD)
 mcmc_plot(fit_qMSQD, variable = "^b_", regex = TRUE) +
@@ -845,7 +844,9 @@ mcmc_plot(fit_qMSQD, variable = "^b_", regex = TRUE) +
     "b_hu_PSDN.Open"    = "Participation: PSDN open",
     "b_hu_PSDN.Participation" = "Participation: PSDN participation"))
 
-### Plot by port ID ###
+#------------------------------------------------------
+### Group parameters ###
+#### By port ID
 
 # brmstools::coefplot(fit_qMSQD, 
 #                     pars = "MSQD_SPAWN_SDM_90",
@@ -871,8 +872,7 @@ coeff_port_int <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 3] %>%
                             "2" = "Santa Barbara", 
                             "3" = "San Diego")) 
   
-  
-### Plot by clusters 
+#### By clusters 
 coeff_cluster_sdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
   ggplot(coeff_cluster_sdm, aes(y=cluster, x=Estimate)) +
@@ -888,8 +888,10 @@ coeff_cluster_int <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 3] %>%
     xlab("Coefficient") + ylab("Cluster")  
   
 
-
-# Compare multilevel effects
+### Hypothesis test ###
+hypothesis(fit_qMSQD, "MSQD_SPAWN_SDM_90 = 0") 
+  
+### Compare multilevel effects ###
 as_draws_df(fit_qMSQD, add_chain = T) %>%
   ggplot(aes(x = sd_cluster__MSQD_SPAWN_SDM_90)) +
   geom_density(size = 0, fill = "orange1", alpha = 3/4) +
@@ -902,10 +904,11 @@ as_draws_df(fit_qMSQD, add_chain = T) %>%
   theme_fivethirtyeight()
 
 
-##### Conditional effects #####
+### Conditional effects ###
 
-# Conditional effects by port area
+#### By port area
 library(tibble)
+library(ggplot2)
 conditions <- data.frame(cluster = unique(dataset_msqd$port_ID))
 rownames(conditions) <- unique(dataset_msqd$PORT_AREA_CODE)
 
@@ -916,8 +919,6 @@ conditional_effects_msqd_sdm <-
     surface=TRUE, 
     conditions = conditions, 
     re_formula = NULL)#, transform = log, method = "posterior_predict"))
-
-library(ggplot2)
 
 plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
   ggtitle('Market squid availability effect on squid landings') +
@@ -941,12 +942,8 @@ plot(conditional_effects_psdn_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] +
   scale_x_continuous(name = "Prob(Presence)") +
   scale_y_continuous(name = element_blank())
 
-coeff_by_group <- ranef(fit_qMSQD)   
-
-rm(conditional_effects_msqd_sdm, conditional_effects_psdn.open,
-   conditional_effects_psdn_sdm)
+rm(conditional_effects_msqd_sdm, conditional_effects_psdn.open, conditional_effects_psdn_sdm)
      
-
 
 ### Interaction effects ###
 c_eff_int_psdn_msqd <- (conditional_effects(
@@ -966,16 +963,9 @@ plot(c_eff_int_psdn_msqd, plot = FALSE)[[1]] +
   scale_x_continuous(name = "P(Pres): PSDN") + scale_y_continuous(name = "P(Pres): MSQD")
 
 
+### Predictions ###
 
-##### Hypothesis test
-hypothesis(fit_qMSQD, "MSQD_SPAWN_SDM_90 = 0")
-
-##### Predictions from the model using data to estimate the model
-
-#   #   <!-- # ### Predictions ### -->
-#   <!-- # pred_data <- data.frame(PSDN_SDM = c(0.5, 0.25), MSQD_SDM = c(0.5), Port_ID = 1) -->
-#   <!-- # predict(fit_qPSDN, newdata = pred_data, re_formula = NA) -->
-
+#### Using the data estimation
 set.seed(123)
 prediction <- cbind(predict(fit_qMSQD), dataset_msqd)
 prediction$LANDING_YEAR <- as.numeric(as.character(prediction$LANDING_YEAR))
@@ -990,7 +980,6 @@ meltdf <- prediction %>%
 ggplot(meltdf, aes(x=LANDING_YEAR, y = value, colour = Variable)) + 
   geom_line(size=1) + 
   facet_wrap(~PORT_AREA_CODE)
-
 
 meltdf <- prediction %>% 
   dplyr::select(Estimate, MSQD_Landings, LANDING_YEAR, group_all) %>%
