@@ -803,10 +803,10 @@ fit_qMSQD_abund        <- readRDS(here::here("Estimations", "fit_qMSQD_abund.RDS
 fit_qMSQD_recruit      <- readRDS(here::here("Estimations", "fit_qMSQD_recruit.RDS"))
 
 ##### Model Comparision #####
-fit_qMSQD_SpawningV1 <- add_criterion(fit_qMSQD_SpawningV1, "loo")
-fit_qMSQD_SpawningV2 <- add_criterion(fit_qMSQD_SpawningV2, "loo")
-fit_qMSQD_abund      <- add_criterion(fit_qMSQD_abund, "loo")
-fit_qMSQD_recruit    <- add_criterion(fit_qMSQD_recruit, "loo")
+fit_qMSQD_SpawningV1 <- add_criterion(fit_qMSQD_SpawningV1, "loo", moment_match = TRUE)
+fit_qMSQD_SpawningV2 <- add_criterion(fit_qMSQD_SpawningV2, "loo", moment_match = TRUE)
+fit_qMSQD_abund      <- add_criterion(fit_qMSQD_abund,      "loo", moment_match = TRUE)
+fit_qMSQD_recruit    <- add_criterion(fit_qMSQD_recruit,    "loo", moment_match = TRUE)
 
 w <- as.data.frame(
   loo_compare(fit_qMSQD_SpawningV1, 
@@ -816,6 +816,9 @@ w <- as.data.frame(
               criterion = "loo"))
 # gs4_create("WAIC", sheets = w)
 
+
+
+fit_qMSQD <- fit_qMSQD_SpawningV2
 
 #----------------------------------------------------
 ## Model summary ##
