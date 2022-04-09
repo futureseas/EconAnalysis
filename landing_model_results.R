@@ -739,6 +739,19 @@ library(brms)
 #     cores = 4)
 #     saveRDS(fit_qMSQD_SpawningV1,
 #           file = here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
+
+fit_qMSQD_SpawningV1_2 <- brm(bf(
+    MSQD_Landings ~ 0 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + factor(cluster) + factor(port_ID)
+    + (0 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID),
+    hu ~ 0 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c + factor(cluster) + factor(port_ID)
+    + (0 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster + port_ID)),
+    data = dataset_msqd,
+    family = hurdle_gamma(),
+    control = list(adapt_delta = 0.95, max_treedepth = 20),
+    chains = 2,
+    cores = 4)
+    saveRDS(fit_qMSQD_SpawningV1_2,
+          file = here::here("Estimations", "fit_qMSQD_SpawningV1_2.RDS"))
   
 ## Work to do: Include anchovy SDM, try with monthly data,
 ## try 0 + factor(vessel_num) + factor(port_area), exclude (1 | group) ###
@@ -769,33 +782,19 @@ library(brms)
 #   saveRDS(fit_qMSQD_recruit, 
 #           file = here::here("Estimations", "fit_qMSQD_recruit.RDS"))
 
-fit_qMSQD_abund <- brm(bf(
-  MSQD_Landings ~ 1 +  MSQD_SDM_90_JS_CPUE +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open
-  + (1 +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open +  MSQD_SDM_90_JS_CPUE | cluster + port_ID),
-  hu ~ 1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c
-  + (1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster + port_ID)),
-  data = dataset_msqd,
-  family = hurdle_gamma(),
-  control = list(adapt_delta = 0.95, max_treedepth = 20),
-  chains = 2,
-  cores = 4)
-  saveRDS(fit_qMSQD_abund,
-          file = here::here("Estimations", "fit_qMSQD_abund.RDS"))
+# fit_qMSQD_abund <- brm(bf(
+#   MSQD_Landings ~ 1 +  MSQD_SDM_90_JS_CPUE +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open
+#   + (1 +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open +  MSQD_SDM_90_JS_CPUE | cluster + port_ID),
+#   hu ~ 1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c
+#   + (1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster + port_ID)),
+#   data = dataset_msqd,
+#   family = hurdle_gamma(),
+#   control = list(adapt_delta = 0.95, max_treedepth = 20),
+#   chains = 2,
+#   cores = 4)
+#   saveRDS(fit_qMSQD_abund,
+#           file = here::here("Estimations", "fit_qMSQD_abund.RDS"))
   
-fit_qMSQD_abund_2 <- brm(bf(
-    MSQD_Landings ~ 0 +  MSQD_SDM_90_JS_CPUE +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open + factor(cluster) + factor(port_ID)
-    + (MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open +  MSQD_SDM_90_JS_CPUE | cluster + port_ID),
-    hu ~ 0 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c  + factor(cluster) + factor(port_ID)
-    + (PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster + port_ID)),
-    data = dataset_msqd,
-    family = hurdle_gamma(),
-    control = list(adapt_delta = 0.95, max_treedepth = 20),
-    chains = 2,
-    cores = 4)
-    saveRDS(fit_qMSQD_abund_2,
-          file = here::here("Estimations", "fit_qMSQD_abund_2.RDS"))
-  
-
 #   prior = c(prior(lognormal(0,1), class = b, coef = "MSQD_SDM_90_JS_cpue")),
 
 fit_qMSQD_SpawningV1   <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
