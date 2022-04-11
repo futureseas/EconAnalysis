@@ -740,19 +740,25 @@ library(brms)
 #     saveRDS(fit_qMSQD_SpawningV1,
 #           file = here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
 
-fit_qMSQD_SpawningV1_2 <- brm(bf(
-    MSQD_Landings ~ 0 + MSQD_SPAWN_SDM_90 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + factor(cluster) + factor(port_ID)
-    + (0 + MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90 | cluster + port_ID),
-    hu ~ 0 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c + factor(cluster) + factor(port_ID)
-    + (0 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster + port_ID)),
+fit_qMSQD_SpawningV2_2 <- brm(bf(
+    MSQD_Landings ~ 0 + MSQD_SPAWN_SDM_90_v2 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open + factor(cluster)
+    + (MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90_v2 | cluster),
+    hu ~ 0 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c + factor(cluster)
+    + (PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster)),
     data = dataset_msqd,
     family = hurdle_gamma(),
     control = list(adapt_delta = 0.95, max_treedepth = 20),
     chains = 2,
     cores = 4)
-    saveRDS(fit_qMSQD_SpawningV1_2,
-          file = here::here("Estimations", "fit_qMSQD_SpawningV1_2.RDS"))
-  
+    saveRDS(fit_qMSQD_SpawningV2_2,
+          file = here::here("Estimations", "fit_qMSQD_SpawningV2_2.RDS"))
+    
+    
+    # WORK TO DO:
+    # Exclude port fixed effects. Might be capturing difference in productivity, not allowing the SDM to capture this. 
+    # Should vessels be in all ports??? In some of them would have zero landings for all the species. Entry and exit of a vessel in a port area not in the model.    
+
+    
 ## Work to do: Include anchovy SDM, try with monthly data,
 ## try 0 + factor(vessel_num) + factor(port_area), exclude (1 | group) ###
 
