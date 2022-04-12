@@ -666,6 +666,7 @@ dataset_msqd <- dataset_annual %>%
   dplyr::mutate(PSDN.Participation = ifelse(PSDN_Landings > 0, 1, 0)) %>%
   dplyr::mutate(NANC.Participation = ifelse(NANC_Landings > 0, 1, 0)) %>%
   dplyr::mutate(MSQD_Price_c = (MSQD_Price - mean(MSQD_Price, na.rm = TRUE)) / sd(MSQD_Price, na.rm = TRUE)) %>%
+    filter(group_all == 1 | group_all == 2 | group_all == 4 | group_all == 5 | group_all == 7) %>%
   drop_na() 
 
 #### Create new port ID and cluster variable 
@@ -680,11 +681,15 @@ MSQD_clusters <- dataset_msqd %>%
 
 #### Convert variables to factor
 dataset_msqd$port_ID      <- factor(dataset_msqd$port_ID)
-dataset_msqd$cluster      <- factor(dataset_msqd$cluster)
+# dataset_msqd$cluster      <- factor(dataset_msqd$cluster)
 dataset_msqd$LANDING_YEAR <- factor(dataset_msqd$LANDING_YEAR)
 class(dataset_msqd$PSDN.Open)
 class(dataset_msqd$port_ID)
 class(dataset_msqd$cluster)
+
+# install.packages(c("fastDummies", "recipes"))
+library('fastDummies')
+dataset_msqd <- dummy_cols(dataset_msqd, select_columns = 'cluster')
 
 
 # ## Check stationarity in the panel dataset
@@ -740,28 +745,6 @@ library(brms)
 #     saveRDS(fit_qMSQD_SpawningV1,
 #           file = here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
 
-fit_qMSQD_SpawningV2_2 <- brm(bf(
-    MSQD_Landings ~ 0 + MSQD_SPAWN_SDM_90_v2 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open + factor(cluster)
-    + (MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90_v2 | cluster),
-    hu ~ 0 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c + factor(cluster)
-    + (PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster)),
-    data = dataset_msqd,
-    family = hurdle_gamma(),
-    control = list(adapt_delta = 0.95, max_treedepth = 20),
-    chains = 2,
-    cores = 4)
-    saveRDS(fit_qMSQD_SpawningV2_2,
-          file = here::here("Estimations", "fit_qMSQD_SpawningV2_2.RDS"))
-    
-    
-    # WORK TO DO:
-    # Exclude port fixed effects. Might be capturing difference in productivity, not allowing the SDM to capture this. 
-    # Should vessels be in all ports??? In some of them would have zero landings for all the species. Entry and exit of a vessel in a port area not in the model.    
-
-    
-## Work to do: Include anchovy SDM, try with monthly data,
-## try 0 + factor(vessel_num) + factor(port_area), exclude (1 | group) ###
-
 # fit_qMSQD_SpawningV2 <- brm(bf(
 #   MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_v2 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open
 #   + (1 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90_v2 | cluster + port_ID),
@@ -774,20 +757,36 @@ fit_qMSQD_SpawningV2_2 <- brm(bf(
 #   cores = 4)
 #   saveRDS(fit_qMSQD_SpawningV2, 
 #           file = here::here("Estimations", "fit_qMSQD_SpawningV2.RDS"))
-# 
-# fit_qMSQD_recruit <- brm(bf(
-#   MSQD_Landings ~ 1 +  MSQD_recruitment + MSQD_recruitment:PSDN_SDM_60:PSDN.Open
-#   + (1 +  MSQD_recruitment:PSDN_SDM_60:PSDN.Open +  MSQD_recruitment | cluster + port_ID),
-#   hu ~ 1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c 
-#   + (1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster + port_ID)), 
+
+# fit_qMSQD_SpawningV2_2 <- brm(bf(
+#   MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_v2 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open
+#   + (1 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90_v2 | cluster),
+#   hu ~ 1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c
+#   + (1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster)),
 #   data = dataset_msqd,
 #   family = hurdle_gamma(),
 #   control = list(adapt_delta = 0.95, max_treedepth = 20),
 #   chains = 2,
 #   cores = 4)
-#   saveRDS(fit_qMSQD_recruit, 
-#           file = here::here("Estimations", "fit_qMSQD_recruit.RDS"))
+#   saveRDS(fit_qMSQD_SpawningV2_2,
+#     file = here::here("Estimations", "fit_qMSQD_SpawningV2_2.RDS"))
+      
+fit_qMSQD_SpawningV2_3 <- brm(bf(
+    MSQD_Landings ~ 0 + MSQD_SPAWN_SDM_90_v2 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open + 
+      factor(cluster)
+    + (0 + MSQD_SPAWN_SDM_90_v2:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90_v2 | cluster),
+    hu ~ 0 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c + 
+      factor(cluster) 
+    + (0 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster)),
+    data = dataset_msqd,
+    family = hurdle_gamma(),
+    control = list(adapt_delta = 0.95, max_treedepth = 20),
+    chains = 2,
+    cores = 4)
+saveRDS(fit_qMSQD_SpawningV2_3,
+        file = here::here("Estimations", "fit_qMSQD_SpawningV2_3.RDS"))
 
+# 
 # fit_qMSQD_abund <- brm(bf(
 #   MSQD_Landings ~ 1 +  MSQD_SDM_90_JS_CPUE +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open
 #   + (1 +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open +  MSQD_SDM_90_JS_CPUE | cluster + port_ID),
@@ -803,28 +802,30 @@ fit_qMSQD_SpawningV2_2 <- brm(bf(
   
 #   prior = c(prior(lognormal(0,1), class = b, coef = "MSQD_SDM_90_JS_cpue")),
 
-fit_qMSQD_SpawningV1   <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
-fit_qMSQD_SpawningV2   <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV2.RDS"))
-fit_qMSQD_abund        <- readRDS(here::here("Estimations", "fit_qMSQD_abund.RDS"))
-fit_qMSQD_recruit      <- readRDS(here::here("Estimations", "fit_qMSQD_recruit.RDS"))
+# fit_qMSQD_SpawningV1   <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
+# fit_qMSQD_SpawningV2   <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV2.RDS"))
+fit_qMSQD_SpawningV2_2 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV2_2.RDS"))
+# fit_qMSQD_SpawningV2_3 <- readRDS(here::here("Estimations", "fit_qMSQD_SpawningV2_3.RDS"))
+# fit_qMSQD_abund        <- readRDS(here::here("Estimations", "fit_qMSQD_abund.RDS"))
+# fit_qMSQD_recruit      <- readRDS(here::here("Estimations", "fit_qMSQD_recruit.RDS"))
 
 ##### Model Comparision #####
-fit_qMSQD_SpawningV1 <- add_criterion(fit_qMSQD_SpawningV1, "loo", moment_match = TRUE)
-fit_qMSQD_SpawningV2 <- add_criterion(fit_qMSQD_SpawningV2, "loo", moment_match = TRUE)
-fit_qMSQD_abund      <- add_criterion(fit_qMSQD_abund,      "loo", moment_match = TRUE)
-fit_qMSQD_recruit    <- add_criterion(fit_qMSQD_recruit,    "loo", moment_match = TRUE)
+# fit_qMSQD_SpawningV1 <- add_criterion(fit_qMSQD_SpawningV1, "loo", moment_match = TRUE)
+# fit_qMSQD_SpawningV2 <- add_criterion(fit_qMSQD_SpawningV2, "waic")
+fit_qMSQD_SpawningV2_2 <- add_criterion(fit_qMSQD_SpawningV2_2, "waic")
+fit_qMSQD_SpawningV2_3 <- add_criterion(fit_qMSQD_SpawningV2_3, "waic")
+# fit_qMSQD_abund      <- add_criterion(fit_qMSQD_abund,      "waic")
+# fit_qMSQD_recruit    <- add_criterion(fit_qMSQD_recruit,    "loo", moment_match = TRUE)
 
 w <- as.data.frame(
-  loo_compare(fit_qMSQD_SpawningV1, 
-              fit_qMSQD_SpawningV2,
-              fit_qMSQD_abund,
-              fit_qMSQD_recruit,
-              criterion = "loo"))
+  loo_compare(fit_qMSQD_SpawningV2_2, 
+              fit_qMSQD_SpawningV2_3,
+              criterion = "waic"))
 # gs4_create("WAIC", sheets = w)
 
 
 
-fit_qMSQD <- fit_qMSQD_SpawningV2
+fit_qMSQD <- fit_qMSQD_SpawningV2_3
 
 #----------------------------------------------------
 ## Model summary ##
@@ -861,31 +862,31 @@ mcmc_plot(fit_qMSQD, variable = "^b_", regex = TRUE) +
 
 #------------------------------------------------------
 ### Group parameters ###
-#### By port ID
-
-# brmstools::coefplot(fit_qMSQD, 
-#                     pars = "MSQD_SPAWN_SDM_90",
-#                     grouping = "port_ID",
-#                     r_intervals = TRUE,
-#                     r_col = "firebrick")
-coeff_port_sdm <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
-  ggplot(coeff_port_sdm, aes(x=port_ID, y=Estimate)) +
-  geom_point() +  geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5), 
-    width=.2, position=position_dodge(0.05)) + coord_flip() + ggtitle("Squid SDM estimates") +  
-  ylab("Coefficient") + xlab("") +  scale_x_discrete(labels=c("1" = "Los Angeles", "4" = "Monterey",
-                            "2" = "Santa Barbara", "3" = "San Diego")) 
-
-coeff_port_int <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 3] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
-  ggplot(coeff_port_int, aes(x=port_ID, y=Estimate)) + geom_point() +  
-  geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5), 
-                width=.2, position=position_dodge(0.05)) + coord_flip() + 
-  ggtitle("Squid SDM x Sardine SDM") +  ylab("Coefficient") + xlab("") +
-  scale_x_discrete(labels=c("1" = "Los Angeles", 
-                            "4" = "Monterey",
-                            "2" = "Santa Barbara", 
-                            "3" = "San Diego")) 
+# #### By port ID
+# 
+# # brmstools::coefplot(fit_qMSQD, 
+# #                     pars = "MSQD_SPAWN_SDM_90",
+# #                     grouping = "port_ID",
+# #                     r_intervals = TRUE,
+# #                     r_col = "firebrick")
+# coeff_port_sdm <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2] %>%
+#   as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
+#   ggplot(coeff_port_sdm, aes(x=port_ID, y=Estimate)) +
+#   geom_point() +  geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5), 
+#     width=.2, position=position_dodge(0.05)) + coord_flip() + ggtitle("Squid SDM estimates") +  
+#   ylab("Coefficient") + xlab("") +  scale_x_discrete(labels=c("1" = "Los Angeles", "4" = "Monterey",
+#                             "2" = "Santa Barbara", "3" = "San Diego")) 
+# 
+# coeff_port_int <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 3] %>%
+#   as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
+#   ggplot(coeff_port_int, aes(x=port_ID, y=Estimate)) + geom_point() +  
+#   geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5), 
+#                 width=.2, position=position_dodge(0.05)) + coord_flip() + 
+#   ggtitle("Squid SDM x Sardine SDM") +  ylab("Coefficient") + xlab("") +
+#   scale_x_discrete(labels=c("1" = "Los Angeles", 
+#                             "4" = "Monterey",
+#                             "2" = "Santa Barbara", 
+#                             "3" = "San Diego")) 
   
 #### By clusters 
 coeff_cluster_sdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
