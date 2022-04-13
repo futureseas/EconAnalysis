@@ -63,19 +63,22 @@ PacFIN.month.aggregate <- doBy::summaryBy(LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PE
 ########################################################
 
 ### Create full database.
-### If a vessel land more than 1,000 USD in value on a port, then in all month he decide to participate or not in a fishery
+### If a vessel land more than 1,000 USD in value on a port, then he have to decide during that port and month 
+### to participate or not in a fishery
 
-vessel.monthly.dataset <- PacFIN.month.aggregate %>% 
-  group_by(VESSEL_NUM, PORT_AREA_CODE, LANDING_YEAR, LANDING_MONTH, AGENCY_CODE, group_all) %>%
-  summarize(total_rev_month = sum(AFI_EXVESSEL_REVENUE.sum.sum)) %>% filter(total_rev_month >= 500)
+vessel.participation <- PacFIN.month.aggregate %>% 
+  group_by(VESSEL_NUM, PORT_AREA_CODE, AGENCY_CODE, group_all) %>%
+  summarize(total_rev = sum(AFI_EXVESSEL_REVENUE.sum.sum)) %>% filter(total_rev >= 5000)
 
-# months = expand.grid(LANDING_YEAR = unique(vessel.monthly.dataset$LANDING_YEAR), LANDING_MONTH = 1:12)
-# vessel.monthly.dataset <- left_join(vessel.monthly.dataset, months, by = "LANDING_YEAR")
+year = expand.grid(PORT_AREA_CODE = unique(vessel.participation$PORT_AREA_CODE), LANDING_YEAR = 2000:2020)
+vessel.participation <- left_join(vessel.participation, year, by = "PORT_AREA_CODE")
 
-PacFIN.month.aggregate <- left_join(vessel.monthly.dataset, PacFIN.month.aggregate,
+months = expand.grid(LANDING_YEAR = unique(vessel.participation$LANDING_YEAR), LANDING_MONTH = 1:12)
+vessel.participation <- left_join(vessel.participation, months, by = "LANDING_YEAR")
+
+PacFIN.month.aggregate <- left_join(vessel.participation, PacFIN.month.aggregate,
                                     by = c("LANDING_YEAR" ,"VESSEL_NUM", "PORT_AREA_CODE", 
                                     "AGENCY_CODE", "group_all", "LANDING_MONTH"))
-## 71448
 
 ########################################################
 
@@ -471,11 +474,6 @@ dataset_msqd <- dataset %>%
   dplyr::mutate(ln_MSQD_Landings = log(MSQD_Landings)) %>%
     filter(group_all == 1 | group_all == 2 | group_all == 4 | group_all == 5 | group_all == 7) %>%
     filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA") %>%
-    drop_na() 
-
-  
-# Center variables 
-  dataset_msqd <- dataset_msqd %>%
     dplyr::mutate(MSQD_Price_z = ((MSQD_Price - mean(MSQD_Price, na.rm = TRUE)) / sd(MSQD_Price, na.rm = TRUE))) %>%
     dplyr::mutate(MSQD_SPAWN_SDM_90_z = ((MSQD_SPAWN_SDM_90 - mean(MSQD_SPAWN_SDM_90, na.rm = TRUE))/sd(MSQD_SPAWN_SDM_90, na.rm = TRUE))) %>%
     dplyr::mutate(PSDN_SDM_60_z = ((PSDN_SDM_60 - mean(PSDN_SDM_60, na.rm = TRUE))/sd(PSDN_SDM_60, na.rm = TRUE))) %>%
@@ -547,44 +545,36 @@ class(dataset_msqd$cluster)
 
 #### Estimate models ####
 library(brms)
-
-# fit_qMSQD_Spawning_6 <-
-#   brm(
-#     formula = ln_MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-#       MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open,
-#     data = dataset_msqd,
-#     control = list(adapt_delta = 0.85, max_treedepth = 12),
-#     chains = 2,
-#     cores = 4)
-#     saveRDS(fit_qMSQD_Spawning_6,
-#             file = here::here("Estimations", "fit_qMSQD_Spawning_6.RDS"))
+dataset_msqd_landing <- dataset_msqd %>%
+  dplyr::filter(MSQD_Landings > 0) 
 
 fit_qMSQD_Spawning_7 <-
   brm(
     formula = ln_MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-      MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + 
+      MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open +
       (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
       MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open | cluster),
-    data = dataset_msqd,
+    data = dataset_msqd_landing,
     control = list(adapt_delta = 0.9, max_treedepth = 12),
     chains = 1,
     cores = 4)
     saveRDS(fit_qMSQD_Spawning_7,
             file = here::here("Estimations", "fit_qMSQD_Spawning_7.RDS"))
-
-
-# fit_qMSQD_Spawning <- brm(bf(
-#     MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_c + MSQD_SPAWN_SDM_90_c:PSDN_SDM_60_c:PSDN.Open
-#     + (1 + MSQD_SPAWN_SDM_90_c:PSDN_SDM_60_c:PSDN.Open + MSQD_SPAWN_SDM_90_c | cluster + port_ID),
-#     hu ~ 1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c
-#     + (1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster + port_ID)),
-#     data = dataset_msqd,
-#     family = hurdle_gamma(),
-#     control = list(adapt_delta = 0.95, max_treedepth = 20),
-#     chains = 2,
-#     cores = 4)
-#     saveRDS(fit_qMSQD_SpawningV1,
-#           file = here::here("Estimations", "fit_qMSQD_SpawningV1.RDS"))
+    
+fit_qMSQD_Spawning_9 <- 
+    brm(bf(
+     MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + 
+     MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + 
+      (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
+         MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open | cluster),
+    hu ~ 1),
+    data = dataset_msqd,
+    family = hurdle_gamma(),
+    control = list(adapt_delta = 0.9, max_treedepth = 12),
+    chains = 1,
+    cores = 4)
+    saveRDS(fit_qMSQD_Spawning_9,
+            file = here::here("Estimations", "fit_qMSQD_Spawning_9.RDS"))    
 
 # fit_qMSQD_abund <- brm(bf(
 #   MSQD_Landings ~ 1 +  MSQD_SDM_90_JS_CPUE +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open
@@ -601,31 +591,24 @@ fit_qMSQD_Spawning_7 <-
   
 #   prior = c(prior(lognormal(0,1), class = b, coef = "MSQD_SDM_90_JS_cpue")),
 
-fit_qMSQD_Spawning_2  <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_2.RDS"))
-fit_qMSQD_Spawning_3  <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_3.RDS"))
-fit_qMSQD_Spawning_6  <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_6.RDS"))
-# fit_qMSQD_Spawning_7  <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_7.RDS"))
+
+    
+fit_qMSQD_Spawning_7  <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_7.RDS"))
+fit_qMSQD_Spawning_9  <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_9.RDS"))
 
 ##### Model Comparision #####
-
-fit_qMSQD_Spawning_2 <- add_criterion(fit_qMSQD_Spawning_2, "loo")
-fit_qMSQD_Spawning_3 <- add_criterion(fit_qMSQD_Spawning_3, "loo")
-fit_qMSQD_Spawning_6 <- add_criterion(fit_qMSQD_Spawning_6, "loo")
 fit_qMSQD_Spawning_7 <- add_criterion(fit_qMSQD_Spawning_7, "loo")
+fit_qMSQD_Spawning_9 <- add_criterion(fit_qMSQD_Spawning_9, "loo")
 
 
 
 w <- as.data.frame(
- loo_compare(fit_qMSQD_Spawning_2,
-             fit_qMSQD_Spawning_3,
-             fit_qMSQD_Spawning_6,
-             fit_qMSQD_Spawning_7, 
+ loo_compare(fit_qMSQD_Spawning_7,
+             fit_qMSQD_Spawning_9, 
              criterion = "loo"))
 # gs4_create("WAIC", sheets = w)
 
-
-
-fit_qMSQD <- fit_qMSQD_Spawning_6
+fit_qMSQD <- fit_qMSQD_Spawning_7
 
 #----------------------------------------------------
 ## Model summary ##
@@ -644,11 +627,12 @@ pp_check(fit_qMSQD) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  + 
-  xlim(0, 10) + xlab("Landing (tons)")
+  xlim(0, 1000) + xlab("Landing (tons)")
 
 
 ### Population parameters ###
 summary(fit_qMSQD)
+
 mcmc_plot(fit_qMSQD, variable = "^b_", regex = TRUE) +
   theme(axis.text.y = element_text(hjust = 0)) + scale_y_discrete(
   labels = c(
@@ -696,12 +680,19 @@ coeff_cluster_sdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
   width=.2, position=position_dodge(0.05)) + ggtitle("Squid SDM estimates") +  
   xlab("Coefficient") + ylab("Cluster") 
   
-coeff_cluster_int <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 3] %>%
+coeff_cluster_osdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 3] %>%
+  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+  ggplot(coeff_cluster_osdm, aes(y=cluster, x=Estimate)) + geom_point() +  
+  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+  width=.2, position=position_dodge(0.05)) + ggtitle("Sardine SDM") + 
+    xlab("Coefficient") + ylab("Cluster")  
+  
+coeff_cluster_int <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
   ggplot(coeff_cluster_int, aes(y=cluster, x=Estimate)) + geom_point() +  
   geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-  width=.2, position=position_dodge(0.05)) + ggtitle("Squid SDM x Sardine SDM") + 
-    xlab("Coefficient") + ylab("Cluster")  
+                  width=.2, position=position_dodge(0.05)) + ggtitle("Sardine SDM x Squid SDM") + 
+    xlab("Coefficient") + ylab("Cluster")    
   
 
 ### Hypothesis test ###
@@ -731,7 +722,7 @@ rownames(conditions) <- unique(dataset_msqd$group_all)
 conditional_effects_msqd_sdm <-
   conditional_effects(
     fit_qMSQD, 
-    "MSQD_SPAWN_SDM_90_c",                
+    "MSQD_SPAWN_SDM_90_z",                
     surface=TRUE, 
     conditions = conditions, 
     re_formula = NULL)#, transform = log, method = "posterior_predict"))
@@ -746,7 +737,7 @@ plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] +
 conditional_effects_psdn_sdm <-
   conditional_effects(
     fit_qMSQD, 
-    "PSDN_SDM_60",                
+    "PSDN_SDM_60_z",                
     surface=TRUE, 
     conditions = conditions, 
     re_formula = NULL)#, transform = log, method = "posterior_predict"))
@@ -763,7 +754,7 @@ rm(conditional_effects_msqd_sdm, conditional_effects_psdn.open, conditional_effe
 
 ### Interaction effects ###
 c_eff_int_psdn_msqd <- (conditional_effects(
-  fit_qMSQD, "PSDN_SDM_60:MSQD_SPAWN_SDM_90_v2", 
+  fit_qMSQD, "PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z", 
   surface=TRUE, 
   conditions = conditions, re_formula = NULL))
 
@@ -787,9 +778,9 @@ prediction <- cbind(predict(fit_qMSQD), dataset_msqd)
 prediction$LANDING_YEAR <- as.numeric(as.character(prediction$LANDING_YEAR))
 
 meltdf <- prediction %>% 
-  dplyr::select(Estimate, MSQD_Landings, LANDING_YEAR, PORT_AREA_CODE) %>%
+  dplyr::select(Estimate, ln_MSQD_Landings, LANDING_YEAR, PORT_AREA_CODE) %>%
   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarise(Est_landings = sum(Estimate), Landings = sum(MSQD_Landings)) %>%
+  summarise(Est_landings = sum(Estimate), Landings = sum(ln_MSQD_Landings)) %>%
   gather(key = Variable, value = value,
          c("Est_landings", "Landings"))
 
@@ -798,9 +789,9 @@ ggplot(meltdf, aes(x=LANDING_YEAR, y = value, colour = Variable)) +
   facet_wrap(~PORT_AREA_CODE)
 
 meltdf <- prediction %>% 
-  dplyr::select(Estimate, MSQD_Landings, LANDING_YEAR, group_all) %>%
+  dplyr::select(Estimate, ln_MSQD_Landings, LANDING_YEAR, group_all) %>%
   group_by(LANDING_YEAR, group_all) %>% 
-  summarise(Est_landings = sum(Estimate), Landings = sum(MSQD_Landings)) %>%
+  summarise(Est_landings = sum(Estimate), Landings = sum(ln_MSQD_Landings)) %>%
   gather(key = Variable, value = value,
          c("Est_landings", "Landings"))
 ggplot(meltdf, aes(x=LANDING_YEAR, y = value, colour = Variable)) + 
