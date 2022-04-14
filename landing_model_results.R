@@ -48,7 +48,8 @@ library(doBy)
 PacFIN.month.aggregate <- doBy::summaryBy(LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PER_MTON.mean + AFI_EXVESSEL_REVENUE.sum
                                           ~ LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_AREA_CODE + 
                                             PACFIN_SPECIES_CODE + AGENCY_CODE + group_all, 
-                                          FUN=sum_mean_fun, data=PacFIN.month)
+                                          FUN=sum_mean_fun, data=PacFIN.month) %>% 
+  dplyr::filter(AFI_EXVESSEL_REVENUE.sum.sum > 0)
 
 ########################################################
 
@@ -56,7 +57,7 @@ PacFIN.month.aggregate <- doBy::summaryBy(LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PE
 ### If a vessel land more than 5,000 USD in value on a port, then he have to decide during that port and month 
 ### to participate or not in a fishery. Also, those are the landing that count in the model, not in random ports.
 
-vessel.participation <- PacFIN.month.aggregate %>% dplyr::filter(AFI_EXVESSEL_REVENUE.sum.sum > 0) %>%
+vessel.participation <- PacFIN.month.aggregate  %>%
   group_by(VESSEL_NUM, PORT_AREA_CODE, AGENCY_CODE, group_all) %>%
   summarize(total_rev = sum(AFI_EXVESSEL_REVENUE.sum.sum)) %>% filter(total_rev >= 5000)
 
@@ -533,34 +534,23 @@ library(brms)
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) 
 
-fit_qMSQD_Spawning_7 <-
-  brm(
-    formula = ln_MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-      MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open +
-      (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-      MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open | cluster),
-    data = dataset_msqd_landing,
-    control = list(adapt_delta = 0.9, max_treedepth = 12),
-    chains = 1,
-    cores = 4)
-    saveRDS(fit_qMSQD_Spawning_7,
-            file = here::here("Estimations", "fit_qMSQD_Spawning_7.RDS"))
+# fit_qMSQD_Spawning_7 <-
+#   brm(
+#     formula = ln_MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
+#       MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open +
+#       (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
+#       MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open | cluster),
+#     data = dataset_msqd_landing,
+#     control = list(adapt_delta = 0.9, max_treedepth = 12),
+#     chains = 1,
+#     cores = 4)
+#     saveRDS(fit_qMSQD_Spawning_7_2,
+#             file = here::here("Estimations", "fit_qMSQD_Spawning_7_2.RDS"))
     
-fit_qMSQD_Spawning_8 <-
-  brm(
-    formula = ln_MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-      (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open | cluster),
-        data = dataset_msqd_landing,
-        control = list(adapt_delta = 0.9, max_treedepth = 12),
-        chains = 1,
-        cores = 4)
-    saveRDS(fit_qMSQD_Spawning_8,
-            file = here::here("Estimations", "fit_qMSQD_Spawning_8.RDS"))
-    
-fit_qMSQD_Spawning_9 <- 
+fit_qMSQD_Spawning_9 <-
     brm(bf(
-     MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + 
-     MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + 
+     MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
+     MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open +
       (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
          MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open | cluster),
     hu ~ 1),
@@ -570,7 +560,7 @@ fit_qMSQD_Spawning_9 <-
     chains = 1,
     cores = 4)
     saveRDS(fit_qMSQD_Spawning_9,
-            file = here::here("Estimations", "fit_qMSQD_Spawning_9.RDS"))    
+            file = here::here("Estimations", "fit_qMSQD_Spawning_9.RDS"))
 
 # fit_qMSQD_abund <- brm(bf(
 #   MSQD_Landings ~ 1 +  MSQD_SDM_90_JS_CPUE +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open
@@ -590,21 +580,28 @@ fit_qMSQD_Spawning_9 <-
 
     
 fit_qMSQD_Spawning_7  <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_7.RDS"))
-fit_qMSQD_Spawning_9  <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_9.RDS"))
+fit_qMSQD_Spawning_8  <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_8.RDS"))
 
 ##### Model Comparision #####
-fit_qMSQD_Spawning_7 <- add_criterion(fit_qMSQD_Spawning_7, "loo")
-fit_qMSQD_Spawning_9 <- add_criterion(fit_qMSQD_Spawning_9, "loo")
+fit_qMSQD_Spawning_7_2 <- add_criterion(fit_qMSQD_Spawning_7_2, "loo")
+fit_qMSQD_Spawning_8_2 <- add_criterion(fit_qMSQD_Spawning_8_2, "loo")
 
+fit_qMSQD_Spawning_7 <- add_criterion(fit_qMSQD_Spawning_7, "loo")
+fit_qMSQD_Spawning_8 <- add_criterion(fit_qMSQD_Spawning_8, "loo")
+
+w <- as.data.frame(
+  loo_compare(fit_qMSQD_Spawning_7,
+              fit_qMSQD_Spawning_8, 
+              criterion = "loo"))
 
 
 w <- as.data.frame(
- loo_compare(fit_qMSQD_Spawning_7,
-             fit_qMSQD_Spawning_9, 
+ loo_compare(fit_qMSQD_Spawning_7_2,
+             fit_qMSQD_Spawning_8_2, 
              criterion = "loo"))
 # gs4_create("WAIC", sheets = w)
 
-fit_qMSQD <- fit_qMSQD_Spawning_8
+fit_qMSQD <- fit_qMSQD_Spawning_9_2
 
 #----------------------------------------------------
 ## Model summary ##
@@ -628,19 +625,15 @@ pp_check(fit_qMSQD) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model
 
 ### Population parameters ###
 summary(fit_qMSQD_Spawning_7)
-summary(fit_qMSQD_Spawning_8)
 summary(fit_qMSQD_Spawning_9)
 
-mcmc_plot(fit_qMSQD, variable = "^b_", regex = TRUE) +
+mcmc_plot(fit_qMSQD, regex = TRUE, variable = 
+            c("b_MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open", "b_MSQD_SPAWN_SDM_90_z", "b_PSDN_SDM_60_z:PSDN.Open")) +
   theme(axis.text.y = element_text(hjust = 0)) + scale_y_discrete(
   labels = c(
-    "b_Intercept"    = "Landing: Intercept",
-    "b_MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open"  = "Landing: MSQD SDM x PSDN SDM x PSDN open",
-    "b_MSQD_SPAWN_SDM_90"     = "Landing: MSQD SDM",
-    "b_hu_Intercept" = "Participation: Intercept",
-    "b_hu_MSQD_Price_c" = "Participation: MSQD Price (z-value)",
-    "b_hu_PSDN.Open"    = "Participation: PSDN open",
-    "b_hu_PSDN.Open:PSDN.Participation" = "Participation: PSDN participation x PSDN open"))
+    "b_MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open"  = "Landing: MSQD SDM x PSDN SDM x PSDN open",
+    "b_MSQD_SPAWN_SDM_90_z"     = "Landing: MSQD SDM",
+    "b_PSDN_SDM_60_z:PSDN.Open" = "Landing: PSDN SDM x PSDN open"))
 
 #------------------------------------------------------
 ### Group parameters ###
