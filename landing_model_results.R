@@ -561,6 +561,17 @@ fit_qMSQD_Spawning_7 <-
     saveRDS(fit_qMSQD_Spawning_7,
             file = here::here("Estimations", "fit_qMSQD_Spawning_7.RDS"))
     
+fit_qMSQD_Spawning_8 <-
+  brm(
+    formula = ln_MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
+      (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open | cluster),
+        data = dataset_msqd_landing,
+        control = list(adapt_delta = 0.9, max_treedepth = 12),
+        chains = 1,
+        cores = 4)
+    saveRDS(fit_qMSQD_Spawning_8,
+            file = here::here("Estimations", "fit_qMSQD_Spawning_8.RDS"))
+    
 fit_qMSQD_Spawning_9 <- 
     brm(bf(
      MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + 
@@ -608,7 +619,7 @@ w <- as.data.frame(
              criterion = "loo"))
 # gs4_create("WAIC", sheets = w)
 
-fit_qMSQD <- fit_qMSQD_Spawning_7
+fit_qMSQD <- fit_qMSQD_Spawning_8
 
 #----------------------------------------------------
 ## Model summary ##
@@ -631,7 +642,9 @@ pp_check(fit_qMSQD) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model
 
 
 ### Population parameters ###
-summary(fit_qMSQD)
+summary(fit_qMSQD_Spawning_7)
+summary(fit_qMSQD_Spawning_8)
+summary(fit_qMSQD_Spawning_9)
 
 mcmc_plot(fit_qMSQD, variable = "^b_", regex = TRUE) +
   theme(axis.text.y = element_text(hjust = 0)) + scale_y_discrete(
@@ -766,7 +779,7 @@ plot(c_eff_int_psdn_msqd, plot = FALSE)[[1]] +
     axis.title = element_text(size = 8),
     legend.title = element_text(size = 9),
     legend.text = element_text(size=8)
-  ) + guides(colour=guide_legend(title="Landings: PSDN")) +
+  ) + guides(colour=guide_legend(title="Landings: MSQD")) +
   scale_x_continuous(name = "P(Pres): PSDN") + scale_y_continuous(name = "P(Pres): MSQD")
 
 
