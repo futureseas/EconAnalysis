@@ -501,7 +501,7 @@ ggplot(sdm.by.species.MSQD) +
   scale_color_manual(name = "Variable: ", 
                      values = c("Landings" = "grey", "SDM output" = "blue"))
 
-coeff4 <- 100000
+coeff4 <- 30000
 ggplot(sdm.by.species.MSQD) + 
   geom_line(mapping = aes(x = Date, y = Landings_MSQD, color = "Landings"), size = 0.5) +
   geom_line(mapping = aes(x = Date, y = MSQD_SDM_90*coeff4, color = "SDM output"), 
