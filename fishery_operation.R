@@ -392,7 +392,7 @@ rm(df, nvessel.year, coeff)
 ## Figure 6. Landings v/s probability of presence by port area ##
 
 sdm.by.species <- PacFIN.month.CPS %>%
-  dplyr::select(LANDING_YEAR, LANDING_MONTH, PSDN_SDM_60, MSQD_SDM_90_JS_CPUE, MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_v2, 
+  dplyr::select(LANDING_YEAR, LANDING_MONTH, PSDN_SDM_60, MSQD_SDM_90_JS_CPUE, MSQD_SDM_90, MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_v2, 
                 NANC_SDM_20, MSQD_recruitment, LANDED_WEIGHT_MTONS.sum, PACFIN_SPECIES_CODE, PORT_AREA_CODE) %>% 
   filter(LANDING_YEAR >= 1998 & LANDING_YEAR <= 2019) %>%
   group_by(LANDING_YEAR, LANDING_MONTH, PORT_AREA_CODE, PACFIN_SPECIES_CODE) %>% 
@@ -400,6 +400,7 @@ sdm.by.species <- PacFIN.month.CPS %>%
             NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
             MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_CPUE, na.rm = TRUE),
             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=TRUE),
+            MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm=TRUE),
             MSQD_SPAWN_SDM_90_v2 = mean(MSQD_SPAWN_SDM_90_v2, na.rm=TRUE),
             MSQD_recruitment = mean(MSQD_recruitment, na.rm=TRUE),
             LANDED_WEIGHT_MTONS = sum(LANDED_WEIGHT_MTONS.sum, na.rm = TRUE)) %>%
@@ -467,6 +468,7 @@ sdm.by.species.MSQD <- sdm.by.species %>%
   group_by(Date, PORT_AREA_CODE) %>% 
   summarize(MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm = TRUE),
             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
+            MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
             MSQD_SPAWN_SDM_90_v2 = mean(MSQD_SPAWN_SDM_90_v2, na.rm = TRUE),
             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
             MSQD_recruitment = mean(MSQD_recruitment, na.rm=TRUE),
@@ -509,7 +511,7 @@ ggplot(sdm.by.species.MSQD) +
   scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff4, name = "P(presence)")) +
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8), legend.position="right") + 
-  ggtitle("(b) Market squid (spawning aggregation model; 90 km radius)") +  
+  ggtitle("(b) Market squid (90 km radius)") +  
   scale_color_manual(name = "Variable: ", 
                      values = c("Landings" = "grey", "SDM output" = "blue"))
 

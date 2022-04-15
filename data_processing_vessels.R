@@ -114,11 +114,18 @@ SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM
 PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_Spawn, 
                               by = c("PORT_AREA_CODE", "LANDING_YEAR"), all.x = TRUE) 
 
-#### Merge data with SDM Market Squid (spawn aggregation) #
+#### Merge data with SDM Market Squid #
 SDM_port_MSQD <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_port_month.csv"))%>% 
   merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
   group_by(PORT_AREA_CODE, LANDING_YEAR, LANDING_MONTH) %>% summarize(MSQD_SDM_90 = mean(SDM_90))
 PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD, 
+                      by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) 
+
+#### Merge data with SDM Market Squid (spawn aggregation) #
+SDM_port_MSQD_Spawn <- read.csv(file = here::here("Data", "SDM", "MSQD_Spawn_SDM_port_month.csv"))%>% 
+  merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
+  group_by(PORT_AREA_CODE, LANDING_YEAR, LANDING_MONTH) %>% summarize(MSQD_SPAWN_SDM_90 = mean(SDM_SPAWN_90))
+PacFIN.month <- merge(PacFIN.month, SDM_port_MSQD_Spawn, 
                       by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE) 
 
 #### Merge data with SDM Northern Anchovy #
