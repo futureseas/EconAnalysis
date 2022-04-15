@@ -306,6 +306,7 @@ df$AFI_PRICE_PER_MTON.mean.mean <- df$AFI_PRICE_PER_MTON.mean.mean * coeff1
 df <- gather(df, key = Variable, value = value,
              c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean"))
 g1 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+  geom_point() +
   scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff1, name = "Price (USD/Ton)")) +
   theme(legend.position="bottom") + scale_x_continuous(name = element_blank()) + 
   theme(plot.title = element_text(size=9, face="bold.italic"), 
@@ -335,7 +336,7 @@ rm(df, g1, g2, landing.price.year, landing.price.year.sel, coeff1, coeff2)
 
 
 #----------------------------------
-## Figure 5. Evolution of Pacific sardine landings and the number of vessels landing market squid
+## Figure 5. Evolution of pacific sardine and squid landings and the number of vessels landing squid
 
 # Create dataframes
 nvessel.year <- PacFIN.month %>% 
@@ -354,22 +355,34 @@ coeff <- 1500
 df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "MSQD" | PACFIN_SPECIES_CODE == "PSDN") %>%
   mutate(n_vessel = ifelse(PACFIN_SPECIES_CODE == "MSQD", n_vessel, 0)) %>%
   mutate(LANDED_WEIGHT_MTONS.sum.sum = ifelse(PACFIN_SPECIES_CODE == "PSDN",
-                                              LANDED_WEIGHT_MTONS.sum.sum, 0)) %>%
-  group_by(LANDING_YEAR) %>%
-  summarise(n_vessel = sum(n_vessel), LANDED_WEIGHT_MTONS.sum.sum = sum(LANDED_WEIGHT_MTONS.sum.sum))
+                                              LANDED_WEIGHT_MTONS.sum.sum, 
+                                              ifelse(PACFIN_SPECIES_CODE == "MSQD",
+                                                     LANDED_WEIGHT_MTONS.sum.sum,
+                                                     0))) %>%
+  group_by(LANDING_YEAR, PACFIN_SPECIES_CODE) %>%
+  summarise(n_vessel = sum(n_vessel), LANDED_WEIGHT_MTONS.sum.sum = sum(LANDED_WEIGHT_MTONS.sum.sum)) %>%
+  reshape2::melt(id.vars=c("LANDING_YEAR", "PACFIN_SPECIES_CODE")) %>%
+  reshape2::dcast(LANDING_YEAR ~ PACFIN_SPECIES_CODE + variable, fun.aggregate=mean, rm.na = T) %>%
+  dplyr::select(-c("PSDN_n_vessel"))
 
-df$n_vessel <- df$n_vessel * coeff
+
+df$MSQD_n_vessel <- df$MSQD_n_vessel * coeff
 df <- gather(df, key = Variable, value = value,
-             c("n_vessel", "LANDED_WEIGHT_MTONS.sum.sum"))
-ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
-  scale_y_continuous(name = "Landings of Pacific sardine (M Tons)", sec.axis = sec_axis(~./coeff, name = "Number of vessels landing market squid")) +
+             c("MSQD_n_vessel", "MSQD_LANDED_WEIGHT_MTONS.sum.sum", "PSDN_LANDED_WEIGHT_MTONS.sum.sum"))
+ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + 
+  geom_line(aes(linetype=Variable), size=1) +
+  geom_point() + 
+  scale_linetype_manual(values=c("solid", "dashed", "solid"), labels=c(
+                              "PSDN_LANDED_WEIGHT_MTONS.sum.sum" = "Landings of Pacific sardine",
+                              "MSQD_LANDED_WEIGHT_MTONS.sum.sum" = "Landings of market squid",                     
+                              "MSQD_n_vessel" = "Number of squid vessels")) +
+  scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff, name = "Number of vessels landing market squid")) +
   theme(legend.position="bottom") + scale_x_continuous(name = element_blank()) +
-  theme(plot.title = element_text(size=9, face="bold.italic"),
-        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-  guides(colour=guide_legend(title="Variables: ")) + scale_color_brewer(palette="Set2",
-                                                                        limits = c("LANDED_WEIGHT_MTONS.sum.sum", "n_vessel"),
-                                                                        labels=c("LANDED_WEIGHT_MTONS.sum.sum" = "Landings of Pacific sardine", 
-                                                                                 "n_vessel" = "Number of vessels landing market squid")) 
+  theme(plot.title = element_text(size=9, face="bold.italic")) + 
+  scale_color_manual(values = c("#66c2a5", "#fc8d62", "#8da0cb"), labels=c(
+                           "PSDN_LANDED_WEIGHT_MTONS.sum.sum" = "Landings of Pacific sardine",
+                           "MSQD_LANDED_WEIGHT_MTONS.sum.sum" = "Landings of market squid",                     
+                           "MSQD_n_vessel" = "Number of squid vessels")) 
 
 rm(df, nvessel.year, coeff)
 
@@ -379,10 +392,10 @@ rm(df, nvessel.year, coeff)
 ## Figure 6. Landings v/s probability of presence by port area ##
 
 sdm.by.species <- PacFIN.month.CPS %>%
-  dplyr::select(LANDING_YEAR, PSDN_SDM_60, MSQD_SDM_90_JS_CPUE, MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_v2, 
+  dplyr::select(LANDING_YEAR, LANDING_MONTH, PSDN_SDM_60, MSQD_SDM_90_JS_CPUE, MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_v2, 
                 NANC_SDM_20, MSQD_recruitment, LANDED_WEIGHT_MTONS.sum, PACFIN_SPECIES_CODE, PORT_AREA_CODE) %>% 
   filter(LANDING_YEAR >= 1998 & LANDING_YEAR <= 2019) %>%
-  group_by(LANDING_YEAR, PORT_AREA_CODE, PACFIN_SPECIES_CODE) %>% 
+  group_by(LANDING_YEAR, LANDING_MONTH, PORT_AREA_CODE, PACFIN_SPECIES_CODE) %>% 
   summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
             NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
             MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_CPUE, na.rm = TRUE),
@@ -445,16 +458,20 @@ g1 / g2
 
 
 # Plot all squid SDMs outputs
+
+sdm.by.species$Date <- zoo::as.yearmon(paste(sdm.by.species$LANDING_YEAR, sdm.by.species$LANDING_MONTH, sep='-'))
+
 sdm.by.species.MSQD <- sdm.by.species %>% 
   filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
   mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "SBA", "MNA")) %>%
-  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
+  group_by(Date, PORT_AREA_CODE) %>% 
   summarize(MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm = TRUE),
             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
             MSQD_SPAWN_SDM_90_v2 = mean(MSQD_SPAWN_SDM_90_v2, na.rm = TRUE),
             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
             MSQD_recruitment = mean(MSQD_recruitment, na.rm=TRUE),
             Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE))
+
 
 coeff3 <- 500000
 g3 <-  ggplot(sdm.by.species.MSQD) + 
@@ -468,13 +485,27 @@ g3 <-  ggplot(sdm.by.species.MSQD) +
         axis.text = element_text(size = 7), axis.title = element_text(size = 8), legend.position="bottom") + 
   ggtitle("(a) Market squid (spawning aggregation model; 90 km radius; August - October)") 
 
-coeff4 <- 500000
-g4 <-  ggplot(sdm.by.species.MSQD) + 
-  geom_line(mapping = aes(x = LANDING_YEAR, y = Landings_MSQD, color = "Landings"), size = 0.5) +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SPAWN_SDM_90*coeff4, color = "SDM output"), 
+coeff4 <- 100000
+ggplot(sdm.by.species.MSQD) + 
+  geom_line(mapping = aes(x = Date, y = Landings_MSQD, color = "Landings"), size = 0.5) +
+  geom_line(mapping = aes(x = Date, y = MSQD_SPAWN_SDM_90*coeff4, color = "SDM output"), 
             size = 0.5, linetype = "dashed") + 
-  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 3) + 
-  scale_x_continuous(name = "Year")  +
+  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 1) + 
+  scale_x_continuous(name = "Date")  +
+  scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff4, name = "P(presence)")) +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8), legend.position="right") + 
+  ggtitle("(b) Market squid (spawning aggregation model; 90 km radius)") +  
+  scale_color_manual(name = "Variable: ", 
+                     values = c("Landings" = "grey", "SDM output" = "blue"))
+
+coeff4 <- 100000
+ggplot(sdm.by.species.MSQD) + 
+  geom_line(mapping = aes(x = Date, y = Landings_MSQD, color = "Landings"), size = 0.5) +
+  geom_line(mapping = aes(x = Date, y = MSQD_SDM_90*coeff4, color = "SDM output"), 
+            size = 0.5, linetype = "dashed") + 
+  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 1) + 
+  scale_x_continuous(name = "Date")  +
   scale_y_continuous(name = "Landings", sec.axis = sec_axis(~./coeff4, name = "P(presence)")) +
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8), legend.position="right") + 

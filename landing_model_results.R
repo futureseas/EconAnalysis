@@ -80,7 +80,7 @@ PacFIN.month.left.join <- left_join(vessel.participation, PacFIN.month.aggregate
 ########################################################
 
 
-PacFIN.month.dataset <- PacFIN.month.left.join %>% 
+PacFIN.month.dataset <- PacFIN.month.aggregate %>% 
   dplyr::select(LANDING_YEAR, LANDING_MONTH, VESSEL_NUM,
                 LANDED_WEIGHT_MTONS.sum.sum, AFI_PRICE_PER_MTON.mean.mean, 
                 PACFIN_SPECIES_CODE, AGENCY_CODE, group_all, PORT_AREA_CODE) %>%
@@ -534,33 +534,33 @@ library(brms)
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) 
 
-# fit_qMSQD_Spawning_7 <-
-#   brm(
-#     formula = ln_MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-#       MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open +
-#       (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-#       MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open | cluster),
-#     data = dataset_msqd_landing,
-#     control = list(adapt_delta = 0.9, max_treedepth = 12),
-#     chains = 1,
-#     cores = 4)
-#     saveRDS(fit_qMSQD_Spawning_7_2,
-#             file = here::here("Estimations", "fit_qMSQD_Spawning_7_2.RDS"))
-    
-fit_qMSQD_Spawning_9 <-
-    brm(bf(
-     MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-     MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open +
+fit_qMSQD_Spawning_linear_2 <-
+  brm(
+    formula = ln_MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
+      MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open +
       (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-         MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open | cluster),
-    hu ~ 1),
-    data = dataset_msqd,
-    family = hurdle_gamma(),
+      MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open | cluster + port_ID),
+    data = dataset_msqd_landing,
     control = list(adapt_delta = 0.9, max_treedepth = 12),
     chains = 1,
     cores = 4)
-    saveRDS(fit_qMSQD_Spawning_9,
-            file = here::here("Estimations", "fit_qMSQD_Spawning_9.RDS"))
+    saveRDS(fit_qMSQD_Spawning_linear_2,
+            file = here::here("Estimations", "fit_qMSQD_Spawning_linear_2.RDS"))
+    
+# fit_qMSQD_Spawning_hurdle <-
+#     brm(bf(
+#      MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
+#      MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open +
+#       (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
+#          MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open | cluster),
+#     hu ~ 1),
+#     data = dataset_msqd,
+#     family = hurdle_gamma(),
+#     control = list(adapt_delta = 0.9, max_treedepth = 12),
+#     chains = 1,
+#     cores = 4)
+#     saveRDS(fit_qMSQD_Spawning_9,
+#             file = here::here("Estimations", "fit_qMSQD_Spawning_9.RDS"))
 
 # fit_qMSQD_abund <- brm(bf(
 #   MSQD_Landings ~ 1 +  MSQD_SDM_90_JS_CPUE +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open
@@ -577,31 +577,32 @@ fit_qMSQD_Spawning_9 <-
   
 #   prior = c(prior(lognormal(0,1), class = b, coef = "MSQD_SDM_90_JS_cpue")),
 
+fit_qMSQD_Spawning_linear <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_7_2.RDS"))
+fit_qMSQD_Spawning_linear_2 <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_linear_2.RDS"))
+# fit_qMSQD_Spawning_9   <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_9.RDS"))
+# fit_qMSQD_Spawning_9_2 <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_9_2.RDS"))
 
-    
-fit_qMSQD_Spawning_7  <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_7.RDS"))
-fit_qMSQD_Spawning_8  <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_8.RDS"))
+
+rbind(bayes_R2(fit_qMSQD_Spawning_linear),
+      bayes_R2(fit_qMSQD_Spawning_linear_2)) %>%
+  as_tibble() %>%
+  mutate(model = c("Linear - cluster effects",
+                   "Hurdle - cluster & port effects"),
+         r_square_posterior_mean = round(Estimate, digits = 2)) %>%
+  select(model, r_square_posterior_mean)
 
 ##### Model Comparision #####
-fit_qMSQD_Spawning_7_2 <- add_criterion(fit_qMSQD_Spawning_7_2, "loo")
-fit_qMSQD_Spawning_8_2 <- add_criterion(fit_qMSQD_Spawning_8_2, "loo")
+fit_qMSQD_Spawning_linear   <- add_criterion(fit_qMSQD_Spawning_linear, "loo")
+fit_qMSQD_Spawning_linear_2 <- add_criterion(fit_qMSQD_Spawning_linear_2, "loo")
+# 
+# w <- as.data.frame(
+ loo_compare(fit_qMSQD_Spawning_linear,
+             fit_qMSQD_Spawning_linear_2,
+             criterion = "loo")
+# )
+# gs4_create("LOO", sheets = w)
 
-fit_qMSQD_Spawning_7 <- add_criterion(fit_qMSQD_Spawning_7, "loo")
-fit_qMSQD_Spawning_8 <- add_criterion(fit_qMSQD_Spawning_8, "loo")
-
-w <- as.data.frame(
-  loo_compare(fit_qMSQD_Spawning_7,
-              fit_qMSQD_Spawning_8, 
-              criterion = "loo"))
-
-
-w <- as.data.frame(
- loo_compare(fit_qMSQD_Spawning_7_2,
-             fit_qMSQD_Spawning_8_2, 
-             criterion = "loo"))
-# gs4_create("WAIC", sheets = w)
-
-fit_qMSQD <- fit_qMSQD_Spawning_9_2
+fit_qMSQD <- fit_qMSQD_Spawning_linear_2
 
 #----------------------------------------------------
 ## Model summary ##
@@ -612,6 +613,7 @@ library(ggthemes)
 library(sjPlot)
 library(sjlabelled)
 library(sjmisc)
+library(tibble)
 theme_set(theme_sjplot())
 
 
@@ -620,13 +622,11 @@ pp_check(fit_qMSQD) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  + 
-  xlim(0, 1000) + xlab("Landing (tons)")
+  xlim(0, 10) + xlab("Landing (tons)")
 
 
 ### Population parameters ###
-summary(fit_qMSQD_Spawning_7)
-summary(fit_qMSQD_Spawning_9)
-
+summary(fit_qMSQD)
 mcmc_plot(fit_qMSQD, regex = TRUE, variable = 
             c("b_MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open", "b_MSQD_SPAWN_SDM_90_z", "b_PSDN_SDM_60_z:PSDN.Open")) +
   theme(axis.text.y = element_text(hjust = 0)) + scale_y_discrete(
@@ -637,31 +637,46 @@ mcmc_plot(fit_qMSQD, regex = TRUE, variable =
 
 #------------------------------------------------------
 ### Group parameters ###
-# #### By port ID
-# 
-# # brmstools::coefplot(fit_qMSQD, 
-# #                     pars = "MSQD_SPAWN_SDM_90",
-# #                     grouping = "port_ID",
-# #                     r_intervals = TRUE,
-# #                     r_col = "firebrick")
-# coeff_port_sdm <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2] %>%
-#   as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
-#   ggplot(coeff_port_sdm, aes(x=port_ID, y=Estimate)) +
-#   geom_point() +  geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5), 
-#     width=.2, position=position_dodge(0.05)) + coord_flip() + ggtitle("Squid SDM estimates") +  
-#   ylab("Coefficient") + xlab("") +  scale_x_discrete(labels=c("1" = "Los Angeles", "4" = "Monterey",
-#                             "2" = "Santa Barbara", "3" = "San Diego")) 
-# 
-# coeff_port_int <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 3] %>%
-#   as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
-#   ggplot(coeff_port_int, aes(x=port_ID, y=Estimate)) + geom_point() +  
-#   geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5), 
-#                 width=.2, position=position_dodge(0.05)) + coord_flip() + 
-#   ggtitle("Squid SDM x Sardine SDM") +  ylab("Coefficient") + xlab("") +
-#   scale_x_discrete(labels=c("1" = "Los Angeles", 
-#                             "4" = "Monterey",
-#                             "2" = "Santa Barbara", 
-#                             "3" = "San Diego")) 
+#### By port ID
+
+# brmstools::coefplot(fit_qMSQD,
+#                     pars = "MSQD_SPAWN_SDM_90_z",
+#                     grouping = "port_ID",
+#                     r_intervals = TRUE,
+#                     r_col = "firebrick")
+
+coeff_port_sdm <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2] %>%
+  as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
+  ggplot(coeff_port_sdm, aes(x=port_ID, y=Estimate)) +
+  geom_point() +  geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5),
+    width=.2, position=position_dodge(0.05)) + coord_flip() + ggtitle("Squid SDM estimates") +
+  ylab("Coefficient") + xlab("") + 
+    scale_x_discrete(labels=c("1" = "Los Angeles", 
+                              "4" = "Monterey",
+                              "2" = "Santa Barbara", 
+                              "3" = "San Diego"))
+
+  coeff_port_int <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 3] %>%
+    as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
+  ggplot(coeff_port_int, aes(x=port_ID, y=Estimate)) + geom_point() +
+    geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5),
+                  width=.2, position=position_dodge(0.05)) + coord_flip() +
+    ggtitle("Sardine SDM") +  ylab("Coefficient") + xlab("") +
+    scale_x_discrete(labels=c("1" = "Los Angeles",
+                              "4" = "Monterey",
+                              "2" = "Santa Barbara",
+                              "3" = "San Diego"))
+  
+coeff_port_int <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 4] %>%
+  as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
+  ggplot(coeff_port_int, aes(x=port_ID, y=Estimate)) + geom_point() +
+  geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5),
+                width=.2, position=position_dodge(0.05)) + coord_flip() +
+  ggtitle("Squid SDM x Sardine SDM") +  ylab("Coefficient") + xlab("") +
+  scale_x_discrete(labels=c("1" = "Los Angeles",
+                            "4" = "Monterey",
+                            "2" = "Santa Barbara",
+                            "3" = "San Diego"))
   
 #### By clusters 
 coeff_cluster_sdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
@@ -686,27 +701,64 @@ coeff_cluster_int <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
     xlab("Coefficient") + ylab("Cluster")    
   
 
-### Hypothesis test ###
-hypothesis(fit_qMSQD, "MSQD_SPAWN_SDM_90 = 0") 
+# ### Hypothesis test ###
+# hypothesis(fit_qMSQD, "MSQD_SPAWN_SDM_90 = 0") 
   
-### Compare multilevel effects ###
-as_draws_df(fit_qMSQD, add_chain = T) %>%
-  ggplot(aes(x = sd_cluster__MSQD_SPAWN_SDM_90)) +
-  geom_density(size = 0, fill = "orange1", alpha = 3/4) +
-  geom_density(aes(x = sd_port_ID__MSQD_SPAWN_SDM_90),
-               size = 0, fill = "orange4", alpha = 3/4) +
-  scale_y_continuous(NULL, breaks = NULL) +
-  labs(title = expression(sigma), subtitle = "Market squid SDM") +
-  annotate("text", x = 10, y = 1/10, label = "Port area", color = "orange4") +
-  annotate("text", x = 4, y = 1/5, label = "Cluster", color = "orange1") +
-  theme_fivethirtyeight()
+# ### Compare multilevel effects ###
+# as_draws_df(fit_qMSQD, add_chain = T) %>%
+#   ggplot(aes(x = sd_cluster__MSQD_SPAWN_SDM_90)) +
+#   geom_density(size = 0, fill = "orange1", alpha = 3/4) +
+#   geom_density(aes(x = sd_port_ID__MSQD_SPAWN_SDM_90),
+#                size = 0, fill = "orange4", alpha = 3/4) +
+#   scale_y_continuous(NULL, breaks = NULL) +
+#   labs(title = expression(sigma), subtitle = "Market squid SDM") +
+#   annotate("text", x = 10, y = 1/10, label = "Port area", color = "orange4") +
+#   annotate("text", x = 4, y = 1/5, label = "Cluster", color = "orange1") +
+#   theme_fivethirtyeight()
 
 
 ### Conditional effects ###
 
-#### By port area
-library(tibble)
-library(ggplot2)
+  
+  #### By port_area
+  conditions <- data.frame(cluster = unique(dataset_msqd$port_ID))
+  rownames(conditions) <- unique(dataset_msqd$PORT_AREA_CODE)
+  
+  conditional_effects_msqd_sdm <-
+    conditional_effects(
+      fit_qMSQD, 
+      "MSQD_SPAWN_SDM_90_z",                
+      surface=TRUE, 
+      conditions = conditions, 
+      re_formula = NULL)#, transform = log, method = "posterior_predict"))
+  
+  plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
+    ggtitle('Market squid availability effect on squid landings') +
+    theme(plot.title = element_text(size=9, face="bold.italic"),
+          axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+    scale_x_continuous(name = "Prob(Presence)") +
+    scale_y_continuous(name = element_blank())
+  
+  conditional_effects_psdn_sdm <-
+    conditional_effects(
+      fit_qMSQD, 
+      "PSDN_SDM_60_z",                
+      surface=TRUE, 
+      conditions = conditions, 
+      re_formula = NULL)#, transform = log, method = "posterior_predict"))
+  
+  plot(conditional_effects_psdn_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
+    ggtitle('Pacific sardine availability effect on squid landings') +
+    theme(plot.title = element_text(size=9, face="bold.italic"),
+          axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+    scale_x_continuous(name = "Prob(Presence)") +
+    scale_y_continuous(name = element_blank())
+  
+  rm(conditional_effects_msqd_sdm, conditional_effects_psdn.open, conditional_effects_psdn_sdm)
+  
+  
+  
+#### By cluster
 conditions <- data.frame(cluster = unique(dataset_msqd$cluster))
 rownames(conditions) <- unique(dataset_msqd$group_all)
 
@@ -765,7 +817,7 @@ plot(c_eff_int_psdn_msqd, plot = FALSE)[[1]] +
 
 #### Using the data estimation
 set.seed(123)
-prediction <- cbind(predict(fit_qMSQD), dataset_msqd)
+prediction <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
 prediction$LANDING_YEAR <- as.numeric(as.character(prediction$LANDING_YEAR))
 
 meltdf <- prediction %>% 
