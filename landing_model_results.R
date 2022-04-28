@@ -553,88 +553,80 @@ library(brms)
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) 
 
-fit_qMSQD_1 <-
-  brm(
-    formula = ln_MSQD_Landings ~ 1,
+# fit_qMSQD <-
+#   brm(
+#     formula = ln_MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open,
+#     data = dataset_msqd_landing,
+#     control = list(adapt_delta = 0.99, max_treedepth = 12),
+#     chains = 1,
+#     family = "gaussian",
+#     cores = 4)
+#     saveRDS(fit_qMSQD, file = here::here("Estimations", "fit_qMSQD.RDS"))
+#
+# fit_qMSQD_both    <- update(fit_qMSQD, newdata = dataset_msqd_landing, formula. = ~ . + (1 | cluster) + (1 | port_ID))
+#                      saveRDS(fit_qMSQD_both, file = here::here("Estimations", "fit_qMSQD_both.RDS"))
+
+fit_qMSQD_both_slopes <- brm(
+    formula = ln_MSQD_Landings ~ 
+       1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open +
+      (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open | cluster) + 
+      (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open | port_ID),
     data = dataset_msqd_landing,
     control = list(adapt_delta = 0.99, max_treedepth = 12),
-    chains = 1,
+    chains = 2,
     family = "gaussian",
     cores = 4)
-    saveRDS(fit_qMSQD_1,
-            file = here::here("Estimations", "fit_qMSQD_1.RDS"))
+    saveRDS(fit_qMSQD_both_slopes, 
+            file = here::here("Estimations", "fit_qMSQD_both_slopes.RDS"))            
+                     
+fit_qMSQD_port_slopes    <- update(fit_qMSQD_both_slopes,
+                            formula. = ~ . - (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open | cluster))
+                            saveRDS(fit_qMSQD_port_slopes, file = here::here("Estimations", "fit_qMSQD_port_slopes.RDS"))
+fit_qMSQD_cluster_slopes <- update(fit_qMSQD_both_slopes,
+                            formula. = ~ . - (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open | port_ID))
+                            saveRDS(fit_qMSQD_cluster_slopes, file = here::here("Estimations", "fit_qMSQD_cluster_slopes.RDS"))
 
-  fit_qMSQD_1_a      <- update(fit_qMSQD_1,                                newdata = dataset_msqd_landing, formula. = ~ . + MSQD_SPAWN_SDM_90_z)
-  fit_qMSQD_1_b      <- update(fit_qMSQD_1_a,                              newdata = dataset_msqd_landing, formula. = ~ . + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open)
-  fit_qMSQD_1_c      <- update(fit_qMSQD_1_b,                              newdata = dataset_msqd_landing, formula. = ~ . + PSDN_SDM_60_z:PSDN.Open)
-  fit_qMSQD_1_d      <- update(fit_qMSQD_1_c,                              newdata = dataset_msqd_landing, formula. = ~ . + MSQD_Price_z)
-  fit_qMSQD_1_e      <- update(fit_qMSQD_1_c,                              newdata = dataset_msqd_landing, formula. = ~ . + MSQD.Open)
-  fit_qMSQD_1_f      <- update(fit_qMSQD_1_c,                              newdata = dataset_msqd_landing, formula. = ~ . + MSQD.Open + MSQD_Price_z)
-  fit_qMSQD_1_a_skew <- update(fit_qMSQD_1,        family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + MSQD_SPAWN_SDM_90_z)
-  fit_qMSQD_1_b_skew <- update(fit_qMSQD_1_a_skew, family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open)
-  fit_qMSQD_1_c_skew <- update(fit_qMSQD_1_b_skew, family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + PSDN_SDM_60_z:PSDN.Open)
-  fit_qMSQD_1_d_skew <- update(fit_qMSQD_1_c_skew, family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + MSQD_Price_z)
-  fit_qMSQD_1_e_skew <- update(fit_qMSQD_1_c_skew, family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + MSQD.Open)
-  fit_qMSQD_1_f_skew <- update(fit_qMSQD_1_c_skew, family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + MSQD.Open + MSQD_Price_z)
-  
-saveRDS(fit_qMSQD_1_a, file = here::here("Estimations", "fit_qMSQD_1_a.RDS"))
-saveRDS(fit_qMSQD_1_b, file = here::here("Estimations", "fit_qMSQD_1_b.RDS"))
-saveRDS(fit_qMSQD_1_c, file = here::here("Estimations", "fit_qMSQD_1_c.RDS"))
-saveRDS(fit_qMSQD_1_d, file = here::here("Estimations", "fit_qMSQD_1_d.RDS"))
-saveRDS(fit_qMSQD_1_e, file = here::here("Estimations", "fit_qMSQD_1_e.RDS"))
-saveRDS(fit_qMSQD_1_f, file = here::here("Estimations", "fit_qMSQD_1_f.RDS"))
+# fit_qMSQD                <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
+# fit_qMSQD_cluster        <- readRDS(here::here("Estimations", "fit_qMSQD_cluster.RDS"))
+# fit_qMSQD_port           <- readRDS(here::here("Estimations", "fit_qMSQD_port.RDS"))
+# fit_qMSQD_both           <- readRDS(here::here("Estimations", "fit_qMSQD_both.RDS"))
+# fit_qMSQD_cluster_slopes <- readRDS(here::here("Estimations", "fit_qMSQD_slopes_cluster.RDS"))
+# fit_qMSQD_port_slopes    <- readRDS(here::here("Estimations", "fit_qMSQD_slopes_port.RDS"))
+# fit_qMSQD_both_slopes    <- readRDS(here::here("Estimations", "fit_qMSQD_slopes_both.RDS"))
 
-saveRDS(fit_qMSQD_1_a_skew, file = here::here("Estimations", "fit_qMSQD_1_a_skew.RDS"))
-saveRDS(fit_qMSQD_1_b_skew, file = here::here("Estimations", "fit_qMSQD_1_b_skew.RDS"))
-saveRDS(fit_qMSQD_1_c_skew, file = here::here("Estimations", "fit_qMSQD_1_c_skew.RDS"))
-saveRDS(fit_qMSQD_1_d_skew, file = here::here("Estimations", "fit_qMSQD_1_d_skew.RDS"))
-saveRDS(fit_qMSQD_1_e_skew, file = here::here("Estimations", "fit_qMSQD_1_e_skew.RDS"))
-saveRDS(fit_qMSQD_1_f_skew, file = here::here("Estimations", "fit_qMSQD_1_f_skew.RDS"))
-
-
-# fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
-# rbind(bayes_R2(fit_qMSQD_Spawning_linear),
-#       bayes_R2(fit_qMSQD_Spawning_linear_2)) %>%
-#   as_tibble() %>%
-#   mutate(model = c("Linear - cluster effects",
-#                    "Hurdle - cluster & port effects"),
-#          r_square_posterior_mean = round(Estimate, digits = 2)) %>%
-#   select(model, r_square_posterior_mean)
+rbind(bayes_R2(fit_qMSQD),           
+      bayes_R2(fit_qMSQD_cluster), 
+      bayes_R2(fit_qMSQD_port), 
+      bayes_R2(fit_qMSQD_both) 
+      # bayes_R2(fit_qMSQD_cluster_slopes), 
+      # bayes_R2(fit_qMSQD_port_slopes), 
+      # bayes_R2(fit_qMSQD_both_slopes)
+      ) %>%
+  as_tibble() %>%
+  mutate(model = c("Pooled", "Cluster RE", "Port RE", "Cluster & Port RE"),
+         r_square_posterior_mean = round(Estimate, digits = 2)) %>%
+  select(model, r_square_posterior_mean)
 
 
 ##### Model Comparision #####
-fit_qMSQD_1_a <- add_criterion(fit_qMSQD_1_a, "loo")
-fit_qMSQD_1_b <- add_criterion(fit_qMSQD_1_b, "loo")
-fit_qMSQD_1_c <- add_criterion(fit_qMSQD_1_c, "loo")
-fit_qMSQD_1_d <- add_criterion(fit_qMSQD_1_d, "loo")
-fit_qMSQD_1_e <- add_criterion(fit_qMSQD_1_e, "loo")
-fit_qMSQD_1_f <- add_criterion(fit_qMSQD_1_f, "loo")
-fit_qMSQD_1_a_skew <- add_criterion(fit_qMSQD_1_a_skew, "loo")
-fit_qMSQD_1_b_skew <- add_criterion(fit_qMSQD_1_b_skew, "loo")
-fit_qMSQD_1_c_skew <- add_criterion(fit_qMSQD_1_c_skew, "loo")
-fit_qMSQD_1_d_skew <- add_criterion(fit_qMSQD_1_d_skew, "loo")
-fit_qMSQD_1_e_skew <- add_criterion(fit_qMSQD_1_e_skew, "loo")
-fit_qMSQD_1_f_skew <- add_criterion(fit_qMSQD_1_f_skew, "loo")
+fit_qMSQD                <- add_criterion(fit_qMSQD               , "loo")
+fit_qMSQD_cluster        <- add_criterion(fit_qMSQD_cluster       , "loo")
+fit_qMSQD_port           <- add_criterion(fit_qMSQD_port          , "loo")
+fit_qMSQD_both           <- add_criterion(fit_qMSQD_both          , "loo")
+fit_qMSQD_cluster_slopes <- add_criterion(fit_qMSQD_cluster_slopes, "loo")
+fit_qMSQD_port_slopes    <- add_criterion(fit_qMSQD_port_slopes   , "loo")
+fit_qMSQD_both_slopes    <- add_criterion(fit_qMSQD_both_slopes   , "loo")
 
-# 
 # w <- as.data.frame(
- loo_compare(fit_qMSQD_1_a,
-             fit_qMSQD_1_b,
-             fit_qMSQD_1_c,
-             fit_qMSQD_1_d,
-             fit_qMSQD_1_e,
-             fit_qMSQD_1_f,
-             fit_qMSQD_1_a_skew,
-             fit_qMSQD_1_b_skew,
-             fit_qMSQD_1_c_skew,
-             fit_qMSQD_1_d_skew,
-             fit_qMSQD_1_e_skew,
-             fit_qMSQD_1_f_skew,
+ loo_compare(fit_qMSQD,               
+             fit_qMSQD_cluster,       
+             fit_qMSQD_port,          
+             fit_qMSQD_both,          
              criterion = "loo")
 # )
 # gs4_create("LOO", sheets = w)
 
-fit_qMSQD <- fit_qMSQD_1_f
+fit_qMSQD <- fit_qMSQD_1_d
 
 
 
