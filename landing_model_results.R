@@ -553,76 +553,53 @@ library(brms)
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) 
 
-# fit_qMSQD <-
-#   brm(
-#     formula = ln_MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open,
-#     data = dataset_msqd_landing,
-#     control = list(adapt_delta = 0.99, max_treedepth = 12),
-#     chains = 1,
-#     family = "gaussian",
-#     cores = 4)
-#     saveRDS(fit_qMSQD, file = here::here("Estimations", "fit_qMSQD.RDS"))
-#
-# fit_qMSQD_both    <- update(fit_qMSQD, newdata = dataset_msqd_landing, formula. = ~ . + (1 | cluster) + (1 | port_ID))
-#                      saveRDS(fit_qMSQD_both, file = here::here("Estimations", "fit_qMSQD_both.RDS"))
-
-fit_qMSQD_both_slopes <- brm(
-    formula = ln_MSQD_Landings ~ 
-       1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open +
-      (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z | cluster) + (1 | port_ID),
+fit_qMSQD_cluster <-
+  brm(
+    formula = MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open
+                                  + (1 | cluster),
     data = dataset_msqd_landing,
     control = list(adapt_delta = 0.99, max_treedepth = 12),
-    chains = 2,
-    family = "gaussian",
+    chains = 1,
+    family = lognormal(),
     cores = 4)
-    saveRDS(fit_qMSQD_both_slopes, 
-            file = here::here("Estimations", "fit_qMSQD_both_slopes.RDS"))            
+    saveRDS(fit_qMSQD_cluster, file = here::here("Estimations", "fit_qMSQD_cluster.RDS"))
+
+fit_qMSQD_cluster_slopes <- brm(
+    formula = MSQD_Landings ~
+       1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open +
+      (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open | cluster),
+    data = dataset_msqd_landing,
+    control = list(adapt_delta = 0.90, max_treedepth = 12),
+    chains = 2,
+    cores = 4,
+    family = lognormal())
+    saveRDS(fit_qMSQD_cluster_slopes,
+            file = here::here("Estimations", "fit_qMSQD_cluster_slopes.RDS"))
                      
-fit_qMSQD_cluster_slopes <- update(fit_qMSQD_both_slopes,
-                            formula. = ~ . - (1 | port_ID))
-                            saveRDS(fit_qMSQD_cluster_slopes, file = here::here("Estimations", "fit_qMSQD_cluster_slopes.RDS"))
-
-# fit_qMSQD                <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
 # fit_qMSQD_cluster        <- readRDS(here::here("Estimations", "fit_qMSQD_cluster.RDS"))
-# fit_qMSQD_port           <- readRDS(here::here("Estimations", "fit_qMSQD_port.RDS"))
-# fit_qMSQD_both           <- readRDS(here::here("Estimations", "fit_qMSQD_both.RDS"))
-# fit_qMSQD_cluster_slopes <- readRDS(here::here("Estimations", "fit_qMSQD_slopes_cluster.RDS"))
-# fit_qMSQD_port_slopes    <- readRDS(here::here("Estimations", "fit_qMSQD_slopes_port.RDS"))
-# fit_qMSQD_both_slopes    <- readRDS(here::here("Estimations", "fit_qMSQD_slopes_both.RDS"))
+# fit_qMSQD_cluster_slopes <- readRDS(here::here("Estimations", "fit_qMSQD_cluster_slopes.RDS"))
 
-rbind(bayes_R2(fit_qMSQD),           
-      bayes_R2(fit_qMSQD_cluster), 
-      bayes_R2(fit_qMSQD_port), 
-      bayes_R2(fit_qMSQD_both) 
-      # bayes_R2(fit_qMSQD_cluster_slopes), 
-      # bayes_R2(fit_qMSQD_port_slopes), 
-      # bayes_R2(fit_qMSQD_both_slopes)
+rbind(bayes_R2(fit_qMSQD_cluster), 
+      bayes_R2(fit_qMSQD_cluster_slopes)
       ) %>%
   as_tibble() %>%
-  mutate(model = c("Pooled", "Cluster RE", "Port RE", "Cluster & Port RE"),
+  mutate(model = c("RE by Cluster", "RE and slopes by cluster"),
          r_square_posterior_mean = round(Estimate, digits = 2)) %>%
   select(model, r_square_posterior_mean)
 
 
 ##### Model Comparision #####
-fit_qMSQD                <- add_criterion(fit_qMSQD               , "loo")
-fit_qMSQD_cluster        <- add_criterion(fit_qMSQD_cluster       , "loo")
-fit_qMSQD_port           <- add_criterion(fit_qMSQD_port          , "loo")
-fit_qMSQD_both           <- add_criterion(fit_qMSQD_both          , "loo")
-fit_qMSQD_cluster_slopes <- add_criterion(fit_qMSQD_cluster_slopes, "loo")
-fit_qMSQD_port_slopes    <- add_criterion(fit_qMSQD_port_slopes   , "loo")
-fit_qMSQD_both_slopes    <- add_criterion(fit_qMSQD_both_slopes   , "loo")
+fit_qMSQD_cluster        <- add_criterion(fit_qMSQD_cluster       , "loo", moment_match = TRUE)
+fit_qMSQD_cluster_slopes <- add_criterion(fit_qMSQD_cluster_slopes, "loo", moment_match = TRUE)
 
 # w <- as.data.frame(
- loo_compare(fit_qMSQD,               
-             fit_qMSQD_cluster,       
-             fit_qMSQD_port,          
-             fit_qMSQD_both,          
+ loo_compare(fit_qMSQD_cluster
+             fit_qMSQD_cluster_slopes,
              criterion = "loo")
 # )
 # gs4_create("LOO", sheets = w)
 
-fit_qMSQD <- fit_qMSQD_1_d
+fit_qMSQD <- fit_qMSQD_cluster_slopes
 
 
 
@@ -644,7 +621,7 @@ pp_check(fit_qMSQD) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  + 
-  xlim(0, 10) + xlab("Landing (tons)")
+  xlim(0, 100) + xlab("Landing (tons)")
 
 
 ### Population parameters ###
