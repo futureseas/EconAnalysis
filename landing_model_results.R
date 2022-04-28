@@ -360,20 +360,11 @@ dataset = subset(dataset, select =
 
 # --------------------------------------------------------------------------------------
 ### Include closure data
-PSDN_closure <- read.csv("C:\\Data\\Closures\\PSDN_closures.csv") %>% 
-  dplyr::rename(LANDING_YEAR = ï..LANDING_YEAR)
-MSQD_closure <- read.csv("C:\\Data\\Closures\\MSQD_closures.csv") %>% 
-  dplyr::rename(LANDING_YEAR = ï..LANDING_YEAR)
+PSDN_closure <- read.csv("C:\\Data\\Closures\\PSDN_closures.csv")
+MSQD_closure <- read.csv("C:\\Data\\Closures\\MSQD_closures.csv") 
 
-
-PacFIN.month.closure <-
-  merge(PacFIN.month.SDM, PSDN_closure, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
-
-PacFIN.month.closure <-
-  merge(PacFIN.month.closure, MSQD_closure, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
-
-
-
+dataset <- merge(dataset, PSDN_closure, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
+dataset <- merge(dataset, MSQD_closure, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
 
 
 #---------------------------------------
@@ -422,7 +413,8 @@ sjlabelled::set_label(dataset$PORT_ID)       <- "Port ID"
 desc_data <- dataset %>%
   subset(select = -c(PORT_AREA_ID, VESSEL_NUM, group_all, LANDING_YEAR, LANDING_MONTH, AGENCY_CODE, PORT_AREA_CODE, 
                      MSQD_Price_z, MSQD_SPAWN_SDM_90_z, MSQD_SDM_90_z, PSDN_SDM_60_z, 
-                     MSQD_Price_c, MSQD_SPAWN_SDM_90_c, MSQD_SDM_90_c, PSDN_SDM_60_c))
+                     MSQD_Price_c, MSQD_SPAWN_SDM_90_c, MSQD_SDM_90_c, PSDN_SDM_60_c,
+                     length_month_PSDN, length_month_MSQD, days_open_month_PSDN, days_open_month_MSQD))
 
 table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 1, "Landings: PSDN", vars)) %>%
@@ -434,7 +426,9 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 7, "Prob(presence): PSDN", vars)) %>%
   mutate(vars = ifelse(vars == 8, "Prob(presence): MSQD", vars)) %>%
   mutate(vars = ifelse(vars == 9, "Prob(presence): MSQD (Spawning model)", vars)) %>%
-  mutate(vars = ifelse(vars == 10, "Prob(presence): NANC", vars)) 
+  mutate(vars = ifelse(vars == 10, "Prob(presence): NANC", vars)) %>%
+  mutate(vars = ifelse(vars == 11, "Fraction of month open: PSDN", vars)) %>%
+  mutate(vars = ifelse(vars == 12, "Fraction of month open: MSQD", vars)) 
 
 # gs4_create("SummaryMonthly", sheets = table)
 rm(desc_data, table)
@@ -473,8 +467,9 @@ dataset_msqd <- dataset %>%
                 MSQD_SPAWN_SDM_90, MSQD_Landings, MSQD_Price, 
                 PSDN_Landings, NANC_Landings, PSDN_Price, NANC_Price, 
                 PSDN_SDM_60, NANC_SDM_20,
-                MSQD_Price_z, MSQD_SPAWN_SDM_90_z, PSDN_SDM_60_z,
-                MSQD_Price_c, MSQD_SPAWN_SDM_90_c, PSDN_SDM_60_c)  %>% 
+                MSQD_Price_z, MSQD_SPAWN_SDM_90_z, MSQD_SDM_90_z, PSDN_SDM_60_z,
+                MSQD_Price_c, MSQD_SPAWN_SDM_90_c, MSQD_SDM_90_c, PSDN_SDM_60_c,
+                PSDN.Open, MSQD.Open)  %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>%
   dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>%
   dplyr::mutate(NANC_Landings = coalesce(NANC_Landings, 0)) %>%
@@ -484,8 +479,9 @@ dataset_msqd <- dataset %>%
   mutate(PSDN_Landings = ifelse(PSDN_Landings< 0.0001, 0, MSQD_Landings)) %>%
   mutate(NANC_Landings = ifelse(NANC_Landings<= 0, 0, MSQD_Landings)) %>%
   mutate(NANC_Landings = ifelse(NANC_Landings< 0.0001, 0, MSQD_Landings)) %>%
-  dplyr::mutate(PSDN.Open = ifelse(LANDING_YEAR < 2015,1,0)) %>%
-  dplyr::mutate(PSDN.Participation = ifelse(PSDN_Landings > 0, 1, 0)) %>%
+  dplyr::mutate(PSDN.Participation = ifelse(PSDN_Landings > 0, 1, 0)) %>% 
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::mutate(ln_MSQD_Landings = log(MSQD_Landings)) %>%
     filter(group_all == 1 | group_all == 2 | group_all == 4 | group_all == 5 | group_all == 7) %>%
     filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA") %>% drop_na()
@@ -508,6 +504,7 @@ dataset_msqd$LANDING_YEAR <- factor(dataset_msqd$LANDING_YEAR)
 class(dataset_msqd$PSDN.Open)
 class(dataset_msqd$port_ID)
 class(dataset_msqd$cluster)
+class(dataset_msqd$LANDING_YEAR)
 
 # # install.packages(c("fastDummies", "recipes"))
 # library('fastDummies')
@@ -556,75 +553,90 @@ library(brms)
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) 
 
-fit_qMSQD_Spawning_linear_2 <-
+fit_qMSQD_1 <-
   brm(
-    formula = ln_MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-      MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open +
-      (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-      MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open | cluster + port_ID),
+    formula = ln_MSQD_Landings ~ 1,
     data = dataset_msqd_landing,
-    control = list(adapt_delta = 0.9, max_treedepth = 12),
+    control = list(adapt_delta = 0.99, max_treedepth = 12),
     chains = 1,
+    family = "gaussian",
     cores = 4)
-    saveRDS(fit_qMSQD_Spawning_linear_2,
-            file = here::here("Estimations", "fit_qMSQD_Spawning_linear_2.RDS"))
-    
-# fit_qMSQD_Spawning_hurdle <-
-#     brm(bf(
-#      MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-#      MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open +
-#       (1 + MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-#          MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open | cluster),
-#     hu ~ 1),
-#     data = dataset_msqd,
-#     family = hurdle_gamma(),
-#     control = list(adapt_delta = 0.9, max_treedepth = 12),
-#     chains = 1,
-#     cores = 4)
-#     saveRDS(fit_qMSQD_Spawning_9,
-#             file = here::here("Estimations", "fit_qMSQD_Spawning_9.RDS"))
+    saveRDS(fit_qMSQD_1,
+            file = here::here("Estimations", "fit_qMSQD_1.RDS"))
 
-# fit_qMSQD_abund <- brm(bf(
-#   MSQD_Landings ~ 1 +  MSQD_SDM_90_JS_CPUE +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open
-#   + (1 +  MSQD_SDM_90_JS_CPUE:PSDN_SDM_60:PSDN.Open +  MSQD_SDM_90_JS_CPUE | cluster + port_ID),
-#   hu ~ 1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c
-#   + (1 + PSDN.Open + PSDN.Participation:PSDN.Open + MSQD_Price_c | cluster + port_ID)),
-#   data = dataset_msqd,
-#   family = hurdle_gamma(),
-#   control = list(adapt_delta = 0.95, max_treedepth = 20),
-#   chains = 2,
-#   cores = 4)
-#   saveRDS(fit_qMSQD_abund,
-#           file = here::here("Estimations", "fit_qMSQD_abund.RDS"))
+  fit_qMSQD_1_a      <- update(fit_qMSQD_1,                                newdata = dataset_msqd_landing, formula. = ~ . + MSQD_SPAWN_SDM_90_z)
+  fit_qMSQD_1_b      <- update(fit_qMSQD_1_a,                              newdata = dataset_msqd_landing, formula. = ~ . + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open)
+  fit_qMSQD_1_c      <- update(fit_qMSQD_1_b,                              newdata = dataset_msqd_landing, formula. = ~ . + PSDN_SDM_60_z:PSDN.Open)
+  fit_qMSQD_1_d      <- update(fit_qMSQD_1_c,                              newdata = dataset_msqd_landing, formula. = ~ . + MSQD_Price_z)
+  fit_qMSQD_1_e      <- update(fit_qMSQD_1_c,                              newdata = dataset_msqd_landing, formula. = ~ . + MSQD.Open)
+  fit_qMSQD_1_f      <- update(fit_qMSQD_1_c,                              newdata = dataset_msqd_landing, formula. = ~ . + MSQD.Open + MSQD_Price_z)
+  fit_qMSQD_1_a_skew <- update(fit_qMSQD_1,        family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + MSQD_SPAWN_SDM_90_z)
+  fit_qMSQD_1_b_skew <- update(fit_qMSQD_1_a_skew, family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open)
+  fit_qMSQD_1_c_skew <- update(fit_qMSQD_1_b_skew, family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + PSDN_SDM_60_z:PSDN.Open)
+  fit_qMSQD_1_d_skew <- update(fit_qMSQD_1_c_skew, family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + MSQD_Price_z)
+  fit_qMSQD_1_e_skew <- update(fit_qMSQD_1_c_skew, family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + MSQD.Open)
+  fit_qMSQD_1_f_skew <- update(fit_qMSQD_1_c_skew, family = 'skew_normal', newdata = dataset_msqd_landing, formula. = ~ . + MSQD.Open + MSQD_Price_z)
   
-#   prior = c(prior(lognormal(0,1), class = b, coef = "MSQD_SDM_90_JS_cpue")),
+saveRDS(fit_qMSQD_1_a, file = here::here("Estimations", "fit_qMSQD_1_a.RDS"))
+saveRDS(fit_qMSQD_1_b, file = here::here("Estimations", "fit_qMSQD_1_b.RDS"))
+saveRDS(fit_qMSQD_1_c, file = here::here("Estimations", "fit_qMSQD_1_c.RDS"))
+saveRDS(fit_qMSQD_1_d, file = here::here("Estimations", "fit_qMSQD_1_d.RDS"))
+saveRDS(fit_qMSQD_1_e, file = here::here("Estimations", "fit_qMSQD_1_e.RDS"))
+saveRDS(fit_qMSQD_1_f, file = here::here("Estimations", "fit_qMSQD_1_f.RDS"))
 
-fit_qMSQD_Spawning_linear <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_7_2.RDS"))
-fit_qMSQD_Spawning_linear_2 <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_linear_2.RDS"))
-# fit_qMSQD_Spawning_9   <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_9.RDS"))
-# fit_qMSQD_Spawning_9_2 <- readRDS(here::here("Estimations", "fit_qMSQD_Spawning_9_2.RDS"))
+saveRDS(fit_qMSQD_1_a_skew, file = here::here("Estimations", "fit_qMSQD_1_a_skew.RDS"))
+saveRDS(fit_qMSQD_1_b_skew, file = here::here("Estimations", "fit_qMSQD_1_b_skew.RDS"))
+saveRDS(fit_qMSQD_1_c_skew, file = here::here("Estimations", "fit_qMSQD_1_c_skew.RDS"))
+saveRDS(fit_qMSQD_1_d_skew, file = here::here("Estimations", "fit_qMSQD_1_d_skew.RDS"))
+saveRDS(fit_qMSQD_1_e_skew, file = here::here("Estimations", "fit_qMSQD_1_e_skew.RDS"))
+saveRDS(fit_qMSQD_1_f_skew, file = here::here("Estimations", "fit_qMSQD_1_f_skew.RDS"))
 
 
-rbind(bayes_R2(fit_qMSQD_Spawning_linear),
-      bayes_R2(fit_qMSQD_Spawning_linear_2)) %>%
-  as_tibble() %>%
-  mutate(model = c("Linear - cluster effects",
-                   "Hurdle - cluster & port effects"),
-         r_square_posterior_mean = round(Estimate, digits = 2)) %>%
-  select(model, r_square_posterior_mean)
+# fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
+# rbind(bayes_R2(fit_qMSQD_Spawning_linear),
+#       bayes_R2(fit_qMSQD_Spawning_linear_2)) %>%
+#   as_tibble() %>%
+#   mutate(model = c("Linear - cluster effects",
+#                    "Hurdle - cluster & port effects"),
+#          r_square_posterior_mean = round(Estimate, digits = 2)) %>%
+#   select(model, r_square_posterior_mean)
+
 
 ##### Model Comparision #####
-fit_qMSQD_Spawning_linear   <- add_criterion(fit_qMSQD_Spawning_linear, "loo")
-fit_qMSQD_Spawning_linear_2 <- add_criterion(fit_qMSQD_Spawning_linear_2, "loo")
+fit_qMSQD_1_a <- add_criterion(fit_qMSQD_1_a, "loo")
+fit_qMSQD_1_b <- add_criterion(fit_qMSQD_1_b, "loo")
+fit_qMSQD_1_c <- add_criterion(fit_qMSQD_1_c, "loo")
+fit_qMSQD_1_d <- add_criterion(fit_qMSQD_1_d, "loo")
+fit_qMSQD_1_e <- add_criterion(fit_qMSQD_1_e, "loo")
+fit_qMSQD_1_f <- add_criterion(fit_qMSQD_1_f, "loo")
+fit_qMSQD_1_a_skew <- add_criterion(fit_qMSQD_1_a_skew, "loo")
+fit_qMSQD_1_b_skew <- add_criterion(fit_qMSQD_1_b_skew, "loo")
+fit_qMSQD_1_c_skew <- add_criterion(fit_qMSQD_1_c_skew, "loo")
+fit_qMSQD_1_d_skew <- add_criterion(fit_qMSQD_1_d_skew, "loo")
+fit_qMSQD_1_e_skew <- add_criterion(fit_qMSQD_1_e_skew, "loo")
+fit_qMSQD_1_f_skew <- add_criterion(fit_qMSQD_1_f_skew, "loo")
+
 # 
 # w <- as.data.frame(
- loo_compare(fit_qMSQD_Spawning_linear,
-             fit_qMSQD_Spawning_linear_2,
+ loo_compare(fit_qMSQD_1_a,
+             fit_qMSQD_1_b,
+             fit_qMSQD_1_c,
+             fit_qMSQD_1_d,
+             fit_qMSQD_1_e,
+             fit_qMSQD_1_f,
+             fit_qMSQD_1_a_skew,
+             fit_qMSQD_1_b_skew,
+             fit_qMSQD_1_c_skew,
+             fit_qMSQD_1_d_skew,
+             fit_qMSQD_1_e_skew,
+             fit_qMSQD_1_f_skew,
              criterion = "loo")
 # )
 # gs4_create("LOO", sheets = w)
 
-fit_qMSQD <- fit_qMSQD_Spawning_linear_2
+fit_qMSQD <- fit_qMSQD_1_f
+
+
 
 #----------------------------------------------------
 ## Model summary ##
@@ -650,12 +662,14 @@ pp_check(fit_qMSQD) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model
 ### Population parameters ###
 summary(fit_qMSQD)
 mcmc_plot(fit_qMSQD, regex = TRUE, variable = 
-            c("b_MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open", "b_MSQD_SPAWN_SDM_90_z", "b_PSDN_SDM_60_z:PSDN.Open")) +
+            c("b_MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open", "b_MSQD_SPAWN_SDM_90_z", 
+              "b_PSDN_SDM_60_z:PSDN.Open", "MSQD.Open")) +
   theme(axis.text.y = element_text(hjust = 0)) + scale_y_discrete(
   labels = c(
-    "b_MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open"  = "Landing: MSQD SDM x PSDN SDM x PSDN open",
+    "b_MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open"  = "Landing: MSQD SDM x PSDN SDM x PSDN open fraction",
     "b_MSQD_SPAWN_SDM_90_z"     = "Landing: MSQD SDM",
-    "b_PSDN_SDM_60_z:PSDN.Open" = "Landing: PSDN SDM x PSDN open"))
+    "b_PSDN_SDM_60_z:PSDN.Open" = "Landing: PSDN SDM x PSDN open",
+    "b_MSQD.Open" = "MSQD open fraction"))
 
 #------------------------------------------------------
 ### Group parameters ###
