@@ -569,8 +569,7 @@ dataset_msqd_landing <- dataset_msqd %>%
 fit_qMSQD_both_slopes <- brm(
     formula = ln_MSQD_Landings ~ 
        1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open +
-      (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open | cluster) + 
-      (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open | port_ID),
+      (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z | cluster) + (1 | port_ID),
     data = dataset_msqd_landing,
     control = list(adapt_delta = 0.99, max_treedepth = 12),
     chains = 2,
@@ -579,11 +578,8 @@ fit_qMSQD_both_slopes <- brm(
     saveRDS(fit_qMSQD_both_slopes, 
             file = here::here("Estimations", "fit_qMSQD_both_slopes.RDS"))            
                      
-fit_qMSQD_port_slopes    <- update(fit_qMSQD_both_slopes,
-                            formula. = ~ . - (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open | cluster))
-                            saveRDS(fit_qMSQD_port_slopes, file = here::here("Estimations", "fit_qMSQD_port_slopes.RDS"))
 fit_qMSQD_cluster_slopes <- update(fit_qMSQD_both_slopes,
-                            formula. = ~ . - (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open | port_ID))
+                            formula. = ~ . - (1 | port_ID))
                             saveRDS(fit_qMSQD_cluster_slopes, file = here::here("Estimations", "fit_qMSQD_cluster_slopes.RDS"))
 
 # fit_qMSQD                <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
