@@ -552,22 +552,36 @@ class(dataset_msqd$LANDING_YEAR)
 library(brms)
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) 
+# %>%
+#   dplyr::filter(MSQD.Open == 1) Check endogeneity of prices and closures... 
+  
 
 fit_qMSQD_cluster <-
   brm(
-    formula = MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open
+    formula = MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD.Open
                                   + (1 | cluster),
     data = dataset_msqd_landing,
-    control = list(adapt_delta = 0.99, max_treedepth = 12),
-    chains = 1,
+    control = list(adapt_delta = 0.90, max_treedepth = 12),
+    chains = 2,
     family = lognormal(),
     cores = 4)
     saveRDS(fit_qMSQD_cluster, file = here::here("Estimations", "fit_qMSQD_cluster.RDS"))
+    
+fit_qMSQD_cluster_port <-
+      brm(
+        formula = MSQD_Landings ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD.Open
+        + (1 | cluster) + (1 | port_ID),
+        data = dataset_msqd_landing,
+        control = list(adapt_delta = 0.90, max_treedepth = 12),
+        chains = 2,
+        family = lognormal(),
+        cores = 4)
+    saveRDS(fit_qMSQD_cluster_port, file = here::here("Estimations", "fit_qMSQD_cluster_port.RDS"))
 
 fit_qMSQD_cluster_slopes <- brm(
     formula = MSQD_Landings ~
-       1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open +
-      (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD_Price_z + MSQD.Open | cluster),
+       1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD.Open +
+      (1 + MSQD_SPAWN_SDM_90_z + MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + PSDN_SDM_60_z:PSDN.Open + MSQD.Open | cluster),
     data = dataset_msqd_landing,
     control = list(adapt_delta = 0.90, max_treedepth = 12),
     chains = 2,
@@ -579,29 +593,30 @@ fit_qMSQD_cluster_slopes <- brm(
 # fit_qMSQD_cluster        <- readRDS(here::here("Estimations", "fit_qMSQD_cluster.RDS"))
 # fit_qMSQD_cluster_slopes <- readRDS(here::here("Estimations", "fit_qMSQD_cluster_slopes.RDS"))
 
-rbind(bayes_R2(fit_qMSQD_cluster), 
+rbind(bayes_R2(fit_qMSQD_cluster),
+      bayes_R2(fit_qMSQD_cluster_port),
       bayes_R2(fit_qMSQD_cluster_slopes)
       ) %>%
   as_tibble() %>%
-  mutate(model = c("RE by Cluster", "RE and slopes by cluster"),
+  mutate(model = c("RE by Cluster", "RE by cluster and port", "RE and slopes by cluster"),
          r_square_posterior_mean = round(Estimate, digits = 2)) %>%
   select(model, r_square_posterior_mean)
 
 
 ##### Model Comparision #####
-fit_qMSQD_cluster        <- add_criterion(fit_qMSQD_cluster       , "loo", moment_match = TRUE)
-fit_qMSQD_cluster_slopes <- add_criterion(fit_qMSQD_cluster_slopes, "loo", moment_match = TRUE)
+fit_qMSQD_cluster        <- add_criterion(fit_qMSQD_cluster       , "loo")
+fit_qMSQD_cluster_port   <- add_criterion(fit_qMSQD_cluster_port  , "loo")
+fit_qMSQD_cluster_slopes <- add_criterion(fit_qMSQD_cluster_slopes, "loo")
 
 # w <- as.data.frame(
- loo_compare(fit_qMSQD_cluster
+ loo_compare(fit_qMSQD_cluster,
+             fit_qMSQD_cluster_port,
              fit_qMSQD_cluster_slopes,
              criterion = "loo")
 # )
 # gs4_create("LOO", sheets = w)
 
 fit_qMSQD <- fit_qMSQD_cluster_slopes
-
-
 
 #----------------------------------------------------
 ## Model summary ##
@@ -621,7 +636,7 @@ pp_check(fit_qMSQD) + ggtitle('(a) Market Squid (SDM: Spawning aggregation model
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  + 
-  xlim(0, 100) + xlab("Landing (tons)")
+  xlim(0, 1000) + xlab("Landing (tons)")
 
 
 ### Population parameters ###
@@ -699,7 +714,9 @@ coeff_cluster_int <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
   ggplot(coeff_cluster_int, aes(y=cluster, x=Estimate)) + geom_point() +  
   geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
                   width=.2, position=position_dodge(0.05)) + ggtitle("Sardine SDM x Squid SDM") + 
-    xlab("Coefficient") + ylab("Cluster")    
+    xlab("Coefficient") + ylab("Cluster")  
+  
+
   
 
 # ### Hypothesis test ###
