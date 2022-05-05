@@ -357,16 +357,6 @@ rm(price.year.NANC)
 dataset = subset(dataset, select = 
                    -c(NANC.price.port.area, NANC.price.state, NANC.price.year.month))
 
-
-# --------------------------------------------------------------------------------------
-### Include closure data
-PSDN_closure <- read.csv("C:\\Data\\Closures\\PSDN_closures.csv")
-MSQD_closure <- read.csv("C:\\Data\\Closures\\MSQD_closures.csv") 
-
-dataset <- merge(dataset, PSDN_closure, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
-dataset <- merge(dataset, MSQD_closure, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
-
-
 #---------------------------------------
 ## Summary statistics ##
 dataset <- dataset %>% 
@@ -387,7 +377,10 @@ dataset <- dataset %>%
   dplyr::mutate(MSQD_Price_c = MSQD_Price - mean(MSQD_Price, na.rm = TRUE)) %>%
   dplyr::mutate(MSQD_SPAWN_SDM_90_c = MSQD_SPAWN_SDM_90 - mean(MSQD_SPAWN_SDM_90, na.rm = TRUE)) %>%
   dplyr::mutate(MSQD_SDM_90_c = MSQD_SDM_90 - mean(MSQD_SDM_90, na.rm = TRUE)) %>%
-  dplyr::mutate(PSDN_SDM_60_c = PSDN_SDM_60 - mean(PSDN_SDM_60, na.rm = TRUE))
+  dplyr::mutate(PSDN_SDM_60_c = PSDN_SDM_60 - mean(PSDN_SDM_60, na.rm = TRUE)) %>%
+  dplyr::mutate(Price.Fishmeal_z = ((Price.Fishmeal - mean(Price.Fishmeal, na.rm = TRUE))/sd(Price.Fishmeal, na.rm = TRUE))) %>%
+  dplyr::mutate(diesel.price_z = ((diesel.price - mean(diesel.price, na.rm = TRUE))/sd(diesel.price, na.rm = TRUE)))
+
 
 
 ### Label dataset ###
@@ -452,20 +445,6 @@ rm(desc_data, table)
 #             MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=T),
 #             NANC_SDM_20 = mean(NANC_SDM_20, na.rm=T))
 #   dataset_annual[dataset_annual == "NaN"] <- NA
-
-# --------------------------------------------------------------------------------------
-### Include world's fish meal price as instrument
-fish.meal <- read.csv(here::here("Data", "Instruments", "PFISHUSDM.csv"), header = TRUE, stringsAsFactors = FALSE)
-fish.meal$DATE <- as.Date(fish.meal$DATE, format = "%m/%d/%Y") 
-fish.meal$LANDING_YEAR  <- lubridate::year(fish.meal$DATE)
-fish.meal$LANDING_MONTH <- lubridate::month(fish.meal$DATE)
-fish.meal <- fish.meal %>% dplyr::select(-c('DATE')) %>% dplyr::rename(Price.Fishmeal = PFISHUSDM)
-fish.meal <- fish.meal %>% dplyr::mutate(Price.Fishmeal_z = ((Price.Fishmeal - mean(Price.Fishmeal, na.rm = TRUE))/sd(Price.Fishmeal, na.rm = TRUE)))
-
-str(fish.meal)
-dataset <- merge(dataset, fish.meal, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
-
-
 
 #-----------------------------------------------
 ## Create dataset for estiumation and run models 
