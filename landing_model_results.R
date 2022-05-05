@@ -46,32 +46,34 @@ sum_mean_fun <- function(x, ...){
 
 library(doBy)
 PacFIN.month.aggregate <- doBy::summaryBy(
-  LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PER_MTON.mean + AFI_EXVESSEL_REVENUE.sum
-  ~ LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_AREA_CODE + PACFIN_SPECIES_CODE + AGENCY_CODE + group_all,
+  LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PER_MTON.mean + AFI_EXVESSEL_REVENUE.sum + Length.mean 
+    ~ LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_AREA_CODE + PACFIN_SPECIES_CODE + AGENCY_CODE + group_all,
   FUN=sum_mean_fun, data=PacFIN.month) %>%
-  dplyr::filter(AFI_EXVESSEL_REVENUE.sum.sum > 0)
-
+  dplyr::filter(AFI_EXVESSEL_REVENUE.sum.sum > 0) %>%
+  dplyr::select(-c('LANDED_WEIGHT_MTONS.sum.mean', 'AFI_PRICE_PER_MTON.mean.sum',
+                   'AFI_EXVESSEL_REVENUE.sum.mean', 'Length.mean.sum'))
+rm(PacFIN.month)
 
 ########################################################
 
 PacFIN.month.dataset <- PacFIN.month.aggregate %>% 
-  dplyr::select(LANDING_YEAR, LANDING_MONTH, VESSEL_NUM,
-                LANDED_WEIGHT_MTONS.sum.sum, AFI_PRICE_PER_MTON.mean.mean, 
-                PACFIN_SPECIES_CODE, AGENCY_CODE, group_all, PORT_AREA_CODE) %>%
   dplyr::rename(AFI_PRICE_PER_MTON.mean = AFI_PRICE_PER_MTON.mean.mean) %>%
   dplyr::rename(LANDED_WEIGHT_MTONS.sum = LANDED_WEIGHT_MTONS.sum.sum) %>%
+  dplyr::rename(AFI_EXVESSEL_REVENUE.sum = AFI_EXVESSEL_REVENUE.sum.sum) %>%
+  dplyr::rename(Length = Length.mean.mean) %>%
   mutate(AFI_PRICE_PER_MTON.mean = na_if(AFI_PRICE_PER_MTON.mean, 0)) %>% 
   filter(group_all != is.na(group_all)) %>%
-  reshape2::melt(id.vars=c("LANDING_YEAR", "LANDING_MONTH", "VESSEL_NUM", 
-                 "PACFIN_SPECIES_CODE", "AGENCY_CODE", 'PORT_AREA_CODE', "group_all")) %>% 
-  reshape2::dcast(LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + AGENCY_CODE + PORT_AREA_CODE + group_all ~
+  reshape2::melt(id.vars=c("LANDING_YEAR", "LANDING_MONTH", "VESSEL_NUM", 'PORT_AREA_CODE',
+                 "PACFIN_SPECIES_CODE", "AGENCY_CODE", "Length", "group_all")) %>% 
+  reshape2::dcast(LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_AREA_CODE + AGENCY_CODE + group_all + Length ~
           PACFIN_SPECIES_CODE + variable, fun.aggregate=mean, rm.na = T) %>%
-  dplyr::select('LANDING_YEAR', 'LANDING_MONTH', 'VESSEL_NUM', 
-                'PSDN_LANDED_WEIGHT_MTONS.sum', 'MSQD_LANDED_WEIGHT_MTONS.sum', 'NANC_LANDED_WEIGHT_MTONS.sum',  
-                'PSDN_AFI_PRICE_PER_MTON.mean', 'MSQD_AFI_PRICE_PER_MTON.mean', 'NANC_AFI_PRICE_PER_MTON.mean', 
-                'AGENCY_CODE', 'PORT_AREA_CODE', 'group_all')
-  rm(PacFIN.month.aggregate)
+  dplyr::select('LANDING_YEAR', 'LANDING_MONTH', 'VESSEL_NUM', 'PORT_AREA_CODE', 'AGENCY_CODE', 'group_all',
+                'Length', 'PSDN_LANDED_WEIGHT_MTONS.sum', 'MSQD_LANDED_WEIGHT_MTONS.sum', 'NANC_LANDED_WEIGHT_MTONS.sum',  
+                'PSDN_AFI_PRICE_PER_MTON.mean', 'MSQD_AFI_PRICE_PER_MTON.mean', 'NANC_AFI_PRICE_PER_MTON.mean')
 
+rm(PacFIN.month.aggregate)
+
+                
   
 ### Selecting port using results from cluster analysis (10% of the revenue for at least one cluster)
 PacFIN.month.dataset <- PacFIN.month.dataset %>%
@@ -357,6 +359,48 @@ rm(price.year.NANC)
 dataset = subset(dataset, select = 
                    -c(NANC.price.port.area, NANC.price.state, NANC.price.year.month))
 
+
+# --------------------------------------------------------------------------------------
+### Include closure data
+PSDN_closure <- read.csv("C:\\Data\\Closures\\PSDN_closures.csv")
+MSQD_closure <- read.csv("C:\\Data\\Closures\\MSQD_closures.csv") 
+dataset <- merge(dataset, PSDN_closure, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
+dataset <- merge(dataset, MSQD_closure, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
+rm(PSDN_closure, MSQD_closure)
+
+
+#---------------------------------------------------------------------------------------
+### Include Consumer Price Index to use as a deflactor
+CPI <- read.csv(here::here("Data", "CPI", "CPIAUCSL.csv"))
+CPI$DATE <- as.Date(CPI$DATE, format = "%Y-%m-%d") 
+CPI$LANDING_YEAR  <- lubridate::year(CPI$DATE)
+CPI$LANDING_MONTH <- lubridate::month(CPI$DATE)
+CPI <- CPI %>% dplyr::select(-c('DATE')) %>% dplyr::rename(CPI = CPIAUCSL)
+dataset <- merge(dataset, CPI, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
+dataset$deflactor <- dataset$CPI/100 
+rm(CPI)
+
+#---------------------------------------------------------------------------------------
+### Include world's fish meal price as instrument
+fish.meal <- read.csv(here::here("Data", "Instruments", "PFISHUSDM.csv"), header = TRUE, stringsAsFactors = FALSE)
+fish.meal$DATE <- as.Date(fish.meal$DATE, format = "%m/%d/%Y") 
+fish.meal$LANDING_YEAR  <- lubridate::year(fish.meal$DATE)
+fish.meal$LANDING_MONTH <- lubridate::month(fish.meal$DATE)
+fish.meal <- fish.meal %>% dplyr::select(-c('DATE')) %>% dplyr::rename(Price.Fishmeal = PFISHUSDM)
+dataset <- merge(dataset, fish.meal, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
+dataset$Price.Fishmeal.AFI <- dataset$Price.Fishmeal/dataset$deflactor
+rm(fish.meal)
+
+#---------------------------------------------------------------------------------------
+### Include fuel prices
+fuel.prices <- read.csv(here::here("Data", "Fuel_prices", "diesel_prices.csv"), header = TRUE, stringsAsFactors = FALSE)
+fuel.prices <- fuel.prices %>% dplyr::select(-c('Date')) %>% dplyr::rename(diesel.price = Diesel.Retail.Prices..Dollars.per.Gallon.)
+dataset <- merge(dataset, fuel.prices, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
+dataset$diesel.price.AFI <- dataset$diesel.price/dataset$deflactor
+rm(fuel.prices)
+
+
+
 #---------------------------------------
 ## Summary statistics ##
 dataset <- dataset %>% 
@@ -379,27 +423,28 @@ dataset <- dataset %>%
   dplyr::mutate(MSQD_SDM_90_c = MSQD_SDM_90 - mean(MSQD_SDM_90, na.rm = TRUE)) %>%
   dplyr::mutate(PSDN_SDM_60_c = PSDN_SDM_60 - mean(PSDN_SDM_60, na.rm = TRUE)) %>%
   dplyr::mutate(Price.Fishmeal_z = ((Price.Fishmeal - mean(Price.Fishmeal, na.rm = TRUE))/sd(Price.Fishmeal, na.rm = TRUE))) %>%
-  dplyr::mutate(diesel.price_z = ((diesel.price - mean(diesel.price, na.rm = TRUE))/sd(diesel.price, na.rm = TRUE)))
+  dplyr::mutate(diesel.price_z = ((diesel.price - mean(diesel.price, na.rm = TRUE))/sd(diesel.price, na.rm = TRUE))) %>%
+  dplyr::mutate(Price.Fishmeal.AFI_z = ((Price.Fishmeal.AFI - mean(Price.Fishmeal.AFI, na.rm = TRUE))/sd(Price.Fishmeal.AFI, na.rm = TRUE))) %>%
+  dplyr::mutate(diesel.price.AFI_z = ((diesel.price.AFI - mean(diesel.price.AFI, na.rm = TRUE))/sd(diesel.price.AFI, na.rm = TRUE)))
 
 
-
-### Label dataset ###
-sjlabelled::set_label(dataset$MSQD_SPAWN_SDM_90) <- "Prob(presence): MSQD (Spawning aggregation model)"
-sjlabelled::set_label(dataset$MSQD_SDM_90)    <- "Prob(presence): MSQD"
-sjlabelled::set_label(dataset$NANC_SDM_20)    <- "Prob(presence): NANC"
-sjlabelled::set_label(dataset$PSDN_SDM_60)    <- "Prob(presence): PSDN"
-sjlabelled::set_label(dataset$LANDING_YEAR)     <- "Year"
-sjlabelled::set_label(dataset$LANDING_MONTH)    <- "Month"
-sjlabelled::set_label(dataset$PORT_AREA_CODE)   <- "Port area code"
-sjlabelled::set_label(dataset$AGENCY_CODE)      <- "State"
-sjlabelled::set_label(dataset$VESSEL_NUM)       <- "Vessel ID"
-sjlabelled::set_label(dataset$MSQD_Landings) <- "Landings: MSQD"
-sjlabelled::set_label(dataset$MSQD_Price)    <- "Price: MSQD"
-sjlabelled::set_label(dataset$PSDN_Landings) <- "Landings: PSDN"
-sjlabelled::set_label(dataset$PSDN_Price)    <- "Price: PSDN"
-sjlabelled::set_label(dataset$NANC_Landings) <- "Landings: NANC"
-sjlabelled::set_label(dataset$NANC_Price)    <- "Price: NANC"
-sjlabelled::set_label(dataset$PORT_ID)       <- "Port ID"
+# ### Label dataset ###
+# sjlabelled::set_label(dataset$MSQD_SPAWN_SDM_90) <- "Prob(presence): MSQD (Spawning aggregation model)"
+# sjlabelled::set_label(dataset$MSQD_SDM_90)       <- "Prob(presence): MSQD"
+# sjlabelled::set_label(dataset$NANC_SDM_20)       <- "Prob(presence): NANC"
+# sjlabelled::set_label(dataset$PSDN_SDM_60)       <- "Prob(presence): PSDN"
+# sjlabelled::set_label(dataset$LANDING_YEAR)     <- "Year"
+# sjlabelled::set_label(dataset$LANDING_MONTH)    <- "Month"
+# sjlabelled::set_label(dataset$PORT_AREA_CODE)   <- "Port area code"
+# sjlabelled::set_label(dataset$AGENCY_CODE)      <- "State"
+# sjlabelled::set_label(dataset$VESSEL_NUM)       <- "Vessel ID"
+# sjlabelled::set_label(dataset$MSQD_Landings) <- "Landings: MSQD"
+# sjlabelled::set_label(dataset$MSQD_Price)    <- "Price: MSQD"
+# sjlabelled::set_label(dataset$PSDN_Landings) <- "Landings: PSDN"
+# sjlabelled::set_label(dataset$PSDN_Price)    <- "Price: PSDN"
+# sjlabelled::set_label(dataset$NANC_Landings) <- "Landings: NANC"
+# sjlabelled::set_label(dataset$NANC_Price)    <- "Price: NANC"
+# sjlabelled::set_label(dataset$PORT_ID)       <- "Port ID"
 
 
 ### Monthly data ###
@@ -407,21 +452,27 @@ desc_data <- dataset %>%
   subset(select = -c(PORT_AREA_ID, VESSEL_NUM, group_all, LANDING_YEAR, LANDING_MONTH, AGENCY_CODE, PORT_AREA_CODE, 
                      MSQD_Price_z, MSQD_SPAWN_SDM_90_z, MSQD_SDM_90_z, PSDN_SDM_60_z, 
                      MSQD_Price_c, MSQD_SPAWN_SDM_90_c, MSQD_SDM_90_c, PSDN_SDM_60_c,
-                     length_month_PSDN, length_month_MSQD, days_open_month_PSDN, days_open_month_MSQD))
+                     length_month_PSDN, length_month_MSQD, days_open_month_PSDN, days_open_month_MSQD, deflactor,
+                     CPI, Price.Fishmeal_z, diesel.price_z, Price.Fishmeal.AFI_z, diesel.price.AFI_z))
 
 table <- psych::describe(desc_data, fast=TRUE) %>%
-  mutate(vars = ifelse(vars == 1, "Landings: PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 2, "Landings: MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 3, "Landings: NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 4, "Price: PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 5, "Price: MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 6, "Price: NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 7, "Prob(presence): PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 8, "Prob(presence): MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 9, "Prob(presence): MSQD (Spawning model)", vars)) %>%
-  mutate(vars = ifelse(vars == 10, "Prob(presence): NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 11, "Fraction of month open: PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 12, "Fraction of month open: MSQD", vars)) 
+  mutate(vars = ifelse(vars == 1, "Vessel Length", vars))%>%
+  mutate(vars = ifelse(vars == 2, "Landings: PSDN", vars)) %>%
+  mutate(vars = ifelse(vars == 3, "Landings: MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 4, "Landings: NANC", vars)) %>%
+  mutate(vars = ifelse(vars == 5, "Price: PSDN", vars)) %>%
+  mutate(vars = ifelse(vars == 6, "Price: MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 7, "Price: NANC", vars)) %>%
+  mutate(vars = ifelse(vars == 8, "Prob(presence): PSDN", vars)) %>%
+  mutate(vars = ifelse(vars == 9, "Prob(presence): MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 10, "Prob(presence): MSQD (Spawning model)", vars)) %>%
+  mutate(vars = ifelse(vars == 11, "Prob(presence): NANC", vars)) %>%
+  mutate(vars = ifelse(vars == 12, "Fraction of month open: PSDN", vars)) %>%
+  mutate(vars = ifelse(vars == 13, "Fraction of month open: MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 14, "Fishmeal price", vars)) %>%
+  mutate(vars = ifelse(vars == 15, "Fishmeal price (AFI)", vars)) %>%
+  mutate(vars = ifelse(vars == 16, "Diesel price", vars)) %>%
+  mutate(vars = ifelse(vars == 17, "Diesel price (AFI)", vars))
 
 # gs4_create("SummaryMonthly", sheets = table)
 rm(desc_data, table)
@@ -461,7 +512,9 @@ dataset_msqd <- dataset %>%
                 PSDN_SDM_60, NANC_SDM_20,
                 MSQD_Price_z, MSQD_SPAWN_SDM_90_z, MSQD_SDM_90_z, PSDN_SDM_60_z,
                 MSQD_Price_c, MSQD_SPAWN_SDM_90_c, MSQD_SDM_90_c, PSDN_SDM_60_c,
-                PSDN.Open, MSQD.Open, Price.Fishmeal, Price.Fishmeal_z)  %>% 
+                PSDN.Open, MSQD.Open, Price.Fishmeal, Price.Fishmeal_z, 
+                Price.Fishmeal.AFI, Price.Fishmeal.AFI_z,
+                diesel.price, diesel.price.AFI, diesel.price_z, diesel.price.AFI_z) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>%
   dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>%
   dplyr::mutate(NANC_Landings = coalesce(NANC_Landings, 0)) %>%
@@ -546,7 +599,6 @@ dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) %>%
   dplyr::filter(MSQD.Open == 1) 
 
-
 fit_qMSQD_price <-
   brm(data = dataset_msqd_landing,
       formula = log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z,
@@ -560,10 +612,8 @@ fit_qMSQD_price <-
       file = "Estimations/fit_qMSQD_price")
 
 ## Problem using price, as is endogenous. Solve price endogeneity... 
-price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal_z)
-landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z +
-                        MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open + 
-                        MSQD_Price_z)
+price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z)
+landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z)
 
 fit_qMSQD_price_endog <-
   brm(data = dataset_msqd_landing,
@@ -581,6 +631,8 @@ fit_qMSQD_price_endog <-
       file = "Estimations/fit_qMSQD_price_endog")
 
 
+### COMPARE MODELS!!! ### https://strengejacke.github.io/sjPlot/articles/tab_bayes.html
+
 
 # rbind(bayes_R2(fit_qMSQD_price_endog),
 #       bayes_R2(fit_qMSQD_price)
@@ -592,16 +644,14 @@ fit_qMSQD_price_endog <-
 # 
 # 
 
-# summary(fit_qMSQD_price_endog_3)
-# summary(fit_qMSQD_price_endog_2)
-
+# summary(fit_qMSQD_price_endog)
 
 ##### Model Comparision #####
-fit_qMSQD_price_endog_2    <- add_criterion(fit_qMSQD_price_endog_2, "loo")
+fit_qMSQD_price_endog <- add_criterion(fit_qMSQD_price_endog, "loo")
 
 # w <- as.data.frame(
-loo_compare(fit_qMSQD_price_endog_3,
-            fit_qMSQD_price_endog_2, 
+loo_compare(fit_qMSQD_price,
+            fit_qMSQD_price_endog, 
             criterion = "loo")
 # )
 # gs4_create("LOO", sheets = w)
