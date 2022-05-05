@@ -264,8 +264,19 @@ PSDN_closure <- read.csv("C:\\Data\\Closures\\PSDN_closures.csv")
 MSQD_closure <- read.csv("C:\\Data\\Closures\\MSQD_closures.csv") 
 dataset <- merge(PacFIN.month.cluster, PSDN_closure, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
 dataset <- merge(dataset, MSQD_closure, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
-rm(PSDN_closure, MSQD_closure)
+rm(PSDN_closure, MSQD_closure, PacFIN.month.cluster)
 
+
+#---------------------------------------------------------------------------------------
+### Include Consumer Price Index to use as a deflactor
+CPI <- read.csv(here::here("Data", "CPI", "CPIAUCSL.csv"))
+CPI$DATE <- as.Date(CPI$DATE, format = "%Y-%m-%d") 
+CPI$LANDING_YEAR  <- lubridate::year(CPI$DATE)
+CPI$LANDING_MONTH <- lubridate::month(CPI$DATE)
+CPI <- CPI %>% dplyr::select(-c('DATE')) %>% dplyr::rename(CPI = CPIAUCSL)
+dataset <- merge(dataset, CPI, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
+dataset$deflactor <- dataset$CPI/100 
+rm(CPI)
 
 #---------------------------------------------------------------------------------------
 ### Include world's fish meal price as instrument
@@ -275,6 +286,7 @@ fish.meal$LANDING_YEAR  <- lubridate::year(fish.meal$DATE)
 fish.meal$LANDING_MONTH <- lubridate::month(fish.meal$DATE)
 fish.meal <- fish.meal %>% dplyr::select(-c('DATE')) %>% dplyr::rename(Price.Fishmeal = PFISHUSDM)
 dataset <- merge(dataset, fish.meal, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
+dataset$Price.Fishmeal.AFI <- dataset$Price.Fishmeal/dataset$deflactor
 rm(fish.meal)
 
 #---------------------------------------------------------------------------------------
@@ -282,9 +294,10 @@ rm(fish.meal)
 fuel.prices <- read.csv(here::here("Data", "Fuel_prices", "diesel_prices.csv"), header = TRUE, stringsAsFactors = FALSE)
 fuel.prices <- fuel.prices %>% dplyr::select(-c('Date')) %>% dplyr::rename(diesel.price = Diesel.Retail.Prices..Dollars.per.Gallon.)
 dataset <- merge(dataset, fuel.prices, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
+dataset$diesel.price.AFI <- dataset$diesel.price/dataset$deflactor
 rm(fuel.prices)
 
 # --------------------------------------------------------------------------------------
 ### Save DATASET
 
-write.csv(PacFIN.month.cluster,"C:\\Data\\PacFIN data\\PacFIN_month.csv", row.names = FALSE)
+write.csv(dataset,"C:\\Data\\PacFIN data\\PacFIN_month.csv", row.names = FALSE)
