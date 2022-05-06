@@ -595,43 +595,55 @@ class(dataset_msqd$LANDING_YEAR)
 #-------------------------------------------------------------------
 #### Estimate models ####
 library(brms)
+library(sjPlot)
+library(sjlabelled)
+library(sjmisc)
+library(insight)
+library(httr)
+
+
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) %>%
   dplyr::filter(MSQD.Open == 1) 
 
-fit_qMSQD_price <-
-  brm(data = dataset_msqd_landing,
-      formula = log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z,
-      prior = c(
-        prior(normal(0, 1), class = b),
-        prior(exponential(1), class = sigma)),
-      control = list(adapt_delta = 0.90, max_treedepth = 12),
-      chains = 2,
-      family = gaussian,
-      cores = 4,
-      file = "Estimations/fit_qMSQD_price")
-
-## Problem using price, as is endogenous. Solve price endogeneity... 
-price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z)
-landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z)
-
-fit_qMSQD_price_endog <-
-  brm(data = dataset_msqd_landing,
-      family = gaussian,
-      price_model + landing_model + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
-      iter = 2000, warmup = 1000, chains = 2, cores = 4,
-      file = "Estimations/fit_qMSQD_price_endog")
+# fit_qMSQD_price <-
+#   brm(data = dataset_msqd_landing,
+#       formula = log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z,
+#       prior = c(
+#         prior(normal(0, 1), class = b),
+#         prior(exponential(1), class = sigma)),
+#       control = list(adapt_delta = 0.90, max_treedepth = 12),
+#       chains = 2,
+#       family = gaussian,
+#       cores = 4,
+#       file = "Estimations/fit_qMSQD_price")
+# 
+# ## Problem using price, as is endogenous. Solve price endogeneity... 
+# price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z)
+# landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z)
+# 
+# fit_qMSQD_price_endog <-
+#   brm(data = dataset_msqd_landing,
+#       family = gaussian,
+#       price_model + landing_model + set_rescor(TRUE),
+#       prior = c(# E model
+#         prior(normal(0, 1), class = b, resp = MSQDPricez),
+#         prior(exponential(1), class = sigma, resp = MSQDPricez),
+#         # W model
+#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
+#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
+#         # rho
+#         prior(lkj(2), class = rescor)),
+#       iter = 2000, warmup = 1000, chains = 2, cores = 4,
+#       file = "Estimations/fit_qMSQD_price_endog")
 
 
 ### COMPARE MODELS!!! ### https://strengejacke.github.io/sjPlot/articles/tab_bayes.html
+
+
+
+tab_model(fit_qMSQD_price)
+tab_model(fit_qMSQD_price_endog)
 
 
 # rbind(bayes_R2(fit_qMSQD_price_endog),
@@ -682,9 +694,6 @@ library(patchwork)
 library(dplyr)
 library(ggplot2)
 library(ggthemes)
-library(sjPlot)
-library(sjlabelled)
-library(sjmisc)
 library(tibble)
 theme_set(theme_sjplot())
 
