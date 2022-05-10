@@ -1,0 +1,52 @@
+Stephen Stohs - NOAA Federal3:03 PM
+Greetings, all from Breeze Park, MO, my parents' retirement community.  Unfortunately they have a current COVID-19 outbreak; hence the mask requirement.
+Stephen Stohs - NOAA Federal3:09 PM
+Is it a correct statement that Herfindahl-Hirshman Index is what economists call it and Simpson Diveristy Index is what ecologists call it?
+Stephen Stohs - NOAA Federal3:11 PM
+Is CCS = CCLME?  If so, which acronym is more widely accepted?
+Stephen Stohs - NOAA Federal3:13 PM
+Is it possible to use a "Diversity Index" as the optimization criterion for selecting the "best" cluster? (Or maybe this is already happening...)
+"Best" clusters?
+Tim Frawley - NOAA Affiliate3:14 PM
+Hey Stephen, I believe your earlier assertion about HHI and the Simpson index is correct
+That is how it is described by Kaperski and Holland 2013
+Stephen Stohs - NOAA Federal3:16 PM
+Thanks, Tim.
+Tim Frawley - NOAA Affiliate3:22 PM
+When vessel size was included as a metric I think these were the smallest vessels as well, many of these folks might be part timers
+Stephen Stohs - NOAA Federal3:27 PM
+With unlimited time and resources, it would be interesting to interview fishermen in each cluster to determine how many are full time fishermen and what else besides fishing those who are not full-timers do.
+Tim Frawley - NOAA Affiliate3:29 PM
+San Pedro Boats!
+Isaac Kaplan - NOAA Federal3:32 PM
+Lorna Wargo also remembered vessels with this behavior, roving along the coast. 
+Tim Frawley - NOAA Affiliate3:34 PM
+I talked to a skipper  in Monterey the other day, he does Kodiak (AK) salmon in the summer then comes down to do Ventura in the Fall before fishing spring in Monterey. Says he loves squid, lots more fun than fishing Cod out of Sand Point (AK) in the winter.
+Tim Frawley - NOAA Affiliate3:46 PM
+That 20% could be one or two vessels that snuck into the mix based on other characteristics that primarily target other species
+Joshua Lindsay - NOAA Federal3:46 PM
+Thanks
+Tim Frawley - NOAA Affiliate3:51 PM
+If there is a .csv file that associates current or former braile permits with  vessel numbers that might help us hone in on this
+Joshua Lindsay - NOAA Federal3:52 PM
+https://doryfleet.com/market/?page_id=2632
+sort of like these guys
+Tim Frawley - NOAA Affiliate3:53 PM
+These photos are great for context!
+Stephen Stohs - NOAA Federal3:56 PM
+Thanks for an interesting discussion, and sorry about bad wi-fi at my parents' retirement community hampering my participation.  My comments may have gotten lost when I was disconnected, but to reiterate one of them, it might be interesting to motivate the cluster selection process in terms of maximizing diversity (e.g. similar to "maximum entropy" principle in other contexts).  Not sure if this is a standard approach, or if there is an obvious way to motivate or implement this logic...
+Isaac Kaplan - NOAA Federal3:59 PM
+Thanks Katie! great ideas. 
+Stephen Stohs - NOAA Federal3:59 PM
+Thanks, all, and see you next week, if not sooner.  Steve
+Isaac Kaplan - NOAA Federal4:00 PM
+Thanks Steve, I wrote down your question for last week :)
+
+Stephen Stohs - NOAA Federal4:00 PM
+Cool.  I also have a rather unrelated cluster analysis idea to bounce off you all at some point (maybe outside the context of this project)...
+Barbara Muhling - NOAA Affiliate4:00 PM
+Only QA/QC from Jenny Suter
+Isaac Kaplan - NOAA Federal4:02 PM
+Trung can you warn us of specific QA QC concerns?
+Trung N4:03 PM
+Yea one concern is sometimes fishers will input incorrect gear code on the landing ticket. We try to QA/QC those fishing tickets but some do get past our editing process. 
