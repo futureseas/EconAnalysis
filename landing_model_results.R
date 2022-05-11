@@ -614,49 +614,47 @@ dataset_msqd_landing <- dataset_msqd %>%
 # fit_qMSQD_price_v11 <- readRDS(here::here("Estimations", "fit_qMSQD_price_v11.RDS"))
 # fit_qMSQD_price_v12 <- readRDS(here::here("Estimations", "fit_qMSQD_price_v12.RDS"))
 
-# fit_qMSQD_price_v9 <-
-#   brm(data = dataset_msqd_landing,
-#       formula = log(MSQD_Landings) ~
-#         1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z + Length_z +
-#         (1 | port_ID) + (1 | cluster),
-#       prior = c(
-#         prior(normal(0, 1), class = b),
-#         prior(exponential(1), class = sigma)),
-#       control = list(adapt_delta = 0.90, max_treedepth = 12),
-#       chains = 2,
-#       family = gaussian,
-#       cores = 4,
-#       file = "Estimations/fit_qMSQD_price_v9")
-# 
- 
-# fit_qMSQD_price_v11 <-
-#   brm(data = dataset_msqd_landing,
-#       formula = log(MSQD_Landings) ~
-#         1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z + Length_z +
-#         (1 | port_ID) + (1 | cluster) + (1 | LANDING_YEAR),
-#       prior = c(
-#         prior(normal(0, 1), class = b),
-#         prior(exponential(1), class = sigma)),
-#       control = list(adapt_delta = 0.90, max_treedepth = 12),
-#       chains = 2,
-#       family = gaussian,
-#       cores = 4,
-#       file = "Estimations/fit_qMSQD_price_v11")
-# 
-# fit_qMSQD_price_v12 <-
-#   brm(data = dataset_msqd_landing,
-#       formula = log(MSQD_Landings) ~
-#         1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z + Length_z +
-#         (1 | port_ID) + (1 | cluster) + factor(LANDING_MONTH),
-#       prior = c(
-#         prior(normal(0, 1), class = b),
-#         prior(exponential(1), class = sigma)),
-#       control = list(adapt_delta = 0.90, max_treedepth = 12),
-#       chains = 2,
-#       family = gaussian,
-#       cores = 4,
-#       file = "Estimations/fit_qMSQD_price_v12")
-# 
+fit_qMSQD_price_v9 <-
+  brm(data = dataset_msqd_landing,
+      formula = log(MSQD_Landings) ~
+        1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z + Length_z +
+        (1 | port_ID) + (1 | cluster),
+      prior = c(
+        prior(normal(0, 1), class = b),
+        prior(exponential(1), class = sigma)),
+      control = list(adapt_delta = 0.90, max_treedepth = 12),
+      chains = 2,
+      family = gaussian,
+      cores = 4,
+      file = "Estimations/fit_qMSQD_price_v9")
+
+fit_qMSQD_price_v11 <-
+  brm(data = dataset_msqd_landing,
+      formula = log(MSQD_Landings) ~
+        1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z + Length_z +
+        (1 | port_ID) + (1 | cluster) + (1 | LANDING_YEAR),
+      prior = c(
+        prior(normal(0, 1), class = b),
+        prior(exponential(1), class = sigma)),
+      control = list(adapt_delta = 0.90, max_treedepth = 12),
+      chains = 2,
+      family = gaussian,
+      cores = 4,
+      file = "Estimations/fit_qMSQD_price_v11")
+
+fit_qMSQD_price_v12 <-
+  brm(data = dataset_msqd_landing,
+      formula = log(MSQD_Landings) ~
+        1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z + Length_z +
+        (1 | port_ID) + (1 | cluster) + factor(LANDING_MONTH),
+      prior = c(
+        prior(normal(0, 1), class = b),
+        prior(exponential(1), class = sigma)),
+      control = list(adapt_delta = 0.90, max_treedepth = 12),
+      chains = 2,
+      family = gaussian,
+      cores = 4,
+      file = "Estimations/fit_qMSQD_price_v12")
 
 # ##### Model Comparision #####
 tab_model(fit_qMSQD_price_v9, fit_qMSQD_price_v11, fit_qMSQD_price_v12)
@@ -699,34 +697,9 @@ fit_qMSQD_price_endog_v9 <- readRDS(here::here("Estimations", "fit_qMSQD_price_e
 #       file = "Estimations/fit_qMSQD_price_endog_v9")
 # 
 
-price_model_11   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
-landing_model_11 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-                         + (1 | LANDING_YEAR) + (1 | port_ID) +
-                         (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z || cluster))
-# 
-fit_qMSQD_price_endog_v11 <-
-  brm(data = dataset_msqd_landing,
-      family = gaussian,
-      price_model_11 + landing_model_11 + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
-      iter = 2000, warmup = 1000, chains = 2, cores = 4,
-      file = "Estimations/fit_qMSQD_price_endog_v11")
+tab_model(fit_qMSQD_price_endog_v9)
 
-
-# tab_model(fit_qMSQD_price_endog_v9)
-tab_model(fit_qMSQD_price_endog_v11)
-
-
-fit_qMSQD_price_endog_v11 <- add_criterion(fit_qMSQD_price_endog_v11, "loo")
-fit_qMSQD_price_endog_v9 <- add_criterion(fit_qMSQD_price_endog_v9, "loo")
-# 
+#fit_qMSQD_price_endog_v9 <- add_criterion(fit_qMSQD_price_endog_v9, "loo")
 # loo_compare(fit_qMSQD_price_endog_v11,
 #             fit_qMSQD_price_endog_v9,
 #             criterion = "loo")
@@ -734,9 +707,9 @@ fit_qMSQD_price_endog_v9 <- add_criterion(fit_qMSQD_price_endog_v9, "loo")
 
 ## Most used gear?
 ## Other marginal costs?
-## Fishmeal as instrument for squid?
+## Fish meal as instrument for squid?
 
-fit_qMSQD <- fit_qMSQD_price_endog_v11
+fit_qMSQD <- fit_qMSQD_price_endog_v9
 coef(fit_qMSQD)
 #----------------------------------------------------
 ## Model summary ##
