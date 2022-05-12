@@ -32,6 +32,51 @@ PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
 
 ### Descriptive statistics ###
 
+#-----------------------------------------  
+## Number and percentage of light brail vessels by cluster
+  options(scipen=999)
+  VESSEL_NUM_to_CDFW_PLATE <- read.csv(file = "C:\\Data\\VESSEL_NUM_to_CDFW_PLATE.csv")
+  Light.Brail.Vessels <- read.csv(file = "C:\\Data\\CDFW CPS Logbooks\\MarketSquidLightBrailLogDataExtract.csv") %>% 
+    dplyr::select('VesselID') %>% dplyr::rename(CDFW_PLATE_NUM = VesselID) %>% unique() 
+  Light.Brail.Vessels_num <- merge(VESSEL_NUM_to_CDFW_PLATE, Light.Brail.Vessels, 
+                                   by = ("CDFW_PLATE_NUM"), all.x = FALSE, all.y = TRUE) %>% 
+    dplyr::select('VESSEL_NUM') %>% unique() %>% drop_na() %>% mutate(light.brail = 1)
+  Light.Brail_byClusters <- read.csv(file = here::here("Clustering", "PAM_Vessel_Groups.csv")) %>%
+    merge(Light.Brail.Vessels_num, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE) %>%
+    mutate_all(~replace(., is.na(.), 0)) %>% group_by(group_all) %>% 
+    summarize(n_vessel = n(), n_brail_vessels = sum(light.brail)) %>% mutate(percentage = (n_brail_vessels / n_vessel))
+  
+  colnames(Light.Brail_byClusters) = c("Cluster", "Number of Vessels", "Number of Light Brail Vessels", "Percentage")
+  # gs4_create("LightBrail_by_cluster", sheets = clusters_by_vessel_num)
+  
+  rm(VESSEL_NUM_to_CDFW_PLATE, Light.Brail.Vessels, Light.Brail.Vessels_num, Light.Brail_byClusters)
+  
+  
+  #-----------------------------------------
+  ## Number and percentage of vessels with CPS permits by cluster
+  options(scipen=999)
+  CPS.Vessels <- read.csv(file = "G:\\My Drive\\Data\\Vessels\\CPS_LE_Permits.csv") %>% 
+    dplyr::select('Coast.Guard.Number.Vessel.ID') %>% 
+    dplyr::rename(VESSEL_NUM = Coast.Guard.Number.Vessel.ID) %>%
+    unique() %>% mutate(CPS.permit = 1)
+  
+  CPS.permits_byCluster <- read.csv(file = here::here("Clustering", "PAM_Vessel_Groups.csv")) %>%
+    merge(CPS.Vessels, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE) %>%
+    mutate_all(~replace(., is.na(.), 0)) %>% group_by(group_all) %>% 
+    summarize(n_vessel = n(), n_vessel_CPS = sum(CPS.permit)) %>% mutate(percentage = (n_vessel_CPS / n_vessel))
+  
+  colnames(CPS.permits_byCluster) = c("Cluster", "Number of Vessels", "Vessels with CPS permit", "Percentage")
+  # gs4_create("CPS.permits_by_cluster", sheets = CPS.permits_byCluster)
+  
+  Clusters <- read.csv(file = here::here("Clustering", "PAM_Vessel_Groups.csv"))
+  CPS.LE.vessels.with.cluster <- read.csv(file = "G:\\My Drive\\Data\\Vessels\\CPS_LE_Permits.csv") %>% 
+    dplyr::rename(VESSEL_NUM = Coast.Guard.Number.Vessel.ID) %>% unique() %>% 
+    merge(Clusters, by = c('VESSEL_NUM'), all.x = TRUE, all.y = FALSE)  
+    # gs4_create("CPS.LE.vessels.with.cluster", sheets = CPS.LE.vessels.with.cluster)
+    
+  rm(CPS.LE.vessels.with.cluster, CPS.permits_byCluster, CPS.Vessels)
+  
+
 #----------------------------------
 ## Product use
 all_product_use <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
