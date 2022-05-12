@@ -207,7 +207,7 @@ Vessel_IDs <- RAW[,1]
 Vessels<-as.data.frame(Vessel_IDs)
 RAW<-RAW[c(-1)]
 rownames(RAW)<-Vessel_IDs
-rm(Vessel_Characteristics, Landings_Volume_Value, Vessel_Geography, FF_Landings_and_Diversity)
+rm(Landings_Volume_Value, Vessel_Geography, FF_Landings_and_Diversity)
 ### I wound up removing weight because I felt as if that and length provided redundant information;
 RAW<-RAW[c(-1)] # Delete AVG_LBS
 RAW$VESSEL_NUM<-Vessel_IDs
@@ -218,34 +218,130 @@ rm(FF_Tickets, Tickets, Vessels, cgi)
 ## Merge pre and post RAW
 
 RAW_POST <- RAW %>%
-  dplyr::rename(AVG_REVENUE_POST = AVG_REVENUE) %>%
-  dplyr::rename(LAT_POST         = LAT) %>%
-  dplyr::rename(DISTANCE_A_POST  = DISTANCE_A) %>%
-  dplyr::rename(Percentage_POST  = Percentage) %>%
-  dplyr::rename(diversity_POST   = diversity) %>% mutate(Post = 1)
+  dplyr::rename(AVG_REVENUE.2015_2020 = AVG_REVENUE) %>%
+  dplyr::rename(LAT.2015_2020         = LAT) %>%
+  dplyr::rename(DISTANCE_A.2015_2020  = DISTANCE_A) %>%
+  dplyr::rename(Percentage.2015_2020  = Percentage) %>%
+  dplyr::rename(diversity.2015_2020   = diversity) %>% mutate(Post = 1)
   rm(RAW)
 
 RAW_PRE  <- fread("RAW_cluster_inputs.csv") %>%
-  dplyr::rename(AVG_REVENUE_PRE = AVG_REVENUE) %>%
-  dplyr::rename(LAT_PRE         = LAT) %>%
-  dplyr::rename(DISTANCE_A_PRE  = DISTANCE_A) %>%
-  dplyr::rename(Percentage_PRE  = Percentage) %>%
-  dplyr::rename(diversity_PRE   = diversity) 
+  dplyr::rename(AVG_REVENUE.2005_2014 = AVG_REVENUE) %>%
+  dplyr::rename(LAT.2005_2014         = LAT) %>%
+  dplyr::rename(DISTANCE_A.2005_2014  = DISTANCE_A) %>%
+  dplyr::rename(Percentage.2005_2014  = Percentage) %>%
+  dplyr::rename(diversity.2005_2014   = diversity) 
 
-RAW <- merge(RAW_PRE, RAW_POST, by = c("VESSEL_NUM") , all.x = TRUE)
+
 
 #-----------------------------------------
 ## Number of vessels that still active but do not have CPS landing tickets
 
-non_CPS_tickets <- RAW %>% filter(Post == 1) %>%
-  group_by(group_all) %>% 
-  summarize(n_vessels_by_cluster = n(), percentage_non_CPS_tickets = (n()/ sum(is.na(diversity_POST)))) 
-
-n_vessel_exit <- RAW %>% group_by(group_all) %>% 
-  summarize(n_vessels = n(), n_vessel_exit = sum(is.na(AVG_REVENUE_POST))) %>%
-  mutate(percentage_stay = ((n_vessels - n_vessel_exit) / n_vessels))
-
+# RAW <- merge(RAW_PRE, RAW_POST, by = c("VESSEL_NUM") , all.x = TRUE)
+# library("googlesheets4")
+# gs4_auth(
+#   email = "fequezad@ucsc.edu",
+#   path = NULL,
+#   scopes = "https://www.googleapis.com/auth/spreadsheets",
+#   cache = gargle::gargle_oauth_cache(),
+#   use_oob = gargle::gargle_oob_default(),
+#   token = NULL
+# )
+# 
+# 
+# non_CPS_tickets <- RAW %>% filter(Post == 1) %>%
+#   group_by(group_all) %>% 
+#   summarize(n_vessels_by_cluster = n(), percentage_non_CPS_tickets = (sum(is.na(diversity.2015_2020))/n())) 
+#   #gs4_create("n_vessels_exit_CPS_but_no_fishing", sheets = non_CPS_tickets)
+# 
+# n_vessel_exit <- RAW %>% group_by(group_all) %>% 
+#   summarize(n_vessels = n(), n_vessel_exit = sum(is.na(AVG_REVENUE.2015_2020))) %>%
+#   mutate(percentage_stay = (n_vessel_exit / n_vessels))
+#   #gs4_create("n_vessels_exit_fishery_by_cluster", sheets = n_vessel_exit)
 
 #---------------------------------------
 ## Compare inputs pre and after closure by cluster
 
+
+### Create database to plot inputs average by cluster ###
+
+RAW_POST[is.na(RAW_POST)] <- 0
+RAW <- RAW_PRE %>% merge(RAW_POST, by = c("VESSEL_NUM") , all.x = TRUE) %>%
+  relocate(group_all, .after = VESSEL_NUM)
+RAW<-RAW[,-13]
+
+RAW_long <- reshape(RAW, direction = "long", idvar=c("VESSEL_NUM","group_all"),
+        varying = 3:ncol(RAW), sep = ".")
+
+RAW <- RAW_long[,-1]
+
+Group_Stats <- RAW %>% group_by(time, group_all) %>% summarise_each(funs(mean(., na.rm = TRUE), se=sd(., na.rm = TRUE)/sqrt(n())))
+Group_Stats <- rbind(tail(Group_Stats, 8)[1:8, ], head(Group_Stats, -8))
+
+Group_Avg_Revenue<-Group_Stats[c(2,1,3,8)]
+Group_Avg_Revenue$Var<-"Average annual revenue"
+names(Group_Avg_Revenue)<- c("memb", "period", "mean", "sd", "Variable")
+Group_LAT<-Group_Stats[c(2,1,4,9)]
+Group_LAT$Var<-"LCG"
+names(Group_LAT)<- c("memb", "period", "mean", "sd", "Variable")
+Group_Inertia<-Group_Stats[c(2,1,5,10)]
+Group_Inertia$Var<-"Inertia"
+names(Group_Inertia)<- c("memb", "period", "mean", "sd", "Variable")
+Group_Percentage_FF<-Group_Stats[c(2,1,6,11)]
+Group_Percentage_FF$Var<-"Percent of revenue from CPS"
+names(Group_Percentage_FF)<- c("memb", "period", "mean", "sd", "Variable")
+Group_FF_Diversity<-Group_Stats[c(2,1,7,12)]
+Group_FF_Diversity$Var<-"CPS diversity index"
+names(Group_FF_Diversity)<- c("memb", "period", "mean", "sd", "Variable")
+
+Group_Avg_Revenue$memb   <- as.factor(Group_Avg_Revenue$memb)
+Group_LAT$memb           <- as.factor(Group_LAT)$memb
+Group_Inertia$memb       <- as.factor(Group_Inertia$memb)
+Group_Percentage_FF$memb <- as.factor(Group_Percentage_FF$memb)
+Group_FF_Diversity$memb  <- as.factor(Group_FF_Diversity$memb)
+# rm(Group_Stats, RAW, RAW_long, RAW_PRE, RAW_POST)
+
+
+##---------------------------------
+# Create plot
+library(viridis)
+ggplot(Group_Avg_Revenue, aes(memb, y=mean, fill=period)) + 
+  geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=period), 
+                width = 0.4, position=position_dodge(.9)) + 
+  theme_classic()  + theme(axis.text.x = element_text(angle = 90)) +
+  labs(x = "Cluster", y = "Mean") + scale_fill_brewer(palette="YlGnBu") +
+  ggtitle("Annual average revenue")
+
+
+ggplot(Group_LAT, aes(memb, y=mean, fill=period)) + 
+  geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=period), 
+                width = 0.4, position=position_dodge(.9)) + 
+  theme_classic()  + theme(axis.text.x = element_text(angle = 90)) +
+  labs(x = "Cluster", y = "Mean") + scale_fill_brewer(palette="YlGnBu") +
+  ggtitle("Latitudinal Center of Gravity")
+
+ggplot(Group_Inertia, aes(memb, y=mean, fill=period)) + 
+  geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=period), 
+                width = 0.4, position=position_dodge(.9)) + 
+  theme_classic()  + theme(axis.text.x = element_text(angle = 90)) +
+  labs(x = "Cluster", y = "Mean") + scale_fill_brewer(palette="YlGnBu") +
+  ggtitle("Inertia")
+
+ggplot(Group_Percentage_FF, aes(memb, y=mean, fill=period)) + 
+  geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=period), 
+                width = 0.4, position=position_dodge(.9)) + 
+  theme_classic()  + theme(axis.text.x = element_text(angle = 90)) +
+  labs(x = "Cluster", y = "Mean") + scale_fill_brewer(palette="YlGnBu") +
+  ggtitle("% of revenue coming from CPS")
+
+ggplot(Group_FF_Diversity, aes(memb, y=mean, fill=period)) + 
+  geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=period), 
+                width = 0.4, position=position_dodge(.9)) + 
+  theme_classic()  + theme(axis.text.x = element_text(angle = 90)) +
+  labs(x = "Cluster", y = "Mean") + scale_fill_brewer(palette="YlGnBu") +
+  ggtitle("CPS Diversity Index")
