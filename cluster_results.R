@@ -32,6 +32,22 @@ PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
 
 ### Descriptive statistics ###
 
+## Number of active vessel by clusters
+nvessel.year <- PacFIN.month %>% dplyr::filter(LANDED_WEIGHT_MTONS.sum > 0) %>%
+  dplyr::select(LANDING_YEAR, VESSEL_NUM, group_all) %>% unique() %>% 
+  mutate(n_vessel = 1) %>% group_by(LANDING_YEAR, group_all) %>%
+  summarise(n_vessel = sum(n_vessel))
+
+ggplot(nvessel.year, aes(x=LANDING_YEAR, y = n_vessel)) + 
+  geom_line(color = "steelblue", size = 1) + 
+  facet_wrap(~ group_all, ncol = 4) + geom_point(color = "steelblue") + 
+  scale_y_continuous(name = "Number of active vessels") +
+  scale_x_continuous(name = "Year") 
+
+
+
+
+
 #-----------------------------------------  
 ## Number and percentage of light brail vessels by cluster
   options(scipen=999)
@@ -135,10 +151,94 @@ colnames(table) = c("Product Use", "Disposition", "Cluster 1", "Cluster 2", "Clu
 rm(table, cluster.use, cluster.use.highest, hist.bait)
 
 
-#------------------------------------------
-    #----------- HERE-----------#
-#-----------------------------------------#
-## Catch composition
+# -----------------------------------------------------------------------------------------------
+## Catch composition (all species)
+all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique() %>% mutate(merge=1)
+all_species_POST <- PacFIN.month  %>%   
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::filter(PSDN.Total.Closure == 1) %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique() %>% mutate(merge=1)
+  
+all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+all_vessels_POST <- PacFIN.month  %>%   
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::filter(PSDN.Total.Closure == 1) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+
+expand <- merge(all_species, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+expand_POST <- merge(all_species_POST, all_vessels_POST, by = c('merge'), all.x = TRUE, all.y = TRUE)
+rm(all_species, all_vessels)
+rm(all_species_POST, all_vessels_POST)
+
+expand_ALL <- merge(expand, expand_POST, by = c('VESSEL_NUM', 'PACFIN_SPECIES_CODE'), all.x = TRUE, all.y = TRUE)
+
+
+options(scipen=999)
+cluster.species <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>%
+  group_by(group_all, PACFIN_SPECIES_CODE, VESSEL_NUM) %>% 
+  summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+  group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
+
+cluster.species <- merge(expand_ALL, cluster.species, by = c('VESSEL_NUM', 'PACFIN_SPECIES_CODE'), all.x = TRUE) %>%
+  mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% group_by(VESSEL_NUM) %>%
+  mutate(group_all = ifelse(is.na(group_all),mean(group_all, na.rm = TRUE),group_all)) %>% 
+  group_by(group_all, PACFIN_SPECIES_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
+  unique() %>% filter(group_all != is.na(group_all))
+
+# cluster.species <- cluster.species[order(cluster.species$group_all, -cluster.species$Percentage),]
+# cluster.species.highest <- cluster.species %>%
+#   group_by(group_all) %>% filter(row_number()==1:5) %>% ungroup() %>% 
+#   dplyr::select('PACFIN_SPECIES_CODE') %>% unique()
+# cluster.species <- setDT(cluster.species)[PACFIN_SPECIES_CODE %chin% cluster.species.highest$PACFIN_SPECIES_CODE] 
+
+table <- as.data.frame(xtabs(Percentage ~  PACFIN_SPECIES_CODE + group_all, cluster.species))
+table <- table %>%
+  spread(key = group_all, value = Freq)
+
+# table = table[,-1]
+colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7", "Cluster 8")
+gs4_create("Table2_all_species", sheets = table)
+
+rm(table, cluster.species, cluster.species.highest)
+
+
+### After ###
+options(scipen=999)
+cluster.species_POST <- PacFIN.month %>%   
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::filter(PSDN.Total.Closure == 1) %>%
+  group_by(group_all, PACFIN_SPECIES_CODE, VESSEL_NUM) %>% 
+  summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+  group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
+
+cluster.species_POST <- merge(expand_ALL, cluster.species_POST, by = c('VESSEL_NUM', 'PACFIN_SPECIES_CODE'), all.x = TRUE) %>%
+  mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% group_by(VESSEL_NUM) %>%
+  mutate(group_all = ifelse(is.na(group_all),mean(group_all, na.rm = TRUE),group_all)) %>% 
+  group_by(group_all, PACFIN_SPECIES_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
+  unique() %>% filter(group_all != is.na(group_all))
+
+# cluster.species <- cluster.species[order(cluster.species$group_all, -cluster.species$Percentage),]
+# cluster.species.highest <- cluster.species %>%
+#   group_by(group_all) %>% filter(row_number()==1:5) %>% ungroup() %>% 
+#   dplyr::select('PACFIN_SPECIES_CODE') %>% unique()
+# cluster.species <- setDT(cluster.species)[PACFIN_SPECIES_CODE %chin% cluster.species.highest$PACFIN_SPECIES_CODE] 
+
+table <- as.data.frame(xtabs(Percentage ~  PACFIN_SPECIES_CODE + group_all, cluster.species_POST))
+table <- table %>%
+  spread(key = group_all, value = Freq)
+
+# table = table[,-1]
+colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7", "Cluster 8")
+gs4_create("Table2_POST_all_species", sheets = table)
+rm(table, cluster.species_POST, cluster.species.highest_POST)
+
+
+# -----------------------------------------------------------------------------------------------
+## Catch composition 
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
@@ -151,14 +251,14 @@ PacFIN.month <- PacFIN.month %>% mutate(
                                                            ifelse(PACFIN_SPECIES_CODE == "DCRB", PACFIN_SPECIES_CODE,
                                                                   ifelse(PACFIN_SPECIES_CODE == "LOBS", PACFIN_SPECIES_CODE, "OTHER"))))))))
 
-                                      
+
 all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique() %>% mutate(merge=1)
 all_species_POST <- PacFIN.month  %>%   
   dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::filter(PSDN.Total.Closure == 1) %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique() %>% mutate(merge=1)
-  
+
 all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
 all_vessels_POST <- PacFIN.month  %>%   
@@ -232,9 +332,6 @@ colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", 
 gs4_create("Table2_POST", sheets = table)
 
 rm(table, cluster.species_POST, cluster.species.highest_POST)
-
-
-
 
 
 
