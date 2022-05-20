@@ -710,12 +710,10 @@ fit_qMSQD_endog_2 <-
 
 ### Add sardine SDM separate to previous model ###
 landing_model_3 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-                      + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_Price_z:PSDN.Open:MSQD_Price_z
+                      + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open
                       + (1 | port_ID)  
                       + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_Price_z:PSDN.Open:MSQD_Price_z || cluster))
-
-
+                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open || cluster))
 
 ### LOO comparision between models ###
 # fit_qMSQD_endog <- add_criterion(fit_qMSQD_endog, "loo")
