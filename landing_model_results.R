@@ -47,7 +47,7 @@ sum_mean_fun <- function(x, ...){
 library(doBy)
 PacFIN.month.aggregate <- doBy::summaryBy(
   LANDED_WEIGHT_MTONS.sum + AFI_PRICE_PER_MTON.mean + AFI_EXVESSEL_REVENUE.sum + Length.mean 
-    ~ LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_AREA_CODE + PACFIN_GEAR_CODE + PACFIN_SPECIES_CODE + AGENCY_CODE + group_all,
+    ~ LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_AREA_CODE + PACFIN_SPECIES_CODE + AGENCY_CODE + group_all,
   FUN=sum_mean_fun, data=PacFIN.month) %>%
   dplyr::filter(AFI_EXVESSEL_REVENUE.sum.sum > 0) %>%
   dplyr::select(-c('LANDED_WEIGHT_MTONS.sum.mean', 'AFI_PRICE_PER_MTON.mean.sum',
@@ -63,11 +63,11 @@ PacFIN.month.dataset <- PacFIN.month.aggregate %>%
   dplyr::rename(Length = Length.mean.mean) %>%
   mutate(AFI_PRICE_PER_MTON.mean = na_if(AFI_PRICE_PER_MTON.mean, 0)) %>% 
   filter(group_all != is.na(group_all)) %>%
-  reshape2::melt(id.vars=c("LANDING_YEAR", "LANDING_MONTH", "VESSEL_NUM", 'PORT_AREA_CODE', 'PACFIN_GEAR_CODE',
-                 "PACFIN_SPECIES_CODE", "AGENCY_CODE", "Length", "group_all")) %>% 
-  reshape2::dcast(LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_AREA_CODE + PACFIN_GEAR_CODE + AGENCY_CODE + group_all + Length ~
+  reshape2::melt(id.vars=c("LANDING_YEAR", "LANDING_MONTH", "VESSEL_NUM", 'PORT_AREA_CODE',
+                           "PACFIN_SPECIES_CODE", "AGENCY_CODE", "Length", "group_all")) %>% 
+  reshape2::dcast(LANDING_YEAR + LANDING_MONTH + VESSEL_NUM + PORT_AREA_CODE + AGENCY_CODE + group_all + Length ~
           PACFIN_SPECIES_CODE + variable, fun.aggregate=mean, rm.na = T) %>%
-  dplyr::select('LANDING_YEAR', 'LANDING_MONTH', 'VESSEL_NUM', 'PORT_AREA_CODE', 'PACFIN_GEAR_CODE', 'AGENCY_CODE', 'group_all',
+  dplyr::select('LANDING_YEAR', 'LANDING_MONTH', 'VESSEL_NUM', 'PORT_AREA_CODE', 'AGENCY_CODE', 'group_all',
                 'Length', 'PSDN_LANDED_WEIGHT_MTONS.sum', 'MSQD_LANDED_WEIGHT_MTONS.sum', 'NANC_LANDED_WEIGHT_MTONS.sum',  
                 'PSDN_AFI_PRICE_PER_MTON.mean', 'MSQD_AFI_PRICE_PER_MTON.mean', 'NANC_AFI_PRICE_PER_MTON.mean')
 
@@ -508,7 +508,7 @@ rm(desc_data, table)
 
 #### Select data for estimation, replace N/A landings to zero 
 dataset_msqd <- dataset %>%
-  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, PACFIN_GEAR_CODE, group_all, 
+  dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, 
                 LANDING_YEAR, LANDING_MONTH,
                 MSQD_SPAWN_SDM_90, MSQD_Landings, MSQD_Price, 
                 PSDN_Landings, NANC_Landings, PSDN_Price, NANC_Price, 
@@ -538,7 +538,6 @@ dataset_msqd <- dataset %>%
 
 #### Create new port ID and cluster variable
 
-dataset_msqd$gear_ID <- udpipe::unique_identifier(dataset_msqd, fields = "PACFIN_GEAR_CODE", start_from = 1) 
 dataset_msqd$port_ID <- udpipe::unique_identifier(dataset_msqd, fields = "PORT_AREA_CODE", start_from = 1) 
 dataset_msqd$cluster <- udpipe::unique_identifier(dataset_msqd, fields = "group_all", start_from = 1) 
 MSQD_port_area <- dataset_msqd %>%
@@ -549,8 +548,6 @@ MSQD_clusters <- dataset_msqd %>%
   unique()
 
 #### Convert variables to factor
-dataset_msqd$gear_ID      <- factor(dataset_msqd$gear_ID)
-
 dataset_msqd$port_ID      <- factor(dataset_msqd$port_ID)
 dataset_msqd$cluster      <- factor(dataset_msqd$cluster)
 dataset_msqd$LANDING_YEAR <- factor(dataset_msqd$LANDING_YEAR)
@@ -609,34 +606,15 @@ library(sjmisc)
 library(insight)
 library(httr)
 
-
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) %>%
   dplyr::filter(MSQD.Open == 1) 
 
-
-# fit_qMSQD_price_v9 <- readRDS(here::here("Estimations", "fit_qMSQD_price_v9.RDS"))
-# 
-# # fit_qMSQD_price_v9 <-
-# #   brm(data = dataset_msqd_landing,
-# #       formula = log(MSQD_Landings) ~
-# #         1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z + Length_z +
-# #         (1 | port_ID) + (1 | cluster),
-# #       prior = c(
-# #         prior(normal(0, 1), class = b),
-# #         prior(exponential(1), class = sigma)),
-# #       control = list(adapt_delta = 0.90, max_treedepth = 12),
-# #       chains = 2,
-# #       family = gaussian,
-# #       cores = 4,
-# #       file = "Estimations/fit_qMSQD_price_v9")
-# # 
-# 
-# fit_qMSQD_price_v13 <-
+# fit_qMSQD <-
 #   brm(data = dataset_msqd_landing,
 #       formula = log(MSQD_Landings) ~
-#         1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z + Length_z + 
-#         (1 | port_ID) + (1 | cluster) + (1 | gear_ID),
+#         1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z + Length_z +
+#         (1 | port_ID) + (1 | cluster),
 #       prior = c(
 #         prior(normal(0, 1), class = b),
 #         prior(exponential(1), class = sigma)),
@@ -644,14 +622,13 @@ dataset_msqd_landing <- dataset_msqd %>%
 #       chains = 2,
 #       family = gaussian,
 #       cores = 4,
-#       file = "Estimations/fit_qMSQD_price_v13")
+#       file = "Estimations/fit_qMSQD")
 # 
-# 
-# fit_qMSQD_price_v14 <-
+# fit_qMSQD_b <-
 #   brm(data = dataset_msqd_landing,
 #       formula = log(MSQD_Landings) ~
-#         1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z + Length_z + diesel.price.AFI_z + 
-#         (1 | port_ID) + (1 | cluster) + (1 | gear_ID),
+#         1 + MSQD_SPAWN_SDM_90  + MSQD_Price + Length +
+#         (1 | port_ID) + (1 | cluster),
 #       prior = c(
 #         prior(normal(0, 1), class = b),
 #         prior(exponential(1), class = sigma)),
@@ -659,43 +636,41 @@ dataset_msqd_landing <- dataset_msqd %>%
 #       chains = 2,
 #       family = gaussian,
 #       cores = 4,
-#       file = "Estimations/fit_qMSQD_price_v14")
-# 
-# tab_model(fit_qMSQD_price_v9, fit_qMSQD_price_v13, fit_qMSQD_price_v14)
+#       file = "Estimations/fit_qMSQD_b")
 
-
-
-# 
-# # ##### Model Comparision #####
+### Model Comparision ###
 # tab_model(fit_qMSQD_price_v9, fit_qMSQD_price_v11)
 
-# fit_qMSQD_price_v9 <- add_criterion(fit_qMSQD_price_v9, "loo")
-# fit_qMSQD_price_v11 <- add_criterion(fit_qMSQD_price_v11, "loo")
-# fit_qMSQD_price_v12 <- add_criterion(fit_qMSQD_price_v12, "loo")
+# fit_qMSQD   <- add_criterion(fit_qMSQD,   "loo")
+# fit_qMSQD_b <- add_criterion(fit_qMSQD_b, "loo")
+
 
 # # w <- as.data.frame(
-# loo_compare(fit_qMSQD_price_v9,
-#             fit_qMSQD_price_v11,
-#             fit_qMSQD_price_v12,
+# loo_compare(fit_qMSQD,
+#             fit_qMSQD_b,
 #             criterion = "loo")
 # )
 # gs4_create("LOO", sheets = w)
 
 
-## --------------------------------------------------------------
-## Problem using price, as is endogenous. Solve price endogeneity... 
+## -------------------------------------------------------------------
+### Problem using price, as is endogenous. Solve price endogeneity ### 
 
-fit_qMSQD_price_endog_v9 <- readRDS(here::here("Estimations", "fit_qMSQD_price_endog_v9.RDS"))
+#### Problems to solve: 
+## - Other marginal costs?
+## - Fish meal as instrument for squid?
+## - Include other species
 
 
-# price_model_9   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
-# landing_model_9 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + 
-#                           (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z || cluster))
-# 
-# fit_qMSQD_price_endog_v9 <-
+### Base model (z-value) ###
+price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
+landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
+                        (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z || cluster))
+
+# fit_qMSQD_endog <-
 #   brm(data = dataset_msqd_landing,
 #       family = gaussian,
-#       price_model_9 + landing_model_9 + set_rescor(TRUE),
+#       price_model + landing_model + set_rescor(TRUE),
 #       prior = c(# E model
 #         prior(normal(0, 1), class = b, resp = MSQDPricez),
 #         prior(exponential(1), class = sigma, resp = MSQDPricez),
@@ -705,44 +680,22 @@ fit_qMSQD_price_endog_v9 <- readRDS(here::here("Estimations", "fit_qMSQD_price_e
 #         # rho
 #         prior(lkj(2), class = rescor)),
 #       iter = 2000, warmup = 1000, chains = 2, cores = 4,
-#       file = "Estimations/fit_qMSQD_price_endog_v9")
-# 
+#       file = "Estimations/fit_qMSQD_endog")
+
+fit_qMSQD_endog <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
 
 
-# price_model_14   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
-# landing_model_14 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                          + (1 | port_ID) + (1 | gear_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z || cluster))
-# 
-# fit_qMSQD_price_endog_v14 <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model_14 + landing_model_14 + set_rescor(TRUE),
-#       prior = c(# E model
-#         prior(normal(0, 1), class = b, resp = MSQDPricez),
-#         prior(exponential(1), class = sigma, resp = MSQDPricez),
-#         # W model
-#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
-#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
-#         # rho
-#         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 2, cores = 4,
-#       file = "Estimations/fit_qMSQD_price_endog_v14")
-# 
-# tab_model(fit_qMSQD_price_endog_v14)
+### Add sardine SDM interacted with squid SDM to base model ###
+landing_model_2 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
+                      + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z 
+                      + (1 | port_ID)  
+                      + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
+                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z || cluster))
 
-
-price_model_13   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
-landing_model_13 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-                       PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_Price_z:PSDN.Open:MSQD_Price_z +
-                         PSDN_SDM_60_z:PSDN.Open + PSDN_Price_z:PSDN.Open + 
-                         (1 | port_ID)  + (1 | gear_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-                       PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_Price_z:PSDN.Open:MSQD_Price_z + 
-                         PSDN_SDM_60_z:PSDN.Open + PSDN_Price_z:PSDN.Open || cluster))
-
-fit_qMSQD_price_endog_v13 <-
+fit_qMSQD_endog_2 <-
   brm(data = dataset_msqd_landing,
       family = gaussian,
-      price_model_13 + landing_model_13 + set_rescor(TRUE),
+      price_model + landing_model_2 + set_rescor(TRUE),
       prior = c(# E model
         prior(normal(0, 1), class = b, resp = MSQDPricez),
         prior(exponential(1), class = sigma, resp = MSQDPricez),
@@ -752,22 +705,27 @@ fit_qMSQD_price_endog_v13 <-
         # rho
         prior(lkj(2), class = rescor)),
       iter = 2000, warmup = 1000, chains = 2, cores = 4,
-      file = "Estimations/fit_qMSQD_price_endog_v13")
-
-tab_model(fit_qMSQD_price_endog_v13)
-
-### TRY WITHOUT PRICES ###
+      file = "Estimations/fit_qMSQD_endog_2")
 
 
-#fit_qMSQD_price_endog_v9 <- add_criterion(fit_qMSQD_price_endog_v9, "loo")
-# loo_compare(fit_qMSQD_price_endog_v12,
-#             fit_qMSQD_price_endog_v9,
+### Add sardine SDM separate to previous model ###
+landing_model_3 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
+                      + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_Price_z:PSDN.Open:MSQD_Price_z
+                      + (1 | port_ID)  
+                      + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
+                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_Price_z:PSDN.Open:MSQD_Price_z || cluster))
+
+
+
+### LOO comparision between models ###
+# fit_qMSQD_endog <- add_criterion(fit_qMSQD_endog, "loo")
+# fit_qMSQD_endog_b <- add_criterion(fit_qMSQD_endog_b, "loo")
+# loo_compare(fit_qMSQD_price_endog,
+#             fit_qMSQD_price_endog,
 #             criterion = "loo")
 
 
-## Other marginal costs?
-## Fish meal as instrument for squid?
-## Include other species
+
 
 fit_qMSQD <- fit_qMSQD_price_endog_v13
 coef(fit_qMSQD)
