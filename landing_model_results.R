@@ -639,7 +639,7 @@ dataset_msqd_landing <- dataset_msqd %>%
 #       file = "Estimations/fit_qMSQD_b")
 
 ### Model Comparision ###
-# tab_model(fit_qMSQD_price_v9, fit_qMSQD_price_v11)
+# tab_model(fit_qMSQD, fit_qMSQD_b)
 
 # fit_qMSQD   <- add_criterion(fit_qMSQD,   "loo")
 # fit_qMSQD_b <- add_criterion(fit_qMSQD_b, "loo")
@@ -706,6 +706,9 @@ fit_qMSQD_endog_2 <-
         prior(lkj(2), class = rescor)),
       iter = 2000, warmup = 1000, chains = 2, cores = 4,
       file = "Estimations/fit_qMSQD_endog_2")
+
+tab_model(fit_qMSQD_endog_2)
+
 
 
 ### Add sardine SDM separate to previous model ###
