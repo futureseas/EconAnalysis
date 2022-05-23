@@ -685,29 +685,30 @@ landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z 
 fit_qMSQD_endog <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
 
 
-### Add sardine SDM interacted with squid SDM to base model ###
-landing_model_2 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-                      + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z 
-                      + (1 | port_ID)  
-                      + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z || cluster))
-
-fit_qMSQD_endog_2 <-
-  brm(data = dataset_msqd_landing,
-      family = gaussian,
-      price_model + landing_model_2 + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
-      iter = 2000, warmup = 1000, chains = 2, cores = 4,
-      file = "Estimations/fit_qMSQD_endog_2")
-
-tab_model(fit_qMSQD_endog_2)
+# ### Add sardine SDM interacted with squid SDM to base model ###
+# landing_model_2 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
+#                       + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z 
+#                       + (1 | port_ID)  
+#                       + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
+#                          + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z || cluster))
+# 
+# fit_qMSQD_endog_2 <-
+#   brm(data = dataset_msqd_landing,
+#       family = gaussian,
+#       price_model + landing_model_2 + set_rescor(TRUE),
+#       prior = c(# E model
+#         prior(normal(0, 1), class = b, resp = MSQDPricez),
+#         prior(exponential(1), class = sigma, resp = MSQDPricez),
+#         # W model
+#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
+#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
+#         # rho
+#         prior(lkj(2), class = rescor)),
+#       iter = 2000, warmup = 1000, chains = 2, cores = 4,
+#       file = "Estimations/fit_qMSQD_endog_2")
+# 
+# tab_model(fit_qMSQD_endog_2)
+fit_qMSQD_endog_2 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_2.RDS"))
 
 
 
@@ -718,14 +719,31 @@ landing_model_3 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_
                       + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
                          + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open || cluster))
 
+fit_qMSQD_endog_3 <-
+  brm(data = dataset_msqd_landing,
+      family = gaussian,
+      price_model + landing_model_3 + set_rescor(TRUE),
+      prior = c(# E model
+        prior(normal(0, 1), class = b, resp = MSQDPricez),
+        prior(exponential(1), class = sigma, resp = MSQDPricez),
+        # W model
+        prior(normal(0, 1), class = b, resp = logMSQDLandings),
+        prior(exponential(1), class = sigma, resp = logMSQDLandings),
+        # rho
+        prior(lkj(2), class = rescor)),
+      iter = 2000, warmup = 1000, chains = 2, cores = 4,
+      file = "Estimations/fit_qMSQD_endog_3")
+# 
+# tab_model(fit_qMSQD_endog_2)
+
+
+
 ### LOO comparision between models ###
 # fit_qMSQD_endog <- add_criterion(fit_qMSQD_endog, "loo")
 # fit_qMSQD_endog_b <- add_criterion(fit_qMSQD_endog_b, "loo")
 # loo_compare(fit_qMSQD_price_endog,
 #             fit_qMSQD_price_endog,
 #             criterion = "loo")
-
-
 
 
 fit_qMSQD <- fit_qMSQD_price_endog_v13
