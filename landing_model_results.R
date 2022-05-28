@@ -393,6 +393,12 @@ rm(fish.meal)
 
 #---------------------------------------------------------------------------------------
 ### Include fuel prices
+fuel.prices.CA <- read_excel(here::here("Data", "Fuel_prices", "fuelca.xls"), sheet = "fuelca")
+fuel.prices.WA <- read_excel(here::here("Data", "Fuel_prices", "fuelca.xls"), sheet = "fuelwa")
+fuel.prices.OR <- read_excel(here::here("Data", "Fuel_prices", "fuelca.xls"), sheet = "fuelor")
+
+
+
 fuel.prices <- read.csv(here::here("Data", "Fuel_prices", "diesel_prices.csv"), header = TRUE, stringsAsFactors = FALSE)
 fuel.prices <- fuel.prices %>% dplyr::select(-c('Date')) %>% dplyr::rename(diesel.price = Diesel.Retail.Prices..Dollars.per.Gallon.)
 dataset <- merge(dataset, fuel.prices, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
@@ -670,11 +676,27 @@ price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 fit_qMSQD_endog <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
 
 ### Add sardine SDM  ###
-# landing_model_b <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-#                         PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-#                           (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-#                         PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open || cluster))
-# 
+landing_model_b <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
+                        PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
+                          (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
+                        PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open || cluster))
+
+fit_qMSQD_endog_b <-
+  brm(data = dataset_msqd_landing,
+      family = gaussian,
+      price_model + landing_model_b + set_rescor(TRUE),
+      prior = c(# E model
+        prior(normal(0, 1), class = b, resp = MSQDPricez),
+        prior(exponential(1), class = sigma, resp = MSQDPricez),
+        # W model
+        prior(normal(0, 1), class = b, resp = logMSQDLandings),
+        prior(exponential(1), class = sigma, resp = logMSQDLandings),
+        # rho
+        prior(lkj(2), class = rescor)),
+      iter = 2000, warmup = 1000, chains = 2, cores = 4,
+      file = "Estimations/fit_qMSQD_endog_b")
+
+
 fit_qMSQD_endog_b <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b.RDS"))
 
 
@@ -725,10 +747,6 @@ fit_qMSQD_endog_c <- readRDS(here::here("Estimations", "fit_qMSQD_endog_c.RDS"))
 #       file = "Estimations/fit_qMSQD_endog_d")
 #
 fit_qMSQD_endog_d <- readRDS(here::here("Estimations", "fit_qMSQD_endog_d.RDS"))
-
-
-
-
 
 ## Try also including PSDN_open separate
 # landing_model_b_2 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
@@ -786,7 +804,7 @@ fit_qMSQD_endog_d_2 <-
 
 # LOO comparision between models ###
 # fit_qMSQD_endog     <- add_criterion(fit_qMSQD_endog, "loo")
-# fit_qMSQD_endog_b   <- add_criterion(fit_qMSQD_endog_b, "loo")
+fit_qMSQD_endog_b   <- add_criterion(fit_qMSQD_endog_b, "loo")
 # fit_qMSQD_endog_c   <- add_criterion(fit_qMSQD_endog_c, "loo")
 # fit_qMSQD_endog_d   <- add_criterion(fit_qMSQD_endog_d, "loo")
 # fit_qMSQD_endog_b_2 <- add_criterion(fit_qMSQD_endog_b_2, "loo", overwrite = TRUE)
@@ -937,22 +955,22 @@ coeff_cluster_int <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
 
   
   #### By port_area
-  conditions <- data.frame(cluster = unique(dataset_msqd$port_ID))
+  conditions <- data.frame(cluster = unique(dataset_msqd$PORT_AREA_ID))
   rownames(conditions) <- unique(dataset_msqd$PORT_AREA_CODE)
   
   conditional_effects_msqd_sdm <-
     conditional_effects(
-      fit_qMSQD, 
+      fit_qMSQD_endog_b_2, 
       "MSQD_SPAWN_SDM_90_z",                
       surface=TRUE, 
       conditions = conditions, 
       re_formula = NULL)#, transform = log, method = "posterior_predict"))
   
-  plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
+  plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[2]] + 
     ggtitle('Market squid availability effect on squid landings') +
     theme(plot.title = element_text(size=9, face="bold.italic"),
           axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-    scale_x_continuous(name = "Prob(Presence)") +
+    scale_x_continuous(name = "Prob(Presence): MSQD") +
     scale_y_continuous(name = element_blank())
   
   conditional_effects_psdn_sdm <-
@@ -963,7 +981,7 @@ coeff_cluster_int <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
       conditions = conditions, 
       re_formula = NULL)#, transform = log, method = "posterior_predict"))
   
-  plot(conditional_effects_psdn_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
+  plot(conditional_effects_psdn_sdm, plot = FALSE, nrow = 3, ncol = 2)[[2]] + 
     ggtitle('Pacific sardine availability effect on squid landings') +
     theme(plot.title = element_text(size=9, face="bold.italic"),
           axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
@@ -980,13 +998,13 @@ rownames(conditions) <- unique(dataset_msqd$group_all)
 
 conditional_effects_msqd_sdm <-
   conditional_effects(
-    fit_qMSQD, 
+    fit_qMSQD_endog_b_2, 
     "MSQD_SPAWN_SDM_90_z",                
     surface=TRUE, 
     conditions = conditions, 
     re_formula = NULL)#, transform = log, method = "posterior_predict"))
 
-plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
+plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[2]] + 
   ggtitle('Market squid availability effect on squid landings') +
   theme(plot.title = element_text(size=9, face="bold.italic"),
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
@@ -995,13 +1013,13 @@ plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] +
                   
 conditional_effects_psdn_sdm <-
   conditional_effects(
-    fit_qMSQD, 
+    fit_qMSQD_endog_b_2, 
     "PSDN_SDM_60_z",                
     surface=TRUE, 
     conditions = conditions, 
     re_formula = NULL)#, transform = log, method = "posterior_predict"))
 
-plot(conditional_effects_psdn_sdm, plot = FALSE, nrow = 3, ncol = 2)[[1]] + 
+plot(conditional_effects_psdn_sdm, plot = FALSE, nrow = 3, ncol = 2)[[2]] + 
   ggtitle('Pacific sardine availability effect on squid landings') +
   theme(plot.title = element_text(size=9, face="bold.italic"),
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
@@ -1012,12 +1030,12 @@ rm(conditional_effects_msqd_sdm, conditional_effects_psdn.open, conditional_effe
      
 
 ### Interaction effects ###
-c_eff_int_psdn_msqd <- (conditional_effects(
-  fit_qMSQD, "PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z", 
+c_eff_int_psdn_msqd_b <- (conditional_effects(
+  fit_qMSQD_endog_b, "PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z", 
   surface=TRUE, 
   conditions = conditions, re_formula = NULL))
 
-plot(c_eff_int_psdn_msqd, plot = FALSE)[[1]] + 
+plot(c_eff_int_psdn_msqd, plot = FALSE)[[2]] + 
   ggtitle('(a) Pacific sardine x Market squid') +
   theme(
     plot.title = element_text(size=9, face="bold.italic"),
