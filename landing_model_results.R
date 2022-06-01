@@ -393,19 +393,51 @@ rm(fish.meal)
 
 #---------------------------------------------------------------------------------------
 ### Include fuel prices
-fuel.prices.CA <- read_excel(here::here("Data", "Fuel_prices", "fuelca.xls"), sheet = "fuelca")
-fuel.prices.WA <- read_excel(here::here("Data", "Fuel_prices", "fuelca.xls"), sheet = "fuelwa")
-fuel.prices.OR <- read_excel(here::here("Data", "Fuel_prices", "fuelca.xls"), sheet = "fuelor")
+fuel.prices.CA <- readxl::read_excel(here::here("Data", "Fuel_prices", "fuelca.xls"), sheet = "fuelca")
+fuel.prices.WA <- readxl::read_excel(here::here("Data", "Fuel_prices", "fuelwa.xls"), sheet = "fuelwa")
+fuel.prices.OR <- readxl::read_excel(here::here("Data", "Fuel_prices", "fuelor.xls"), sheet = "fuelor")
 
+fuel.prices <- rbind(fuel.prices.CA,fuel.prices.OR,fuel.prices.WA) %>% 
+  dplyr::select(-c('portname', 'DOCKCODE', 'notes', 'pricettl', 'pxquoted')) %>%
+  dplyr::rename(PACFIN_PORT_CODE = port) %>%
+  dplyr::rename(LANDING_YEAR = YEAR) %>%
+  dplyr::rename(LANDING_MONTH = MONTH) 
 
+## Replace zero to NA
+fuel.prices[fuel.prices == 0] <- NA
 
-fuel.prices <- read.csv(here::here("Data", "Fuel_prices", "diesel_prices.csv"), header = TRUE, stringsAsFactors = FALSE)
-fuel.prices <- fuel.prices %>% dplyr::select(-c('Date')) %>% dplyr::rename(diesel.price = Diesel.Retail.Prices..Dollars.per.Gallon.)
-dataset <- merge(dataset, fuel.prices, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
+## Merge port area code
+port_area_codes <- read.csv(here::here('Data', 'Ports', 'ports_area_and_name_codes.csv'), 
+                            header = TRUE, stringsAsFactors = FALSE)
+
+fuel.prices <- merge(fuel.prices, port_area_codes, 
+                     by = ("PACFIN_PORT_CODE"), all.x = TRUE, all.y = FALSE)
+
+fuel.prices <- fuel.prices %>% group_by(LANDING_YEAR, LANDING_MONTH, PORT_AREA_CODE) %>% 
+  summarize(diesel.price = mean(pricegal, na.rm = TRUE))
+
+## Merge price to dataset
+dataset <- merge(dataset, fuel.prices, by = c('LANDING_YEAR', 'LANDING_MONTH', 'PORT_AREA_CODE'), all.x = TRUE, all.y = FALSE)
+
+#### replace NA using state price
+fuel.prices.state <- readxl::read_excel(here::here("Data", "Fuel_prices", "state_averages.xls"), sheet = "state_averages") %>%
+  dplyr::rename(LANDING_YEAR = YEAR) %>%
+  dplyr::rename(LANDING_MONTH = MONTH) %>%
+  dplyr::rename(AGENCY_CODE = STATE) %>%
+  dplyr::rename(diesel.price.state = avgpricegal) %>%
+  dplyr::select(-c('avgpricettl')) %>%
+  mutate(AGENCY_CODE = ifelse(AGENCY_CODE == 'WA', 'W', 
+                              ifelse(AGENCY_CODE == 'CA', 'C', 
+                                     ifelse(AGENCY_CODE == 'OR', 'O', 'A'))))
+
+dataset <- dataset %>%
+  merge(fuel.prices.state, by = c("LANDING_YEAR", "LANDING_MONTH", "AGENCY_CODE"), all.x = TRUE) %>% 
+  mutate(diesel.price = ifelse(is.na(diesel.price), diesel.price.state, diesel.price))
+
+## Deflact prices
 dataset$diesel.price.AFI <- dataset$diesel.price/dataset$deflactor
-rm(fuel.prices)
 
-
+rm(fuel.prices, fuel.prices.CA, fuel.prices.OR, fuel.prices.WA, fuel.prices.state)
 
 #---------------------------------------
 ## Summary statistics ##
@@ -670,9 +702,9 @@ dataset_msqd_landing <- dataset_msqd %>%
 
 ### Base model (z-value) ###
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
-# landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-#                         (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z || cluster))
-# 
+landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
+                        (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z || cluster))
+
 fit_qMSQD_endog <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
 
 ### Add sardine SDM  ###
@@ -681,79 +713,32 @@ landing_model_b <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_
                           (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
                         PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open || cluster))
 
-fit_qMSQD_endog_b <-
-  brm(data = dataset_msqd_landing,
-      family = gaussian,
-      price_model + landing_model_b + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
-      iter = 2000, warmup = 1000, chains = 2, cores = 4,
-      file = "Estimations/fit_qMSQD_endog_b")
-
-
 fit_qMSQD_endog_b <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b.RDS"))
 
 
 ### Only interaction ###
-# 
-# landing_model_c <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-#                         PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + 
-#                           (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-#                         PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z || cluster))
-# 
-# fit_qMSQD_endog_c <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model + landing_model_c + set_rescor(TRUE),
-#       prior = c(# E model
-#         prior(normal(0, 1), class = b, resp = MSQDPricez),
-#         prior(exponential(1), class = sigma, resp = MSQDPricez),
-#         # W model
-#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
-#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
-#         # rho
-#         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 2, cores = 4,
-#       file = "Estimations/fit_qMSQD_endog_c")
-#
+landing_model_c <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
+                        PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z +
+                          (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
+                        PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z || cluster))
+
 fit_qMSQD_endog_c <- readRDS(here::here("Estimations", "fit_qMSQD_endog_c.RDS"))
 
 ### Without interaction ###
-# landing_model_d <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                       + PSDN_SDM_60_z:PSDN.Open
-#                       + (1 | port_ID)  
-#                       + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                       + PSDN_SDM_60_z:PSDN.Open || cluster))
-# 
-# fit_qMSQD_endog_d <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model + landing_model_d + set_rescor(TRUE),
-#       prior = c(# E model
-#         prior(normal(0, 1), class = b, resp = MSQDPricez),
-#         prior(exponential(1), class = sigma, resp = MSQDPricez),
-#         # W model
-#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
-#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
-#         # rho
-#         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 2, cores = 4,
-#       file = "Estimations/fit_qMSQD_endog_d")
-#
+landing_model_d <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
+                      + PSDN_SDM_60_z:PSDN.Open
+                      + (1 | port_ID)
+                      + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
+                      + PSDN_SDM_60_z:PSDN.Open || cluster))
+
 fit_qMSQD_endog_d <- readRDS(here::here("Estimations", "fit_qMSQD_endog_d.RDS"))
 
 ## Try also including PSDN_open separate
-# landing_model_b_2 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open 
-#                         + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open || cluster))
-#
+landing_model_b_2 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
+                        + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
+                        + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
+                        + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open || cluster))
+
 fit_qMSQD_endog_b_2 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_2.RDS"))
 
 
@@ -763,20 +748,7 @@ landing_model_c_2 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Pric
                         + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN.Open || cluster))
 
-fit_qMSQD_endog_c_2 <-
-  brm(data = dataset_msqd_landing,
-      family = gaussian,
-      price_model + landing_model_c_2 + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
-      iter = 2000, warmup = 1000, chains = 2, cores = 4,
-      file = "Estimations/fit_qMSQD_endog_c_2")
+fit_qMSQD_endog_c_2 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_c_2.RDS"))
 
 
 ### Without interaction ###
@@ -785,10 +757,23 @@ landing_model_d_2 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Pric
                       + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
                       + PSDN_SDM_60_z:PSDN.Open + PSDN.Open || cluster))
 
-fit_qMSQD_endog_d_2 <-
+fit_qMSQD_endog_d_2 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_d_2.RDS"))
+
+
+
+#####################################################################################################
+### Preferred model with diesel price by port
+landing_model_b_3 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
+                       + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
+                       + diesel.price.AFI_z
+                       + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
+                       + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
+                       + diesel.price.AFI_z || cluster))
+
+fit_qMSQD_endog_b_3 <-
   brm(data = dataset_msqd_landing,
       family = gaussian,
-      price_model + landing_model_d_2 + set_rescor(TRUE),
+      price_model + landing_model_b_3 + set_rescor(TRUE),
       prior = c(# E model
         prior(normal(0, 1), class = b, resp = MSQDPricez),
         prior(exponential(1), class = sigma, resp = MSQDPricez),
@@ -798,18 +783,20 @@ fit_qMSQD_endog_d_2 <-
         # rho
         prior(lkj(2), class = rescor)),
       iter = 2000, warmup = 1000, chains = 2, cores = 4,
-      file = "Estimations/fit_qMSQD_endog_d_2")
+      file = "Estimations/fit_qMSQD_endog_b_3")
 
 
 
 # LOO comparision between models ###
 # fit_qMSQD_endog     <- add_criterion(fit_qMSQD_endog, "loo")
-fit_qMSQD_endog_b   <- add_criterion(fit_qMSQD_endog_b, "loo")
+# fit_qMSQD_endog_b   <- add_criterion(fit_qMSQD_endog_b, "loo")
 # fit_qMSQD_endog_c   <- add_criterion(fit_qMSQD_endog_c, "loo")
 # fit_qMSQD_endog_d   <- add_criterion(fit_qMSQD_endog_d, "loo")
 # fit_qMSQD_endog_b_2 <- add_criterion(fit_qMSQD_endog_b_2, "loo", overwrite = TRUE)
-fit_qMSQD_endog_c_2 <- add_criterion(fit_qMSQD_endog_c_2, "loo", overwrite = TRUE)
-fit_qMSQD_endog_d_2 <- add_criterion(fit_qMSQD_endog_d_2, "loo", overwrite = TRUE)
+# fit_qMSQD_endog_c_2 <- add_criterion(fit_qMSQD_endog_c_2, "loo", overwrite = TRUE)
+# fit_qMSQD_endog_d_2 <- add_criterion(fit_qMSQD_endog_d_2, "loo", overwrite = TRUE)
+fit_qMSQD_endog_b_3 <- add_criterion(fit_qMSQD_endog_b_3, "loo", overwrite = TRUE)
+
 
 
 loo_compare(fit_qMSQD_endog,
@@ -819,9 +806,10 @@ loo_compare(fit_qMSQD_endog,
             fit_qMSQD_endog_b_2,
             fit_qMSQD_endog_c_2,
             fit_qMSQD_endog_d_2,
+            fit_qMSQD_endog_b_3,
             criterion = "loo")
 
-tab_model(fit_qMSQD_endog_b_2)
+tab_model(fit_qMSQD_endog_b_3)
 
 
 ## Add new fuel prices to the best model ##
