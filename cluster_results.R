@@ -337,14 +337,27 @@ rm(table, cluster.species_POST, cluster.species.highest_POST)
 
 #-----------------------------------
 ## Gear
-
 all_gear <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_GEAR_CODE) %>% unique() %>% mutate(merge=1)
+all_gear_POST <- PacFIN.month  %>%   
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::filter(PSDN.Total.Closure == 1) %>% dplyr::select(PACFIN_GEAR_CODE) %>% unique() %>% mutate(merge=1)
+
 all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
-expand <- merge(all_gear, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+all_vessels_POST <- PacFIN.month  %>%   
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::filter(PSDN.Total.Closure == 1) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
 
+expand <- merge(all_gear, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+expand_POST <- merge(all_gear_POST, all_vessels_POST, by = c('merge'), all.x = TRUE, all.y = TRUE)
+rm(all_gear_POST, all_vessels_POST)
 rm(all_gear, all_vessels)
+
+
+############  CHECK FROM HERE ##################
 
 ### How gear are used by clusters??? ###
 options(scipen=999)
