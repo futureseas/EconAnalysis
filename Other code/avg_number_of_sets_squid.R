@@ -21,7 +21,7 @@ sqd.logbook.vessel <- read_csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidVesselDa
   dplyr::rename(lon = SetLongitude) %>%
   mutate(vessel="CA Vessel") %>%
   mutate(date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
-  mutate(year = year(date)) %>%
+  mutate(LANDING_YEAR = year(date)) %>%
   mutate(month = month(date)) %>%
   dplyr::rename(effort = "CatchEstimate") 
   
@@ -41,5 +41,8 @@ max_n_set.by.trip %>%
 
 # Save data to use it in estimations #
 
+write.csv(max_n_set.by.trip,
+          "Data/Logbook_output/max_n_set.by.trip.csv", 
+          row.names = FALSE)
 
 
