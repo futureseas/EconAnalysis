@@ -869,7 +869,7 @@ loo_compare(fit_qMSQD_endog,
             fit_qMSQD_endog_b_5,
             criterion = "loo")
 
-tab_model(fit_qMSQD_endog_b_3)
+tab_model(fit_qMSQD_endog_b_4)
 
 
 dataset_select <- dataset_msqd_landing %>% 
