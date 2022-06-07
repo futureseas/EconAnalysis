@@ -794,22 +794,7 @@ landing_model_b_4 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Pric
                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                                            + avg_set_MSQD_z || cluster))
 
-# fit_qMSQD_endog_b_4 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_4.RDS"))
-
-fit_qMSQD_endog_b_4 <-
-  brm(data = dataset_msqd_landing,
-      family = gaussian,
-      price_model + landing_model_b_4 + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
-      iter = 2000, warmup = 1000, chains = 2, cores = 4,
-      file = "Estimations/fit_qMSQD_endog_b_4")
+fit_qMSQD_endog_b_4 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_4.RDS"))
 
 
 ### Using year trend 
@@ -820,12 +805,21 @@ landing_model_b_5 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Pric
                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                                            + LANDING_YEAR || cluster))
 
-# fit_qMSQD_endog_b_5 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_5.RDS"))
+fit_qMSQD_endog_b_5 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_5.RDS"))
 
-fit_qMSQD_endog_b_5 <-
+
+## Include PSDN price
+landing_model_b_7 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
+                        + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
+                        + PSDN_Price_z:PSDN.Open:MSQD_Price_z 
+                        + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
+                                           + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
+                                           + PSDN_Price_z:PSDN.Open:MSQD_Price_z || cluster))
+
+fit_qMSQD_endog_b_7 <-
   brm(data = dataset_msqd_landing,
       family = gaussian,
-      price_model + landing_model_b_5 + set_rescor(TRUE),
+      price_model + landing_model_b_7 + set_rescor(TRUE),
       prior = c(# E model
         prior(normal(0, 1), class = b, resp = MSQDPricez),
         prior(exponential(1), class = sigma, resp = MSQDPricez),
@@ -835,8 +829,23 @@ fit_qMSQD_endog_b_5 <-
         # rho
         prior(lkj(2), class = rescor)),
       iter = 2000, warmup = 1000, chains = 2, cores = 4,
-      file = "Estimations/fit_qMSQD_endog_b_5")
+      file = "Estimations/fit_qMSQD_endog_b_7")
 
+
+fit_qMSQD_endog_b_2_again <-
+  brm(data = dataset_msqd_landing,
+      family = gaussian,
+      price_model + landing_model_b_2 + set_rescor(TRUE),
+      prior = c(# E model
+        prior(normal(0, 1), class = b, resp = MSQDPricez),
+        prior(exponential(1), class = sigma, resp = MSQDPricez),
+        # W model
+        prior(normal(0, 1), class = b, resp = logMSQDLandings),
+        prior(exponential(1), class = sigma, resp = logMSQDLandings),
+        # rho
+        prior(lkj(2), class = rescor)),
+      iter = 2000, warmup = 1000, chains = 2, cores = 4,
+      file = "Estimations/fit_qMSQD_endog_b_2_again")
 
 
 
@@ -849,33 +858,31 @@ fit_qMSQD_endog_b_5 <-
 # fit_qMSQD_endog_b_2 <- add_criterion(fit_qMSQD_endog_b_2, "loo", overwrite = TRUE)
 # fit_qMSQD_endog_c_2 <- add_criterion(fit_qMSQD_endog_c_2, "loo", overwrite = TRUE)
 # fit_qMSQD_endog_d_2 <- add_criterion(fit_qMSQD_endog_d_2, "loo", overwrite = TRUE)
-# fit_qMSQD_endog_b_3 <- add_criterion(fit_qMSQD_endog_b_3, "loo", overwrite = TRUE)
- fit_qMSQD_endog_b_4 <- add_criterion(fit_qMSQD_endog_b_4, "loo", overwrite = TRUE)
- fit_qMSQD_endog_b_5 <- add_criterion(fit_qMSQD_endog_b_5, "loo", overwrite = TRUE)
-# fit_qMSQD_b_3 <- add_criterion(fit_qMSQD_b_3, "loo", overwrite = TRUE)
+# fit_qMSQD_endog_b_3 <- add_criterion(fit_qMSQD_endog_b_3, "loo", overwrite = TRUE) 
+# fit_qMSQD_endog_b_4 <- add_criterion(fit_qMSQD_endog_b_4, "loo", overwrite = TRUE)
+# fit_qMSQD_endog_b_5 <- add_criterion(fit_qMSQD_endog_b_5, "loo", overwrite = TRUE)
+#fit_qMSQD_endog_b_6 <- add_criterion(fit_qMSQD_endog_b_6, "loo", overwrite = TRUE)
+fit_qMSQD_endog_b_2_again <- add_criterion(fit_qMSQD_endog_b_2_again, "loo", overwrite = TRUE)
 
 
+ # fit_qMSQD_b_3 <- add_criterion(fit_qMSQD_b_3, "loo", overwrite = TRUE)
 
 
-loo_compare(fit_qMSQD_endog,
-            fit_qMSQD_endog_b,
-            fit_qMSQD_endog_c,
-            fit_qMSQD_endog_d,
-            fit_qMSQD_endog_b_2,
-            fit_qMSQD_endog_c_2,
-            fit_qMSQD_endog_d_2,
-            fit_qMSQD_endog_b_3,
+loo_compare(fit_qMSQD_endog_b_2_again,
             fit_qMSQD_endog_b_4,
             fit_qMSQD_endog_b_5,
+            fit_qMSQD_endog_b_6,
             criterion = "loo")
 
-tab_model(fit_qMSQD_endog_b_4)
+tab_model(fit_qMSQD_endog_b_6)
 
 
-dataset_select <- dataset_msqd_landing %>% 
-  dplyr::select(diesel.price.AFI_z, Price.Fishmeal.AFI_z, MSQD_Price_z)
-res <- cor(dataset_select)
-round(res, 2)
+
+
+# dataset_select <- dataset_msqd_landing %>% 
+#   dplyr::select(diesel.price.AFI_z, Price.Fishmeal.AFI_z, MSQD_Price_z)
+# res <- cor(dataset_select)
+# round(res, 2)
 
 ## Add new fuel prices to the best model ##
 
