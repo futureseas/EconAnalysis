@@ -461,13 +461,45 @@ names(Group_FF_Diversity)<- c("memb", "mean", "sd", "Variable")
 
 Group_Stats_Wide<-rbind(Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
 Group_Stats_Wide$memb<-as.factor(Group_Stats_Wide$memb)
-
 rm(Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
+
 
 Group_Stats_Wide <- Group_Stats_Wide %>%
   mutate(time.period = period) 
-  saveRDS(Group_Stats_Wide, file = "stats_input.RDS")  
+saveRDS(Group_Stats_Wide, file = "stats_input.RDS")  
 
+
+## Archetype by each cluster ##
+RAW_ns<-RAW[c(-1)]
+Group_Stats_ns <- RAW_ns %>% group_by(group_all) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+
+RAW_archetype <- merge(RAW, Group_Stats_ns, by = c('group_all'), all.x = TRUE) %>%
+  mutate(AVG_REVENUE_z = abs(AVG_REVENUE - AVG_REVENUE_mean) / AVG_REVENUE_se) %>%      
+  mutate(LAT_z = abs(LAT - LAT_mean) / LAT_se) %>%     
+  mutate(DISTANCE_A_z = abs(DISTANCE_A - DISTANCE_A_mean) / DISTANCE_A_se) %>%     
+  mutate(Percentage_z = abs(Percentage - Percentage_mean) / Percentage_se) %>%     
+  mutate(diversity_z = abs(diversity - diversity_mean) / diversity_se) 
+  
+RAW_archetype$Percentage_z[is.na(RAW_archetype$Percentage_z)] <- 0
+RAW_archetype$diversity_z[is.na(RAW_archetype$diversity_z)] <- 0
+
+RAW_archetype <- RAW_archetype %>% 
+  mutate(sum_z = AVG_REVENUE_z + LAT_z + DISTANCE_A_z + Percentage_z + diversity_z) %>% 
+  group_by(group_all) %>% 
+  slice_min(sum_z, n = 2) %>% 
+  dplyr::select('VESSEL_NUM', 'AVG_REVENUE', 'LAT', 'DISTANCE_A', 'Percentage', 'diversity') 
+
+library("googlesheets4")
+gs4_auth(
+  email = "fequezad@ucsc.edu",
+  path = NULL,
+  scopes = "https://www.googleapis.com/auth/spreadsheets",
+  cache = gargle::gargle_oauth_cache(),
+  use_oob = gargle::gargle_oob_default(),
+  token = NULL
+)
+
+# gs4_create("vessel_archetype_by_cluster", sheets = RAW_archetype)
 rm(Group_Stats_Wide, Group_Stats, FTID)
 
 # plot

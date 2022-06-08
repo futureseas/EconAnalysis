@@ -45,10 +45,6 @@ ggplot(nvessel.year, aes(x=LANDING_YEAR, y = n_vessel)) +
   scale_y_continuous(name = "Number of active vessels") +
   scale_x_continuous(name = "Year") 
 
-
-
-
-
 #-----------------------------------------  
 ## Number and percentage of light brail vessels by cluster
   options(scipen=999)
