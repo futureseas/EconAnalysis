@@ -877,10 +877,20 @@ dataset_select <- dataset_msqd_landing %>%
                 diesel.price.AFI_z, 
                 Price.Fishmeal.AFI_z,
                 avg_set_MSQD_z)
-res <- cor(dataset_select)
+res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
+library("googlesheets4")
+gs4_auth(
+  email = "fequezad@ucsc.edu",
+  path = NULL,
+  scopes = "https://www.googleapis.com/auth/spreadsheets",
+  cache = gargle::gargle_oauth_cache(),
+  use_oob = gargle::gargle_oob_default(),
+  token = NULL
+)
 
+# gs4_create("correlation_exp_variables_MSQD_landings", sheets = res)
 
 
 #----------------------------------------------------
