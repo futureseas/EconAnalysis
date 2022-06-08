@@ -802,6 +802,8 @@ fit_qMSQD_endog_b_2 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_2.RD
 # 
 # fit_qMSQD_endog_b_5 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_5.RDS"))
 
+fit_qMSQD_endog_b_6 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_6.RDS"))
+
 
 fit_qMSQD_endog_b_2_again <-
   brm(data = dataset_msqd_landing,
@@ -825,10 +827,10 @@ fit_qMSQD_endog_b_2_again <-
 
 landing_model_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
-                        + NANC_SDM_20_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN.Open
+                        + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z
                         + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
-                                           + NANC_SDM_20_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN.Open || cluster))
+                                           + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z || cluster))
 
 fit_qMSQD_endog_NANC <-
   brm(data = dataset_msqd_landing,
@@ -852,40 +854,38 @@ fit_qMSQD_endog_NANC <-
 # fit_qMSQD_endog     <- add_criterion(fit_qMSQD_endog, "loo")
 # fit_qMSQD_endog_b_6 <- add_criterion(fit_qMSQD_endog_b_6, "loo", overwrite = TRUE)
 # fit_qMSQD_endog_b_2_again <- add_criterion(fit_qMSQD_endog_b_2_again, "loo", overwrite = TRUE)
-fit_qMSQD_endog_NANC <- add_criterion(fit_qMSQD_endog_NANC, "loo", overwrite = TRUE)
-
+# fit_qMSQD_endog_NANC <- add_criterion(fit_qMSQD_endog_NANC, "loo", overwrite = TRUE)
 
 loo_compare(fit_qMSQD_endog_NANC,
             fit_qMSQD_endog_b_2_again,
-            fit_qMSQD_endog_b_6,
             fit_qMSQD_endog,
             criterion = "loo")
 
+tab_model(fit_qMSQD_endog_NANC)
 
 
-
-tab_model(fit_qMSQD_endog_b_2_again)
-
-
-
-
-
-######## check correlation....
+######## Check correlation ###########
 
 
 dataset_select <- dataset_msqd_landing %>%
-  dplyr::select(diesel.price.AFI_z, Price.Fishmeal.AFI_z, MSQD_Price_z, PSDN_Price_z)
+  dplyr::select(MSQD_SPAWN_SDM_90_z,
+                PSDN_SDM_60_z,
+                NANC_SDM_20_z,
+                Length_z,
+                MSQD_Price_z, 
+                PSDN_Price_z, 
+                diesel.price.AFI_z, 
+                Price.Fishmeal.AFI_z,
+                avg_set_MSQD_z)
 res <- cor(dataset_select)
 round(res, 2)
-
-## Add new fuel prices to the best model ##
 
 
 
 
 #----------------------------------------------------
 ## Model summary ##
-fit_qMSQD <- fit_qMSQD_endog_b_2
+fit_qMSQD <- fit_qMSQD_endog_NANC
 coef(fit_qMSQD)
 
 library(patchwork)
