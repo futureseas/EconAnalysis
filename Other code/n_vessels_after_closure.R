@@ -377,7 +377,13 @@ Group_FF_Diversity<-Group_Stats[c(5,10)]
 Group_FF_Diversity$Var<-"CPS diversity index"
 names(Group_FF_Diversity)<- c("mean", "sd", "Variable")
 
-
+Group_Stats_POST <- RAW %>% summarise_each(funs(mean)) %>%
+  dplyr::rename(AVG_REVENUE_NEW = AVG_REVENUE) %>%
+  dplyr::rename(LAT_NEW         = LAT        ) %>%
+  dplyr::rename(DISTANCE_A_NEW  = DISTANCE_A ) %>%
+  dplyr::rename(Percentage_NEW  = Percentage ) %>%
+  dplyr::rename(diversity_NEW   = diversity  )
+  
 Group_Stats_Wide_POST <- rbind(Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
 rm(Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
 
@@ -390,5 +396,78 @@ gs4_auth(
   use_oob = gargle::gargle_oob_default(),
   token = NULL
 )
-gs4_create("Inputs_new_vessels", sheets = Group_Stats_Wide_POST)
+# gs4_create("Inputs_new_vessels", sheets = Group_Stats_Wide_POST)
+
+###
+# Compare with clusters averages #
+RAW_cluster_inputs <- read.csv(here::here("Clustering", "RAW_cluster_inputs.csv"))
+Vessel_IDs <- RAW_cluster_inputs[,1]
+Vessels<-as.data.frame(Vessel_IDs)
+RAW_cluster_inputs <- RAW_cluster_inputs[c(-1)]
+rownames(RAW_cluster_inputs)<-Vessel_IDs
+
+Group_Stats <- RAW_cluster_inputs %>% group_by(group_all) %>% summarise_each(funs(mean))
+cluster <- Group_Stats$group_all
+
+# transpose all but the first column (name)
+Group_Stats <- as.data.frame(t(Group_Stats[,-1]))
+Group_Stats_POST <- as.data.frame(t(Group_Stats_POST))
+colnames(Group_Stats) <- cluster
+Group_Stats$variables <- factor(row.names(Group_Stats))
+
+matrix <- cbind(Group_Stats, Group_Stats_POST)
+euclidean <- function(a, b) sqrt(sum((a - b)^2))
+matrix[nrow(matrix) + 1,] <- c(euclidean(matrix$`1`, matrix$V1), 
+euclidean(matrix$`2`, matrix$V1),
+euclidean(matrix$`3`, matrix$V1),
+euclidean(matrix$`4`, matrix$V1),
+euclidean(matrix$`5`, matrix$V1),
+euclidean(matrix$`6`, matrix$V1),
+euclidean(matrix$`7`, matrix$V1),
+euclidean(matrix$`8`, matrix$V1), "Euclidian distance", "NA")
+
+# gs4_create("New_vessels_compared_to_clusters_avg", sheets = matrix)
+
+###
+# Check new vessels catch composition
+
+Tickets<- within(Tickets, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
+Tickets<- within(Tickets, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
+Tickets<- within(Tickets, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
+
+all_species_POST <- Tickets  %>%   
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::filter(PSDN.Total.Closure == 1) %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique() %>% mutate(merge=1)
+
+all_vessels_POST <- Tickets  %>%   
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::filter(PSDN.Total.Closure == 1) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+
+expand_POST <- merge(all_species_POST, all_vessels_POST, by = c('merge'), all.x = TRUE, all.y = TRUE, allow.cartesian=TRUE)
+rm(all_species_POST, all_vessels_POST)
+
+options(scipen=999)
+cluster.species_POST <- Tickets %>%   
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::filter(PSDN.Total.Closure == 1) %>%
+  group_by(PACFIN_SPECIES_CODE, VESSEL_NUM) %>% 
+  summarise(revenue = sum(AFI_EXVESSEL_REVENUE)) %>%
+  group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
+
+cluster.species_POST <- merge(expand_POST, cluster.species_POST, by = c('VESSEL_NUM', 'PACFIN_SPECIES_CODE'), all.x = TRUE) %>%
+  mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% 
+  group_by(PACFIN_SPECIES_CODE) %>% 
+  summarise(Percentage = mean(Percentage)) %>% 
+  unique() 
+
+table <- as.data.frame(xtabs(Percentage ~  PACFIN_SPECIES_CODE, cluster.species_POST))
+gs4_create("Catch_composition_new_vessels", sheets = table)
+
+
+
+
+
 
