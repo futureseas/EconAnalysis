@@ -654,23 +654,25 @@ landing_model_PSDN_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQ
                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                                            + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z || cluster))
 
-# fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC.RDS"))
+fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC.RDS"))
 
-fit_qMSQD_endog_PSDN_NANC_final <-
-  brm(data = dataset_msqd_landing,
-      family = gaussian,
-      price_model + landing_model_PSDN_NANC + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
-      iter = 2000, warmup = 1000, chains = 4, cores = 4,
-      control = list(max_treedepth = 15, adapt_delta = 0.95),
-      file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final")
+# fit_qMSQD_endog_PSDN_NANC_final <-
+#   brm(data = dataset_msqd_landing,
+#       family = gaussian,
+#       price_model + landing_model_PSDN_NANC + set_rescor(TRUE),
+#       prior = c(# E model
+#         prior(normal(0, 1), class = b, resp = MSQDPricez),
+#         prior(exponential(1), class = sigma, resp = MSQDPricez),
+#         # W model
+#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
+#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
+#         # rho
+#         prior(lkj(2), class = rescor)),
+#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
+#       control = list(max_treedepth = 15, adapt_delta = 0.95),
+#       file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final")
+
+# fit_qMSQD_endog_PSDN_NANC_final <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_final.RDS"))
 
 
 
@@ -776,7 +778,8 @@ pp_check(fit_qMSQD, resp = "logMSQDLandings") +
 
 #------------------------------------------------------
 ### Group parameters ###
-#### By port ID
+
+#### Intercepts ####
 
 coef(fit_qMSQD)$port_ID
 coeff_port_sdm <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2] %>%
@@ -804,8 +807,8 @@ coeff_cluster_sdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 1] %>%
   gg1 + gg2
   
 
-coef(fit_qMSQD)$cluster
-#### By clusters 
+#### Explanatory variables by clusters #### 
+  
 coeff_cluster_sdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
   ggplot(coeff_cluster_sdm, aes(y=cluster, x=Estimate)) +
