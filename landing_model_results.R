@@ -755,7 +755,6 @@ round(res, 2)
 ## Model summary ##
 
 fit_qMSQD <- fit_qMSQD_endog_PSDN_NANC ## Preferred model
-coef(fit_qMSQD)
 
 library(patchwork)
 library(dplyr)
@@ -768,12 +767,12 @@ theme_set(theme_sjplot())
 pp_check(fit_qMSQD, resp = "logMSQDLandings") +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
-  theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  + 
-  xlim(-5, 11) + xlab("Landing (tons)")
+  theme(legend.position = "right", plot.title = element_text(size=12, face="bold.italic"))  + 
+  xlim(-5, 11) + xlab("Natural logarithm of market squid landing")
 
 
 ### Population parameters ###
-summary(fit_qMSQD)
+
 mcmc_plot(fit_qMSQD, regex = TRUE, variable = 
             c("b_logMSQDLandings_MSQD_SPAWN_SDM_90_z", 
               "b_logMSQDLandings_MSQD_Price_z",
@@ -795,7 +794,7 @@ labels = c(
 #                     grouping = "port_ID",
 #                     r_intervals = TRUE,
 #                     r_col = "firebrick")
-
+# coef(fit_qMSQD)
 # coeff_port_sdm <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2] %>%
 #   as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
 #   ggplot(coeff_port_sdm, aes(x=port_ID, y=Estimate)) +
