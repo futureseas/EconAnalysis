@@ -634,22 +634,7 @@ price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
                         (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z || cluster))
 
-# fit_qMSQD_endog <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model + landing_model + set_rescor(TRUE),
-#       prior = c(# E model
-#         prior(normal(0, 1), class = b, resp = MSQDPricez),
-#         prior(exponential(1), class = sigma, resp = MSQDPricez),
-#         # W model
-#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
-#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
-#         # rho
-#         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 2, cores = 4,
-#       file = "Estimations/fit_qMSQD_endog")
-
-#fit_qMSQD_endog <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
+fit_qMSQD_endog <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
 
 
 ## Include PSDN.Open and sardine SDM
@@ -721,16 +706,30 @@ fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_
 # 
 # # gs4_create("Squid_landings_Model_3", sheets = df)
 
+# ### Population parameters ###
+# mcmc_plot(fit_qMSQD_endog_PSDN_NANC, regex = TRUE, variable = 
+#             c("b_logMSQDLandings_MSQD_SPAWN_SDM_90_z", 
+#               "b_logMSQDLandings_MSQD_Price_z",
+#               "b_logMSQDLandings_Length_z",
+#               "b_logMSQDLandings_Intercept")) +
+#   theme(axis.text.y = element_text(hjust = 0)) + scale_y_discrete(
+#     labels = c(
+#       "b_logMSQDLandings_MSQD_Price_z" = "MSQD price",
+#       "b_logMSQDLandings_MSQD_SPAWN_SDM_90_z" = "MSQD availability (SDM)",
+#       "b_logMSQDLandings_Length_z" = "Vessel length",
+#       "b_logMSQDLandings_Intercept" = "Intercept"))
 
 
 ###############################################################################################
 # LOO comparision between models ###
-# fit_qMSQD_endog_NANC <- add_criterion(fit_qMSQD_endog_NANC, "loo", overwrite = TRUE)
+fit_qMSQD_endog           <- add_criterion(fit_qMSQD_endog, "loo", overwrite = TRUE)
+#fit_qMSQD_endog_PSDN      <- add_criterion(fit_qMSQD_endog_PSDN, "loo", overwrite = TRUE)
+#fit_qMSQD_endog_PSDN_NANC <- add_criterion(fit_qMSQD_endog_PSDN_NANC, "loo", overwrite = TRUE)
 
-# loo_compare(fit_qMSQD_endog_PSDN_NANC,
-#             fit_qMSQD_endog_PSDN,
-#             fit_qMSQD_endog,
-#             criterion = "loo")
+loo_compare(fit_qMSQD_endog_PSDN_NANC,
+            fit_qMSQD_endog_PSDN,
+            fit_qMSQD_endog,
+            criterion = "loo")
 
 
 ######## Check correlation ###########
@@ -771,64 +770,35 @@ pp_check(fit_qMSQD, resp = "logMSQDLandings") +
   xlim(-5, 11) + xlab("Natural logarithm of market squid landing")
 
 
-### Population parameters ###
-
-mcmc_plot(fit_qMSQD, regex = TRUE, variable = 
-            c("b_logMSQDLandings_MSQD_SPAWN_SDM_90_z", 
-              "b_logMSQDLandings_MSQD_Price_z",
-              "b_logMSQDLandings_Length_z",
-              "b_logMSQDLandings_Intercept")) +
-theme(axis.text.y = element_text(hjust = 0)) + scale_y_discrete(
-labels = c(
-  "b_logMSQDLandings_MSQD_Price_z" = "MSQD price",
-  "b_logMSQDLandings_MSQD_SPAWN_SDM_90_z" = "MSQD availability (SDM)",
-  "b_logMSQDLandings_Length_z" = "Vessel length",
-  "b_logMSQDLandings_Intercept" = "Intercept"))
-
 #------------------------------------------------------
 ### Group parameters ###
 #### By port ID
 
-# brmstools::coefplot(fit_qMSQD,
-#                     pars = "MSQD_SPAWN_SDM_90_z",
-#                     grouping = "port_ID",
-#                     r_intervals = TRUE,
-#                     r_col = "firebrick")
-# coef(fit_qMSQD)
-# coeff_port_sdm <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2] %>%
-#   as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
-#   ggplot(coeff_port_sdm, aes(x=port_ID, y=Estimate)) +
-#   geom_point() +  geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5),
-#     width=.2, position=position_dodge(0.05)) + coord_flip() + ggtitle("Squid SDM estimates") +
-#   ylab("Coefficient") + xlab("") + 
-#     scale_x_discrete(labels=c("1" = "Los Angeles", 
-#                               "4" = "Monterey",
-#                               "2" = "Santa Barbara", 
-#                               "3" = "San Diego"))
-#   
-# 
-#   coeff_port_int <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 3] %>%
-#     as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
-#   ggplot(coeff_port_int, aes(x=port_ID, y=Estimate)) + geom_point() +
-#     geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5),
-#                   width=.2, position=position_dodge(0.05)) + coord_flip() +
-#     ggtitle("Sardine SDM") +  ylab("Coefficient") + xlab("") +
-#     scale_x_discrete(labels=c("1" = "Los Angeles",
-#                               "4" = "Monterey",
-#                               "2" = "Santa Barbara",
-#                               "3" = "San Diego"))
-#   
-# coeff_port_int <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 4] %>%
-#   as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
-#   ggplot(coeff_port_int, aes(x=port_ID, y=Estimate)) + geom_point() +
-#   geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5),
-#                 width=.2, position=position_dodge(0.05)) + coord_flip() +
-#   ggtitle("Squid SDM x Sardine SDM") +  ylab("Coefficient") + xlab("") +
-#   scale_x_discrete(labels=c("1" = "Los Angeles",
-#                             "4" = "Monterey",
-#                             "2" = "Santa Barbara",
-#                             "3" = "San Diego"))
+coef(fit_qMSQD)$port_ID
+coeff_port_sdm <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2] %>%
+  as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
+gg1 <-  ggplot(coeff_port_sdm, aes(x=port_ID, y=Estimate)) +
+  geom_point() +  geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5),
+    width=.2, position=position_dodge(0.05)) + coord_flip() + ggtitle("(a) Port areas") +
+  ylab("") + xlab("") +
+    scale_x_discrete(labels=c("1" = "Los Angeles",
+                              "2" = "Monterey",
+                              "3" = "Santa Barbara"))
 
+coeff_cluster_sdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 1] %>% 
+  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+  gg2 <-  ggplot(coeff_cluster_sdm, aes(y=cluster, x=Estimate)) +
+    geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+                                  width=.2, position=position_dodge(0.05))  + ggtitle("(b) Clusters") +  
+    xlab("") + ylab("")  + 
+    scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
+                              "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
+                              "3" = "Southern CCS\nindustrial\nsquid-specialists",
+                              "4" = "Roving industrial\nsardine-squid\nswitchers",
+                              "5" = "Southern CCS\nforage fish\ndiverse"))
+  
+  gg1 + gg2
+  
 
 coef(fit_qMSQD)$cluster
 #### By clusters 
