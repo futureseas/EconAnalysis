@@ -654,23 +654,23 @@ landing_model_PSDN_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQ
                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                                            + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z || cluster))
 
-fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC.RDS"))
+# fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC.RDS"))
 
-# fit_qMSQD_endog_PSDN_NANC_final <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model + landing_model + set_rescor(TRUE),
-#       prior = c(# E model
-#         prior(normal(0, 1), class = b, resp = MSQDPricez),
-#         prior(exponential(1), class = sigma, resp = MSQDPricez),
-#         # W model
-#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
-#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
-#         # rho
-#         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#       control = list(max_treedepth = 15, adapt_delta = 0.95),
-#       file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final")
+fit_qMSQD_endog_PSDN_NANC_final <-
+  brm(data = dataset_msqd_landing,
+      family = gaussian,
+      price_model + landing_model_PSDN_NANC + set_rescor(TRUE),
+      prior = c(# E model
+        prior(normal(0, 1), class = b, resp = MSQDPricez),
+        prior(exponential(1), class = sigma, resp = MSQDPricez),
+        # W model
+        prior(normal(0, 1), class = b, resp = logMSQDLandings),
+        prior(exponential(1), class = sigma, resp = logMSQDLandings),
+        # rho
+        prior(lkj(2), class = rescor)),
+      iter = 2000, warmup = 1000, chains = 4, cores = 4,
+      control = list(max_treedepth = 15, adapt_delta = 0.95),
+      file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final")
 
 
 
@@ -722,9 +722,13 @@ fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_
 
 ###############################################################################################
 # LOO comparision between models ###
-fit_qMSQD_endog           <- add_criterion(fit_qMSQD_endog, "loo", overwrite = TRUE)
+#fit_qMSQD_endog           <- add_criterion(fit_qMSQD_endog, "loo", overwrite = TRUE)
 #fit_qMSQD_endog_PSDN      <- add_criterion(fit_qMSQD_endog_PSDN, "loo", overwrite = TRUE)
 #fit_qMSQD_endog_PSDN_NANC <- add_criterion(fit_qMSQD_endog_PSDN_NANC, "loo", overwrite = TRUE)
+
+LOO(fit_qMSQD_endog_PSDN_NANC)
+LOO(fit_qMSQD_endog_PSDN)
+LOO(fit_qMSQD_endog)
 
 loo_compare(fit_qMSQD_endog_PSDN_NANC,
             fit_qMSQD_endog_PSDN,
