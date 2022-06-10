@@ -436,13 +436,11 @@ dataset <- dataset %>%
 
 ## Deflact prices
 dataset$diesel.price.AFI <- dataset$diesel.price/dataset$deflactor
-
 rm(fuel.prices, fuel.prices.CA, fuel.prices.OR, fuel.prices.WA, fuel.prices.state)
 
 
-
+#---------------------------------------------------------------------------------------
 ## Include trend and average number of set for MSQD
-
 avg.number.set <- read.csv(here::here("Data", "Logbook_output", "max_n_set.by.trip.csv"), header = TRUE, stringsAsFactors = FALSE)
 dataset <- merge(dataset, avg.number.set, by = ('LANDING_YEAR'), all.x = TRUE, all.y = FALSE)
 
@@ -492,38 +490,6 @@ dataset <- dataset %>%
 # sjlabelled::set_label(dataset$NANC_Price)    <- "Price: NANC"
 # sjlabelled::set_label(dataset$PORT_ID)       <- "Port ID"
 
-
-### Monthly data ###
-desc_data <- dataset %>%
-  subset(select = -c(PORT_AREA_ID, VESSEL_NUM, group_all, LANDING_YEAR, LANDING_MONTH, AGENCY_CODE, PORT_AREA_CODE, 
-                     MSQD_Price_z, MSQD_SPAWN_SDM_90_z, MSQD_SDM_90_z, PSDN_SDM_60_z, NANC_SDM_20_z,
-                     length_month_PSDN, length_month_MSQD, days_open_month_PSDN, days_open_month_MSQD, deflactor,
-                     CPI, Price.Fishmeal_z, diesel.price_z, Price.Fishmeal.AFI_z, diesel.price.AFI_z, Length_z, 
-                     avg_set_MSQD, avg_set_MSQD_z))
-
-table <- psych::describe(desc_data, fast=TRUE) %>%
-  mutate(vars = ifelse(vars == 1, "Vessel Length", vars))%>%
-  mutate(vars = ifelse(vars == 2, "Landings: PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 3, "Landings: MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 4, "Landings: NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 5, "Price: PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 6, "Price: MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 7, "Price: NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 8, "Prob(presence): PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 9, "Prob(presence): MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 10, "Prob(presence): MSQD (Spawning model)", vars)) %>%
-  mutate(vars = ifelse(vars == 11, "Prob(presence): NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 12, "Fraction of month open: PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 13, "Fraction of month open: MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 14, "Fishmeal price", vars)) %>%
-  mutate(vars = ifelse(vars == 15, "Fishmeal price (AFI)", vars)) %>%
-  mutate(vars = ifelse(vars == 16, "Diesel price", vars)) %>%
-  mutate(vars = ifelse(vars == 17, "Diesel price (AFI)", vars))
-
-# gs4_create("SummaryMonthly", sheets = table)
-rm(desc_data, table)
-  
-
 ### Quarterly data ###
 # library("zoo")
 # dataset$MonthYear <- as.yearmon(paste(dataset$LANDING_YEAR, dataset$LANDING_MONTH), "%Y %m")
@@ -544,12 +510,11 @@ rm(desc_data, table)
 #   dataset_annual[dataset_annual == "NaN"] <- NA
 
 #-----------------------------------------------
-## Create dataset for estiumation and run models 
-
+## Create dataset for estimation and run landing models 
 
 ### Market squid ###
 
-#### Select data for estimation, replace N/A landings to zero 
+#### Select data for estimation, replace N/A landings to zero ####
 dataset_msqd <- dataset %>%
   dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, 
                 LANDING_YEAR, LANDING_MONTH,
@@ -579,8 +544,7 @@ dataset_msqd <- dataset %>%
     filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA") %>% drop_na()
 
 
-#### Create new port ID and cluster variable
-
+#### Create new port ID and cluster variable ####
 dataset_msqd$port_ID <- udpipe::unique_identifier(dataset_msqd, fields = "PORT_AREA_CODE", start_from = 1) 
 dataset_msqd$cluster <- udpipe::unique_identifier(dataset_msqd, fields = "group_all", start_from = 1) 
 MSQD_port_area <- dataset_msqd %>%
@@ -590,54 +554,65 @@ MSQD_clusters <- dataset_msqd %>%
   dplyr::select(group_all, cluster) %>%
   unique()
 
-#### Convert variables to factor
+## install.packages(c("fastDummies", "recipes"))
+# library('fastDummies')
+# dataset_msqd <- dummy_cols(dataset_msqd, select_columns = 'cluster')
+
+#### Convert variables to factor ####
 dataset_msqd$port_ID      <- factor(dataset_msqd$port_ID)
 dataset_msqd$cluster      <- factor(dataset_msqd$cluster)
-dataset_msqd$LANDING_YEAR <- as.numeric(dataset_msqd$LANDING_YEAR)
-class(dataset_msqd$PSDN.Open)
+dataset_msqd$LANDING_YEAR <- factor(dataset_msqd$LANDING_YEAR)
 class(dataset_msqd$port_ID)
 class(dataset_msqd$cluster)
 class(dataset_msqd$LANDING_YEAR)
 
-# # install.packages(c("fastDummies", "recipes"))
-# library('fastDummies')
-# dataset_msqd <- dummy_cols(dataset_msqd, select_columns = 'cluster')
+dataset_msqd_landing <- dataset_msqd %>%
+  dplyr::filter(MSQD_Landings > 0) %>%
+  dplyr::filter(MSQD.Open == 1) 
+
+### Descriptive statistics 
+desc_data <- dataset_msqd_landing %>%
+  subset(select = c(Length, MSQD_Landings, MSQD_Price, 
+                    MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,  
+                    PSDN.Open, Price.Fishmeal.AFI))
+
+table <- psych::describe(desc_data, fast=TRUE) %>%
+  mutate(vars = ifelse(vars == 1, "Vessel Length", vars))%>%
+  mutate(vars = ifelse(vars == 2, "Landings: MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 3, "Price: MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 4, "Prob(presence): MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 5, "Prob(presence): PSDN", vars)) %>%
+  mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
+  mutate(vars = ifelse(vars == 7, "Fraction of month open: PSDN", vars)) %>%
+  mutate(vars = ifelse(vars == 8, "Fishmeal price", vars)) 
+
+gs4_create("SummaryMonthly_Q_MSQD", sheets = table)
+rm(desc_data, table)
+
 
 #-------------------------------------------------------------------
-# ## Check stationarity in the panel dataset
-# library("plm")
-# 
-# # dataset_msqd$Date <- zoo::as.yearmon(paste(dataset_msqd$LANDING_YEAR, dataset_msqd$LANDING_MONTH), "%Y %m")
-# 
-# pDataset <- dataset_msqd %>% mutate(Unique_ID = paste(VESSEL_NUM, PORT_AREA_CODE, sep = " ")) %>%
-#   group_by(Unique_ID) %>% mutate(n_obs_group = n()) %>% ungroup() %>% filter(n_obs_group > 11) %>% drop_na()
-# pDataset <- pdata.frame(pDataset, index = c('Unique_ID', 'LANDING_YEAR'))
-# 
-# purtest(pDataset$MSQD_Price, pmax = 4, exo = "intercept", test = "madwu")
-# purtest(pDataset$PSDN_Price, pmax = 4, exo = "intercept", test = "madwu")
-# purtest(pDataset$NANC_Price, pmax = 4, exo = "intercept", test = "madwu")
-# purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "madwu")
-# purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "madwu")
-# purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "madwu")
-# 
-# 
-# pDatasetV2 <- dataset_msqd %>% mutate(Unique_ID = paste(VESSEL_NUM, PORT_AREA_CODE, sep = " ")) %>% 
-#   filter(MSQD_Landings > 0)  %>%  
-#   group_by(Unique_ID) %>% mutate(n_obs_group = n()) %>% ungroup() %>% filter(n_obs_group > 11) %>% drop_na()
-# pDatasetV2 <- pdata.frame(pDatasetV2, index = c('Unique_ID', 'LANDING_YEAR'))
-# 
-# purtest(pDatasetV2$MSQD_Landings, pmax = 4, exo = "intercept", test = "madwu")
-# purtest(pDatasetV2$MSQD_Price, pmax = 4, exo = "intercept", test = "madwu")
-# purtest(pDatasetV2$PSDN_Price, pmax = 4, exo = "intercept", test = "madwu")
-# purtest(pDatasetV2$NANC_Price, pmax = 4, exo = "intercept", test = "madwu")
-# purtest(pDatasetV2$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "madwu")
-# purtest(pDatasetV2$NANC_SDM_20, pmax = 4, exo = "intercept", test = "madwu")
-# purtest(pDatasetV2$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "madwu")
-# 
-# rm(pDataset, pDatasetV2)
-# 
-# # duplicate_indexes <- dataset_msqd %>% 
-# #   group_by(PORT_AREA_CODE, Date, VESSEL_NUM) %>% mutate(dupe = n()>1)
+## Check stationarity in the panel dataset
+library("plm")
+
+dataset_msqd_landing$Date <- 
+  zoo::as.yearmon(paste(dataset_msqd_landing$LANDING_YEAR, dataset_msqd_landing$LANDING_MONTH), "%Y %m")
+
+pDataset <- dataset_msqd_landing %>% mutate(Unique_ID = paste(VESSEL_NUM, PORT_AREA_CODE, sep = " ")) %>%
+  group_by(Unique_ID) %>% mutate(n_obs_group = n()) %>% ungroup() %>% filter(n_obs_group >= 12) %>% drop_na()
+pDataset <- pdata.frame(pDataset, index = c('Unique_ID', 'Date'))
+
+# duplicate_indexes <- dataset_msqd %>%
+#   group_by(PORT_AREA_CODE, Date, VESSEL_NUM) %>% mutate(dupe = n()>1)
+
+purtest(pDataset$MSQD_Landings, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$MSQD_Price, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
+
+rm(pDataset)
+
 
 
 #-------------------------------------------------------------------
@@ -649,61 +624,10 @@ library(sjmisc)
 library(insight)
 library(httr)
 
-dataset_msqd_landing <- dataset_msqd %>%
-  dplyr::filter(MSQD_Landings > 0) %>%
-  dplyr::filter(MSQD.Open == 1) 
-
-# fit_qMSQD <-
-#   brm(data = dataset_msqd_landing,
-#       formula = log(MSQD_Landings) ~
-#         1 + MSQD_SPAWN_SDM_90_z  + MSQD_Price_z + Length_z +
-#         (1 | port_ID) + (1 | cluster),
-#       prior = c(
-#         prior(normal(0, 1), class = b),
-#         prior(exponential(1), class = sigma)),
-#       control = list(adapt_delta = 0.90, max_treedepth = 12),
-#       chains = 2,
-#       family = gaussian,
-#       cores = 4,
-#       file = "Estimations/fit_qMSQD")
-# 
-# fit_qMSQD_b <-
-#   brm(data = dataset_msqd_landing,
-#       formula = log(MSQD_Landings) ~
-#         1 + MSQD_SPAWN_SDM_90  + MSQD_Price + Length +
-#         (1 | port_ID) + (1 | cluster),
-#       prior = c(
-#         prior(normal(0, 1), class = b),
-#         prior(exponential(1), class = sigma)),
-#       control = list(adapt_delta = 0.90, max_treedepth = 12),
-#       chains = 2,
-#       family = gaussian,
-#       cores = 4,
-#       file = "Estimations/fit_qMSQD_b")
-
-### Model Comparision ###
-# tab_model(fit_qMSQD, fit_qMSQD_b)
-
-# fit_qMSQD   <- add_criterion(fit_qMSQD,   "loo")
-# fit_qMSQD_b <- add_criterion(fit_qMSQD_b, "loo")
-
-
-# # w <- as.data.frame(
-# loo_compare(fit_qMSQD,
-#             fit_qMSQD_b,
-#             criterion = "loo")
-# )
-# gs4_create("LOO", sheets = w)
 
 
 ## -------------------------------------------------------------------
 ### Problem using price, as is endogenous. Solve price endogeneity ### 
-
-#### Problems to solve: 
-## - Other marginal costs?
-## - Fish meal as instrument for squid?
-## - Include other species
-
 
 ### Base model (z-value) ###
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
@@ -712,160 +636,57 @@ landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z 
 
 fit_qMSQD_endog <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
 
-# ### Add sardine SDM  ###
-# landing_model_b <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-#                         PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open +
-#                           (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-#                         PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open || cluster))
-# 
-# fit_qMSQD_endog_b <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b.RDS"))
-# 
-# 
-# ### Only interaction ###
-# landing_model_c <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-#                         PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z +
-#                           (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
-#                         PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z || cluster))
-# 
-# fit_qMSQD_endog_c <- readRDS(here::here("Estimations", "fit_qMSQD_endog_c.RDS"))
-# 
-# ### Without interaction ###
-# landing_model_d <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
-#                       + PSDN_SDM_60_z:PSDN.Open
-#                       + (1 | port_ID)
-#                       + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
-#                       + PSDN_SDM_60_z:PSDN.Open || cluster))
-# 
-# fit_qMSQD_endog_d <- readRDS(here::here("Estimations", "fit_qMSQD_endog_d.RDS"))
 
-## Try also including PSDN_open separate
-landing_model_b_2 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
+## Include PSDN.Open and sardine SDM
+landing_model_PSDN <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                         + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open || cluster))
 
-fit_qMSQD_endog_b_2 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_2.RDS"))
+fit_qMSQD_endog_PSDN <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN.RDS"))
 
+### Add anchovy
 
-# ### Only interaction ###
-# landing_model_c_2 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
-#                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN.Open 
-#                         + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN.Open || cluster))
-# 
-# fit_qMSQD_endog_c_2 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_c_2.RDS"))
-# 
-# 
-# ### Without interaction ###
-# landing_model_d_2 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                       + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
-#                       + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                       + PSDN_SDM_60_z:PSDN.Open + PSDN.Open || cluster))
-# 
-# fit_qMSQD_endog_d_2 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_d_2.RDS"))
-
-
-
-
-# #####################################################################################################
-# 
-# ### Preferred model with diesel price by port
-# landing_model_b_3 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                        + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
-#                        + diesel.price.AFI_z
-#                        + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                        + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
-#                        + diesel.price.AFI_z || cluster))
-# 
-# fit_qMSQD_endog_b_3 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_3.RDS"))
-# 
-# 
-# ### Using average number of set
-# class(dataset_msqd_landing$LANDING_YEAR)
-# landing_model_b_4 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
-#                         + avg_set_MSQD_z
-#                         + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
-#                                            + avg_set_MSQD_z || cluster))
-# 
-# fit_qMSQD_endog_b_4 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_4.RDS"))
-# 
-# 
-# ### Using year trend 
-# landing_model_b_5 <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
-#                         + LANDING_YEAR
-#                         + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z 
-#                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
-#                                            + LANDING_YEAR || cluster))
-# 
-# fit_qMSQD_endog_b_5 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_5.RDS"))
-
-fit_qMSQD_endog_b_6 <- readRDS(here::here("Estimations", "fit_qMSQD_endog_b_6.RDS"))
-
-
-fit_qMSQD_endog_b_2_again <-
-  brm(data = dataset_msqd_landing,
-      family = gaussian,
-      price_model + landing_model_b_2 + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
-      iter = 2000, warmup = 1000, chains = 2, cores = 4,
-      file = "Estimations/fit_qMSQD_endog_b_2_again")
-
-
-
-##################
-### add anchovy and compare
-
-landing_model_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
+landing_model_PSDN_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                         + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z
                         + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                                            + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z || cluster))
 
-fit_qMSQD_endog_NANC <-
-  brm(data = dataset_msqd_landing,
-      family = gaussian,
-      price_model + landing_model_NANC + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
-      iter = 2000, warmup = 1000, chains = 2, cores = 4,
-      file = "Estimations/fit_qMSQD_endog_NANC")
+# fit_qMSQD_endog_PSDN_NANC <-
+#   brm(data = dataset_msqd_landing,
+#       family = gaussian,
+#       price_model + landing_model_PSDN_NANC + set_rescor(TRUE),
+#       prior = c(# E model
+#         prior(normal(0, 1), class = b, resp = MSQDPricez),
+#         prior(exponential(1), class = sigma, resp = MSQDPricez),
+#         # W model
+#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
+#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
+#         # rho
+#         prior(lkj(2), class = rescor)),
+#       iter = 2000, warmup = 1000, chains = 2, cores = 4,
+#       file = "Estimations/fit_qMSQD_endog_PSDN_NANC")
 
+fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC.RDS"))
 
 
 ###############################################################################################
 # LOO comparision between models ###
-# fit_qMSQD_endog     <- add_criterion(fit_qMSQD_endog, "loo")
-# fit_qMSQD_endog_b_6 <- add_criterion(fit_qMSQD_endog_b_6, "loo", overwrite = TRUE)
-# fit_qMSQD_endog_b_2_again <- add_criterion(fit_qMSQD_endog_b_2_again, "loo", overwrite = TRUE)
 # fit_qMSQD_endog_NANC <- add_criterion(fit_qMSQD_endog_NANC, "loo", overwrite = TRUE)
 
-loo_compare(fit_qMSQD_endog_NANC,
-            fit_qMSQD_endog_b_2_again,
+loo_compare(fit_qMSQD_endog_PSDN_NANC,
+            fit_qMSQD_endog_PSDN,
             fit_qMSQD_endog,
             criterion = "loo")
 
-tab_model(fit_qMSQD_endog_NANC)
+tab_model(fit_qMSQD_endog)
+tab_model(fit_qMSQD_endog_PSDN)
+tab_model(fit_qMSQD_endog_PSDN_NANC)
 
 
 ######## Check correlation ###########
-
 
 dataset_select <- dataset_msqd_landing %>%
   dplyr::select(MSQD_SPAWN_SDM_90_z,
@@ -892,10 +713,11 @@ gs4_auth(
 
 # gs4_create("correlation_exp_variables_MSQD_landings", sheets = res)
 
-
-#----------------------------------------------------
+#####################################################
+#####################################################
 ## Model summary ##
-fit_qMSQD <- fit_qMSQD_endog_NANC
+
+fit_qMSQD <- fit_qMSQD_endog_PSDN_NANC ## Preferred model
 coef(fit_qMSQD)
 
 library(patchwork)
@@ -904,6 +726,7 @@ library(ggplot2)
 library(ggthemes)
 library(tibble)
 theme_set(theme_sjplot())
+
 
 
 ### Posterior predictive check ###
