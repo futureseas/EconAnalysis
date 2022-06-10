@@ -16,8 +16,8 @@ gs4_auth(
   use_oob = gargle::gargle_oob_default(),
   token = NULL)
 
-## Read packages 
 
+## Read packages 
 library("tidyr")
 library("dplyr") 
 library("data.table") 
@@ -634,7 +634,22 @@ price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z +
                         (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z || cluster))
 
-fit_qMSQD_endog <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
+# fit_qMSQD_endog <-
+#   brm(data = dataset_msqd_landing,
+#       family = gaussian,
+#       price_model + landing_model + set_rescor(TRUE),
+#       prior = c(# E model
+#         prior(normal(0, 1), class = b, resp = MSQDPricez),
+#         prior(exponential(1), class = sigma, resp = MSQDPricez),
+#         # W model
+#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
+#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
+#         # rho
+#         prior(lkj(2), class = rescor)),
+#       iter = 2000, warmup = 1000, chains = 2, cores = 4,
+#       file = "Estimations/fit_qMSQD_endog")
+
+#fit_qMSQD_endog <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
 
 
 ## Include PSDN.Open and sardine SDM
@@ -645,8 +660,8 @@ landing_model_PSDN <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Pri
 
 fit_qMSQD_endog_PSDN <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN.RDS"))
 
-### Add anchovy
 
+### Add anchovy
 landing_model_PSDN_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
                         + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                         + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z
@@ -654,10 +669,12 @@ landing_model_PSDN_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQ
                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                                            + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z || cluster))
 
-# fit_qMSQD_endog_PSDN_NANC <-
+fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC.RDS"))
+
+# fit_qMSQD_endog_PSDN_NANC_final <-
 #   brm(data = dataset_msqd_landing,
 #       family = gaussian,
-#       price_model + landing_model_PSDN_NANC + set_rescor(TRUE),
+#       price_model + landing_model + set_rescor(TRUE),
 #       prior = c(# E model
 #         prior(normal(0, 1), class = b, resp = MSQDPricez),
 #         prior(exponential(1), class = sigma, resp = MSQDPricez),
@@ -666,24 +683,54 @@ landing_model_PSDN_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQ
 #         prior(exponential(1), class = sigma, resp = logMSQDLandings),
 #         # rho
 #         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 2, cores = 4,
-#       file = "Estimations/fit_qMSQD_endog_PSDN_NANC")
+#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
+#       control = list(max_treedepth = 15, adapt_delta = 0.95),
+#       file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final")
 
-fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC.RDS"))
+
+
+###############################################
+### Create result tables ###
+
+
+# library(XML)
+# tab_model_fit_qMSQD_endog <- 
+#   sjPlot::tab_model(fit_qMSQD_endog)
+# 
+# df <- data.frame(readHTMLTable(htmlParse(tab_model_fit_qMSQD_endog))[1])
+# colnames(df) <- df[1,]
+# df <- df[-1,]
+# 
+# #gs4_create("Squid_landings_Model_1", sheets = df)
+# 
+# tab_model_fit_qMSQD_endog_PSDN <- 
+#   sjPlot::tab_model(fit_qMSQD_endog_PSDN)
+# 
+# df <- data.frame(readHTMLTable(htmlParse(tab_model_fit_qMSQD_endog_PSDN))[1])
+# colnames(df) <- df[1,]
+# df <- df[-1,]
+# 
+# #gs4_create("Squid_landings_Model_2", sheets = df)
+# 
+# tab_model_fit_qMSQD_endog_PSDN_NANC <- 
+#   sjPlot::tab_model(fit_qMSQD_endog_PSDN_NANC)
+# 
+# df <- data.frame(readHTMLTable(htmlParse(tab_model_fit_qMSQD_endog_PSDN_NANC))[1])
+# colnames(df) <- df[1,]
+# df <- df[-1,]
+# 
+# # gs4_create("Squid_landings_Model_3", sheets = df)
+
 
 
 ###############################################################################################
 # LOO comparision between models ###
 # fit_qMSQD_endog_NANC <- add_criterion(fit_qMSQD_endog_NANC, "loo", overwrite = TRUE)
 
-loo_compare(fit_qMSQD_endog_PSDN_NANC,
-            fit_qMSQD_endog_PSDN,
-            fit_qMSQD_endog,
-            criterion = "loo")
-
-tab_model(fit_qMSQD_endog)
-tab_model(fit_qMSQD_endog_PSDN)
-tab_model(fit_qMSQD_endog_PSDN_NANC)
+# loo_compare(fit_qMSQD_endog_PSDN_NANC,
+#             fit_qMSQD_endog_PSDN,
+#             fit_qMSQD_endog,
+#             criterion = "loo")
 
 
 ######## Check correlation ###########
@@ -701,16 +748,6 @@ dataset_select <- dataset_msqd_landing %>%
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
-library("googlesheets4")
-gs4_auth(
-  email = "fequezad@ucsc.edu",
-  path = NULL,
-  scopes = "https://www.googleapis.com/auth/spreadsheets",
-  cache = gargle::gargle_oauth_cache(),
-  use_oob = gargle::gargle_oob_default(),
-  token = NULL
-)
-
 # gs4_create("correlation_exp_variables_MSQD_landings", sheets = res)
 
 #####################################################
@@ -727,10 +764,8 @@ library(ggthemes)
 library(tibble)
 theme_set(theme_sjplot())
 
-
-
 ### Posterior predictive check ###
-pp_check(fit_qMSQD, resp = "logMSQDLandings") + ggtitle('Market Squid (SDM: Spawning aggregation model)') +
+pp_check(fit_qMSQD, resp = "logMSQDLandings") +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  + 
