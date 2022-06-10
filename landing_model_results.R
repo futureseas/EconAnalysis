@@ -721,6 +721,8 @@ fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_
 #       "b_logMSQDLandings_Length_z" = "Vessel length",
 #       "b_logMSQDLandings_Intercept" = "Intercept"))
 
+# ### Hypothesis test ###
+# hypothesis(fit_qMSQD, "MSQD_SPAWN_SDM_90 = 0") 
 
 ###############################################################################################
 # LOO comparision between models ###
@@ -728,9 +730,9 @@ fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_
 #fit_qMSQD_endog_PSDN      <- add_criterion(fit_qMSQD_endog_PSDN, "loo", overwrite = TRUE)
 #fit_qMSQD_endog_PSDN_NANC <- add_criterion(fit_qMSQD_endog_PSDN_NANC, "loo", overwrite = TRUE)
 
-LOO(fit_qMSQD_endog_PSDN_NANC)
-LOO(fit_qMSQD_endog_PSDN)
-LOO(fit_qMSQD_endog)
+# LOO(fit_qMSQD_endog_PSDN_NANC)
+# LOO(fit_qMSQD_endog_PSDN)
+# LOO(fit_qMSQD_endog)
 
 loo_compare(fit_qMSQD_endog_PSDN_NANC,
             fit_qMSQD_endog_PSDN,
@@ -806,36 +808,6 @@ coeff_cluster_sdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 1] %>%
   
   gg1 + gg2
   
-
-#### Explanatory variables by clusters #### 
-  
-coeff_cluster_sdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-  ggplot(coeff_cluster_sdm, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-  width=.2, position=position_dodge(0.05)) + ggtitle("Squid SDM") +  
-  xlab("Coefficient") + ylab("Cluster") 
-  
-coeff_cluster_osdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 3] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-  ggplot(coeff_cluster_osdm, aes(y=cluster, x=Estimate)) + geom_point() +  
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-  width=.2, position=position_dodge(0.05)) + ggtitle("MSQD Price") + 
-    xlab("Coefficient") + ylab("Cluster")  
-  
-coeff_cluster_int <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-  ggplot(coeff_cluster_int, aes(y=cluster, x=Estimate)) + geom_point() +  
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-                  width=.2, position=position_dodge(0.05)) + ggtitle("Lenght") + 
-    xlab("Coefficient") + ylab("Cluster")  
-  
-
-  
-
-# ### Hypothesis test ###
-# hypothesis(fit_qMSQD, "MSQD_SPAWN_SDM_90 = 0") 
-  
 # ### Compare multilevel effects ###
 # as_draws_df(fit_qMSQD, add_chain = T) %>%
 #   ggplot(aes(x = sd_cluster__MSQD_SPAWN_SDM_90)) +
@@ -848,10 +820,64 @@ coeff_cluster_int <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
 #   annotate("text", x = 4, y = 1/5, label = "Cluster", color = "orange1") +
 #   theme_fivethirtyeight()
 
+    
+
+#### Explanatory variables by clusters #### CHECK IF CLUSTER ARE CORRECT....
+
+coef(fit_qMSQD)$cluster
+coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
+  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+gg_1 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+  width=.2, position=position_dodge(0.05)) + ggtitle("SDM: Market squid")+
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +  
+  xlab("") + ylab("") +  coord_flip() + 
+  theme(plot.title = element_text(size=10))
+  
+coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 3] %>%
+  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+gg_2 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
+  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+  width=.2, position=position_dodge(0.05)) + ggtitle("Price: Market squid") +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  xlab("") + ylab("") +  coord_flip() + 
+  theme(plot.title = element_text(size=10))
+  
+coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
+  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+gg_3 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
+  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+                  width=.2, position=position_dodge(0.05)) +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) + xlab("") + ylab("") +
+  ggtitle("Vessel lenght") + coord_flip() + 
+  theme(plot.title = element_text(size=10))
+  
+
+coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 5] %>%
+    as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+gg_4 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
+    geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+                  width=.2, position=position_dodge(0.05)) + ggtitle("Open: PSDN") + 
+    xlab("") + ylab("") + 
+  scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
+                            "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
+                            "3" = "Southern CCS\nindustrial\nsquid-specialists",
+                            "4" = "Roving industrial\nsardine-squid\nswitchers",
+                            "5" = "Southern CCS\nforage fish\ndiverse")) + coord_flip() + 
+  theme(plot.title = element_text(size=10))
+
+gg_2 / gg_3 / gg_4
+
+
+  
+
+
 
 ### Conditional effects ###
 
-  
   #### By port_area
   conditions <- data.frame(cluster = unique(dataset_msqd$PORT_AREA_ID))
   rownames(conditions) <- unique(dataset_msqd$PORT_AREA_CODE)
