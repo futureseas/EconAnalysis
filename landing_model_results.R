@@ -653,6 +653,10 @@ landing_model_PSDN_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQ
                                            + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z || cluster))
 
 fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC.RDS"))
+fit_qMSQD_endog_PSDN_NANC_final <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_final.RDS"))
+summary(fit_qMSQD_endog_PSDN_NANC_final)
+
+
 
 fit_qMSQD_endog_PSDN_NANC_final_v2 <-
   brm(data = dataset_msqd_landing,
@@ -667,10 +671,9 @@ fit_qMSQD_endog_PSDN_NANC_final_v2 <-
         # rho
         prior(lkj(2), class = rescor)),
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-      control = list(max_treedepth = 15, adapt_delta = 0.95),
+      control = list(max_treedepth = 15, adapt_delta = 0.99),
       file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final_v2")
 
-# fit_qMSQD_endog_PSDN_NANC_final <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_final.RDS"))
 
 
 
