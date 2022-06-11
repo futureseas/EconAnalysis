@@ -820,100 +820,58 @@ coeff_cluster_sdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 1] %>%
 
     
 
-#### Explanatory variables by clusters #### CHECK IF CLUSTER ARE CORRECT....
-
-coef(fit_qMSQD)$cluster
-coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_1 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-  width=.2, position=position_dodge(0.05)) + ggtitle("SDM: Market squid")+
-  theme(axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +  
-  xlab("") + ylab("") +  coord_flip() + 
-  theme(plot.title = element_text(size=10))
-  
-coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 3] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_2 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-  width=.2, position=position_dodge(0.05)) + ggtitle("Price: Market squid") +
-  theme(axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  xlab("") + ylab("") +  coord_flip() + 
-  theme(plot.title = element_text(size=10))
-  
-coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_3 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-                  width=.2, position=position_dodge(0.05)) +
-  theme(axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) + xlab("") + ylab("") +
-  ggtitle("Vessel lenght") + coord_flip() + 
-  theme(plot.title = element_text(size=10))
-  
-
-coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 5] %>%
-    as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_4 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
-    geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-                  width=.2, position=position_dodge(0.05)) + ggtitle("Open: PSDN") + 
-    xlab("") + ylab("") + 
-  scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
-                            "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
-                            "3" = "Southern CCS\nindustrial\nsquid-specialists",
-                            "4" = "Roving industrial\nsardine-squid\nswitchers",
-                            "5" = "Southern CCS\nforage fish\ndiverse")) + coord_flip() + 
-  theme(plot.title = element_text(size=10))
-
-gg_2 / gg_3 / gg_4
-
-
-  
-
+# #### Explanatory variables by clusters ####
+# 
+# coef(fit_qMSQD)$cluster
+# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
+#   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+# gg_1 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+#   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+#   width=.2, position=position_dodge(0.05)) + ggtitle("SDM: Market squid")+
+#   theme(axis.text.x=element_blank(),
+#         axis.ticks.x=element_blank()) +  
+#   xlab("") + ylab("") +  coord_flip() + 
+#   theme(plot.title = element_text(size=10))
+#   
+# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 3] %>%
+#   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+# gg_2 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
+#   geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+#   width=.2, position=position_dodge(0.05)) + ggtitle("Price: Market squid") +
+#   theme(axis.text.x=element_blank(),
+#         axis.ticks.x=element_blank()) +
+#   xlab("") + ylab("") +  coord_flip() + 
+#   theme(plot.title = element_text(size=10))
+#   
+# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
+#   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+# gg_3 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
+#   geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+#                   width=.2, position=position_dodge(0.05)) +
+#   theme(axis.text.x=element_blank(),
+#         axis.ticks.x=element_blank()) + xlab("") + ylab("") +
+#   ggtitle("Vessel lenght") + coord_flip() + 
+#   theme(plot.title = element_text(size=10))
+#   
+# 
+# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 5] %>%
+#     as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+# gg_4 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
+#     geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+#                   width=.2, position=position_dodge(0.05)) + ggtitle("Open: PSDN") + 
+#     xlab("") + ylab("") + 
+#   scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
+#                             "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
+#                             "3" = "Southern CCS\nindustrial\nsquid-specialists",
+#                             "4" = "Roving industrial\nsardine-squid\nswitchers",
+#                             "5" = "Southern CCS\nforage fish\ndiverse")) + coord_flip() + 
+#   theme(plot.title = element_text(size=10))
+# 
+# gg_1 / gg_2 / gg_3 / gg_4
 
 
 ### Conditional effects ###
 
-  #### By port_area
-  conditions <- data.frame(cluster = unique(dataset_msqd$PORT_AREA_ID))
-  rownames(conditions) <- unique(dataset_msqd$PORT_AREA_CODE)
-  
-  conditional_effects_msqd_sdm <-
-    conditional_effects(
-      fit_qMSQD_endog_b_2, 
-      "MSQD_SPAWN_SDM_90_z",                
-      surface=TRUE, 
-      conditions = conditions, 
-      re_formula = NULL)#, transform = log, method = "posterior_predict"))
-  
-  plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[2]] + 
-    ggtitle('Market squid availability effect on squid landings') +
-    theme(plot.title = element_text(size=9, face="bold.italic"),
-          axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-    scale_x_continuous(name = "Prob(Presence): MSQD") +
-    scale_y_continuous(name = element_blank())
-  
-  conditional_effects_psdn_sdm <-
-    conditional_effects(
-      fit_qMSQD, 
-      "PSDN_SDM_60_z",                
-      surface=TRUE, 
-      conditions = conditions, 
-      re_formula = NULL)#, transform = log, method = "posterior_predict"))
-  
-  plot(conditional_effects_psdn_sdm, plot = FALSE, nrow = 3, ncol = 2)[[2]] + 
-    ggtitle('Pacific sardine availability effect on squid landings') +
-    theme(plot.title = element_text(size=9, face="bold.italic"),
-          axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-    scale_x_continuous(name = "Prob(Presence)") +
-    scale_y_continuous(name = element_blank())
-  
-  rm(conditional_effects_msqd_sdm, conditional_effects_psdn.open, conditional_effects_psdn_sdm)
-  
-  
-  
 #### By cluster
 conditions <- data.frame(cluster = unique(dataset_msqd$cluster))
 rownames(conditions) <- unique(dataset_msqd$group_all)
