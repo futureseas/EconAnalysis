@@ -654,14 +654,20 @@ landing_model_PSDN_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQ
 
 fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC.RDS"))
 fit_qMSQD_endog_PSDN_NANC_final <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_final.RDS"))
-summary(fit_qMSQD_endog_PSDN_NANC_final)
 
 
+landing_model_PSDN_NANC_corr <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
+                              + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
+                              + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z
+                              + (1 | port_ID) + (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
+                                                 + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
+                                                 + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z | cluster))
 
-fit_qMSQD_endog_PSDN_NANC_final_v2 <-
+
+fit_qMSQD_endog_PSDN_NANC_final_corr <-
   brm(data = dataset_msqd_landing,
       family = gaussian,
-      price_model + landing_model_PSDN_NANC + set_rescor(TRUE),
+      price_model + landing_model_PSDN_NANC_corr + set_rescor(TRUE),
       prior = c(# E model
         prior(normal(0, 1), class = b, resp = MSQDPricez),
         prior(exponential(1), class = sigma, resp = MSQDPricez),
@@ -672,7 +678,9 @@ fit_qMSQD_endog_PSDN_NANC_final_v2 <-
         prior(lkj(2), class = rescor)),
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final_v2")
+      file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final_corr")
+
+sjPlot::tab_model(fit_qMSQD_endog_PSDN_NANC_final_corr)
 
 
 
@@ -762,7 +770,7 @@ round(res, 2)
 #####################################################
 ## Model summary ##
 
-fit_qMSQD <- fit_qMSQD_endog_PSDN_NANC ## Preferred model
+fit_qMSQD <- fit_qMSQD_endog_PSDN_NANC_final_v2 ## Preferred model
 
 library(patchwork)
 library(dplyr)
@@ -784,28 +792,39 @@ pp_check(fit_qMSQD, resp = "logMSQDLandings") +
 
 #### Intercepts ####
 
-coef(fit_qMSQD)$port_ID
-coeff_port_sdm <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(port_ID = as.factor(1:n()))
-gg1 <-  ggplot(coeff_port_sdm, aes(x=port_ID, y=Estimate)) +
+coef(fit_qMSQD)$port_ID 
+coeff_port_sdm <- as.data.frame(coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2]) %>% 
+  round(digits = 2) 
+names <- rownames(coeff_port_sdm)
+rownames(coeff_port_sdm) <- NULL
+coeff_port_sdm <- cbind(names,coeff_port_sdm)
+
+
+gg1 <-  ggplot(coeff_port_sdm, aes(x=names, y=Estimate)) +
   geom_point() +  geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5),
     width=.2, position=position_dodge(0.05)) + coord_flip() + ggtitle("(a) Port areas") +
   ylab("") + xlab("") +
-    scale_x_discrete(labels=c("1" = "Los Angeles",
-                              "2" = "Monterey",
-                              "3" = "Santa Barbara"))
+    scale_x_discrete(labels=c("LAA" = "Los Angeles",
+                              "MNA" = "Monterey",
+                              "SBA" = "Santa Barbara"))
 
-coeff_cluster_sdm <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 1] %>% 
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-  gg2 <-  ggplot(coeff_cluster_sdm, aes(y=cluster, x=Estimate)) +
+coef(fit_qMSQD)$cluster
+coeff_cluster_sdm <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 1]) %>% 
+  round(digits = 2)
+cluster <- rownames(coeff_cluster_sdm)
+rownames(coeff_cluster_sdm) <- NULL
+coeff_port_sdm <- cbind(cluster,coeff_cluster_sdm)  
+
+
+gg2 <-  ggplot(coeff_cluster_sdm, aes(y=cluster, x=Estimate)) +
     geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
                                   width=.2, position=position_dodge(0.05))  + ggtitle("(b) Clusters") +  
     xlab("") + ylab("")  + 
     scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
                               "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
-                              "3" = "Southern CCS\nindustrial\nsquid-specialists",
-                              "4" = "Roving industrial\nsardine-squid\nswitchers",
-                              "5" = "Southern CCS\nforage fish\ndiverse"))
+                              "4" = "Southern CCS\nindustrial\nsquid-specialists",
+                              "5" = "Roving industrial\nsardine-squid\nswitchers",
+                              "7" = "Southern CCS\nforage fish\ndiverse"))
   
   gg1 + gg2
   
