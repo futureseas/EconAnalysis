@@ -558,13 +558,11 @@ MSQD_clusters <- dataset_msqd %>%
 # library('fastDummies')
 # dataset_msqd <- dummy_cols(dataset_msqd, select_columns = 'cluster')
 
-#### Convert variables to factor ####
-dataset_msqd$port_ID      <- factor(dataset_msqd$port_ID)
-dataset_msqd$cluster      <- factor(dataset_msqd$cluster)
-dataset_msqd$LANDING_YEAR <- factor(dataset_msqd$LANDING_YEAR)
+#### Convert variables to factor #### HERE I CHANGE THE ID
+dataset_msqd$port_ID      <- factor(dataset_msqd$PORT_AREA_CODE)
+dataset_msqd$cluster      <- factor(dataset_msqd$group_all)
 class(dataset_msqd$port_ID)
 class(dataset_msqd$cluster)
-class(dataset_msqd$LANDING_YEAR)
 
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) %>%
@@ -656,21 +654,21 @@ landing_model_PSDN_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQ
 
 fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC.RDS"))
 
-# fit_qMSQD_endog_PSDN_NANC_final <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model + landing_model_PSDN_NANC + set_rescor(TRUE),
-#       prior = c(# E model
-#         prior(normal(0, 1), class = b, resp = MSQDPricez),
-#         prior(exponential(1), class = sigma, resp = MSQDPricez),
-#         # W model
-#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
-#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
-#         # rho
-#         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#       control = list(max_treedepth = 15, adapt_delta = 0.95),
-#       file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final")
+fit_qMSQD_endog_PSDN_NANC_final_v2 <-
+  brm(data = dataset_msqd_landing,
+      family = gaussian,
+      price_model + landing_model_PSDN_NANC + set_rescor(TRUE),
+      prior = c(# E model
+        prior(normal(0, 1), class = b, resp = MSQDPricez),
+        prior(exponential(1), class = sigma, resp = MSQDPricez),
+        # W model
+        prior(normal(0, 1), class = b, resp = logMSQDLandings),
+        prior(exponential(1), class = sigma, resp = logMSQDLandings),
+        # rho
+        prior(lkj(2), class = rescor)),
+      iter = 2000, warmup = 1000, chains = 4, cores = 4,
+      control = list(max_treedepth = 15, adapt_delta = 0.95),
+      file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final_v2")
 
 # fit_qMSQD_endog_PSDN_NANC_final <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_final.RDS"))
 
