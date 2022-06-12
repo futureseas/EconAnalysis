@@ -739,11 +739,17 @@ sjPlot::tab_model(fit_qMSQD_endog_PSDN_NANC_final_corr)
 #fit_qMSQD_endog_PSDN      <- add_criterion(fit_qMSQD_endog_PSDN, "loo", overwrite = TRUE)
 #fit_qMSQD_endog_PSDN_NANC <- add_criterion(fit_qMSQD_endog_PSDN_NANC, "loo", overwrite = TRUE)
 
+fit_qMSQD_endog_PSDN_NANC_final_corr <- add_criterion(fit_qMSQD_endog_PSDN_NANC_final_corr, "loo", overwrite = TRUE)
+fit_qMSQD_endog_PSDN_NANC_final      <- add_criterion(fit_qMSQD_endog_PSDN_NANC_final, "loo", overwrite = TRUE)
+
+
 # LOO(fit_qMSQD_endog_PSDN_NANC)
 # LOO(fit_qMSQD_endog_PSDN)
 # LOO(fit_qMSQD_endog)
 
-loo_compare(fit_qMSQD_endog_PSDN_NANC,
+loo_compare(fit_qMSQD_endog_PSDN_NANC_final_corr,
+            fit_qMSQD_endog_PSDN_NANC_final,
+            fit_qMSQD_endog_PSDN_NANC,
             fit_qMSQD_endog_PSDN,
             fit_qMSQD_endog,
             criterion = "loo")
