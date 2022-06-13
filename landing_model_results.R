@@ -518,7 +518,7 @@ dataset <- dataset %>%
 dataset_msqd <- dataset %>%
   dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, 
                 LANDING_YEAR, LANDING_MONTH,
-                MSQD_SPAWN_SDM_90, MSQD_Landings, MSQD_Price, 
+                MSQD_SPAWN_SDM_90, MSQD_SDM_90, MSQD_Landings, MSQD_Price, 
                 PSDN_Landings, NANC_Landings, PSDN_Price, NANC_Price, 
                 PSDN_SDM_60, NANC_SDM_20,
                 MSQD_Price_z, PSDN_Price_z, MSQD_SPAWN_SDM_90_z, MSQD_SDM_90_z, 
@@ -544,15 +544,7 @@ dataset_msqd <- dataset %>%
     filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA") %>% drop_na()
 
 
-#### Create new port ID and cluster variable ####
-dataset_msqd$port_ID <- udpipe::unique_identifier(dataset_msqd, fields = "PORT_AREA_CODE", start_from = 1) 
-dataset_msqd$cluster <- udpipe::unique_identifier(dataset_msqd, fields = "group_all", start_from = 1) 
-MSQD_port_area <- dataset_msqd %>%
-  dplyr::select('PORT_AREA_CODE', 'port_ID') %>%
-  unique()
-MSQD_clusters <- dataset_msqd %>%
-  dplyr::select(group_all, cluster) %>%
-  unique()
+
 
 ## install.packages(c("fastDummies", "recipes"))
 # library('fastDummies')
@@ -571,7 +563,7 @@ dataset_msqd_landing <- dataset_msqd %>%
 ### Descriptive statistics 
 desc_data <- dataset_msqd_landing %>%
   subset(select = c(Length, MSQD_Landings, MSQD_Price, 
-                    MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,  
+                    MSQD_SDM_90, MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,  
                     PSDN.Open, Price.Fishmeal.AFI))
 
 table <- psych::describe(desc_data, fast=TRUE) %>%
@@ -584,7 +576,7 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 7, "Fraction of month open: PSDN", vars)) %>%
   mutate(vars = ifelse(vars == 8, "Fishmeal price", vars)) 
 
-gs4_create("SummaryMonthly_Q_MSQD", sheets = table)
+# gs4_create("SummaryMonthly_Q_MSQD", sheets = table)
 rm(desc_data, table)
 
 
@@ -652,10 +644,12 @@ landing_model_PSDN_NANC <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQ
                                            + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                                            + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z || cluster))
 
+
 fit_qMSQD_endog_PSDN_NANC <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC.RDS"))
 fit_qMSQD_endog_PSDN_NANC_final <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_final.RDS"))
 
 
+### Add correlation between variables
 landing_model_PSDN_NANC_corr <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z
                               + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                               + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z
@@ -663,11 +657,22 @@ landing_model_PSDN_NANC_corr <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z 
                                                  + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
                                                  + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z | cluster))
 
+fit_qMSQD_endog_PSDN_NANC_final_corr <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_final_corr.RDS"))
 
-fit_qMSQD_endog_PSDN_NANC_final_corr <-
+
+
+### Estimate using original model
+landing_model_PSDN_NANC_corr_NS <- bf(log(MSQD_Landings) ~ 1 + MSQD_SDM_90_z + MSQD_Price_z + Length_z
+                                   + PSDN_SDM_60_z:PSDN.Open:MSQD_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
+                                   + NANC_SDM_20_z:MSQD_SDM_90_z + NANC_SDM_20_z
+                                   + (1 | port_ID) + (1 + MSQD_SDM_90_z + MSQD_Price_z + Length_z
+                                                      + PSDN_SDM_60_z:PSDN.Open:MSQD_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + PSDN.Open
+                                                      + NANC_SDM_20_z:MSQD_SDM_90_z + NANC_SDM_20_z | cluster))
+
+fit_qMSQD_endog_PSDN_NANC_final_corr_NS <-
   brm(data = dataset_msqd_landing,
       family = gaussian,
-      price_model + landing_model_PSDN_NANC_corr + set_rescor(TRUE),
+      price_model + landing_model_PSDN_NANC_corr_NS + set_rescor(TRUE),
       prior = c(# E model
         prior(normal(0, 1), class = b, resp = MSQDPricez),
         prior(exponential(1), class = sigma, resp = MSQDPricez),
@@ -678,18 +683,52 @@ fit_qMSQD_endog_PSDN_NANC_final_corr <-
         prior(lkj(2), class = rescor)),
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final_corr")
-
-sjPlot::tab_model(fit_qMSQD_endog_PSDN_NANC_final_corr)
+      file = "Estimations/fit_qMSQD_endog_PSDN_NANC_final_corr_NS")
 
 
+
+
+#####################################################
+## Model summary ##
+
+fit_qMSQD <- fit_qMSQD_endog_PSDN_NANC_final_corr ## Preferred model
+
+library(patchwork)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(tibble)
+theme_set(theme_sjplot())
+
+### Divergence ###
+launch_shinystan(fit_qMSQD)
+
+
+### Posterior predictive check ###
+pp_check(fit_qMSQD, resp = "logMSQDLandings") +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) + 
+  theme(legend.position = "right", plot.title = element_text(size=12, face="bold.italic"))  + 
+  xlim(-5, 11) + xlab("Natural logarithm of market squid landing")
 
 
 ###############################################
 ### Create result tables ###
 
+sjPlot::tab_model(fit_qMSQD_endog_PSDN_NANC_final_corr)
 
-# library(XML)
+library(XML)
+
+tab_model_fit_qMSQD_endog_PSDN_NANC_final_corr <-
+  sjPlot::tab_model(fit_qMSQD_endog_PSDN_NANC_final_corr)
+
+df <- data.frame(readHTMLTable(htmlParse(tab_model_fit_qMSQD_endog_PSDN_NANC_final_corr))[1])
+colnames(df) <- df[1,]
+df <- df[-1,]
+
+gs4_create("Squid_landings_Model_spawning", sheets = df)
+
+
 # tab_model_fit_qMSQD_endog <- 
 #   sjPlot::tab_model(fit_qMSQD_endog)
 # 
@@ -738,11 +777,12 @@ sjPlot::tab_model(fit_qMSQD_endog_PSDN_NANC_final_corr)
 #fit_qMSQD_endog           <- add_criterion(fit_qMSQD_endog, "loo", overwrite = TRUE)
 #fit_qMSQD_endog_PSDN      <- add_criterion(fit_qMSQD_endog_PSDN, "loo", overwrite = TRUE)
 #fit_qMSQD_endog_PSDN_NANC <- add_criterion(fit_qMSQD_endog_PSDN_NANC, "loo", overwrite = TRUE)
+# fit_qMSQD_endog_PSDN_NANC_final_corr <- add_criterion(fit_qMSQD_endog_PSDN_NANC_final_corr, "loo", overwrite = TRUE)
+# fit_qMSQD_endog_PSDN_NANC_final      <- add_criterion(fit_qMSQD_endog_PSDN_NANC_final, "loo", overwrite = TRUE)
 
-fit_qMSQD_endog_PSDN_NANC_final_corr <- add_criterion(fit_qMSQD_endog_PSDN_NANC_final_corr, "loo", overwrite = TRUE)
-fit_qMSQD_endog_PSDN_NANC_final      <- add_criterion(fit_qMSQD_endog_PSDN_NANC_final, "loo", overwrite = TRUE)
 
-
+LOO(fit_qMSQD_endog_PSDN_NANC_final_corr)
+# LOO(fit_qMSQD_endog_PSDN_NANC_final)
 # LOO(fit_qMSQD_endog_PSDN_NANC)
 # LOO(fit_qMSQD_endog_PSDN)
 # LOO(fit_qMSQD_endog)
@@ -771,26 +811,6 @@ res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
 # gs4_create("correlation_exp_variables_MSQD_landings", sheets = res)
-
-#####################################################
-#####################################################
-## Model summary ##
-
-fit_qMSQD <- fit_qMSQD_endog_PSDN_NANC_final_v2 ## Preferred model
-
-library(patchwork)
-library(dplyr)
-library(ggplot2)
-library(ggthemes)
-library(tibble)
-theme_set(theme_sjplot())
-
-### Posterior predictive check ###
-pp_check(fit_qMSQD, resp = "logMSQDLandings") +
-  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-                     labels = c("y" = "Observed", "yrep" = "Replicated")) + 
-  theme(legend.position = "right", plot.title = element_text(size=12, face="bold.italic"))  + 
-  xlim(-5, 11) + xlab("Natural logarithm of market squid landing")
 
 
 #------------------------------------------------------
