@@ -28,12 +28,12 @@ rm(Tickets1, Tickets2, Tickets3, Tickets4)
 
 ## Subset the data to get remove columns not relevant to this analysis. This will speed things up.
 Tickets <- dplyr::select(Tickets, c(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS, LANDING_YEAR, LANDING_MONTH, 
-                                    AGENCY_CODE, VESSEL_OWNER_ADDRESS_STATE, ))
+                                    AGENCY_CODE, PACFIN_PORT_CODE))
 options(scipen=999)  
 Tickets_anchovy <- Tickets %>% dplyr::filter(PACFIN_SPECIES_CODE == 'MSQD') %>% 
-  group_by(LANDING_YEAR, AGENCY_CODE) %>%
+  group_by(LANDING_YEAR, PACFIN_PORT_CODE) %>%
     summarize(MSQD_Landings = sum(LANDED_WEIGHT_MTONS))
 
-write.csv(Tickets_anchovy,"C:\\Data\\Anchovy_landings_by_state.csv", row.names = FALSE)
+write.csv(Tickets_anchovy,"C:\\Data\\squid_landings_by_port_year.csv", row.names = FALSE)
 
   
