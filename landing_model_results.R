@@ -741,39 +741,10 @@ loo_compare(fit_qMSQD_endog                              ,
 
 
 
-
-#####################################################
-## Model summary ##
-fit_qMSQD <- fit_qMSQD_endog_Open_PSDN_NANC_Interaction ## Preferred model
-tab_model(fit_qMSQD)
-
-
-library(patchwork)
-library(dplyr)
-library(ggplot2)
-library(ggthemes)
-library(tibble)
-theme_set(theme_sjplot())
-
-### Divergence ###
-launch_shinystan(fit_qMSQD)
-
-
-### Posterior predictive check ###
-pp_check(fit_qMSQD, resp = "logMSQDLandings") +
-  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-                     labels = c("y" = "Observed", "yrep" = "Replicated")) + 
-  theme(legend.position = "right", plot.title = element_text(size=12, face="bold.italic"))  + 
-  xlim(-5, 11) + xlab("Natural logarithm of market squid landing")
-
-
 ###############################################
 ### Create result tables ###
 
-sjPlot::tab_model(fit_qMSQD_endog_PSDN_NANC_final_corr)
-
 library(XML)
-
 tab_model_fit_qMSQD_endog_PSDN_NANC_final_corr <-
   sjPlot::tab_model(fit_qMSQD_endog_PSDN_NANC_final_corr)
 
@@ -844,6 +815,32 @@ res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
 # gs4_create("correlation_exp_variables_MSQD_landings", sheets = res)
+
+
+#####################################################
+## Model summary ##
+fit_qMSQD_endog_Open_PSDN_NANC_Interaction    <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open_PSDN_NANC_Interaction.RDS"))
+fit_qMSQD <- fit_qMSQD_endog_Open_PSDN_NANC_Interaction ## Preferred model
+
+
+library(patchwork)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(tibble)
+theme_set(theme_sjplot())
+
+### Divergence ###
+launch_shinystan(fit_qMSQD)
+
+
+### Posterior predictive check ###
+pp_check(fit_qMSQD, resp = "logMSQDLandings") +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) + 
+  theme(legend.position = "right", plot.title = element_text(size=12, face="bold.italic"))  + 
+  xlim(-5, 11) + xlab("Natural logarithm of market squid landing")
+
 
 
 #------------------------------------------------------
@@ -950,91 +947,138 @@ gg2 <-  ggplot(coeff_cluster_sdm, aes(y=cluster, x=Estimate)) +
 # 
 # gg_1 / gg_2 / gg_3 / gg_4
 
-
+####################################################################
 ### Conditional effects ###
 
 #### By cluster
-conditions <- data.frame(cluster = unique(dataset_msqd$cluster))
-rownames(conditions) <- unique(dataset_msqd$group_all)
+conditions <- data.frame(cluster = unique(dataset_msqd_landing$cluster)) 
+rownames(conditions) <- unique(dataset_msqd_landing$cluster)
 
+conditions <- conditions %>% 
+  arrange(-desc(cluster)) 
+
+cond_label <- as_labeller(c("1" = "Southern CCS small-scale squid-specialists",
+                            "2" = "Southern CCS small-scale CPS-opportunists",
+                            "4" = "Southern CCS industrial squid-specialists",
+                            "5" = "Roving industrial sardine-squid switchers",
+                            "7" = "Southern CCS forage fish diverse"))
+
+# (a) Effect of MSQD presence
 conditional_effects_msqd_sdm <-
   conditional_effects(
-    fit_qMSQD_endog_b_2, 
+    fit_qMSQD, 
     "MSQD_SPAWN_SDM_90_z",                
     surface=TRUE, 
     conditions = conditions, 
     re_formula = NULL)#, transform = log, method = "posterior_predict"))
 
-plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[2]] + 
-  ggtitle('Market squid availability effect on squid landings') +
+gg1 <- plot(conditional_effects_msqd_sdm, plot = FALSE, nrow = 3, ncol = 2)[[2]] + 
   theme(plot.title = element_text(size=9, face="bold.italic"),
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-  scale_x_continuous(name = "Prob(Presence)") +
-  scale_y_continuous(name = element_blank())
-                  
-conditional_effects_psdn_sdm <-
-  conditional_effects(
-    fit_qMSQD_endog_b_2, 
-    "PSDN_SDM_60_z",                
-    surface=TRUE, 
-    conditions = conditions, 
-    re_formula = NULL)#, transform = log, method = "posterior_predict"))
+  scale_x_continuous(name = "MSQD: Prob(Presence)") +
+  scale_y_continuous(name = "ln(MSQD: Landings)")
+gg1$facet$params$labeller <- cond_label
+gg1
 
-plot(conditional_effects_psdn_sdm, plot = FALSE, nrow = 3, ncol = 2)[[2]] + 
-  ggtitle('Pacific sardine availability effect on squid landings') +
-  theme(plot.title = element_text(size=9, face="bold.italic"),
-        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
-  scale_x_continuous(name = "Prob(Presence)") +
-  scale_y_continuous(name = element_blank())
+# # (b) Effect of PSDN fraction of the month open
+# conditional_effects_psdn_open <-
+#   conditional_effects(
+#     fit_qMSQD, 
+#     "PSDN.Open",                
+#     surface=TRUE, 
+#     conditions = conditions, 
+#     re_formula = NULL)#, transform = log, method = "posterior_predict"))
+# 
+# gg.open <- plot(conditional_effects_psdn_open, plot = FALSE, nrow = 3, ncol = 2)[[2]] + 
+#   theme(plot.title = element_text(size=9, face="bold.italic"),
+#         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+#   scale_x_continuous(name = "PSDN: Open") +
+#   scale_y_continuous(name = "ln(MSQD: Landings)")
+# gg.open$facet$params$labeller <- cond_label
+# gg.open
 
-rm(conditional_effects_msqd_sdm, conditional_effects_psdn.open, conditional_effects_psdn_sdm)
-     
+# (c) Effect of PSDN presence
 
+# conditional_effects_psdn_sdm <-
+#   conditional_effects(
+#     fit_qMSQD, 
+#     "PSDN_SDM_60_z",                
+#     surface=TRUE, 
+#     conditions = conditions, 
+#     re_formula = NULL)
+# 
+# gg2 <- plot(conditional_effects_psdn_sdm, plot = FALSE, nrow = 3, ncol = 2)[[2]] + 
+#   theme(plot.title = element_text(size=9, face="bold.italic"),
+#         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) +
+#   scale_x_continuous(name = "MSQD: Prob(Presence)") +
+#   scale_y_continuous(name = "ln(MSQD: Landings)")
+# gg2$facet$params$labeller <- cond_label
+# gg2
+# 
+# rm(conditional_effects_msqd_sdm, conditional_effects_psdn, conditional_effects_psdn_sdm)
+
+####################################################################
 ### Interaction effects ###
-c_eff_int_psdn_msqd_b <- (conditional_effects(
-  fit_qMSQD_endog_b, "PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z", 
+conditional_effects_psdn_msqd_sdm <- (conditional_effects(
+  fit_qMSQD, "PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z", 
   surface=TRUE, 
   conditions = conditions, re_formula = NULL))
 
-plot(c_eff_int_psdn_msqd, plot = FALSE)[[2]] + 
-  ggtitle('(a) Pacific sardine x Market squid') +
+gg_int <- plot(conditional_effects_psdn_msqd_sdm, plot = FALSE)[[2]] + 
   theme(
     plot.title = element_text(size=9, face="bold.italic"),
     axis.text = element_text(size = 7),
     axis.title = element_text(size = 8),
     legend.title = element_text(size = 9),
     legend.text = element_text(size=8)
-  ) + guides(colour=guide_legend(title="Landings: MSQD")) +
-  scale_x_continuous(name = "P(Pres): PSDN") + scale_y_continuous(name = "P(Pres): MSQD")
+  ) + guides(colour=guide_legend(title="ln(MSQD: Landings)")) +
+  scale_x_continuous(name = "PSDN: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
+
+gg_int$facet$params$labeller <- cond_label
+gg_int
 
 
+##########################################################################
 ### Predictions ###
 
 #### Using the data estimation
 set.seed(123)
 prediction <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
-prediction$LANDING_YEAR <- as.numeric(as.character(prediction$LANDING_YEAR))
+prediction$LANDING_MONTH <- as.numeric(as.character(prediction$LANDING_MONTH))
 
-meltdf <- prediction %>% 
-  dplyr::select(Estimate, ln_MSQD_Landings, LANDING_YEAR, PORT_AREA_CODE) %>%
-  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarise(Est_landings = sum(Estimate), Landings = sum(ln_MSQD_Landings)) %>%
+prediction_sel <- prediction[,-1]
+prediction_sel <- prediction_sel[,-1]
+prediction_sel <- prediction_sel[,-1]
+prediction_sel <- prediction_sel[,-1]
+
+port_label <- as_labeller(c("LAA" = "Los Angeles",
+                            "MNA" = "Monterey",
+                            "SBA" = "Santa Barbara"))
+
+meltdf <- prediction_sel %>% 
+  dplyr::select(Estimate.logMSQDLandings, ln_MSQD_Landings, Date, PORT_AREA_CODE) %>%
+  group_by(Date, PORT_AREA_CODE) %>% 
+  summarise(Est_landings = sum(Estimate.logMSQDLandings), Landings = sum(ln_MSQD_Landings)) %>%
   gather(key = Variable, value = value,
          c("Est_landings", "Landings"))
 
-ggplot(meltdf, aes(x=LANDING_YEAR, y = value, colour = Variable)) + 
+ggplot(meltdf, aes(x=Date, y = value, colour = Variable)) + 
   geom_line(size=1) + 
-  facet_wrap(~PORT_AREA_CODE)
+  facet_wrap(~PORT_AREA_CODE, labeller = port_label) +
+  scale_x_continuous(name = "Date")  +
+  scale_y_continuous(name = "ln(Landings)")
 
-meltdf <- prediction %>% 
-  dplyr::select(Estimate, ln_MSQD_Landings, LANDING_YEAR, group_all) %>%
-  group_by(LANDING_YEAR, group_all) %>% 
-  summarise(Est_landings = sum(Estimate), Landings = sum(ln_MSQD_Landings)) %>%
+meltdf <- prediction_sel %>% 
+  dplyr::select(Estimate.logMSQDLandings, ln_MSQD_Landings, Date, group_all) %>%
+  group_by(Date, group_all) %>% 
+  summarise(Est_landings = sum(Estimate.logMSQDLandings), Landings = sum(ln_MSQD_Landings)) %>%
   gather(key = Variable, value = value,
          c("Est_landings", "Landings"))
-ggplot(meltdf, aes(x=LANDING_YEAR, y = value, colour = Variable)) + 
+ggplot(meltdf, aes(x=Date, y = value, colour = Variable)) + 
   geom_line(size=1) + 
-  facet_wrap(~group_all)
+  facet_wrap(~group_all, labeller = cond_label) +
+  scale_x_continuous(name = "Landing Month")  +
+  scale_y_continuous(name = "ln(Landings)")
 
 
 
