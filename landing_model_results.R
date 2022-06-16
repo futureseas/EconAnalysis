@@ -698,6 +698,18 @@ landing_model_Interaction <- bf(log(MSQD_Landings) ~
                                                  PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster))
 
 
+#### Port RE slopes
+landing_model_Open_PSDN_NANC_Interaction_portSlopes <- bf(log(MSQD_Landings) ~ 
+                                                 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z +
+                                                 PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + 
+                                                 (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + 
+                                                    PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | port_ID) +
+                                                 (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + 
+                                                    PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster))
+
+
+
+
 fit_qMSQD_endog                               <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
 # fit_qMSQD_endog_Open                          <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open.RDS"))
 # fit_qMSQD_endog_Open_PSDN                     <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open_PSDN.RDS"))
