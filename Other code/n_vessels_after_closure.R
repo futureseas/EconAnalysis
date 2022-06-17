@@ -142,13 +142,13 @@ rm(Trip_Dominant, X, Boats)
 
 
 ### Subset to select only records where one of the forage fish species of interest was the target species
-### (species in the CPS FMP; squid, sardine, mackerrels and anchovy) 
+### (species in the CPS FMP; squid, sardine, mackerels and anchovy) 
 FF_Tickets<-Tickets[which((Tickets$Dominant == "PACIFIC SARDINE"  & Tickets$AFI_EXVESSEL_REVENUE>0) | 
-                            (Tickets$Dominant == "MARKET SQUID"     & Tickets$AFI_EXVESSEL_REVENUE>0) | 
-                            (Tickets$Dominant == "NORTHERN ANCHOVY" & Tickets$AFI_EXVESSEL_REVENUE>0) | 
-                            (Tickets$Dominant == "CHUB MACKEREL"    & Tickets$AFI_EXVESSEL_REVENUE>0) | 
-                            (Tickets$Dominant == "JACK MACKEREL"    & Tickets$AFI_EXVESSEL_REVENUE>0) |
-                            (Tickets$Dominant == "UNSP. MACKEREL"   & Tickets$AFI_EXVESSEL_REVENUE>0)),]
+                          (Tickets$Dominant == "MARKET SQUID"     & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+                          (Tickets$Dominant == "NORTHERN ANCHOVY" & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+                          (Tickets$Dominant == "CHUB MACKEREL"    & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+                          (Tickets$Dominant == "JACK MACKEREL"    & Tickets$AFI_EXVESSEL_REVENUE>0) |
+                          (Tickets$Dominant == "UNSP. MACKEREL"   & Tickets$AFI_EXVESSEL_REVENUE>0)),]
 
 ## Agreggate mackerrels in one category
 FF_Tickets<- within(FF_Tickets, Dominant[Dominant == "CHUB MACKEREL"]  <- "MACKEREL")
@@ -345,6 +345,7 @@ rm(Boats, FFP, FF_Total, Total)
 ####Step 5: Combine metrics, scale metrics, determine optimal cluster number, assign vessels to clusters
 RAW<-merge(Landings_Volume_Value, Vessel_Geography, by="VESSEL_NUM")
 RAW<-merge(RAW, FF_Landings_and_Diversity, by="VESSEL_NUM")
+write.csv(RAW,here::here("Clustering", "RAW_cluster_inputs_new_vessels.csv"), row.names = FALSE)
 Vessel_IDs <- RAW[,1]
 Vessels<-as.data.frame(Vessel_IDs)
 RAW<-RAW[c(-1)]
@@ -359,30 +360,30 @@ RAW<-RAW[c(-1)] # Delete AVG_LBS
 ##############################
 
 ### Create database to plot inputs average by cluster ###
-Group_Stats <- RAW %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
+Group_Stats <- RAW %>% summarise_each(funs(mean, min, max, se=sd(.)/sqrt(n())))
 
-Group_Avg_Revenue<-Group_Stats[c(1,6)]
+Group_Avg_Revenue<-Group_Stats[c(1,6,11)]
 Group_Avg_Revenue$Var<-"Average annual revenue"
-names(Group_Avg_Revenue)<- c("mean", "sd", "Variable")
-Group_LAT<-Group_Stats[c(2,7)]
+names(Group_Avg_Revenue)<- c("mean", "min", "max", "Variable")
+Group_LAT<-Group_Stats[c(2,7,12)]
 Group_LAT$Var<-"LCG"
-names(Group_LAT)<- c("mean", "sd", "Variable")
-Group_Inertia<-Group_Stats[c(3,8)]
+names(Group_LAT)<- c("mean", "min", "max", "Variable")
+Group_Inertia<-Group_Stats[c(3,8,13)]
 Group_Inertia$Var<-"Inertia"
-names(Group_Inertia)<- c("mean", "sd", "Variable")
-Group_Percentage_FF<-Group_Stats[c(4,9)]
+names(Group_Inertia)<- c("mean", "min", "max", "Variable")
+Group_Percentage_FF<-Group_Stats[c(4,9,14)]
 Group_Percentage_FF$Var<-"Percent of revenue from CPS"
-names(Group_Percentage_FF)<- c("mean", "sd", "Variable")
-Group_FF_Diversity<-Group_Stats[c(5,10)]
+names(Group_Percentage_FF)<- c("mean", "min", "max", "Variable")
+Group_FF_Diversity<-Group_Stats[c(5,10,15)]
 Group_FF_Diversity$Var<-"CPS diversity index"
-names(Group_FF_Diversity)<- c("mean", "sd", "Variable")
+names(Group_FF_Diversity)<- c("mean", "min", "max", "Variable")
 
-Group_Stats_POST <- RAW %>% summarise_each(funs(mean)) %>%
-  dplyr::rename(AVG_REVENUE_NEW = AVG_REVENUE) %>%
-  dplyr::rename(LAT_NEW         = LAT        ) %>%
-  dplyr::rename(DISTANCE_A_NEW  = DISTANCE_A ) %>%
-  dplyr::rename(Percentage_NEW  = Percentage ) %>%
-  dplyr::rename(diversity_NEW   = diversity  )
+# Group_Stats_POST <- RAW %>% summarise_each(funs(mean)) %>%
+#   dplyr::rename(AVG_REVENUE_NEW = AVG_REVENUE) %>%
+#   dplyr::rename(LAT_NEW         = LAT        ) %>%
+#   dplyr::rename(DISTANCE_A_NEW  = DISTANCE_A ) %>%
+#   dplyr::rename(Percentage_NEW  = Percentage ) %>%
+#   dplyr::rename(diversity_NEW   = diversity  )
   
 Group_Stats_Wide_POST <- rbind(Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
 rm(Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
@@ -396,9 +397,10 @@ gs4_auth(
   use_oob = gargle::gargle_oob_default(),
   token = NULL
 )
-# gs4_create("Inputs_new_vessels", sheets = Group_Stats_Wide_POST)
+# gs4_create("Inputs_new_vessels_range", sheets = Group_Stats_Wide_POST)
 
-###
+
+
 # Compare with clusters averages #
 RAW_cluster_inputs <- read.csv(here::here("Clustering", "RAW_cluster_inputs.csv"))
 Vessel_IDs <- RAW_cluster_inputs[,1]
