@@ -652,21 +652,21 @@ landing_model_Open_PSDN <- bf(log(MSQD_Landings) ~
                                (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open | cluster))
 
 
-# fit_qMSQD_endog_Open_PSDN <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model + landing_model_Open_PSDN + set_rescor(TRUE),
-#       prior = c(# E model
-#         prior(normal(0, 1), class = b, resp = MSQDPricez),
-#         prior(exponential(1), class = sigma, resp = MSQDPricez),
-#         # W model
-#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
-#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
-#         # rho
-#         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#       control = list(max_treedepth = 15, adapt_delta = 0.99),
-#       file = "Estimations/fit_qMSQD_endog_Open_PSDN")
+fit_qMSQD_endog_Open_PSDN <-
+  brm(data = dataset_msqd_landing,
+      family = gaussian,
+      price_model + landing_model_Open_PSDN + set_rescor(TRUE),
+      prior = c(# E model
+        prior(normal(0, 1), class = b, resp = MSQDPricez),
+        prior(exponential(1), class = sigma, resp = MSQDPricez),
+        # W model
+        prior(normal(0, 1), class = b, resp = logMSQDLandings),
+        prior(exponential(1), class = sigma, resp = logMSQDLandings),
+        # rho
+        prior(lkj(2), class = rescor)),
+      iter = 2000, warmup = 1000, chains = 4, cores = 4,
+      control = list(max_treedepth = 15, adapt_delta = 0.99),
+      file = "Estimations/fit_qMSQD_endog_Open_PSDN")
 
 
 
