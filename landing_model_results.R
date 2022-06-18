@@ -635,7 +635,12 @@ landing_model_Open_PSDN <- bf(log(MSQD_Landings) ~
                                (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open | cluster))
 
 
-fit_qMSQD_endog_Open_PSDN <-
+#### Add anchovy SDM
+landing_model_Open_PSDN_NANC<- bf(log(MSQD_Landings) ~ 
+                     1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + (1 | port_ID) +
+                    (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z | cluster))
+
+fit_qMSQD_endog_Open_PSDN_NANC <-
   brm(data = dataset_msqd_landing,
       family = gaussian,
       price_model + landing_model_Open_PSDN + set_rescor(TRUE),
@@ -649,14 +654,7 @@ fit_qMSQD_endog_Open_PSDN <-
         prior(lkj(2), class = rescor)),
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qMSQD_endog_Open_PSDN")
-
-
-
-#### Add anchovy SDM
-landing_model_Open_PSDN_NANC<- bf(log(MSQD_Landings) ~ 
-                     1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + (1 | port_ID) +
-                    (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z | cluster))
+      file = "Estimations/fit_qMSQD_endog_Open_PSDN_NANC")
 
 
 #### Add interaction effects
