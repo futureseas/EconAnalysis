@@ -643,7 +643,7 @@ landing_model_Open_PSDN_NANC<- bf(log(MSQD_Landings) ~
 fit_qMSQD_endog_Open_PSDN_NANC <-
   brm(data = dataset_msqd_landing,
       family = gaussian,
-      price_model + landing_model_Open_PSDN + set_rescor(TRUE),
+      price_model + landing_model_Open_PSDN_NANC + set_rescor(TRUE),
       prior = c(# E model
         prior(normal(0, 1), class = b, resp = MSQDPricez),
         prior(exponential(1), class = sigma, resp = MSQDPricez),
@@ -663,6 +663,10 @@ landing_model_Open_PSDN_NANC_Interaction <- bf(log(MSQD_Landings) ~
                                            PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + (1 | port_ID) +
                     (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + 
                                            PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster))
+
+
+#### Add PSDN closure
+
 
 #### Exclude PSDN: Open
 landing_model_PSDN_NANC_Interaction <- bf(log(MSQD_Landings) ~ 
@@ -692,7 +696,7 @@ landing_model_Open_PSDN_NANC_Interaction_portSlopes <- bf(log(MSQD_Landings) ~
 
 
 fit_qMSQD_endog                               <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
-# fit_qMSQD_endog_Open                          <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open.RDS"))
+fit_qMSQD_endog_Open                          <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open.RDS"))
 # fit_qMSQD_endog_Open_PSDN                     <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open_PSDN.RDS"))
 # fit_qMSQD_endog_Open_PSDN_NANC                <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open_PSDN_NANC.RDS"))
 fit_qMSQD_endog_Open_PSDN_NANC_Interaction    <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open_PSDN_NANC_Interaction.RDS"))
@@ -718,21 +722,22 @@ tab_model(fit_qMSQD_endog)
 
 LOO(fit_qMSQD_endog)                              
 LOO(fit_qMSQD_endog_Open)                         
-# LOO(fit_qMSQD_endog_Open_PSDN)                    
+LOO(fit_qMSQD_endog_Open_PSDN)                    
 # LOO(fit_qMSQD_endog_Open_PSDN_NANC)               
 LOO(fit_qMSQD_endog_Open_PSDN_NANC_Interaction)   
 LOO(fit_qMSQD_endog_Open_PSDN_NANC_Interaction_NS)
 # LOO(fit_qMSQD_endog_PSDN_NANC_Interaction)
 # LOO(fit_qMSQD_endog_Interaction)
 #   
-loo_compare(fit_qMSQD_endog                              ,
-            fit_qMSQD_endog_Open                         ,
-            # fit_qMSQD_endog_Open_PSDN                  ,
-            # fit_qMSQD_endog_Open_PSDN_NANC               ,
-            fit_qMSQD_endog_Open_PSDN_NANC_Interaction   ,
-            fit_qMSQD_endog_Open_PSDN_NANC_Interaction_NS,
-            # fit_qMSQD_endog_PSDN_NANC_Interaction        ,
-            # fit_qMSQD_endog_Interaction                  ,
+loo_compare(fit_qMSQD_endog                                   ,
+            fit_qMSQD_endog_Open                              ,
+            fit_qMSQD_endog_Open_PSDN                         ,
+            # fit_qMSQD_endog_Open_PSDN_NANC                  ,
+            fit_qMSQD_endog_Open_PSDN_NANC_Interaction        ,
+            fit_qMSQD_endog_Open_PSDN_NANC_Interaction_NS     ,
+            # fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure,
+            # fit_qMSQD_endog_PSDN_NANC_Interaction           ,
+            # fit_qMSQD_endog_Interaction                     ,
             criterion = "loo")
 
 
@@ -743,13 +748,13 @@ loo_compare(fit_qMSQD_endog                              ,
 library(XML)
 
 tab_model <-
-  sjPlot::tab_model(fit_qMSQD_endog_Open)
+  sjPlot::tab_model(fit_qMSQD_endog_Open_PSDN)
 
 df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
 colnames(df) <- df[1,]
 df <- df[-1,]
 
-gs4_create("Squid_landings_Model_2", sheets = df)
+# gs4_create("Squid_landings_Model_3", sheets = df)
 
 
 # ### Population parameters ###
