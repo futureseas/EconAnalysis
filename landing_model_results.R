@@ -726,11 +726,20 @@ loo_compare(fit_qMSQD_endog                                   ,
             fit_qMSQD_endog_Open_PSDN_NANC_Interaction        ,
             fit_qMSQD_endog_Open_PSDN_NANC_Interaction_NS     ,
             fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure,
-            fit_qMSQD_endog_PSDN_NANC_Interaction_Closure     ,
+            #fit_qMSQD_endog_PSDN_NANC_Interaction_Closure     ,
             criterion = "loo")
 
 
+###############################################
+### Analyze convergence ###
 
+# launch_shinystan(fit_qMSQD_endog)
+# launch_shinystan(fit_qMSQD_endog_Open)
+# launch_shinystan(fit_qMSQD_endog_Open_PSDN)
+# launch_shinystan(fit_qMSQD_endog_Open_PSDN_NANC)
+# launch_shinystan(fit_qMSQD_endog_Open_PSDN_NANC_Interaction)
+# launch_shinystan(fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure)
+# launch_shinystan(fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure)
 
 ###############################################
 ### Create result tables ###
@@ -738,13 +747,13 @@ loo_compare(fit_qMSQD_endog                                   ,
 library(XML)
 
 tab_model <-
-  sjPlot::tab_model(fit_qMSQD_endog_Open_PSDN)
+  sjPlot::tab_model(fit_qMSQD_endog_PSDN_NANC_Interaction_Closure)
 
 df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
 colnames(df) <- df[1,]
 df <- df[-1,]
 
-# gs4_create("Squid_landings_Model_3", sheets = df)
+# gs4_create("Squid_landings_Model_7", sheets = df)
 
 
 # ### Population parameters ###
@@ -784,7 +793,7 @@ round(res, 2)
 
 #####################################################
 ## Model summary ##
-fit_qMSQD <- fit_qMSQD_endog_Open_PSDN_NANC_Interaction ## Preferred model
+fit_qMSQD <- fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure ## Preferred model
 
 
 library(patchwork)
@@ -793,9 +802,6 @@ library(ggplot2)
 library(ggthemes)
 library(tibble)
 theme_set(theme_sjplot())
-
-### Divergence ###
-# launch_shinystan(fit_qMSQD)
 
 
 ### Posterior predictive check ###
