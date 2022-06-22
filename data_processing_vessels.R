@@ -54,6 +54,7 @@ Tickets <- merge(Tickets, Dominant_Length, by="VESSEL_NUM")
 
 # Filter by removal type
 nrow_tickets <- nrow(Tickets)
+  options(scipen=999)
   removal.df <- Tickets %>% dplyr:::select("REMOVAL_TYPE_CODE") %>% mutate(n = 1) %>% 
   group_by(REMOVAL_TYPE_CODE) %>% summarise(n_group = sum(n)/nrow_tickets*100) 
 
@@ -75,7 +76,8 @@ FF_Vessels <- read.csv(file = here::here("Clustering", "FF_Vessels.csv"))
   ## Remove records associated with landings of zero value; this is likely bycatch 
   Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]     
   Tickets<-as.data.frame(Tickets)
-  nrow(as.data.frame(unique(Tickets$FTID)))   # 80% of the total number of tickets, from 4,596,193 tickets to 3,709,040.
+  nrow(as.data.frame(unique(Tickets$FTID))) # 80% of the total number of tickets, from 4,596,193 tickets to 3,709,040.
+  nrow(as.data.frame(unique(Tickets$VESSEL_NUM))) 
   rm(FF_Vessels)
   
 #----------------------
