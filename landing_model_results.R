@@ -654,7 +654,7 @@ landing_model_Open_PSDN_NANC_Interaction_Closure <-
                     (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + 
                                            PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + factor(PSDN.Total.Closure) | cluster))
 
-#### Exclude PSDN: Open
+#### Exclude "PSDN: Open"
 landing_model_PSDN_NANC_Interaction_Closure <- bf(log(MSQD_Landings) ~ 
                      1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) +
                                            PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + (1 | port_ID) +
@@ -679,7 +679,8 @@ landing_model_PSDN_NANC_Interaction_Closure <- bf(log(MSQD_Landings) ~
 #       file = "Estimations/fit_qMSQD_endog_PSDN_NANC_Interaction_Closure")
 
 
-#### Exclude direct effects
+
+#### Exclude direct effects and "PSDN: Open"
 
 landing_model_Interaction_Closure <- bf(log(MSQD_Landings) ~ 
                                        1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + factor(PSDN.Total.Closure) +
