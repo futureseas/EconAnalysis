@@ -111,6 +111,9 @@ Tickets<-as.data.frame(Tickets)
 
 rm(FF_Vessels, FTID_Value)
 
+nrow(as.data.frame(unique(Tickets$FTID))) 
+nrow(as.data.frame(unique(Tickets$VESSEL_NUM))) 
+
 
 ######################
 ### Create metrics ###

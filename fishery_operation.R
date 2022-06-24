@@ -81,10 +81,10 @@ PacFIN.month.CPS <- PacFIN.month %>%
 
 # Calculate landings by port and year
 landings.by.port.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ 
-                                     PACFIN_SPECIES_CODE + PORT_AREA_CODE + LANDING_YEAR + AGENCY_CODE, FUN=sumfun, data=PacFIN.month)
-landings.by.port.year <- landings.by.port.year %>% filter(LANDING_YEAR <2015)
+                                     PACFIN_SPECIES_CODE + PORT_AREA_CODE + LANDING_YEAR + AGENCY_CODE, FUN = sumfun, data=PacFIN.month)
+landings.by.port.year.PRE <- landings.by.port.year %>% filter(LANDING_YEAR <2015)
 landings.by.port.avg.year <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE + PORT_AREA_CODE 
-                                       + AGENCY_CODE, FUN=meanfun, data=landings.by.port.year) %>%
+                                       + AGENCY_CODE, FUN=meanfun, data=landings.by.port.year.PRE) %>%
   filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA" |
            PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS") %>%
   mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, 
@@ -102,22 +102,24 @@ landings.by.port.avg.year <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPEC
 states_names <- as_labeller(c(`C` = "California", `O` = "Oregon",`W` = "Washington"))
 
 
-ggplot(landings.by.port.avg.year, aes(fill=PACFIN_SPECIES_CODE, 
+gg1 <- ggplot(landings.by.port.avg.year, aes(fill=PACFIN_SPECIES_CODE, 
                                       y=LANDED_WEIGHT_MTONS.sum.sum.mean, x=PORT_AREA_CODE)) +
   geom_bar(position="dodge", stat="identity") + 
   facet_grid(~ AGENCY_CODE, scale="free", space="free_x", labeller = states_names) + 
   theme(strip.text.x = element_text(size = 7)) +
   theme(legend.position="bottom") + 
+  theme(plot.title = element_text(size=9, face="bold.italic")) +
+  theme(plot.title = element_text(size=9, face="bold.italic")) +
   scale_fill_viridis(discrete = T, labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
                                             "PSDN" = "Pacific Sardine", "OMCK" = "Mackerels",
                                             "OTHER" = "Non-CPS")) +
-  theme(axis.text.x = element_text(angle=90, hjust=0.95, vjust=0.45)) + xlab("Ports") + 
-  ylab("Landings (tons)") + guides(fill=guide_legend(title="Species: "))  + 
-  scale_x_discrete(labels=c(
-    "LAA" = "Los Angeles", "SBA" = "Santa Barbara", "MNA" = "Monterrey", 
-    "SFA" = "San Francisco", "ERA" = "Eureka", "CLO" = "Columbia\nRiver (OR)", 
-    "CLW" = "Columbia\nRiver (WA)", "CWA" = "Washington\nCoastal Ports", "NPS" = "North Puget\nSound")) +
-  scale_color_brewer(palette="Set2")
+  theme(axis.text.x = element_text(angle=90, hjust=0.95, vjust=0.45)) +
+  xlab("") + 
+  theme(axis.title = element_text(size = 9)) +
+  ylab("Landings (tons)") + theme(legend.position="none") +
+  guides(fill=guide_legend(title="Species: "))  + 
+  scale_x_discrete(labels=NULL) +
+  scale_color_brewer(palette="Set2") + ggtitle("(a) 2000-2014")
 
 # "SP" = "San\nPedro", "HNM" = "Hueneme", 
 # "MNT" = "Monterrey", "MOS" = "Moss\nLanding", 
@@ -126,6 +128,40 @@ ggplot(landings.by.port.avg.year, aes(fill=PACFIN_SPECIES_CODE,
 # "VEN" = "Ventura", "WIN" = "Winchester\nBay",
 # "WLM" = "Willmington", "WPT" = "Westport", "NEW" = "Newport", 
 # "ERK" = "Eureka"
+# Calculate landings by port and year
+
+
+landings.by.port.year.POST <- landings.by.port.year %>% filter(LANDING_YEAR >=2015)
+landings.by.port.avg.year <- summaryBy(LANDED_WEIGHT_MTONS.sum.sum ~ PACFIN_SPECIES_CODE + PORT_AREA_CODE 
+                                       + AGENCY_CODE, FUN=meanfun, data=landings.by.port.year.POST) %>%
+  filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA" |
+           PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS") %>%
+  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, 
+                                      "LAA", "SBA", "MNA", "CLO", "CLW", "CWA", "NPS"))
+
+gg2 <- ggplot(landings.by.port.avg.year, aes(fill=PACFIN_SPECIES_CODE, 
+                                             y=LANDED_WEIGHT_MTONS.sum.sum.mean, x=PORT_AREA_CODE)) +
+  geom_bar(position="dodge", stat="identity") + 
+  facet_grid(~ AGENCY_CODE, scale="free", space="free_x", labeller = states_names) + 
+  theme(strip.text.x = element_text(size = 7)) +
+  theme(legend.position="bottom") + 
+  theme(axis.title = element_text(size = 9)) +
+  theme(plot.title = element_text(size=9, face="bold.italic")) +
+  scale_fill_viridis(discrete = T, labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
+                                            "PSDN" = "Pacific Sardine", "OMCK" = "Mackerels",
+                                            "OTHER" = "Non-CPS")) +
+  xlab("") + 
+  ylab("Landings (tons)") + guides(fill=guide_legend(title="Species: "))  + 
+  scale_x_discrete(labels=c(
+    "LAA" = "Los Angeles", "SBA" = "Santa Barbara", "MNA" = "Monterrey", 
+    "SFA" = "San Francisco", "ERA" = "Eureka", "CLO" = "Columbia\nRiver (OR)", 
+    "CLW" = "Columbia\nRiver (WA)", "CWA" = "Washington\nCoastal Ports", "NPS" = "North Puget\nSound")) +
+  scale_color_brewer(palette="Set2") + ggtitle("(b) 2015-2020") +   
+  scale_y_continuous(limits = c(0, 33750), breaks = seq(0, 33750, 10000))
+
+gg1 / gg2
+
+
 
 rm(landings.by.port.avg.year, landings.by.port.year, states_names)
 
