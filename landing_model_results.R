@@ -677,6 +677,7 @@ landing_model_PSDN_NANC_Closure <-
       (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) | cluster))
 
 
+###################################################################################################################################
 #### Port RE slopes (best models)
 price_model_portID <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 + Price.Fishmeal.AFI_z | port_ID))
 landing_model_PSDN_NANC_Interaction_Closure_portID <- 
@@ -684,9 +685,9 @@ landing_model_PSDN_NANC_Interaction_Closure_portID <-
         1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) +
             PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z +
        (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) +
-            PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster)) + 
+            PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster) + 
        (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) +
-            PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | port_ID)
+            PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | port_ID))
 
 fit_qMSQD_endog_PSDN_NANC_Interaction_Closure_portID <-
   brm(data = dataset_msqd_landing,
@@ -706,15 +707,33 @@ fit_qMSQD_endog_PSDN_NANC_Interaction_Closure_portID <-
 
 
 ### Exclude direct SDM effects and "PSDN: Open"
-landing_model_Interaction_Closure <- bf(log(MSQD_Landings) ~ 
-                                          1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + factor(PSDN.Total.Closure) +
-                                          PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + (1 | port_ID) +
-                                          (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + factor(PSDN.Total.Closure) +
-                                             PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster))
+landing_model_Interaction_Closure_portID <- 
+  bf(log(MSQD_Landings) ~ 
+       1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + factor(PSDN.Total.Closure) +
+           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + 
+      (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + factor(PSDN.Total.Closure) +
+           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster) + 
+      (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + factor(PSDN.Total.Closure) +
+           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | port_ID))
 
+fit_qMSQD_endog_Interaction_Closure_portID <-
+  brm(data = dataset_msqd_landing,
+      family = gaussian,
+      price_model_portID + landing_model_Interaction_Closure_portID + set_rescor(TRUE),
+      prior = c(# E model
+        prior(normal(0, 1), class = b, resp = MSQDPricez),
+        prior(exponential(1), class = sigma, resp = MSQDPricez),
+        # W model
+        prior(normal(0, 1), class = b, resp = logMSQDLandings),
+        prior(exponential(1), class = sigma, resp = logMSQDLandings),
+        # rho
+        prior(lkj(2), class = rescor)),
+      iter = 2000, warmup = 1000, chains = 4, cores = 4,
+      control = list(max_treedepth = 15, adapt_delta = 0.99),
+      file = "Estimations/fit_qMSQD_endog_Interaction_Closure_portID")
 
-
-#### Use original SDM for squid
+##################################################################################################################################
+#### Use original SDM for squid (best of the best model)
 
 
 
@@ -730,7 +749,7 @@ fit_qMSQD_endog_Open_PSDN_NANC_Interaction_NS      <- readRDS(here::here("Estima
 fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure.RDS"))
 fit_qMSQD_endog_PSDN_NANC_Interaction_Closure      <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_Interaction_Closure.RDS"))
 fit_qMSQD_endog_Interaction_Closure                <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Interaction_Closure.RDS"))
-# fit_qMSQD_endog_PSDN_NANC_Closure                  <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_Closure.RDS"))
+fit_qMSQD_endog_PSDN_NANC_Closure                  <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_Closure.RDS"))
 
 
 ###############################################################################################
