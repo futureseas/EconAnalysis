@@ -537,15 +537,47 @@ area_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara",
                             `MNA` = "Monterey", `CLO` = "Columbia River (OR)", 
                             `CWA` = "Washington Coastal Ports"))
 
+sdm.by.species$Date <- zoo::as.yearmon(paste(sdm.by.species$LANDING_YEAR, sdm.by.species$LANDING_MONTH, sep='-'))
+
+
 # Create sardine plot
 sdm.by.species.PSDN <- sdm.by.species %>% 
   filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "CLO") %>% 
   mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "MNA", "CLO")) %>%
-  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
+  group_by(Date, PORT_AREA_CODE) %>% 
   summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
             Landings_PSDN = sum(Landings_PSDN, na.rm = TRUE),
             n_vessel_PSDN = mean(n_vessel_PSDN, na.rm = TRUE)) %>% 
   mutate(RATIO = (Landings_PSDN / n_vessel_PSDN))
+
+
+# Create anchovy plot
+sdm.by.species.NANC <- sdm.by.species %>% 
+  filter(PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
+  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "SBA", "MNA", "CWA")) %>%
+  group_by(Date, PORT_AREA_CODE) %>% 
+  summarize(NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
+            Landings_NANC = sum(Landings_NANC, na.rm = TRUE),
+            n_vessel_NANC = mean(n_vessel_NANC, na.rm = TRUE)) %>% 
+  mutate(RATIO = (Landings_NANC / n_vessel_NANC))
+
+
+# Plot all squid SDMs outputs
+
+sdm.by.species.MSQD <- sdm.by.species %>% 
+  filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
+  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "SBA", "MNA")) %>%
+  group_by(Date, PORT_AREA_CODE) %>% 
+  summarize(MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm = TRUE),
+            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
+            MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
+            MSQD_SPAWN_SDM_90_v2 = mean(MSQD_SPAWN_SDM_90_v2, na.rm = TRUE),
+            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
+            MSQD_recruitment = mean(MSQD_recruitment, na.rm=TRUE),
+            Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE),
+            n_vessel_MSQD = mean(n_vessel_PSDN, na.rm = TRUE)) %>% 
+  mutate(RATIO = (Landings_MSQD / n_vessel_MSQD))
+
 
 
 # coeff1 <- 60000
@@ -560,10 +592,9 @@ sdm.by.species.PSDN <- sdm.by.species %>%
 #         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
 #   ggtitle("(b) Pacific sardine (60 km radius)")
 
-coeff1_2 <- 1000
 g1_2 <- ggplot(sdm.by.species.PSDN) + 
-  geom_line(mapping = aes(x = LANDING_YEAR, y = RATIO), size = 0.5, color = "grey") +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = PSDN_SDM_60*coeff1_2), 
+  geom_line(mapping = aes(x = Date, y = RATIO), size = 0.5, color = "grey") +
+  geom_line(mapping = aes(x = Date, y = PSDN_SDM_60*coeff1_2), 
             size = 0.5, color = "blue", linetype = "dashed") + 
   facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "MNA", "CLO")), labeller = area_names,  ncol = 4) + 
   scale_x_continuous(name = element_blank(), labels = NULL) +
@@ -572,16 +603,6 @@ g1_2 <- ggplot(sdm.by.species.PSDN) +
         axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
   ggtitle("(b) Pacific sardine (60 km radius)")
 
-
-# Create anchovy plot
-sdm.by.species.NANC <- sdm.by.species %>% 
-  filter(PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
-  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "SBA", "MNA", "CWA")) %>%
-  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
-            Landings_NANC = sum(Landings_NANC, na.rm = TRUE),
-            n_vessel_NANC = mean(n_vessel_NANC, na.rm = TRUE)) %>% 
-  mutate(RATIO = (Landings_NANC / n_vessel_NANC))
 
 # coeff2 <- 12000
 # g2 <-  ggplot(sdm.by.species.NANC) + 
@@ -598,40 +619,19 @@ sdm.by.species.NANC <- sdm.by.species %>%
 #   scale_color_manual(name = "Variable: ", 
 #                      values = c("Landings" = "grey", "Probability of presence" = "blue"))
 
-
-coeff2_2 <- 500
 g2_2 <-  ggplot(sdm.by.species.NANC) + 
-  geom_line(mapping = aes(x = LANDING_YEAR, y = RATIO, color = "Landings by active vessel"), size = 0.5) +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = NANC_SDM_20*coeff2_2, color = "Probability of presence"), 
+  geom_line(mapping = aes(x = Date, y = RATIO, color = "Landings by active vessel"), size = 0.5) +
+  geom_line(mapping = aes(x = Date, y = NANC_SDM_20*coeff2_2, color = "Probability of presence"), 
             size = 0.5, linetype = "dashed") + 
   facet_wrap(~ factor(PORT_AREA_CODE, levels=c("SBA", "MNA", "CWA")), labeller = area_names,  ncol = 4) + 
-  scale_x_continuous(name = "Year")  +
-  scale_y_continuous(name = "Landings by active vessel", sec.axis = sec_axis(~./coeff2, name = "P(presence)")) +
+  scale_x_continuous(name = "Month")  +
+  scale_y_continuous(name = "Landings by active vessel", sec.axis = sec_axis(~./coeff2_2, name = "P(presence)")) +
   theme(plot.title = element_text(size=9, face="bold.italic"), 
         axis.text = element_text(size = 7), axis.title = element_text(size = 8),
         legend.position="bottom") + 
   ggtitle("(c) Northern anchovy (20 km radius)") +  
   scale_color_manual(name = "Variable: ", 
                      values = c("Landings by active vessel" = "grey", "Probability of presence" = "blue"))
-
-
-# Plot all squid SDMs outputs
-
-sdm.by.species$Date <- zoo::as.yearmon(paste(sdm.by.species$LANDING_YEAR, sdm.by.species$LANDING_MONTH, sep='-'))
-
-sdm.by.species.MSQD <- sdm.by.species %>% 
-  filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
-  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "SBA", "MNA")) %>%
-  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm = TRUE),
-            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
-            MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
-            MSQD_SPAWN_SDM_90_v2 = mean(MSQD_SPAWN_SDM_90_v2, na.rm = TRUE),
-            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
-            MSQD_recruitment = mean(MSQD_recruitment, na.rm=TRUE),
-            Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE),
-            n_vessel_MSQD = mean(n_vessel_PSDN, na.rm = TRUE)) %>% 
-  mutate(RATIO = (Landings_MSQD / n_vessel_MSQD))
 
 
 # coeff3 <- 500000
@@ -718,10 +718,10 @@ sdm.by.species.MSQD <- sdm.by.species %>%
 #         axis.text = element_text(size = 7), axis.title = element_text(size = 8), legend.position="bottom") + 
 #   ggtitle("(a) Market squid (spawning aggregation model; 90 km radius; August - October)") 
 # 
-coeff4_2 <- 10000
+
 g4_2 <- ggplot(sdm.by.species.MSQD) +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = RATIO, color = "Landings by active vessel"), size = 0.5) +
-  geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SPAWN_SDM_90*coeff4_2, color = "SDM output"),
+  geom_line(mapping = aes(x = Date, y = RATIO, color = "Landings by active vessel"), size = 0.5) +
+  geom_line(mapping = aes(x = Date, y = MSQD_SPAWN_SDM_90*coeff4_2, color = "SDM output"),
             size = 0.5, linetype = "dashed") +
   facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 3) +
   scale_x_continuous(name = "")  +
@@ -731,6 +731,11 @@ g4_2 <- ggplot(sdm.by.species.MSQD) +
   ggtitle("(a) Market squid (spawning aggregation model; 90 km radius)") +
   scale_color_manual(name = "Variable: ",
                      values = c("Landings by active vessel" = "grey", "SDM output" = "blue"))
+
+
+coeff4_2 <- 3000
+coeff1_2 <- 150
+coeff2_2 <- 150
 
 g4_2 / g1_2 / g2_2
 
