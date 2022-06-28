@@ -39,9 +39,18 @@ nvessel.year <- PacFIN.month %>% dplyr::filter(LANDED_WEIGHT_MTONS.sum > 0) %>%
   mutate(n_vessel = 1) %>% group_by(LANDING_YEAR, group_all) %>%
   summarise(n_vessel = sum(n_vessel))
 
+cond_label <- as_labeller(c("1" = "Southern CCS small-scale\nsquid-specialists",
+                            "2" = "Southern CCS small-scale\nCPS-opportunists",
+                            "3" = "PNW sardine\nopportunists",
+                            "4" = "Southern CCS industrial\nsquid-specialists",
+                            "5" = "Roving industrial\nsardine-squid switchers",
+                            "6" = "PNW sardine\nspecialists",
+                            "7" = "Southern CCS\nforage fish diverse",
+                            "8" = "PNW albacore-crab\nswitchers"))
+
 ggplot(nvessel.year, aes(x=LANDING_YEAR, y = n_vessel)) + 
   geom_line(color = "steelblue", size = 1) + 
-  facet_wrap(~ group_all, ncol = 4) + geom_point(color = "steelblue") + 
+  facet_wrap(~ group_all, labeller = cond_label, ncol = 4) + geom_point(color = "steelblue") + 
   scale_y_continuous(name = "Number of active vessels") +
   scale_x_continuous(name = "Year") 
 
