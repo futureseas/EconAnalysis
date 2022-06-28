@@ -621,188 +621,76 @@ library(httr)
 
 #### Base model 
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
-landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z  + (1 | port_ID) + 
-                                        (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z | cluster))
+landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + 
+                                        (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z | cluster) + 
+                                        (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z | port_ID))
 
-#### Add whether PSDN is open
-landing_model_Open <- bf(log(MSQD_Landings) ~ 
-                           1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + (1 | port_ID) +
-                          (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open | cluster))
+fit_qMSQD_FINAL_endog <-
+  brm(data = dataset_msqd_landing,
+      family = gaussian,
+      price_model + landing_model + set_rescor(TRUE),
+      prior = c(# E model
+        prior(normal(0, 1), class = b, resp = MSQDPricez),
+        prior(exponential(1), class = sigma, resp = MSQDPricez),
+        # W model
+        prior(normal(0, 1), class = b, resp = logMSQDLandings),
+        prior(exponential(1), class = sigma, resp = logMSQDLandings),
+        # rho
+        prior(lkj(2), class = rescor)),
+      iter = 2000, warmup = 1000, chains = 4, cores = 4,
+      control = list(max_treedepth = 15, adapt_delta = 0.99),
+      file = "Estimations/fit_qMSQD_FINAL_endog")
 
-#### Add sardine SDM
-landing_model_Open_PSDN <- bf(log(MSQD_Landings) ~ 
-                                1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + (1 | port_ID) +
-                               (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open | cluster))
 
-#### Add anchovy SDM
-landing_model_Open_PSDN_NANC<- bf(log(MSQD_Landings) ~ 
-                     1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + (1 | port_ID) +
-                    (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z | cluster))
+#### Add PSDN interaction effects
+landing_model_Interaction <- bf(log(MSQD_Landings) ~ 
+            1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z +
+           (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z | cluster) + 
+           (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z | port_ID))
 
-#### Add interaction effects
-landing_model_Open_PSDN_NANC_Interaction <- bf(log(MSQD_Landings) ~ 
-                     1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z +
-                                           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + (1 | port_ID) +
-                    (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + 
-                                           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster))
+
+#### Add NANC interaction effects
+
+# + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z 
 
 #### Add PSDN closure
-landing_model_Open_PSDN_NANC_Interaction_Closure <- 
-  bf(log(MSQD_Landings) ~ 
-                     1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z +
-                                           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + factor(PSDN.Total.Closure) + (1 | port_ID) +
-                    (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN.Open + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + 
-                                           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + factor(PSDN.Total.Closure) | cluster))
 
-#### Exclude "PSDN: Open"
-landing_model_PSDN_NANC_Interaction_Closure <- bf(log(MSQD_Landings) ~ 
-                     1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) +
-                                           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + (1 | port_ID) +
-                    (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) +
-                                           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster))
+# + factor(PSDN.Total.Closure) 
 
-
-#### Exclude direct SDM effects and "PSDN: Open"
-landing_model_Interaction_Closure <- bf(log(MSQD_Landings) ~ 
-                                       1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + factor(PSDN.Total.Closure) +
-                                        PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + (1 | port_ID) +
-                                      (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + factor(PSDN.Total.Closure) +
-                                        PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster))
-
-
-#### Include closure and exclude PSDN.Open in model with only direct SDM effects
-landing_model_PSDN_NANC_Closure <- 
-  bf(log(MSQD_Landings) ~ 
-       1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) + (1 | port_ID) +
-      (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) | cluster))
-
-
-###################################################################################################################################
-#### Port RE slopes (best models)
-price_model_portID <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 + Price.Fishmeal.AFI_z | port_ID))
-landing_model_PSDN_NANC_Interaction_Closure_portID <- 
-  bf(log(MSQD_Landings) ~ 
-        1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) +
-            PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z +
-       (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) +
-            PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster) + 
-       (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + factor(PSDN.Total.Closure) +
-            PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | port_ID))
-
-fit_qMSQD_endog_PSDN_NANC_Interaction_Closure_portID <-
-  brm(data = dataset_msqd_landing,
-      family = gaussian,
-      price_model_portID + landing_model_PSDN_NANC_Interaction_Closure_portID + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
-      iter = 2000, warmup = 1000, chains = 4, cores = 4,
-      control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qMSQD_endog_PSDN_NANC_Interaction_Closure_portID")
-
-
-### Exclude direct SDM effects and "PSDN: Open"
-landing_model_Interaction_Closure_portID <- 
-  bf(log(MSQD_Landings) ~ 
-       1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + factor(PSDN.Total.Closure) +
-           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + 
-      (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + factor(PSDN.Total.Closure) +
-           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster) + 
-      (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + factor(PSDN.Total.Closure) +
-           PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | port_ID))
-
-fit_qMSQD_endog_Interaction_Closure_portID <-
-  brm(data = dataset_msqd_landing,
-      family = gaussian,
-      price_model_portID + landing_model_Interaction_Closure_portID + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
-      iter = 2000, warmup = 1000, chains = 4, cores = 4,
-      control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qMSQD_endog_Interaction_Closure_portID")
-
-##################################################################################################################################
-#### Use original SDM for squid (best of the best model)
+#### Exclude variables that are not important
 
 
 
 
 ###############################################################################################
 ## Read estimated models
-fit_qMSQD_endog                                    <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
-fit_qMSQD_endog_Open                               <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open.RDS"))
-fit_qMSQD_endog_Open_PSDN                          <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open_PSDN.RDS"))
-fit_qMSQD_endog_Open_PSDN_NANC                     <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open_PSDN_NANC.RDS"))
-fit_qMSQD_endog_Open_PSDN_NANC_Interaction         <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open_PSDN_NANC_Interaction.RDS"))
-fit_qMSQD_endog_Open_PSDN_NANC_Interaction_NS      <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open_PSDN_NANC_Interaction_NS.RDS"))
-fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure.RDS"))
-fit_qMSQD_endog_PSDN_NANC_Interaction_Closure      <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_Interaction_Closure.RDS"))
-fit_qMSQD_endog_Interaction_Closure                <- readRDS(here::here("Estimations", "fit_qMSQD_endog_Interaction_Closure.RDS"))
-fit_qMSQD_endog_PSDN_NANC_Closure                  <- readRDS(here::here("Estimations", "fit_qMSQD_endog_PSDN_NANC_Closure.RDS"))
+fit_qMSQD_FINAL_endog <- readRDS(here::here("Estimations", "fit_qMSQD_endog.RDS"))
 
 
 ###############################################################################################
 ## LOO comparision between models 
 
-# fit_qMSQD_endog                                    <- add_criterion(fit_qMSQD_endog                                   , "loo", overwrite = TRUE, moment_match=TRUE)
-# fit_qMSQD_endog_Open                               <- add_criterion(fit_qMSQD_endog_Open                              , "loo", overwrite = TRUE, moment_match=TRUE)
-# fit_qMSQD_endog_Open_PSDN                          <- add_criterion(fit_qMSQD_endog_Open_PSDN                         , "loo", overwrite = TRUE, moment_match=TRUE)
-# fit_qMSQD_endog_Open_PSDN_NANC                     <- add_criterion(fit_qMSQD_endog_Open_PSDN_NANC                    , "loo", overwrite = TRUE, moment_match=TRUE)
-# fit_qMSQD_endog_Open_PSDN_NANC_Interaction         <- add_criterion(fit_qMSQD_endog_Open_PSDN_NANC_Interaction        , "loo", overwrite = TRUE, moment_match=TRUE)
-# fit_qMSQD_endog_Open_PSDN_NANC_Interaction_NS      <- add_criterion(fit_qMSQD_endog_Open_PSDN_NANC_Interaction_NS     , "loo", overwrite = TRUE, moment_match=TRUE)
-# fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure <- add_criterion(fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure, "loo", overwrite = TRUE, moment_match=TRUE)
-# fit_qMSQD_endog_PSDN_NANC_Interaction_Closure      <- add_criterion(fit_qMSQD_endog_PSDN_NANC_Interaction_Closure, "loo", overwrite = TRUE)
-# fit_qMSQD_endog_Interaction_Closure                <- add_criterion(fit_qMSQD_endog_Interaction_Closure, "loo", overwrite = TRUE)
-# fit_qMSQD_endog_PSDN_NANC_Closure                  <- add_criterion(fit_qMSQD_endog_PSDN_NANC_Closure, "loo", overwrite = TRUE)
+
+# fit_qMSQD_FINAL_endog <- add_criterion(fit_qMSQD_FINAL_endog, "loo", overwrite = TRUE, moment_match=TRUE)
+# LOO(fit_qMSQD_FINAL_endog)                              
 
 
-# LOO(fit_qMSQD_endog)                              
-# LOO(fit_qMSQD_endog_Open)                         
-# LOO(fit_qMSQD_endog_Open_PSDN)                    
-# LOO(fit_qMSQD_endog_Open_PSDN_NANC)               
-# LOO(fit_qMSQD_endog_Open_PSDN_NANC_Interaction)   
-# LOO(fit_qMSQD_endog_Open_PSDN_NANC_Interaction_NS)
-# LOO(fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure) 
-# LOO(fit_qMSQD_endog_PSDN_NANC_Interaction_Closure) 
-# LOO(fit_qMSQD_endog_Interaction_Closure)
-# LOO(fit_qMSQD_endog_PSDN_NANC_Closure)
 
-loo_compare(fit_qMSQD_endog                                   ,
-            fit_qMSQD_endog_Open                              ,
-            fit_qMSQD_endog_Open_PSDN                         ,
-            fit_qMSQD_endog_Open_PSDN_NANC                    ,
-            fit_qMSQD_endog_Open_PSDN_NANC_Interaction        ,
-            fit_qMSQD_endog_Open_PSDN_NANC_Interaction_NS     ,
-            fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure,
-            fit_qMSQD_endog_PSDN_NANC_Interaction_Closure     ,
-            fit_qMSQD_endog_Interaction_Closure,
-            fit_qMSQD_endog_PSDN_NANC_Closure,
-            criterion = "loo")
+LOO_compare <- 
+  as.data.frame(
+    loo_compare(
+      fit_qMSQD_FINAL_endog,
+      criterion = "loo"))
 
+LOO_compare <- tibble::rownames_to_column(LOO_compare, "model")
+
+gs4_create("LOO", sheets = LOO_compare)
 
 ###############################################
 ### Analyze convergence ###
 
-# launch_shinystan(fit_qMSQD_endog)
-# launch_shinystan(fit_qMSQD_endog_Open)
-# launch_shinystan(fit_qMSQD_endog_Open_PSDN)
-# launch_shinystan(fit_qMSQD_endog_Open_PSDN_NANC)
-# launch_shinystan(fit_qMSQD_endog_Open_PSDN_NANC_Interaction)
-# launch_shinystan(fit_qMSQD_endog_Open_PSDN_NANC_Interaction_Closure)
-# launch_shinystan(fit_qMSQD_endog_PSDN_NANC_Interaction_Closure)
-# launch_shinystan(fit_qMSQD_endog_Interaction_Closure)
-# launch_shinystan(fit_qMSQD_endog_PSDN_NANC_Closure)
+# launch_shinystan(fit_qMSQD_FINAL_endog)
+
 
 ###############################################
 ### Create result tables ###
@@ -810,13 +698,13 @@ loo_compare(fit_qMSQD_endog                                   ,
 library(XML)
 
 tab_model <-
-  sjPlot::tab_model(fit_qMSQD_endog_PSDN_NANC_Closure)
+  sjPlot::tab_model(fit_qMSQD_endog_Interaction_Closure_portID)
 
 df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
 colnames(df) <- df[1,]
 df <- df[-1,]
 
-gs4_create("Squid_landings_Model_8", sheets = df)
+gs4_create("Squid_landings_Model_10", sheets = df)
 
 
 # ### Population parameters ###
@@ -1124,7 +1012,6 @@ ggplot(meltdf, aes(x=Date, y = value, colour = Variable)) +
   facet_wrap(~group_all, labeller = cond_label, scales="free_y") +
   scale_x_continuous(name = "Landing Month")  +
   scale_y_continuous(name = "ln(Landings)")
-
 
 
 # d2 %>%
