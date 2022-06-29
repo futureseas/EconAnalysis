@@ -625,24 +625,8 @@ landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z 
                                         (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z | cluster) + 
                                         (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z | port_ID))
 
-# fit_qMSQD_FINAL_endog <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model + landing_model + set_rescor(TRUE),
-#       prior = c(# E model
-#         prior(normal(0, 1), class = b, resp = MSQDPricez),
-#         prior(exponential(1), class = sigma, resp = MSQDPricez),
-#         # W model
-#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
-#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
-#         # rho
-#         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#       control = list(max_treedepth = 15, adapt_delta = 0.99),
-#       file = "Estimations/fit_qMSQD_FINAL_endog")
-
+# fit_qMSQD_FINAL_endog <- add_criterion(fit_qMSQD_FINAL_endog, "loo", overwrite = TRUE)
 fit_qMSQD_FINAL_endog <- readRDS(here::here("Estimations", "fit_qMSQD_FINAL_endog.RDS"))
-fit_qMSQD_FINAL_endog <- add_criterion(fit_qMSQD_FINAL_endog, "loo", overwrite = TRUE)
 LOO(fit_qMSQD_FINAL_endog)
 
 #### Add PSDN interaction effects
@@ -651,38 +635,52 @@ landing_model_PSDNInteraction <- bf(log(MSQD_Landings) ~
            (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z | cluster) + 
            (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z | port_ID))
 
-# fit_qMSQD_FINAL_endog_PSDNInteraction <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model + landing_model_PSDNInteraction + set_rescor(TRUE),
-#       prior = c(# E model
-#         prior(normal(0, 1), class = b, resp = MSQDPricez),
-#         prior(exponential(1), class = sigma, resp = MSQDPricez),
-#         # W model
-#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
-#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
-#         # rho
-#         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#       control = list(max_treedepth = 15, adapt_delta = 0.99),
-#       file = "Estimations/fit_qMSQD_FINAL_endog_PSDNInteraction")
-
+# fit_qMSQD_FINAL_endog_PSDNInteraction <- add_criterion(fit_qMSQD_FINAL_endog_PSDNInteraction, "loo", overwrite = TRUE)
 fit_qMSQD_FINAL_endog_PSDNInteraction <- readRDS(here::here("Estimations", "fit_qMSQD_FINAL_endog_PSDNInteraction.RDS"))
-fit_qMSQD_FINAL_endog_PSDNInteraction <- add_criterion(fit_qMSQD_FINAL_endog_PSDNInteraction, "loo", overwrite = TRUE)
 LOO(fit_qMSQD_FINAL_endog_PSDNInteraction)
 
 ### Check if better to include PSDN interaction or not...
 loo_compare(
   fit_qMSQD_FINAL_endog,
   fit_qMSQD_FINAL_endog_PSDNInteraction,
-  criterion = "loo")
+  criterion = "loo") 
+
+# -30.6 / 9.7 > 3
 
 
 #### Add NANC interaction effects
 
-# + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z 
+landing_model_PSDNInteraction_NANCInteraction <- bf(log(MSQD_Landings) ~ 
+    1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z +
+   (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | cluster) + 
+   (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | port_ID))
+
+fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction <-
+  brm(data = dataset_msqd_landing,
+      family = gaussian,
+      price_model + landing_model_PSDNInteraction_NANCInteraction + set_rescor(TRUE),
+      prior = c(# E model
+        prior(normal(0, 1), class = b, resp = MSQDPricez),
+        prior(exponential(1), class = sigma, resp = MSQDPricez),
+        # W model
+        prior(normal(0, 1), class = b, resp = logMSQDLandings),
+        prior(exponential(1), class = sigma, resp = logMSQDLandings),
+        # rho
+        prior(lkj(2), class = rescor)),
+      iter = 2000, warmup = 1000, chains = 4, cores = 4,
+      control = list(max_treedepth = 15, adapt_delta = 0.99),
+      file = "Estimations/fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction")
+
 
 #### Add PSDN closure
+
+
+loo_compare(
+  fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction,
+  fit_qMSQD_FINAL_endog_PSDNInteraction,
+  criterion = "loo") 
+
+# -30.6 / 9.7 > 3
 
 # + factor(PSDN.Total.Closure) 
 
@@ -709,7 +707,8 @@ loo_compare(
 ###############################################
 ### Analyze convergence ###
 
-# launch_shinystan(fit_qMSQD_FINAL_endog)
+#launch_shinystan(fit_qMSQD_FINAL_endog)
+launch_shinystan(fit_qMSQD_FINAL_endog_PSDNInteraction)
 
 
 ###############################################
@@ -718,13 +717,13 @@ loo_compare(
 library(XML)
 
 tab_model <-
-  sjPlot::tab_model(fit_qMSQD_endog_Interaction_Closure_portID)
+  sjPlot::tab_model(fit_qMSQD_FINAL_endog_PSDNInteraction)
 
 df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
 colnames(df) <- df[1,]
 df <- df[-1,]
 
-gs4_create("Squid_landings_Model_10", sheets = df)
+gs4_create("Squid_landings_FINAL_Model_2", sheets = df)
 
 
 # ### Population parameters ###
