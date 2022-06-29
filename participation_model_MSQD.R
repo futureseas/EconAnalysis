@@ -1,6 +1,6 @@
-#####################
-### Landing model ###
-#####################
+###################################
+### Participation model -- MSQD ###
+###################################
 
 #----------------------------
 # Setup #
@@ -40,6 +40,11 @@ PacFIN.month <- PacFIN.month %>% mutate(
                                ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
                                       ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
                                              ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
+
+
+<<< WORK FROM HERE >>>
+
+
 
 sum_mean_fun <- function(x, ...){
   c(mean=mean(x, na.rm=TRUE, ...), sum=sum(x, na.rm=TRUE, ...)) }
