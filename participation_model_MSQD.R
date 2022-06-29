@@ -42,10 +42,6 @@ PacFIN.month <- PacFIN.month %>% mutate(
                                              ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
 
 
-<<< WORK FROM HERE >>>
-
-
-
 sum_mean_fun <- function(x, ...){
   c(mean=mean(x, na.rm=TRUE, ...), sum=sum(x, na.rm=TRUE, ...)) }
 
@@ -59,7 +55,35 @@ PacFIN.month.aggregate <- doBy::summaryBy(
                    'AFI_EXVESSEL_REVENUE.sum.mean', 'Length.mean.sum'))
 rm(PacFIN.month)
 
+
 ########################################################
+
+### Create full database.
+### If a vessel land more than 5,000 USD in value on a port, then he have to decide during that port and month 
+### to participate or not in a fishery. Also, those are the landing that count in the model, not in random ports.
+
+vessel.participation <- PacFIN.month.aggregate  %>%
+  group_by(VESSEL_NUM, PORT_AREA_CODE, AGENCY_CODE, group_all) %>%
+  summarize(total_rev = sum(AFI_EXVESSEL_REVENUE.sum.sum)) %>% filter(total_rev >= 5000)
+
+year = expand.grid(PORT_AREA_CODE = unique(vessel.participation$PORT_AREA_CODE), LANDING_YEAR = 2000:2020)
+vessel.participation <- left_join(vessel.participation, year, by = "PORT_AREA_CODE")
+
+months = expand.grid(LANDING_YEAR = unique(vessel.participation$LANDING_YEAR), LANDING_MONTH = 1:12)
+vessel.participation <- left_join(vessel.participation, months, by = "LANDING_YEAR")
+
+PacFIN.month.left.join <- left_join(vessel.participation, PacFIN.month.aggregate,
+                                    by = c("LANDING_YEAR" ,"VESSEL_NUM", "PORT_AREA_CODE", 
+                                           "AGENCY_CODE", "group_all", "LANDING_MONTH"))
+
+# PacFIN.month.merge <- merge(vessel.participation, PacFIN.month.aggregate,
+#   by = c("LANDING_YEAR" ,"VESSEL_NUM", "PORT_AREA_CODE", 
+#   "AGENCY_CODE", "group_all", "LANDING_MONTH"), all.x = TRUE, all.y = TRUE) %>%
+#   dplyr::filter(is.na(total_rev))
+#   rm(PacFIN.month.merge)
+
+########################################################
+
 
 PacFIN.month.dataset <- PacFIN.month.aggregate %>% 
   dplyr::rename(AFI_PRICE_PER_MTON.mean = AFI_PRICE_PER_MTON.mean.mean) %>%
