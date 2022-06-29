@@ -41,7 +41,6 @@ PacFIN.month <- PacFIN.month %>% mutate(
                                       ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
                                              ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
 
-
 sum_mean_fun <- function(x, ...){
   c(mean=mean(x, na.rm=TRUE, ...), sum=sum(x, na.rm=TRUE, ...)) }
 
@@ -57,15 +56,15 @@ rm(PacFIN.month)
 
 
 ########################################################
+# Create full database
 
-### Create full database.
-### If a vessel land more than 5,000 USD in value on a port, then he have to decide during that port and month 
-### to participate or not in a fishery. Also, those are the landing that count in the model, not in random ports.
-
-vessel.participation <- PacFIN.month.aggregate  %>%
+### If a vessel land more than 5,000 USD in value on a port during 2000-2020, then he have to decide during that port and month 
+### to participate or not in a fishery.
+vessel.participation <- PacFIN.month.aggregate %>%
   group_by(VESSEL_NUM, PORT_AREA_CODE, AGENCY_CODE, group_all) %>%
   summarize(total_rev = sum(AFI_EXVESSEL_REVENUE.sum.sum)) %>% filter(total_rev >= 5000)
 
+### Create grid with all the years and month by port where a vessel participate
 year = expand.grid(PORT_AREA_CODE = unique(vessel.participation$PORT_AREA_CODE), LANDING_YEAR = 2000:2020)
 vessel.participation <- left_join(vessel.participation, year, by = "PORT_AREA_CODE")
 

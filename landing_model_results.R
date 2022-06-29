@@ -642,7 +642,7 @@ landing_model <- bf(log(MSQD_Landings) ~ 1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z 
 #       file = "Estimations/fit_qMSQD_FINAL_endog")
 
 fit_qMSQD_FINAL_endog <- readRDS(here::here("Estimations", "fit_qMSQD_FINAL_endog.RDS"))
-fit_qMSQD_FINAL_endog <- add_criterion(fit_qMSQD_FINAL_endog, "loo", overwrite = TRUE, moment_match=TRUE)
+fit_qMSQD_FINAL_endog <- add_criterion(fit_qMSQD_FINAL_endog, "loo", overwrite = TRUE)
 LOO(fit_qMSQD_FINAL_endog)
 
 #### Add PSDN interaction effects
@@ -668,7 +668,7 @@ landing_model_PSDNInteraction <- bf(log(MSQD_Landings) ~
 #       file = "Estimations/fit_qMSQD_FINAL_endog_PSDNInteraction")
 
 fit_qMSQD_FINAL_endog_PSDNInteraction <- readRDS(here::here("Estimations", "fit_qMSQD_FINAL_endog_PSDNInteraction.RDS"))
-fit_qMSQD_FINAL_endog_PSDNInteraction <- add_criterion(fit_qMSQD_FINAL_endog_PSDNInteraction, "loo", overwrite = TRUE, moment_match=TRUE)
+fit_qMSQD_FINAL_endog_PSDNInteraction <- add_criterion(fit_qMSQD_FINAL_endog_PSDNInteraction, "loo", overwrite = TRUE)
 LOO(fit_qMSQD_FINAL_endog_PSDNInteraction)
 
 ### Check if better to include PSDN interaction or not...
