@@ -671,9 +671,9 @@ fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction <-
       control = list(max_treedepth = 15, adapt_delta = 0.99),
       file = "Estimations/fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction")
 
-
-#### Add PSDN closure
-
+# fit_qMSQD_FINAL_endog_PSDNInteraction <- add_criterion(fit_qMSQD_FINAL_endog_PSDNInteraction, "loo", overwrite = TRUE)
+fit_qMSQD_FINAL_endog_PSDNInteraction <- readRDS(here::here("Estimations", "fit_qMSQD_FINAL_endog_PSDNInteraction.RDS"))
+LOO(fit_qMSQD_FINAL_endog_PSDNInteraction)
 
 loo_compare(
   fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction,
@@ -681,6 +681,9 @@ loo_compare(
   criterion = "loo") 
 
 # -30.6 / 9.7 > 3
+
+
+#### Add PSDN closure
 
 # + factor(PSDN.Total.Closure) 
 
