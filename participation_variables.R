@@ -1,6 +1,6 @@
-###################################
-### Participation model -- MSQD ###
-###################################
+########################################
+### Participation model -- variables ###
+########################################
 
 ###Load packages and set working directory
 library(data.table)
@@ -110,8 +110,8 @@ for (y in 2000:2020) {
 }
 
 ###Produce dissimilarity matrix and pairwise comparisons following methods above
-names(Permit_COG)[1]<-"VESSEL_NUM"
-Permit_COG<-Permit_COG[c(1,3,4,6,7)]
+names(Vessel_Geography)[1]<-"VESSEL_NUM"
+Vessel_Geography<-Vessel_Geography[c(1,3,4,6,7)]
 
 rm(Coords, Ticket_Coords, Ticket_Coords_filtered, List, Permit_ID, Permit_COG, Distance_A, Distance_B, 
    Point_Coord, Single_Permit, Single_COG, i, Permit, Value, Line_Coord_A, Line_Coord_B)
@@ -149,16 +149,24 @@ Boats <- cbind(Boats, Boats_diversity)
 Boats <- Boats[c(1,2,3,8)]
 Boats$diversity[which(!is.finite(Boats$diversity))] <- 0
 
-
 ###Calculate the percentage of revenue derived from CPS
-FF_Total<-aggregate(AFI_EXVESSEL_REVENUE~ VESSEL_NUM + , data=FF_Tickets, FUN=sum)
-Total<-aggregate(AFI_EXVESSEL_REVENUE~VESSEL_NUM, data=Tickets, FUN=sum)
-FFP<-merge(Total, FF_Total, by="VESSEL_NUM")
+FF_Total<-aggregate(AFI_EXVESSEL_REVENUE~ VESSEL_NUM + LANDING_MONTH + LANDING_YEAR, data=FF_Tickets, FUN=sum)
+Total<-aggregate(AFI_EXVESSEL_REVENUE~VESSEL_NUM + LANDING_MONTH + LANDING_YEAR, data=Tickets, FUN=sum)
+FFP<-merge(Total, FF_Total, by=c("VESSEL_NUM", "LANDING_MONTH", "LANDING_YEAR"))
 FFP$Percentage<-FFP$AFI_EXVESSEL_REVENUE.y/FFP$AFI_EXVESSEL_REVENUE.x
-Boats<-merge(FFP, Boats, by="VESSEL_NUM")
-Boats<-Boats[c(-2,-3)]
+Boats<-merge(FFP, Boats, by=c("VESSEL_NUM", "LANDING_MONTH", "LANDING_YEAR"))
+Boats<-Boats[c(-4,-5)]
 FF_Landings_and_Diversity<-Boats
 
-rm(Boats, FFP, FF_Total, Total)
+rm(Boats, FFP, FF_Total, Total, Boats_diversity)
+
+####################################
+# Combine metrics
+
+RAW<-merge(Vessel_Geography, Landings_Volume_Value, by=c("VESSEL_NUM", "LANDING_MONTH", "LANDING_YEAR"))
+RAW<-merge(RAW, FF_Landings_and_Diversity, by=c("VESSEL_NUM", "LANDING_MONTH", "LANDING_YEAR"))
+
+write.csv(RAW, "participation_variables.csv", row.names = FALSE)
+
 
 
