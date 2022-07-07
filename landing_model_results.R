@@ -731,12 +731,12 @@ fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM           <- readRDS(here::h
 
 ## Calculate average error
 set.seed(123)
-mean(predict(fit_qMSQD_FINAL_endog)$Est.Error.logMSQDLandings)
-mean(predict(fit_qMSQD_FINAL_endog_PSDNInteraction)$Est.Error.logMSQDLandings)
-mean(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction)$Est.Error.logMSQDLandings)
-mean(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction_Closure)$Est.Error.logMSQDLandings)
-mean(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_noSDM)$Est.Error.logMSQDLandings)
-mean(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM)$Est.Error.logMSQDLandings)
+mean(as.data.frame(predict(fit_qMSQD_FINAL_endog))$Est.Error.logMSQDLandings)
+mean(as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction))$Est.Error.logMSQDLandings)
+mean(as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction))$Est.Error.logMSQDLandings)
+mean(as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction_Closure))$Est.Error.logMSQDLandings)
+mean(as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_noSDM))$Est.Error.logMSQDLandings)
+mean(as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM))$Est.Error.logMSQDLandings)
 
 
 
