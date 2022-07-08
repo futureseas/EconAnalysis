@@ -551,10 +551,12 @@ dataset_msqd <- dataset %>%
 # dataset_msqd <- dummy_cols(dataset_msqd, select_columns = 'cluster')
 
 #### Convert variables to factor #### HERE I CHANGE THE ID
-dataset_msqd$port_ID      <- factor(dataset_msqd$PORT_AREA_CODE)
-dataset_msqd$cluster      <- factor(dataset_msqd$group_all)
+dataset_msqd$port_ID            <- factor(dataset_msqd$PORT_AREA_CODE)
+dataset_msqd$cluster            <- factor(dataset_msqd$group_all)
 class(dataset_msqd$port_ID)
 class(dataset_msqd$cluster)
+class(dataset_msqd$PSDN.Total.Closure)
+
 
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) %>%
@@ -687,25 +689,25 @@ landing_model_PSDNInteraction_noSDM <- bf(log(MSQD_Landings) ~
                                   (1 + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z | port_ID))
 
 landing_model_PSDNInteraction_Closure_noSDM <- bf(log(MSQD_Landings) ~ 
-                                   1 + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + factor(PSDN.Total.Closure) +
-                                  (1 + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + factor(PSDN.Total.Closure) | cluster) + 
-                                  (1 + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + factor(PSDN.Total.Closure) | port_ID))
+                                   1 + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN.Total.Closure +
+                                  (1 + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN.Total.Closure | cluster) + 
+                                  (1 + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + PSDN.Total.Closure | port_ID))
 
-# fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model + landing_model_PSDNInteraction_Closure_noSDM + set_rescor(TRUE),
-#       prior = c(# E model
-#         prior(normal(0, 1), class = b, resp = MSQDPricez),
-#         prior(exponential(1), class = sigma, resp = MSQDPricez),
-#         # W model
-#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
-#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
-#         # rho
-#         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#       control = list(max_treedepth = 15, adapt_delta = 0.99),
-#       file = "Estimations/fit_qMSQD_FINAL_endog_Closure_PSDNInteraction_noSDM")
+fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM <-
+  brm(data = dataset_msqd_landing,
+      family = gaussian,
+      price_model + landing_model_PSDNInteraction_Closure_noSDM + set_rescor(TRUE),
+      prior = c(# E model
+        prior(normal(0, 1), class = b, resp = MSQDPricez),
+        prior(exponential(1), class = sigma, resp = MSQDPricez),
+        # W model
+        prior(normal(0, 1), class = b, resp = logMSQDLandings),
+        prior(exponential(1), class = sigma, resp = logMSQDLandings),
+        # rho
+        prior(lkj(2), class = rescor)),
+      iter = 2000, warmup = 1000, chains = 4, cores = 4,
+      control = list(max_treedepth = 15, adapt_delta = 0.99),
+      file = "Estimations/fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM")
 
 # fit_qMSQD_FINAL_endog_PSDNInteraction_noSDM         <- add_criterion(fit_qMSQD_FINAL_endog_PSDNInteraction_noSDM, "loo", overwrite = TRUE)
 # fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM <- add_criterion(fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM, "loo", overwrite = TRUE)
@@ -729,16 +731,28 @@ fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM           <- readRDS(here::h
 ############################
 # Calculate estimation error
 
-## Calculate average error
-set.seed(123)
-mean(as.data.frame(predict(fit_qMSQD_FINAL_endog))$Est.Error.logMSQDLandings)
-mean(as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction))$Est.Error.logMSQDLandings)
-mean(as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction))$Est.Error.logMSQDLandings)
-mean(as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction_Closure))$Est.Error.logMSQDLandings)
-mean(as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_noSDM))$Est.Error.logMSQDLandings)
-mean(as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM))$Est.Error.logMSQDLandings)
-
-
+# ## Calculate average error
+# set.seed(123)
+# predict1 <- as.data.frame(predict(fit_qMSQD_FINAL_endog))
+# predict2 <- as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction))
+# predict3 <- as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction))
+# predict4 <- as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction_Closure))
+# predict5 <- as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_noSDM))
+# predict6 <- as.data.frame(predict(fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM))
+# 
+# prediction1 <- cbind(predict1, dataset_msqd_landing)
+# prediction2 <- cbind(predict2, dataset_msqd_landing)
+# prediction3 <- cbind(predict3, dataset_msqd_landing)
+# prediction4 <- cbind(predict4, dataset_msqd_landing)
+# prediction5 <- cbind(predict5, dataset_msqd_landing)
+# prediction6 <- cbind(predict6, dataset_msqd_landing)
+# 
+# sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+# sqrt(sum((prediction2$Estimate.logMSQDLandings - prediction2$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+# sqrt(sum((prediction3$Estimate.logMSQDLandings - prediction3$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+# sqrt(sum((prediction4$Estimate.logMSQDLandings - prediction4$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+# sqrt(sum((prediction5$Estimate.logMSQDLandings - prediction5$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+# sqrt(sum((prediction6$Estimate.logMSQDLandings - prediction6$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
 
 
 ##############################################################################################
@@ -854,71 +868,6 @@ round(res, 2)
 fit_qMSQD <- fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM ## Preferred model
 
 
-
-##########################################################################
-### Predictions ###
-
-#### Using the data estimation
-set.seed(123)
-prediction <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
-
-prediction_sel <- prediction[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-
-
-## Graph prediction
-meltdf <- prediction_sel %>% 
-  dplyr::select(Estimate.logMSQDLandings, ln_MSQD_Landings, Date, PORT_AREA_CODE, VESSEL_NUM) %>%
-  group_by(Date, PORT_AREA_CODE, VESSEL_NUM) %>% 
-  summarise(Est_landings = sum(Estimate.logMSQDLandings), Landings = sum(ln_MSQD_Landings)) %>%
-  group_by(Date, PORT_AREA_CODE) %>% 
-  summarise(Est_landings_mean = mean(Est_landings), Landings_mean = mean(Landings)) %>%
-  gather(key = Variable, value = value,
-         c("Est_landings_mean", "Landings_mean"))
-
-port_label <- as_labeller(c("LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara"))
-
-ggplot(meltdf, aes(x=Date, y = value, colour = Variable)) + 
-  geom_line(size=1) + 
-  facet_wrap(~PORT_AREA_CODE, labeller = port_label) +
-  scale_x_continuous(name = "Date")  +
-  scale_y_continuous(name = "ln(Landings)")
-
-meltdf <- prediction_sel %>% 
-  dplyr::select(Estimate.logMSQDLandings, ln_MSQD_Landings, Date, group_all, VESSEL_NUM) %>%
-  group_by(Date, group_all, VESSEL_NUM) %>% 
-  summarise(Est_landings = sum(Estimate.logMSQDLandings), Landings = sum(ln_MSQD_Landings)) %>%
-  group_by(Date, group_all) %>% 
-  summarise(Est_landings_mean = mean(Est_landings), Landings_mean = mean(Landings)) %>%
-  gather(key = Variable, value = value,
-         c("Est_landings_mean", "Landings_mean"))
-
-cond_label <- as_labeller(c("1" = "Southern CCS small-scale squid-specialists",
-                            "2" = "Southern CCS small-scale CPS-opportunists",
-                            "4" = "Southern CCS industrial squid-specialists",
-                            "5" = "Roving industrial sardine-squid switchers",
-                            "7" = "Southern CCS forage fish diverse"))
-
-ggplot(meltdf, aes(x=Date, y = value, colour = Variable)) + 
-  geom_line(size=1) + 
-  facet_wrap(~group_all, labeller = cond_label, scales="free_y") +
-  scale_x_continuous(name = "Landing Month")  +
-  scale_y_continuous(name = "ln(Landings)")
-
-
-
-
-
-
-
-
-
-
-
 #####################################################
 ## Model summary ##
 library(patchwork)
@@ -928,15 +877,12 @@ library(ggthemes)
 library(tibble)
 theme_set(theme_sjplot())
 
-
 ### Posterior predictive check ###
 pp_check(fit_qMSQD, resp = "logMSQDLandings") +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
   theme(legend.position = "right", plot.title = element_text(size=12, face="bold.italic"))  + 
   xlim(-5, 11) + xlab("Natural logarithm of market squid landing")
-
-
 
 #------------------------------------------------------
 ### Group parameters ###
@@ -981,66 +927,16 @@ gg2 <-  ggplot(coeff_cluster_sdm, aes(y=cluster, x=Estimate)) +
   
 # ### Compare multilevel effects ###
 # as_draws_df(fit_qMSQD, add_chain = T) %>%
-#   ggplot(aes(x = sd_cluster__MSQD_SPAWN_SDM_90)) +
+#   ggplot(aes(x = sd_cluster__logMSQDLandings_Intercept)) +
 #   geom_density(size = 0, fill = "orange1", alpha = 3/4) +
-#   geom_density(aes(x = sd_port_ID__MSQD_SPAWN_SDM_90),
+#   geom_density(aes(x = sd_port_ID__logMSQDLandings_Intercept),
 #                size = 0, fill = "orange4", alpha = 3/4) +
 #   scale_y_continuous(NULL, breaks = NULL) +
 #   labs(title = expression(sigma), subtitle = "Market squid SDM") +
-#   annotate("text", x = 10, y = 1/10, label = "Port area", color = "orange4") +
-#   annotate("text", x = 4, y = 1/5, label = "Cluster", color = "orange1") +
+#   annotate("text", x = 2, y = 1/10, label = "Port area", color = "orange4") +
+#   annotate("text", x = 2, y = 1/5, label = "Cluster", color = "orange1") +
 #   theme_fivethirtyeight()
 
-    
-
-# #### Explanatory variables by clusters ####
-# 
-# coef(fit_qMSQD)$cluster
-# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
-#   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-# gg_1 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-#   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-#   width=.2, position=position_dodge(0.05)) + ggtitle("SDM: Market squid")+
-#   theme(axis.text.x=element_blank(),
-#         axis.ticks.x=element_blank()) +  
-#   xlab("") + ylab("") +  coord_flip() + 
-#   theme(plot.title = element_text(size=10))
-#   
-# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 3] %>%
-#   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-# gg_2 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
-#   geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-#   width=.2, position=position_dodge(0.05)) + ggtitle("Price: Market squid") +
-#   theme(axis.text.x=element_blank(),
-#         axis.ticks.x=element_blank()) +
-#   xlab("") + ylab("") +  coord_flip() + 
-#   theme(plot.title = element_text(size=10))
-#   
-# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
-#   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-# gg_3 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
-#   geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-#                   width=.2, position=position_dodge(0.05)) +
-#   theme(axis.text.x=element_blank(),
-#         axis.ticks.x=element_blank()) + xlab("") + ylab("") +
-#   ggtitle("Vessel lenght") + coord_flip() + 
-#   theme(plot.title = element_text(size=10))
-#   
-# 
-# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 5] %>%
-#     as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-# gg_4 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
-#     geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-#                   width=.2, position=position_dodge(0.05)) + ggtitle("Open: PSDN") + 
-#     xlab("") + ylab("") + 
-#   scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
-#                             "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
-#                             "3" = "Southern CCS\nindustrial\nsquid-specialists",
-#                             "4" = "Roving industrial\nsardine-squid\nswitchers",
-#                             "5" = "Southern CCS\nforage fish\ndiverse")) + coord_flip() + 
-#   theme(plot.title = element_text(size=10))
-# 
-# gg_1 / gg_2 / gg_3 / gg_4
 
 ####################################################################
 ### Conditional effects ###
@@ -1131,6 +1027,60 @@ gg_int <- plot(conditional_effects_psdn_msqd_sdm, plot = FALSE)[[2]] +
 
 gg_int$facet$params$labeller <- cond_label
 gg_int
+
+
+
+# #### Explanatory variables by clusters ####
+# 
+# coef(fit_qMSQD)$cluster
+# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
+#   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+# gg_1 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+#   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+#   width=.2, position=position_dodge(0.05)) + ggtitle("SDM: Market squid")+
+#   theme(axis.text.x=element_blank(),
+#         axis.ticks.x=element_blank()) +  
+#   xlab("") + ylab("") +  coord_flip() + 
+#   theme(plot.title = element_text(size=10))
+#   
+# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 3] %>%
+#   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+# gg_2 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
+#   geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+#   width=.2, position=position_dodge(0.05)) + ggtitle("Price: Market squid") +
+#   theme(axis.text.x=element_blank(),
+#         axis.ticks.x=element_blank()) +
+#   xlab("") + ylab("") +  coord_flip() + 
+#   theme(plot.title = element_text(size=10))
+#   
+# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
+#   as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+# gg_3 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
+#   geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+#                   width=.2, position=position_dodge(0.05)) +
+#   theme(axis.text.x=element_blank(),
+#         axis.ticks.x=element_blank()) + xlab("") + ylab("") +
+#   ggtitle("Vessel lenght") + coord_flip() + 
+#   theme(plot.title = element_text(size=10))
+#   
+# 
+# coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 5] %>%
+#     as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+# gg_4 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +  
+#     geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+#                   width=.2, position=position_dodge(0.05)) + ggtitle("Open: PSDN") + 
+#     xlab("") + ylab("") + 
+#   scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
+#                             "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
+#                             "3" = "Southern CCS\nindustrial\nsquid-specialists",
+#                             "4" = "Roving industrial\nsardine-squid\nswitchers",
+#                             "5" = "Southern CCS\nforage fish\ndiverse")) + coord_flip() + 
+#   theme(plot.title = element_text(size=10))
+# 
+# gg_1 / gg_2 / gg_3 / gg_4
+
+
+
 
 
 ##########################################################################

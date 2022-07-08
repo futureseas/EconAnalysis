@@ -470,11 +470,14 @@ df = dataset_avg_part %>%
 
 
 #-----------------------------------------------
-## Create dataset for estimation and run landing models 
+## Create dataset for estimation  
 
 df <- df %>%
   mutate(MSQD.Participation = ifelse(MSQD.Landings > 0, 1, 0)) %>%
-  mutate(Past.MSQD.Participation = ifelse(landings.lag12 > 0, 1, 0))
+  mutate(Past.MSQD.Participation = ifelse(landings.lag12 > 0, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 
+                                            1, PSDN.Total.Closure))
 
 df <- df %>%
   dplyr::select('VESSEL_NUM', 'LANDING_YEAR', 'LANDING_MONTH', 'group_all', 
@@ -483,8 +486,15 @@ df <- df %>%
     'Past.MSQD.Participation') %>%
      drop_na()
                 
-df$group_all     <- factor(df$group_all)
-df$LANDING_MONTH <- factor(df$LANDING_MONTH)
+df$group_all               <- factor(df$group_all)
+df$LANDING_MONTH           <- factor(df$LANDING_MONTH)
+df$Past.MSQD.Participation <- factor(df$Past.MSQD.Participation)
+
+#--------------------------------------------------
+## Run participation model
+
+<<READ PAPER ABOUT ITEM RESPONSE>>
+
 
 
 
