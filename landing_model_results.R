@@ -710,10 +710,10 @@ fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM <-
       file = "Estimations/fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM")
 
 # fit_qMSQD_FINAL_endog_PSDNInteraction_noSDM         <- add_criterion(fit_qMSQD_FINAL_endog_PSDNInteraction_noSDM, "loo", overwrite = TRUE)
-# fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM <- add_criterion(fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM, "loo", overwrite = TRUE)
+fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM <- add_criterion(fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM, "loo", overwrite = TRUE)
 
 # LOO(fit_qMSQD_FINAL_endog_PSDNInteraction_noSDM)
-# LOO(fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM)
+LOO(fit_qMSQD_FINAL_endog_PSDNInteraction_Closure_noSDM)
 
 
 
