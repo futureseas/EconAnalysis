@@ -1033,9 +1033,10 @@ gg_int <- plot(conditional_effects_psdn_msqd_sdm_cluster, plot = FALSE)[[2]] +
   ggtitle("(a) Clusters") +  
   theme(plot.title = element_text(size=9, face="bold.italic")) + 
   guides(colour=guide_legend(title="ln(MSQD: Landings)")) +
-  scale_x_continuous(name = "") + scale_y_continuous(name = "MSQD: Prob(Presence)")
+  scale_x_continuous(name = "PSDN: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
   gg_int$facet$params$labeller <- cluster_label
-
+  gg_int
+  
 gg_int_2 <- plot(conditional_effects_psdn_msqd_sdm_port, plot = FALSE)[[2]] + 
   theme(
     plot.title = element_text(size=9, face="bold.italic"),
@@ -1050,6 +1051,52 @@ gg_int_2 <- plot(conditional_effects_psdn_msqd_sdm_port, plot = FALSE)[[2]] +
   gg_int_2$facet$params$labeller <- port_label
 
 gg_int / gg_int_2
+
+
+### Interaction effects Squid v/s Anchovy ###
+
+conditional_effects_nanc_msqd_sdm_cluster <- (conditional_effects(
+  fit_qMSQD, "NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z", 
+  surface=TRUE, 
+  conditions = conditions_cluster, re_formula = NULL))
+
+# conditional_effects_psdn_msqd_sdm_port <- (conditional_effects(
+#   fit_qMSQD, "NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z", 
+#   surface=TRUE, 
+#   conditions = conditions_port, re_formula = NULL))
+
+# Plot
+gg_int <- plot(conditional_effects_nanc_msqd_sdm_cluster, plot = FALSE)[[2]] + 
+  theme(
+    plot.title = element_text(size=9, face="bold.italic"),
+    axis.text = element_text(size = 7),
+    axis.title = element_text(size = 8),
+    legend.title = element_text(size = 9),
+    legend.text = element_text(size=8)) + 
+  ggtitle("(a) Clusters") +  
+  theme(plot.title = element_text(size=9, face="bold.italic")) + 
+  guides(colour=guide_legend(title="ln(MSQD: Landings)")) +
+  scale_x_continuous(name = "NANC: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
+gg_int$facet$params$labeller <- cluster_label
+
+# gg_int_2 <- plot(conditional_effects_psdn_msqd_sdm_port, plot = FALSE)[[2]] + 
+#   theme(
+#     plot.title = element_text(size=9, face="bold.italic"),
+#     axis.text = element_text(size = 7),
+#     axis.title = element_text(size = 8),
+#     legend.title = element_text(size = 9),
+#     legend.text = element_text(size=8)) + 
+#   ggtitle("(b) Ports") +  
+#   theme(plot.title = element_text(size=9, face="bold.italic")) +
+#   guides(colour=guide_legend(title="ln(MSQD: Landings)")) +
+#   scale_x_continuous(name = "PSDN: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
+# gg_int_2$facet$params$labeller <- port_label
+
+gg_int
+# / gg_int_2
+
+
+
   
 ###########################################
 ### Effect of closure ###
@@ -1151,7 +1198,7 @@ coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 5] %>%
     as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
 gg_4 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
     geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                  width=.2, position=position_dodge(0.05)) + ggtitle("Open: PSDN") +
+                  width=.2, position=position_dodge(0.05)) + ggtitle("PSDN Closure") +
     xlab("") + ylab("") +
   scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
                             "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
@@ -1163,8 +1210,52 @@ gg_4 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
 gg_1 / gg_2 / gg_3 / gg_4
 
 
+# Port ID
 
+coef(fit_qMSQD)$port_ID
+coeff_cluster <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 3] %>%
+  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+gg_1 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                                width=.2, position=position_dodge(0.05)) + ggtitle("SDM: Market squid")+
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  xlab("") + ylab("") +  coord_flip() +
+  theme(plot.title = element_text(size=10))
 
+coeff_cluster <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 4] %>%
+  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+gg_2 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
+  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                width=.2, position=position_dodge(0.05)) + ggtitle("Price: Market squid") +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  xlab("") + ylab("") +  coord_flip() +
+  theme(plot.title = element_text(size=10))
+
+coeff_cluster <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 5] %>%
+  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+gg_3 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
+  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                width=.2, position=position_dodge(0.05)) +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) + xlab("") + ylab("") +
+  ggtitle("Vessel lenght") + coord_flip() +
+  theme(plot.title = element_text(size=10))
+
+coeff_cluster <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 6] %>%
+  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
+gg_4 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
+  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                width=.2, position=position_dodge(0.05)) + ggtitle("PSDN Closure") +
+  xlab("") + ylab("") +
+  scale_y_discrete(labels=c("1" = "Los Angeles",
+                            "2" = "Monterey",
+                            "3" = "Santa Barbara")) + 
+  coord_flip() +
+  theme(plot.title = element_text(size=10))
+
+gg_1 / gg_2 / gg_3 / gg_4
 
 ##########################################################################
 ### Predictions ###
@@ -1177,6 +1268,17 @@ prediction_sel <- prediction[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
+
+
+# prediction_sel %>% group_by(group_all) %>%
+#   mutate(mean.y = mean(ln_MSQD_Landings)) %>%
+#   summarize(SSR = sum((ln_MSQD_Landings - Estimate.logMSQDLandings)^2), 
+#             SST = sum((ln_MSQD_Landings - mean.y)^2)) %>%
+#   mutate(R2 = 1 - (SSR / SST))
+
+prediction_sel %>% group_by(group_all) %>%
+  summarize(SSR = mean(Est.Error.logMSQDLandings))
+
 
 meltdf <- prediction_sel %>% 
   dplyr::select(Estimate.logMSQDLandings, ln_MSQD_Landings, Date, PORT_AREA_CODE, VESSEL_NUM) %>%
@@ -1217,6 +1319,22 @@ ggplot(meltdf, aes(x=Date, y = value, colour = Variable)) +
   facet_wrap(~group_all, labeller = cond_label, scales="free_y") +
   scale_x_continuous(name = "Landing Month")  +
   scale_y_continuous(name = "ln(Landings)")
+
+
+### CHECK FROM HERE
+
+# g4_2 <- ggplot(sdm.by.species.MSQD) +
+#   geom_line(mapping = aes(x = Date, y = RATIO, color = "Landings by active vessel"), size = 0.5) +
+#   geom_line(mapping = aes(x = Date, y = MSQD_SPAWN_SDM_90*coeff4_2, color = "SDM output"),
+#             size = 0.5, linetype = "dashed") +
+#   facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 3) +
+#   scale_x_continuous(name = "")  +
+#   scale_y_continuous(name = "Landings by vessel", sec.axis = sec_axis(~./coeff4_2, name = "P(presence)")) +
+#   theme(plot.title = element_text(size=9, face="bold.italic"),
+#         axis.text = element_text(size = 7), axis.title = element_text(size = 8), legend.position="none") +
+#   ggtitle("(a) Market squid (spawning aggregation model; 90 km radius)") +
+#   scale_color_manual(name = "Variable: ",
+#                      values = c("Landings by active vessel" = "grey", "SDM output" = "blue"))
 
 
 # d2 %>%
