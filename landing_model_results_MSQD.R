@@ -180,9 +180,9 @@ price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 # #### Add PSDN closure
 
 landing_model_PSDNInteraction_NANCInteraction_Closure_v2 <- bf(log(MSQD_Landings) ~
-  1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + PSDN.Total.Closure +
- (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + PSDN.Total.Closure | cluster) +
- (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + Length_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + PSDN.Total.Closure | port_ID))
+  1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + PSDN.Total.Closure + Length_z +
+ (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + PSDN.Total.Closure | cluster) +
+ (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | port_ID))
 
 # fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction_Closure <- add_criterion(fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction_Closure, "loo", overwrite = TRUE)
 
