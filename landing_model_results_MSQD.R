@@ -137,14 +137,7 @@ landing_model <- bf(log(MSQD_Landings) ~
  (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + PSDN.Total.Closure | cluster) +
  (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | port_ID))
 
-
-
-get_prior(get_prior(data = d, 
-                    family = negbinomial,
-                    total_tools ~ 1))
-
-
-# #### Estimation
+# #### Estimation ####
 # set.seed(123)
 # fit_qMSQD_FINAL <-
 #   brm(data = dataset_msqd_landing,
@@ -165,20 +158,33 @@ get_prior(get_prior(data = d,
 # fit_qMSQD_FINAL <- add_criterion(fit_qMSQD_FINAL, "loo", overwrite = TRUE)
 
 
-#### Estimation
+#### Estimation with log_normal priors ####
+
+# get_prior(data = dataset_msqd_landing,
+#           family = gaussian,
+#           price_model + landing_model + set_rescor(TRUE)
+# )
+
+prior_lognormal <- c(
+  prior(lognormal(0,1), class = b,     resp = MSQDPricez,      coef = Price.Fishmeal.AFI_z),
+  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = Length_z),
+  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_Price_z),
+  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90_z),
+  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90_z:NANC_SDM_20_z),
+  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open),
+  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = PSDN.Total.Closure),
+  prior(exponential(1), class = sigma, resp = MSQDPricez),
+  prior(exponential(1), class = sigma, resp = logMSQDLandings),
+  prior(lkj(2),         class = rescor))
+
+
+
 set.seed(123)
 fit_qMSQD_FINAL_lognormal <-
   brm(data = dataset_msqd_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
-      prior = c(# E model
-        prior(normal(0, 1), class = b, resp = MSQDPricez),
-        prior(exponential(1), class = sigma, resp = MSQDPricez),
-        # W model
-        prior(normal(0, 1), class = b, resp = logMSQDLandings),
-        prior(exponential(1), class = sigma, resp = logMSQDLandings),
-        # rho
-        prior(lkj(2), class = rescor)),
+      prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
       file = "Estimations/fit_qMSQD_FINAL_lognormal")
