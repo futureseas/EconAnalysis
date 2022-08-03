@@ -64,7 +64,10 @@ dataset_msqd <- dataset %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::mutate(ln_MSQD_Landings = log(MSQD_Landings)) %>%
-  filter(group_all == 1 | group_all == 4 | group_all == 5 | group_all == 7) %>%
+  filter(group_all == 1 | group_all == 2 | group_all == 4 | group_all == 5 | group_all == 7) %>% drop_na()
+
+
+
   filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA") %>%
   drop_na()
 
@@ -129,7 +132,7 @@ purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 rm(pDataset)
 
 ## -------------------------------------------------------------------
-### Market squid landing model
+### Market squid landing model ###
 
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(MSQD_Landings) ~
@@ -137,28 +140,8 @@ landing_model <- bf(log(MSQD_Landings) ~
  (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + PSDN.Total.Closure | cluster) +
  (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z | port_ID))
 
-# #### Estimation ####
-# set.seed(123)
-# fit_qMSQD_FINAL <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model + landing_model + set_rescor(TRUE),
-#       prior = c(# E model
-#         prior(normal(0, 1), class = b, resp = MSQDPricez),
-#         prior(exponential(1), class = sigma, resp = MSQDPricez),
-#         # W model
-#         prior(normal(0, 1), class = b, resp = logMSQDLandings),
-#         prior(exponential(1), class = sigma, resp = logMSQDLandings),
-#         # rho
-#         prior(lkj(2), class = rescor)),
-#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#       control = list(max_treedepth = 15, adapt_delta = 0.99),
-#       file = "Estimations/fit_qMSQD_FINAL")
-# 
-# fit_qMSQD_FINAL <- add_criterion(fit_qMSQD_FINAL, "loo", overwrite = TRUE)
 
-
-#### Estimation with log_normal priors ####
+# Create prior
 
 # get_prior(data = dataset_msqd_landing,
 #           family = gaussian,
@@ -177,19 +160,50 @@ prior_lognormal <- c(
   prior(exponential(1), class = sigma, resp = logMSQDLandings),
   prior(lkj(2),         class = rescor))
 
+# set.seed(123)
+# fit_qMSQD_FINAL_lognormal <-
+#   brm(data = dataset_msqd_landing,
+#       family = gaussian,
+#       price_model + landing_model + set_rescor(TRUE),
+#       prior = prior_lognormal,
+#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
+#       control = list(max_treedepth = 15, adapt_delta = 0.99),
+#       file = "Estimations/fit_qMSQD_FINAL_lognormal")
 
+# fit_qMSQD_FINAL_lognormal <- add_criterion(fit_qMSQD_FINAL_lognormal, "loo", overwrite = TRUE)
+
+
+# prior_lognormal_flat <- c(
+#   prior(lognormal(0,1), class = b,     resp = MSQDPricez,      coef = Price.Fishmeal.AFI_z),
+#   prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = Length_z),
+#   prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_Price_z),
+#   prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90_z))
+# 
+# set.seed(123)
+# fit_qMSQD_FINAL_lognormal_flat <-
+#   brm(data = dataset_msqd_landing,
+#       family = gaussian,
+#       price_model + landing_model + set_rescor(TRUE),
+#       prior = prior_lognormal_flat,
+#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
+#       control = list(max_treedepth = 15, adapt_delta = 0.99),
+#       file = "Estimations/fit_qMSQD_FINAL_lognormal_flat")
+# 
+# 
+# fit_qMSQD_FINAL_lognormal_flat <- add_criterion(fit_qMSQD_FINAL_lognormal_flat, "loo", overwrite = TRUE)
+# 
 
 set.seed(123)
-fit_qMSQD_FINAL_lognormal <-
+fit_qMSQD_FINAL_flat <-
   brm(data = dataset_msqd_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
-      prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qMSQD_FINAL_lognormal")
+      file = "Estimations/fit_qMSQD_FINAL_flat")
 
-fit_qMSQD_FINAL_lognormal <- add_criterion(fit_qMSQD_FINAL_lognormal, "loo", overwrite = TRUE)
+
+fit_qMSQD_FINAL_flat <- add_criterion(fit_qMSQD_FINAL_flat, "loo", overwrite = TRUE)
 
 
 
@@ -197,7 +211,7 @@ fit_qMSQD_FINAL_lognormal <- add_criterion(fit_qMSQD_FINAL_lognormal, "loo", ove
 ######
 # Read previous models 
 # fit_qMSQD_FINAL <- readRDS(here::here("Estimations", "fit_qMSQD_FINAL.RDS"))
-# fit_qMSQD_FINAL_lognormal <- readRDS(here::here("Estimations", "fit_qMSQD_FINAL_lognormal.RDS"))
+fit_qMSQD_FINAL_lognormal <- readRDS(here::here("Estimations", "fit_qMSQD_FINAL_lognormal.RDS"))
 
 
 ############################
@@ -208,38 +222,46 @@ set.seed(123)
 predict1 <- as.data.frame(predict(fit_qMSQD_FINAL))
 prediction1 <- cbind(predict1, dataset_msqd_landing)
 sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
-# sqrt(sum((prediction2$Estimate.logMSQDLandings - prediction2$ln_MSQD_Landings)^2)/(nrow(prediction2)-2))
+
+set.seed(123)
+predict2 <- as.data.frame(predict(fit_qMSQD_FINAL_lognormal))
+prediction2 <- cbind(predict2, dataset_msqd_landing)
+sqrt(sum((prediction2$Estimate.logMSQDLandings - prediction2$ln_MSQD_Landings)^2)/(nrow(prediction2)-2))
+
+set.seed(123)
+predict3 <- as.data.frame(predict(fit_qMSQD_FINAL_flat))
+prediction3 <- cbind(predict3, dataset_msqd_landing)
+sqrt(sum((prediction3$Estimate.logMSQDLandings - prediction3$ln_MSQD_Landings)^2)/(nrow(prediction3)-2))
 
 
 ##############################################################################################
 ## LOO comparision between models 
 
 
-# loo_compare(
-#   fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction_Closure_v2,
-#   fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction_Closure_v3,
-#   criterion = "loo") 
-# 
+LOO(
+  fit_qMSQD_FINAL_flat,
+  fit_qMSQD_FINAL_lognormal)
+
 
 ###############################################
 ### Analyze convergence ###
-# launch_shinystan(fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction_Closure_v2)
+launch_shinystan(fit_qMSQD_FINAL_flat)
 
 
 
 ###############################################
 ### Create result tables ###
 
-# library(XML)
-# 
-# tab_model <-
-#   sjPlot::tab_model(fit_qMSQD_FINAL_endog_PSDNInteraction_NANCInteraction_Closure_v2)
-# 
-# df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
-# colnames(df) <- df[1,]
-# df <- df[-1,]
-# 
-# gs4_create("Squid_landings_FINAL_Model_v2", sheets = df)
+library(XML)
+
+tab_model <-
+  sjPlot::tab_model(fit_qMSQD_FINAL_flat)
+
+df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
+colnames(df) <- df[1,]
+df <- df[-1,]
+
+gs4_create("Squid_landings_FINAL_Model_flat", sheets = df)
 
 
 # ### Population parameters ###
