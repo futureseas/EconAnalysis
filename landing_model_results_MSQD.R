@@ -158,17 +158,17 @@ prior_lognormal <- c(
   prior(exponential(1), class = sigma, resp = logMSQDLandings),
   prior(lkj(2),         class = rescor))
 
-# set.seed(123)
-# fit_qMSQD <-
-#   brm(data = dataset_msqd_landing,
-#       family = gaussian,
-#       price_model + landing_model + set_rescor(TRUE),
-#       prior = prior_lognormal,
-#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#       control = list(max_treedepth = 15, adapt_delta = 0.99),
-#       file = "Estimations/fit_qMSQD")
+set.seed(123)
+ fit_qMSQD <-
+   brm(data = dataset_msqd_landing,
+       family = gaussian,
+       price_model + landing_model + set_rescor(TRUE),
+       prior = prior_lognormal,
+       iter = 2000, warmup = 1000, chains = 4, cores = 4,
+       control = list(max_treedepth = 15, adapt_delta = 0.99),
+       file = "Estimations/fit_qMSQD")
 
-# fit_qMSQD <- add_criterion(fit_qMSQD, "loo", overwrite = TRUE)
+fit_qMSQD <- add_criterion(fit_qMSQD, "loo", overwrite = TRUE)
 
 
 ######
@@ -182,19 +182,10 @@ prior_lognormal <- c(
 
 # ## Calculate average error
 set.seed(123)
-predict1 <- as.data.frame(predict(fit_qMSQD_FINAL))
+predict1 <- as.data.frame(predict(fit_qMSQD))
 prediction1 <- cbind(predict1, dataset_msqd_landing)
 sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
 
-set.seed(123)
-predict2 <- as.data.frame(predict(fit_qMSQD_FINAL_lognormal))
-prediction2 <- cbind(predict2, dataset_msqd_landing)
-sqrt(sum((prediction2$Estimate.logMSQDLandings - prediction2$ln_MSQD_Landings)^2)/(nrow(prediction2)-2))
-
-set.seed(123)
-predict3 <- as.data.frame(predict(fit_qMSQD_FINAL_flat))
-prediction3 <- cbind(predict3, dataset_msqd_landing)
-sqrt(sum((prediction3$Estimate.logMSQDLandings - prediction3$ln_MSQD_Landings)^2)/(nrow(prediction3)-2))
 
 
 ##############################################################################################
