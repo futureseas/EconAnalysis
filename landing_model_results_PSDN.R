@@ -39,31 +39,27 @@ dataset <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation.csv")
 ### Market squid ###
 
 #### Select data for estimation, replace N/A landings to zero ####
-dataset_msqd <- dataset %>%
+dataset_psdn <- dataset %>%
   dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, 
                 LANDING_YEAR, LANDING_MONTH,
-                MSQD_SPAWN_SDM_90, MSQD_SDM_90, MSQD_Landings, MSQD_Price, 
-                PSDN_Landings, NANC_Landings, PSDN_Price, NANC_Price, 
-                PSDN_SDM_60, NANC_SDM_20,
-                MSQD_Price_z, PSDN_Price_z, MSQD_SPAWN_SDM_90_z, MSQD_SDM_90_z, 
+                MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_z,
+                PSDN_Landings, 
+                PSDN_Price, PSDN_Price_z, 
+                PSDN_SDM_60, NANC_SDM_20, 
                 PSDN_SDM_60_z, NANC_SDM_20_z,
-                PSDN.Open, MSQD.Open, Price.Fishmeal, Price.Fishmeal_z, 
+                PSDN.Open, MSQD.Open,
+                Price.Fishmeal, Price.Fishmeal_z, 
                 Price.Fishmeal.AFI, Price.Fishmeal.AFI_z,
-                diesel.price, diesel.price.AFI, diesel.price_z, diesel.price.AFI_z,
-                Length, Length_z, avg_set_MSQD, avg_set_MSQD_z) %>% 
-  dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>%
+                Length, Length_z) %>% 
   dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>%
-  dplyr::mutate(NANC_Landings = coalesce(NANC_Landings, 0)) %>%
-  mutate(MSQD_Landings = ifelse(MSQD_Landings<= 0, 0, MSQD_Landings)) %>%
-  mutate(MSQD_Landings = ifelse(MSQD_Landings< 0.0001, 0, MSQD_Landings)) %>%
-  mutate(PSDN_Landings = ifelse(PSDN_Landings<= 0, 0, MSQD_Landings)) %>%
-  mutate(PSDN_Landings = ifelse(PSDN_Landings< 0.0001, 0, MSQD_Landings)) %>%
-  mutate(NANC_Landings = ifelse(NANC_Landings<= 0, 0, MSQD_Landings)) %>%
-  mutate(NANC_Landings = ifelse(NANC_Landings< 0.0001, 0, MSQD_Landings)) %>%
-  dplyr::mutate(PSDN.Participation = ifelse(PSDN_Landings > 0, 1, 0)) %>% 
+  mutate(PSDN_Landings = ifelse(PSDN_Landings<= 0, 0, PSDN_Landings)) %>%
+  mutate(PSDN_Landings = ifelse(PSDN_Landings< 0.0001, 0, PSDN_Landings)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
-  dplyr::mutate(ln_MSQD_Landings = log(MSQD_Landings)) %>%
+  dplyr::mutate(ln_PSDN_Landings = log(PSDN_Landings)) 
+
+
+%>%
   filter(group_all == 1 | group_all == 2 | group_all == 4 | group_all == 5 | group_all == 7) %>% 
   filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA") %>%
   drop_na()
