@@ -16,7 +16,6 @@ gs4_auth(
   use_oob = gargle::gargle_oob_default(),
   token = NULL)
 
-
 ## Read packages 
 library("brms")
 library("sjPlot")
@@ -32,11 +31,12 @@ library('doBy')
 
 ##### Read landing models
 fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
-summary(fit_qMSQD)
+fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
+fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
 
-# fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
-# fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
-
+# summary(fit_qMSQD)
+# summary(fit_qPSDN)
+# summary(fit_qNANC)
 
 
 ############################
@@ -46,6 +46,14 @@ summary(fit_qMSQD)
 
 ### Market squid
 set.seed(123)
+# predict1 <- as.data.frame(predict(fit_qMSQD))
+# prediction1 <- cbind(predict1, dataset_msqd_landing)
+# sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+
+# predict1 <- as.data.frame(predict(fit_qMSQD))
+# prediction1 <- cbind(predict1, dataset_msqd_landing)
+# sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+
 # predict1 <- as.data.frame(predict(fit_qMSQD))
 # prediction1 <- cbind(predict1, dataset_msqd_landing)
 # sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))

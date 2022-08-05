@@ -460,6 +460,7 @@ dataset <- dataset %>%
 dataset <- dataset %>%
   dplyr::mutate(MSQD_Price_z = ((MSQD_Price - mean(MSQD_Price, na.rm = TRUE)) / sd(MSQD_Price, na.rm = TRUE))) %>%
   dplyr::mutate(PSDN_Price_z = ((PSDN_Price - mean(PSDN_Price, na.rm = TRUE)) / sd(PSDN_Price, na.rm = TRUE))) %>%
+  dplyr::mutate(NANC_Price_z = ((NANC_Price - mean(NANC_Price, na.rm = TRUE)) / sd(NANC_Price, na.rm = TRUE))) %>%
   dplyr::mutate(MSQD_SPAWN_SDM_90_z = ((MSQD_SPAWN_SDM_90 - mean(MSQD_SPAWN_SDM_90, na.rm = TRUE))/sd(MSQD_SPAWN_SDM_90, na.rm = TRUE))) %>%
   dplyr::mutate(MSQD_SDM_90_z = ((MSQD_SDM_90 - mean(MSQD_SDM_90, na.rm = TRUE))/sd(MSQD_SDM_90, na.rm = TRUE))) %>%
   dplyr::mutate(PSDN_SDM_60_z = ((PSDN_SDM_60 - mean(PSDN_SDM_60, na.rm = TRUE))/sd(PSDN_SDM_60, na.rm = TRUE))) %>%
