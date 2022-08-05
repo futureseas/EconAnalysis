@@ -167,6 +167,6 @@ fit_qPSDN <-
       control = list(max_treedepth = 15, adapt_delta = 0.99),
       file = "Estimations/fit_qPSDN")
 
-fit_qMSQD <- add_criterion(fit_qPSDN, "loo", overwrite = TRUE)
+fit_qPSDN <- add_criterion(fit_qPSDN, "loo", overwrite = TRUE)
 
 
