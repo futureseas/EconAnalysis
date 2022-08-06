@@ -34,6 +34,12 @@ fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
 fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
 fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
 
+#### Read database 
+dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv")
+dataset_nanc_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv")
+dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_PSDN.csv")
+
+
 # summary(fit_qMSQD)
 # summary(fit_qPSDN)
 # summary(fit_qNANC)
@@ -50,13 +56,13 @@ set.seed(123)
 # prediction1 <- cbind(predict1, dataset_msqd_landing)
 # sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
 
-# predict1 <- as.data.frame(predict(fit_qMSQD))
-# prediction1 <- cbind(predict1, dataset_msqd_landing)
-# sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+predict2 <- as.data.frame(predict(fit_qPSDN))
+prediction2 <- cbind(predict2, dataset_psdn_landing)
+sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2)/(nrow(prediction2)-2))
 
-# predict1 <- as.data.frame(predict(fit_qMSQD))
-# prediction1 <- cbind(predict1, dataset_msqd_landing)
-# sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+predict3 <- as.data.frame(predict(fit_qNANC))
+prediction3 <- cbind(predict3, dataset_nanc_landing)
+sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2))
 
 
 
@@ -71,6 +77,8 @@ set.seed(123)
 ###############################################
 ### Analyze convergence ###
 # launch_shinystan(fit_qMSQD)
+# launch_shinystan(fit_qPSDN)
+# launch_shinystan(fit_qNANC)
 
 
 
@@ -87,6 +95,23 @@ colnames(df) <- df[1,]
 df <- df[-1,]
 # gs4_create("MSQD_landings_results", sheets = df)
 
+
+tab_model <-
+  sjPlot::tab_model(fit_qPSDN)
+
+df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
+colnames(df) <- df[1,]
+df <- df[-1,]
+gs4_create("PSDN_landings_results", sheets = df)
+
+
+tab_model <-
+  sjPlot::tab_model(fit_qNANC)
+
+df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
+colnames(df) <- df[1,]
+df <- df[-1,]
+gs4_create("NANC_landings_results", sheets = df)
 
 
 # ### Population parameters ###
@@ -355,7 +380,6 @@ gg_1 + gg_2 + gg_3 + gg_4 + gg_5 + gg_6
 ###########################################################
 ### Conditional effect of MSQD presence
 
-# dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv")
 # 
 # conditions_cluster <- data.frame(cluster = unique(dataset_msqd_landing$cluster)) 
 # rownames(conditions_cluster) <- unique(dataset_msqd_landing$cluster)
