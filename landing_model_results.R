@@ -167,42 +167,42 @@ theme_set(theme_sjplot())
 #------------------------------------------------------
 ### Group parameters ###
 
-#### Intercepts ####
-
-coef(fit_qMSQD)$port_ID 
-coeff_port_sdm <- as.data.frame(coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2]) %>% 
-  round(digits = 2) 
-names <- rownames(coeff_port_sdm)
-rownames(coeff_port_sdm) <- NULL
-coeff_port_sdm <- cbind(names,coeff_port_sdm)
-
-gg1 <-  ggplot(coeff_port_sdm, aes(x=names, y=Estimate)) +
-  geom_point() +  geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + coord_flip() + ggtitle("(a) Port areas") +
-  ylab("") + xlab("") + theme(plot.title = element_text(size=9, face="bold.italic")) +
-  scale_x_discrete(labels=c("LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara"))
-
-coef(fit_qMSQD)$cluster
-coeff_cluster_sdm <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 1]) %>% 
-  round(digits = 2)
-cluster <- rownames(coeff_cluster_sdm)
-rownames(coeff_cluster_sdm) <- NULL
-coeff_cluster_sdm <- cbind(cluster,coeff_cluster_sdm)  
-
-
-gg2 <-  ggplot(coeff_cluster_sdm, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
-                                width=.2, position=position_dodge(0.05))  + ggtitle("(b) Clusters") +  
-  xlab("") + ylab("") + theme(plot.title = element_text(size=9, face="bold.italic")) + 
-  scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
-                            "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
-                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
-                            "5" = "Roving industrial\nsardine-squid\nswitchers",
-                            "7" = "Southern CCS\nforage fish\ndiverse"))
-
-gg1 + gg2
+# #### Intercepts ####
+# 
+# coef(fit_qMSQD)$port_ID 
+# coeff_port_sdm <- as.data.frame(coef(fit_qMSQD)$port_ID[, c(1, 3:4), 2]) %>% 
+#   round(digits = 2) 
+# names <- rownames(coeff_port_sdm)
+# rownames(coeff_port_sdm) <- NULL
+# coeff_port_sdm <- cbind(names,coeff_port_sdm)
+# 
+# gg1 <-  ggplot(coeff_port_sdm, aes(x=names, y=Estimate)) +
+#   geom_point() +  geom_errorbar(aes(ymin=Q2.5, ymax=Q97.5),
+#                                 width=.2, position=position_dodge(0.05)) + coord_flip() + ggtitle("(a) Port areas") +
+#   ylab("") + xlab("") + theme(plot.title = element_text(size=9, face="bold.italic")) +
+#   scale_x_discrete(labels=c("LAA" = "Los Angeles",
+#                             "MNA" = "Monterey",
+#                             "SBA" = "Santa Barbara"))
+# 
+# coef(fit_qMSQD)$cluster
+# coeff_cluster_sdm <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 1]) %>% 
+#   round(digits = 2)
+# cluster <- rownames(coeff_cluster_sdm)
+# rownames(coeff_cluster_sdm) <- NULL
+# coeff_cluster_sdm <- cbind(cluster,coeff_cluster_sdm)  
+# 
+# 
+# gg2 <-  ggplot(coeff_cluster_sdm, aes(y=cluster, x=Estimate)) +
+#   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5), 
+#                                 width=.2, position=position_dodge(0.05))  + ggtitle("(b) Clusters") +  
+#   xlab("") + ylab("") + theme(plot.title = element_text(size=9, face="bold.italic")) + 
+#   scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
+#                             "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
+#                             "4" = "Southern CCS\nindustrial\nsquid-specialists",
+#                             "5" = "Roving industrial\nsardine-squid\nswitchers",
+#                             "7" = "Southern CCS\nforage fish\ndiverse"))
+# 
+# gg1 + gg2
 
 # ### Compare multilevel effects ###
 # as_draws_df(fit_qMSQD, add_chain = T) %>%
@@ -221,157 +221,180 @@ gg1 + gg2
 ###################################################################
 #### Explanatory variables by clusters ####
 
-coef(fit_qMSQD)$cluster
 
-coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 2] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_1 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+# ### SDM effect
+# 
+# coef(fit_qMSQD)$cluster
+# 
+# coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 2]) %>%
+#   round(digits = 2) 
+#   cluster <- rownames(coeff_cluster)
+#   rownames(coeff_cluster) <- NULL
+#   coeff_cluster <- cbind(cluster,coeff_cluster)  
+# 
+# 
+# gg_1_MSDQ <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+#   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+#                                 width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(MSQD) effect on MSQD landings") +
+#   xlab("") + ylab("") +
+#   theme(plot.title = element_text(size=10)) +
+#   scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
+#                             "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
+#                             "4" = "Southern CCS\nindustrial\nsquid-specialists",
+#                             "5" = "Roving industrial\nsardine-squid\nswitchers",
+#                             "7" = "Southern CCS\nforage fish\ndiverse")) +
+#   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
+# 
+# 
+# coeff_cluster <- as.data.frame(coef(fit_qNANC)$cluster[, c(1, 3:4), 2]) %>%
+#   round(digits = 2) 
+#   cluster <- rownames(coeff_cluster)
+#   rownames(coeff_cluster) <- NULL
+#   coeff_cluster <- cbind(cluster,coeff_cluster)  
+# 
+# gg_1_NANC <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+#   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+#                                 width=.2, position=position_dodge(0.05)) + ggtitle("(b) Pr(NANC) effect on NANC landings") +
+#   xlab("") + ylab("") +
+#   theme(plot.title = element_text(size=10)) +
+#   scale_y_discrete(labels=c("6" = "PNW sardine\nspecialists",
+#                             "7" = "Southern CCS\nforage fish\ndiverse")) +
+#   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
+# 
+# 
+# coeff_cluster <- as.data.frame(coef(fit_qPSDN)$cluster[, c(1, 3:4), 2]) %>%
+#   round(digits = 2) 
+# cluster <- rownames(coeff_cluster)
+# rownames(coeff_cluster) <- NULL
+# coeff_cluster <- cbind(cluster,coeff_cluster)  
+# 
+# gg_1_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+#   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+#                                 width=.2, position=position_dodge(0.05)) + ggtitle("(c) Pr(PSDN) effect on PSDN landings") +
+#   xlab("") + ylab("") +
+#   theme(plot.title = element_text(size=10)) +
+#   scale_y_discrete(labels=c("3" = "PNW sardine\nopportunists",
+#                             "4" = "Southern CCS\nindustrial\nsquid-specialists",
+#                             "5" = "Roving industrial\nsardine-squid\nswitchers",
+#                             "6" = "PNW sardine\nspecialists",
+#                             "7" = "Southern CCS\nforage fish\ndiverse")) +
+#   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
+# 
+# 
+# gg_1_MSDQ + gg_1_NANC + gg_1_PSDN
+
+
+### Price effect
+
+coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 3]) %>%
+  round(digits = 2) 
+cluster <- rownames(coeff_cluster)
+rownames(coeff_cluster) <- NULL
+coeff_cluster <- cbind(cluster,coeff_cluster)  
+
+
+gg_2_MSDQ <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("SDM: Market squid") +
+                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Price effect on MSQD landings") +
   xlab("") + ylab("") +
   theme(plot.title = element_text(size=10)) +
   scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
                             "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
-                            "3" = "Southern CCS\nindustrial\nsquid-specialists",
-                            "4" = "Roving industrial\nsardine-squid\nswitchers",
-                            "5" = "Southern CCS\nforage fish\ndiverse")) +
+                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
+                            "5" = "Roving industrial\nsardine-squid\nswitchers",
+                            "7" = "Southern CCS\nforage fish\ndiverse")) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
 
-coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 3] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_2 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                width=.2, position=position_dodge(0.05)) + ggtitle("Price: Market squid") +
-  xlab("") + ylab("")  +
-  theme(axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(plot.title = element_text(size=10)) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
 
-coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 4] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_3 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                width=.2, position=position_dodge(0.05)) +
-  theme(axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) + xlab("") + ylab("") +
-  ggtitle("Vessel lenght") +
-  theme(plot.title = element_text(size=10)) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
+coeff_cluster <- as.data.frame(coef(fit_qNANC)$cluster[, c(1, 3:4), 3]) %>%
+  round(digits = 2) 
+cluster <- rownames(coeff_cluster)
+rownames(coeff_cluster) <- NULL
+coeff_cluster <- cbind(cluster,coeff_cluster)  
 
-coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 7] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_4 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                width=.2, position=position_dodge(0.05)) +
+gg_2_NANC <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                                width=.2, position=position_dodge(0.05)) + ggtitle("(b) Price effect on NANC landings") +
   xlab("") + ylab("") +
-  ggtitle("SDM: Market squid x SDM: Pacific Sardine") +
+  theme(plot.title = element_text(size=10)) +
+  scale_y_discrete(labels=c("6" = "PNW sardine\nspecialists",
+                            "7" = "Southern CCS\nforage fish\ndiverse")) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
+
+
+coeff_cluster <- as.data.frame(coef(fit_qPSDN)$cluster[, c(1, 3:4), 3]) %>%
+  round(digits = 2) 
+cluster <- rownames(coeff_cluster)
+rownames(coeff_cluster) <- NULL
+coeff_cluster <- cbind(cluster,coeff_cluster)  
+
+gg_2_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                                width=.2, position=position_dodge(0.05)) + ggtitle("(c) Price effect on PSDN landings") +
+  xlab("") + ylab("") +
+  theme(plot.title = element_text(size=10)) +
+  scale_y_discrete(labels=c("3" = "PNW sardine\nopportunists",
+                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
+                            "5" = "Roving industrial\nsardine-squid\nswitchers",
+                            "6" = "PNW sardine\nspecialists",
+                            "7" = "Southern CCS\nforage fish\ndiverse")) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
+
+
+gg_2_MSDQ + gg_2_NANC + gg_2_PSDN
+
+
+
+### Closure effect
+
+
+coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 4]) %>%
+  round(digits = 2) 
+cluster <- rownames(coeff_cluster)
+rownames(coeff_cluster) <- NULL
+coeff_cluster <- cbind(cluster,coeff_cluster)  
+
+
+gg_3_MSDQ <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) PSDN Closure effect on MSQD landings") +
+  xlab("") + ylab("") +
   theme(plot.title = element_text(size=10)) +
   scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
                             "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
-                            "3" = "Southern CCS\nindustrial\nsquid-specialists",
-                            "4" = "Roving industrial\nsardine-squid\nswitchers",
-                            "5" = "Southern CCS\nforage fish\ndiverse")) +
+                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
+                            "5" = "Roving industrial\nsardine-squid\nswitchers",
+                            "7" = "Southern CCS\nforage fish\ndiverse")) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
 
-coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 6] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_5 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                width=.2, position=position_dodge(0.05)) +
-  xlab("") + ylab("") +
-  theme(axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  ggtitle("SDM: Market squid x SDM: Northern Anchovy") +
-  theme(plot.title = element_text(size=10)) +
-  geom_vline(xintercept = 0, color = "blue", linetype="dashed", size=0.5)
 
-coeff_cluster <- coef(fit_qMSQD)$cluster[, c(1, 3:4), 5] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_6 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                width=.2, position=position_dodge(0.05)) + ggtitle("PSDN Closure") +
-  xlab("") + ylab("") +
-  theme(axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(plot.title = element_text(size=10)) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
+coeff_cluster <- as.data.frame(coef(fit_qNANC)$cluster[, c(1, 3:4), 4]) %>%
+  round(digits = 2) 
+cluster <- rownames(coeff_cluster)
+rownames(coeff_cluster) <- NULL
+coeff_cluster <- cbind(cluster,coeff_cluster)  
 
-gg_1 + gg_2 + gg_3 + gg_4 + gg_5 + gg_6
-
-
-
-# Port ID
-coef(fit_qMSQD)$port_ID
-coeff_cluster <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 3] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_1 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                width=.2, position=position_dodge(0.05)) + 
-  ggtitle("SDM: Market squid")+
-  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
-  xlab("") + ylab("") + theme(plot.title = element_text(size=10)) +  
-  scale_y_discrete(labels=c("1" = "Los Angeles",
-                            "2" = "Monterey",
-                            "3" = "Santa Barbara")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
-
-coeff_cluster <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 4] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_2 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                width=.2, position=position_dodge(0.05)) + 
-  ggtitle("Price: Market squid") +
-  theme(axis.text.y=element_blank(), axis.ticks.y=element_blank()) +
+gg_3_NANC <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                                width=.2, position=position_dodge(0.05)) + ggtitle("(b)  PSDN Closure effect on NANC landings") +
   xlab("") + ylab("") +
   theme(plot.title = element_text(size=10)) +
+  scale_y_discrete(labels=c("6" = "PNW sardine\nspecialists",
+                            "7" = "Southern CCS\nforage fish\ndiverse")) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
 
-coeff_cluster <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 5] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_3 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                width=.2, position=position_dodge(0.05)) + 
-  theme(axis.text.y=element_blank(), axis.ticks.y=element_blank()) + 
-  xlab("") + ylab("") +
-  ggtitle("Vessel lenght") + 
-  theme(plot.title = element_text(size=10)) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
 
-coeff_cluster <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 6] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_4 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                width=.2, position=position_dodge(0.05)) + ggtitle("PSDN Closure") +
-  xlab("") + ylab("") +
-  scale_y_discrete(labels=c("1" = "Los Angeles",
-                            "2" = "Monterey",
-                            "3" = "Santa Barbara")) + 
-  theme(plot.title = element_text(size=10)) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
+coeff_cluster <- as.data.frame(coef(fit_qPSDN)$cluster[, c(1, 3:4), 2]) %>%
+  round(digits = 2) 
+cluster <- rownames(coeff_cluster)
+rownames(coeff_cluster) <- NULL
+coeff_cluster <- cbind(cluster,coeff_cluster)  
 
-coeff_cluster <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 8] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_5 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                width=.2, position=position_dodge(0.05)) + ggtitle("SDM: Market squid x SDM: Pacific sardine") +
-  xlab("") + ylab("") + theme(axis.text.y=element_blank(),
-                              axis.ticks.y=element_blank()) +
-  theme(plot.title = element_text(size=10)) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
+gg_3_MSDQ + gg_3_NANC 
 
-coeff_cluster <- coef(fit_qMSQD)$port_ID[, c(1, 3:4), 7] %>%
-  as_tibble() %>% round(digits = 2) %>% mutate(cluster = as.factor(1:n()))
-gg_6 <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) + geom_point() +
-  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                width=.2, position=position_dodge(0.05)) + ggtitle("SDM: Market squid x SDM: Northern anchovy") +
-  xlab("") + ylab("") + theme(axis.text.y=element_blank(),
-                              axis.ticks.y=element_blank()) +
-  theme(plot.title = element_text(size=10)) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
 
-gg_1 + gg_2 + gg_3 + gg_4 + gg_5 + gg_6
+
+
 
 
 
