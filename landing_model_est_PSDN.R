@@ -76,9 +76,9 @@ dataset_psdn_landing <- dataset_psdn %>%
   dplyr::filter(PSDN.Total.Closure == 0) 
 
 
-# #### Check number of observation by port area ####
-# n_obs_port_area <- dataset_psdn_landing %>% group_by(PORT_AREA_CODE) %>%
-#   summarize(n_obs = n()) %>% mutate(per = scales::percent(n_obs / sum(n_obs)))
+#### Check number of observation by port area ####
+n_obs_port_area <- dataset_psdn_landing %>% group_by(PORT_AREA_CODE) %>%
+  summarize(n_obs = n()) %>% mutate(per = scales::percent(n_obs / sum(n_obs)))
 
 
 ### Descriptive statistics 

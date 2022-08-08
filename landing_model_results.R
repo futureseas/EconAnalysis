@@ -55,14 +55,12 @@ set.seed(123)
 # predict1 <- as.data.frame(predict(fit_qMSQD))
 # prediction1 <- cbind(predict1, dataset_msqd_landing)
 # sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
-
-predict2 <- as.data.frame(predict(fit_qPSDN))
-prediction2 <- cbind(predict2, dataset_psdn_landing)
-sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2)/(nrow(prediction2)-2))
-
-predict3 <- as.data.frame(predict(fit_qNANC))
-prediction3 <- cbind(predict3, dataset_nanc_landing)
-sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2))
+# predict2 <- as.data.frame(predict(fit_qPSDN))
+# prediction2 <- cbind(predict2, dataset_psdn_landing)
+# sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2)/(nrow(prediction2)-2))
+# predict3 <- as.data.frame(predict(fit_qNANC))
+# prediction3 <- cbind(predict3, dataset_nanc_landing)
+# sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2))
 
 
 
@@ -87,31 +85,31 @@ sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2
 
 library(XML)
 
-tab_model <-
-  sjPlot::tab_model(fit_qMSQD)
-
-df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
-colnames(df) <- df[1,]
-df <- df[-1,]
-# gs4_create("MSQD_landings_results", sheets = df)
-
-
-tab_model <-
-  sjPlot::tab_model(fit_qPSDN)
-
-df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
-colnames(df) <- df[1,]
-df <- df[-1,]
-gs4_create("PSDN_landings_results", sheets = df)
-
-
-tab_model <-
-  sjPlot::tab_model(fit_qNANC)
-
-df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
-colnames(df) <- df[1,]
-df <- df[-1,]
-gs4_create("NANC_landings_results", sheets = df)
+# tab_model <-
+#   sjPlot::tab_model(fit_qMSQD)
+# 
+# df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
+# colnames(df) <- df[1,]
+# df <- df[-1,]
+# # gs4_create("MSQD_landings_results", sheets = df)
+# 
+# 
+# tab_model <-
+#   sjPlot::tab_model(fit_qPSDN)
+# 
+# df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
+# colnames(df) <- df[1,]
+# df <- df[-1,]
+# gs4_create("PSDN_landings_results", sheets = df)
+# 
+# 
+# tab_model <-
+#   sjPlot::tab_model(fit_qNANC)
+# 
+# df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
+# colnames(df) <- df[1,]
+# df <- df[-1,]
+# gs4_create("NANC_landings_results", sheets = df)
 
 
 # ### Population parameters ###
