@@ -162,20 +162,20 @@ theme_set(theme_sjplot())
 gg1 <- pp_check(fit_qMSQD, resp = "logMSQDLandings") +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) +
-  theme(legend.position = "right", plot.title = element_text(size=12, face="bold.italic"))  +
-  xlim(-5, 11) + xlab("") + ggtitle("(a) Market squid")
+  theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  +
+  xlim(-5, 12) + xlab("") + ggtitle("(a) Market squid")
 
 gg2 <- pp_check(fit_qNANC, resp = "logNANCLandings") +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) +
   theme(legend.position="none", plot.title = element_text(size=12, face="bold.italic"))  +
-  xlim(-5, 11) + xlab("ln(Landing)") + ggtitle("(b) Northern anchovy")
+  xlim(-5, 12) + xlab("ln(Landing)") + ggtitle("(b) Northern anchovy")
 
 gg3 <- pp_check(fit_qPSDN, resp = "logPSDNLandings") +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) +
-  theme(legend.position="none", plot.title = element_text(size=12, face="bold.italic"))  +
-  xlim(-5, 11) + xlab("") + ggtitle("(c) Pacific sardine")
+  theme(legend.position="right", plot.title = element_text(size=12, face="bold.italic"))  +
+  xlim(-5, 12) + xlab("") + ggtitle("(c) Pacific sardine")
 
 gg1 + gg2 + gg3
 
