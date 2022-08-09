@@ -819,7 +819,9 @@ gg_psdn <- ggplot(df_cluster_PSDN) +
   scale_y_continuous(name = "ln(Landings)") 
 
 
-gg_msqd + gg_nanc + gg_psdn
+gg_msqd 
+gg_nanc 
+gg_psdn
 
 
 # # by port
