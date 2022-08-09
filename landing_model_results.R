@@ -673,6 +673,8 @@ gg_int / gg_int_2
 ##########################################################################
 ### Predictions ###
 
+library(zoo)
+
 #### Using the data estimation -- Marker squid
 set.seed(123)
 prediction <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
@@ -692,8 +694,11 @@ prediction_sel %>% group_by(group_all) %>%
   summarize(SSR = mean(Est.Error.logMSQDLandings))
 
 # by cluster
-df_cluster <- prediction_sel %>% 
-  dplyr::select(Estimate.logMSQDLandings, ln_MSQD_Landings, Date, group_all, VESSEL_NUM) %>%
+df_cluster_MSQD <- prediction_sel %>% 
+  dplyr::select(Estimate.logMSQDLandings, ln_MSQD_Landings, 
+                LANDING_YEAR, LANDING_MONTH, group_all, VESSEL_NUM) %>%
+  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
+  mutate(Date = zoo::as.yearmon(Date)) %>%
   group_by(Date, group_all, VESSEL_NUM) %>% 
   summarise(Est_landings = sum(Estimate.logMSQDLandings), Landings = sum(ln_MSQD_Landings)) %>%
   group_by(Date, group_all) %>% 
@@ -705,13 +710,14 @@ df_cluster <- prediction_sel %>%
   mutate(Landings_mean_MA     = rollapply(data = Landings_mean    , 
                                           width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
 
+
 cond_label <- as_labeller(c("1" = "Southern CCS small-scale squid-specialists",
                             "2" = "Southern CCS small-scale CPS-opportunists",
                             "4" = "Southern CCS industrial squid-specialists",
                             "5" = "Roving industrial sardine-squid switchers",
                             "7" = "Southern CCS forage fish diverse"))
 
-gg_msqd <- ggplot(df_cluster) + 
+gg_msqd <- ggplot(df_cluster_MSQD) + 
   geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
   geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
   facet_wrap(~group_all, labeller = cond_label) +
@@ -736,8 +742,11 @@ prediction_sel %>% group_by(group_all) %>%
   summarize(SSR = mean(Est.Error.logNANCLandings))
 
 # by cluster
-df_cluster <- prediction_sel %>% 
-  dplyr::select(Estimate.logNANCLandings, ln_NANC_Landings, Date, group_all, VESSEL_NUM) %>%
+df_cluster_NANC <- prediction_sel %>% 
+  dplyr::select(Estimate.logNANCLandings, ln_NANC_Landings, 
+                LANDING_YEAR, LANDING_MONTH, group_all, VESSEL_NUM) %>%
+  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
+  mutate(Date = zoo::as.yearmon(Date)) %>%
   group_by(Date, group_all, VESSEL_NUM) %>% 
   summarise(Est_landings = sum(Estimate.logNANCLandings), Landings = sum(ln_NANC_Landings)) %>%
   group_by(Date, group_all) %>% 
@@ -752,7 +761,7 @@ df_cluster <- prediction_sel %>%
 cond_label <- as_labeller(c("6" = "PNW sardine\nspecialists",
                             "7" = "Southern CCS\nforage fish\ndiverse"))
 
-gg_nanc <- ggplot(df_cluster) + 
+gg_nanc <- ggplot(df_cluster_NANC) + 
   geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
   geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
   facet_wrap(~group_all, labeller = cond_label) +
@@ -777,8 +786,11 @@ prediction_sel %>% group_by(group_all) %>%
 
 
 # by cluster
-df_cluster <- prediction_sel %>% 
-  dplyr::select(Estimate.logPSDNLandings, ln_PSDN_Landings, Date, group_all, VESSEL_NUM) %>%
+df_cluster_PSDN <- prediction_sel %>% 
+  dplyr::select(Estimate.logPSDNLandings, ln_PSDN_Landings, 
+                LANDING_YEAR, LANDING_MONTH, group_all, VESSEL_NUM) %>%
+  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
+  mutate(Date = zoo::as.yearmon(Date)) %>%
   group_by(Date, group_all, VESSEL_NUM) %>% 
   summarise(Est_landings = sum(Estimate.logPSDNLandings), Landings = sum(ln_PSDN_Landings)) %>%
   group_by(Date, group_all) %>% 
@@ -796,18 +808,18 @@ cond_label <- as_labeller(c("3" = "PNW sardine\nopportunists",
                             "6" = "PNW sardine\nspecialists",
                             "7" = "Southern CCS\nforage fish\ndiverse"))
 
-gg_psdn <- ggplot(df_cluster) + 
+gg_psdn <- ggplot(df_cluster_PSDN) + 
   geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
   geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~group_all, labeller = cond_label) +
+  facet_wrap(~group_all, labeller = cond_label) + 
+  scale_color_manual(name = "Variable: ",
+                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85")) +
   ggtitle("(c) Pacific sardine predictions") +
   scale_x_continuous(name = "Date")  +
-  scale_y_continuous(name = "ln(Landings)") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
+  scale_y_continuous(name = "ln(Landings)") 
 
 
-gg_msqd / gg_nanc / gg_psdn
+gg_msqd + gg_nanc + gg_psdn
 
 
 # # by port
