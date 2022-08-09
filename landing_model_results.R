@@ -74,6 +74,7 @@ set.seed(123)
 
 ###############################################
 ### Analyze convergence ###
+
 # launch_shinystan(fit_qMSQD)
 # launch_shinystan(fit_qPSDN)
 # launch_shinystan(fit_qNANC)
@@ -157,12 +158,26 @@ library(ggthemes)
 library(tibble)
 theme_set(theme_sjplot())
 
-# ### Posterior predictive check ###
-# pp_check(fit_qMSQD, resp = "logMSQDLandings") +
-#   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-#                      labels = c("y" = "Observed", "yrep" = "Replicated")) + 
-#   theme(legend.position = "right", plot.title = element_text(size=12, face="bold.italic"))  + 
-#   xlim(-5, 11) + xlab("Natural logarithm of market squid landing")
+### Posterior predictive check ###
+gg1 <- pp_check(fit_qMSQD, resp = "logMSQDLandings") +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) +
+  theme(legend.position = "right", plot.title = element_text(size=12, face="bold.italic"))  +
+  xlim(-5, 11) + xlab("") + ggtitle("(a) Market squid")
+
+gg2 <- pp_check(fit_qNANC, resp = "logNANCLandings") +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) +
+  theme(legend.position="none", plot.title = element_text(size=12, face="bold.italic"))  +
+  xlim(-5, 11) + xlab("ln(Landing)") + ggtitle("(b) Northern anchovy")
+
+gg3 <- pp_check(fit_qPSDN, resp = "logPSDNLandings") +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) +
+  theme(legend.position="none", plot.title = element_text(size=12, face="bold.italic"))  +
+  xlim(-5, 11) + xlab("") + ggtitle("(c) Pacific sardine")
+
+gg1 + gg2 + gg3
 
 #------------------------------------------------------
 ### Group parameters ###
