@@ -122,9 +122,9 @@ write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC.c
 
 price_model   <- bf(NANC_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(NANC_Landings) ~
-                      1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + PSDN.Total.Closure + Length_z +
-                     (1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + PSDN.Total.Closure | cluster) +
-                     (1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open | port_ID))
+                      1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:PSDN.Open + PSDN.Total.Closure + Length_z +
+                     (1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:PSDN.Open + PSDN.Total.Closure | cluster) +
+                     (1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:PSDN.Open | port_ID))
 
 
 get_prior(data = dataset_nanc_landing,
@@ -140,20 +140,22 @@ prior_lognormal <- c(
   prior(lognormal(0,1), class = b,     resp = logNANCLandings, coef = NANC_SDM_20_z),
   prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open),
   prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = NANC_SDM_20_z:MSQD.Open:MSQD_SPAWN_SDM_90_z),
+  prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = PSDN_SDM_60_z:PSDN.Open),
+  prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = MSQD.Open:MSQD_SPAWN_SDM_90_z),
   prior(exponential(1), class = sigma, resp = NANCPricez),
   prior(exponential(1), class = sigma, resp = logNANCLandings),
   prior(lkj(2),         class = rescor))
 
 set.seed(123)
-fit_qNANC <-
+fit_qNANC_v2 <-
   brm(data = dataset_nanc_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qNANC")
+      file = "Estimations/fit_qNANC_v2")
 
-fit_qNANC <- add_criterion(fit_qNANC, "loo", overwrite = TRUE)
+fit_qNANC <- add_criterion(fit_qNANC_v2, "loo", overwrite = TRUE)
 
 

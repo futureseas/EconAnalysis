@@ -56,6 +56,7 @@ dataset_psdn <- dataset %>%
   mutate(PSDN_Landings = ifelse(PSDN_Landings< 0.0001, 0, PSDN_Landings)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::mutate(WA.Restriction = ifelse(LANDING_MONTH <= 3, 1, 0)) %>%
   dplyr::mutate(ln_PSDN_Landings = log(PSDN_Landings)) %>%
   filter(group_all == 3 | group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>%
   filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA"  | 

@@ -817,6 +817,41 @@ g4_2 / g1_2 / g2_2
 # rm(g1, g2, g3, g4, g5, g6, sdm.by.species, coeff1, coeff2, coeff3, coeff4, coeff5, coeff6 , area_names, landing.price.year.sel)
 #  
 
+####################################################################################################
+## Create monthly SDM graph by port per month
+
+str(sdm.by.species)
+
+sdm.by.species.LONG <- sdm.by.species %>% ungroup() %>% 
+  dplyr::select('LANDING_MONTH', 'PORT_AREA_CODE', 'PSDN_SDM_60', 'NANC_SDM_20', 'MSQD_SPAWN_SDM_90') %>%
+  dplyr::mutate(MSQD_SPAWN_SDM_90_z = ((MSQD_SPAWN_SDM_90 - mean(MSQD_SPAWN_SDM_90, na.rm = TRUE))/sd(MSQD_SPAWN_SDM_90, na.rm = TRUE))) %>%
+  dplyr::mutate(PSDN_SDM_60_z = ((PSDN_SDM_60 - mean(PSDN_SDM_60, na.rm = TRUE))/sd(PSDN_SDM_60, na.rm = TRUE))) %>%
+  dplyr::mutate(NANC_SDM_20_z = ((NANC_SDM_20 - mean(NANC_SDM_20, na.rm = TRUE))/sd(NANC_SDM_20, na.rm = TRUE))) %>%
+  group_by(LANDING_MONTH, PORT_AREA_CODE) %>% 
+  summarize(NANC = mean(NANC_SDM_20_z, na.rm = TRUE), MSQD = mean(MSQD_SPAWN_SDM_90_z, na.rm = TRUE), PSDN = mean(PSDN_SDM_60_z, na.rm = TRUE)) %>%
+  gather(Species, SDM, c('NANC', 'PSDN', 'MSQD'), factor_key=TRUE) 
+
+sdm.by.species.LONG$Month <- as.factor(sdm.by.species.LONG$LANDING_MONTH)
+# sdm.by.species.LONG <- transform(sdm.by.species.LONG, MonthAbb = month.abb[LANDING_MONTH])
+
+# %>%
+#   mutate(PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "NANC_SDM_20", "Northern anchovy", PACFIN_SPECIES_CODE)) %>%
+#   mutate(PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "2", "Pacific sardine", PACFIN_SPECIES_CODE)) %>%
+#   mutate(PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "3", "Market squid", PACFIN_SPECIES_CODE))
+
+# port_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara"))
+# , labeller = port_name
+
+ggplot(sdm.by.species.LONG, aes(fill=Species, y=SDM, x=Month)) +
+  geom_bar(position="dodge", stat="identity") + 
+  facet_wrap(~ PORT_AREA_CODE) +  
+  theme(strip.text.x = element_text(size = 7)) + scale_fill_brewer(palette="Set2")
+
+
+
+
+
+
 #---------------------------------------------------------------------------------------------------------
 ## Figure XX?
 # I wonder if this perception is due to the fact that some vessels actually changed 

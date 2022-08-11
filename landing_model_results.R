@@ -28,11 +28,17 @@ library("dplyr")
 library("data.table") 
 library("reshape2")
 library('doBy')
+library("patchwork")
+library('ggplot2')
+library('ggthemes')
+library('tibble')
+library('XML')
+theme_set(theme_sjplot())
 
 ##### Read landing models
 fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
 fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
-fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
+fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC_v2.RDS"))
 
 #### Read database 
 dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv")
@@ -51,7 +57,7 @@ dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimatio
 ## Calculate average error
 
 ### Market squid
-set.seed(123)
+# set.seed(123)
 # predict1 <- as.data.frame(predict(fit_qMSQD))
 # prediction1 <- cbind(predict1, dataset_msqd_landing)
 # sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
@@ -84,7 +90,6 @@ set.seed(123)
 ###############################################
 ### Create result tables ###
 
-library(XML)
 
 # tab_model <-
 #   sjPlot::tab_model(fit_qMSQD)
@@ -104,13 +109,13 @@ library(XML)
 # gs4_create("PSDN_landings_results", sheets = df)
 # 
 # 
-# tab_model <-
-#   sjPlot::tab_model(fit_qNANC)
-# 
-# df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
-# colnames(df) <- df[1,]
-# df <- df[-1,]
-# gs4_create("NANC_landings_results", sheets = df)
+tab_model <-
+  sjPlot::tab_model(fit_qNANC)
+
+df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
+colnames(df) <- df[1,]
+df <- df[-1,]
+gs4_create("NANC_landings_results2", sheets = df)
 
 
 # ### Population parameters ###
@@ -151,12 +156,6 @@ library(XML)
 
 #####################################################
 ## Model summary ##
-library(patchwork)
-library(dplyr)
-library(ggplot2)
-library(ggthemes)
-library(tibble)
-theme_set(theme_sjplot())
 
 ### Posterior predictive check ###
 gg1 <- pp_check(fit_qMSQD, resp = "logMSQDLandings") +
@@ -165,17 +164,17 @@ gg1 <- pp_check(fit_qMSQD, resp = "logMSQDLandings") +
   theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  +
   xlim(-5, 12) + xlab("") + ggtitle("(a) Market squid")
 
-gg2 <- pp_check(fit_qNANC, resp = "logNANCLandings") +
-  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-                     labels = c("y" = "Observed", "yrep" = "Replicated")) +
-  theme(legend.position="none", plot.title = element_text(size=12, face="bold.italic"))  +
-  xlim(-5, 12) + xlab("ln(Landing)") + ggtitle("(b) Northern anchovy")
-
-gg3 <- pp_check(fit_qPSDN, resp = "logPSDNLandings") +
+gg3 <- pp_check(fit_qNANC, resp = "logNANCLandings") +
   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
                      labels = c("y" = "Observed", "yrep" = "Replicated")) +
   theme(legend.position="right", plot.title = element_text(size=12, face="bold.italic"))  +
-  xlim(-5, 12) + xlab("") + ggtitle("(c) Pacific sardine")
+  xlim(-5, 12) + xlab("") + ggtitle("(c) Northern anchovy")
+
+gg2 <- pp_check(fit_qPSDN, resp = "logPSDNLandings") +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) +
+  theme(legend.position="none", plot.title = element_text(size=12, face="bold.italic"))  +
+  xlim(-5, 12) + xlab("ln(Landing)") + ggtitle("(b) Pacific sardine")
 
 gg1 + gg2 + gg3
 
@@ -331,7 +330,7 @@ coeff_cluster <- cbind(cluster,coeff_cluster)
 gg_2_NANC <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
                                 width=.2, position=position_dodge(0.05)) +
-  ggtitle("(b) Price effect on NANC landings") +
+  ggtitle("(c) Price effect on NANC landings") +
   xlab("") + ylab("") +
   theme(plot.title = element_text(size=10)) +
   scale_y_discrete(labels=c("6" = "PNW sardine\nspecialists",
@@ -348,7 +347,7 @@ coeff_cluster <- cbind(cluster,coeff_cluster)
 gg_2_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
                                 width=.2, position=position_dodge(0.05)) +
-  ggtitle("(c) Price effect on PSDN landings") +
+  ggtitle("(b) Price effect on PSDN landings") +
   xlab("") + ylab("") +
   theme(plot.title = element_text(size=10)) +
   scale_y_discrete(labels=c("3" = "PNW sardine\nopportunists",
@@ -359,7 +358,7 @@ gg_2_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
 
 
-gg_2_MSDQ + gg_2_NANC + gg_2_PSDN
+gg_2_MSDQ  + gg_2_PSDN + gg_2_NANC
 
 
 
@@ -456,21 +455,11 @@ gg_3_MSDQ + gg_3_NANC
 conditions_cluster <- data.frame(cluster = unique(dataset_msqd_landing$cluster)) 
 rownames(conditions_cluster) <- conditions_cluster$cluster
 
-cluster_label <- as_labeller(c("1" = "Southern CCS small-scale squid-specialists",
-                               "2" = "Southern CCS small-scale CPS-opportunists",
-                               "4" = "Southern CCS industrial squid-specialists",
-                               "5" = "Roving industrial sardine-squid switchers",
-                               "7" = "Southern CCS forage fish diverse"))
-
-
-# conditions_port <- data.frame(port_ID = unique(dataset_msqd_landing$port_ID)) 
-# rownames(conditions_port) <- unique(dataset_msqd_landing$port_ID)
-# conditions_port <- conditions_port %>% 
-#   arrange(-desc(port_ID)) 
-# 
-# port_label <- as_labeller(c("LAA" = "Los Angeles",
-#                             "MNA" = "Monterey",
-#                             "SBA" = "Santa Barbara"))
+cluster_label <- as_labeller(c("1" = "Southern CCS\nsmall-scale squid-specialists",
+                               "2" = "Southern CCS\nsmall-scale CPS-opportunists",
+                               "4" = "Southern CCS\nindustrial squid-specialists",
+                               "5" = "Roving industrial\nsardine-squid switchers",
+                               "7" = "Southern CCS\nforage fish diverse"))
 
 
 ### Squid v/s Sardine ###
@@ -480,12 +469,16 @@ conditional_effects_psdn_msqd_sdm_cluster <- (conditional_effects(
   surface=TRUE, 
   conditions = conditions_cluster, re_formula = NULL))
 
-# conditional_effects_psdn_msqd_sdm_port <- (conditional_effects(
-#   fit_qMSQD, "PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z", 
-#   surface=TRUE, 
-#   conditions = conditions_port, re_formula = NULL))
+### Squid v/s Anchovy ###
+
+conditional_effects_nanc_msqd_sdm_cluster <- (conditional_effects(
+  fit_qMSQD, "NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z", 
+  surface=TRUE, 
+  conditions = conditions_cluster, re_formula = NULL))
+
 
 # Plot
+
 gg_int <- plot(conditional_effects_psdn_msqd_sdm_cluster, plot = FALSE)[[2]] + 
   theme(
     plot.title = element_text(size=9, face="bold.italic"),
@@ -499,35 +492,6 @@ gg_int <- plot(conditional_effects_psdn_msqd_sdm_cluster, plot = FALSE)[[2]] +
   scale_x_continuous(name = "PSDN: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
 gg_int$facet$params$labeller <- cluster_label
 
-
-# gg_int_2 <- plot(conditional_effects_psdn_msqd_sdm_port, plot = FALSE)[[2]] + 
-#   theme(
-#     plot.title = element_text(size=9, face="bold.italic"),
-#     axis.text = element_text(size = 7),
-#     axis.title = element_text(size = 8),
-#     legend.title = element_text(size = 9),
-#     legend.text = element_text(size=8)) + 
-#   ggtitle("(b) Ports") +  
-#   theme(plot.title = element_text(size=9, face="bold.italic")) +
-#   guides(colour=guide_legend(title="ln(MSQD: Landings)")) +
-#   scale_x_continuous(name = "PSDN: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
-# gg_int_2$facet$params$labeller <- port_label
-
-
-
-### Interaction effects Squid v/s Anchovy ###
-
-conditional_effects_nanc_msqd_sdm_cluster <- (conditional_effects(
-  fit_qMSQD, "NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z", 
-  surface=TRUE, 
-  conditions = conditions_cluster, re_formula = NULL))
-
-# conditional_effects_nanc_msqd_sdm_port <- (conditional_effects(
-#   fit_qMSQD, "NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z",
-#   surface=TRUE,
-#   conditions = conditions_port, re_formula = NULL))
-
-# Plot
 gg_int_2 <- plot(conditional_effects_nanc_msqd_sdm_cluster, plot = FALSE)[[2]] + 
   theme(
     plot.title = element_text(size=9, face="bold.italic"),
@@ -541,19 +505,6 @@ gg_int_2 <- plot(conditional_effects_nanc_msqd_sdm_cluster, plot = FALSE)[[2]] +
   scale_x_continuous(name = "NANC: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
 gg_int_2$facet$params$labeller <- cluster_label
 
-# gg_int_2 <- plot(conditional_effects_nanc_msqd_sdm_port, plot = FALSE)[[2]] +
-#   theme(
-#     plot.title = element_text(size=9, face="bold.italic"),
-#     axis.text = element_text(size = 7),
-#     axis.title = element_text(size = 8),
-#     legend.title = element_text(size = 9),
-#     legend.text = element_text(size=8)) +
-#   ggtitle("(b) Ports") +
-#   theme(plot.title = element_text(size=9, face="bold.italic")) +
-#   guides(colour=guide_legend(title="ln(MSQD: Landings)")) +
-#   scale_x_continuous(name = "NANC: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
-# gg_int_2$facet$params$labeller <- port_label
-
 gg_int / gg_int_2
 
 
@@ -563,15 +514,21 @@ gg_int / gg_int_2
 conditions_cluster <- data.frame(cluster = unique(dataset_nanc_landing$cluster)) 
 rownames(conditions_cluster) <- conditions_cluster$cluster
 
-cluster_label <- as_labeller(c("6" = "PNW sardine\nspecialists",
-                               "7" = "Southern CCS\nforage fish\ndiverse"))
+cluster_label <- as_labeller(c("6" = "PNW sardine specialists",
+                               "7" = "Southern CCS forage fish diverse"))
 
 ### Anchovy v/s Sardine ###
-
 conditional_effects_nanc_psdn_sdm_cluster <- (conditional_effects(
   fit_qNANC, "PSDN_SDM_60_z:NANC_SDM_20_z", 
   surface=TRUE, 
   conditions = conditions_cluster, re_formula = NULL))
+
+### Anchovy v/s squid ###
+conditional_effects_nanc_msqd_sdm_cluster <- (conditional_effects(
+  fit_qNANC, "MSQD_SPAWN_SDM_90_z:NANC_SDM_20_z", 
+  surface=TRUE, 
+  conditions = conditions_cluster, re_formula = NULL))
+
 
 # Plot
 gg_int <- plot(conditional_effects_nanc_psdn_sdm_cluster, plot = FALSE)[[2]] + 
@@ -587,14 +544,6 @@ gg_int <- plot(conditional_effects_nanc_psdn_sdm_cluster, plot = FALSE)[[2]] +
   scale_y_continuous(name = "NANC: Prob(Presence)") + scale_x_continuous(name = "PSDN: Prob(Presence)")
 gg_int$facet$params$labeller <- cluster_label
 
-### Anchovy v/s squid ###
-
-conditional_effects_nanc_msqd_sdm_cluster <- (conditional_effects(
-  fit_qNANC, "MSQD_SPAWN_SDM_90_z:NANC_SDM_20_z", 
-  surface=TRUE, 
-  conditions = conditions_cluster, re_formula = NULL))
-
-# Plot
 gg_int_2 <- plot(conditional_effects_nanc_msqd_sdm_cluster, plot = FALSE)[[2]] + 
   theme(
     plot.title = element_text(size=9, face="bold.italic"),
@@ -606,9 +555,9 @@ gg_int_2 <- plot(conditional_effects_nanc_msqd_sdm_cluster, plot = FALSE)[[2]] +
   theme(plot.title = element_text(size=9, face="bold.italic")) + 
   guides(colour=guide_legend(title="ln(NANC: Landings)")) +
   scale_y_continuous(name = "NANC: Prob(Presence)") + scale_x_continuous(name = "MSQD: Prob(Presence)")
-  gg_int$facet$params$labeller <- cluster_label
+gg_int_2$facet$params$labeller <- cluster_label
 
-  gg_int / gg_int_2
+gg_int / gg_int_2
   
   
 
@@ -618,10 +567,10 @@ conditions_cluster <- data.frame(cluster = unique(dataset_psdn_landing$cluster))
 rownames(conditions_cluster) <- conditions_cluster$cluster
 
 cluster_label <- as_labeller(c("3" = "PNW sardine\nopportunists",
-                               "4" = "Southern CCS\nindustrial\nsquid-specialists",
-                               "5" = "Roving industrial\nsardine-squid\nswitchers",
+                               "4" = "Southern CCS\nindustrial squid-specialists",
+                               "5" = "Roving industrial\nsardine-squid switchers",
                                "6" = "PNW sardine\nspecialists",
-                               "7" = "Southern CCS\nforage fish\ndiverse"))
+                               "7" = "Southern CCS\nforage fish diverse"))
 
 ### Sardine v/s Squid ###
 
@@ -630,7 +579,17 @@ conditional_effects_psdn_msqd_sdm_cluster <- (conditional_effects(
   surface=TRUE, 
   conditions = conditions_cluster, re_formula = NULL))
 
+### Sardine v/s Anchovy ###
+
+conditional_effects_nanc_psdn_sdm_cluster <- (conditional_effects(
+  fit_qPSDN, "NANC_SDM_20_z:PSDN_SDM_60_z", 
+  surface=TRUE, 
+  conditions = conditions_cluster, re_formula = NULL))
+
+
+
 # Plot
+
 gg_int <- plot(conditional_effects_psdn_msqd_sdm_cluster, plot = FALSE)[[2]] + 
   theme(
     plot.title = element_text(size=9, face="bold.italic"),
@@ -644,15 +603,6 @@ gg_int <- plot(conditional_effects_psdn_msqd_sdm_cluster, plot = FALSE)[[2]] +
   scale_y_continuous(name = "PSDN: Prob(Presence)") + scale_x_continuous(name = "MSQD: Prob(Presence)")
 gg_int$facet$params$labeller <- cluster_label
 
-
-### Squid v/s Anchovy ###
-
-conditional_effects_nanc_psdn_sdm_cluster <- (conditional_effects(
-  fit_qPSDN, "NANC_SDM_20_z:PSDN_SDM_60_z", 
-  surface=TRUE, 
-  conditions = conditions_cluster, re_formula = NULL))
-
-# Plot
 gg_int_2 <- plot(conditional_effects_nanc_psdn_sdm_cluster, plot = FALSE)[[2]] + 
   theme(
     plot.title = element_text(size=9, face="bold.italic"),
@@ -669,17 +619,82 @@ gg_int_2$facet$params$labeller <- cluster_label
 gg_int / gg_int_2
 
 
+####### By port
+
+# conditions_port <- data.frame(port_ID = unique(dataset_msqd_landing$port_ID)) 
+# rownames(conditions_port) <- unique(dataset_msqd_landing$port_ID)
+# conditions_port <- conditions_port %>% 
+#   arrange(-desc(port_ID)) 
+# 
+# port_label <- as_labeller(c("LAA" = "Los Angeles",
+#                             "MNA" = "Monterey",
+#                             "SBA" = "Santa Barbara"))
+
+
+# conditional_effects_psdn_msqd_sdm_port <- (conditional_effects(
+#   fit_qMSQD, "PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z", 
+#   surface=TRUE, 
+#   conditions = conditions_port, re_formula = NULL))
+
+# conditional_effects_nanc_msqd_sdm_port <- (conditional_effects(
+#   fit_qMSQD, "NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z",
+#   surface=TRUE,
+#   conditions = conditions_port, re_formula = NULL))
+
+# gg_int_2 <- plot(conditional_effects_psdn_msqd_sdm_port, plot = FALSE)[[2]] + 
+#   theme(
+#     plot.title = element_text(size=9, face="bold.italic"),
+#     axis.text = element_text(size = 7),
+#     axis.title = element_text(size = 8),
+#     legend.title = element_text(size = 9),
+#     legend.text = element_text(size=8)) + 
+#   ggtitle("(b) Ports") +  
+#   theme(plot.title = element_text(size=9, face="bold.italic")) +
+#   guides(colour=guide_legend(title="ln(MSQD: Landings)")) +
+#   scale_x_continuous(name = "PSDN: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
+# gg_int_2$facet$params$labeller <- port_label
+
+# gg_int_2 <- plot(conditional_effects_nanc_msqd_sdm_port, plot = FALSE)[[2]] +
+#   theme(
+#     plot.title = element_text(size=9, face="bold.italic"),
+#     axis.text = element_text(size = 7),
+#     axis.title = element_text(size = 8),
+#     legend.title = element_text(size = 9),
+#     legend.text = element_text(size=8)) +
+#   ggtitle("(b) Ports") +
+#   theme(plot.title = element_text(size=9, face="bold.italic")) +
+#   guides(colour=guide_legend(title="ln(MSQD: Landings)")) +
+#   scale_x_continuous(name = "NANC: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
+# gg_int_2$facet$params$labeller <- port_label
+
 
 ##########################################################################
 ### Predictions ###
 
+# Predict
+
+# set.seed(123)
+# prediction_MSQD <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
+# saveRDS(prediction_MSDQ, file = "prediction_MSDQ.rds")
+# 
+# set.seed(123)
+# prediction_NANC <- cbind(predict(fit_qNANC), dataset_nanc_landing)
+# saveRDS(prediction_NANC, file = "prediction_NANC.rds")
+# 
+# set.seed(123)
+# prediction_PSDN <- cbind(predict(fit_qPSDN), dataset_psdn_landing)
+# saveRDS(prediction_PSDN, file = "prediction_PSDN.rds")
+
+prediction_MSQD <- readRDS(file = "prediction_MSQD.rds")
+prediction_NANC <- readRDS(file = "prediction_NANC.rds")
+prediction_PSDN <- readRDS(file = "prediction_PSDN.rds")
+
+
+
 library(zoo)
 
-#### Using the data estimation -- Marker squid
-set.seed(123)
-prediction <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
-
-prediction_sel <- prediction[,-1]
+####  Marker squid
+prediction_sel <- prediction_MSQD[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
@@ -711,29 +726,9 @@ df_cluster_MSQD <- prediction_sel %>%
                                           width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
 
 
-cond_label <- as_labeller(c("1" = "Southern CCS small-scale squid-specialists",
-                            "2" = "Southern CCS small-scale CPS-opportunists",
-                            "4" = "Southern CCS industrial squid-specialists",
-                            "5" = "Roving industrial sardine-squid switchers",
-                            "7" = "Southern CCS forage fish diverse"))
-
-gg_msqd <- ggplot(df_cluster_MSQD) + 
-  geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
-  geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~group_all, labeller = cond_label) +
-  ggtitle("(a) Market squid predictions") +
-  scale_x_continuous(name = "Date")  +
-  scale_y_continuous(name = "ln(Landings)") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
-
-
-
 #### Using the data estimation -- Northern anchovy
-set.seed(123)
-prediction <- cbind(predict(fit_qNANC), dataset_nanc_landing)
 
-prediction_sel <- prediction[,-1]
+prediction_sel <- prediction_NANC[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
@@ -741,7 +736,6 @@ prediction_sel <- prediction_sel[,-1]
 prediction_sel %>% group_by(group_all) %>%
   summarize(SSR = mean(Est.Error.logNANCLandings))
 
-# by cluster
 df_cluster_NANC <- prediction_sel %>% 
   dplyr::select(Estimate.logNANCLandings, ln_NANC_Landings, 
                 LANDING_YEAR, LANDING_MONTH, group_all, VESSEL_NUM) %>%
@@ -758,25 +752,11 @@ df_cluster_NANC <- prediction_sel %>%
   mutate(Landings_mean_MA     = rollapply(data = Landings_mean    , 
                                           width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
 
-cond_label <- as_labeller(c("6" = "PNW sardine\nspecialists",
-                            "7" = "Southern CCS\nforage fish\ndiverse"))
-
-gg_nanc <- ggplot(df_cluster_NANC) + 
-  geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
-  geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~group_all, labeller = cond_label) +
-  ggtitle("(b) Northern anchovy predictions") +
-  scale_x_continuous(name = "Date")  +
-  scale_y_continuous(name = "ln(Landings)") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
-
 
 #### Using the data estimation -- Pacific sardine
-set.seed(123)
-prediction <- cbind(predict(fit_qPSDN), dataset_psdn_landing)
 
-prediction_sel <- prediction[,-1]
+
+prediction_sel <- prediction_PSDN[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
@@ -785,7 +765,6 @@ prediction_sel %>% group_by(group_all) %>%
   summarize(SSR = mean(Est.Error.logPSDNLandings))
 
 
-# by cluster
 df_cluster_PSDN <- prediction_sel %>% 
   dplyr::select(Estimate.logPSDNLandings, ln_PSDN_Landings, 
                 LANDING_YEAR, LANDING_MONTH, group_all, VESSEL_NUM) %>%
@@ -802,26 +781,63 @@ df_cluster_PSDN <- prediction_sel %>%
   mutate(Landings_mean_MA     = rollapply(data = Landings_mean    , 
                                           width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
 
-cond_label <- as_labeller(c("3" = "PNW sardine\nopportunists",
-                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
-                            "5" = "Roving industrial\nsardine-squid\nswitchers",
-                            "6" = "PNW sardine\nspecialists",
-                            "7" = "Southern CCS\nforage fish\ndiverse"))
+
+# Plot
+
+
+cond_label_msqd <- as_labeller(c("1" = "Southern CCS\nsmall-scale squid-specialists",
+                                 "2" = "Southern CCS\nsmall-scale CPS-opportunists",
+                                 "4" = "Southern CCS\nindustrial squid-specialists",
+                                 "5" = "Roving industrial\nsardine-squid switchers",
+                                 "7" = "Southern CCS\nforage fish diverse"))
+
+cond_label_psdn <- as_labeller(c("3" = "PNW sardine\nopportunists",
+                                 "4" = "Southern CCS\nindustrial squid-specialists",
+                                 "5" = "Roving industrial\nsardine-squid switchers",
+                                 "6" = "PNW sardine\nspecialists",
+                                 "7" = "Southern CCS\nforage fish diverse"))
+
+cond_label_nanc <- as_labeller(c("6" = "PNW sardine\nspecialists",
+                                 "7" = "Southern CCS\nforage fish\ndiverse"))
+
+
+gg_msqd <- ggplot(df_cluster_MSQD) + 
+  geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
+  geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
+  facet_wrap(~group_all, labeller = cond_label_msqd, ncol = 2) +
+  theme(legend.position="none") +
+  ggtitle("(a) Market squid predictions") +
+  scale_x_continuous(name = "")  +
+  scale_y_continuous(name = "ln(Landings)") +
+  scale_color_manual(name = "Variable: ",
+                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
+
+
+gg_nanc <- ggplot(df_cluster_NANC) + 
+  geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
+  geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
+  facet_wrap(~group_all, labeller = cond_label_nanc, ncol = 1) +
+  theme(legend.position="right") +
+  ggtitle("(c) Northern anchovy predictions") +
+  scale_x_continuous(name = "")  +
+  scale_y_continuous(name = "") +
+  scale_color_manual(name = "Variable: ",
+                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
+
 
 gg_psdn <- ggplot(df_cluster_PSDN) + 
   geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
   geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~group_all, labeller = cond_label) + 
+  facet_wrap(~group_all, labeller = cond_label_psdn, ncol = 2) + 
+  theme(legend.position="none") +
   scale_color_manual(name = "Variable: ",
                      values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85")) +
-  ggtitle("(c) Pacific sardine predictions") +
+  ggtitle("(b) Pacific sardine predictions") +
   scale_x_continuous(name = "Date")  +
-  scale_y_continuous(name = "ln(Landings)") 
+  scale_y_continuous(name = "") 
 
 
-gg_msqd 
-gg_nanc 
-gg_psdn
+gg_msqd  + gg_psdn + gg_nanc
 
 
 # # by port
