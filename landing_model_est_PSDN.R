@@ -131,9 +131,9 @@ write.csv(dataset_psdn_landing,"C:\\Data\\PacFIN data\\dataset_estimation_PSDN.c
 
 price_model   <- bf(PSDN_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(PSDN_Landings) ~
-                       1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z + Length_z +
-                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z | cluster) +
-                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z | port_ID))
+                       1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z + WA.Restriction + Length_z +
+                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z + WA.Restriction | cluster) +
+                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z + WA.Restriction | port_ID))
 
 
 get_prior(data = dataset_psdn_landing,
@@ -149,20 +149,22 @@ prior_lognormal <- c(
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60_z),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60_z:NANC_SDM_20_z),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60_z:MSQD.Open:MSQD_SPAWN_SDM_90_z),
+  prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = NANC_SDM_20_z),
+  prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = MSQD_SPAWN_SDM_90_z:MSQD.Open),
   prior(exponential(1), class = sigma, resp = PSDNPricez),
   prior(exponential(1), class = sigma, resp = logPSDNLandings),
   prior(lkj(2),         class = rescor))
 
 set.seed(123)
-fit_qPSDN <-
+fit_qPSDN_v2 <-
   brm(data = dataset_psdn_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qPSDN")
+      file = "Estimations/fit_qPSDN_v2")
 
-fit_qPSDN <- add_criterion(fit_qPSDN, "loo", overwrite = TRUE)
+fit_qPSDN <- add_criterion(fit_qPSDN_v2, "loo", overwrite = TRUE)
 
 
