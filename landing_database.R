@@ -117,7 +117,7 @@ PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_MSQD_Spawn,
 SDM_port_NANC <- read.csv(file = here::here("Data", "SDM", "NANC_SDM_port_month.csv"))%>% 
   merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
   group_by(PORT_AREA_CODE, LANDING_MONTH, LANDING_YEAR) %>% summarize(NANC_SDM_20 = mean(SDM_20))
-dataset <- merge(PacFIN.month.dataset, SDM_port_NANC, 
+PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_NANC, 
                  by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
 
 # #### Merge data with SDM Market Squid (JS Abundance model) #
@@ -127,8 +127,15 @@ dataset <- merge(PacFIN.month.dataset, SDM_port_NANC,
 # PacFIN.month.dataset <- merge(PacFIN.month.dataset, SDM_port_MSQD_JS_cpue, 
 #                       by = c("PORT_AREA_CODE", "LANDING_YEAR"), all.x = TRUE)
 
+#### Merge data with Total Crab Landings by port and month #
+Landing_port_DCRB <- read.csv(file = "C:\\GitHub\\EconAnalysis\\Data\\Port landings\\DCRB_landings.csv") %>%
+  group_by(PORT_AREA_CODE, LANDING_MONTH, LANDING_YEAR) %>% summarize(DCRB_LANDING = mean(ROUND_WEIGHT_MTONS, na.rm = TRUE))
+dataset <- merge(PacFIN.month.dataset, Landing_port_DCRB, 
+                          by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
+
+
 rm(PacFIN.month.dataset, 
-   SDM_port_PSDN, SDM_port_NANC, SDM_port_MSQD, SDM_port_MSQD_Spawn, ports_area_codes, vessel.monthly.dataset)
+   SDM_port_PSDN, SDM_port_NANC, SDM_port_MSQD, SDM_port_MSQD_Spawn, Landing_port_DCRB, ports_area_codes)
 
 
 #-----------------------------------------------------------------
@@ -223,6 +230,22 @@ dataset = subset(dataset, select = -c(MSQD_SPAWN.SDM.port.area))
 # rm(SDM.port.area.MSQD_JS_cpue)
 # dataset = subset(dataset, select = -c(MSQD_JS_cpue.SDM.port.area))
 
+
+#### Using port area code
+LANDING.port.area.DCRB <- aggregate(x=dataset$DCRB_LANDING,
+                        by = list(dataset$LANDING_YEAR,
+                                  dataset$LANDING_MONTH,
+                                  dataset$PORT_AREA_CODE), FUN = mean, na.rm=T)
+LANDING.port.area.DCRB <- LANDING.port.area.DCRB %>% dplyr::rename(LANDING_YEAR = Group.1) %>%
+  dplyr::rename(LANDING_MONTH = Group.2) %>% dplyr::rename(PORT_AREA_CODE = Group.3) %>%
+  dplyr::rename(DCRB.LANDING.port.area = x)
+LANDING.port.area.DCRB[LANDING.port.area.DCRB == "NaN"] <- NA
+dataset <- dataset %>%
+  merge(LANDING.port.area.DCRB, by = c("LANDING_YEAR", "LANDING_MONTH", "PORT_AREA_CODE"), all.x = TRUE) %>%
+  mutate(DCRB_LANDING = ifelse(is.na(DCRB_LANDING), DCRB.LANDING.port.area, DCRB_LANDING))
+rm(LANDING.port.area.DCRB)
+
+dataset = subset(dataset, select = -c(DCRB.LANDING.port.area))
 
 
 #----------------------------------------------------------------------------------------------
@@ -455,6 +478,9 @@ dataset <- dataset %>%
   dplyr::rename(MSQD_Landings = MSQD_LANDED_WEIGHT_MTONS.sum) %>%
   dplyr::rename(NANC_Landings = NANC_LANDED_WEIGHT_MTONS.sum)
 
+## NA crab landings to zero
+dataset <- dataset %>%
+  dplyr::mutate(DCRB_LANDING = ifelse(is.na(DCRB_LANDING), 0, DCRB_LANDING))
 # Create centerized variables and z-values 
 
 dataset <- dataset %>%
@@ -464,6 +490,7 @@ dataset <- dataset %>%
   dplyr::mutate(MSQD_SPAWN_SDM_90_z = ((MSQD_SPAWN_SDM_90 - mean(MSQD_SPAWN_SDM_90, na.rm = TRUE))/sd(MSQD_SPAWN_SDM_90, na.rm = TRUE))) %>%
   dplyr::mutate(MSQD_SDM_90_z = ((MSQD_SDM_90 - mean(MSQD_SDM_90, na.rm = TRUE))/sd(MSQD_SDM_90, na.rm = TRUE))) %>%
   dplyr::mutate(PSDN_SDM_60_z = ((PSDN_SDM_60 - mean(PSDN_SDM_60, na.rm = TRUE))/sd(PSDN_SDM_60, na.rm = TRUE))) %>%
+  dplyr::mutate(DCRB_LANDING_z = ((DCRB_LANDING - mean(DCRB_LANDING, na.rm = TRUE))/sd(DCRB_LANDING, na.rm = TRUE))) %>%
   dplyr::mutate(NANC_SDM_20_z = ((NANC_SDM_20 - mean(NANC_SDM_20, na.rm = TRUE))/sd(NANC_SDM_20, na.rm = TRUE))) %>%
   dplyr::mutate(Price.Fishmeal_z = ((Price.Fishmeal - mean(Price.Fishmeal, na.rm = TRUE))/sd(Price.Fishmeal, na.rm = TRUE))) %>%
   dplyr::mutate(diesel.price_z = ((diesel.price - mean(diesel.price, na.rm = TRUE))/sd(diesel.price, na.rm = TRUE))) %>%

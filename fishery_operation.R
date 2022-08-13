@@ -537,10 +537,10 @@ PacFIN.month.CPS.nvessels <- left_join(PacFIN.month.CPS, nvessel.year,
 
 sdm.by.species <- PacFIN.month.CPS.nvessels %>%
   dplyr::select(LANDING_YEAR, LANDING_MONTH, PSDN_SDM_60, MSQD_SDM_90_JS_CPUE,
-                MSQD_SDM_90, MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_v2, 
+                MSQD_SDM_90, MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_v2, DCRB_LANDING, 
                 NANC_SDM_20, MSQD_recruitment, LANDED_WEIGHT_MTONS.sum, 
                 PACFIN_SPECIES_CODE, PORT_AREA_CODE, n_vessel) %>% 
-  filter(LANDING_YEAR >= 1998 & LANDING_YEAR <= 2019) %>%
+  filter(LANDING_YEAR >= 2000 & LANDING_YEAR <= 2019) %>%
   group_by(LANDING_YEAR, LANDING_MONTH, PORT_AREA_CODE, PACFIN_SPECIES_CODE) %>% 
   summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
             NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
@@ -549,11 +549,12 @@ sdm.by.species <- PacFIN.month.CPS.nvessels %>%
             MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm=TRUE),
             MSQD_SPAWN_SDM_90_v2 = mean(MSQD_SPAWN_SDM_90_v2, na.rm=TRUE),
             MSQD_recruitment = mean(MSQD_recruitment, na.rm=TRUE),
+            DCRB_LANDING = mean(DCRB_LANDING, na.rm=TRUE),
             LANDED_WEIGHT_MTONS = sum(LANDED_WEIGHT_MTONS.sum, na.rm = TRUE),
             n_vessel = mean(n_vessel, na.rm = TRUE)) %>%
   pivot_wider(id_cols = c("LANDING_YEAR", "LANDING_MONTH", "PORT_AREA_CODE",
   "PSDN_SDM_60", "NANC_SDM_20", "MSQD_SDM_90_JS_cpue", "MSQD_SPAWN_SDM_90",
-  "MSQD_SDM_90", "MSQD_SPAWN_SDM_90_v2", "MSQD_recruitment"), 
+  "MSQD_SDM_90", "MSQD_SPAWN_SDM_90_v2", "MSQD_recruitment", "DCRB_LANDING"), 
               names_from = PACFIN_SPECIES_CODE,
               values_from = c("LANDED_WEIGHT_MTONS", "n_vessel")) %>% 
   dplyr::rename(Landings_PSDN = LANDED_WEIGHT_MTONS_PSDN) %>% 
@@ -823,13 +824,16 @@ g4_2 / g1_2 / g2_2
 str(sdm.by.species)
 
 sdm.by.species.LONG <- sdm.by.species %>% ungroup() %>% 
-  dplyr::select('LANDING_MONTH', 'PORT_AREA_CODE', 'PSDN_SDM_60', 'NANC_SDM_20', 'MSQD_SPAWN_SDM_90') %>%
+  dplyr::select('LANDING_MONTH', 'PORT_AREA_CODE', 
+                'PSDN_SDM_60', 'NANC_SDM_20', 'MSQD_SPAWN_SDM_90', 'DCRB_LANDING') %>%
   dplyr::mutate(MSQD_SPAWN_SDM_90_z = ((MSQD_SPAWN_SDM_90 - mean(MSQD_SPAWN_SDM_90, na.rm = TRUE))/sd(MSQD_SPAWN_SDM_90, na.rm = TRUE))) %>%
   dplyr::mutate(PSDN_SDM_60_z = ((PSDN_SDM_60 - mean(PSDN_SDM_60, na.rm = TRUE))/sd(PSDN_SDM_60, na.rm = TRUE))) %>%
   dplyr::mutate(NANC_SDM_20_z = ((NANC_SDM_20 - mean(NANC_SDM_20, na.rm = TRUE))/sd(NANC_SDM_20, na.rm = TRUE))) %>%
+  dplyr::mutate(DCRB_LANDING_z = ((DCRB_LANDING - mean(DCRB_LANDING, na.rm = TRUE))/sd(DCRB_LANDING, na.rm = TRUE))) %>%
   group_by(LANDING_MONTH, PORT_AREA_CODE) %>% 
-  summarize(NANC = mean(NANC_SDM_20_z, na.rm = TRUE), MSQD = mean(MSQD_SPAWN_SDM_90_z, na.rm = TRUE), PSDN = mean(PSDN_SDM_60_z, na.rm = TRUE)) %>%
-  gather(Species, SDM, c('NANC', 'PSDN', 'MSQD'), factor_key=TRUE) 
+  summarize(NANC = mean(NANC_SDM_20_z, na.rm = TRUE), MSQD = mean(MSQD_SPAWN_SDM_90_z, na.rm = TRUE),
+            PSDN = mean(PSDN_SDM_60_z, na.rm = TRUE), DCRB = mean(DCRB_LANDING_z, na.rm = TRUE)/4) %>%
+  gather(Species, SDM, c('NANC', 'PSDN', 'MSQD', 'DCRB'), factor_key=TRUE) 
 
 sdm.by.species.LONG$Month <- as.factor(sdm.by.species.LONG$LANDING_MONTH)
 # sdm.by.species.LONG <- transform(sdm.by.species.LONG, MonthAbb = month.abb[LANDING_MONTH])
@@ -844,7 +848,7 @@ sdm.by.species.LONG$Month <- as.factor(sdm.by.species.LONG$LANDING_MONTH)
 
 ggplot(sdm.by.species.LONG, aes(fill=Species, y=SDM, x=Month)) +
   geom_bar(position="dodge", stat="identity") + 
-  facet_wrap(~ PORT_AREA_CODE) +  
+  facet_wrap(~ PORT_AREA_CODE) + ylab("SDM / Landings")
   theme(strip.text.x = element_text(size = 7)) + scale_fill_brewer(palette="Set2")
 
 

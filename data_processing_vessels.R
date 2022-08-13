@@ -156,9 +156,19 @@ SDM_port_MSQD_JS_cpue <- read.csv(file = here::here("Data", "SDM", "MSQD_SDM_por
 Recruitment_port_MSQD <- read.csv(file = here::here("Data", "SDM", "MSQD_recruitmen_index.csv")) %>%
   merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
   group_by(PORT_AREA_CODE, LANDING_YEAR) %>% summarize(MSQD_recruitment = mean(Model_Predictions))
-  PacFIN.month.SDM <- merge(PacFIN.month, Recruitment_port_MSQD, 
+  PacFIN.month <- merge(PacFIN.month, Recruitment_port_MSQD, 
                       by = c("PORT_AREA_CODE", "LANDING_YEAR"), all.x = TRUE)
+
+#### Merge data with Total Crab Landings by port and month #
+Landing_port_DCRB <- read.csv(file = "C:\\GitHub\\EconAnalysis\\Data\\Port landings\\DCRB_landings.csv") %>%
+  group_by(PORT_AREA_CODE, LANDING_MONTH, LANDING_YEAR) %>% summarize(DCRB_LANDING = mean(ROUND_WEIGHT_MTONS, na.rm = TRUE))
+  PacFIN.month.SDM <- merge(PacFIN.month, Landing_port_DCRB, 
+                          by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
   
+
+
+
+
 rm(PacFIN.month, 
    ports_area_codes, 
    Ports.landing.FF, 
@@ -167,7 +177,8 @@ rm(PacFIN.month,
    SDM_port_MSQD_JS_cpue,
    SDM_port_MSQD_Spawn,
    SDM_port_NANC,
-   SDM_port_PSDN)
+   SDM_port_PSDN,
+   Landing_port_DCRB)
 
 #----------------------
 ### Merge TAC data set 

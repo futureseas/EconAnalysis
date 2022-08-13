@@ -57,7 +57,7 @@ dataset_nanc <- dataset %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::mutate(ln_NANC_Landings = log(NANC_Landings)) %>%
-  filter(group_all == 6 | group_all == 7) %>%
+  filter(group_all == 6 | group_all == 7) %>% filter(PORT_AREA_CODE != "CLO") %>%
   drop_na()
 
 
@@ -126,7 +126,6 @@ landing_model <- bf(log(NANC_Landings) ~
                      (1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:PSDN.Open + PSDN.Total.Closure | cluster) +
                      (1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:PSDN.Open | port_ID))
 
-
 get_prior(data = dataset_nanc_landing,
           family = gaussian,
           price_model + landing_model + set_rescor(TRUE))
@@ -147,15 +146,15 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(123)
-fit_qNANC_v2 <-
+fit_qNANC_v3 <-
   brm(data = dataset_nanc_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qNANC_v2")
+      file = "Estimations/fit_qNANC_v3")
 
-fit_qNANC <- add_criterion(fit_qNANC_v2, "loo", overwrite = TRUE)
+fit_qNANC_v3 <- add_criterion(fit_qNANC_v3, "loo", overwrite = TRUE)
 
 

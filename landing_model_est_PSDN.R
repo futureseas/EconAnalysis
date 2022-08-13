@@ -46,6 +46,7 @@ dataset_psdn <- dataset %>%
                 PSDN_Landings, 
                 PSDN_Price, PSDN_Price_z, 
                 PSDN_SDM_60, NANC_SDM_20, 
+                DCRB_LANDING, DCRB_LANDING_z,
                 PSDN_SDM_60_z, NANC_SDM_20_z,
                 PSDN.Open, MSQD.Open,
                 Price.Fishmeal, Price.Fishmeal_z, 
@@ -58,7 +59,7 @@ dataset_psdn <- dataset %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::mutate(WA.Restriction = ifelse(LANDING_MONTH <= 3, 1, 0)) %>%
   dplyr::mutate(ln_PSDN_Landings = log(PSDN_Landings)) %>%
-  filter(group_all == 3 | group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>%
+  filter(group_all == 1 | group_all == 3 | group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>%
   filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA"  | 
            PORT_AREA_CODE == "CLO"  | PORT_AREA_CODE == "CWA"  | PORT_AREA_CODE == "CLW" | 
            PORT_AREA_CODE == "SDA") %>% drop_na()
@@ -85,7 +86,7 @@ n_obs_port_area <- dataset_psdn_landing %>% group_by(PORT_AREA_CODE) %>%
 ### Descriptive statistics 
 desc_data <- dataset_psdn_landing %>%
   subset(select = c(Length, PSDN_Landings, PSDN_Price, 
-                    MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,  
+                    MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,DCRB_LANDING,
                     MSQD.Open, Price.Fishmeal.AFI))
 
 table <- psych::describe(desc_data, fast=TRUE) %>%
@@ -95,6 +96,7 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 4, "Prob(presence): MSQD", vars)) %>%
   mutate(vars = ifelse(vars == 5, "Prob(presence): PSDN", vars)) %>%
   mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
+  mutate(vars = ifelse(vars == 6, "Landings: DCRB", vars)) %>%
   mutate(vars = ifelse(vars == 7, "Fraction of month open: MSQD", vars)) %>%
   mutate(vars = ifelse(vars == 8, "Fishmeal price", vars)) 
 
@@ -121,6 +123,7 @@ purtest(pDataset$PSDN_Price, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$DCRB_LANDING, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
@@ -129,28 +132,29 @@ rm(pDataset)
 ### Market squid landing model ###
 write.csv(dataset_psdn_landing,"C:\\Data\\PacFIN data\\dataset_estimation_PSDN.csv", row.names = FALSE)
 
+
 price_model   <- bf(PSDN_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(PSDN_Landings) ~
-                       1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z + WA.Restriction + Length_z +
-                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z + WA.Restriction | cluster) +
-                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:PSDN_SDM_60_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z + WA.Restriction | port_ID))
-
+                       1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:NANC_SDM_20_z + PSDN_SDM_60_z:DCRB_LANDING_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z  + DCRB_LANDING_z + WA.Restriction + Length_z +
+                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:NANC_SDM_20_z + PSDN_SDM_60_z:DCRB_LANDING_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z  + DCRB_LANDING_z + WA.Restriction | cluster) +
+                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:NANC_SDM_20_z + PSDN_SDM_60_z:DCRB_LANDING_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z  + DCRB_LANDING_z + WA.Restriction | port_ID))
 
 get_prior(data = dataset_psdn_landing,
           family = gaussian,
           price_model + landing_model + set_rescor(TRUE))
 
 # Create priors
-
 prior_lognormal <- c(
   prior(lognormal(0,1), class = b,     resp = PSDNPricez,      coef = Price.Fishmeal.AFI_z),
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = Length_z),
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = PSDN_Price_z),
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60_z),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60_z:NANC_SDM_20_z),
-  prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60_z:MSQD.Open:MSQD_SPAWN_SDM_90_z),
+  prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z:MSQD.Open),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = NANC_SDM_20_z),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = MSQD_SPAWN_SDM_90_z:MSQD.Open),
+  prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60_z:DCRB_LANDING_z),
+  prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = DCRB_LANDING_z),
   prior(exponential(1), class = sigma, resp = PSDNPricez),
   prior(exponential(1), class = sigma, resp = logPSDNLandings),
   prior(lkj(2),         class = rescor))
