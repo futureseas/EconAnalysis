@@ -123,10 +123,11 @@ purtest(pDataset$PSDN_Price, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
-purtest(pDataset$DCRB_LANDING, pmax = 4, exo = "intercept", test = "Pm")
+# purtest(pDataset$DCRB_LANDING, pmax = 1, exo = "intercept", test = "Pm")
 purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
+
 
 ## -------------------------------------------------------------------
 ### Market squid landing model ###
