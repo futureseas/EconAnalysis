@@ -57,7 +57,8 @@ dataset_nanc <- dataset %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::mutate(ln_NANC_Landings = log(NANC_Landings)) %>%
-  filter(group_all == 6 | group_all == 7) %>% filter(PORT_AREA_CODE != "CLO") %>%
+  filter(group_all == 6 | group_all == 7) %>%
+  filter(PORT_AREA_CODE != "CLO") %>% filter(PORT_AREA_CODE != "CLW") %>%
   drop_na()
 
 
@@ -146,15 +147,15 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(123)
-fit_qNANC_v3 <-
+fit_qNANC_v4 <-
   brm(data = dataset_nanc_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qNANC_v3")
+      file = "Estimations/fit_qNANC_v4")
 
-fit_qNANC_v3 <- add_criterion(fit_qNANC_v3, "loo", overwrite = TRUE)
+fit_qNANC_v4 <- add_criterion(fit_qNANC_v4, "loo", overwrite = TRUE)
 
 
