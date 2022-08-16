@@ -96,11 +96,11 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 4, "Prob(presence): MSQD", vars)) %>%
   mutate(vars = ifelse(vars == 5, "Prob(presence): PSDN", vars)) %>%
   mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 6, "Landings: DCRB", vars)) %>%
-  mutate(vars = ifelse(vars == 7, "Fraction of month open: MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 8, "Fishmeal price", vars)) 
+  mutate(vars = ifelse(vars == 7, "Landings: DCRB", vars)) %>%
+  mutate(vars = ifelse(vars == 8, "Fraction of month open: MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 9, "Fishmeal price", vars)) 
 
-# gs4_create("SummaryMonthly_Q_PSDN", sheets = table)
+gs4_create("SummaryMonthly_Q_PSDN", sheets = table)
 rm(desc_data, table)
 
 

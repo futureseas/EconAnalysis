@@ -91,7 +91,7 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
   mutate(vars = ifelse(vars == 7, "Fishmeal price", vars)) 
 
-#gs4_create("SummaryMonthly_Q_NANC", sheets = table)
+gs4_create("SummaryMonthly_Q_NANC", sheets = table)
 rm(desc_data, table)
 
 
