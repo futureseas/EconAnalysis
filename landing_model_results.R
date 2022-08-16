@@ -46,9 +46,9 @@ dataset_nanc_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimatio
 dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_PSDN.csv")
 
 
-# summary(fit_qMSQD)
-# summary(fit_qPSDN)
-# summary(fit_qNANC)
+summary(fit_qMSQD)
+summary(fit_qPSDN)
+summary(fit_qNANC)
 
 
 ############################
@@ -56,17 +56,16 @@ dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimatio
 
 ## Calculate average error
 
-### Market squid
-# set.seed(123)
-# predict1 <- as.data.frame(predict(fit_qMSQD))
-# prediction1 <- cbind(predict1, dataset_msqd_landing)
-# sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
-# predict2 <- as.data.frame(predict(fit_qPSDN))
-# prediction2 <- cbind(predict2, dataset_psdn_landing)
-# sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2)/(nrow(prediction2)-2))
-# predict3 <- as.data.frame(predict(fit_qNANC))
-# prediction3 <- cbind(predict3, dataset_nanc_landing)
-# sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2))
+set.seed(123)
+predict1 <- as.data.frame(predict(fit_qMSQD))
+prediction1 <- cbind(predict1, dataset_msqd_landing)
+sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+predict2 <- as.data.frame(predict(fit_qPSDN))
+prediction2 <- cbind(predict2, dataset_psdn_landing)
+sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2)/(nrow(prediction2)-2))
+predict3 <- as.data.frame(predict(fit_qNANC))
+prediction3 <- cbind(predict3, dataset_nanc_landing)
+sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2))
 
 
 
@@ -81,9 +80,9 @@ dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimatio
 ###############################################
 ### Analyze convergence ###
 
-# launch_shinystan(fit_qMSQD)
- launch_shinystan(fit_qPSDN)
- launch_shinystan(fit_qNANC)
+launch_shinystan(fit_qMSQD)
+launch_shinystan(fit_qPSDN)
+launch_shinystan(fit_qNANC)
 
 
 
