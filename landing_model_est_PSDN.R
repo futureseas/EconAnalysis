@@ -59,7 +59,7 @@ dataset_psdn <- dataset %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::mutate(WA.Restriction = ifelse(LANDING_MONTH <= 3, 1, 0)) %>%
   dplyr::mutate(ln_PSDN_Landings = log(PSDN_Landings)) %>%
-  filter(group_all == 1 | group_all == 3 | group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>%
+  filter(group_all == 3 | group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>%
   filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA"  | 
            PORT_AREA_CODE == "CLO"  | PORT_AREA_CODE == "CWA"  | PORT_AREA_CODE == "CLW" | 
            PORT_AREA_CODE == "SDA") %>% drop_na()
@@ -100,7 +100,7 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 8, "Fraction of month open: MSQD", vars)) %>%
   mutate(vars = ifelse(vars == 9, "Fishmeal price", vars)) 
 
-gs4_create("SummaryMonthly_Q_PSDN", sheets = table)
+#gs4_create("SummaryMonthly_Q_PSDN", sheets = table)
 rm(desc_data, table)
 
 
@@ -136,9 +136,9 @@ write.csv(dataset_psdn_landing,"C:\\Data\\PacFIN data\\dataset_estimation_PSDN.c
 
 price_model   <- bf(PSDN_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(PSDN_Landings) ~
-                       1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:NANC_SDM_20_z + PSDN_SDM_60_z:DCRB_LANDING_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z  + DCRB_LANDING_z + WA.Restriction + Length_z +
-                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:NANC_SDM_20_z + PSDN_SDM_60_z:DCRB_LANDING_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z  + DCRB_LANDING_z + WA.Restriction | cluster) +
-                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:NANC_SDM_20_z + PSDN_SDM_60_z:DCRB_LANDING_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z  + DCRB_LANDING_z + WA.Restriction | port_ID))
+                       1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:NANC_SDM_20_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z + WA.Restriction + Length_z +
+                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:NANC_SDM_20_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z + WA.Restriction | cluster) +
+                      (1 + PSDN_SDM_60_z + PSDN_Price_z + PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:NANC_SDM_20_z + MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z + WA.Restriction | port_ID))
 
 get_prior(data = dataset_psdn_landing,
           family = gaussian,
@@ -154,22 +154,20 @@ prior_lognormal <- c(
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z:MSQD.Open),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = NANC_SDM_20_z),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = MSQD_SPAWN_SDM_90_z:MSQD.Open),
-  prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60_z:DCRB_LANDING_z),
-  prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = DCRB_LANDING_z),
   prior(exponential(1), class = sigma, resp = PSDNPricez),
   prior(exponential(1), class = sigma, resp = logPSDNLandings),
   prior(lkj(2),         class = rescor))
 
 set.seed(123)
-fit_qPSDN_v2 <-
+fit_qPSDN_v3 <-
   brm(data = dataset_psdn_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qPSDN_v2")
+      file = "Estimations/fit_qPSDN_v3")
 
-fit_qPSDN <- add_criterion(fit_qPSDN_v2, "loo", overwrite = TRUE)
+fit_qPSDN_v3 <- add_criterion(fit_qPSDN_v3, "loo", overwrite = TRUE)
 
 

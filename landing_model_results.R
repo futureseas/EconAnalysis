@@ -46,27 +46,27 @@ dataset_nanc_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimatio
 dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_PSDN.csv")
 
 
-summary(fit_qMSQD)
-summary(fit_qPSDN)
-summary(fit_qNANC)
+# summary(fit_qMSQD)
+# summary(fit_qPSDN)
+# summary(fit_qNANC)
 
 
 ############################
 # Calculate estimation error
 
 ## Calculate average error
-
-set.seed(123)
-predict1 <- as.data.frame(predict(fit_qMSQD))
-prediction1 <- cbind(predict1, dataset_msqd_landing)
-sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
-predict2 <- as.data.frame(predict(fit_qPSDN))
-prediction2 <- cbind(predict2, dataset_psdn_landing)
-sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2)/(nrow(prediction2)-2))
-predict3 <- as.data.frame(predict(fit_qNANC))
-prediction3 <- cbind(predict3, dataset_nanc_landing)
-sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2))
-
+# 
+# set.seed(123)
+# predict1 <- as.data.frame(predict(fit_qMSQD))
+# prediction1 <- cbind(predict1, dataset_msqd_landing)
+# sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+# predict2 <- as.data.frame(predict(fit_qPSDN))
+# prediction2 <- cbind(predict2, dataset_psdn_landing)
+# sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2)/(nrow(prediction2)-2))
+# predict3 <- as.data.frame(predict(fit_qNANC))
+# prediction3 <- cbind(predict3, dataset_nanc_landing)
+# sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2))
+# 
 
 
 ##############################################################################################
@@ -80,9 +80,9 @@ sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2
 ###############################################
 ### Analyze convergence ###
 
-launch_shinystan(fit_qMSQD)
-launch_shinystan(fit_qPSDN)
-launch_shinystan(fit_qNANC)
+# launch_shinystan(fit_qMSQD)
+# launch_shinystan(fit_qPSDN)
+# launch_shinystan(fit_qNANC)
 
 
 
@@ -96,9 +96,9 @@ launch_shinystan(fit_qNANC)
 # df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
 # colnames(df) <- df[1,]
 # df <- df[-1,]
-# # gs4_create("MSQD_landings_results", sheets = df)
-# 
-# 
+# gs4_create("MSQD_landings_results", sheets = df)
+
+
 # tab_model <-
 #   sjPlot::tab_model(fit_qPSDN)
 # 
@@ -114,7 +114,7 @@ launch_shinystan(fit_qNANC)
 # df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
 # colnames(df) <- df[1,]
 # df <- df[-1,]
-# gs4_create("NANC_landings_results3", sheets = df)
+# gs4_create("NANC_landings_results", sheets = df)
 
 
 # ### Population parameters ###
@@ -156,26 +156,26 @@ launch_shinystan(fit_qNANC)
 #####################################################
 ## Model summary ##
 
-### Posterior predictive check ###
-gg1 <- pp_check(fit_qMSQD, resp = "logMSQDLandings") +
-  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-                     labels = c("y" = "Observed", "yrep" = "Replicated")) +
-  theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  +
-  xlim(-5, 12) + xlab("") + ggtitle("(a) Market squid")
-
-gg3 <- pp_check(fit_qNANC, resp = "logNANCLandings") +
-  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-                     labels = c("y" = "Observed", "yrep" = "Replicated")) +
-  theme(legend.position="right", plot.title = element_text(size=12, face="bold.italic"))  +
-  xlim(-5, 12) + xlab("") + ggtitle("(c) Northern anchovy")
-
-gg2 <- pp_check(fit_qPSDN, resp = "logPSDNLandings") +
-  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-                     labels = c("y" = "Observed", "yrep" = "Replicated")) +
-  theme(legend.position="none", plot.title = element_text(size=12, face="bold.italic"))  +
-  xlim(-5, 12) + xlab("ln(Landing)") + ggtitle("(b) Pacific sardine")
-
-gg1 + gg2 + gg3
+# ### Posterior predictive check ###
+# gg1 <- pp_check(fit_qMSQD, resp = "logMSQDLandings") +
+#   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+#                      labels = c("y" = "Observed", "yrep" = "Replicated")) +
+#   theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  +
+#   xlim(-5, 12) + xlab("") + ggtitle("(a) Market squid")
+# 
+# gg3 <- pp_check(fit_qNANC, resp = "logNANCLandings") +
+#   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+#                      labels = c("y" = "Observed", "yrep" = "Replicated")) +
+#   theme(legend.position="right", plot.title = element_text(size=12, face="bold.italic"))  +
+#   xlim(-5, 12) + xlab("") + ggtitle("(c) Northern anchovy")
+# 
+# gg2 <- pp_check(fit_qPSDN, resp = "logPSDNLandings") +
+#   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+#                      labels = c("y" = "Observed", "yrep" = "Replicated")) +
+#   theme(legend.position="none", plot.title = element_text(size=12, face="bold.italic"))  +
+#   xlim(-5, 12) + xlab("ln(Landing)") + ggtitle("(b) Pacific sardine")
+# 
+# gg1 + gg2 + gg3
 
 #------------------------------------------------------
 ### Group parameters ###
@@ -349,7 +349,8 @@ gg_2_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   ggtitle("(b) Price effect on PSDN landings") +
   xlab("") + ylab("") +
   theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("3" = "PNW sardine\nopportunists",
+  scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
+                            "3" = "PNW sardine\nopportunists",
                             "4" = "Southern CCS\nindustrial\nsquid-specialists",
                             "5" = "Roving industrial\nsardine-squid\nswitchers",
                             "6" = "PNW sardine\nspecialists",
@@ -565,7 +566,8 @@ gg_int / gg_int_2
 conditions_cluster <- data.frame(cluster = unique(dataset_psdn_landing$cluster)) 
 rownames(conditions_cluster) <- conditions_cluster$cluster
 
-cluster_label <- as_labeller(c("3" = "PNW sardine\nopportunists",
+cluster_label <- as_labeller(c("1" = "Southern CCS\nsmall-scale squid-specialists",
+                               "3" = "PNW sardine\nopportunists",
                                "4" = "Southern CCS\nindustrial squid-specialists",
                                "5" = "Roving industrial\nsardine-squid switchers",
                                "6" = "PNW sardine\nspecialists",
@@ -672,21 +674,21 @@ gg_int / gg_int_2
 
 # Predict
 
-# set.seed(123)
-# prediction_MSQD <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
-# saveRDS(prediction_MSDQ, file = "prediction_MSDQ.rds")
-# 
-# set.seed(123)
-# prediction_NANC <- cbind(predict(fit_qNANC), dataset_nanc_landing)
-# saveRDS(prediction_NANC, file = "prediction_NANC.rds")
-# 
-# set.seed(123)
-# prediction_PSDN <- cbind(predict(fit_qPSDN), dataset_psdn_landing)
-# saveRDS(prediction_PSDN, file = "prediction_PSDN.rds")
+set.seed(123)
+prediction_MSQD <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
+saveRDS(prediction_MSQD, file = "prediction_MSQD_v2.rds")
 
-prediction_MSQD <- readRDS(file = "prediction_MSQD.rds")
-prediction_NANC <- readRDS(file = "prediction_NANC.rds")
-prediction_PSDN <- readRDS(file = "prediction_PSDN.rds")
+set.seed(123)
+prediction_NANC <- cbind(predict(fit_qNANC), dataset_nanc_landing)
+saveRDS(prediction_NANC, file = "prediction_NANC_v2.rds")
+
+set.seed(123)
+prediction_PSDN <- cbind(predict(fit_qPSDN), dataset_psdn_landing)
+saveRDS(prediction_PSDN, file = "prediction_PSDN_v2.rds")
+
+# prediction_MSQD <- readRDS(file = "prediction_MSQD_v2.rds")
+# prediction_NANC <- readRDS(file = "prediction_NANC_v2.rds")
+# prediction_PSDN <- readRDS(file = "prediction_PSDN_v2.rds")
 
 
 
@@ -790,7 +792,8 @@ cond_label_msqd <- as_labeller(c("1" = "Southern CCS\nsmall-scale squid-speciali
                                  "5" = "Roving industrial\nsardine-squid switchers",
                                  "7" = "Southern CCS\nforage fish diverse"))
 
-cond_label_psdn <- as_labeller(c("3" = "PNW sardine\nopportunists",
+cond_label_psdn <- as_labeller(c("1" = "Southern CCS\nsmall-scale squid-specialists",
+                                 "3" = "PNW sardine\nopportunists",
                                  "4" = "Southern CCS\nindustrial squid-specialists",
                                  "5" = "Roving industrial\nsardine-squid switchers",
                                  "6" = "PNW sardine\nspecialists",
