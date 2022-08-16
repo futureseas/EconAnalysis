@@ -825,15 +825,18 @@ str(sdm.by.species)
 
 sdm.by.species.LONG <- sdm.by.species %>% ungroup() %>% 
   dplyr::select('LANDING_MONTH', 'PORT_AREA_CODE', 
-                'PSDN_SDM_60', 'NANC_SDM_20', 'MSQD_SPAWN_SDM_90', 'DCRB_LANDING') %>%
+                'PSDN_SDM_60', 'NANC_SDM_20', 'MSQD_SPAWN_SDM_90') %>%
+                #, 'DCRB_LANDING') %>%
   dplyr::mutate(MSQD_SPAWN_SDM_90_z = ((MSQD_SPAWN_SDM_90 - mean(MSQD_SPAWN_SDM_90, na.rm = TRUE))/sd(MSQD_SPAWN_SDM_90, na.rm = TRUE))) %>%
   dplyr::mutate(PSDN_SDM_60_z = ((PSDN_SDM_60 - mean(PSDN_SDM_60, na.rm = TRUE))/sd(PSDN_SDM_60, na.rm = TRUE))) %>%
   dplyr::mutate(NANC_SDM_20_z = ((NANC_SDM_20 - mean(NANC_SDM_20, na.rm = TRUE))/sd(NANC_SDM_20, na.rm = TRUE))) %>%
-  dplyr::mutate(DCRB_LANDING_z = ((DCRB_LANDING - mean(DCRB_LANDING, na.rm = TRUE))/sd(DCRB_LANDING, na.rm = TRUE))) %>%
+  #dplyr::mutate(DCRB_LANDING_z = ((DCRB_LANDING - mean(DCRB_LANDING, na.rm = TRUE))/sd(DCRB_LANDING, na.rm = TRUE))) %>%
   group_by(LANDING_MONTH, PORT_AREA_CODE) %>% 
   summarize(NANC = mean(NANC_SDM_20_z, na.rm = TRUE), MSQD = mean(MSQD_SPAWN_SDM_90_z, na.rm = TRUE),
-            PSDN = mean(PSDN_SDM_60_z, na.rm = TRUE), DCRB = mean(DCRB_LANDING_z, na.rm = TRUE)/4) %>%
-  gather(Species, SDM, c('NANC', 'PSDN', 'MSQD', 'DCRB'), factor_key=TRUE) 
+            PSDN = mean(PSDN_SDM_60_z, na.rm = TRUE)) %>%
+              #, DCRB = mean(DCRB_LANDING_z, na.rm = TRUE)/4) %>%
+  gather(Species, SDM, c('NANC', 'PSDN', 'MSQD'), factor_key=TRUE)
+  #, 'DCRB'), factor_key=TRUE) 
 
 sdm.by.species.LONG$Month <- as.factor(sdm.by.species.LONG$LANDING_MONTH)
 # sdm.by.species.LONG <- transform(sdm.by.species.LONG, MonthAbb = month.abb[LANDING_MONTH])
@@ -848,7 +851,7 @@ sdm.by.species.LONG$Month <- as.factor(sdm.by.species.LONG$LANDING_MONTH)
 
 ggplot(sdm.by.species.LONG, aes(fill=Species, y=SDM, x=Month)) +
   geom_bar(position="dodge", stat="identity") + 
-  facet_wrap(~ PORT_AREA_CODE) + ylab("SDM / Landings")
+  facet_wrap(~ PORT_AREA_CODE) + ylab("Probability of presence (z-value)")
   theme(strip.text.x = element_text(size = 7)) + scale_fill_brewer(palette="Set2")
 
 
