@@ -46,7 +46,6 @@ dataset_psdn <- dataset %>%
                 PSDN_Landings, 
                 PSDN_Price, PSDN_Price_z, 
                 PSDN_SDM_60, NANC_SDM_20, 
-                DCRB_LANDING, DCRB_LANDING_z,
                 PSDN_SDM_60_z, NANC_SDM_20_z,
                 PSDN.Open, MSQD.Open,
                 Price.Fishmeal, Price.Fishmeal_z, 
@@ -61,8 +60,7 @@ dataset_psdn <- dataset %>%
   dplyr::mutate(ln_PSDN_Landings = log(PSDN_Landings)) %>%
   filter(group_all == 3 | group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>%
   filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA"  | 
-           PORT_AREA_CODE == "CLO"  | PORT_AREA_CODE == "CWA"  | PORT_AREA_CODE == "CLW" | 
-           PORT_AREA_CODE == "SDA") %>% drop_na()
+           PORT_AREA_CODE == "CLO"  | PORT_AREA_CODE == "CWA"  | PORT_AREA_CODE == "CLW") %>% drop_na()
  
 
 #### Convert variables to factor #### HERE I CHANGE THE ID
@@ -86,7 +84,7 @@ n_obs_port_area <- dataset_psdn_landing %>% group_by(PORT_AREA_CODE) %>%
 ### Descriptive statistics 
 desc_data <- dataset_psdn_landing %>%
   subset(select = c(Length, PSDN_Landings, PSDN_Price, 
-                    MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,DCRB_LANDING,
+                    MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,
                     MSQD.Open, Price.Fishmeal.AFI))
 
 table <- psych::describe(desc_data, fast=TRUE) %>%
@@ -96,9 +94,8 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 4, "Prob(presence): MSQD", vars)) %>%
   mutate(vars = ifelse(vars == 5, "Prob(presence): PSDN", vars)) %>%
   mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 7, "Landings: DCRB", vars)) %>%
-  mutate(vars = ifelse(vars == 8, "Fraction of month open: MSQD", vars)) %>%
-  mutate(vars = ifelse(vars == 9, "Fishmeal price", vars)) 
+  mutate(vars = ifelse(vars == 7, "Fraction of month open: MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 8, "Fishmeal price", vars)) 
 
 #gs4_create("SummaryMonthly_Q_PSDN", sheets = table)
 rm(desc_data, table)
@@ -123,7 +120,6 @@ purtest(pDataset$PSDN_Price, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
-# purtest(pDataset$DCRB_LANDING, pmax = 1, exo = "intercept", test = "Pm")
 purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
@@ -159,15 +155,15 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(123)
-fit_qPSDN_v3 <-
+fit_qPSDN_v4 <-
   brm(data = dataset_psdn_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qPSDN_v3")
+      file = "Estimations/fit_qPSDN_v4")
 
-fit_qPSDN_v3 <- add_criterion(fit_qPSDN_v3, "loo", overwrite = TRUE)
+fit_qPSDN_v4 <- add_criterion(fit_qPSDN_v4, "loo", overwrite = TRUE)
 
 
