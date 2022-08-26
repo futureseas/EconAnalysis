@@ -37,7 +37,7 @@ theme_set(theme_sjplot())
 
 ##### Read landing models
 fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD_v2.RDS"))
-fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN_v3.RDS"))
+fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN_v4.RDS"))
 fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC_v2.RDS"))
 
 #### Read database 
@@ -60,13 +60,12 @@ dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimatio
 # predict1 <- as.data.frame(predict(fit_qMSQD))
 # prediction1 <- cbind(predict1, dataset_msqd_landing)
 # sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
-predict2 <- as.data.frame(predict(fit_qPSDN))
-prediction2 <- cbind(predict2, dataset_psdn_landing)
-sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2)/(nrow(prediction2)-2))
+# predict2 <- as.data.frame(predict(fit_qPSDN))
+# prediction2 <- cbind(predict2, dataset_psdn_landing)
+# sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2)/(nrow(prediction2)-2))
 # predict3 <- as.data.frame(predict(fit_qNANC))
 # prediction3 <- cbind(predict3, dataset_nanc_landing)
 # sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2))
-# 
 
 
 ##############################################################################################
@@ -81,7 +80,7 @@ sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2
 ### Analyze convergence ###
 
 # launch_shinystan(fit_qMSQD)
- launch_shinystan(fit_qPSDN)
+# launch_shinystan(fit_qPSDN)
 # launch_shinystan(fit_qNANC)
 
 
@@ -105,8 +104,8 @@ sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2
 # df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
 # colnames(df) <- df[1,]
 # df <- df[-1,]
-# gs4_create("PSDN_landings_results", sheets = df)
-# 
+# gs4_create("PSDN_landings_results_v4", sheets = df)
+# # 
 # 
 # tab_model <-
 #   sjPlot::tab_model(fit_qNANC)
@@ -156,26 +155,26 @@ sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2
 #####################################################
 ## Model summary ##
 
-# ### Posterior predictive check ###
-# gg1 <- pp_check(fit_qMSQD, resp = "logMSQDLandings") +
-#   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-#                      labels = c("y" = "Observed", "yrep" = "Replicated")) +
-#   theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  +
-#   xlim(-5, 12) + xlab("") + ggtitle("(a) Market squid")
-# 
-# gg3 <- pp_check(fit_qNANC, resp = "logNANCLandings") +
-#   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-#                      labels = c("y" = "Observed", "yrep" = "Replicated")) +
-#   theme(legend.position="right", plot.title = element_text(size=12, face="bold.italic"))  +
-#   xlim(-5, 12) + xlab("") + ggtitle("(c) Northern anchovy")
-# 
-# gg2 <- pp_check(fit_qPSDN, resp = "logPSDNLandings") +
-#   scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
-#                      labels = c("y" = "Observed", "yrep" = "Replicated")) +
-#   theme(legend.position="none", plot.title = element_text(size=12, face="bold.italic"))  +
-#   xlim(-5, 12) + xlab("ln(Landing)") + ggtitle("(b) Pacific sardine")
-# 
-# gg1 + gg2 + gg3
+### Posterior predictive check ###
+gg1 <- pp_check(fit_qMSQD, resp = "logMSQDLandings") +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) +
+  theme(legend.position = "none", plot.title = element_text(size=12, face="bold.italic"))  +
+  xlim(-5, 12) + xlab("") + ggtitle("(a) Market squid")
+
+gg3 <- pp_check(fit_qNANC, resp = "logNANCLandings") +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) +
+  theme(legend.position="right", plot.title = element_text(size=12, face="bold.italic"))  +
+  xlim(-5, 12) + xlab("") + ggtitle("(c) Northern anchovy")
+
+gg2 <- pp_check(fit_qPSDN, resp = "logPSDNLandings") +
+  scale_color_manual(name = "", values = c("y" = "royalblue4", "yrep" = "azure3"),
+                     labels = c("y" = "Observed", "yrep" = "Replicated")) +
+  theme(legend.position="none", plot.title = element_text(size=12, face="bold.italic"))  +
+  xlim(-5, 12) + xlab("ln(Landing)") + ggtitle("(b) Pacific sardine")
+
+gg1 + gg2 + gg3
 
 #------------------------------------------------------
 ### Group parameters ###

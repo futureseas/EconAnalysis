@@ -38,6 +38,8 @@ Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LAN
 Tickets <- Tickets %>% filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
 
 
+
+
 ####Find the dominant species by value of each fishing trip ( = target species). 
 Boats<-dcast(Tickets, FTID ~ PACFIN_SPECIES_COMMON_NAME, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
 row.names(Boats) <- Boats$FTID
@@ -65,66 +67,95 @@ Tickets<-merge(Tickets, Trip_Port_Dominant, by='FTID')
 rm(Trip_Port_Dominant, X, Boats)
 
 
-
-### Subset to select only records where one of the forage fish species of interest was the target species
-### (species in the CPS FMP; squid, sardine, mackerrels and anchovy) 
-FF_Tickets<-Tickets[which((Tickets$Species_Dominant == "PACIFIC SARDINE"  & Tickets$AFI_EXVESSEL_REVENUE>0) | 
-                          (Tickets$Species_Dominant == "MARKET SQUID"     & Tickets$AFI_EXVESSEL_REVENUE>0) | 
-                          (Tickets$Species_Dominant == "NORTHERN ANCHOVY" & Tickets$AFI_EXVESSEL_REVENUE>0) | 
-                          (Tickets$Species_Dominant == "CHUB MACKEREL"    & Tickets$AFI_EXVESSEL_REVENUE>0) | 
-                          (Tickets$Species_Dominant == "JACK MACKEREL"    & Tickets$AFI_EXVESSEL_REVENUE>0) |
-                          (Tickets$Species_Dominant == "UNSP. MACKEREL"   & Tickets$AFI_EXVESSEL_REVENUE>0) | 
-                          (Tickets$Species_Dominant == "ALBACORE" & 
-                           Tickets$PACFIN_SPECIES_COMMON_NAME == "NORTHERN ANCHOVY")),]
-
-## Agreggate mackerrels in one category
-FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "CHUB MACKEREL"]  <- "MACKEREL")
-FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "JACK MACKEREL"]  <- "MACKEREL")
-FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "UNSP. MACKEREL"] <- "MACKEREL")
-
-
-###Creating a filter here to only retain vessels with more than 3 forage fish landings (tickets where FF is the dominant species) 
-###over the time period. I think 3 is appropriate if you are clustering
-###several years together, but if you are just clustering a single year than maybe you should drop it down to 1. 
-FTID_Value<-aggregate(AFI_EXVESSEL_REVENUE~FTID+VESSEL_NUM, FUN=sum, data=FF_Tickets)
-FTID_Value<-FTID_Value[FTID_Value$VESSEL_NUM %in% names(which(table(FTID_Value$VESSEL_NUM) > 3)), ]
-FF_Tickets<-setDT(FF_Tickets)[VESSEL_NUM %chin% FTID_Value$VESSEL_NUM]    
-FF_Tickets<-as.data.frame(FF_Tickets)
-
-# FF_Tickets indicate tickets where FF are dominant in the trip, but still have landings for other species. 
-
-###Find the list of unique vessels in the subset, these are the vessels we will cluster                           
-FF_Vessels<-as.data.frame(unique(FTID_Value$VESSEL_NUM)) 
-names(FF_Vessels)[1]<-"VESSEL_NUM"
-FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM==""),])
-names(FF_Vessels)[1]<-"VESSEL_NUM"
-FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="UNKNOWN"),])
-names(FF_Vessels)[1]<-"VESSEL_NUM"
-FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="MISSING"),])
-names(FF_Vessels)[1]<-"VESSEL_NUM"
-
-write.csv(FF_Vessels, "FF_Vessels_paerticipation.csv", row.names = FALSE)
-
-###Subset from the complete data set to only retain records associated with these Vessels       
-###Remove records associated with landings of zero value; this is likely bycatch
-# Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
-Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]   
-Tickets<-as.data.frame(Tickets)
-rm(FF_Vessels, FTID_Value)
+# 
+# ### Subset to select only records where one of the forage fish species of interest was the target species
+# ### (species in the CPS FMP; squid, sardine, mackerrels and anchovy) 
+# FF_Tickets<-Tickets[which((Tickets$Species_Dominant == "PACIFIC SARDINE"  & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+#                           (Tickets$Species_Dominant == "MARKET SQUID"     & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+#                           (Tickets$Species_Dominant == "NORTHERN ANCHOVY" & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+#                           (Tickets$Species_Dominant == "CHUB MACKEREL"    & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+#                           (Tickets$Species_Dominant == "JACK MACKEREL"    & Tickets$AFI_EXVESSEL_REVENUE>0) |
+#                           (Tickets$Species_Dominant == "UNSP. MACKEREL"   & Tickets$AFI_EXVESSEL_REVENUE>0) | 
+#                           (Tickets$Species_Dominant == "ALBACORE" & 
+#                            Tickets$PACFIN_SPECIES_COMMON_NAME == "NORTHERN ANCHOVY")),]
+# 
+# ## Agreggate mackerrels in one category
+# FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "CHUB MACKEREL"]  <- "MACKEREL")
+# FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "JACK MACKEREL"]  <- "MACKEREL")
+# FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "UNSP. MACKEREL"] <- "MACKEREL")
+# 
+# 
+# ###Creating a filter here to only retain vessels with more than 3 forage fish landings (tickets where FF is the dominant species) 
+# ###over the time period. I think 3 is appropriate if you are clustering
+# ###several years together, but if you are just clustering a single year than maybe you should drop it down to 1. 
+# FTID_Value<-aggregate(AFI_EXVESSEL_REVENUE~FTID+VESSEL_NUM, FUN=sum, data=FF_Tickets)
+# FTID_Value<-FTID_Value[FTID_Value$VESSEL_NUM %in% names(which(table(FTID_Value$VESSEL_NUM) > 3)), ]
+# FF_Tickets<-setDT(FF_Tickets)[VESSEL_NUM %chin% FTID_Value$VESSEL_NUM]    
+# FF_Tickets<-as.data.frame(FF_Tickets)
+# 
+# # FF_Tickets indicate tickets where FF are dominant in the trip, but still have landings for other species. 
+# 
+# ###Find the list of unique vessels in the subset, these are the vessels we will cluster                           
+# FF_Vessels<-as.data.frame(unique(FTID_Value$VESSEL_NUM)) 
+# names(FF_Vessels)[1]<-"VESSEL_NUM"
+# FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM==""),])
+# names(FF_Vessels)[1]<-"VESSEL_NUM"
+# FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="UNKNOWN"),])
+# names(FF_Vessels)[1]<-"VESSEL_NUM"
+# FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="MISSING"),])
+# names(FF_Vessels)[1]<-"VESSEL_NUM"
+# 
+# write.csv(FF_Vessels, "FF_Vessels_participation.csv", row.names = FALSE)
 
 
-### How many tickets per species?
 
-library("googlesheets4")
-gs4_auth(
-  email = "fequezad@ucsc.edu",
-  path = NULL,
-  scopes = "https://www.googleapis.com/auth/spreadsheets",
-  cache = gargle::gargle_oauth_cache(),
-  use_oob = gargle::gargle_oob_default(),
-  token = NULL)
+# ###Subset from the complete data set to only retain records associated with these Vessels       
+# ###Remove records associated with landings of zero value; this is likely bycatch
+# # Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
+# Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]   
+# Tickets<-as.data.frame(Tickets)
+# rm(FF_Vessels, FTID_Value)
 
-library('plyr')
-freq_dominant_species <- count(Tickets, 'Species_Dominant')
-gs4_create("freq_dominant_species_participation", sheets = freq_dominant_species)
+
+### Merge with cluster data...
+PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
+Tickets_clust <- merge(Tickets, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+rm(PAM_Vessel_Groups)
+
+
+Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
+
+
+# ### How many tickets per species?
+# 
+# library("googlesheets4")
+# gs4_auth(
+#   email = "fequezad@ucsc.edu",
+#   path = NULL,
+#   scopes = "https://www.googleapis.com/auth/spreadsheets",
+#   cache = gargle::gargle_oauth_cache(),
+#   use_oob = gargle::gargle_oob_default(),
+#   token = NULL)
+# 
+# library('plyr')
+# freq_dominant_species <- count(Tickets, 'Species_Dominant')
+# gs4_create("freq_dominant_species_participation", sheets = freq_dominant_species)
+
+
+
+<<<WORK FROM HERE>>>
+
+### Create port-species choice
+
+
+
+### Create each vessel's choice set 
+### --- (maybe based on the inertia? 
+### --- Maybe start with all the port areas in the database. 
+### ---- What if not participating?)
+
+
+### Run a base model...
+
+
 
