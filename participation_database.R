@@ -24,6 +24,7 @@ gc()
 setwd("C:/GitHub/EconAnalysis/Clustering")
 
 
+#-----------------------------------------------------
 ### Load in the data
 Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
 Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
@@ -31,6 +32,7 @@ Tickets<-rbind(Tickets1, Tickets2)
 rm(Tickets1, Tickets2)
 
 
+#-----------------------------------------------------
 ###Subset the data to remove columns not relevant to this analysis. This will speed things up.
 Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_NAME, PACFIN_PORT_CODE, VESSEL_NUM, 
                              VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE, 
@@ -38,10 +40,12 @@ Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LAN
                              VESSEL_OWNER_ADDRESS_STATE, VESSEL_OWNER_ADDRESS_STREET, REMOVAL_TYPE_CODE))
 
 
+#-----------------------------------------------------
 #### Use only tickets that the removal type is commercial ####
 Tickets <- Tickets %>% filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
 
 
+#-----------------------------------------------------
 ####Find the dominant species by value of each fishing trip ( = target species). 
 Boats<-dcast(Tickets, FTID ~ PACFIN_SPECIES_CODE, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
 row.names(Boats) <- Boats$FTID
@@ -54,6 +58,7 @@ Tickets<-merge(Tickets, Trip_Species_Dominant, by='FTID')
 rm(Trip_Species_Dominant, X, Boats)
 
 
+#-----------------------------------------------------
 ####Find the dominant port by value of each fishing trip ( = target species). 
 port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
 Tickets <- Tickets %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
@@ -68,7 +73,7 @@ Tickets<-merge(Tickets, Trip_Port_Dominant, by='FTID')
 rm(Trip_Port_Dominant, X, Boats)
 
 
-# 
+#-----------------------------------------------------
 # ### Subset to select only records where one of the forage fish species of interest was the target species
 # ### (species in the CPS FMP; squid, sardine, mackerrels and anchovy) 
 # FF_Tickets<-Tickets[which((Tickets$Species_Dominant == "PACIFIC SARDINE"  & Tickets$AFI_EXVESSEL_REVENUE>0) | 
@@ -116,6 +121,7 @@ rm(Trip_Port_Dominant, X, Boats)
 # rm(FF_Vessels, FTID_Value)
 
 
+#-----------------------------------------------------
 ### Merge with cluster data...
 PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
 Tickets_clust <- merge(Tickets, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
@@ -123,32 +129,37 @@ rm(PAM_Vessel_Groups)
 Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 
 
-
+#-----------------------------------------------------
 ### Rename species dominant: MSQD, PSDN, NANC, OMCK, NON-CPS.
 
-Tickets_clust <- within(Tickets_clust, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
-Tickets_clust <- within(Tickets_clust, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
-Tickets_clust <- within(Tickets_clust, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
+Tickets_clust <- within(Tickets_clust, Species_Dominant[Species_Dominant == "CMCK"] <- "OMCK")
+Tickets_clust <- within(Tickets_clust, Species_Dominant[Species_Dominant == "JMCK"] <- "OMCK")
+Tickets_clust <- within(Tickets_clust, Species_Dominant[Species_Dominant == "UMCK"] <- "OMCK")
 Tickets_clust <- Tickets_clust %>% mutate(
-  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OMCK",PACFIN_SPECIES_CODE, 
-                               ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
-                                      ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
-                                             ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
+  Species_Dominant = ifelse(Species_Dominant == "OMCK", Species_Dominant, 
+                     ifelse(Species_Dominant == "PSDN", Species_Dominant, 
+                     ifelse(Species_Dominant == "MSQD", Species_Dominant, 
+                     ifelse(Species_Dominant == "NANC", Species_Dominant, "OTHER")))))
 
-
-
-
+#-----------------------------------------------------
 ### Create port-species choice
 Tickets_clust_2 <- Tickets_clust %>% mutate(selection = paste(Port_Dominant, Species_Dominant, sep = "-", collapse = NULL))
 
 
-
+#-----------------------------------------------------
 ### Create each vessel's choice set 
-### --- (maybe based on the inertia? 
-### --- Maybe start with all the port areas in the database. 
-### ---- What if not participating?)
+
+### --- Start with all the port areas in the database. 
+### --- Later, based on the inertia? 
 
 
+
+#-----------------------------------------------------
+### Add non-participation in the database. What are the characteristics of the choice??? zero???
+
+
+
+#-----------------------------------------------------
 ### Run a base model...
 
 
@@ -159,7 +170,15 @@ Tickets_clust_2 <- Tickets_clust %>% mutate(selection = paste(Port_Dominant, Spe
 
 
 
-####### OTHER ANALYSIS #######
+
+
+
+
+
+
+
+######################################################
+#### OTHER ANALYSIS ####
 
 # ### How many tickets per species?
 # 
