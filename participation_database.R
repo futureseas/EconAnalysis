@@ -14,7 +14,7 @@ gs4_auth(
 
 
 ###Load packages and set working directory
-library('plyr')
+library(plyr)
 library(data.table)
 library(dplyr)
 library(distances)
@@ -162,6 +162,8 @@ Tickets_clust_2 <- Tickets_clust %>% mutate(selection = paste(Port_Dominant, Spe
 
 ### --- Start with all the port areas in the database. 
 ### --- Later, based on the inertia? 
+freq_selection <- count(Tickets_clust_2, 'selection')
+# gs4_create("freq_selection", sheets = freq_selection)
 
 
 
