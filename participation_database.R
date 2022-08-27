@@ -2,6 +2,7 @@
 ### Participation model -- database ###
 ########################################
 
+
 ###Load packages and set working directory
 library(data.table)
 library(dplyr)
@@ -13,6 +14,7 @@ library(vegan)
 library(NbClust)
 library(factoextra)
 
+
 ###I run these lines as well as they are packages I frequently use that can interfere with some of the processes below
 detach(package:raster, unload=TRUE)
 detach(package:igraph, unload=TRUE)
@@ -20,6 +22,7 @@ detach(package:igraph, unload=TRUE)
 rm(list=ls())
 gc()
 setwd("C:/GitHub/EconAnalysis/Clustering")
+
 
 ### Load in the data
 Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
@@ -34,10 +37,9 @@ Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LAN
                              PACFIN_GEAR_CODE, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, VESSEL_OWNER_NAME, 
                              VESSEL_OWNER_ADDRESS_STATE, VESSEL_OWNER_ADDRESS_STREET, REMOVAL_TYPE_CODE))
 
+
 #### Use only tickets that the removal type is commercial ####
 Tickets <- Tickets %>% filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
-
-
 
 
 ####Find the dominant species by value of each fishing trip ( = target species). 
@@ -49,7 +51,6 @@ X<-as.data.frame(colnames(Boats)[apply(Boats,1,which.max)])
 colnames(X)<-"Species_Dominant"
 Trip_Species_Dominant<-as.data.frame(cbind(FTID,X))
 Tickets<-merge(Tickets, Trip_Species_Dominant, by='FTID')
-
 rm(Trip_Species_Dominant, X, Boats)
 
 
@@ -121,10 +122,36 @@ rm(Trip_Port_Dominant, X, Boats)
 PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
 Tickets_clust <- merge(Tickets, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 rm(PAM_Vessel_Groups)
-
-
 Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 
+
+
+
+
+### Rename species dominant: MSQD, PSDN, NANC, OMCK, NON-CPS.
+
+### Create port-species choice
+Tickets_clust_2 <- Tickets_clust %>% mutate(selection = paste(Port_Dominant, Species_Dominant, sep = "-", collapse = NULL))
+
+
+
+### Create each vessel's choice set 
+### --- (maybe based on the inertia? 
+### --- Maybe start with all the port areas in the database. 
+### ---- What if not participating?)
+
+
+### Run a base model...
+
+
+
+
+
+
+
+
+
+####### OTHER ANALYSIS #######
 
 # ### How many tickets per species?
 # 
@@ -140,22 +167,5 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 # library('plyr')
 # freq_dominant_species <- count(Tickets, 'Species_Dominant')
 # gs4_create("freq_dominant_species_participation", sheets = freq_dominant_species)
-
-
-
-<<<WORK FROM HERE>>>
-
-### Create port-species choice
-
-
-
-### Create each vessel's choice set 
-### --- (maybe based on the inertia? 
-### --- Maybe start with all the port areas in the database. 
-### ---- What if not participating?)
-
-
-### Run a base model...
-
 
 

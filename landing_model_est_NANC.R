@@ -220,12 +220,11 @@ fit_qNANC_MODEL2 <- add_criterion(fit_qNANC_MODEL2, "loo", overwrite = TRUE)
 
 ## Define landing equation
 landing_model_MODEL3 <- bf(log(NANC_Landings) ~
-  b1 + b2 * NANC_SDM_20_z + b3 * NANC_Price_z + b4 * (NANC_SDM_20_z/MSQD_SPAWN_SDM_90_z) * MSQD.Open +
+  b1 + b2 * NANC_SDM_20_z + b4 * (NANC_SDM_20_z/MSQD_SPAWN_SDM_90_z) * MSQD.Open +
     b5 * (NANC_SDM_20_z/PSDN_SDM_60_z) * PSDN.Open + b6 * (NANC_Price_z/MSQD_Price_z) * MSQD.Open +
     b7 * (NANC_Price_z/PSDN_Price_z) * PSDN.Open + b8 * PSDN.Total.Closure + b9 * Length_z,
   b1 ~ 1 + (1 | cluster) + (1 | port_ID),
   b2 ~ 1 + (1 | cluster) + (1 | port_ID),
-  b3 ~ 1 + (1 | cluster) + (1 | port_ID),
   b4 ~ 1 + (1 | cluster) + (1 | port_ID),
   b5 ~ 1 + (1 | cluster) + (1 | port_ID),
   b6 ~ 1 + (1 | cluster) + (1 | port_ID),
@@ -242,7 +241,6 @@ get_prior(data = dataset_nanc_landing,
 prior_lognormal_MODEL3 <- c(
   prior(lognormal(0,1), nlpar = b9),
   prior(lognormal(0,1), nlpar = b2),
-  prior(lognormal(0,1), nlpar = b3),
   prior(normal(0,1),    nlpar = b4),
   prior(normal(0,1),    nlpar = b5),
   prior(normal(0,1),    nlpar = b6),
