@@ -3,7 +3,18 @@
 ########################################
 
 
+library("googlesheets4")
+gs4_auth(
+  email = "fequezad@ucsc.edu",
+  path = NULL,
+  scopes = "https://www.googleapis.com/auth/spreadsheets",
+  cache = gargle::gargle_oauth_cache(),
+  use_oob = gargle::gargle_oob_default(),
+  token = NULL)
+
+
 ###Load packages and set working directory
+library('plyr')
 library(data.table)
 library(dplyr)
 library(distances)
@@ -181,17 +192,7 @@ Tickets_clust_2 <- Tickets_clust %>% mutate(selection = paste(Port_Dominant, Spe
 #### OTHER ANALYSIS ####
 
 # ### How many tickets per species?
-# 
-# library("googlesheets4")
-# gs4_auth(
-#   email = "fequezad@ucsc.edu",
-#   path = NULL,
-#   scopes = "https://www.googleapis.com/auth/spreadsheets",
-#   cache = gargle::gargle_oauth_cache(),
-#   use_oob = gargle::gargle_oob_default(),
-#   token = NULL)
-# 
-# library('plyr')
+
 # freq_dominant_species <- count(Tickets, 'Species_Dominant')
 # gs4_create("freq_dominant_species_participation", sheets = freq_dominant_species)
 
