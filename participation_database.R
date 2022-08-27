@@ -43,7 +43,7 @@ Tickets <- Tickets %>% filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D
 
 
 ####Find the dominant species by value of each fishing trip ( = target species). 
-Boats<-dcast(Tickets, FTID ~ PACFIN_SPECIES_COMMON_NAME, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
+Boats<-dcast(Tickets, FTID ~ PACFIN_SPECIES_CODE, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
 row.names(Boats) <- Boats$FTID
 FTID<-Boats$FTID
 Boats<-Boats[,-(1)]
@@ -108,8 +108,6 @@ rm(Trip_Port_Dominant, X, Boats)
 # 
 # write.csv(FF_Vessels, "FF_Vessels_participation.csv", row.names = FALSE)
 
-
-
 # ###Subset from the complete data set to only retain records associated with these Vessels       
 # ###Remove records associated with landings of zero value; this is likely bycatch
 # # Tickets<-Tickets[which(Tickets$AFI_EXVESSEL_REVENUE>0),]
@@ -126,9 +124,19 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 
 
 
-
-
 ### Rename species dominant: MSQD, PSDN, NANC, OMCK, NON-CPS.
+
+Tickets_clust <- within(Tickets_clust, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
+Tickets_clust <- within(Tickets_clust, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
+Tickets_clust <- within(Tickets_clust, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
+Tickets_clust <- Tickets_clust %>% mutate(
+  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OMCK",PACFIN_SPECIES_CODE, 
+                               ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
+                                      ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
+                                             ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
+
+
+
 
 ### Create port-species choice
 Tickets_clust_2 <- Tickets_clust %>% mutate(selection = paste(Port_Dominant, Species_Dominant, sep = "-", collapse = NULL))
