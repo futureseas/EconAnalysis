@@ -162,14 +162,15 @@ Tickets_clust_2 <- Tickets_clust %>% mutate(selection = paste(Port_Dominant, Spe
 
 ### --- Start with all the port areas in the database. 
 ### --- Later, based on the inertia? 
-freq_selection <- count(Tickets_clust_2, 'selection')
+
+# freq_selection <- count(Tickets_clust_2, 'selection')
 # gs4_create("freq_selection", sheets = freq_selection)
 
-
-
-#-----------------------------------------------------
-### Add non-participation in the database. What are the characteristics of the choice??? zero???
-
+choice_set <- Tickets_clust_2 %>% dplyr::select('selection') %>% unique()
+choice_set_by_vessel <- expand.grid(VESSEL_NUM = unique(Tickets_clust_2$VESSEL_NUM), choice_set = unique(Tickets_clust_2$selection))
+Tickets_clust_3 <- merge(Tickets_clust_2, choice_set_by_vessel, by = ('VESSEL_NUM'), all.x = TRUE, all.y = TRUE, allow.cartesian=TRUE)
+participation_df <- Tickets_clust_3 %>% mutate(choice = ifelse(selection == choice_set, 1, 0)) 
+head(participation_df, 5)
 
 
 #-----------------------------------------------------
