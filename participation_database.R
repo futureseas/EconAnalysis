@@ -173,6 +173,10 @@ participation_df <- Tickets_clust_3 %>% mutate(choice = ifelse(selection == choi
 head(participation_df, 5)
 
 
+### Include outside option? Then, expand data when variables are not observed.
+
+
+
 #-----------------------------------------------------
 ### Run a base model...
 
