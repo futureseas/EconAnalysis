@@ -45,8 +45,8 @@ dataset_nanc <- dataset %>%
                 MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_z,
                 NANC_Landings, 
                 NANC_Price, NANC_Price_z, 
-                # MSQD_Price, MSQD_Price_z, 
-                # PSDN_Price, PSDN_Price_z, 
+                MSQD_Price, MSQD_Price_z,
+                PSDN_Price, PSDN_Price_z,
                 PSDN_SDM_60, PSDN_SDM_60_z,
                 NANC_SDM_20, NANC_SDM_20_z,
                 PSDN.Open, MSQD.Open,
@@ -194,16 +194,15 @@ predict2 <- as.data.frame(predict(fit_qNANC_MODEL2))
 predict3 <- as.data.frame(predict(fit_qNANC_MODEL3))
 predict4 <- as.data.frame(predict(fit_qNANC_MODEL4))
 
+dataset_nanc_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv")
+
 prediction1 <- cbind(predict1, dataset_nanc_landing)
 prediction2 <- cbind(predict2, dataset_nanc_landing)
 prediction3 <- cbind(predict3, dataset_nanc_landing)
 prediction4 <- cbind(predict4, dataset_nanc_landing)
 
-
-sqrt(sum((prediction1$Estimate.logNANCLandings - prediction1$ln_NANC_Landings)^2)/(nrow(prediction1)-2))
-sqrt(sum((prediction2$Estimate.logNANCLandings - prediction2$ln_NANC_Landings)^2)/(nrow(prediction2)-2))
-sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2))
-sqrt(sum((prediction4$Estimate.logNANCLandings - prediction4$ln_NANC_Landings)^2)/(nrow(prediction4)-2))
-
-
+sqrt(sum((prediction1$Estimate.logNANCLandings - prediction1$ln_NANC_Landings)^2)/(nrow(prediction1)-2)) ## 1.30
+sqrt(sum((prediction2$Estimate.logNANCLandings - prediction2$ln_NANC_Landings)^2)/(nrow(prediction2)-2)) ## 1.34
+sqrt(sum((prediction3$Estimate                 - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2)) ## 1.46
+sqrt(sum((prediction4$Estimate.logNANCLandings - prediction4$ln_NANC_Landings)^2)/(nrow(prediction4)-2)) ## 1.29
 
