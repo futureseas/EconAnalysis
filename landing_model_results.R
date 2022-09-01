@@ -63,9 +63,9 @@ set.seed(123)
 # predict2 <- as.data.frame(predict(fit_qPSDN))
 # prediction2 <- cbind(predict2, dataset_psdn_landing)
 # sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2)/(nrow(prediction2)-2))
-predict3 <- as.data.frame(predict(fit_qNANC))
-prediction3 <- cbind(predict3, dataset_nanc_landing)
-sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2))
+# predict3 <- as.data.frame(predict(fit_qNANC))
+# prediction3 <- cbind(predict3, dataset_nanc_landing)
+# sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2))
 
 
 ##############################################################################################
@@ -81,7 +81,7 @@ sqrt(sum((prediction3$Estimate.logNANCLandings - prediction3$ln_NANC_Landings)^2
 
 # launch_shinystan(fit_qMSQD)
 # launch_shinystan(fit_qPSDN)
-launch_shinystan(fit_qNANC)
+# launch_shinystan(fit_qNANC)
 
 
 
