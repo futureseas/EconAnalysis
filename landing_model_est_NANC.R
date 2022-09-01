@@ -126,7 +126,7 @@ price_model <- bf(NANC_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 
 # Model 1: Original
 # Model 2: Relative abundance.
-# Model 3: Relative abundance and relative prices?
+# Model 3: Relative abundance and relative prices
 # Model 4: Original with interactive prices
 
 
@@ -166,6 +166,16 @@ prior_lognormal_MODEL1 <- c(
 #       file = "Estimations/fit_qNANC")
 # 
 # fit_qNANC <- add_criterion(fit_qNANC, "loo", overwrite = TRUE)
+
+
+
+##### Read landing models
+fit_qNANC_MODEL1 <- readRDS(here::here("Estimations", "fit_qNANC_MODEL1.RDS"))
+fit_qNANC_MODEL2 <- readRDS(here::here("Estimations", "fit_qNANC_MODEL2.RDS"))
+fit_qNANC_MODEL3 <- readRDS(here::here("Estimations", "fit_qNANC_MODEL3.RDS"))
+fit_qNANC_MODEL4 <- readRDS(here::here("Estimations", "fit_qNANC_MODEL4.RDS"))
+
+
 
 
 
