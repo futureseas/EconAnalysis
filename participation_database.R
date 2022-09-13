@@ -175,8 +175,16 @@ head(participation_df, 5)
 
 ### Include outside option? Then, expand data when variables are not observed.
 
+#### Se first how many trips per day
+n_trips_per_day <- participation_df %>% 
+  dplyr::select('VESSEL_NUM', 'FTID', 'LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY') %>% 
+  unique() %>% 
+  group_by(VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+  summarize(n_trips = n()) 
 
-
+### Create database to expand
+n_trips_per_day <- participation_df %>% 
+  dplyr::select('VESSEL_NUM', 'FTID', 'LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY') 
 
 
 #-----------------------------------------------------
