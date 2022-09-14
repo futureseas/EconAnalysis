@@ -45,7 +45,8 @@ rm(Tickets1, Tickets2)
 
 #-----------------------------------------------------
 ###Subset the data to remove columns not relevant to this analysis. This will speed things up.
-Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_NAME, PACFIN_PORT_CODE, VESSEL_NUM, 
+Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_NAME, PACFIN_PORT_CODE, 
+                             VESSEL_NUM, 
                              VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE, 
                              PACFIN_GEAR_CODE, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, VESSEL_OWNER_NAME, 
                              VESSEL_OWNER_ADDRESS_STATE, VESSEL_OWNER_ADDRESS_STREET, REMOVAL_TYPE_CODE))
@@ -83,6 +84,11 @@ Trip_Port_Dominant<-as.data.frame(cbind(FTID,X))
 Tickets<-merge(Tickets, Trip_Port_Dominant, by='FTID')
 rm(Trip_Port_Dominant, X, Boats)
 
+
+#------------------------------------------------------
+### Filter relevant row (targeted species in dominant port)
+Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) 
+Tickets <- Tickets %>% filter(PORT_AREA_CODE == Port_Dominant) 
 
 #-----------------------------------------------------
 # ### Subset to select only records where one of the forage fish species of interest was the target species
@@ -140,6 +146,9 @@ rm(PAM_Vessel_Groups)
 Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 
 
+
+
+
 #-----------------------------------------------------
 ### Rename species dominant: MSQD, PSDN, NANC, OMCK, NON-CPS.
 
@@ -152,9 +161,20 @@ Tickets_clust <- Tickets_clust %>% mutate(
                      ifelse(Species_Dominant == "MSQD", Species_Dominant, 
                      ifelse(Species_Dominant == "NANC", Species_Dominant, "OTHER")))))
 
+
+
+
 #-----------------------------------------------------
 ### Create port-species choice
 Tickets_clust_2 <- Tickets_clust %>% mutate(selection = paste(Port_Dominant, Species_Dominant, sep = "-", collapse = NULL))
+
+
+
+#-----------------------------------------------------
+### Expand database 
+library(tidyr)
+Tickets_clust_3 <- complete(Tickets_clust_2, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+  mutate(selection = ifelse(is.na(selection), 'No-Participation', selection))
 
 
 #-----------------------------------------------------
@@ -166,11 +186,17 @@ Tickets_clust_2 <- Tickets_clust %>% mutate(selection = paste(Port_Dominant, Spe
 # freq_selection <- count(Tickets_clust_2, 'selection')
 # gs4_create("freq_selection", sheets = freq_selection)
 
-choice_set <- Tickets_clust_2 %>% dplyr::select('selection') %>% unique()
-choice_set_by_vessel <- expand.grid(VESSEL_NUM = unique(Tickets_clust_2$VESSEL_NUM), choice_set = unique(Tickets_clust_2$selection))
-Tickets_clust_3 <- merge(Tickets_clust_2, choice_set_by_vessel, by = ('VESSEL_NUM'), all.x = TRUE, all.y = TRUE, allow.cartesian=TRUE)
-participation_df <- Tickets_clust_3 %>% mutate(choice = ifelse(selection == choice_set, 1, 0)) 
-head(participation_df, 5)
+choice_set <- Tickets_clust_3 %>% dplyr::select('selection') %>% unique()
+choice_set_by_vessel <- expand.grid(VESSEL_NUM = unique(Tickets_clust_3$VESSEL_NUM), choice_set = unique(Tickets_clust_3$selection))
+
+
+gc()
+memory.limit(9999999999)
+Tickets_clust_4 <- merge(Tickets_clust_3, choice_set_by_vessel, by = ('VESSEL_NUM'), all.x = TRUE, all.y = TRUE, allow.cartesian=TRUE)
+
+
+participation_df <- Tickets_clust_4 %>% mutate(choice = ifelse(selection == choice_set, 1, 0))
+head(participation_df, 25)
 
 
 ### Include outside option? Then, expand data when variables are not observed.
@@ -182,9 +208,21 @@ n_trips_per_day <- participation_df %>%
   group_by(VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
   summarize(n_trips = n()) 
 
+hist(n_trips_per_day$n_trips, 
+     main = '', 
+     xlab	= 'Number of trips per day'
+     )
+
+
 ### Create database to expand
-n_trips_per_day <- participation_df %>% 
-  dplyr::select('VESSEL_NUM', 'FTID', 'LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY') 
+all_dates <- participation_df %>% 
+  dplyr::select('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY') %>% unique()
+
+all_dates <- all_dates [order(LANDING_YEAR, LANDING_MONTH, LANDING_DAY),]
+row.names(all_dates) <- 1 : nrow(all_dates)
+
+
+
 
 
 #-----------------------------------------------------
