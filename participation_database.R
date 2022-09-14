@@ -85,10 +85,18 @@ Tickets<-merge(Tickets, Trip_Port_Dominant, by='FTID')
 rm(Trip_Port_Dominant, X, Boats)
 
 
+
 #------------------------------------------------------
 ### Filter relevant row (targeted species in dominant port)
+
 Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) 
 Tickets <- Tickets %>% filter(PORT_AREA_CODE == Port_Dominant) 
+
+
+#-----------------------------------------------------
+### Agregate species in a FTID
+Tickets <- Tickets %>% group_by(FTID, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, Species_Dominant, Port_Dominant) %>% 
+  summarize(Landings = sum(LANDED_WEIGHT_LBS))
 
 #-----------------------------------------------------
 # ### Subset to select only records where one of the forage fish species of interest was the target species
@@ -172,33 +180,6 @@ Tickets_clust_2 <- Tickets_clust %>% mutate(selection = paste(Port_Dominant, Spe
 
 #-----------------------------------------------------
 ### Expand database 
-library(tidyr)
-Tickets_clust_3 <- complete(Tickets_clust_2, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
-  mutate(selection = ifelse(is.na(selection), 'No-Participation', selection))
-
-
-#-----------------------------------------------------
-### Create each vessel's choice set 
-
-### --- Start with all the port areas in the database. 
-### --- Later, based on the inertia? 
-
-# freq_selection <- count(Tickets_clust_2, 'selection')
-# gs4_create("freq_selection", sheets = freq_selection)
-
-choice_set <- Tickets_clust_3 %>% dplyr::select('selection') %>% unique()
-choice_set_by_vessel <- expand.grid(VESSEL_NUM = unique(Tickets_clust_3$VESSEL_NUM), choice_set = unique(Tickets_clust_3$selection))
-
-
-gc()
-memory.limit(9999999999)
-Tickets_clust_4 <- merge(Tickets_clust_3, choice_set_by_vessel, by = ('VESSEL_NUM'), all.x = TRUE, all.y = TRUE, allow.cartesian=TRUE)
-
-
-participation_df <- Tickets_clust_4 %>% mutate(choice = ifelse(selection == choice_set, 1, 0))
-head(participation_df, 25)
-
-
 ### Include outside option? Then, expand data when variables are not observed.
 
 #### Se first how many trips per day
@@ -211,22 +192,65 @@ n_trips_per_day <- participation_df %>%
 hist(n_trips_per_day$n_trips, 
      main = '', 
      xlab	= 'Number of trips per day'
-     )
+)
 
-
-### Create database to expand
-all_dates <- participation_df %>% 
-  dplyr::select('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY') %>% unique()
-
-all_dates <- all_dates [order(LANDING_YEAR, LANDING_MONTH, LANDING_DAY),]
-row.names(all_dates) <- 1 : nrow(all_dates)
-
+library(tidyr)
+Tickets_clust_3 <- complete(Tickets_clust_2, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+  mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
+  mutate(FTID = ifelse(is.na(FTID), paste('NP-',1:n()), FTID))
 
 
 
 
 #-----------------------------------------------------
+### Create each vessel's choice set 
+
+### --- Start with all the port areas in the database. 
+### --- Later, based on the inertia? 
+
+# freq_selection <- count(Tickets_clust_2, 'selection')
+# gs4_create("freq_selection", sheets = freq_selection)
+
+choice_set <- Tickets_clust_3 %>% dplyr::select('selection') %>% unique()
+choice_set_by_vessel    <- expand.grid(VESSEL_NUM = unique(Tickets_clust_3$VESSEL_NUM), choice_set = unique(Tickets_clust_3$selection))
+choice_set_by_vessel_v2 <- Tickets_clust_3 %>% dplyr::select('selection', 'VESSEL_NUM') %>% unique()
+
+gc()
+memory.limit(9999999999)
+Tickets_clust_4 <- merge(Tickets_clust_3, choice_set_by_vessel_v2, by = ('VESSEL_NUM'), all.x = TRUE, all.y = TRUE, allow.cartesian=TRUE)
+gc()
+participation_df <- Tickets_clust_4 %>% mutate(choice = ifelse(selection.x == selection.y, 1, 0))
+head(participation_df, 25)
+
+
+
+#-----------------------------------------------------
+### Create variables
+
+
+
+#-----------------------------------------------------
 ### Run a base model...
+library("mlogit")
+
+data <- Tickets_clust_3 %>% dplyr::select('selection', 'VESSEL_NUM', 'FTID') %>%
+  group_by(FTID) %>% mutate(n_obs = n()) %>% ungroup() %>% filter(n_obs==1)
+  choice_data <- dfidx(Tickets_clust_3, choice = "selection", idnames = c("VESSEL_NUM", "FTID"))
+
+
+
+
+# data("Electricity", package = "mlogit")
+# Electricity$chid <- 1:nrow(Electricity)
+# Electr <- dfidx(Electricity, idx = list(c("chid", "id")),
+#                 choice = "choice", varying = 3:26, sep = "")
+# 
+# Elec.mxl <- mlogit(choice ~ pf + cl + loc + wk + tod + seas | 0, Electr, 
+#                    rpar=c(pf = 'n', cl = 'n', loc = 'n', wk = 'n', 
+#                           tod = 'n', seas = 'n'), 
+#                    R = 100, halton = NA, panel = TRUE)
+
+
 
 
 
