@@ -142,9 +142,6 @@ Dominant_Weight<-Tickets %>% group_by(VESSEL_NUM) %>%
   summarize(Weight=names(which.max(table(VESSEL_WEIGHT))))
 
 Vessel_Characteristics<-merge(Dominant_Length, Dominant_Weight, by="VESSEL_NUM")
-
-
-
 Vessel_Characteristics$Length<-as.numeric(as.character(Vessel_Characteristics$Length))
 Vessel_Characteristics$Weight<-as.numeric(as.character(Vessel_Characteristics$Weight))
 

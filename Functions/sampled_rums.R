@@ -40,7 +40,7 @@ sampled_rums <- function(data_in = filt_clusts, the_port = "ASTORIA / WARRENTON"
   #---------------------------------------------------------------
   #Calculate net revenues for each haul
   dat <- dat %>% group_by(haul_id) %>%
-      mutate(haul_net_revenue.catch = sum(psdn.rev.catch, na.rm = T)) %>%
+    mutate(haul_net_revenue.catch = sum(psdn.rev.catch, na.rm = T)) %>%
     mutate(haul_net_revenue.sdm = sum(psdn.rev.sdm, na.rm = T))
 
   #---------------------------------------------------------------
