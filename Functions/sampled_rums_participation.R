@@ -43,7 +43,10 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
 
 
   dat <- participation_data.save %>% dplyr::filter(set_year >= min.year, set_year <= max.year)
-
+  min_year <- min.year
+  focus_year <- 2014
+  nhauls_sampled <- 20
+  
   #---------------------------------------------------------------
   # #Calculate net revenues for each haul
   # dat <- dat %>% group_by(haul_id) %>%
@@ -61,7 +64,8 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
 
   #For each tow in the focus year, sample other tows
   #Hauls in focus year
-  hauls <- dist_hauls %>% dplyr::filter(set_year == 2014) %>% arrange(trip_id)
+  hauls <- dist_hauls %>% dplyr::filter(set_year == focus_year) %>% arrange(trip_id)
+  
   # hauls$prev_haul_num <- hauls$haul_num - 1
 
   # #Data frame of previous haul locations
@@ -84,8 +88,9 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   # hauls <- hauls %>% left_join(prev_hauls, by = c('trip_id', 'prev_haul_num'))
   # 
   #Calculate depth bin proportions
-  dbp <- dist_hauls_catch_shares %>% dplyr::filter(depth_bin != 69) %>%
-    group_by(depth_bin) %>% summarize(nvals = length(unique(haul_id))) %>%
+  
+  dbp <- dist_hauls_catch_shares %>% filter(selection != "No-Participation") %>% 
+    group_by(selection) %>% summarize(nvals = length(unique(trip_id))) %>%
     mutate(tot_nvals = sum(nvals), prop = nvals / tot_nvals)
   # 
   # dbp <- as.data.frame(dbp)
@@ -110,14 +115,14 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   #For each haul in the focus year, sample nhauls_sampled tows
   cl <- makeCluster(ncores)
   registerDoParallel(cl)
-  source("C:\\GitHub\\EconAnalysis\\Functions\\sample_hauls.R")
+  source("C:\\GitHub\\EconAnalysis\\Functions\\sample_hauls_participation.R")
 
   sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls),
     .export = c("sample_hauls"),
     .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
       sample_hauls(xx = ii, hauls1 = hauls,
         dist_hauls_catch_shares1 = dist_hauls_catch_shares, nhauls_sampled1 = nhauls_sampled,
-        depth_bin_proportions = dbp, the_seed = seedz[ii])
+        choice_proportions = dbp, the_seed = seedz[ii])
     }
   print("Done sampling hauls")
   sampled_hauls <- plyr::ldply(sampled_hauls)
