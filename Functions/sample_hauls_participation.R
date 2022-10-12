@@ -24,7 +24,7 @@
    #Check to make sure there are enough samples of each thing to sample without replacement
    the_samples <- lapply(1:nrow(choice_proportions), FUN = function(dd){
                       temp <- dist_hauls_catch_shares1 %>% dplyr::filter(trip_id != hauls1[xx, 'trip_id'],
-                                                                         choices == choice_proportions[dd, "selection"])
+                                                                         selection == choice_proportions[dd, "selection"])
                       samps <- temp %>% sample_n(size = choice_proportions[dd, "n_samp"], replace = F)
                       return(samps)
                   })
