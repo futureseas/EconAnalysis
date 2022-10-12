@@ -42,10 +42,12 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   }
 
 
-  dat <- participation_data.save %>% dplyr::filter(set_year >= min.year, set_year <= max.year)
+  dat <- participation_data.save %>% dplyr::filter(set_year >= 2013, set_year <= 2015)
   min_year <- min.year
   focus_year <- 2014
   nhauls_sampled <- 20
+  seed = 300
+  ncores = 4
   
   #---------------------------------------------------------------
   # #Calculate net revenues for each haul
