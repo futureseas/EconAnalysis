@@ -42,12 +42,13 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   }
 
 
-  dat <- participation_data.save %>% dplyr::filter(set_year >= 2013, set_year <= 2015)
+  dat <- participation_data.save %>% dplyr::filter(set_year >= 2014, set_year <= 2015, group_all == 1)
   min_year <- min.year
   focus_year <- 2014
-  nhauls_sampled <- 20
+  nhauls_sampled <- 5
   seed = 300
-  ncores = 4
+  ncores = 2
+  ndays = 60
   
   #---------------------------------------------------------------
   # #Calculate net revenues for each haul
@@ -91,10 +92,31 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   # 
   #Calculate depth bin proportions
   
-  dbp <- dist_hauls_catch_shares %>% filter(selection != "No-Participation") %>% 
-    group_by(selection) %>% summarize(nvals = length(unique(trip_id))) %>%
-    mutate(tot_nvals = sum(nvals), prop = nvals / tot_nvals)
-  # 
+  
+  # Create dataframes
+  dbp <- dist_hauls_catch_shares %>% 
+    group_by(selection, VESSEL_NUM, set_year) %>% 
+    summarize(sum_rev = sum(Revenue)) %>%
+    group_by(selection, VESSEL_NUM) %>%
+    summarize(mean_rev = mean(sum_rev)) %>%
+    group_by(VESSEL_NUM) %>%
+    mutate(tot_rev = sum(mean_rev)) %>% ungroup() %>%
+    mutate(catch_composition = mean_rev/tot_rev)
+    
+  full_choice_set <- dist_hauls_catch_shares %>% dplyr::filter(Revenue > 0) %>%
+    dplyr::select(selection) %>% unique() %>% mutate(merge=1)
+  
+  all_vessels <- dist_hauls_catch_shares %>% 
+    dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+
+  expand <- merge(full_choice_set, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+  dbp <- merge(expand, dbp, by = c('VESSEL_NUM', 'selection'), all.x = TRUE) %>%
+    mutate(catch_composition = ifelse(is.na(catch_composition),0,catch_composition))
+
+  dbp <- dbp %>%
+    group_by(selection) %>%
+    summarize(prop = mean(catch_composition))
+
   # dbp <- as.data.frame(dbp)
 
   #Add number of values to sample
@@ -115,25 +137,39 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
 
   #Sample hauls and calculate distances
   #For each haul in the focus year, sample nhauls_sampled tows
+
+  
   cl <- makeCluster(ncores)
   registerDoParallel(cl)
   source("C:\\GitHub\\EconAnalysis\\Functions\\sample_hauls_participation.R")
-
+  
   sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls),
-    .export = c("sample_hauls"),
-    .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
-      sample_hauls(xx = ii, hauls1 = hauls,
-        dist_hauls_catch_shares1 = dist_hauls_catch_shares, nhauls_sampled1 = nhauls_sampled,
-        choice_proportions = dbp, the_seed = seedz[ii])
-    }
+                                    .export = c("sample_hauls"),
+                                    .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
+                                      set.seed(seedz[ii])
+                                      temp <- dbp %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]))
+                                      samps <- temp %>% sample_n(size = nhauls_sampled, prob = prop, replace = F) 
+                                      the_samples <- as.data.frame(samps[ , "selection"])
+                                      actual_haul <- as.data.frame(hauls[ii, "selection"])
+                                      colnames(actual_haul)[1] <- "selection"
+                                      
+                                      #Combine the sampled values and the empirical haul
+                                      actual_haul$fished <- TRUE
+                                      actual_haul$fished_haul <- hauls[ii, "trip_id"]
+                                      actual_haul$fished_VESSEL_NUM <- hauls[ii, "VESSEL_NUM"]
+                                      the_samples$fished <- FALSE
+                                      the_samples$fished_haul <- hauls[ii, "trip_id"]
+                                      the_samples$fished_VESSEL_NUM <- hauls[ii, "VESSEL_NUM"]
+                                      the_samples <- rbind(actual_haul, the_samples)
+                                     
+                                      #Define the set_date
+                                      the_samples$set_date <- ymd(paste(hauls[ii, "set_year"], hauls[ii, "set_month"], hauls[ii, "set_day"], sep = "-"))
+                                      return(the_samples)
+                                      rm(actual_haul, the_samples, temp, samps)
+                                    }
   print("Done sampling hauls")
   sampled_hauls <- plyr::ldply(sampled_hauls)
   
-  #Add in the vessel that's doing the fishing
-  fd <- sampled_hauls %>% dplyr::filter(fished == TRUE) %>% distinct(fished_haul, drvid)
-  fd <- plyr::rename(fd, c("drvid" = 'fished_drvid'))
-  sampled_hauls <- sampled_hauls %>% left_join(fd, by = "fished_haul")
-
   #Obtain previous day, year and day/year date
   sampled_hauls$prev_days_date <- sampled_hauls$set_date - days(ndays)
   sampled_hauls$prev_year_set_date <- sampled_hauls$set_date - days(365)
@@ -149,16 +185,15 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   
   #What were the average revenues in each location
   tow_dates <- sampled_hauls %>%
-    dplyr::select(haul_id, drvid, set_date, prev_days_date, prev_year_set_date, prev_year_days_date,
-                  set_lat, set_long, up_lat, up_long, depth_bin, fished_drvid, haul_net_revenue.sdm, haul_net_revenue.catch)
+    dplyr::select(fished_haul, set_date, prev_days_date, prev_year_set_date, prev_year_days_date,
+                  fished_VESSEL_NUM)
 
   #calculate intervals
   tow_dates$days_inter <- interval(tow_dates$prev_days_date, tow_dates$set_date)
   tow_dates$prev_year_days_inter <- interval(tow_dates$prev_year_days_date, tow_dates$prev_year_set_date)
 
   #add in the fleet name
-  paste_port <- paste(the_port, collapse = "_")
-  tow_dates$fleet_name <- paste_port
+  tow_dates$fleet_name <- "cluster 1"
   td1 <- tow_dates
 
 
@@ -167,7 +202,7 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
 
   dummys2 <- foreach::foreach(ii = 1:nrow(td1),
     .packages = c("dplyr", 'lubridate')) %dopar% {
-      source("C:\\GitHub\\EconAnalysis\\Functions\\process_dummys2.R")
+      source("C:\\GitHub\\EconAnalysis\\Functions\\process_dummys2_participation.R")
       process_dummys2(xx = ii, td2 = td1, dat1 = dat, hab_dist = habit_distance)
     }
   print("Done calculating dummys and revenues")

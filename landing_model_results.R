@@ -538,14 +538,14 @@ cluster_label <- as_labeller(c("1" = "Southern CCS\nsmall-scale squid-specialist
 
 conditional_effects_psdn_msqd_sdm_cluster <- (conditional_effects(
   fit_qMSQD, "PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z", 
-  surface=TRUE, 
+  surface=FALSE, 
   conditions = conditions_cluster, re_formula = NULL))
 
 ### Squid v/s Anchovy ###
 
 conditional_effects_nanc_msqd_sdm_cluster <- (conditional_effects(
   fit_qMSQD, "NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z", 
-  surface=TRUE, 
+  surface=FALSE, 
   conditions = conditions_cluster, re_formula = NULL))
 
 
@@ -559,10 +559,13 @@ gg_int <- plot(conditional_effects_psdn_msqd_sdm_cluster, plot = FALSE)[[2]] +
     legend.title = element_text(size = 9),
     legend.text = element_text(size=8)) + 
   ggtitle("(a) SDM: Market squid x SDM: Pacific sardine") +  
-  theme(plot.title = element_text(size=9, face="bold.italic")) + 
+  theme(plot.title = element_text(size=9, face="bold.italic"))
+gg_int$facet$params$labeller <- cluster_label
+
++ 
   guides(colour=guide_legend(title="ln(MSQD: Landings)")) +
   scale_x_continuous(name = "PSDN: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
-gg_int$facet$params$labeller <- cluster_label
+
 
 gg_int_2 <- plot(conditional_effects_nanc_msqd_sdm_cluster, plot = FALSE)[[2]] + 
   theme(
@@ -572,10 +575,13 @@ gg_int_2 <- plot(conditional_effects_nanc_msqd_sdm_cluster, plot = FALSE)[[2]] +
     legend.title = element_text(size = 9),
     legend.text = element_text(size=8)) + 
   ggtitle("(a) SDM: Market squid x SDM: Northern anchovy") +  
-  theme(plot.title = element_text(size=9, face="bold.italic")) + 
+  theme(plot.title = element_text(size=9, face="bold.italic")) 
+gg_int_2$facet$params$labeller <- cluster_label
+
++ 
   guides(colour=guide_legend(title="ln(MSQD: Landings)")) +
   scale_x_continuous(name = "NANC: Prob(Presence)") + scale_y_continuous(name = "MSQD: Prob(Presence)")
-gg_int_2$facet$params$labeller <- cluster_label
+
 
 gg_int / gg_int_2
 

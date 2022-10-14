@@ -106,7 +106,7 @@ participation_data.save <- participation_data %>%
       dplyr::rename(set_year = LANDING_YEAR) %>%
       select("set_date", "set_day", "set_month", "set_year", "Landings", "Revenue", 
              "Species_Dominant", "selection", "VESSEL_NUM", "trip_id", "hurricane", 
-             "gale", "smcraft", "mww_other", "selection")
+             "gale", "smcraft", "mww_other", "selection", 'group_all')
          # "psdn.sdm", "nanc.sdm", "msqd.sdm", "wind.u", "wind.v"
 
 

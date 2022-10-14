@@ -12,55 +12,40 @@
     nhauls_sampled1 = 50, choice_proportions, the_seed){
     
    #---------------------------------------------------------------
-   ## Load functions
-   source("C:\\GitHub\\EconAnalysis\\Functions\\deg2rad.R")
-   source("C:\\GitHub\\EconAnalysis\\Functions\\gcd_slc.R")
-   
-   #---------------------------------------------------------------
 
    #Seed uses the row index in the foreach function of sampled_rums
    set.seed(the_seed)
    
-   #Check to make sure there are enough samples of each thing to sample without replacement
-   the_samples <- lapply(1:nrow(choice_proportions), FUN = function(dd){
-                      temp <- dist_hauls_catch_shares1 %>% dplyr::filter(trip_id != hauls1[xx, 'trip_id'],
-                                                                         selection == choice_proportions[dd, "selection"])
-                      samps <- temp %>% sample_n(size = choice_proportions[dd, "n_samp"], replace = F)
-                      return(samps)
-                  })
-   the_samples <- plyr::ldply(the_samples)
+   # #Check to make sure there are enough samples of each thing to sample without replacement
+   # the_samples <- lapply(1:nrow(choice_proportions), FUN = function(dd){
+   #                    temp <- dist_hauls_catch_shares1 %>% dplyr::filter(trip_id != hauls1[xx, 'trip_id'],
+   #                                                                       selection != as.character(choice_proportions[dd, "selection"]))
+   #                    samps <- temp %>% sample_n(size = as.numeric(choice_proportions[dd, "n_samp"]), replace = F)
+   #                    return(samps)
+   #                })
+   # the_samples <- plyr::ldply(the_samples)
+   # 
+   
     
-    #Now calculate the distances between the points and the actual points
-    actual_haul <- hauls1[xx, ]
-  
-    # #calculate distances in km
-    # prev_point <- actual_haul %>% select(prev_up_long, prev_up_lat)
-    # the_samples$prev_up_long <- prev_point$prev_up_long
-    # the_samples$prev_up_lat <- prev_point$prev_up_lat
+    temp <- choice_proportions %>% dplyr::filter(selection != as.character(hauls1[xx, "selection"]))
+    samps <- temp %>% sample_n(size = nhauls_sampled1, prob = prop, replace = F)
     
-    ## for the samples
-    the_samples[, c('set_long', 'set_lat', 'prev_up_lat', 'prev_up_long')] <- deg2rad(the_samples[, 
-      c('set_long', 'set_lat', 'prev_up_lat', 'prev_up_long')])
-    the_samples$distance <- gcd_slc(the_samples$prev_up_long, 
-        the_samples$prev_up_lat, the_samples$set_long, the_samples$set_lat)
-  
-    ## for the actual data
-    actual_haul[, c('set_long', 'set_lat', 'prev_up_lat', 'prev_up_long')] <- deg2rad(actual_haul[, 
-        c('set_long', 'set_lat', 'prev_up_lat', 'prev_up_long')])  
-    actual_haul$distance <- gcd_slc(actual_haul$prev_up_long, 
-        actual_haul$prev_up_lat, actual_haul$set_long, actual_haul$set_lat)
+    the_samples <- plyr::ldply(samps)
+    
+    
+    
+#Now calculate the distances between the points and the actual points
+actual_haul <- hauls1[xx, ]
+    
+ #Combine the sampled values and the empirical haul
+ actual_haul$prev_haul_num <- NULL
+ actual_haul$fished <- TRUE
+ actual_haul$fished_haul <- actual_haul$trip_id
+ the_samples$fished <- FALSE
+ the_samples$fished_haul <- actual_haul$trip_id
+ the_samples <- rbind(actual_haul, the_samples)
 
-    #Combine the sampled values and the empirical haul
-    actual_haul$prev_haul_num <- NULL
-    actual_haul$fished <- TRUE
-    actual_haul$fished_haul <- actual_haul$haul_id
-    the_samples$fished <- FALSE
-    the_samples$fished_haul <- actual_haul$haul_id
-  
-    the_samples <- rbind(actual_haul, the_samples)
-  
-    #Define the set_date
-    the_samples$set_date <- ymd(paste(actual_haul$set_year, actual_haul$set_month, actual_haul$set_day, sep = "-"))
-    
-    return(the_samples)
+  #Define the set_date
+  the_samples$set_date <- ymd(paste(actual_haul$set_year, actual_haul$set_month, actual_haul$set_day, sep = "-"))
+  return(the_samples)
   }
