@@ -16,7 +16,6 @@
 #' @param seed Seed for sampling tows
 #' @param ncores Number of cores to use
 #' @param rev_scale Scale the revenue by this factor
-#' @param habit_distance Distance of spatiotemporal filter
 #' @param return_hauls Option to return the hauls before processing dummys, defaults to FALSE
 #' @param exp_rev Type of expected revenue (from sdm or catch)
 #'
@@ -24,8 +23,7 @@
 
 sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   min_year = 2010, max_year = 2012, ndays = 60, focus_year = 2012, nhauls_sampled = 50, 
-  seed = 300, ncores, rev_scale, habit_distance, 
-  return_hauls = FALSE, exp_rev = "sdm")
+  seed = 300, ncores, rev_scale, return_hauls = FALSE, exp_rev = "sdm") 
 
 #Start by sampling 50 tows within the same fleet
 #Figure out how close the different clusters are
@@ -45,22 +43,15 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   dat <- participation_data.save %>% dplyr::filter(set_year >= 2014, set_year <= 2015, group_all == 1)
   min_year <- min.year
   focus_year <- 2014
-  nhauls_sampled <- 5
+  nhauls_sampled <- 4
   seed = 300
   ncores = 2
-  ndays = 60
+  ndays = 90
+  rev_scale = 100  
   
-  #---------------------------------------------------------------
-  # #Calculate net revenues for each haul
-  # dat <- dat %>% group_by(haul_id) %>%
-  #   mutate(haul_net_revenue.sdm = sum(psdn.rev.sdm, na.rm = T))
-
-  #---------------------------------------------------------------
-  #Create data set, for each tow
   dist_hauls <- dat %>% 
     distinct(trip_id, .keep_all = T) %>% 
-    dplyr::select(trip_id, set_month, VESSEL_NUM, trip_id, set_day, set_year, Revenue, selection) %>% 
-      #haul_net_revenue.sdm, haul_net_revenue.catch) %>% 
+    dplyr::select(trip_id, set_month, VESSEL_NUM, set_day, set_year, Revenue, selection) %>% 
     as.data.frame
 
   dist_hauls_catch_shares <- dist_hauls %>% dplyr::filter(set_year >= min_year)
@@ -69,41 +60,23 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   #Hauls in focus year
   hauls <- dist_hauls %>% dplyr::filter(set_year == focus_year) %>% arrange(trip_id)
   
-  # hauls$prev_haul_num <- hauls$haul_num - 1
-
-  # #Data frame of previous haul locations
-  # prev_hauls <- hauls %>% dplyr::select(trip_id, haul_num, up_long, up_lat)
-
-  # #add in zero haul_num values
-  # zero_hauls <- prev_hauls %>% distinct(trip_id)
-  # zero_hauls$haul_num <- 0
-  # 
-  # port_locs <- dat %>% ungroup %>% distinct(trip_id, d_port_long, d_port_lat)
-  # zero_hauls <- zero_hauls %>% left_join(port_locs, by = "trip_id")
-  # zero_hauls <- plyr::rename(zero_hauls, c("d_port_long" = "up_long",
-  #   "d_port_lat" = 'up_lat'))
-  # 
-  # #Add into previous hauls data frame
-  # prev_hauls <- rbind(prev_hauls, zero_hauls) %>% arrange(trip_id, haul_num)
-  # names(prev_hauls)[2:4] <- c('prev_haul_num', "prev_up_long", 'prev_up_lat')
-
-  # #Add this into the hauls data frame
-  # hauls <- hauls %>% left_join(prev_hauls, by = c('trip_id', 'prev_haul_num'))
-  # 
-  #Calculate depth bin proportions
   
+  
+  #---------------------------------------------------------------
+  # Create probabilities for sampling choice sets
+
   
   # Create dataframes
   dbp <- dist_hauls_catch_shares %>% 
     group_by(selection, VESSEL_NUM, set_year) %>% 
-    summarize(sum_rev = sum(Revenue)) %>%
+    summarize(sum_rev = sum(Revenue, na.rm = TRUE)) %>%
     group_by(selection, VESSEL_NUM) %>%
-    summarize(mean_rev = mean(sum_rev)) %>%
+    summarize(mean_rev = mean(sum_rev, na.rm = TRUE)) %>%
     group_by(VESSEL_NUM) %>%
-    mutate(tot_rev = sum(mean_rev)) %>% ungroup() %>%
+    mutate(tot_rev = sum(mean_rev, na.rm = TRUE)) %>% ungroup() %>%
     mutate(catch_composition = mean_rev/tot_rev)
     
-  full_choice_set <- dist_hauls_catch_shares %>% dplyr::filter(Revenue > 0) %>%
+  full_choice_set <- dist_hauls_catch_shares %>%
     dplyr::select(selection) %>% unique() %>% mutate(merge=1)
   
   all_vessels <- dist_hauls_catch_shares %>% 
@@ -117,17 +90,25 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
     group_by(selection) %>%
     summarize(prop = mean(catch_composition))
 
-  # dbp <- as.data.frame(dbp)
+  factor <- 1/sum(dbp$prop)
+  dbp <- dbp %>% mutate(prop = prop * factor)        
+  sum(dbp$prop)
+  
+  dbp <- dbp[dbp$selection != "No-Participation", ]
+    
+  
 
-  #Add number of values to sample
-  dbp$n_samp <- dbp$prop * nhauls_sampled
-
-  #Round the values to integers
-  dbp$n_samp <- round(dbp$n_samp)
-
-  #Top off the highest value
-  max_dbp <- which(dbp$prop == max(dbp$prop))
-  dbp[max_dbp, 'n_samp'] <- dbp[max_dbp, 'n_samp'] + (nhauls_sampled - sum(round(dbp$n_samp)))
+  # # dbp <- as.data.frame(dbp)
+  # 
+  # #Add number of values to sample
+  # dbp$n_samp <- dbp$prop * nhauls_sampled
+  # 
+  # #Round the values to integers
+  # dbp$n_samp <- round(dbp$n_samp)
+  # 
+  # #Top off the highest value
+  # max_dbp <- which(dbp$prop == max(dbp$prop))
+  # dbp[max_dbp, 'n_samp'] <- dbp[max_dbp, 'n_samp'] + (nhauls_sampled - sum(round(dbp$n_samp)))
 
   #-----------------------------------------------------------------------------
   #Sample Hauls
@@ -147,9 +128,20 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
                                     .export = c("sample_hauls"),
                                     .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
                                       set.seed(seedz[ii])
-                                      temp <- dbp %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]))
-                                      samps <- temp %>% sample_n(size = nhauls_sampled, prob = prop, replace = F) 
-                                      the_samples <- as.data.frame(samps[ , "selection"])
+                     
+                                      if (hauls[ii, "selection"] != "No-Participation") {
+                                        temp <- dbp %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]))
+                                        samps <- temp %>% sample_n(size = (nhauls_sampled - 1), prob = prop, replace = F)
+                                        the_samples <- as.data.frame(samps[ , "selection"]) %>%
+                                          add_row(selection = "No-Participation")
+                                      }
+                                      
+                                      else {
+                                        temp <- dbp %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]))
+                                        samps <- temp %>% sample_n(size = nhauls_sampled, prob = prop, replace = F)
+                                        the_samples <- as.data.frame(samps[ , "selection"])
+                                      }
+                                      
                                       actual_haul <- as.data.frame(hauls[ii, "selection"])
                                       colnames(actual_haul)[1] <- "selection"
                                       
@@ -186,48 +178,41 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   #What were the average revenues in each location
   tow_dates <- sampled_hauls %>%
     dplyr::select(fished_haul, set_date, prev_days_date, prev_year_set_date, prev_year_days_date,
-                  fished_VESSEL_NUM)
+                  fished_VESSEL_NUM, selection)
 
   #calculate intervals
   tow_dates$days_inter <- interval(tow_dates$prev_days_date, tow_dates$set_date)
   tow_dates$prev_year_days_inter <- interval(tow_dates$prev_year_days_date, tow_dates$prev_year_set_date)
 
   #add in the fleet name
-  tow_dates$fleet_name <- "cluster 1"
+  tow_dates$fleet_name <- 1
   td1 <- tow_dates
 
 
   #-----------------------------------------------------------------------------
-  ### Calculate revenues (LATER!) from each period and process dummy variables
+  ### Calculate revenues from each period and process dummy variables
 
   dummys2 <- foreach::foreach(ii = 1:nrow(td1),
     .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\process_dummys2_participation.R")
-      process_dummys2(xx = ii, td2 = td1, dat1 = dat, hab_dist = habit_distance)
+      process_dummys2(xx = ii, td2 = td1, dat1 = dat)
     }
   print("Done calculating dummys and revenues")
+  td1 <- ldply(dummys2)
+  
+  
   stopCluster(cl)
   
-  td1 <- ldply(dummys2)
 
   #-----------------------------------------------------------------------------
-  ##Create additional dummys
+  ## Create additional dummys
   
   #Convert set_date to character string to merge with the sampled_hauls
   tow_dates$set_date_chr <- as.character(tow_dates$set_date)
   td1$set_date_chr <- as.character(td1$set_date)
   sampled_hauls$set_date_chr <- as.character(sampled_hauls$set_date)
 
-  #Add in dummy variable for first tow
-  first_hauls <- sampled_hauls %>% dplyr::filter(fished == TRUE, haul_num == 1) %>% dplyr::select(fished_haul)
-  sampled_hauls$dummy_first <- 0
-  sampled_hauls[which(sampled_hauls$fished_haul %in% first_hauls$fished_haul), 'dummy_first'] <- 1
-  sampled_hauls$dummy_not_first <- sampled_hauls$dummy_first
-
-  sampled_hauls[which(sampled_hauls$dummy_not_first == 1), "dummy_not_first"] <- 2
-  sampled_hauls[which(sampled_hauls$dummy_not_first == 0), "dummy_not_first"] <- 1
-  sampled_hauls[which(sampled_hauls$dummy_not_first == 2), "dummy_not_first"] <- 0
-
+  #create dummy for prev days fishing
   td1[which(td1$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
   td1[which(td1$dummy_prev_year_days != 0), 'dummy_prev_year_days'] <- 1
 
@@ -238,78 +223,108 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
 
   sampled_hauls <- cbind(sampled_hauls,
     td1[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
+  
+  
+  #-----------------------------------------------------------------------------
+  ## Create additional variables
+  
+  #---------------------------------------------------------------
+  ## Obtain (year) price by port from PacFIN landing data
+  # 
+  # PacFIN_dat <- read.csv(file = here::here("Data", "PacFin.csv"))
+  # price_PSDN <- PacFIN_dat %>%
+  #   dplyr::filter(Species_code == "PSDN") %>%
+  #   group_by(Landing_year) %>%
+  #   summarize(price.PSDN = mean(Price, na.rm = T)) %>%
+  #   dplyr::rename(set_year = Landing_year)
+  # 
+  # psdn.logbook <- merge(psdn.logbook,price_PSDN,by=c('set_year'),all.x = TRUE) 
+  
+  #---------------------------------------------------------------
+  ## Create expected and actual revenue -- psdn_rev variable-- using SDMs (maybe moving average?) and catch
+  ## (I need prices by port)
+  
+  # psdn.logbook <- psdn.logbook %>%
+  #   mutate(psdn.rev.catch = catch * price.PSDN) %>%
+  #   mutate(psdn.rev.sdm = pSDM * price.PSDN)
+  
+  #---------------------------------------------------------------
+  ## Calculate net revenues for each haul
+  # dat <- dat %>% group_by(haul_id) %>%
+  #   mutate(haul_net_revenue.sdm = sum(psdn.rev.sdm, na.rm = T))
+  
+  #---------------------------------------------------------------
+  ## Merge storm warning signals
+  # warnings.signals <- read.csv(file = "G://My Drive//Data//Storm Warnings//WCports_mww_events09-16.csv")
+  # warnings.signals <- warnings.signals %>% 
+  #   select("pcid", "d_issued", "d_expired", "hurricane", "gale", "smcraft", "mww_other") %>%
+  #   dplyr::rename(PACFIN_PORT_CODE = pcid) 
+  # port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
+  # warnings.signals <- warnings.signals %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
+  # warnings.signals$d_issued  <- as.Date(warnings.signals$d_issued, "%d%b%Y %H:%M:%OS")
+  # warnings.signals$d_expired <- as.Date(warnings.signals$d_expired, "%d%b%Y %H:%M:%OS")
+  # warnings.signals <- warnings.signals %>% unique() 
+  # library(sqldf)
+  # df1 <- participation_data
+  # df2 <- warnings.signals
+  # warnings.signals <-  sqldf("select df1.*, df2.hurricane, df2.gale, df2.smcraft, df2.mww_other
+  #                                       from df1 left join df2 on
+  #                                       (df1.Port_Dominant = df2.PORT_AREA_CODE) AND 
+  #                                       (df1.set_date between df2.d_issued and df2.d_expired)") 
+  # warnings.signals <- warnings.signals %>% unique() %>% 
+  #   select("trip_id", "hurricane", "gale", "smcraft", "mww_other")
+  # warnings.signals <- warning.signals %>% group_by(trip_id) %>%
+  #   summarise(hurricane = sum(hurricane), gale = sum(gale), 
+  #             smcraft = sum(smcraft), mww_other = sum(mww_other))
+  # warnings.signals[is.na(warnings.signals)] <- 0
+  # participation_data <- merge(participation_data, warnings.signals, 
+  #                             by=c("trip_id"), all.x = TRUE)
+  # 
+  
+  
+  
+  
 
+ 
+  
   #-----------------------------------------------------------------------------
   #Format as mlogit.data
-  rdo <- sampled_hauls %>% dplyr::select(haul_id, haul_num, distance, fished, fished_haul,
-    dummy_prev_days, dummy_prev_year_days, dummy_first, dummy_not_first, set_lat, set_long, haul_net_revenue.sdm, haul_net_revenue.catch,
-    dummy_miss, mean_rev, mean_rev_adj)
+  rdo <- sampled_hauls %>% dplyr::select(fished, fished_haul,
+    dummy_prev_days, dummy_prev_year_days, dummy_miss, mean_rev, mean_rev_adj, selection)
 
-  rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(haul_id)) %>% as.data.frame
+  # rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(fished_haul)) %>% as.data.frame
 
   #-----------------------------------------------------------------------------
   ##Fit mlogit models returning the coefficients, the models, and the data going into the model
 
-  #Filter out tows with missing values for distance
-  rdo <- rdo %>% dplyr::filter(is.na(distance) == FALSE)
-  remove_all_missing <- rdo %>% group_by(fished_haul) %>%
-    summarize(keep = sum(fished)) %>% 
-    dplyr::filter(keep != 1) %>% 
-    as.data.frame
-  rdo <- rdo %>% dplyr::filter(fished_haul %in% remove_all_missing$fished_haul == F)
-  
   #Fit the model for everything at once
-  the_tows <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'alt_tow', chid.var = 'fished_haul')
+  library(mlogit)
+  the_tows2 <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'selection', chid.var = 'fished_haul')
   
-  if(exp_rev == "sdm"){
-    mf <- mFormula(fished ~  distance * dummy_first + distance * dummy_not_first + dummy_prev_days + dummy_prev_year_days + haul_net_revenue.sdm 
-                   - 1 - dist - distance - dummy_first - dummy_not_first)
-    res <- mlogit(mf, the_tows)
-    
-    #List coefficients and rename to align with jeem paper
-    coefs <- coef(res)
-    coefs <- plyr::rename(coefs, c('dummy_prev_days' = 'dum30',
-                                   "dummy_prev_year_days" = "dum30y", "distance:dummy_first" = 'dist1',
-                                   "distance:dummy_not_first" = 'distN',
-                                   'haul_net_revenue.sdm' = 'rev'))
-    coefs <- data.frame(coefs = round(coefs[c('distN', 'dist1', 'dum30', 'dum30y', 'rev')],
-      digits = 5))
-    
-    ps <- summary(res)$CoefTable[, 4]
-
-    ps <- plyr::rename(ps, c('dummy_prev_days' = 'dum30',
-                             "dummy_prev_year_days" = "dum30y", "distance:dummy_first" = 'dist1',
-                             "distance:dummy_not_first" = 'distN', 
-                             'haul_net_revenue.sdm' = 'rev'))
-    
-    ps <- ps[c('dist1', 'distN', 'dum30', 'dum30y', 'rev')]
-  }  
-  
-  if(exp_rev == "catch"){
-    mf <- mFormula(fished ~ mean_rev_adj + distance * dummy_first + distance * dummy_not_first 
-                   + dummy_prev_days + dummy_prev_year_days + dummy_miss 
-                   - 1 - distance - dummy_first - dummy_not_first)
-    res <- mlogit(mf, the_tows)
+    mf <- mFormula(fished ~ mean_rev_adj + dummy_miss | 0)
+    res <- mlogit(mf, the_tows, reflevel = 'No-Participation')
     
     #List coefficients and rename to align with jeem paper
     coefs <- coef(res)
 
-    coefs <- plyr::rename(coefs, c('dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y",
-                                   "mean_rev_adj" = "rev",
-                                   "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'distN',
+    coefs <- plyr::rename(coefs, c("mean_rev_adj" = "rev",
                                    "dummy_miss" = "dmiss"))
-    coefs <- data.frame(coefs = round(coefs[c('dist1', 'distN', 'rev', 'dmiss', 'dum30', 'dum30y')],
+    
+    # 'dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y",
+    
+    #'dist1', 'distN', 'dum30', 'dum30y' 
+    
+    coefs <- data.frame(coefs = round(coefs[c('rev', 'dmiss')],
       digits = 5))
 
     ps <- summary(res)$CoefTable[, 4]
 
-    ps <- plyr::rename(ps, c('dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y", 
-                             "mean_rev_adj" = "rev",
-                             "distance:dummy_first" = 'dist1', "distance:dummy_not_first" = 'distN',
+    ps <- plyr::rename(ps, c("mean_rev_adj" = "rev",
                              "dummy_miss" = "dmiss"))
-    ps <- ps[c('dist1', 'distN', 'rev', 'dmiss', 'dum30', 'dum30y')]
-  }
-  
+    
+    ps <- ps[c('rev', 'dmiss')]
+
+    
   print("Done with estimating discrete choice model")
 
   #Add significance values
@@ -339,4 +354,3 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   ## Output from the model
   outs <- list(coefs = coefs, mod = res, preds = preds, choices = sampled_hauls, data = rdo)  
   return(outs)
-}
