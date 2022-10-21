@@ -348,7 +348,7 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 
 
 ### Save logbooks ###
-write.csv(Tickets_clust, "participation_data.csv", row.names = FALSE)
+write.csv(Tickets_clust, "C:\\GitHub\\EconAnalysis\\Data\\participation_data.csv", row.names = FALSE)
 
 
 # #####################################################

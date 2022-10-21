@@ -40,14 +40,36 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   }
 
 
-  dat <- participation_data.save %>% dplyr::filter(set_year >= 2014, set_year <= 2015, group_all == 1)
-  min_year <- min.year
+### DELETE THIS LATER ###
+###Load packages and set working directory
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(lubridate)
+library(reshape2)
+library(devtools)
+library(maps)
+library(doParallel)
+library(tidyr)
+library(tidyverse)
+library(mlogit)
+library(parallel)
+
+
+  participation_data <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\discrete_choice_participation.csv")
+  dat <- participation_data %>% dplyr::filter(set_year >= 2014, set_year <= 2015, group_all == 1)
+  
+  min_year <- 2014
+  max_year <- 2015
   focus_year <- 2014
-  nhauls_sampled <- 4
+  nhauls_sampled <- 5
   seed = 300
   ncores = 2
   ndays = 90
   rev_scale = 100  
+  
+#########################  
+
   
   dist_hauls <- dat %>% 
     distinct(trip_id, .keep_all = T) %>% 
@@ -68,11 +90,11 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   
   # Create dataframes
   dbp <- dist_hauls_catch_shares %>% 
-    group_by(selection, VESSEL_NUM, set_year) %>% 
+    group_by(selection, VESSEL_NUM, set_year, set_month) %>% 
     summarize(sum_rev = sum(Revenue, na.rm = TRUE)) %>%
-    group_by(selection, VESSEL_NUM) %>%
+    group_by(selection, VESSEL_NUM, set_month) %>%
     summarize(mean_rev = mean(sum_rev, na.rm = TRUE)) %>%
-    group_by(VESSEL_NUM) %>%
+    group_by(VESSEL_NUM, set_month) %>%
     mutate(tot_rev = sum(mean_rev, na.rm = TRUE)) %>% ungroup() %>%
     mutate(catch_composition = mean_rev/tot_rev)
     
@@ -81,20 +103,55 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   
   all_vessels <- dist_hauls_catch_shares %>% 
     dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+  
+  all_month <- dist_hauls_catch_shares %>% 
+    dplyr::select(set_month) %>% unique() %>% mutate(merge=1)
 
-  expand <- merge(full_choice_set, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
-  dbp <- merge(expand, dbp, by = c('VESSEL_NUM', 'selection'), all.x = TRUE) %>%
+  expand <- merge(full_choice_set, all_vessels, 
+                  by = c('merge'), all.x = TRUE, all.y = TRUE)
+  
+  expand <- merge(expand, all_month, 
+                  by = c('merge'), all.x = TRUE, all.y = TRUE)
+  
+  dbp <- merge(expand, dbp, by = c('VESSEL_NUM', 'selection', 'set_month'), all.x = TRUE) %>%
     mutate(catch_composition = ifelse(is.na(catch_composition),0,catch_composition))
 
   dbp <- dbp %>%
-    group_by(selection) %>%
+    group_by(selection, set_month) %>%
     summarize(prop = mean(catch_composition))
 
-  factor <- 1/sum(dbp$prop)
-  dbp <- dbp %>% mutate(prop = prop * factor)        
-  sum(dbp$prop)
   
-  dbp <- dbp[dbp$selection != "No-Participation", ]
+  ### Create factor by month and graph composition
+  
+
+
+cl <- makeCluster(ncores)
+registerDoParallel(cl)
+
+
+dbp3 <- foreach::foreach(ll = 1:12, .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
+    dbp2 <- dbp %>% dplyr::filter(set_month == ll)  %>%  
+      mutate(prop = ifelse(prop == 0,0.001,prop))
+      factor <- 1/sum(dbp2$prop)
+      
+    dbp2 <- dbp2 %>% 
+      mutate(prop = prop * factor)
+    
+    sum(dbp2$prop)
+    return(dbp2)
+}
+
+dbp_month <- as.data.frame(do.call(rbind.data.frame, dbp3))
+
+
+# dbp_month <- dbp_month %>% filter(prop > 0)
+# ggplot(dbp_month, aes(x=selection, y=prop, fill = selection))+
+#   geom_bar(stat='identity')+
+#   facet_grid(~set_month,scales="free", space="free_x") +
+#   theme(axis.text.x = element_text(size=7, angle=90))
+
+  
+dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
     
   
 
@@ -128,18 +185,23 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
                                     .export = c("sample_hauls"),
                                     .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
                                       set.seed(seedz[ii])
-                     
-                                      if (hauls[ii, "selection"] != "No-Participation") {
-                                        temp <- dbp %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]))
-                                        samps <- temp %>% sample_n(size = (nhauls_sampled - 1), prob = prop, replace = F)
-                                        the_samples <- as.data.frame(samps[ , "selection"]) %>%
+                                 
+                                     if (hauls[ii, "selection"] != "No-Participation") {
+                                        temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
+                                                                      set_month == as.character(hauls[ii, "set_month"])) 
+                                        samps <- temp %>% sample_n(size = (nhauls_sampled - 1), weight = prop, replace = F)
+                                        the_samples <- as.data.frame(samps[ , "selection"]) 
+                                        colnames(the_samples)[1] <- "selection"
+                                        the_samples <- the_samples %>%
                                           add_row(selection = "No-Participation")
                                       }
                                       
                                       else {
-                                        temp <- dbp %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]))
-                                        samps <- temp %>% sample_n(size = nhauls_sampled, prob = prop, replace = F)
-                                        the_samples <- as.data.frame(samps[ , "selection"])
+                                        temp <- dbp_month %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
+                                                                      set_month == as.character(hauls[ii, "set_month"]))
+                                        samps <- temp %>% sample_n(size = nhauls_sampled, weight = prop, replace = F)
+                                        the_samples <- as.data.frame(samps[ , "selection"]) 
+                                        colnames(the_samples)[1] <- "selection"
                                       }
                                       
                                       actual_haul <- as.data.frame(hauls[ii, "selection"])
@@ -218,6 +280,7 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
 
   td1[which(td1$mean_rev != 0), 'dummy_miss'] <- 0
   td1[which(td1$mean_rev == 0), 'dummy_miss'] <- 1
+  td1[which(td1$selection == "No-Participation"), 'dummy_miss'] <- 0
 
   td1$mean_rev_adj <- td1$mean_rev / rev_scale
 
@@ -284,9 +347,6 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   
   
   
-
- 
-  
   #-----------------------------------------------------------------------------
   #Format as mlogit.data
   rdo <- sampled_hauls %>% dplyr::select(fished, fished_haul,
@@ -299,10 +359,23 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
 
   #Fit the model for everything at once
   library(mlogit)
-  the_tows2 <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'selection', chid.var = 'fished_haul')
+  rdo <- na.omit(rdo)
+  the_tows <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'selection', 
+                          chid.var = 'fished_haul', drop.index = TRUE)
   
-    mf <- mFormula(fished ~ mean_rev_adj + dummy_miss | 0)
+  head(the_tows)
+  
+    mf <- mFormula(fished ~ mean_rev_adj + dummy_miss | dummy_prev_days)
     res <- mlogit(mf, the_tows, reflevel = 'No-Participation')
+    summary(res)
+    
+    
+    
+    
+    dat.modeled <- rdo[, c("mean_rev_adj", "dummy_miss")]
+    dat.undup <- dat.modeled[!duplicated(dat.modeled), ]
+    
+    
     
     #List coefficients and rename to align with jeem paper
     coefs <- coef(res)
@@ -312,7 +385,7 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
     
     # 'dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y",
     
-    #'dist1', 'distN', 'dum30', 'dum30y' 
+    # 'dist1', 'distN', 'dum30', 'dum30y' 
     
     coefs <- data.frame(coefs = round(coefs[c('rev', 'dmiss')],
       digits = 5))
@@ -336,20 +409,22 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   coefs[which(coefs$p_values <= .001), 'significance'] <- "***"
   
   #Generate and format the predictions
-  source("C:\\GitHub\\EconAnalysis\\Functions\\pred_metrics.R")
-  preds <- pred_metrics(choices = rdo, mod = res)
-  print("Done calculating predictive metrics")
-  preds <- data.frame(score1 = preds[1], score2 = preds[2], score3 = preds[3], score4 = preds[4])
-  preds$min_year <- min_year
-  preds$focus_year <- focus_year
-  preds$nhauls_sampled <- nhauls_sampled
-  preds$seed <- preds$seed
-  preds$rev_scale <- rev_scale
-  preds$habit_distance <- habit_distance
-  preds$ndays <- ndays
+  fits <- fitted(res, outcome = TRUE)
+  # pr <- predict(res, newdata = dat.modeled)
+  mfits2 <- reshape2::melt(fits, byrow = T)
+  names(mfits2) <- c("rrow", "ccolumn", 'value')
+  preds <- as.data.frame(rdo)
+  preds$probs <- mfits2$value
+  
+  
+  ## -- Correct prediction using max probability value -- ##
+  # Filter out the fished tows
+  pred_tows <- preds %>% group_by(fished_haul) %>% filter(probs == max(probs)) %>% as.data.frame
+  correct_prediction <- sum(pred_tows$fished) / nrow(pred_tows) #score 1
+  outs <- c(correct_prediction)
 
-  if(length(the_port) > 1) the_port <- paste(the_port, collapse = " and ")
-   preds$port <- the_port
+  print("Done calculating predictive metrics")
+
 
   ## Output from the model
   outs <- list(coefs = coefs, mod = res, preds = preds, choices = sampled_hauls, data = rdo)  

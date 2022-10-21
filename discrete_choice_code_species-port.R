@@ -29,7 +29,7 @@ library(parallel)
 #-----------------------------------------------------------------------------
 
 ## Read participation database ##
-participation_data <- read.csv("participation_data.csv")
+participation_data <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\participation_data.csv")
 
 
 #-----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ participation_data.save <- participation_data %>%
       select("set_date", "set_day", "set_month", "set_year", "Landings", "Revenue", 
              "Species_Dominant", "selection", "VESSEL_NUM", "trip_id", "selection", 'group_all')
 
-write.csv(participation_data.save,"discrete_choice_participation.csv", row.names = FALSE)
+write.csv(participation_data.save,"C:\\GitHub\\EconAnalysis\\Data\\discrete_choice_participation.csv", row.names = FALSE)
 # save.image(file = "disc_choice.RData")
 
 
@@ -62,15 +62,11 @@ write.csv(participation_data.save,"discrete_choice_participation.csv", row.names
 ## Sampling choice data ##
 source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums_participation.R")
 
-sampsSDM <- sampled_rums(data_in = participation_data.save, cluster = "all",
+samps <- sampled_rums(data_in = participation_data.save, cluster = "all",
                          min_year = min.year, max_year = max.year, ndays = 30,
                          focus_year = max.year, nhauls_sampled = 10,
-                         seed = 42, ncores = 4, rev_scale = 100, habit_distance = 5,
-                         return_hauls =FALSE, exp_rev = "sdm")
+                         seed = 42, ncores = 4, rev_scale = 100,
+                         return_hauls =FALSE)
 
-sampsCatch <- sampled_rums(data_in = psdn.logbook, cluster = "all",
-                           min_year = min.year, max_year = max.year, ndays = 30,
-                           focus_year = max.year, nhauls_sampled = 10,
-                           seed = 42, ncores = 4, rev_scale = 100, habit_distance = 5,
-                           return_hauls =FALSE, exp_rev = "catch")
+
 

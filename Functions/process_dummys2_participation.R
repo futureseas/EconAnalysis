@@ -47,7 +47,7 @@ process_dummys2 <- function(xx, td2 = td1, dat1 = dat){
   if (sel != "No-Participation") {
     dum_rev <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
                                                   set_date %within% temp_dat$days_inter,
-                                                  group_all %in% fltz,
+                                                  group_all %in% fltz, ## In the same cluster???
                                                   selection %in% sel)
       dum_rev <- dum_rev %>% distinct(trip_id, .keep_all = T)
 
