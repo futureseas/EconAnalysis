@@ -7,23 +7,25 @@
 #' Function calls mlogit
 
 #' @param data_in Data going in to the function; default is filt_clusts
-#' @param the_port Port of focus; Default is Astoria
+#' @param cluster cluster that we are analyzing 
 #' @param min_year Minimum year used to filter the data
 #' @param max_year Maximum year used to filter the data, also RUM data is filtered to be from the max_year
 #' @param ndays Number of previous days data to use in revenue expectations
-#' @param focus_year Year to focus on for the models
 #' @param nhauls_sampled Number of hauls to sample from the full data set
 #' @param seed Seed for sampling tows
 #' @param ncores Number of cores to use
 #' @param rev_scale Scale the revenue by this factor
-#' @param return_hauls Option to return the hauls before processing dummys, defaults to FALSE
-#' @param exp_rev Type of expected revenue (from sdm or catch)
+#' @param min_year_prob Minimum year used to compute sample probabilities
+#' @param max_year_prob Maximum year used to compute sample probabilities
+
 #'
 #' @export
 
-sampled_rums <- function(data_in = filt_clusts, cluster = "all",
-  min_year = 2010, max_year = 2012, ndays = 60, focus_year = 2012, nhauls_sampled = 50, 
-  seed = 300, ncores, rev_scale, return_hauls = FALSE, exp_rev = "sdm") 
+sampled_rums <- function(data_in, cluster = 1,
+                         min_year_prob = 2010, max_year_prob = 2012,
+                         min_year = 2010, max_year = 2012,  
+                         ndays = 60, nhauls_sampled = 50, seed = 300, 
+                         ncores, rev_scale) {
 
 #Start by sampling 50 tows within the same fleet
 #Figure out how close the different clusters are
@@ -31,56 +33,23 @@ sampled_rums <- function(data_in = filt_clusts, cluster = "all",
   
   #---------------------------------------------------------------
   ##Filter the data
-  if (cluster == "ALL") {
-  dat <- data_in %>% dplyr::filter(set_year >= min_year, set_year <= max_year)
-  }
-  else {
-  dat <- data_in %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
+  dat <- participation_data.save %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
                                    group_all %in% cluster)
-  }
-
-
-### DELETE THIS LATER ###
-###Load packages and set working directory
-library(ggplot2)
-library(plyr)
-library(dplyr)
-library(lubridate)
-library(reshape2)
-library(devtools)
-library(maps)
-library(doParallel)
-library(tidyr)
-library(tidyverse)
-library(mlogit)
-library(parallel)
-
-
-  participation_data <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\discrete_choice_participation.csv")
-  dat <- participation_data %>% dplyr::filter(set_year >= 2014, set_year <= 2015, group_all == 1)
   
-  min_year <- 2014
-  max_year <- 2015
-  focus_year <- 2014
-  nhauls_sampled <- 5
-  seed = 300
-  ncores = 2
-  ndays = 90
-  rev_scale = 100  
-  
-#########################  
+  #########################  
 
   
-  dist_hauls <- dat %>% 
+  hauls <- dat %>% 
     distinct(trip_id, .keep_all = T) %>% 
     dplyr::select(trip_id, set_month, VESSEL_NUM, set_day, set_year, Revenue, selection) %>% 
     as.data.frame
 
-  dist_hauls_catch_shares <- dist_hauls %>% dplyr::filter(set_year >= min_year)
+  dist_hauls_catch_shares <- hauls %>% dplyr::filter(set_year >= min_year_prob, set_year <= max_year_prob)
+  
 
-  #For each tow in the focus year, sample other tows
-  #Hauls in focus year
-  hauls <- dist_hauls %>% dplyr::filter(set_year == focus_year) %>% arrange(trip_id)
+  # #For each tow in the focus year, sample other tows
+  # #Hauls in focus year
+  # hauls <- dist_hauls %>% dplyr::filter(set_year == focus_year) %>% arrange(trip_id)
   
   
   
@@ -229,11 +198,7 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
   sampled_hauls$prev_year_set_date <- sampled_hauls$set_date - days(365)
   sampled_hauls$prev_year_days_date <- sampled_hauls$prev_days_date - days(365)
 
-  if(return_hauls == TRUE) {
-    stopCluster(cl)
-    return(sampled_hauls)
-  }
-  
+
   #-----------------------------------------------------------------------------
   ### Calculate interval between previews day and year
   
@@ -261,7 +226,7 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
     }
   print("Done calculating dummys and revenues")
   td1 <- ldply(dummys2)
-  
+  # td_select <- td1 %>% select(c(fished_haul, selection, mean_rev))
   
   stopCluster(cl)
   
@@ -288,144 +253,6 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
     td1[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
   
   
-  #-----------------------------------------------------------------------------
-  ## Create additional variables
+  return(sampled_hauls)
+}
   
-  #---------------------------------------------------------------
-  ## Obtain (year) price by port from PacFIN landing data
-  # 
-  # PacFIN_dat <- read.csv(file = here::here("Data", "PacFin.csv"))
-  # price_PSDN <- PacFIN_dat %>%
-  #   dplyr::filter(Species_code == "PSDN") %>%
-  #   group_by(Landing_year) %>%
-  #   summarize(price.PSDN = mean(Price, na.rm = T)) %>%
-  #   dplyr::rename(set_year = Landing_year)
-  # 
-  # psdn.logbook <- merge(psdn.logbook,price_PSDN,by=c('set_year'),all.x = TRUE) 
-  
-  #---------------------------------------------------------------
-  ## Create expected and actual revenue -- psdn_rev variable-- using SDMs (maybe moving average?) and catch
-  ## (I need prices by port)
-  
-  # psdn.logbook <- psdn.logbook %>%
-  #   mutate(psdn.rev.catch = catch * price.PSDN) %>%
-  #   mutate(psdn.rev.sdm = pSDM * price.PSDN)
-  
-  #---------------------------------------------------------------
-  ## Calculate net revenues for each haul
-  # dat <- dat %>% group_by(haul_id) %>%
-  #   mutate(haul_net_revenue.sdm = sum(psdn.rev.sdm, na.rm = T))
-  
-  #---------------------------------------------------------------
-  ## Merge storm warning signals
-  # warnings.signals <- read.csv(file = "G://My Drive//Data//Storm Warnings//WCports_mww_events09-16.csv")
-  # warnings.signals <- warnings.signals %>% 
-  #   select("pcid", "d_issued", "d_expired", "hurricane", "gale", "smcraft", "mww_other") %>%
-  #   dplyr::rename(PACFIN_PORT_CODE = pcid) 
-  # port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
-  # warnings.signals <- warnings.signals %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
-  # warnings.signals$d_issued  <- as.Date(warnings.signals$d_issued, "%d%b%Y %H:%M:%OS")
-  # warnings.signals$d_expired <- as.Date(warnings.signals$d_expired, "%d%b%Y %H:%M:%OS")
-  # warnings.signals <- warnings.signals %>% unique() 
-  # library(sqldf)
-  # df1 <- participation_data
-  # df2 <- warnings.signals
-  # warnings.signals <-  sqldf("select df1.*, df2.hurricane, df2.gale, df2.smcraft, df2.mww_other
-  #                                       from df1 left join df2 on
-  #                                       (df1.Port_Dominant = df2.PORT_AREA_CODE) AND 
-  #                                       (df1.set_date between df2.d_issued and df2.d_expired)") 
-  # warnings.signals <- warnings.signals %>% unique() %>% 
-  #   select("trip_id", "hurricane", "gale", "smcraft", "mww_other")
-  # warnings.signals <- warning.signals %>% group_by(trip_id) %>%
-  #   summarise(hurricane = sum(hurricane), gale = sum(gale), 
-  #             smcraft = sum(smcraft), mww_other = sum(mww_other))
-  # warnings.signals[is.na(warnings.signals)] <- 0
-  # participation_data <- merge(participation_data, warnings.signals, 
-  #                             by=c("trip_id"), all.x = TRUE)
-  # 
-  
-  
-  
-  
-  #-----------------------------------------------------------------------------
-  #Format as mlogit.data
-  rdo <- sampled_hauls %>% dplyr::select(fished, fished_haul,
-    dummy_prev_days, dummy_prev_year_days, dummy_miss, mean_rev, mean_rev_adj, selection)
-
-  # rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(fished_haul)) %>% as.data.frame
-
-  #-----------------------------------------------------------------------------
-  ##Fit mlogit models returning the coefficients, the models, and the data going into the model
-
-  #Fit the model for everything at once
-  library(mlogit)
-  rdo <- na.omit(rdo)
-  the_tows <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'selection', 
-                          chid.var = 'fished_haul', drop.index = TRUE)
-  
-  head(the_tows)
-  
-    mf <- mFormula(fished ~ mean_rev_adj + dummy_miss | dummy_prev_days)
-    res <- mlogit(mf, the_tows, reflevel = 'No-Participation')
-    summary(res)
-    
-    
-    
-    
-    dat.modeled <- rdo[, c("mean_rev_adj", "dummy_miss")]
-    dat.undup <- dat.modeled[!duplicated(dat.modeled), ]
-    
-    
-    
-    #List coefficients and rename to align with jeem paper
-    coefs <- coef(res)
-
-    coefs <- plyr::rename(coefs, c("mean_rev_adj" = "rev",
-                                   "dummy_miss" = "dmiss"))
-    
-    # 'dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y",
-    
-    # 'dist1', 'distN', 'dum30', 'dum30y' 
-    
-    coefs <- data.frame(coefs = round(coefs[c('rev', 'dmiss')],
-      digits = 5))
-
-    ps <- summary(res)$CoefTable[, 4]
-
-    ps <- plyr::rename(ps, c("mean_rev_adj" = "rev",
-                             "dummy_miss" = "dmiss"))
-    
-    ps <- ps[c('rev', 'dmiss')]
-
-    
-  print("Done with estimating discrete choice model")
-
-  #Add significance values
-  coefs$p_values <- round(ps, digits = 5)
-  coefs$significance <- " "
-  coefs[which(coefs$p_values <= .10), 'significance'] <- "."
-  coefs[which(coefs$p_values <= .05), 'significance'] <- "*"
-  coefs[which(coefs$p_values <= .01), 'significance'] <- "**"
-  coefs[which(coefs$p_values <= .001), 'significance'] <- "***"
-  
-  #Generate and format the predictions
-  fits <- fitted(res, outcome = TRUE)
-  # pr <- predict(res, newdata = dat.modeled)
-  mfits2 <- reshape2::melt(fits, byrow = T)
-  names(mfits2) <- c("rrow", "ccolumn", 'value')
-  preds <- as.data.frame(rdo)
-  preds$probs <- mfits2$value
-  
-  
-  ## -- Correct prediction using max probability value -- ##
-  # Filter out the fished tows
-  pred_tows <- preds %>% group_by(fished_haul) %>% filter(probs == max(probs)) %>% as.data.frame
-  correct_prediction <- sum(pred_tows$fished) / nrow(pred_tows) #score 1
-  outs <- c(correct_prediction)
-
-  print("Done calculating predictive metrics")
-
-
-  ## Output from the model
-  outs <- list(coefs = coefs, mod = res, preds = preds, choices = sampled_hauls, data = rdo)  
-  return(outs)

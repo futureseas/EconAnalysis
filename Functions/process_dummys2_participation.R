@@ -9,10 +9,12 @@
 process_dummys2 <- function(xx, td2 = td1, dat1 = dat){
   
   temp_dat <- td2[xx, ]
+
   
-  
+  dat1$set_date <- as_date(dat1$set_date)
   fltz <- temp_dat$fleet_name
   sel  <- temp_dat$selection
+  
   #-----------------------------------------------------------------------------------------------
   #Did vessel fish in past 30 days? FQ: In the same depth_bin???
   dum30 <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
