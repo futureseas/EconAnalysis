@@ -59,13 +59,13 @@ participation_data.save <- participation_data %>%
 ## Sampling choice data including revenue##
 source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums_participation.R")
 
-samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
-                         min_year = 2012, max_year = 2015,
-                         min_year_prob = 2013, max_year_prob = 2014,
-                         ndays = 60, nhauls_sampled = 4,
-                         seed = 42, ncores = 2, rev_scale = 100)
-
-saveRDS(samps, file = "samples_choices.rds")
+# samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
+#                          min_year = 2012, max_year = 2015,
+#                          min_year_prob = 2013, max_year_prob = 2014,
+#                          ndays = 60, nhauls_sampled = 4,
+#                          seed = 42, ncores = 2, rev_scale = 100)
+# 
+# saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\samples_choices.rds")
 
 # Restore the object
 readRDS(file = "samples_choices.rds")
@@ -127,16 +127,11 @@ readRDS(file = "samples_choices.rds")
 # 
 
 
-
-
-
-
-
-
 #-----------------------------------------------------------------------------
 #Format as mlogit.data
-rdo <- sampled_hauls %>% dplyr::select(fished, fished_haul,
-                                       dummy_prev_days, dummy_prev_year_days, dummy_miss, mean_rev, mean_rev_adj, selection)
+rdo <- samps %>% dplyr::select(fished, fished_haul,dummy_prev_days,
+                               dummy_prev_year_days, dummy_miss, mean_rev, 
+                               mean_rev_adj, selection)
 
 # rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(fished_haul)) %>% as.data.frame
 
@@ -149,72 +144,24 @@ rdo <- na.omit(rdo)
 the_tows <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'selection', 
                         chid.var = 'fished_haul', drop.index = TRUE)
 
-head(the_tows)
-
-mf <- mFormula(fished ~ mean_rev_adj + dummy_miss | |  dummy_prev_days)
+mf <- mFormula(fished ~ mean_rev_adj + dummy_miss)
 res <- mlogit(mf, the_tows, reflevel = 'No-Participation')
 summary(res)
 
-
-
-
-dat.modeled <- rdo[, c("mean_rev_adj", "dummy_miss")]
-dat.undup <- dat.modeled[!duplicated(dat.modeled), ]
-
-
-
-#List coefficients and rename to align with jeem paper
-coefs <- coef(res)
-
-coefs <- plyr::rename(coefs, c("mean_rev_adj" = "rev",
-                               "dummy_miss" = "dmiss"))
-
-# 'dummy_prev_days' = 'dum30', "dummy_prev_year_days" = "dum30y",
-
-# 'dist1', 'distN', 'dum30', 'dum30y' 
-
-coefs <- data.frame(coefs = round(coefs))
-
-ps <- summary(res)$CoefTable[, 4]
-
-ps <- plyr::rename(ps, c("mean_rev_adj" = "rev",
-                         "dummy_miss" = "dmiss"))
-
-ps <- ps[c('rev', 'dmiss')]
-
-
-print("Done with estimating discrete choice model")
-
-#Add significance values
-coefs$p_values <- round(ps, digits = 5)
-coefs$significance <- " "
-coefs[which(coefs$p_values <= .10), 'significance'] <- "."
-coefs[which(coefs$p_values <= .05), 'significance'] <- "*"
-coefs[which(coefs$p_values <= .01), 'significance'] <- "**"
-coefs[which(coefs$p_values <= .001), 'significance'] <- "***"
-
+#--------------------------------------------------------------------
 #Generate and format the predictions
-fits <- fitted(res, outcome = TRUE)
-# pr <- predict(res, newdata = dat.modeled)
-mfits2 <- reshape2::melt(fits, byrow = T)
-names(mfits2) <- c("rrow", "ccolumn", 'value')
-preds <- as.data.frame(rdo)
-preds$probs <- mfits2$value
-
+fits <- fitted(res, outcome = FALSE)
+mfits <- reshape2::melt(fits) %>% 
+  dplyr::rename(fished_haul = Var1) %>%
+  dplyr::rename(selection_pred = Var2)
 
 ## -- Correct prediction using max probability value -- ##
-# Filter out the fished tows
-pred_tows <- preds %>% group_by(fished_haul) %>% filter(probs == max(probs)) %>% as.data.frame
-correct_prediction <- sum(pred_tows$fished) / nrow(pred_tows) #score 1
-outs <- c(correct_prediction)
+pred_tows <- mfits %>% group_by(fished_haul) %>% filter(value == max(value)) %>% as.data.frame
+pred_tows <- merge(rdo, pred_tows, by = "fished_haul") %>% filter(fished == TRUE) %>% 
+  mutate(correct = ifelse(selection_pred == selection, 1, 0))
 
-print("Done calculating predictive metrics")
-
-
-## Output from the model
-outs <- list(coefs = coefs, mod = res, preds = preds, choices = sampled_hauls, data = rdo)  
-return(outs)
-
+correct_prediction <- sum(pred_tows$correct) / nrow(pred_tows) #score 1
+correct_prediction
 
 
 

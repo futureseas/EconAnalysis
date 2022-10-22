@@ -233,14 +233,49 @@ gg1 + gg2 + gg3
 ###################################################################
 #### Explanatory variables by clusters ####
 
+coef(fit_qMSQD)$cluster
+
+### Effect NANC ###
+coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 4]) %>%
+  round(digits = 2)
+cluster <- rownames(coeff_cluster)
+rownames(coeff_cluster) <- NULL
+coeff_cluster <- cbind(cluster,coeff_cluster)
+
+
+
+### Interaction effects NANC v/s SQUID ###
+coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 6]) %>%
+  round(digits = 2)
+cluster <- rownames(coeff_cluster)
+rownames(coeff_cluster) <- NULL
+coeff_cluster <- cbind(cluster,coeff_cluster)
+
+
+
+### Interaction effects ###
+coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 4]) %>%
+  round(digits = 2)
+cluster <- rownames(coeff_cluster)
+rownames(coeff_cluster) <- NULL
+coeff_cluster <- cbind(cluster,coeff_cluster)
+
+
+
+
+
+
+
+
 
 ### SDM effect
 
-coef(fit_qMSQD)$cluster
+
 
 coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 2]) %>%
   round(digits = 2)
-  cluster <- rownames(coeff_cluster)
+  
+cluster <- rownames(coeff_cluster)
   rownames(coeff_cluster) <- NULL
   coeff_cluster <- cbind(cluster,coeff_cluster)
 
