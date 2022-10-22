@@ -243,6 +243,40 @@ rownames(coeff_cluster) <- NULL
 coeff_cluster <- cbind(cluster,coeff_cluster)
 
 
+gg_NANC <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(NANC) effect on MSQD landings") +
+  xlab("") + ylab("") +
+  theme(plot.title = element_text(size=10)) +
+  scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
+                            "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
+                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
+                            "5" = "Roving industrial\nsardine-squid\nswitchers",
+                            "7" = "Southern CCS\nforage fish\ndiverse")) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
+
+
+
+### Effect PSDN ###
+coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 7]) %>%
+  round(digits = 2)
+cluster <- rownames(coeff_cluster)
+rownames(coeff_cluster) <- NULL
+coeff_cluster <- cbind(cluster,coeff_cluster)
+
+
+gg_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(PSDN) effect on MSQD landings") +
+  xlab("") + ylab("") +
+  theme(plot.title = element_text(size=10)) +
+  scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
+                            "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
+                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
+                            "5" = "Roving industrial\nsardine-squid\nswitchers",
+                            "7" = "Southern CCS\nforage fish\ndiverse")) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
+
 
 ### Interaction effects NANC v/s SQUID ###
 coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 6]) %>%
@@ -251,14 +285,40 @@ cluster <- rownames(coeff_cluster)
 rownames(coeff_cluster) <- NULL
 coeff_cluster <- cbind(cluster,coeff_cluster)
 
+gg_NANC_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(PSDN) effect on MSQD landings") +
+  xlab("") + ylab("") +
+  theme(plot.title = element_text(size=10)) +
+  scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
+                            "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
+                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
+                            "5" = "Roving industrial\nsardine-squid\nswitchers",
+                            "7" = "Southern CCS\nforage fish\ndiverse")) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
 
 
-### Interaction effects ###
-coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 4]) %>%
+### Interaction effects PSDN v/s SQUID ###
+coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 8]) %>%
   round(digits = 2)
 cluster <- rownames(coeff_cluster)
 rownames(coeff_cluster) <- NULL
 coeff_cluster <- cbind(cluster,coeff_cluster)
+
+gg_PSDN_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
+                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(PSDN) effect on MSQD landings") +
+  xlab("") + ylab("") +
+  theme(plot.title = element_text(size=10)) +
+  scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
+                            "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
+                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
+                            "5" = "Roving industrial\nsardine-squid\nswitchers",
+                            "7" = "Southern CCS\nforage fish\ndiverse")) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
+
+
+
 
 
 
