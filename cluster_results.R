@@ -158,6 +158,76 @@ rm(table, cluster.use, cluster.use.highest, hist.bait)
 
 
 # -----------------------------------------------------------------------------------------------
+## Catch composition over time (stack graph)
+mat = matrix(ncol = 0, nrow = 0)
+cluster.species.all <- as.data.frame(mat)
+
+### GET 10 MORE IMPORTANT SPECIES, THE REST IN OTHERS
+
+
+for(i in 2005:2020)  {
+  for(m in 1:7) {
+      PacFIN.month2 <- PacFIN.month %>% dplyr::filter(group_all == m) %>%
+      dplyr::filter(LANDING_YEAR == i) %>% dplyr::filter(AFI_EXVESSEL_REVENUE.sum > 0)
+
+  all_species <- PacFIN.month2  %>% dplyr::select(PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME) %>% unique() %>% mutate(merge=1)
+  all_vessels <- PacFIN.month2  %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+  expand <- merge(all_species, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+  
+  options(scipen=999)
+  cluster.species <- PacFIN.month2 %>% 
+    group_by(PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, VESSEL_NUM) %>% 
+    summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum, na.rm = TRUE)) %>%
+    group_by(VESSEL_NUM) %>% 
+    mutate(Percentage = revenue / sum(revenue, na.rm = TRUE)) %>% ungroup() %>% drop_na()
+  
+  cluster.species <- merge(expand, cluster.species, by = c('VESSEL_NUM', 'PACFIN_SPECIES_CODE', 'PACFIN_SPECIES_COMMON_NAME'), all.x = TRUE) %>%
+    mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% 
+    group_by(PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME) %>% summarise(Percentage = mean(Percentage, na.rm = TRUE)) %>% drop_na()
+  cluster.species$LANDING_YEAR <- i
+  cluster.species$group_all <- m
+  
+  cluster.species.all <- rbind(cluster.species.all, cluster.species)
+  rm(cluster.species)
+  
+  }
+}
+
+
+#-------------------------
+## Plot 
+cluster = 1
+n_species = 5
+
+
+
+df <- cluster.species.all %>% filter(Percentage > 0) %>% filter(group_all == cluster)
+df2 <- df %>% group_by(group_all, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME) %>% summarize(Percentage = mean(Percentage))
+df2 <- df2[order(df2$group_all, -df2$Percentage),]
+highest <- df2 %>%
+  group_by(group_all) %>% filter(row_number()==1:n_species) %>% ungroup() %>%
+  dplyr::select('PACFIN_SPECIES_CODE') %>% unique()
+df3 <- df %>% mutate(
+  PACFIN_SPECIES_COMMON_NAME = 
+                        ifelse(PACFIN_SPECIES_CODE == "PSDN", PACFIN_SPECIES_COMMON_NAME,
+                        ifelse(PACFIN_SPECIES_CODE == "CMCK", "MACKEREL (JACK + CHUB)",
+                        ifelse(PACFIN_SPECIES_CODE == "JMCK", "MACKEREL (JACK + CHUB)",
+                        ifelse(PACFIN_SPECIES_CODE == "UMCK", "MACKEREL (JACK + CHUB)",
+                        ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_COMMON_NAME,
+                        ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_COMMON_NAME, 
+                        ifelse(PACFIN_SPECIES_CODE %chin% highest$PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, "OTHER-NON-CPS")))))))) %>%
+  group_by(PACFIN_SPECIES_COMMON_NAME, group_all, LANDING_YEAR) %>% summarize(Percentage = sum(Percentage))
+
+ggplot(df3, aes(x=LANDING_YEAR, y=Percentage, fill = PACFIN_SPECIES_COMMON_NAME)) +
+  geom_bar(stat="identity", color = "black") + 
+  guides(fill = guide_legend(title = "Species")) + 
+  xlab("Year") 
+
+
+
+
+
+# -----------------------------------------------------------------------------------------------
 ## Catch composition (all species)
 all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique() %>% mutate(merge=1)

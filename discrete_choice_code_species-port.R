@@ -40,35 +40,35 @@ participation_data$set_date<-as.Date(with(
    "%Y-%m-%d")
 
 participation_data$set_date <- as.Date(participation_data$set_date, "%d%b%Y %H:%M:%OS")
-  participation_data <- participation_data %>% drop_na(set_date)  
+  participation_data <- participation_data %>% drop_na(set_date)
 
 
 # --------------------------------------------------
-## Save database! 
+## Save database!
 participation_data.save <- participation_data %>%
-      dplyr::rename(set_day = LANDING_DAY) %>% 
+      dplyr::rename(set_day = LANDING_DAY) %>%
       dplyr::rename(set_month = LANDING_MONTH) %>%
       dplyr::rename(set_year = LANDING_YEAR) %>%
-      select("set_date", "set_day", "set_month", "set_year", "Landings", "Revenue", 
+      select("set_date", "set_day", "set_month", "set_year", "Landings", "Revenue",
              "Species_Dominant", "selection", "VESSEL_NUM", "trip_id", "selection", 'group_all')
 
 # write.csv(participation_data.save,"C:\\GitHub\\EconAnalysis\\Data\\discrete_choice_participation.csv", row.names = FALSE)
 
 
-#-----------------------------------------------------------------------------
-## Sampling choice data including revenue##
+# #-----------------------------------------------------------------------------
+# ## Sampling choice data including revenue##
 source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums_participation.R")
 
-# samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
-#                          min_year = 2012, max_year = 2015,
-#                          min_year_prob = 2013, max_year_prob = 2014,
-#                          ndays = 60, nhauls_sampled = 4,
-#                          seed = 42, ncores = 2, rev_scale = 100)
-# 
-# saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\samples_choices.rds")
+samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
+                         min_year = 2012, max_year = 2015,
+                         min_year_prob = 2013, max_year_prob = 2014,
+                         ndays = 60, ndays_participation = 365 , nhauls_sampled = 4,
+                         seed = 42, ncores = 2, rev_scale = 100)
+
+saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\samples_choices2.rds")
 
 # Restore the object
-readRDS(file = "samples_choices.rds")
+samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\samples_choices2.rds")
 
 #-----------------------------------------------------------------------------
 ## Create additional variables
@@ -129,9 +129,8 @@ readRDS(file = "samples_choices.rds")
 
 #-----------------------------------------------------------------------------
 #Format as mlogit.data
-rdo <- samps %>% dplyr::select(fished, fished_haul,dummy_prev_days,
-                               dummy_prev_year_days, dummy_miss, mean_rev, 
-                               mean_rev_adj, selection)
+rdo <- samps %>% dplyr::select(fished, fished_haul,dummy_miss, mean_rev, 
+                               mean_rev_adj, selection, fished_VESSEL_NUM)
 
 # rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(fished_haul)) %>% as.data.frame
 
@@ -139,14 +138,39 @@ rdo <- samps %>% dplyr::select(fished, fished_haul,dummy_prev_days,
 ##Fit mlogit models returning the coefficients, the models, and the data going into the model
 
 #Fit the model for everything at once
+library(data.table)
 library(mlogit)
-rdo <- na.omit(rdo)
-the_tows <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'selection', 
-                        chid.var = 'fished_haul', drop.index = TRUE)
 
-mf <- mFormula(fished ~ mean_rev_adj + dummy_miss)
-res <- mlogit(mf, the_tows, reflevel = 'No-Participation')
+
+## Drop choice cards that received no choice
+# rdo2 <- rdo %>% 
+#   group_by(fished_haul) %>% 
+#   mutate(full = sum(fished)) %>% 
+#   filter(full!=0) %>% 
+#   select(-c(full))
+
+rdo2 <- rdo[order(rdo$fished_VESSEL_NUM, rdo$fished_haul, -rdo$fished),]
+
+## Maybe create new fished_haul number within VESSEL_NUM?
+
+
+the_tows <- mlogit.data(rdo2, shape = 'long', choice = 'fished', alt.var = 'selection', 
+                        id.var = "fished_VESSEL_NUM", chid.var = "fished_haul")
+
+# drop.index
+
+# mf <- mFormula(fished ~ dummy_miss | 1 | mean_rev_adj)
+
+res <- mlogit(fished ~ dummy_miss + mean_rev_adj,
+              the_tows, reflevel = 'No-Participation')
+              
+              # , panel = TRUE, rpar = c(mean_rev_adj = "n"),
+              #           correlation = FALSE, R = 100, halton = NA, )
+
+# res <- mlogit(mf, the_tows)
 summary(res)
+
+### Export to Stata?
 
 #--------------------------------------------------------------------
 #Generate and format the predictions

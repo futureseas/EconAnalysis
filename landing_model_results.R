@@ -287,7 +287,7 @@ coeff_cluster <- cbind(cluster,coeff_cluster)
 
 gg_NANC_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(PSDN) effect on MSQD landings") +
+                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(NANC) x Pr(MSQD) effect on MSQD landings") +
   xlab("") + ylab("") +
   theme(plot.title = element_text(size=10)) +
   scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
@@ -307,7 +307,7 @@ coeff_cluster <- cbind(cluster,coeff_cluster)
 
 gg_PSDN_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(PSDN) effect on MSQD landings") +
+                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(PSDN) x Pr(MSQD) effect on MSQD landings") +
   xlab("") + ylab("") +
   theme(plot.title = element_text(size=10)) +
   scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
@@ -320,7 +320,7 @@ gg_PSDN_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
 
 
 
-
+(gg_NANC + gg_PSDN)  / (gg_NANC_MSQD +  gg_PSDN_MSQD) 
 
 
 

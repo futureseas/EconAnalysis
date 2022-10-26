@@ -11,6 +11,7 @@
 #' @param min_year Minimum year used to filter the data
 #' @param max_year Maximum year used to filter the data, also RUM data is filtered to be from the max_year
 #' @param ndays Number of previous days data to use in revenue expectations
+#' @param ndays_participation
 #' @param nhauls_sampled Number of hauls to sample from the full data set
 #' @param seed Seed for sampling tows
 #' @param ncores Number of cores to use
@@ -24,7 +25,7 @@
 sampled_rums <- function(data_in, cluster = 1,
                          min_year_prob = 2010, max_year_prob = 2012,
                          min_year = 2010, max_year = 2012,  
-                         ndays = 60, nhauls_sampled = 50, seed = 300, 
+                         ndays = 60, ndays_participation = 365, nhauls_sampled = 50, seed = 300, 
                          ncores, rev_scale) {
 
 #Start by sampling 50 tows within the same fleet
@@ -177,10 +178,10 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
                                       colnames(actual_haul)[1] <- "selection"
                                       
                                       #Combine the sampled values and the empirical haul
-                                      actual_haul$fished <- TRUE
+                                      actual_haul$fished <- 1
                                       actual_haul$fished_haul <- hauls[ii, "trip_id"]
                                       actual_haul$fished_VESSEL_NUM <- hauls[ii, "VESSEL_NUM"]
-                                      the_samples$fished <- FALSE
+                                      the_samples$fished <- 0
                                       the_samples$fished_haul <- hauls[ii, "trip_id"]
                                       the_samples$fished_VESSEL_NUM <- hauls[ii, "VESSEL_NUM"]
                                       the_samples <- rbind(actual_haul, the_samples)
@@ -197,7 +198,9 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
   sampled_hauls$prev_days_date <- sampled_hauls$set_date - days(ndays)
   sampled_hauls$prev_year_set_date <- sampled_hauls$set_date - days(365)
   sampled_hauls$prev_year_days_date <- sampled_hauls$prev_days_date - days(365)
+  sampled_hauls$participation_date <- sampled_hauls$set_date - days(ndays_participation)
 
+  
 
   #-----------------------------------------------------------------------------
   ### Calculate interval between previews day and year
@@ -205,9 +208,10 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
   #What were the average revenues in each location
   tow_dates <- sampled_hauls %>%
     dplyr::select(fished_haul, set_date, prev_days_date, prev_year_set_date, prev_year_days_date,
-                  fished_VESSEL_NUM, selection)
+                  fished_VESSEL_NUM, selection, participation_date)
 
   #calculate intervals
+  tow_dates$days_inter_part <- interval(tow_dates$participation_date, tow_dates$set_date)
   tow_dates$days_inter <- interval(tow_dates$prev_days_date, tow_dates$set_date)
   tow_dates$prev_year_days_inter <- interval(tow_dates$prev_year_days_date, tow_dates$prev_year_set_date)
 
@@ -242,6 +246,7 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
   #create dummy for prev days fishing
   td1[which(td1$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
   td1[which(td1$dummy_prev_year_days != 0), 'dummy_prev_year_days'] <- 1
+  td1[which(td1$dummy_prev_days_part != 0), 'dummy_prev_days_part'] <- 1
 
   td1[which(td1$mean_rev != 0), 'dummy_miss'] <- 0
   td1[which(td1$mean_rev == 0), 'dummy_miss'] <- 1
@@ -249,8 +254,17 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
 
   td1$mean_rev_adj <- td1$mean_rev / rev_scale
 
+  
+  #filter database when Non-participation but no fishing in 'ndays_participation'
+  td1 <- td1 %>% 
+    mutate(exit = ifelse(selection == "No-Participation" & dummy_prev_days_part == 0, 1, 0)) %>%
+    dplyr::filter(exit == 0)
+  
   sampled_hauls <- cbind(sampled_hauls,
     td1[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
+  
+  
+  
   
   
   return(sampled_hauls)

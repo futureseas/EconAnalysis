@@ -307,6 +307,13 @@ Tickets_2 <- Tickets %>%
 #      main = '', 
 #      xlab	= 'Number of trips per day')
 
+
+#################################################################################
+############ ONLY IF VESSEL PARTICIPATE IN THE PREVIOUS YEAR ####################
+
+
+
+
 library(tidyr)
 Tickets_3 <- complete(Tickets_2, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
   mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
