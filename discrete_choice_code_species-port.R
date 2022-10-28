@@ -62,7 +62,7 @@ source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums_participation.R")
 samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
                          min_year = 2012, max_year = 2015,
                          min_year_prob = 2013, max_year_prob = 2014,
-                         ndays = 60, ndays_participation = 365 , nhauls_sampled = 4,
+                         ndays = 60, ndays_participation = 365, nhauls_sampled = 4,
                          seed = 42, ncores = 2, rev_scale = 100)
 
 saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\samples_choices2.rds")

@@ -28,16 +28,48 @@ sampled_rums <- function(data_in, cluster = 1,
                          ndays = 60, ndays_participation = 365, nhauls_sampled = 50, seed = 300, 
                          ncores, rev_scale) {
 
-#Start by sampling 50 tows within the same fleet
-#Figure out how close the different clusters are
-  
-  
   #---------------------------------------------------------------
   ##Filter the data
-  dat <- participation_data.save %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
-                                   group_all %in% cluster)
   
-  #########################  
+
+  ###############
+  # Delete
+  
+  gc()
+  rm(list=ls())
+  memory.limit(9999999999)
+  
+  ## Load packages ##
+  library(ggplot2)
+  library(plyr)
+  library(dplyr)
+  library(lubridate)
+  library(reshape2)
+  library(devtools)
+  library(maps)
+  library(doParallel)
+  library(tidyr)
+  library(tidyverse)
+  library(mlogit)
+
+  data_in <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\discrete_choice_participation.csv")
+  cluster <- 1
+  min_year_prob <- 2013
+  max_year_prob <- 2013
+  min_year <- 2012
+  max_year <- 2015
+  ndays <- 30
+  ndays_participation <- 365
+  nhauls_sampled <- 5
+  seed <- 300 
+  ncores <- 2
+  rev_scale <- 100
+
+  ########################    
+  dat <- data_in %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
+                                     group_all %in% cluster)
+  
+#########################  
 
   
   hauls <- dat %>% 
@@ -147,8 +179,6 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
   #For each haul in the focus year, sample nhauls_sampled tows
 
   
-  cl <- makeCluster(ncores)
-  registerDoParallel(cl)
   source("C:\\GitHub\\EconAnalysis\\Functions\\sample_hauls_participation.R")
   
   sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls),
@@ -215,6 +245,7 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
   tow_dates$days_inter <- interval(tow_dates$prev_days_date, tow_dates$set_date)
   tow_dates$prev_year_days_inter <- interval(tow_dates$prev_year_days_date, tow_dates$prev_year_set_date)
 
+
   #add in the fleet name
   tow_dates$fleet_name <- 1
   td1 <- tow_dates
@@ -259,6 +290,8 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
   td1 <- td1 %>% 
     mutate(exit = ifelse(selection == "No-Participation" & dummy_prev_days_part == 0, 1, 0)) %>%
     dplyr::filter(exit == 0)
+  
+    ### Extend to the whole sample...
   
   sampled_hauls <- cbind(sampled_hauls,
     td1[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'mean_rev', 'mean_rev_adj')] )

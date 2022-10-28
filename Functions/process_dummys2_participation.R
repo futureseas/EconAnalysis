@@ -8,6 +8,14 @@
 
 process_dummys2 <- function(xx, td2 = td1, dat1 = dat){
   
+# 
+#   ### Delete
+#   xx <- 100
+#   td2 <- td1
+#   dat1 <- dat
+#   
+#   ###
+  
   temp_dat <- td2[xx, ]
 
   
@@ -78,11 +86,11 @@ dum30y_val <- nrow(dum30y)
   #Calculate revenue
   mean_rev <- mean(dum_rev$Revenue)
   mean_rev <- replace(mean_rev, is.na(mean_rev), 0)
-  }
-  else {
-    mean_rev <- 0 
-  }
+  }  else {
+    mean_rev <- 0
+    }
   
+
   # Include new information in temp_dat
   temp_dat$mean_rev <- mean_rev
   temp_dat$dummy_prev_days <- dum30_val
