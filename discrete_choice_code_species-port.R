@@ -56,16 +56,16 @@ participation_data.save <- participation_data %>%
 
 
 # #-----------------------------------------------------------------------------
-# ## Sampling choice data including revenue##
-source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums_participation.R")
-
-samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
-                         min_year = 2012, max_year = 2015,
-                         min_year_prob = 2013, max_year_prob = 2014,
-                         ndays = 60, ndays_participation = 365, nhauls_sampled = 4,
-                         seed = 42, ncores = 2, rev_scale = 100)
-
-saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\samples_choices.rds")
+# # ## Sampling choice data including revenue##
+# source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums_participation.R")
+# 
+# samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
+#                          min_year = 2012, max_year = 2015,
+#                          min_year_prob = 2013, max_year_prob = 2014,
+#                          ndays = 60, ndays_participation = 365, nhauls_sampled = 4,
+#                          seed = 42, ncores = 2, rev_scale = 100)
+# 
+# saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\samples_choices.rds")
 
 
 
@@ -153,7 +153,10 @@ library(mlogit)
 #   filter(full!=0) %>% 
 #   select(-c(full))
 
-rdo2 <- rdo[order(rdo$fished_VESSEL_NUM, rdo$fished_haul, -rdo$fished),]
+rdo2 <- as.data.frame(rdo[order(rdo$fished_VESSEL_NUM, rdo$fished_haul, -rdo$fished),])
+write.csv(rdo2,"C:\\GitHub\\EconAnalysis\\Data\\sampled_mixed_logit_data.csv", row.names = FALSE)
+
+
 
 ## Maybe create new fished_haul number within VESSEL_NUM?
 
@@ -162,19 +165,20 @@ the_tows <- mlogit.data(rdo2, shape = 'long', choice = 'fished', alt.var = 'sele
                         id.var = "fished_VESSEL_NUM", chid.var = "fished_haul")
 
 # drop.index
-
 # mf <- mFormula(fished ~ dummy_miss | 1 | mean_rev_adj)
+# res <- mlogit(mf, the_tows)
+# summary(res)
 
 res <- mlogit(fished ~ dummy_miss + mean_rev_adj,
-              the_tows, reflevel = 'No-Participation')
-              
-              # , panel = TRUE, rpar = c(mean_rev_adj = "n"),
-              #           correlation = FALSE, R = 100, halton = NA, )
-
-# res <- mlogit(mf, the_tows)
+              the_tows, reflevel = 'No-Participation', panel = TRUE, 
+              rpar = c(mean_rev_adj = "n"),
+              correlation = FALSE, R = 100, halton = NA)
 summary(res)
 
-### Export to Stata?
+
+###
+# Error in if (abs(x - oldx) < ftol) { : 
+#     missing value where TRUE/FALSE needed --- Export to Stata?
 
 #--------------------------------------------------------------------
 #Generate and format the predictions
