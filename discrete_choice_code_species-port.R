@@ -65,10 +65,14 @@ samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
                          ndays = 60, ndays_participation = 365, nhauls_sampled = 4,
                          seed = 42, ncores = 2, rev_scale = 100)
 
-saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\samples_choices2.rds")
+saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\samples_choices.rds")
+
+
+
+
 
 # Restore the object
-samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\samples_choices2.rds")
+samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\samples_choices.rds")
 
 #-----------------------------------------------------------------------------
 ## Create additional variables

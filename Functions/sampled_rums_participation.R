@@ -31,41 +31,43 @@ sampled_rums <- function(data_in, cluster = 1,
   #---------------------------------------------------------------
   ##Filter the data
   
-
-  ###############
-  # Delete
+# 
+#   ###############
+#   # Delete
+#   
+#   gc()
+#   rm(list=ls())
+#   memory.limit(9999999999)
+#   
+#   ## Load packages ##
+#   library(ggplot2)
+#   library(plyr)
+#   library(dplyr)
+#   library(lubridate)
+#   library(reshape2)
+#   library(devtools)
+#   library(maps)
+#   library(doParallel)
+#   library(tidyr)
+#   library(tidyverse)
+#   library(mlogit)
+# 
+#   data_in <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\discrete_choice_participation.csv")
+#   cluster <- 1
+#   min_year_prob <- 2013
+#   max_year_prob <- 2013
+#   min_year <- 2012
+#   max_year <- 2015
+#   ndays <- 30
+#   ndays_participation <- 365
+#   nhauls_sampled <- 5
+#   seed <- 300 
+#   ncores <- 2
+#   rev_scale <- 100
+# 
+#   ########################    
   
-  gc()
-  rm(list=ls())
-  memory.limit(9999999999)
   
-  ## Load packages ##
-  library(ggplot2)
-  library(plyr)
-  library(dplyr)
-  library(lubridate)
-  library(reshape2)
-  library(devtools)
-  library(maps)
-  library(doParallel)
-  library(tidyr)
-  library(tidyverse)
-  library(mlogit)
-
-  data_in <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\discrete_choice_participation.csv")
-  cluster <- 1
-  min_year_prob <- 2013
-  max_year_prob <- 2013
-  min_year <- 2012
-  max_year <- 2015
-  ndays <- 30
-  ndays_participation <- 365
-  nhauls_sampled <- 5
-  seed <- 300 
-  ncores <- 2
-  rev_scale <- 100
-
-  ########################    
   dat <- data_in %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
                                      group_all %in% cluster)
   
@@ -286,17 +288,22 @@ dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
   td1$mean_rev_adj <- td1$mean_rev / rev_scale
 
   
-  #filter database when Non-participation but no fishing in 'ndays_participation'
-  td1 <- td1 %>% 
-    mutate(exit = ifelse(selection == "No-Participation" & dummy_prev_days_part == 0, 1, 0)) %>%
-    dplyr::filter(exit == 0)
-  
-    ### Extend to the whole sample...
-  
+
   sampled_hauls <- cbind(sampled_hauls,
-    td1[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
+    td1[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'mean_rev', 'mean_rev_adj', 'dummy_prev_days_part')] )
+  
+
+  #filter database when Non-participation but no fishing in 'ndays_participation'
+  hauls_wo_exit <- sampled_hauls %>% dplyr::filter(fished == 1) %>%
+    mutate(exit = ifelse((selection == "No-Participation" & 
+                            dummy_prev_days_part == 0), 1, 0)) %>% 
+    dplyr::select(fished_haul, exit) %>%
+    dplyr::filter(exit == 0) %>% 
+    dplyr::select(fished_haul) %>% unique()
   
   
+    
+  sampled_hauls <- data.table::setDT(sampled_hauls)[fished_haul %chin% hauls_wo_exit$fished_haul]    
   
   
   
