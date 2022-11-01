@@ -59,11 +59,11 @@ participation_data.save <- participation_data %>%
 # # ## Sampling choice data including revenue##
 # source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums_participation.R")
 # 
-# samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
-#                          min_year = 2012, max_year = 2015,
-#                          min_year_prob = 2013, max_year_prob = 2014,
-#                          ndays = 60, ndays_participation = 365, nhauls_sampled = 4,
-#                          seed = 42, ncores = 2, rev_scale = 100)
+samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
+                         min_year = 2012, max_year = 2015,
+                         min_year_prob = 2013, max_year_prob = 2014,
+                         ndays = 60, ndays_participation = 365, nhauls_sampled = 4,
+                         seed = 42, ncores = 2, rev_scale = 100)
 # 
 # saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\samples_choices.rds")
 
@@ -134,7 +134,7 @@ samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\samples_choices.rds")
 #-----------------------------------------------------------------------------
 #Format as mlogit.data
 rdo <- samps %>% dplyr::select(fished, fished_haul,dummy_miss, mean_rev, 
-                               mean_rev_adj, selection, fished_VESSEL_NUM)
+                               mean_rev_adj, selection, fished_VESSEL_NUM, set_date)
 
 # rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(fished_haul)) %>% as.data.frame
 
@@ -153,16 +153,33 @@ library(mlogit)
 #   filter(full!=0) %>% 
 #   select(-c(full))
 
-rdo2 <- as.data.frame(rdo[order(rdo$fished_VESSEL_NUM, rdo$fished_haul, -rdo$fished),])
+
+# Check hauls in same day (only 30)
+fished_haul_select <- rdo %>%
+  group_by(fished_VESSEL_NUM, set_date) %>%
+  mutate(ncount = n()) %>% dplyr::filter(ncount == 5) %>% ungroup() %>%
+  select('fished_haul') %>% unique()
+
+rdo <- data.table::setDT(rdo)[fished_haul %chin% fished_haul_select$fished_haul]
+
+
+rdo2 <- as.data.frame(rdo[order(rdo$fished_VESSEL_NUM, rdo$fished_haul, -rdo$fished),]) %>%
+  group_by(fished_VESSEL_NUM) %>%
+  dplyr::mutate(fished_VESSEL_ID = cur_group_id()) %>%
+  ungroup() %>% dplyr::select(-c('fished_VESSEL_NUM')) %>%
+  group_by(set_date) %>%
+  dplyr::mutate(time = cur_group_id()) %>%
+  ungroup() %>% dplyr::select(-c('set_date'))
+
+
 write.csv(rdo2,"C:\\GitHub\\EconAnalysis\\Data\\sampled_mixed_logit_data.csv", row.names = FALSE)
 
 
-
+str(rdo2)
 ## Maybe create new fished_haul number within VESSEL_NUM?
 
-
 the_tows <- mlogit.data(rdo2, shape = 'long', choice = 'fished', alt.var = 'selection', 
-                        id.var = "fished_VESSEL_NUM", chid.var = "fished_haul")
+                        id.var = "fished_VESSEL_ID", chid.var = "fished_haul")
 
 # drop.index
 # mf <- mFormula(fished ~ dummy_miss | 1 | mean_rev_adj)
