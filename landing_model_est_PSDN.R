@@ -60,9 +60,12 @@ dataset_psdn <- dataset %>%
   dplyr::mutate(ln_PSDN_Landings = log(PSDN_Landings)) %>%
   filter(group_all == 3 | group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>%
   filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA"  | 
-           PORT_AREA_CODE == "CLO"  | PORT_AREA_CODE == "CWA"  | PORT_AREA_CODE == "CLW") %>% drop_na()
+           PORT_AREA_CODE == "CLO"  | PORT_AREA_CODE == "CWA") %>% drop_na()
  
-
+  # dataset_psdn %>% group_by(PORT_AREA_CODE) %>% summarize(n_freq = n()/nrow(dataset_psdn))
+  # 
+  # 
+  
 #### Convert variables to factor #### HERE I CHANGE THE ID
 dataset_psdn$port_ID            <- factor(dataset_psdn$PORT_AREA_CODE)
 dataset_psdn$cluster            <- factor(dataset_psdn$group_all)
@@ -155,15 +158,15 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(123)
-fit_qPSDN_v4 <-
+fit_qPSDN <-
   brm(data = dataset_psdn_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qPSDN_v4")
+      file = "Estimations/fit_qPSDN_v2")
 
-fit_qPSDN_v4 <- add_criterion(fit_qPSDN_v4, "loo", overwrite = TRUE)
+fit_qPSDN <- add_criterion(fit_qPSDN, "loo", overwrite = TRUE)
 
 

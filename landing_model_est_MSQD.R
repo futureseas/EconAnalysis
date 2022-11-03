@@ -64,11 +64,11 @@ dataset_msqd <- dataset %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::mutate(ln_MSQD_Landings = log(MSQD_Landings)) %>%
-  filter(group_all == 1 | group_all == 2 | group_all == 4 | group_all == 5 | group_all == 7) %>% 
+  filter(group_all == 1 | group_all == 2 | group_all == 4 | group_all == 5 | group_all == 7) %>%
   filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA") %>%
   drop_na()
 
-
+# dataset_msqd %>% group_by(PORT_AREA_CODE) %>% summarize(n_freq = n()/nrow(dataset_msqd))
 
 
 #### Convert variables to factor #### HERE I CHANGE THE ID
@@ -149,7 +149,6 @@ landing_model <- bf(log(MSQD_Landings) ~
 
 
 # Create priors
-
 prior_lognormal <- c(
   prior(lognormal(0,1), class = b,     resp = MSQDPricez,      coef = Price.Fishmeal.AFI_z),
   prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = Length_z),
@@ -165,7 +164,7 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(123)
- fit_qMSQD_v2 <-
+ fit_qMSQD <-
    brm(data = dataset_msqd_landing,
        family = gaussian,
        price_model + landing_model + set_rescor(TRUE),
@@ -174,4 +173,4 @@ set.seed(123)
        control = list(max_treedepth = 15, adapt_delta = 0.99),
        file = "Estimations/fit_qMSQD_v2")
 
-fit_qMSQD_v2 <- add_criterion(fit_qMSQD_v2, "loo", overwrite = TRUE)
+fit_qMSQD <- add_criterion(fit_qMSQD, "loo", overwrite = TRUE)

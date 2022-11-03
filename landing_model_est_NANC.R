@@ -60,8 +60,11 @@ dataset_nanc <- dataset %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::mutate(ln_NANC_Landings = log(NANC_Landings)) %>%
   filter(group_all == 6 | group_all == 7) %>%
-  filter(PORT_AREA_CODE != "CLO") %>% filter(PORT_AREA_CODE != "CLW") %>%
+  filter(PORT_AREA_CODE != "CLW") %>%
   drop_na()
+
+# dataset_nanc %>% group_by(PORT_AREA_CODE) %>% summarize(n_freq = n()/nrow(dataset_nanc))
+# filter(PORT_AREA_CODE != "CLO") %>%
 
 
 #### Convert variables to factor #### HERE I CHANGE THE ID
@@ -140,7 +143,7 @@ landing_model <- bf(log(NANC_Landings) ~
 ## Create priors
 get_prior(data = dataset_nanc_landing,
            family = gaussian,
-           price_model + landing_model_MODEL1 + set_rescor(TRUE))
+           price_model + landing_model + set_rescor(TRUE))
 prior_lognormal_MODEL1 <- c(
   prior(lognormal(0,1), class = b,     resp = NANCPricez,      coef = Price.Fishmeal.AFI_z),
   prior(lognormal(0,1), class = b,     resp = logNANCLandings, coef = Length_z),
@@ -154,18 +157,18 @@ prior_lognormal_MODEL1 <- c(
   prior(exponential(1), class = sigma, resp = logNANCLandings),
   prior(lkj(2),         class = rescor))
 
-# ## Estimate model
-# set.seed(123)
-# fit_qNANC <-
-#   brm(data = dataset_nanc_landing,
-#       family = gaussian,
-#       price_model + landing_model_MODEL1 + set_rescor(TRUE),
-#       prior = prior_lognormal_MODEL1,
-#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#       control = list(max_treedepth = 15, adapt_delta = 0.99),
-#       file = "Estimations/fit_qNANC")
-# 
-# fit_qNANC <- add_criterion(fit_qNANC, "loo", overwrite = TRUE)
+## Estimate model
+set.seed(123)
+fit_qNANC <-
+  brm(data = dataset_nanc_landing,
+      family = gaussian,
+      price_model + landing_model_MODEL1 + set_rescor(TRUE),
+      prior = prior_lognormal_MODEL1,
+      iter = 2000, warmup = 1000, chains = 4, cores = 4,
+      control = list(max_treedepth = 15, adapt_delta = 0.99),
+      file = "Estimations/fit_qNANC_v2")
+
+fit_qNANC <- add_criterion(fit_qNANC, "loo", overwrite = TRUE)
 
 
 

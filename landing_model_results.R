@@ -37,6 +37,10 @@ theme_set(theme_sjplot())
 
 ##### Read landing models
 fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
+
+coef(fit_qMSQD)$port_ID
+
+
 fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
 fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
 
