@@ -36,8 +36,8 @@ library('XML')
 theme_set(theme_sjplot())
 
 ##### Read landing models
-fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD_v2.RDS"))
-coef(fit_qMSQD)$port_cluster_ID
+fit_qMSQD_v3 <- readRDS(here::here("Estimations", "fit_qMSQD_v3.RDS"))
+coef(fit_qMSQD_v3)$port_cluster_ID
 
 
 fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))

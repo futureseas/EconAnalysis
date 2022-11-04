@@ -177,4 +177,4 @@ set.seed(123)
        control = list(max_treedepth = 15, adapt_delta = 0.99),
        file = "Estimations/fit_qMSQD_v3")
 
-fit_qMSQD_v2 <- add_criterion(fit_qMSQD_v2, "loo", overwrite = TRUE)
+fit_qMSQD_v3 <- add_criterion(fit_qMSQD_v3, "loo", overwrite = TRUE)
