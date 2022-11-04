@@ -45,8 +45,6 @@ dataset_nanc <- dataset %>%
                 MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_z,
                 NANC_Landings, 
                 NANC_Price, NANC_Price_z, 
-                MSQD_Price, MSQD_Price_z,
-                PSDN_Price, PSDN_Price_z,
                 PSDN_SDM_60, PSDN_SDM_60_z,
                 NANC_SDM_20, NANC_SDM_20_z,
                 PSDN.Open, MSQD.Open,
@@ -59,26 +57,32 @@ dataset_nanc <- dataset %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::mutate(ln_NANC_Landings = log(NANC_Landings)) %>%
-  filter(group_all == 6 | group_all == 7) %>%
-  filter(PORT_AREA_CODE != "CLW") %>%
+  mutate(cluster_port = paste(group_all, PORT_AREA_CODE, sep = "-", collapse = NULL)) %>%
+    filter(group_all == 6 | group_all == 7) %>%
   drop_na()
 
-# dataset_nanc %>% group_by(PORT_AREA_CODE) %>% summarize(n_freq = n()/nrow(dataset_nanc))
 # filter(PORT_AREA_CODE != "CLO") %>%
+# filter(PORT_AREA_CODE != "CLW") %>%
+# dataset_nanc %>% group_by(PORT_AREA_CODE) %>% summarize(n_freq = n()/nrow(dataset_nanc))
 
 
 #### Convert variables to factor #### HERE I CHANGE THE ID
 dataset_nanc$port_ID            <- factor(dataset_nanc$PORT_AREA_CODE)
-dataset_nanc$cluster            <- factor(dataset_nanc$group_all)
+dataset_nanc$port_cluster_ID    <- factor(dataset_nanc$cluster_port)
 class(dataset_nanc$port_ID)
-class(dataset_nanc$cluster)
+class(dataset_nanc$port_cluster_ID)
 class(dataset_nanc$PSDN.Total.Closure)
 
 dataset_nanc_landing <- dataset_nanc %>%
-  dplyr::filter(NANC_Landings > 0)
+  dplyr::filter(NANC_Landings > 0) %>%
+  mutate(n_total = n()) %>%
+  group_by(cluster_port) %>% 
+  mutate(obs = n(), perc = n()/n_total) %>% 
+  filter(perc > 0.05)
 
-# #### Check number of observation by port area ####
-n_obs_port_area <- dataset_nanc_landing %>% group_by(PORT_AREA_CODE) %>%
+### Check number of observations
+dataset_nanc_landing %>% select('cluster_port', 'obs', 'perc') %>% unique()
+dataset_nanc_landing %>% group_by(PORT_AREA_CODE) %>%
   summarize(n_obs = n()) %>% mutate(per = scales::percent(n_obs / sum(n_obs)))
 
 ### Descriptive statistics 
@@ -95,9 +99,9 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 5, "Prob(presence): PSDN", vars)) %>%
   mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
   mutate(vars = ifelse(vars == 7, "Fishmeal price", vars)) 
-
-gs4_create("SummaryMonthly_Q_NANC", sheets = table)
-rm(desc_data, table)
+# 
+# gs4_create("SummaryMonthly_Q_NANC_v3", sheets = table)
+# rm(desc_data, table)
 
 
 #-------------------------------------------------------------------
@@ -119,26 +123,20 @@ purtest(pDataset$NANC_Price, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
 
 ## -------------------------------------------------------------------
 ### Market squid landing model ###
-write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv", row.names = FALSE)
+write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC_v3.csv", row.names = FALSE)
 price_model <- bf(NANC_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
-
-# Model 1: Original
-# Model 2: Relative abundance.
-# Model 3: Relative abundance and relative prices
-# Model 4: Original with interactive prices
-
 
 
 ## Define landing equation
 landing_model <- bf(log(NANC_Landings) ~
   1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:PSDN.Open + PSDN.Total.Closure + Length_z +
- (1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:PSDN.Open + PSDN.Total.Closure | cluster) +
- (1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:PSDN.Open | port_ID))
+ (1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:PSDN.Open + PSDN.Total.Closure | port_cluster_ID))
 
 ## Create priors
 get_prior(data = dataset_nanc_landing,
@@ -159,16 +157,16 @@ prior_lognormal_MODEL1 <- c(
 
 ## Estimate model
 set.seed(123)
-fit_qNANC <-
+fit_qNANC_v3 <-
   brm(data = dataset_nanc_landing,
       family = gaussian,
       price_model + landing_model_MODEL1 + set_rescor(TRUE),
       prior = prior_lognormal_MODEL1,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qNANC_v2")
+      file = "Estimations/fit_qNANC_v3")
 
-fit_qNANC <- add_criterion(fit_qNANC, "loo", overwrite = TRUE)
+fit_qNANC_v3 <- add_criterion(fit_qNANC_v3, "loo", overwrite = TRUE)
 
 
 

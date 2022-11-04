@@ -36,15 +36,12 @@ library('XML')
 theme_set(theme_sjplot())
 
 ##### Read landing models
-fit_qMSQD_v3 <- readRDS(here::here("Estimations", "fit_qMSQD_v3.RDS"))
-coef(fit_qMSQD_v3)$port_cluster_ID
-
-
+fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD_v3.RDS"))
 fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
 fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
 
 #### Read database 
-dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv")
+dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD_v3.csv")
 dataset_nanc_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv")
 dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_PSDN.csv")
 
@@ -63,6 +60,7 @@ set.seed(123)
 # predict1 <- as.data.frame(predict(fit_qMSQD))
 # prediction1 <- cbind(predict1, dataset_msqd_landing)
 # sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
+
 # predict2 <- as.data.frame(predict(fit_qPSDN))
 # prediction2 <- cbind(predict2, dataset_psdn_landing)
 # sqrt(sum((prediction2$Estimate.logPSDNLandings - prediction2$ln_PSDN_Landings)^2)/(nrow(prediction2)-2))
@@ -235,9 +233,9 @@ gg1 + gg2 + gg3
 
 
 
-################################################################
-############# Explanatory variables by clusters ################
-################################################################
+######################################################################
+############# Explanatory variables by clusters-port ################
+#####################################################################
 
 #### Effect of other species SDM
 
@@ -257,16 +255,15 @@ gg_NANC <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
                                 width=.2, position=position_dodge(0.05)) + ggtitle("(b) Pr(NANC) effect on MSQD landings") +
   xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("1-LAA" = "Southern CCS small-scale squid-specialists\n(Los Angeles)",
-                            "1-SBA" = "Southern CCS small-scale squid-specialists\n(Santa Barbara)",
-                            "4-LAA" = "Southern CCS industrial squid-specialists\n(Los Angeles)",
-                            "4-MNA" = "Southern CCS industrial squid-specialists\n(Monterey)",
-                            "4-SBA" = "Southern CCS industrial squid-specialists\n(Santa Barbara)",
-                            "5-SBA" = "Roving industrial sardine-squid switchers\n(Santa Barbara)",
-                            "7-LAA" = "Southern CCS forage fish diverse\n(Los Angeles)")) +
+  theme(plot.title = element_text(size=9), axis.text.y = element_text(size = 8)) +
+  scale_y_discrete(labels=c("1-LAA" = "Southern CCS small-scale\nsquid-specialists (Los Angeles)",
+                            "1-SBA" = "Southern CCS small-scale\nsquid-specialists (Santa Barbara)",
+                            "4-LAA" = "Southern CCS industrial\nsquid-specialists (Los Angeles)",
+                            "4-MNA" = "Southern CCS industrial\nsquid-specialists (Monterey)",
+                            "4-SBA" = "Southern CCS industrial\nsquid-specialists (Santa Barbara)",
+                            "5-SBA" = "Roving industrial sardine-squid\nswitchers (Santa Barbara)",
+                            "7-LAA" = "Southern CCS forage fish\ndiverse (Los Angeles)")) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
 
 
 ### Effect PSDN on MSQD ###
@@ -281,14 +278,14 @@ gg_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
                                 width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(PSDN) effect on MSQD landings") +
   xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("1-LAA" = "Southern CCS small-scale squid-specialists\n(Los Angeles)",
-                            "1-SBA" = "Southern CCS small-scale squid-specialists\n(Santa Barbara)",
-                            "4-LAA" = "Southern CCS industrial squid-specialists\n(Los Angeles)",
-                            "4-MNA" = "Southern CCS industrial squid-specialists\n(Monterey)",
-                            "4-SBA" = "Southern CCS industrial squid-specialists\n(Santa Barbara)",
-                            "5-SBA" = "Roving industrial sardine-squid switchers\n(Santa Barbara)",
-                            "7-LAA" = "Southern CCS forage fish diverse\n(Los Angeles)")) +
+  theme(plot.title = element_text(size=9), axis.text.y = element_text(size = 8)) +
+  scale_y_discrete(labels=c("1-LAA" = "Southern CCS small-scale\nsquid-specialists (Los Angeles)",
+                            "1-SBA" = "Southern CCS small-scale\nsquid-specialists (Santa Barbara)",
+                            "4-LAA" = "Southern CCS industrial\nsquid-specialists (Los Angeles)",
+                            "4-MNA" = "Southern CCS industrial\nsquid-specialists (Monterey)",
+                            "4-SBA" = "Southern CCS industrial\nsquid-specialists (Santa Barbara)",
+                            "5-SBA" = "Roving industrial sardine-squid\nswitchers (Santa Barbara)",
+                            "7-LAA" = "Southern CCS forage fish\ndiverse (Los Angeles)")) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
 
 
@@ -304,14 +301,14 @@ gg_NANC_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
                                 width=.2, position=position_dodge(0.05)) + ggtitle("(d) Pr(NANC) x Pr(MSQD) effect on MSQD landings") +
   xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("1-LAA" = "Southern CCS small-scale squid-specialists\n(Los Angeles)",
-                            "1-SBA" = "Southern CCS small-scale squid-specialists\n(Santa Barbara)",
-                            "4-LAA" = "Southern CCS industrial squid-specialists\n(Los Angeles)",
-                            "4-MNA" = "Southern CCS industrial squid-specialists\n(Monterey)",
-                            "4-SBA" = "Southern CCS industrial squid-specialists\n(Santa Barbara)",
-                            "5-SBA" = "Roving industrial sardine-squid switchers\n(Santa Barbara)",
-                            "7-LAA" = "Southern CCS forage fish diverse\n(Los Angeles)")) +
+  theme(plot.title = element_text(size=9), axis.text.y = element_text(size = 8)) +
+  scale_y_discrete(labels=c("1-LAA" = "Southern CCS small-scale\nsquid-specialists (Los Angeles)",
+                            "1-SBA" = "Southern CCS small-scale\nsquid-specialists (Santa Barbara)",
+                            "4-LAA" = "Southern CCS industrial\nsquid-specialists (Los Angeles)",
+                            "4-MNA" = "Southern CCS industrial\nsquid-specialists (Monterey)",
+                            "4-SBA" = "Southern CCS industrial\nsquid-specialists (Santa Barbara)",
+                            "5-SBA" = "Roving industrial sardine-squid\nswitchers (Santa Barbara)",
+                            "7-LAA" = "Southern CCS forage fish\ndiverse (Los Angeles)")) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
 
 
@@ -326,18 +323,19 @@ gg_PSDN_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
                                 width=.2, position=position_dodge(0.05)) + ggtitle("(c) Pr(PSDN) x Pr(MSQD) effect on MSQD landings") +
   xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("1-LAA" = "Southern CCS small-scale squid-specialists\n(Los Angeles)",
-                            "1-SBA" = "Southern CCS small-scale squid-specialists\n(Santa Barbara)",
-                            "4-LAA" = "Southern CCS industrial squid-specialists\n(Los Angeles)",
-                            "4-MNA" = "Southern CCS industrial squid-specialists\n(Monterey)",
-                            "4-SBA" = "Southern CCS industrial squid-specialists\n(Santa Barbara)",
-                            "5-SBA" = "Roving industrial sardine-squid switchers\n(Santa Barbara)",
-                            "7-LAA" = "Southern CCS forage fish diverse\n(Los Angeles)")) +
+  theme(plot.title = element_text(size=9), axis.text.y = element_text(size = 8)) +
+  scale_y_discrete(labels=c("1-LAA" = "Southern CCS small-scale\nsquid-specialists (Los Angeles)",
+                            "1-SBA" = "Southern CCS small-scale\nsquid-specialists (Santa Barbara)",
+                            "4-LAA" = "Southern CCS industrial\nsquid-specialists (Los Angeles)",
+                            "4-MNA" = "Southern CCS industrial\nsquid-specialists (Monterey)",
+                            "4-SBA" = "Southern CCS industrial\nsquid-specialists (Santa Barbara)",
+                            "5-SBA" = "Roving industrial sardine-squid\nswitchers (Santa Barbara)",
+                            "7-LAA" = "Southern CCS forage fish\ndiverse (Los Angeles)")) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
 
 
 (gg_PSDN + gg_NANC)  / (gg_PSDN_MSQD + gg_NANC_MSQD) 
+
 
 
 #### Pacific Sardine
@@ -515,7 +513,7 @@ gg_NANC_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
 ### SDM effect
 
 
-coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 2]) %>%
+coeff_cluster <- as.data.frame(coef(fit_qMSQD)$port_cluster_ID[, c(1, 3:4), 2]) %>%
   round(digits = 2)
   
 cluster <- rownames(coeff_cluster)
@@ -523,16 +521,19 @@ cluster <- rownames(coeff_cluster)
   coeff_cluster <- cbind(cluster,coeff_cluster)
 
 
-gg_1_MSDQ <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+gg_1_MSDQ <- 
+ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
                                 width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(MSQD) effect on MSQD landings") +
   xlab("") + ylab("") +
   theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
-                            "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
-                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
-                            "5" = "Roving industrial\nsardine-squid\nswitchers",
-                            "7" = "Southern CCS\nforage fish\ndiverse")) +
+  scale_y_discrete(labels=c("1-LAA" = "Southern CCS small-scale squid-specialists (Los Angeles)",
+                            "1-SBA" = "Southern CCS small-scale squid-specialists (Santa Barbara)",
+                            "4-LAA" = "Southern CCS industrial squid-specialists (Los Angeles)",
+                            "4-MNA" = "Southern CCS industrial squid-specialists (Monterey)",
+                            "4-SBA" = "Southern CCS industrial squid-specialists (Santa Barbara)",
+                            "5-SBA" = "Roving industrial sardine-squid switchers (Santa Barbara)",
+                            "7-LAA" = "Southern CCS forage fish diverse (Los Angeles)")) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
 
 
@@ -579,24 +580,28 @@ gg_1_MSDQ +  gg_1_PSDN + gg_1_NANC
 ##############################################################
 ### Price effect
 
-coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 3]) %>%
+coeff_cluster <- as.data.frame(coef(fit_qMSQD)$port_cluster_ID[, c(1, 3:4), 3]) %>%
   round(digits = 2) 
 cluster <- rownames(coeff_cluster)
 rownames(coeff_cluster) <- NULL
 coeff_cluster <- cbind(cluster,coeff_cluster)  
 
 
-gg_2_MSDQ <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+gg_2_MSDQ <- 
+  
+ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
                                 width=.2, position=position_dodge(0.05)) +
   ggtitle("(a) Price effect on MSQD landings") +
   xlab("") + ylab("") +
   theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
-                            "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
-                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
-                            "5" = "Roving industrial\nsardine-squid\nswitchers",
-                            "7" = "Southern CCS\nforage fish\ndiverse")) +
+  scale_y_discrete(labels=c("1-LAA" = "Southern CCS small-scale squid-specialists (Los Angeles)",
+                            "1-SBA" = "Southern CCS small-scale squid-specialists (Santa Barbara)",
+                            "4-LAA" = "Southern CCS industrial squid-specialists (Los Angeles)",
+                            "4-MNA" = "Southern CCS industrial squid-specialists (Monterey)",
+                            "4-SBA" = "Southern CCS industrial squid-specialists (Santa Barbara)",
+                            "5-SBA" = "Roving industrial sardine-squid switchers (Santa Barbara)",
+                            "7-LAA" = "Southern CCS forage fish diverse (Los Angeles)")) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
 
 
@@ -638,31 +643,35 @@ gg_2_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
 
 
-gg_2_MSDQ  + gg_2_PSDN + gg_2_NANC
+gg_2_MSDQ  / gg_2_PSDN / gg_2_NANC
 
 
 
 ### Closure effect
 
 
-coeff_cluster <- as.data.frame(coef(fit_qMSQD)$cluster[, c(1, 3:4), 4]) %>%
+coeff_cluster <- as.data.frame(coef(fit_qMSQD)$port_cluster_ID[, c(1, 3:4), 4]) %>%
   round(digits = 2) 
 cluster <- rownames(coeff_cluster)
 rownames(coeff_cluster) <- NULL
 coeff_cluster <- cbind(cluster,coeff_cluster)  
 
 
-gg_3_MSDQ <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
+gg_3_MSDQ <- 
+  
+  ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
   geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
                                 width=.2, position=position_dodge(0.05)) +
   ggtitle("(a) PSDN Closure effect on MSQD landings") +
   xlab("") + ylab("") +
   theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("1" = "Southern CCS\nsmall-scale\nsquid-specialists",
-                            "2" = "Southern CCS\nsmall-scale\nCPS-opportunists",
-                            "4" = "Southern CCS\nindustrial\nsquid-specialists",
-                            "5" = "Roving industrial\nsardine-squid\nswitchers",
-                            "7" = "Southern CCS\nforage fish\ndiverse")) +
+  scale_y_discrete(labels=c("1-LAA" = "Southern CCS small-scale squid-specialists (Los Angeles)",
+                            "1-SBA" = "Southern CCS small-scale squid-specialists (Santa Barbara)",
+                            "4-LAA" = "Southern CCS industrial squid-specialists (Los Angeles)",
+                            "4-MNA" = "Southern CCS industrial squid-specialists (Monterey)",
+                            "4-SBA" = "Southern CCS industrial squid-specialists (Santa Barbara)",
+                            "5-SBA" = "Roving industrial sardine-squid switchers (Santa Barbara)",
+                            "7-LAA" = "Southern CCS forage fish diverse (Los Angeles)")) +
   geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
 
 
@@ -690,442 +699,6 @@ rownames(coeff_cluster) <- NULL
 coeff_cluster <- cbind(cluster,coeff_cluster)  
 
 gg_3_MSDQ + gg_3_NANC 
-
-
-
-######################################################
-################ RESULTS BY PORT #####################
-######################################################
-
-#################################################################
-### SDM effect (by port)
-
-coef(fit_qMSQD)$port_ID
-
-coeff_cluster <- as.data.frame(coef(fit_qMSQD)$port_ID[, c(1, 3:4), 3]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-
-gg_1_MSDQ <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(MSQD) effect on MSQD landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "SDA" = "San Diego")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-
-coef(fit_qNANC)$port_ID
-coeff_cluster <- as.data.frame(coef(fit_qNANC)$port_ID[, c(1, 3:4), 3]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-gg_1_NANC <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(c) Pr(NANC) effect on NANC landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLW" = "Columbia River\nat Washington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "CWA" = "Coastal\nWashington",
-                            "SDA" = "San Diego",
-                            "CLO" = "Columbia River\nat Oregon")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-coef(fit_qPSDN)$port_ID
-coeff_cluster <- as.data.frame(coef(fit_qPSDN)$port_ID[, c(1, 3:4), 3]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-gg_1_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(b) Pr(PSDN) effect on PSDN landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "CLW" = "Columbia River\nat Washington",
-                            "CWA" = "Coastal\nWashington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-gg_1_MSDQ + gg_1_PSDN + gg_1_NANC
-
-
-### EFFECT OF OTHER SPECIES SDM
-#### Market squid
-
-
-### Effect NANC on MSQD ###
-coeff_cluster <- as.data.frame(coef(fit_qMSQD)$port_ID[, c(1, 3:4), 5]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-
-gg_NANC <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(b) Pr(NANC) effect on MSQD landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "SDA" = "San Diego")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-
-### Effect PSDN on MSQD ###
-coeff_cluster <- as.data.frame(coef(fit_qMSQD)$port_ID[, c(1, 3:4), 7]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-
-gg_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(PSDN) effect on MSQD landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "SDA" = "San Diego")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-### Interaction effects NANC v/s SQUID on MSQD ###
-coeff_cluster <- as.data.frame(coef(fit_qMSQD)$port_ID[, c(1, 3:4), 6]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-gg_NANC_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(d) Pr(NANC) x Pr(MSQD) effect on MSQD landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "SDA" = "San Diego")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-### Interaction effects PSDN v/s SQUID on MSQD###
-coeff_cluster <- as.data.frame(coef(fit_qMSQD)$port_ID[, c(1, 3:4), 8]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-gg_PSDN_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(c) Pr(PSDN) x Pr(MSQD) effect on MSQD landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "SDA" = "San Diego")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-(gg_PSDN + gg_NANC)  / (gg_PSDN_MSQD + gg_NANC_MSQD) 
-
-
-#############################
-#### Pacific Sardine
-
-coef(fit_qPSDN)$port_ID
-
-### Effect MSQD on PSDN ###
-coeff_cluster <- as.data.frame(coef(fit_qPSDN)$port_ID[, c(1, 3:4), 8]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-
-gg_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(MSQD) effect on PSDN landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "CLW" = "Columbia River\nat Washington",
-                            "CWA" = "Coastal\nWashington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-
-### Effect NANC on PSDN ###
-coeff_cluster <- as.data.frame(coef(fit_qPSDN)$port_ID[, c(1, 3:4), 5]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-
-gg_NANC <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(b) Pr(NANC) effect on PSDN landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "CLW" = "Columbia River\nat Washington",
-                            "CWA" = "Coastal\nWashington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-### Interaction effects PSDN v/s NANC on PSDN ###
-coeff_cluster <- as.data.frame(coef(fit_qPSDN)$port_ID[, c(1, 3:4), 7]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-gg_PSDN_NANC <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(d) Pr(NANC) x Pr(PSDN) effect on PSDN landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "CLW" = "Columbia River\nat Washington",
-                            "CWA" = "Coastal\nWashington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-### Interaction effects PSDN v/s SQUID on PSDN###
-coeff_cluster <- as.data.frame(coef(fit_qPSDN)$port_ID[, c(1, 3:4), 9]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-gg_PSDN_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(c) Pr(MSQD) x Pr(PSDN) effect on PSDN landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "CLW" = "Columbia River\nat Washington",
-                            "CWA" = "Coastal\nWashington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-(gg_MSQD + gg_NANC)  / (gg_PSDN_MSQD + gg_PSDN_NANC) 
-
-
-
-
-#############################
-#### Northern anchovy
-
-coef(fit_qNANC)$port_ID
-
-### Effect MSQD on NANC ###
-coeff_cluster <- as.data.frame(coef(fit_qNANC)$port_ID[, c(1, 3:4), 5]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-
-gg_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(a) Pr(MSQD) effect on NANC landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLW" = "Columbia River\nat Washington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "CWA" = "Coastal\nWashington",
-                            "SDA" = "San Diego",
-                            "CLO" = "Columbia River\nat Oregon")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-
-### Effect PSDN on NANC ###
-coeff_cluster <- as.data.frame(coef(fit_qNANC)$port_ID[, c(1, 3:4), 6]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-
-gg_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(b) Pr(PSDN) effect on NANC landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLW" = "Columbia River\nat Washington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "CWA" = "Coastal\nWashington",
-                            "SDA" = "San Diego",
-                            "CLO" = "Columbia River\nat Oregon")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-### Interaction effects NANC v/s SQUID on NANC ###
-coeff_cluster <- as.data.frame(coef(fit_qNANC)$port_ID[, c(1, 3:4), 7]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-gg_NANC_MSQD <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(c) Pr(NANC) x Pr(MSQD) effect on NANC landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLW" = "Columbia River\nat Washington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "CWA" = "Coastal\nWashington",
-                            "SDA" = "San Diego",
-                            "CLO" = "Columbia River\nat Oregon")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-### Interaction effects NANC v/s PSDN on NANC ###
-coeff_cluster <- as.data.frame(coef(fit_qNANC)$port_ID[, c(1, 3:4), 8]) %>%
-  round(digits = 2)
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)
-
-gg_NANC_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) + ggtitle("(d) Pr(NANC) x Pr(PSDN) effect on NANC landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLW" = "Columbia River\nat Washington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "CWA" = "Coastal\nWashington",
-                            "SDA" = "San Diego",
-                            "CLO" = "Columbia River\nat Oregon")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5)
-
-
-(gg_MSQD + gg_PSDN)  / (gg_NANC_MSQD +  gg_NANC_PSDN) 
-
-
-
-
-
-##############################################################
-### Price effect
-
-coeff_cluster <- as.data.frame(coef(fit_qMSQD)$port_ID[, c(1, 3:4), 4]) %>%
-  round(digits = 2) 
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)  
-
-
-gg_2_MSDQ <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) +
-  ggtitle("(a) Price effect on MSQD landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "SDA" = "San Diego")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
-
-
-coeff_cluster <- as.data.frame(coef(fit_qNANC)$port_ID[, c(1, 3:4), 4]) %>%
-  round(digits = 2) 
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)  
-
-gg_2_NANC <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) +
-  ggtitle("(c) Price effect on NANC landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLW" = "Columbia River\nat Washington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara",
-                            "CWA" = "Coastal\nWashington",
-                            "SDA" = "San Diego",
-                            "CLO" = "Columbia River\nat Oregon")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
-
-
-coeff_cluster <- as.data.frame(coef(fit_qPSDN)$port_ID[, c(1, 3:4), 4]) %>%
-  round(digits = 2) 
-cluster <- rownames(coeff_cluster)
-rownames(coeff_cluster) <- NULL
-coeff_cluster <- cbind(cluster,coeff_cluster)  
-
-gg_2_PSDN <- ggplot(coeff_cluster, aes(y=cluster, x=Estimate)) +
-  geom_point() +  geom_errorbar(aes(xmin=Q2.5, xmax=Q97.5),
-                                width=.2, position=position_dodge(0.05)) +
-  ggtitle("(b) Price effect on PSDN landings") +
-  xlab("") + ylab("") +
-  theme(plot.title = element_text(size=10)) +
-  scale_y_discrete(labels=c("CLO" = "Columbia River\nat Oregon",
-                            "CLW" = "Columbia River\nat Washington",
-                            "CWA" = "Coastal\nWashington",
-                            "LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara")) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "blue", size=0.5) 
-
-
-gg_2_MSDQ  + gg_2_PSDN + gg_2_NANC
 
 
 ###############################################
@@ -1343,162 +916,6 @@ gg_int_2$facet$params$labeller <- cluster_label
 
 gg_int / gg_int_2
 
-###############################################
-####### By port
-
-###############################
-#### Market squid #############
-###############################
-
-conditions_port <- data.frame(port_ID = unique(dataset_msqd_landing$port_ID))
-rownames(conditions_port) <-  conditions_port$port_ID
-
-port_label <- as_labeller(c("LAA" = "Los Angeles",
-                            "MNA" = "Monterey",
-                            "SBA" = "Santa Barbara"))
-
-
-### Squid v/s Sardine ###
-
-int_cond <- list(
-  MSQD_SPAWN_SDM_90_z = setNames(c(-2, 0, 2), c("-2", "0", "2"))
-)
-
-conditions_port1 <- conditions_port %>% 
-  filter(port_ID == "LAA" | port_ID == "MNA" | port_ID == "SBA")
-
-conditional_effects_psdn_msqd_sdm_port <- (conditional_effects(
-  fit_qMSQD, "PSDN_SDM_60_z:MSQD_SPAWN_SDM_90_z", 
-  surface=FALSE, 
-  conditions = conditions_port1, 
-  int_conditions = int_cond,
-  re_formula = NULL))
-
-
-### Squid v/s Anchovy ###
-conditions_port2 <- conditions_port %>% 
-  filter(port_ID == "LAA" | port_ID == "MNA")
-
-conditional_effects_nanc_msqd_sdm_port <- (conditional_effects(
-  fit_qMSQD, "NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z", 
-  surface=FALSE, 
-  conditions = conditions_port2, 
-  int_conditions = int_cond,
-  re_formula = NULL))
-
-
-# Plot
-
-gg_int <- plot(conditional_effects_psdn_msqd_sdm_port, plot = FALSE)[[2]] + 
-  theme(
-    plot.title = element_text(size=9, face="bold.italic"),
-    axis.text = element_text(size = 7),
-    axis.title = element_text(size = 8),
-    legend.title = element_text(size = 9),
-    legend.text = element_text(size=8)) + 
-  ggtitle("(a) SDM: Market squid x SDM: Pacific sardine") +  
-  guides(fill=guide_legend(title="MSQD: Prob(Presence)")) +
-  guides(colour=guide_legend(title="MSQD: Prob(Presence)")) +
-  theme(plot.title = element_text(size=9, face="bold.italic")) + 
-  scale_x_continuous(name = "PSDN: Prob(Presence)") + scale_y_continuous(name = "ln(MSQD: Landings)")
-gg_int$facet$params$labeller <- port_label
-
-gg_int_2 <- plot(conditional_effects_nanc_msqd_sdm_port, plot = FALSE)[[2]] + 
-  theme(
-    plot.title = element_text(size=9, face="bold.italic"),
-    axis.text = element_text(size = 7),
-    axis.title = element_text(size = 8),
-    legend.title = element_text(size = 9),
-    legend.text = element_text(size=8)) + 
-  ggtitle("(b) SDM: Market squid x SDM: Northern anchovy") +  
-  theme(plot.title = element_text(size=9, face="bold.italic")) + 
-  guides(fill=guide_legend(title="MSQD: Prob(Presence)")) +
-  guides(colour=guide_legend(title="MSQD: Prob(Presence)")) +
-  scale_x_continuous(name = "NANC: Prob(Presence)") + 
-  scale_y_continuous(name = "ln(MSQD: Landings)")
-gg_int_2$facet$params$labeller <- port_label
-
-gg_int / gg_int_2
-
-
-
-
-
-###############################
-#### Pacific sardine #############
-###############################
-
-conditions_port <- data.frame(port_ID = unique(dataset_psdn_landing$port_ID))
-rownames(conditions_port) <-  conditions_port$port_ID
-
-port_label <- as_labeller(c("LAA" = "Los Angeles",
-                            "CLO" = "Columbia River at Oregon"))
-
-
-### Squid v/s Sardine ###
-int_cond <- list(
-  PSDN_SDM_60_z = setNames(c(-2, 0, 2), c("-2", "0", "2"))
-)
-
-conditions_port1 <- conditions_port %>% 
-  filter(port_ID == "CLO")
-
-conditional_effects_msqd_psdn_sdm_port <- (conditional_effects(
-  fit_qPSDN, "MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z", 
-  surface=FALSE, 
-  conditions = conditions_port1, 
-  int_conditions = int_cond,
-  re_formula = NULL))
-
-
-### Squid v/s Anchovy ###
-conditions_port2 <- conditions_port %>% 
-  filter(port_ID == "LAA")
-
-conditional_effects_nanc_psdn_sdm_port <- (conditional_effects(
-  fit_qPSDN, "NANC_SDM_20_z:PSDN_SDM_60_z", 
-  surface=FALSE, 
-  conditions = conditions_port2, 
-  int_conditions = int_cond,
-  re_formula = NULL))
-
-
-# Plot
-gg_int <- plot(conditional_effects_msqd_psdn_sdm_port, plot = FALSE)[[2]] + 
-  theme(
-    plot.title = element_text(size=9, face="bold.italic"),
-    axis.text = element_text(size = 7),
-    axis.title = element_text(size = 8),
-    legend.title = element_text(size = 9),
-    legend.text = element_text(size=8)) + 
-  ggtitle("(a) SDM: Pacific sardine x SDM: Market squid (Columbia River at Oregon)") +  
-  theme(plot.title = element_text(size=9, face="bold.italic")) + 
-  guides(fill=guide_legend(title="PSDN: Prob(Presence)")) +
-  guides(colour=guide_legend(title="PSDN: Prob(Presence)")) +
-  scale_y_continuous(name = "ln(PSDN: Landings)") + 
-  scale_x_continuous(name = "MSQD: Prob(Presence)") 
-gg_int$facet$params$labeller <- port_label
-
-
-
-gg_int_2 <- plot(conditional_effects_nanc_psdn_sdm_port, plot = FALSE)[[2]] + 
-  theme(
-    plot.title = element_text(size=9, face="bold.italic"),
-    axis.text = element_text(size = 7),
-    axis.title = element_text(size = 8),
-    legend.title = element_text(size = 9),
-    legend.text = element_text(size=8)) + 
-  ggtitle("(b) SDM: Pacific sardine x SDM: Northern anchovy (Los Angeles)") +  
-  theme(plot.title = element_text(size=9, face="bold.italic")) +
-  guides(fill=guide_legend(title="PSDN: Prob(Presence)")) +
-  guides(colour=guide_legend(title="PSDN: Prob(Presence)")) +
-  scale_y_continuous(name = "ln(PSDN: Landings)") + 
-  scale_x_continuous(name = "NANC: Prob(Presence)")
-gg_int_2$facet$params$labeller <- port_label
-
-gg_int / gg_int_2
-
-
 
 ##########################################################################
 ### Predictions ###
@@ -1687,179 +1104,6 @@ gg_psdn <- ggplot(df_cluster_PSDN) +
 
 gg_msqd  + gg_psdn + gg_nanc
 
-#########################################
-## By ports
-
-library(zoo)
-
-####  Marker squid
-prediction_sel <- prediction_MSQD[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-
-prediction_sel %>% group_by(port_ID) %>%
-  summarize(SSR = sum(abs(ln_MSQD_Landings - Estimate.logMSQDLandings))/n())
-
-prediction_sel %>% group_by(port_ID) %>%
-  summarize(SSR = cor(ln_MSQD_Landings, Estimate.logMSQDLandings))
-
-prediction_sel %>% group_by(port_ID) %>%
-  summarize(SSR = mean(Est.Error.logMSQDLandings))
-
-df_port_MSQD <- prediction_sel %>% 
-  dplyr::select(Estimate.logMSQDLandings, ln_MSQD_Landings, 
-                LANDING_YEAR, LANDING_MONTH, port_ID, VESSEL_NUM) %>%
-  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
-  mutate(Date = zoo::as.yearmon(Date)) %>%
-  group_by(Date, port_ID, VESSEL_NUM) %>% 
-  summarise(Est_landings = sum(Estimate.logMSQDLandings), Landings = sum(ln_MSQD_Landings)) %>%
-  group_by(Date, port_ID) %>% 
-  summarise(Est_landings_mean = mean(Est_landings), Landings_mean = mean(Landings)) %>%
-  group_by(port_ID) %>%
-  arrange(port_ID, Date) %>%
-  mutate(Est_landings_mean_MA = rollapply(data = Est_landings_mean, 
-                                          width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
-  mutate(Landings_mean_MA     = rollapply(data = Landings_mean    , 
-                                          width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
-
-
-#### Using the data estimation -- Northern anchovy
-
-prediction_sel <- prediction_NANC[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-
-prediction_sel %>% group_by(port_ID) %>%
-  summarize(SSR = mean(Est.Error.logNANCLandings))
-
-prediction_sel %>% group_by(port_ID) %>%
-  summarize(SSR = sum(abs(ln_NANC_Landings - Estimate.logNANCLandings))/n())
-
-prediction_sel %>% group_by(port_ID) %>%
-  summarize(SSR = cor(ln_NANC_Landings, Estimate.logNANCLandings))
-
-
-
-df_port_NANC <- prediction_sel %>% 
-  dplyr::select(Estimate.logNANCLandings, ln_NANC_Landings, 
-                LANDING_YEAR, LANDING_MONTH, port_ID, VESSEL_NUM) %>%
-  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
-  mutate(Date = zoo::as.yearmon(Date)) %>%
-  group_by(Date, port_ID, VESSEL_NUM) %>% 
-  summarise(Est_landings = sum(Estimate.logNANCLandings), Landings = sum(ln_NANC_Landings)) %>%
-  group_by(Date, port_ID) %>% 
-  summarise(Est_landings_mean = mean(Est_landings), Landings_mean = mean(Landings)) %>%
-  group_by(port_ID) %>%
-  arrange(port_ID, Date) %>%
-  mutate(Est_landings_mean_MA = rollapply(data = Est_landings_mean, 
-                                          width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
-  mutate(Landings_mean_MA     = rollapply(data = Landings_mean    , 
-                                          width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
-
-
-#### Using the data estimation -- Pacific sardine
-
-
-prediction_sel <- prediction_PSDN[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-
-prediction_sel %>% group_by(port_ID) %>%
-  summarize(SSR = mean(Est.Error.logPSDNLandings))
-
-prediction_sel %>% group_by(port_ID) %>%
-  summarize(SSR = sum(abs(ln_PSDN_Landings - Estimate.logPSDNLandings))/n())
-
-prediction_sel %>% group_by(port_ID) %>%
-  summarize(SSR = cor(ln_PSDN_Landings, Estimate.logPSDNLandings))
-
-
-
-df_port_PSDN <- prediction_sel %>% 
-  dplyr::select(Estimate.logPSDNLandings, ln_PSDN_Landings, 
-                LANDING_YEAR, LANDING_MONTH, port_ID, VESSEL_NUM) %>%
-  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
-  mutate(Date = zoo::as.yearmon(Date)) %>%
-  group_by(Date, port_ID, VESSEL_NUM) %>% 
-  summarise(Est_landings = sum(Estimate.logPSDNLandings), Landings = sum(ln_PSDN_Landings)) %>%
-  group_by(Date, port_ID) %>% 
-  summarise(Est_landings_mean = mean(Est_landings), Landings_mean = mean(Landings)) %>%
-  group_by(port_ID) %>%
-  arrange(port_ID, Date) %>%
-  mutate(Est_landings_mean_MA = rollapply(data = Est_landings_mean, 
-                                          width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
-  mutate(Landings_mean_MA     = rollapply(data = Landings_mean    , 
-                                          width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
-
-
-# Plot
-cond_label_msqd <- as_labeller(c("CLO" = "Columbia River\nat Oregon",
-                                 "LAA" = "Los Angeles",
-                                 "MNA" = "Monterey",
-                                 "SBA" = "Santa Barbara",
-                                 "SDA" = "San Diego")) 
-
-cond_label_nanc <- as_labeller(c("CLW" = "Columbia River\nat Washington",
-                                 "LAA" = "Los Angeles",
-                                 "MNA" = "Monterey",
-                                 "SBA" = "Santa Barbara",
-                                 "CWA" = "Coastal\nWashington",
-                                 "SDA" = "San Diego",
-                                 "CLO" = "Columbia River\nat Oregon"))
-
-cond_label_psdn <- as_labeller(c("CLO" = "Columbia River\nat Oregon",
-                                 "CLW" = "Columbia River\nat Washington",
-                                 "CWA" = "Coastal\nWashington",
-                                 "LAA" = "Los Angeles",
-                                 "MNA" = "Monterey",
-                                 "SBA" = "Santa Barbara")) 
-  
-
-gg_msqd <- ggplot(df_port_MSQD) + 
-  geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
-  geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~port_ID, labeller = cond_label_msqd, ncol = 2) +
-  theme(legend.position="none") +
-  ggtitle("(a) Market squid predictions") +
-  scale_x_continuous(name = "")  +
-  scale_y_continuous(name = "ln(Landings)") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
-
-
-gg_nanc <- ggplot(df_port_NANC) + 
-  geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
-  geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~port_ID, labeller = cond_label_nanc, ncol = 1) +
-  theme(legend.position="right") +
-  ggtitle("(c) Northern anchovy predictions") +
-  scale_x_continuous(name = "")  +
-  scale_y_continuous(name = "") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
-
-
-gg_psdn <- ggplot(df_port_PSDN) + 
-  geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
-  geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~port_ID, labeller = cond_label_psdn, ncol = 2) + 
-  theme(legend.position="none") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85")) +
-  ggtitle("(b) Pacific sardine predictions") +
-  scale_x_continuous(name = "Date")  +
-  scale_y_continuous(name = "") 
-
-
-gg_msqd  + gg_psdn + gg_nanc
-
-
-################################################################
-################################################################
-
 
 #----------------------------------------
 ### Aggregate plots
@@ -1978,143 +1222,6 @@ gg_psdn <- ggplot(df_cluster_PSDN) +
   geom_line(mapping = aes(x = Date, y = Landings_MA, color = "Actual landings"), size = 0.75) + 
   geom_line(mapping = aes(x = Date, y = Est_landings_MA, color = "Estimated landings (MA)"), size = 1) +
   facet_wrap(~group_all, labeller = cond_label_psdn, ncol = 2) + 
-  theme(legend.position="none") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85")) +
-  ggtitle("(b) Pacific sardine predictions") +
-  scale_x_continuous(name = "Date")  +
-  scale_y_continuous(name = "") 
-
-
-gg_msqd  + gg_psdn + gg_nanc
-
-
-
-
-#------------------------------------------
-### Aggregate plots
-#### By Ports 
-
-
-####  Marker squid
-prediction_sel <- prediction_MSQD[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-
-
-
-#### Market squid
-df_port_MSQD <- prediction_sel %>% 
-  dplyr::select(Estimate.logMSQDLandings, ln_MSQD_Landings, 
-                LANDING_YEAR, LANDING_MONTH, port_ID) %>%
-  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
-  mutate(Date = zoo::as.yearmon(Date)) %>%
-  group_by(Date, port_ID) %>% 
-  summarise(Est_landings = sum(Estimate.logMSQDLandings), Landings = sum(ln_MSQD_Landings)) %>% 
-  group_by(port_ID) %>%
-  arrange(port_ID, Date) %>%
-  mutate(Est_landings_MA = rollapply(data = Est_landings, 
-                                     width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
-  mutate(Landings_MA     = rollapply(data = Landings    , 
-                                     width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
-
-
-
-#### Pacific sardine
-prediction_sel <- prediction_PSDN[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-
-df_port_PSDN <- prediction_sel %>% 
-  dplyr::select(Estimate.logPSDNLandings, ln_PSDN_Landings, 
-                LANDING_YEAR, LANDING_MONTH, port_ID) %>%
-  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
-  mutate(Date = zoo::as.yearmon(Date)) %>%
-  group_by(Date, port_ID) %>% 
-  summarise(Est_landings = sum(Estimate.logPSDNLandings), Landings = sum(ln_PSDN_Landings)) %>% 
-  group_by(port_ID) %>%
-  arrange(port_ID, Date) %>%
-  mutate(Est_landings_MA = rollapply(data = Est_landings, 
-                                     width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
-  mutate(Landings_MA     = rollapply(data = Landings    , 
-                                     width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
-
-
-#### Northern anchovy
-prediction_sel <- prediction_NANC[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-
-df_port_NANC <- prediction_sel %>% 
-  dplyr::select(Estimate.logNANCLandings, ln_NANC_Landings, 
-                LANDING_YEAR, LANDING_MONTH, port_ID) %>%
-  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
-  mutate(Date = zoo::as.yearmon(Date)) %>%
-  group_by(Date, port_ID) %>% 
-  summarise(Est_landings = sum(Estimate.logNANCLandings), Landings = sum(ln_NANC_Landings)) %>% 
-  group_by(port_ID) %>%
-  arrange(port_ID, Date) %>%
-  mutate(Est_landings_MA = rollapply(data = Est_landings, 
-                                     width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
-  mutate(Landings_MA     = rollapply(data = Landings    , 
-                                     width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
-
-
-# Plot
-cond_label_msqd <- as_labeller(c("CLO" = "Columbia River\nat Oregon",
-                                 "LAA" = "Los Angeles",
-                                 "MNA" = "Monterey",
-                                 "SBA" = "Santa Barbara",
-                                 "SDA" = "San Diego")) 
-
-cond_label_nanc <- as_labeller(c("CLW" = "Columbia River\nat Washington",
-                                 "LAA" = "Los Angeles",
-                                 "MNA" = "Monterey",
-                                 "SBA" = "Santa Barbara",
-                                 "CWA" = "Coastal\nWashington",
-                                 "SDA" = "San Diego",
-                                 "CLO" = "Columbia River\nat Oregon"))
-
-cond_label_psdn <- as_labeller(c("CLO" = "Columbia River\nat Oregon",
-                                 "CLW" = "Columbia River\nat Washington",
-                                 "CWA" = "Coastal\nWashington",
-                                 "LAA" = "Los Angeles",
-                                 "MNA" = "Monterey",
-                                 "SBA" = "Santa Barbara")) 
-
-
-
-gg_msqd <- ggplot(df_port_MSQD) + 
-  geom_line(mapping = aes(x = Date, y = Landings_MA, color = "Actual landings"), size = 0.75) + 
-  geom_line(mapping = aes(x = Date, y = Est_landings_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~port_ID, labeller = cond_label_msqd, ncol = 2) +
-  theme(legend.position="none") +
-  ggtitle("(a) Market squid predictions") +
-  scale_x_continuous(name = "")  +
-  scale_y_continuous(name = "ln(Landings)") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
-
-
-gg_nanc <- ggplot(df_port_NANC) + 
-  geom_line(mapping = aes(x = Date, y = Landings_MA, color = "Actual landings"), size = 0.75) + 
-  geom_line(mapping = aes(x = Date, y = Est_landings_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~port_ID, labeller = cond_label_nanc, ncol = 1) +
-  theme(legend.position="right") +
-  ggtitle("(c) Northern anchovy predictions") +
-  scale_x_continuous(name = "")  +
-  scale_y_continuous(name = "") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
-
-
-gg_psdn <- ggplot(df_port_PSDN) + 
-  geom_line(mapping = aes(x = Date, y = Landings_MA, color = "Actual landings"), size = 0.75) + 
-  geom_line(mapping = aes(x = Date, y = Est_landings_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~port_ID, labeller = cond_label_psdn, ncol = 2) + 
   theme(legend.position="none") +
   scale_color_manual(name = "Variable: ",
                      values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85")) +
