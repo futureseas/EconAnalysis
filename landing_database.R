@@ -23,9 +23,12 @@ library("dplyr")
 library("data.table") 
 library("reshape2")
 
-## Read PacFIN database 
-PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv") %>% 
+## Read PacFIN database and deflactor
+PacFIN.month <- read.csv(file = "C:\\Data\\PacFIN data\\PacFIN_month.csv") %>% 
   dplyr::filter(AFI_EXVESSEL_REVENUE.sum > 0)
+
+Deflactor <- read.csv(file = "C:\\Data\\PacFIN data\\deflactor.csv")
+
 
 ## Create database of port area code and port names
 ports_area_codes <- PacFIN.month %>% dplyr::select('PORT_NAME', 'AGENCY_CODE', 'PORT_AREA_CODE') %>% unique()
@@ -393,15 +396,14 @@ rm(PSDN_closure, MSQD_closure)
 
 
 #---------------------------------------------------------------------------------------
-### Include Consumer Price Index to use as a deflactor
-CPI <- read.csv(here::here("Data", "CPI", "CPIAUCSL.csv"))
-CPI$DATE <- as.Date(CPI$DATE, format = "%Y-%m-%d") 
-CPI$LANDING_YEAR  <- lubridate::year(CPI$DATE)
-CPI$LANDING_MONTH <- lubridate::month(CPI$DATE)
-CPI <- CPI %>% dplyr::select(-c('DATE')) %>% dplyr::rename(CPI = CPIAUCSL)
-dataset <- merge(dataset, CPI, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
-dataset$deflactor <- dataset$CPI/100 
-rm(CPI)
+### Include deflactor
+# CPI <- read.csv(here::here("Data", "CPI", "CPIAUCSL.csv"))
+# CPI$DATE <- as.Date(CPI$DATE, format = "%Y-%m-%d") 
+# CPI$LANDING_YEAR  <- lubridate::year(CPI$DATE)
+# CPI$LANDING_MONTH <- lubridate::month(CPI$DATE)
+# CPI <- CPI %>% dplyr::select(-c('DATE')) %>% dplyr::rename(CPI = CPIAUCSL)
+dataset <- merge(dataset, Deflactor, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
+rm(Deflactor)
 
 #---------------------------------------------------------------------------------------
 ### Include world's fish meal price as instrument
@@ -411,7 +413,7 @@ fish.meal$LANDING_YEAR  <- lubridate::year(fish.meal$DATE)
 fish.meal$LANDING_MONTH <- lubridate::month(fish.meal$DATE)
 fish.meal <- fish.meal %>% dplyr::select(-c('DATE')) %>% dplyr::rename(Price.Fishmeal = PFISHUSDM)
 dataset <- merge(dataset, fish.meal, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
-dataset$Price.Fishmeal.AFI <- dataset$Price.Fishmeal/dataset$deflactor
+dataset$Price.Fishmeal.AFI <- dataset$Price.Fishmeal*dataset$defl
 rm(fish.meal)
 
 #---------------------------------------------------------------------------------------
@@ -458,8 +460,10 @@ dataset <- dataset %>%
   mutate(diesel.price = ifelse(is.na(diesel.price), diesel.price.state, diesel.price))
 
 ## Deflact prices
-dataset$diesel.price.AFI <- dataset$diesel.price/dataset$deflactor
+dataset$diesel.price.AFI <- dataset$diesel.price*dataset$defl
 rm(fuel.prices, fuel.prices.CA, fuel.prices.OR, fuel.prices.WA, fuel.prices.state)
+
+
 
 
 #---------------------------------------------------------------------------------------

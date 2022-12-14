@@ -78,17 +78,17 @@ dataset_nanc_landing <- dataset_nanc %>%
   mutate(n_total = n()) %>%
   group_by(cluster_port) %>% 
   mutate(obs = n(), perc = n()/n_total) %>% 
-  filter(perc > 0.05)
+  filter(perc > 0.02)
 
 ### Check number of observations
 dataset_nanc_landing %>% select('cluster_port', 'obs', 'perc') %>% unique()
 dataset_nanc_landing %>% group_by(PORT_AREA_CODE) %>%
   summarize(n_obs = n()) %>% mutate(per = scales::percent(n_obs / sum(n_obs)))
 
-### Descriptive statistics 
+# ### Descriptive statistics 
 desc_data <- dataset_nanc_landing %>%
-  subset(select = c(Length, NANC_Landings, NANC_Price, 
-                    MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,  
+  subset(select = c(Length, NANC_Landings, NANC_Price,
+                    MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,
                     Price.Fishmeal.AFI))
 
 table <- psych::describe(desc_data, fast=TRUE) %>%
@@ -98,10 +98,10 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 4, "Prob(presence): MSQD", vars)) %>%
   mutate(vars = ifelse(vars == 5, "Prob(presence): PSDN", vars)) %>%
   mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
-  mutate(vars = ifelse(vars == 7, "Fishmeal price", vars)) 
-# 
-# gs4_create("SummaryMonthly_Q_NANC_v3", sheets = table)
-# rm(desc_data, table)
+  mutate(vars = ifelse(vars == 7, "Fishmeal price", vars))
+
+gs4_create("SummaryMonthly_Q_NANC_v4", sheets = table)
+rm(desc_data, table)
 
 
 #-------------------------------------------------------------------
@@ -129,44 +129,45 @@ rm(pDataset)
 
 ## -------------------------------------------------------------------
 ### Market squid landing model ###
-write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC_v3.csv", row.names = FALSE)
+write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC_v4.csv", row.names = FALSE)
 price_model <- bf(NANC_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 
 
 ## Define landing equation
 landing_model <- bf(log(NANC_Landings) ~
-  1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:PSDN.Open + PSDN.Total.Closure + Length_z +
- (1 + NANC_SDM_20_z + NANC_Price_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z:MSQD.Open + NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open + MSQD_SPAWN_SDM_90_z:MSQD.Open + PSDN_SDM_60_z:PSDN.Open + PSDN.Total.Closure | port_cluster_ID))
+  1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure + Length_z +
+ (1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure | port_cluster_ID))
 
 ## Create priors
 get_prior(data = dataset_nanc_landing,
            family = gaussian,
            price_model + landing_model + set_rescor(TRUE))
-prior_lognormal_MODEL1 <- c(
+
+prior_lognormal <- c(
   prior(lognormal(0,1), class = b,     resp = NANCPricez,      coef = Price.Fishmeal.AFI_z),
   prior(lognormal(0,1), class = b,     resp = logNANCLandings, coef = Length_z),
   prior(lognormal(0,1), class = b,     resp = logNANCLandings, coef = NANC_Price_z),
-  prior(lognormal(0,1), class = b,     resp = logNANCLandings, coef = NANC_SDM_20_z),
-  prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = NANC_SDM_20_z:PSDN_SDM_60_z:PSDN.Open),
-  prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z:MSQD.Open),
-  prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = PSDN_SDM_60_z:PSDN.Open),
-  prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = MSQD_SPAWN_SDM_90_z:MSQD.Open),
+  prior(lognormal(0,1), class = b,     resp = logNANCLandings, coef = NANC_SDM_20),
+  prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = NANC_SDM_20:PSDN_SDM_60:PSDN.Open),
+  prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open),
+  prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = PSDN_SDM_60:PSDN.Open),
+  prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = MSQD_SPAWN_SDM_90:MSQD.Open),
   prior(exponential(1), class = sigma, resp = NANCPricez),
   prior(exponential(1), class = sigma, resp = logNANCLandings),
   prior(lkj(2),         class = rescor))
 
 ## Estimate model
-set.seed(123)
-fit_qNANC_v3 <-
+set.seed(66)
+fit_qNANC_v4 <-
   brm(data = dataset_nanc_landing,
       family = gaussian,
-      price_model + landing_model_MODEL1 + set_rescor(TRUE),
-      prior = prior_lognormal_MODEL1,
+      price_model + landing_model + set_rescor(TRUE),
+      prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qNANC_v3")
+      file = "Estimations/fit_qNANC_v4")
 
-fit_qNANC_v3 <- add_criterion(fit_qNANC_v3, "loo", overwrite = TRUE)
+fit_qNANC_v4 <- add_criterion(fit_qNANC_v4, "loo", overwrite = TRUE)
 
 
 

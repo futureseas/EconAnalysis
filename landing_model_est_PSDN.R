@@ -50,6 +50,7 @@ dataset_psdn <- dataset %>%
                 PSDN.Open, MSQD.Open,
                 Price.Fishmeal, Price.Fishmeal_z, 
                 Price.Fishmeal.AFI, Price.Fishmeal.AFI_z,
+                diesel.price.AFI, diesel.price.AFI_z,
                 Length, Length_z) %>% 
   dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>%
   mutate(PSDN_Landings = ifelse(PSDN_Landings<= 0, 0, PSDN_Landings)) %>%
@@ -60,6 +61,7 @@ dataset_psdn <- dataset %>%
   dplyr::mutate(ln_PSDN_Landings = log(PSDN_Landings)) %>%
   filter(group_all == 3 | group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>%
   mutate(cluster_port = paste(group_all, PORT_AREA_CODE, sep = "-", collapse = NULL)) %>%
+  mutate(diesel.price.AFI_z = -1*diesel.price.AFI_z) %>%
   drop_na()
   
   
@@ -83,7 +85,7 @@ dataset_psdn_landing <- dataset_psdn %>%
   mutate(n_total = n()) %>%
   group_by(cluster_port) %>% 
   mutate(obs = n(), perc = n()/n_total) %>% 
-  filter(perc > 0.05) 
+  filter(perc > 0.02) 
 
 ### Check number of observations
 dataset_psdn_landing %>% select('cluster_port', 'obs', 'perc') %>% unique()
@@ -91,59 +93,59 @@ dataset_psdn_landing %>% group_by(PORT_AREA_CODE) %>%
   summarize(n_obs = n()) %>% mutate(per = scales::percent(n_obs / sum(n_obs)))
 
 
-# ### Descriptive statistics 
-# desc_data <- dataset_psdn_landing %>%
-#   subset(select = c(Length, PSDN_Landings, PSDN_Price, 
-#                     MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,
-#                     MSQD.Open, Price.Fishmeal.AFI))
-# 
-# table <- psych::describe(desc_data, fast=TRUE) %>%
-#   mutate(vars = ifelse(vars == 1, "Vessel Length", vars))%>%
-#   mutate(vars = ifelse(vars == 2, "Landings: PSDN", vars)) %>%
-#   mutate(vars = ifelse(vars == 3, "Price: PSDN", vars)) %>%
-#   mutate(vars = ifelse(vars == 4, "Prob(presence): MSQD", vars)) %>%
-#   mutate(vars = ifelse(vars == 5, "Prob(presence): PSDN", vars)) %>%
-#   mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
-#   mutate(vars = ifelse(vars == 7, "Fraction of month open: MSQD", vars)) %>%
-#   mutate(vars = ifelse(vars == 8, "Fishmeal price", vars)) 
-# 
-# # gs4_create("SummaryMonthly_Q_PSDN_v3", sheets = table)
-# # rm(desc_data, table)
+### Descriptive statistics
+desc_data <- dataset_psdn_landing %>%
+  subset(select = c(Length, PSDN_Landings, PSDN_Price,
+                    MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,
+                    MSQD.Open, Price.Fishmeal.AFI))
+
+table <- psych::describe(desc_data, fast=TRUE) %>%
+  mutate(vars = ifelse(vars == 1, "Vessel Length", vars))%>%
+  mutate(vars = ifelse(vars == 2, "Landings: PSDN", vars)) %>%
+  mutate(vars = ifelse(vars == 3, "Price: PSDN", vars)) %>%
+  mutate(vars = ifelse(vars == 4, "Prob(presence): MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 5, "Prob(presence): PSDN", vars)) %>%
+  mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
+  mutate(vars = ifelse(vars == 7, "Fraction of month open: MSQD", vars)) %>%
+  mutate(vars = ifelse(vars == 8, "Fishmeal price", vars))
+
+# gs4_create("SummaryMonthly_Q_PSDN_v4", sheets = table)
+# rm(desc_data, table)
 
 
-#-------------------------------------------------------------------
-# # ## Check stationarity in the panel dataset
-# library("plm")
-# 
-# dataset_psdn_landing$Date <-
-#   zoo::as.yearmon(paste(dataset_psdn_landing$LANDING_YEAR, dataset_psdn_landing$LANDING_MONTH), "%Y %m")
-# 
-# pDataset <- dataset_psdn_landing %>% mutate(Unique_ID = paste(VESSEL_NUM, PORT_AREA_CODE, sep = " ")) %>%
-#   group_by(Unique_ID) %>% mutate(n_obs_group = n()) %>% ungroup() %>% filter(n_obs_group >= 12) %>% drop_na()
-# pDataset <- pdata.frame(pDataset, index = c('Unique_ID', 'Date'))
-# 
-# # duplicate_indexes <- dataset_msqd %>%
-# #   group_by(PORT_AREA_CODE, Date, VESSEL_NUM) %>% mutate(dupe = n()>1)
-# 
-# purtest(pDataset$PSDN_Landings, pmax = 4, exo = "intercept", test = "Pm")
-# purtest(pDataset$PSDN_Price, pmax = 4, exo = "intercept", test = "Pm")
-# purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
-# purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
-# purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
-# purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
-# 
-# rm(pDataset)
+-------------------------------------------------------------------
+# ## Check stationarity in the panel dataset
+library("plm")
+
+dataset_psdn_landing$Date <-
+  zoo::as.yearmon(paste(dataset_psdn_landing$LANDING_YEAR, dataset_psdn_landing$LANDING_MONTH), "%Y %m")
+
+pDataset <- dataset_psdn_landing %>% mutate(Unique_ID = paste(VESSEL_NUM, PORT_AREA_CODE, sep = " ")) %>%
+  group_by(Unique_ID) %>% mutate(n_obs_group = n()) %>% ungroup() %>% filter(n_obs_group >= 12) %>% drop_na()
+pDataset <- pdata.frame(pDataset, index = c('Unique_ID', 'Date'))
+
+# duplicate_indexes <- dataset_msqd %>%
+#   group_by(PORT_AREA_CODE, Date, VESSEL_NUM) %>% mutate(dupe = n()>1)
+
+purtest(pDataset$PSDN_Landings, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$PSDN_Price, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
+
+rm(pDataset)
 
 
 ## -------------------------------------------------------------------
 ### Market squid landing model ###
-write.csv(dataset_psdn_landing,"C:\\Data\\PacFIN data\\dataset_estimation_PSDN_v3.csv", row.names = FALSE)
+write.csv(dataset_psdn_landing,"C:\\Data\\PacFIN data\\dataset_estimation_PSDN_v5.csv", row.names = FALSE)
 
 
 price_model   <- bf(PSDN_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(PSDN_Landings) ~
-                       1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction + Length_z +
-                      (1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction | port_cluster_ID))
+                       1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction + diesel.price.AFI_z + Length_z +
+                      (1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction + diesel.price.AFI_z | port_cluster_ID))
 
 get_prior(data = dataset_psdn_landing,
           family = gaussian,
@@ -154,6 +156,7 @@ prior_lognormal <- c(
   prior(lognormal(0,1), class = b,     resp = PSDNPricez,      coef = Price.Fishmeal.AFI_z),
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = Length_z),
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = PSDN_Price_z),
+  prior(lognormal(1,1), class = b,     resp = logPSDNLandings, coef = diesel.price.AFI_z),
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60:NANC_SDM_20),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open),
@@ -164,15 +167,15 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(66)
-fit_qPSDN_v3 <-
+fit_qPSDN_v5 <-
   brm(data = dataset_psdn_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qPSDN_v3")
+      file = "Estimations/fit_qPSDN_v5")
 
-fit_qPSDN_v3 <- add_criterion(fit_qPSDN_v3, "loo", overwrite = TRUE)
+fit_qPSDN_v5 <- add_criterion(fit_qPSDN_v5, "loo", overwrite = TRUE)
 
 

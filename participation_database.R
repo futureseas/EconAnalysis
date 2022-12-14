@@ -55,7 +55,7 @@ Tickets <- select(Tickets, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LAN
 #-----------------------------------------------------
 #### Use only tickets that the removal type is commercial ####
 Tickets <- Tickets %>% filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") %>%
-  filter(LANDING_YEAR >= 2009) %>% filter(LANDING_YEAR <= 2016)
+  filter(LANDING_YEAR >= 2000) %>% filter(LANDING_YEAR <= 2018)
 
 
 #-----------------------------------------------------
@@ -292,6 +292,60 @@ Tickets_2 <- Tickets %>%
   mutate(selection = paste(Port_Dominant, Species_Dominant, sep = "-", collapse = NULL))
 
 
+# ------------------------------------------------------------------
+## Merge location data to SDM outputs
+
+# Pacific sardine
+
+sdm.psdn.all <- tibble(LANDING_YEAR = integer(),
+                       LANDING_MONTH = integer(),
+                       LANDING_DAY = integer(),
+                       PORT_NAME = character(),
+                       AGENCY_CODE = character(),
+                       psdn.sdm = integer(), 
+                       psdn.date.sdm = integer())
+
+for (y in min.year:max.year) {
+  for (m in 1:12) {
+    
+    dat <- ncdf4::nc_open(paste0("G:/My Drive/Project/Data/SDM/sardine/sard_", 
+                                 paste0(as.character(m), 
+                                        paste0("_", paste0(as.character(y),"_GAM.nc")))))    
+    
+    set_long <- ncdf4::ncvar_get(dat, "lon")
+    set_lat <- ncdf4::ncvar_get(dat, "lat")
+    psdn.date.sdm <- ncdf4::ncvar_get(dat, "time")
+    psdn.sdm <- ncdf4::ncvar_get(dat, "predGAM")
+    
+    # Close the netcdf
+    ncdf4::nc_close(dat)			
+    
+    # Reshape the 3D array so we can map it, change the time field to be date
+    dimnames(psdn.sdm) <- list(set_long = set_long, set_lat = set_lat, psdn.date.sdm = psdn.date.sdm)
+    sdmMelt <- reshape2::melt(psdn.sdm, value.name = "psdn.sdm")
+    sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$psdn.date.sdm)			
+    
+    
+    # mutate(set_lat_sdm = round(set_lat, digits = 1)) %>%
+    # mutate(set_long_sdm = round(set_long, digits = 1)) 
+    
+    sdm.month <- gfw.fishing.effort.CPS %>%
+      left_join(sdmMelt, by = c("set_date", "set_lat", "set_long")) %>% drop_na(psdn.sdm) %>% 
+      select("set_date", "set_lat", "set_long", "psdn.sdm", "psdn.date.sdm")
+    
+    sdm.psdn.all <- rbind(sdm.psdn.all, sdm.month)
+    
+    print(y)
+    print(m)
+  }
+}
+
+sdm.psdn.all <-  sdm.psdn.all  %>% unique() 
+gfw.fishing.effort.CPS <- gfw.fishing.effort.CPS %>%
+  left_join(sdm.psdn.all, by = c("set_date", "set_lat", "set_long"))
+gfw.fishing.effort.CPS$psdn.date.sdm <- as.Date("1900-01-01") + days(gfw.fishing.effort.CPS$psdn.date.sdm)	
+
+
 #-----------------------------------------------------
 ### Expand database 
 ### Include outside option? Then, expand data when variables are not observed.
@@ -310,9 +364,6 @@ Tickets_2 <- Tickets %>%
 
 #################################################################################
 ############ ONLY IF VESSEL PARTICIPATE IN THE PREVIOUS YEAR ####################
-
-
-
 
 library(tidyr)
 Tickets_3 <- complete(Tickets_2, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%

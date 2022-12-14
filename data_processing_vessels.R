@@ -28,6 +28,17 @@ nrow(as.data.frame(unique(Tickets$VESSEL_NUM)))
 ## Include price per kilogram
 Tickets$AFI_PRICE_PER_MTON <- Tickets$AFI_PRICE_PER_POUND * 2.20462 * 1000
 
+## Create Deflactor 
+Tickets$Deflactor <- Tickets$AFI_PRICE_PER_POUND / Tickets$PRICE_PER_POUND
+Deflactor1 <- cbind.data.frame(Tickets$LANDING_YEAR, Tickets$LANDING_MONTH, (Tickets$AFI_PRICE_PER_POUND / Tickets$PRICE_PER_POUND))
+colnames(Deflactor1) <- c('LANDING_YEAR','LANDING_MONTH', 'DEFLACTOR')
+Deflactor <- Deflactor1 %>%
+    group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(defl = mean(DEFLACTOR, na.rm = TRUE))
+
+###  Save deflactor...
+write.csv(Deflactor,"C:\\Data\\PacFIN data\\deflactor.csv", row.names = FALSE)
+
+
 ## Subset the data to get remove columns not relevant to this analysis. This will speed things up.
 Tickets <- dplyr::select(Tickets, c(FTID, VESSEL_NUM, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, 
                              AFI_PRICE_PER_MTON, LANDED_WEIGHT_MTONS, AFI_EXVESSEL_REVENUE, 
