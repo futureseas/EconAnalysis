@@ -459,10 +459,21 @@ dataset <- dataset %>%
   merge(fuel.prices.state, by = c("LANDING_YEAR", "LANDING_MONTH", "AGENCY_CODE"), all.x = TRUE) %>% 
   mutate(diesel.price = ifelse(is.na(diesel.price), diesel.price.state, diesel.price))
 
-## Deflact prices
+## Deflect prices
 dataset$diesel.price.AFI <- dataset$diesel.price*dataset$defl
 rm(fuel.prices, fuel.prices.CA, fuel.prices.OR, fuel.prices.WA, fuel.prices.state)
 
+
+# ## Plot for prices
+# plot.fuel.prices <- dataset %>%
+#   group_by(AGENCY_CODE, LANDING_MONTH, LANDING_YEAR) %>% 
+#   summarize(price_fuel = mean(diesel.price.AFI, na.rm = TRUE)) %>%
+#   mutate(Date = zoo::as.yearmon(paste(LANDING_YEAR, LANDING_MONTH), "%Y %m")) %>%
+#   mutate(AGENCY_CODE = ifelse(AGENCY_CODE == 'C', 'California', ifelse(AGENCY_CODE == 'O', 'Oregon', 'Washington')))
+# ggplot2::ggplot(data = plot.fuel.prices, ggplot2::aes(x = Date, y = price_fuel)) + 
+#   ggplot2::geom_line() + 
+#   ggplot2::facet_wrap(~AGENCY_CODE) +
+#   ggplot2::labs(title="Price of marine diesel", x ="Date", y = "US$ per 600 gallon")
 
 
 

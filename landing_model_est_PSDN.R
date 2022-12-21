@@ -156,7 +156,7 @@ prior_lognormal <- c(
   prior(lognormal(0,1), class = b,     resp = PSDNPricez,      coef = Price.Fishmeal.AFI_z),
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = Length_z),
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = PSDN_Price_z),
-  prior(lognormal(1,1), class = b,     resp = logPSDNLandings, coef = diesel.price.AFI_z),
+  prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = diesel.price.AFI_z),
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60:NANC_SDM_20),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open),

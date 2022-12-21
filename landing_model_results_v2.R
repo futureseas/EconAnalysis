@@ -36,7 +36,9 @@ library('XML')
 theme_set(theme_sjplot())
 
 ##### Read landing models
-fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD_v3.RDS"))
+fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD_v6.RDS"))
+launch_shinystan(fit_qMSQD)
+
 fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN_v5.RDS"))
 fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC_v4.RDS"))
 
@@ -193,7 +195,7 @@ set.seed(123)
 ###############################################
 ### Analyze convergence ###
 
-# launch_shinystan(fit_qMSQD)
+launch_shinystan(fit_qMSQD)
 # launch_shinystan(fit_qPSDN)
 # launch_shinystan(fit_qNANC)
 
