@@ -81,8 +81,8 @@ dataset_msqd <- dataset %>%
 #### Convert variables to factor #### HERE I CHANGE THE ID
 dataset_msqd$port_cluster_ID    <- factor(dataset_msqd$cluster_port)
 dataset_msqd$port_ID            <- factor(dataset_msqd$PORT_AREA_CODE)
-dataset_msqd$month              <- factor(dataset_msqd$LANDING_MONTH)
-dataset_msqd$MSQD.Close         <- (1 - dataset_msqd$MSQD.Open)
+dataset_msqd$MSQD.Close         <- factor((1 - dataset_msqd$MSQD.Open))
+
 
 class(dataset_msqd$port_ID)
 class(dataset_msqd$port_cluster_ID)
@@ -153,12 +153,12 @@ rm(pDataset)
 # library('fastDummies')
 # dataset_msqd <- dummy_cols(dataset_msqd, select_columns = 'cluster')
 
-write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD_v8.csv", row.names = FALSE)
+write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD_close.csv", row.names = FALSE)
 
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(MSQD_Landings) ~
-  1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + diesel.price.AFI_z + MSQD.Close + month + Length_z +
- (1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + diesel.price.AFI_z + MSQD.Close + month | port_cluster_ID))
+  1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + diesel.price.AFI_z + MSQD.Close + Length_z +
+ (1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + diesel.price.AFI_z + MSQD.Close | port_cluster_ID))
 
 
 # Create priors
@@ -177,13 +177,13 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(66)
- fit_qMSQD_v8 <-
+ fit_qMSQD_close <-
    brm(data = dataset_msqd_landing,
        family = gaussian,
        price_model + landing_model + set_rescor(TRUE),
        prior = prior_lognormal,
        iter = 2000, warmup = 1000, chains = 4, cores = 4,
        control = list(max_treedepth = 15, adapt_delta = 0.99),
-       file = "Estimations/fit_qMSQD_v8")
+       file = "Estimations/fit_qMSQD_close")
 
-fit_qMSQD_v8 <- add_criterion(fit_qMSQD_v8, "loo", overwrite = TRUE)
+fit_qMSQD_close <- add_criterion(fit_qMSQD_close, "loo", overwrite = TRUE)
