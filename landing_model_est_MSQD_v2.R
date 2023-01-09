@@ -177,13 +177,13 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(66)
- fit_qMSQD_close <-
+ fit_qMSQD_close2 <-
    brm(data = dataset_msqd_landing,
        family = gaussian,
        price_model + landing_model + set_rescor(TRUE),
        prior = prior_lognormal,
-       iter = 2000, warmup = 1000, chains = 4, cores = 4,
+       iter = 4000, warmup = 1000, chains = 4, cores = 4,
        control = list(max_treedepth = 15, adapt_delta = 0.99),
-       file = "Estimations/fit_qMSQD_close")
+       file = "Estimations/fit_qMSQD_close2")
 
-fit_qMSQD_close <- add_criterion(fit_qMSQD_close, "loo", overwrite = TRUE)
+fit_qMSQD_close2 <- add_criterion(fit_qMSQD_close2, "loo", overwrite = TRUE)
