@@ -385,13 +385,13 @@ names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
     # compute intercluster distances and intracluster diameters
     library(clv)
     cls.scatt <- cls.scatt.data(RAW, as.integer(Clusters$clustering), dist="euclidean")
-  # Intercluster diameters
+  # Table S1. Intercluster diameters
     intradist <- rbind.data.frame(cls.scatt$intracls.complete, cls.scatt$intracls.average)
     colnames(intradist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
     rownames(intradist) = c("Complete distance", "Average distance")
     # gs4_create("Intradist", sheets = intradist)
     
-  # Intercluster distances
+  # Table S2. Intercluster distances
     interdist <- as.data.frame(cls.scatt$intercls.average)
     colnames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
     rownames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")

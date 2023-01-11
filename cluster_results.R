@@ -96,7 +96,7 @@ ggplot(nvessel.year, aes(x=LANDING_YEAR, y = n_vessel)) +
   
 
 #----------------------------------
-## Product use
+## Table S6. Product use
 all_product_use <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(PRODUCT_USE_CODE, DISPOSITION_CODE) %>% unique() %>% mutate(merge=1)
   all_product_use <- all_product_use[-c(11), ] 
@@ -154,7 +154,7 @@ rm(table, cluster.use, cluster.use.highest, hist.bait)
 
 
 # -----------------------------------------------------------------------------------------------
-## Catch composition over time (stack graph)
+## Table X. Catch composition over time (stack graph, for each cluster, need to select number of top species)
 mat = matrix(ncol = 0, nrow = 0)
 cluster.species.all <- as.data.frame(mat)
 
@@ -189,7 +189,6 @@ for(i in 2005:2020)  {
   }
 }
 
-
 #-------------------------
 ## Plot 
 cluster = 1
@@ -218,11 +217,8 @@ ggplot(df3, aes(x=LANDING_YEAR, y=Percentage, fill = PACFIN_SPECIES_COMMON_NAME)
   xlab("Year") 
 
 
-
-
-
 # -----------------------------------------------------------------------------------------------
-## Catch composition (all species)
+## Table 5 (expanded). Catch composition (all species)
 all_species <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique() %>% mutate(merge=1)
 all_species_POST <- PacFIN.month  %>%   
@@ -243,7 +239,6 @@ rm(all_species, all_vessels)
 rm(all_species_POST, all_vessels_POST)
 
 expand_ALL <- merge(expand, expand_POST, by = c('VESSEL_NUM', 'PACFIN_SPECIES_CODE'), all.x = TRUE, all.y = TRUE)
-
 
 options(scipen=999)
 cluster.species <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
@@ -273,7 +268,6 @@ colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", 
 # gs4_create("Table2_all_species", sheets = table)
 
 rm(table, cluster.species, cluster.species.highest)
-
 
 ### After ###
 options(scipen=999)
@@ -308,7 +302,7 @@ rm(table, cluster.species_POST, cluster.species.highest_POST)
 
 
 # -----------------------------------------------------------------------------------------------
-## Catch composition 
+## Table 5 and Table S4. Catch composition 
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
@@ -406,7 +400,7 @@ rm(table, cluster.species_POST, cluster.species.highest_POST)
 
 
 #-----------------------------------
-## Gear
+## Table S5: Gear
 all_gear <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(PACFIN_GEAR_CODE) %>% unique() %>% mutate(merge=1)
 all_gear_POST <- PacFIN.month  %>%   
@@ -502,7 +496,7 @@ rm(table, cluster.gear_POST)
 
 
 #-----------------------------------
-## Port area
+## Table S3. Port area
 
 all_ports <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
   filter(LANDING_YEAR <= 2014) %>% dplyr::select(PORT_AREA_CODE) %>% unique() %>% mutate(merge=1)
@@ -547,7 +541,7 @@ rm(table, cluster.port, cluster.port.highest)
 
 
 #-----------------------------------
-## Port area (percentage of revenue that come from each cluster in a port area)
+## Table X. Port area (percentage of revenue that come from each cluster in a port area) -- FOR ATLANTIS
 
 options(scipen=999)
 cluster.port <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
