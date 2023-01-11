@@ -310,7 +310,7 @@ RAW_Scaled<-as.data.frame(RAW %>% scale())
 Distance_matrix<-dist(RAW_Scaled, method='euclidean')
 
 #--------------------------------------------------------
-##Determine the Optimal Number of Clusters 
+## Figure 5. Determine the Optimal Number of Clusters 
 
 ## (A) Using NbClust (the Method O'Farrell et al. 2019 use);
 ## If you don't like the value it spits out, another defensible means
@@ -322,6 +322,7 @@ Distance_matrix<-dist(RAW_Scaled, method='euclidean')
 #            # length(unique(dbclust$Best.partition))
 
 ## (B) Using PAM and the "Average Silhouette Method"
+
 Ks=sapply(2:25,
           function(i)
             summary(silhouette(pam((Distance_matrix), k=i)))$avg.width)
@@ -332,19 +333,18 @@ Ks=sapply(2:25,
 #--------------------------------------------------------
 # ### Heriarchical Clustering
 # 
-##Visualize what the dendrogram looks like with this number of clusters
+## Visualize what the dendrogram looks like with this number of clusters
 hc <- hclust(Distance_matrix, method="ward.D")
 fviz_dend(hc, cex = 0.5, k = n.clust, color_labels_by_k = TRUE)
 sub_grp <- cutree(hc, n.clust)
 # 
-# ###See how many vessels are in each group
+## See how many vessels are in each group
 # table(sub_grp)
 # Hierarchical_Vessel_Groups <- Vessels %>% mutate(cluster=sub_grp)
 # names(Hierarchical_Vessel_Groups)<-c("VESSEL_NUM", "group")
 # 
 # names(Hierarchical_Vessel_Groups)[names(Hierarchical_Vessel_Groups) == "group"] <- "group_all"
 # write.csv(Hierarchical_Vessel_Groups, "Hierarchical_Vessel_Groups.csv", row.names = FALSE)
-# 
 # 
 # rm(hc, sub_grp)
 
@@ -353,6 +353,8 @@ sub_grp <- cutree(hc, n.clust)
 ### PAM Clustering
 Clusters<-pam(Distance_matrix, n.clust, keep.diss = TRUE)
     Clusters$data <- RAW
+    
+    ### Figure 8. Principal component analysis
     p <- fviz_cluster(Clusters, geom = "point",
                       main = "") + 
       scale_fill_brewer('Cluster', palette='Set2')  + 
@@ -360,8 +362,6 @@ Clusters<-pam(Distance_matrix, n.clust, keep.diss = TRUE)
       scale_shape_manual('Cluster', values=c(1,2,3,4,5,6,7,8)) 
     p        
                  
-
-    
 ## Obtain cluster outputs 
 PAM_Vessel_Groups<-Vessels
 PAM_Vessel_Groups$group<-Clusters$clustering
@@ -369,7 +369,7 @@ names(PAM_Vessel_Groups)[1]<-"VESSEL_NUM"
 aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
 
 names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
-    write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv", row.names = FALSE)
+    # write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv", row.names = FALSE)
 
 # ## Check cluster validity
 
@@ -382,21 +382,20 @@ names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
     #   use_oob = gargle::gargle_oob_default(),
     #   token = NULL)
 
-  
-  # compute intercluster distances and intracluster diameters
+    # compute intercluster distances and intracluster diameters
     library(clv)
     cls.scatt <- cls.scatt.data(RAW, as.integer(Clusters$clustering), dist="euclidean")
   # Intercluster diameters
     intradist <- rbind.data.frame(cls.scatt$intracls.complete, cls.scatt$intracls.average)
     colnames(intradist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
     rownames(intradist) = c("Complete distance", "Average distance")
-    gs4_create("Intradist", sheets = intradist)
+    # gs4_create("Intradist", sheets = intradist)
     
   # Intercluster distances
     interdist <- as.data.frame(cls.scatt$intercls.average)
     colnames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
     rownames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
-    gs4_create("Interdist", sheets = interdist)
+    # gs4_create("Interdist", sheets = interdist)
     
 ## Save RAW for analysis with cluster ID
 RAW$VESSEL_NUM<-Vessel_IDs
@@ -404,6 +403,7 @@ RAW <- merge(RAW, PAM_Vessel_Groups, by="VESSEL_NUM")
 write.csv(RAW, "RAW_cluster_inputs.csv", row.names = FALSE)
 
 rm(Ks, Clusters, Vessels, Distance_matrix)
+
 ##############################
 ### Descriptive statistics ###
 ##############################
@@ -411,7 +411,7 @@ rm(Ks, Clusters, Vessels, Distance_matrix)
 #----------------------------------------------
 ###Step 6: Visualize relative contribution of different cluster inputs
 
-### Random forrest to see importance of each data
+### Figure 6. Random forrest to see importance of each data
 library(randomForest)
 set.seed(17)
 RAW_rf <- RAW[c(-1)]
@@ -463,7 +463,6 @@ Group_Stats_Wide<-rbind(Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Perce
 Group_Stats_Wide$memb<-as.factor(Group_Stats_Wide$memb)
 rm(Group_Avg_Revenue, Group_LAT, Group_Inertia, Group_Percentage_FF, Group_FF_Diversity)
 
-
 Group_Stats_Wide <- Group_Stats_Wide %>%
   mutate(time.period = period) 
 saveRDS(Group_Stats_Wide, file = "stats_input.RDS")  
@@ -489,20 +488,19 @@ RAW_archetype <- RAW_archetype %>%
   slice_min(sum_z, n = 2) %>% 
   dplyr::select('VESSEL_NUM', 'AVG_REVENUE', 'LAT', 'DISTANCE_A', 'Percentage', 'diversity') 
 
-library("googlesheets4")
-gs4_auth(
-  email = "fequezad@ucsc.edu",
-  path = NULL,
-  scopes = "https://www.googleapis.com/auth/spreadsheets",
-  cache = gargle::gargle_oauth_cache(),
-  use_oob = gargle::gargle_oob_default(),
-  token = NULL
-)
-
+# library("googlesheets4")
+# gs4_auth(
+#   email = "fequezad@ucsc.edu",
+#   path = NULL,
+#   scopes = "https://www.googleapis.com/auth/spreadsheets",
+#   cache = gargle::gargle_oauth_cache(),
+#   use_oob = gargle::gargle_oob_default(),
+#   token = NULL
+# )
 # gs4_create("vessel_archetype_by_cluster", sheets = RAW_archetype)
 rm(Group_Stats_Wide, Group_Stats, FTID)
 
-# plot
+### Figure 7. Inputs contribution to each cluster
 library(viridis)
 Group_Stats_Wide <- readRDS(here::here("Clustering", "stats_input.RDS"))
   ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
