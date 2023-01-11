@@ -1,3 +1,4 @@
+
 ###########################
 ### SQUID Landing model ###
 ###########################
@@ -91,7 +92,7 @@ class(dataset_msqd$PSDN.Total.Closure)
 
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) %>%
-  # dplyr::filter(MSQD.Open == 1) %>%
+  dplyr::filter(MSQD.Open == 1) %>%
   mutate(n_total = n()) %>%
   group_by(cluster_port) %>% 
   mutate(obs = n(), perc = n()/n_total) %>% 
@@ -123,6 +124,9 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
 # rm(desc_data, table)
 
 
+### Correlation 
+
+
 #-------------------------------------------------------------------
 ## Check stationarity in the panel dataset
 library("plm")
@@ -145,6 +149,10 @@ purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
+round(cor(dataset_msqd_landing$Price.Fishmeal.AFI, dataset_msqd_landing$diesel.price.AFI_z), 2)
+
+cors4 <- plyr::ddply(dataset_msqd_landing, c("PORT_AREA_CODE"), summarise, cor = round(cor(Price.Fishmeal.AFI, diesel.price.AFI_z), 2))
+
 
 ## -------------------------------------------------------------------
 ### Market squid landing model ###
@@ -182,8 +190,10 @@ set.seed(66)
        family = gaussian,
        price_model + landing_model + set_rescor(TRUE),
        prior = prior_lognormal,
-       iter = 4000, warmup = 1000, chains = 4, cores = 4,
+       iter = 3000, warmup = 1000, chains = 4, cores = 4,
        control = list(max_treedepth = 15, adapt_delta = 0.99),
        file = "Estimations/fit_qMSQD_close2")
 
 fit_qMSQD_close2 <- add_criterion(fit_qMSQD_close2, "loo", overwrite = TRUE)
+
+
