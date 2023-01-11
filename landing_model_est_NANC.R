@@ -50,6 +50,7 @@ dataset_nanc <- dataset %>%
                 PSDN.Open, MSQD.Open,
                 Price.Fishmeal, Price.Fishmeal_z, 
                 Price.Fishmeal.AFI, Price.Fishmeal.AFI_z,
+                diesel.price.AFI_z,
                 Length, Length_z) %>% 
   dplyr::mutate(NANC_Landings = coalesce(NANC_Landings, 0)) %>%
   mutate(NANC_Landings = ifelse(NANC_Landings<= 0, 0, NANC_Landings)) %>%
@@ -126,6 +127,12 @@ purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
+
+round(cor(dataset_nanc_landing$Price.Fishmeal.AFI, dataset_nanc_landing$diesel.price.AFI_z), 2)
+
+cors4 <- plyr::ddply(dataset_nanc_landing, c("PORT_AREA_CODE"), summarise, cor = round(cor(Price.Fishmeal.AFI, diesel.price.AFI_z), 2))
+
+
 
 ## -------------------------------------------------------------------
 ### Market squid landing model ###

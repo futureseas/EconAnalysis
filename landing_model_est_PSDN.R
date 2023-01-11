@@ -135,6 +135,8 @@ purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
+round(cor(dataset_psdn_landing$Price.Fishmeal.AFI, dataset_psdn_landing$diesel.price.AFI_z), 2)
+cors4 <- plyr::ddply(dataset_psdn_landing, c("PORT_AREA_CODE"), summarise, cor = round(cor(Price.Fishmeal.AFI, diesel.price.AFI_z), 2))
 
 
 ## -------------------------------------------------------------------
