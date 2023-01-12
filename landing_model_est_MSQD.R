@@ -48,7 +48,6 @@ dataset_msqd <- dataset %>%
   dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, 
                 LANDING_YEAR, LANDING_MONTH,
                 MSQD_SPAWN_SDM_90, MSQD_SDM_90, MSQD_Landings, MSQD_Price, 
-                # PSDN_Landings, NANC_Landings, 
                 PSDN_Price, NANC_Price, 
                 PSDN_SDM_60, NANC_SDM_20,
                 MSQD_Price_z, PSDN_Price_z, MSQD_SPAWN_SDM_90_z, MSQD_SDM_90_z, 
@@ -58,15 +57,8 @@ dataset_msqd <- dataset %>%
                 diesel.price, diesel.price.AFI, diesel.price_z, diesel.price.AFI_z,
                 Length, Length_z, avg_set_MSQD, avg_set_MSQD_z) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>%
-  # dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>%
-  # dplyr::mutate(NANC_Landings = coalesce(NANC_Landings, 0)) %>%
   mutate(MSQD_Landings = ifelse(MSQD_Landings<= 0, 0, MSQD_Landings)) %>%
   mutate(MSQD_Landings = ifelse(MSQD_Landings< 0.0001, 0, MSQD_Landings)) %>%
-  # mutate(PSDN_Landings = ifelse(PSDN_Landings<= 0, 0, MSQD_Landings)) %>%
-  # mutate(PSDN_Landings = ifelse(PSDN_Landings< 0.0001, 0, MSQD_Landings)) %>%
-  # mutate(NANC_Landings = ifelse(NANC_Landings<= 0, 0, MSQD_Landings)) %>%
-  # mutate(NANC_Landings = ifelse(NANC_Landings< 0.0001, 0, MSQD_Landings)) %>%
-  # dplyr::mutate(PSDN.Participation = ifelse(PSDN_Landings > 0, 1, 0)) %>% 
   dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::mutate(ln_MSQD_Landings = log(MSQD_Landings)) %>%
@@ -81,8 +73,6 @@ dataset_msqd <- dataset %>%
 #### Convert variables to factor #### HERE I CHANGE THE ID
 dataset_msqd$port_cluster_ID    <- factor(dataset_msqd$cluster_port)
 dataset_msqd$port_ID            <- factor(dataset_msqd$PORT_AREA_CODE)
-dataset_msqd$MSQD.Close         <- factor((1 - dataset_msqd$MSQD.Open))
-
 
 class(dataset_msqd$port_ID)
 class(dataset_msqd$port_cluster_ID)
@@ -123,7 +113,8 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
 # rm(desc_data, table)
 
 
-### Correlation 
+### Correlation between diesel price and fishmeal price
+plyr::ddply(dataset_msqd_landing, c("PORT_AREA_CODE"), summarise, cor = round(cor(Price.Fishmeal.AFI, diesel.price.AFI_z), 2))
 
 
 #-------------------------------------------------------------------
@@ -150,7 +141,6 @@ purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 rm(pDataset)
 round(cor(dataset_msqd_landing$Price.Fishmeal.AFI, dataset_msqd_landing$diesel.price.AFI_z), 2)
 
-cors4 <- plyr::ddply(dataset_msqd_landing, c("PORT_AREA_CODE"), summarise, cor = round(cor(Price.Fishmeal.AFI, diesel.price.AFI_z), 2))
 
 
 ## -------------------------------------------------------------------
