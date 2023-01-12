@@ -38,7 +38,7 @@ theme_set(theme_sjplot())
 ##### Read landing models
 fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
 fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
-fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC2.RDS"))
+fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
 
 #### Read database 
 dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv")
@@ -1020,19 +1020,19 @@ gg_int_2
 
 # set.seed(123)
 # prediction_MSQD <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
-# saveRDS(prediction_MSQD, file = "prediction_MSQD_v3.rds")
-# 
+# saveRDS(prediction_MSQD, file = "prediction_MSQD.rds")
+#
 # set.seed(123)
 # prediction_NANC <- cbind(predict(fit_qNANC), dataset_nanc_landing)
-# saveRDS(prediction_NANC, file = "prediction_NANC_v4.rds")
-# 
+# saveRDS(prediction_NANC, file = "prediction_NANC.rds")
+#
 # set.seed(123)
 # prediction_PSDN <- cbind(predict(fit_qPSDN), dataset_psdn_landing)
-# saveRDS(prediction_PSDN, file = "prediction_PSDN_v4.rds")
+# saveRDS(prediction_PSDN, file = "prediction_PSDN.rds")
 
-prediction_MSQD <- readRDS(file = "prediction_MSQD_v3.rds")
-prediction_NANC <- readRDS(file = "prediction_NANC_v4.rds")
-prediction_PSDN <- readRDS(file = "prediction_PSDN_v4.rds")
+prediction_MSQD <- readRDS(file = "prediction_MSQD.rds")
+prediction_NANC <- readRDS(file = "prediction_NANC.rds")
+prediction_PSDN <- readRDS(file = "prediction_PSDN.rds")
 
 
 
@@ -1393,7 +1393,8 @@ gg_psdn <- ggplot(df_cluster_PSDN) +
 
 
 ##################################################################
-
+### Other code 
+  
 ### Predict if sardine would have been open
 # prediction_mod <- cbind(predict(fit_qMSQD_Spawning, newdata = data.frame(MSQD_Landings = dataset_msqd$MSQD_Landings,
 #                                            MSQD_SPAWN_SDM_90 = dataset_msqd$MSQD_SPAWN_SDM_90,
