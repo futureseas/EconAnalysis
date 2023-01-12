@@ -45,6 +45,18 @@ dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimatio
 dataset_nanc_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv")
 dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_PSDN.csv")
 
+
+fit_qMSQD[["prior"]][["coef"]]
+fit_qMSQD[["prior"]][["prior"]]
+
+fit_qPSDN[["prior"]][["coef"]]
+fit_qPSDN[["prior"]][["prior"]]
+
+### Add prior to PSDN.Closure in NANC estimation?
+fit_qNANC[["prior"]][["coef"]]
+fit_qNANC[["prior"]][["prior"]]
+
+
 # summary(fit_qMSQD)
 # summary(fit_qPSDN)
 # summary(fit_qNANC)
@@ -95,7 +107,6 @@ hist(rsq_bayes$sigma_logPSDNLandings)
 print(c(median(rsq_bayes$sigma_logPSDNLandings), mean(rsq_bayes$sigma_logPSDNLandings),
         sd(rsq_bayes$sigma_logPSDNLandings)))
 
-
 cluster_groups <- fit_qPSDN$data %>% dplyr::select("port_cluster_ID") %>% unique()
 list = as.list(cluster_groups$port_cluster_ID)
 
@@ -111,7 +122,6 @@ for (p in list) {
     MSQD.Open = fitdata$MSQD.Open,
     NANC_SDM_20 = fitdata$NANC_SDM_20,
     WA.Restriction = fitdata$WA.Restriction,
-    diesel.price.AFI_z = fitdata$diesel.price.AFI_z,
     Length_z = fitdata$Length_z)
   fit_qPSDN_subset <- extract_draws(fit_qPSDN, newdata = newdf, allow_new_levels = T)
   y_pred <- brms::posterior_linpred(fit_qPSDN, newdata = newdf, allow_new_levels = T, resp = 'logPSDNLandings')
@@ -121,8 +131,6 @@ for (p in list) {
   print(median(rsq_bayes$V1))
   print(p)
 }
-
-
 
 y_pred <- brms::posterior_linpred(fit_qNANC, resp = 'logNANCLandings') 
 var_fit <- apply(y_pred, 1, var)
@@ -160,14 +168,11 @@ for (p in list) {
 }
 
 
-
-
 ############################
 # Calculate estimation error
 
 # Calculate average error
-
-set.seed(123)
+# set.seed(123)
 # predict1 <- as.data.frame(predict(fit_qMSQD))
 # prediction1 <- cbind(predict1, dataset_msqd_landing)
 # sqrt(sum((prediction1$Estimate.logMSQDLandings - prediction1$ln_MSQD_Landings)^2)/(nrow(prediction1)-2))
