@@ -28,7 +28,7 @@ nrow(as.data.frame(unique(Tickets$VESSEL_NUM)))
 ## Include price per kilogram
 Tickets$AFI_PRICE_PER_MTON <- Tickets$AFI_PRICE_PER_POUND * 2.20462 * 1000
 
-## Create Deflactor 
+## Create Deflactor (which is used in PacFIN: Inflation)
 Tickets$Deflactor <- Tickets$AFI_PRICE_PER_POUND / Tickets$PRICE_PER_POUND
 Deflactor1 <- cbind.data.frame(Tickets$LANDING_YEAR, Tickets$LANDING_MONTH, (Tickets$AFI_PRICE_PER_POUND / Tickets$PRICE_PER_POUND))
 colnames(Deflactor1) <- c('LANDING_YEAR','LANDING_MONTH', 'DEFLACTOR')
