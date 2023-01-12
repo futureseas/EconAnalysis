@@ -177,9 +177,6 @@ Landing_port_DCRB <- read.csv(file = "C:\\GitHub\\EconAnalysis\\Data\\Port landi
                           by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
   
 
-
-
-
 rm(PacFIN.month, 
    ports_area_codes, 
    Ports.landing.FF, 

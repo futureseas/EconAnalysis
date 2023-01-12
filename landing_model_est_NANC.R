@@ -85,6 +85,7 @@ dataset_nanc_landing <- dataset_nanc %>%
 dataset_nanc_landing %>% select('cluster_port', 'obs', 'perc') %>% unique()
 dataset_nanc_landing %>% group_by(PORT_AREA_CODE) %>%
   summarize(n_obs = n()) %>% mutate(per = scales::percent(n_obs / sum(n_obs)))
+nrow(dataset_nanc_landing)
 
 # ### Descriptive statistics 
 desc_data <- dataset_nanc_landing %>%
@@ -101,8 +102,14 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
   mutate(vars = ifelse(vars == 7, "Fishmeal price", vars))
 
-gs4_create("SummaryMonthly_Q_NANC_v4", sheets = table)
-rm(desc_data, table)
+# gs4_create("SummaryMonthly_Q_NANC_v4", sheets = table)
+# rm(desc_data, table)
+
+
+### Correlation between diesel price and fishmeal price
+round(cor(dataset_nanc_landing$Price.Fishmeal.AFI, dataset_nanc_landing$diesel.price.AFI_z), 2)
+cors4 <- plyr::ddply(dataset_nanc_landing, c("PORT_AREA_CODE"), summarise, cor = round(cor(Price.Fishmeal.AFI, diesel.price.AFI_z), 2))
+
 
 
 #-------------------------------------------------------------------
@@ -124,19 +131,16 @@ purtest(pDataset$NANC_Price, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
-purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
+# purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
 
-round(cor(dataset_nanc_landing$Price.Fishmeal.AFI, dataset_nanc_landing$diesel.price.AFI_z), 2)
-
-cors4 <- plyr::ddply(dataset_nanc_landing, c("PORT_AREA_CODE"), summarise, cor = round(cor(Price.Fishmeal.AFI, diesel.price.AFI_z), 2))
 
 
 
 ## -------------------------------------------------------------------
 ### Market squid landing model ###
-write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC_v4.csv", row.names = FALSE)
+write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv", row.names = FALSE)
 price_model <- bf(NANC_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 
 
@@ -165,53 +169,13 @@ prior_lognormal <- c(
 
 ## Estimate model
 set.seed(66)
-fit_qNANC_v4 <-
+fit_qNANC <-
   brm(data = dataset_nanc_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qNANC_v4")
+      file = "Estimations/fit_qNANC")
 
-fit_qNANC_v4 <- add_criterion(fit_qNANC_v4, "loo", overwrite = TRUE)
-
-
-
-# ##### Read landing models
-# fit_qNANC_MODEL1 <- readRDS(here::here("Estimations", "fit_qNANC_MODEL1.RDS"))
-# fit_qNANC_MODEL2 <- readRDS(here::here("Estimations", "fit_qNANC_MODEL2.RDS"))
-# fit_qNANC_MODEL3 <- readRDS(here::here("Estimations", "fit_qNANC_MODEL3.RDS"))
-# fit_qNANC_MODEL4 <- readRDS(here::here("Estimations", "fit_qNANC_MODEL4.RDS"))
-# 
-# 
-# loo_compare(
-#   fit_qNANC_MODEL1, #2nd
-#   fit_qNANC_MODEL2, #4th
-#   fit_qNANC_MODEL3, #1st
-#   fit_qNANC_MODEL4  #3th
-# )
-# 
-# summary(fit_qNANC_MODEL1) ## 0 divergent transitions
-# summary(fit_qNANC_MODEL2) ## 4 divergent transitions
-# summary(fit_qNANC_MODEL3) ## 13 divergent transitions
-# summary(fit_qNANC_MODEL4) ## 12 divergent transitions
-# 
-# 
-# predict1 <- as.data.frame(predict(fit_qNANC_MODEL1))
-# predict2 <- as.data.frame(predict(fit_qNANC_MODEL2))
-# predict3 <- as.data.frame(predict(fit_qNANC_MODEL3))
-# predict4 <- as.data.frame(predict(fit_qNANC_MODEL4))
-# 
-# dataset_nanc_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv")
-# 
-# prediction1 <- cbind(predict1, dataset_nanc_landing)
-# prediction2 <- cbind(predict2, dataset_nanc_landing)
-# prediction3 <- cbind(predict3, dataset_nanc_landing)
-# prediction4 <- cbind(predict4, dataset_nanc_landing)
-# 
-# sqrt(sum((prediction1$Estimate.logNANCLandings - prediction1$ln_NANC_Landings)^2)/(nrow(prediction1)-2)) ## 1.30
-# sqrt(sum((prediction2$Estimate.logNANCLandings - prediction2$ln_NANC_Landings)^2)/(nrow(prediction2)-2)) ## 1.34
-# sqrt(sum((prediction3$Estimate                 - prediction3$ln_NANC_Landings)^2)/(nrow(prediction3)-2)) ## 1.46
-# sqrt(sum((prediction4$Estimate.logNANCLandings - prediction4$ln_NANC_Landings)^2)/(nrow(prediction4)-2)) ## 1.29
-# 
+fit_qNANC <- add_criterion(fit_qNANC, "loo", overwrite = TRUE)
