@@ -360,7 +360,31 @@ Clusters<-pam(Distance_matrix, n.clust, keep.diss = TRUE)
       scale_fill_brewer('Cluster', palette='Set2')  + 
       scale_color_brewer('Cluster', palette='Set2') + 
       scale_shape_manual('Cluster', values=c(1,2,3,4,5,6,7,8)) 
-    p        
+    
+    p[["plot_env"]][["p"]][["layers"]][[1]][["data"]][["cluster"]] <- factor(p[["plot_env"]][["p"]][["layers"]][[1]][["data"]][["cluster"]],
+                                                        levels = c(1,2,3,4,5,6,7,8),
+                                                        labels = c(
+                                                          "Southern CCS small-scale squid-specialists",
+                                                          "Southern CCS small-scale CPS-opportunists",
+                                                          "PNW sardine opportunists",
+                                                          "Southern CCS industrial squid-specialists",
+                                                          "Roving industrial sardine-squid generalists",
+                                                          "PNW sardine specialists",
+                                                          "Southern CCS forage fish diverse",
+                                                          "PNW albacore-crab generalists"))
+    
+    p[["plot_env"]][["p"]][["layers"]][[2]][["data"]][["cluster"]] <- factor( p[["plot_env"]][["p"]][["layers"]][[2]][["data"]][["cluster"]],
+                                                        levels = c(1,2,3,4,5,6,7,8),
+                                                        labels = c(
+                                                          "Southern CCS small-scale squid-specialists",
+                                                          "Southern CCS small-scale CPS-opportunists",
+                                                          "PNW sardine opportunists",
+                                                          "Southern CCS industrial squid-specialists",
+                                                          "Roving industrial sardine-squid generalists",
+                                                          "PNW sardine specialists",
+                                                          "Southern CCS forage fish diverse",
+                                                          "PNW albacore-crab generalists"))
+    p 
                  
 ## Obtain cluster outputs 
 PAM_Vessel_Groups<-Vessels
@@ -371,31 +395,36 @@ aggregate(VESSEL_NUM~group, FUN=length, data=PAM_Vessel_Groups )
 names(PAM_Vessel_Groups)[names(PAM_Vessel_Groups) == "group"] <- "group_all"
     # write.csv(PAM_Vessel_Groups, "PAM_Vessel_Groups.csv", row.names = FALSE)
 
-# ## Check cluster validity
+# ## Table S1 and Table S2. Check cluster validity
 
-    # library("googlesheets4")
-    # gs4_auth(
-    #   email = gs4_auth(),
-    #   path = NULL,
-    #   scopes = "https://www.googleapis.com/auth/spreadsheets",
-    #   cache = gargle::gargle_oauth_cache(),
-    #   use_oob = gargle::gargle_oob_default(),
-    #   token = NULL)
+library("googlesheets4")
+  gs4_auth(
+    email = "fequezad@ucsc.edu",
+    path = NULL,
+    scopes = "https://www.googleapis.com/auth/spreadsheets",
+    cache = gargle::gargle_oauth_cache(),
+    use_oob = gargle::gargle_oob_default(),
+    token = NULL)
 
-    # compute intercluster distances and intracluster diameters
+
+    # Compute intercluster distances and intracluster diameters
     library(clv)
-    cls.scatt <- cls.scatt.data(RAW, as.integer(Clusters$clustering), dist="euclidean")
-  # Table S1. Intercluster diameters
+    RAW_Scaled$VESSEL_NUM<-Vessel_IDs
+    RAW_Scaled<-merge(RAW_Scaled, PAM_Vessel_Groups, by="VESSEL_NUM")
+    RAW_Scaled<-RAW_Scaled[c(-1)]
+    cls.scatt <- cls.scatt.data(RAW_Scaled, as.integer(RAW_Scaled$group_all), dist="euclidean")
+
+    # Table S1. Intercluster diameters
     intradist <- rbind.data.frame(cls.scatt$intracls.complete, cls.scatt$intracls.average)
     colnames(intradist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
     rownames(intradist) = c("Complete distance", "Average distance")
-    # gs4_create("Intradist", sheets = intradist)
+    gs4_create("Intradist", sheets = intradist)
     
-  # Table S2. Intercluster distances
+    # Table S2. Intercluster distances
     interdist <- as.data.frame(cls.scatt$intercls.average)
     colnames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
     rownames(interdist) = c("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8")
-    # gs4_create("Interdist", sheets = interdist)
+    gs4_create("Interdist", sheets = interdist)
     
 ## Save RAW for analysis with cluster ID
 RAW$VESSEL_NUM<-Vessel_IDs
@@ -435,9 +464,6 @@ rm(RAW_rf, RAW.rf)
 
 
 ### Create database to plot inputs average by cluster ###
-RAW_Scaled$VESSEL_NUM<-Vessel_IDs
-RAW_Scaled<-merge(RAW_Scaled, PAM_Vessel_Groups, by="VESSEL_NUM")
-RAW_Scaled<-RAW_Scaled[c(-1)]
 Group_Stats<-RAW_Scaled%>% group_by(group_all) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
 
 Group_Avg_Revenue<-Group_Stats[c(1,2,7)]
