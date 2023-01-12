@@ -169,13 +169,13 @@ prior_lognormal <- c(
 
 ## Estimate model
 set.seed(66)
-fit_qNANC2 <-
+fit_qNANC <-
   brm(data = dataset_nanc_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qNANC2")
+      file = "Estimations/fit_qNANC")
 
-fit_qNANC2 <- add_criterion(fit_qNANC2, "loo", overwrite = TRUE)
+fit_qNANC <- add_criterion(fit_qNANC, "loo", overwrite = TRUE)
