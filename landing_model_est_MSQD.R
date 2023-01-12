@@ -114,6 +114,7 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
 
 
 ### Correlation between diesel price and fishmeal price
+round(cor(dataset_msqd_landing$Price.Fishmeal.AFI, dataset_msqd_landing$diesel.price.AFI_z), 2)
 plyr::ddply(dataset_msqd_landing, c("PORT_AREA_CODE"), summarise, cor = round(cor(Price.Fishmeal.AFI, diesel.price.AFI_z), 2))
 
 
@@ -136,19 +137,14 @@ purtest(pDataset$MSQD_Price, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
-purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
+# purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
-round(cor(dataset_msqd_landing$Price.Fishmeal.AFI, dataset_msqd_landing$diesel.price.AFI_z), 2)
 
 
 
 ## -------------------------------------------------------------------
 ### Market squid landing model ###
-
-## install.packages(c("fastDummies", "recipes"))
-# library('fastDummies')
-# dataset_msqd <- dummy_cols(dataset_msqd, select_columns = 'cluster')
 
 write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD_close.csv", row.names = FALSE)
 
