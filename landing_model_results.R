@@ -255,7 +255,7 @@ dataset_select <- dataset_msqd_landing %>%
                 Length_z,
                 MSQD_Price_z,
                 Price.Fishmeal.AFI_z,
-                wages.AFI_z)
+                diesel.price.AFI_z)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
@@ -266,7 +266,7 @@ dataset_select <- dataset_psdn_landing %>%
                 Length_z,
                 PSDN_Price_z,
                 Price.Fishmeal.AFI_z,
-                wages.AFI_z)
+                diesel.price.AFI_z)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
@@ -277,7 +277,7 @@ dataset_select <- dataset_nanc_landing %>%
                 Length_z,
                 NANC_Price_z,
                 Price.Fishmeal.AFI_z,
-                wages.AFI_z)
+                diesel.price.AFI_z)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
