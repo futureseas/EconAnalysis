@@ -113,7 +113,7 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
 # rm(desc_data, table)
 
 
-### Correlation between diesel price and fishmeal price
+### Correlation between diesel price and fish meal price
 round(cor(dataset_msqd_landing$Price.Fishmeal.AFI, dataset_msqd_landing$diesel.price.AFI_z), 2)
 plyr::ddply(dataset_msqd_landing, c("PORT_AREA_CODE"), summarise, cor = round(cor(Price.Fishmeal.AFI, diesel.price.AFI_z), 2))
 

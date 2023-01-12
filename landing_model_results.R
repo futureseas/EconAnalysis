@@ -247,35 +247,39 @@ dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimatio
 
 # ######## Check correlation ###########
 # # No correlation larger than 0.5
-# dataset_select <- dataset_msqd_landing %>%
-#   dplyr::select(MSQD_SPAWN_SDM_90,
-#                 PSDN_SDM_60,
-#                 NANC_SDM_20,
-#                 Length_z,
-#                 MSQD_Price_z,
-#                 Price.Fishmeal.AFI_z)
-# res <- as.data.frame(cor(dataset_select))
-# round(res, 2)
-# 
-# dataset_select <- dataset_psdn_landing %>%
-#   dplyr::select(MSQD_SPAWN_SDM_90,
-#                 PSDN_SDM_60,
-#                 NANC_SDM_20,
-#                 Length_z,
-#                 PSDN_Price_z,
-#                 Price.Fishmeal.AFI_z)
-# res <- as.data.frame(cor(dataset_select))
-# round(res, 2)
-# 
-# dataset_select <- dataset_nanc_landing %>%
-#   dplyr::select(MSQD_SPAWN_SDM_90,
-#                 PSDN_SDM_60,
-#                 NANC_SDM_20,
-#                 Length_z,
-#                 NANC_Price_z,
-#                 Price.Fishmeal.AFI_z)
-# res <- as.data.frame(cor(dataset_select))
-# round(res, 2)
+
+dataset_select <- dataset_msqd_landing %>%
+  dplyr::select(MSQD_SPAWN_SDM_90,
+                PSDN_SDM_60,
+                NANC_SDM_20,
+                Length_z,
+                MSQD_Price_z,
+                Price.Fishmeal.AFI_z,
+                wages.AFI_z)
+res <- as.data.frame(cor(dataset_select))
+round(res, 2)
+
+dataset_select <- dataset_psdn_landing %>%
+  dplyr::select(MSQD_SPAWN_SDM_90,
+                PSDN_SDM_60,
+                NANC_SDM_20,
+                Length_z,
+                PSDN_Price_z,
+                Price.Fishmeal.AFI_z,
+                wages.AFI_z)
+res <- as.data.frame(cor(dataset_select))
+round(res, 2)
+
+dataset_select <- dataset_nanc_landing %>%
+  dplyr::select(MSQD_SPAWN_SDM_90,
+                PSDN_SDM_60,
+                NANC_SDM_20,
+                Length_z,
+                NANC_Price_z,
+                Price.Fishmeal.AFI_z,
+                wages.AFI_z)
+res <- as.data.frame(cor(dataset_select))
+round(res, 2)
 
 
 

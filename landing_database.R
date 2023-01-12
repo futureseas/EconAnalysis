@@ -476,6 +476,31 @@ rm(fuel.prices, fuel.prices.CA, fuel.prices.OR, fuel.prices.WA, fuel.prices.stat
 #   ggplot2::labs(title="Price of marine diesel", x ="Date", y = "US$ per 600 gallon")
 
 
+#---------------------------------------------------------------------------------------
+### Include wages
+wages <- readxl::read_excel(here::here("Data", "Wages", "wageall.xls"), sheet = "wageall")
+
+wages_fishing <- wages %>%
+  dplyr::select(c('year', 'state', 'sic', 'naics','aearn_q1',	'aearn_q2',	'aearn_q3', 'aearn_q4')) %>%
+  dplyr::filter(sic == 912 | naics == 114111) %>% filter(state != "AK") %>% filter(year > 1999) %>%
+  dplyr::rename(LANDING_YEAR = year) %>% dplyr::rename(AGENCY_CODE = state) %>% 
+  mutate(AGENCY_CODE = ifelse(AGENCY_CODE == "CA", "C", ifelse(AGENCY_CODE == "OR", "O", "W"))) %>%
+  dplyr::select(-c('sic', 'naics'))
+wages_fishing[wages_fishing == 0] <- NA
+
+wages_fishing_long <- gather(wages_fishing, LANDING_QUARTER, wages, aearn_q1:aearn_q4, factor_key=TRUE) %>%
+  mutate(LANDING_QUARTER = ifelse(LANDING_QUARTER == "aearn_q1", 1, 
+                                  ifelse(LANDING_QUARTER == "aearn_q2", 2,
+                                         ifelse(LANDING_QUARTER == "aearn_q3", 3, 4))))
+
+## Merge wages to dataset
+dataset$LANDING_QUARTER <- lubridate::quarter(dataset$LANDING_MONTH)
+dataset <- merge(dataset, wages_fishing_long, by = c('LANDING_YEAR', 'LANDING_QUARTER', 'AGENCY_CODE'), all.x = TRUE, all.y = FALSE)
+
+## Deflect prices
+dataset$wages.AFI <- dataset$wages*dataset$defl
+rm(wages_fishing_long, wages_fishing, wages)
+
 
 #---------------------------------------------------------------------------------------
 ## Include trend and average number of set for MSQD
@@ -484,7 +509,7 @@ dataset <- merge(dataset, avg.number.set, by = ('LANDING_YEAR'), all.x = TRUE, a
 
 
 #---------------------------------------
-## Summary statistics ##
+## Save data ##
 dataset <- dataset %>% 
   dplyr::rename(PSDN_Price = PSDN_AFI_PRICE_PER_MTON.mean) %>%
   dplyr::rename(MSQD_Price = MSQD_AFI_PRICE_PER_MTON.mean) %>%
@@ -509,8 +534,10 @@ dataset <- dataset %>%
   dplyr::mutate(NANC_SDM_20_z = ((NANC_SDM_20 - mean(NANC_SDM_20, na.rm = TRUE))/sd(NANC_SDM_20, na.rm = TRUE))) %>%
   dplyr::mutate(Price.Fishmeal_z = ((Price.Fishmeal - mean(Price.Fishmeal, na.rm = TRUE))/sd(Price.Fishmeal, na.rm = TRUE))) %>%
   dplyr::mutate(diesel.price_z = ((diesel.price - mean(diesel.price, na.rm = TRUE))/sd(diesel.price, na.rm = TRUE))) %>%
+  dplyr::mutate(wages_z = ((wages - mean(wages, na.rm = TRUE))/sd(wages, na.rm = TRUE))) %>%
   dplyr::mutate(Price.Fishmeal.AFI_z = ((Price.Fishmeal.AFI - mean(Price.Fishmeal.AFI, na.rm = TRUE))/sd(Price.Fishmeal.AFI, na.rm = TRUE))) %>%
   dplyr::mutate(diesel.price.AFI_z = ((diesel.price.AFI - mean(diesel.price.AFI, na.rm = TRUE))/sd(diesel.price.AFI, na.rm = TRUE))) %>%
+  dplyr::mutate(wages.AFI_z = ((wages.AFI - mean(wages.AFI, na.rm = TRUE))/sd(wages.AFI, na.rm = TRUE))) %>%
   dplyr::mutate(Length_z = ((Length - mean(Length, na.rm = TRUE))/sd(Length, na.rm = TRUE))) %>%
   dplyr::mutate(avg_set_MSQD_z = ((avg_set_MSQD - mean(avg_set_MSQD, na.rm = TRUE))/sd(avg_set_MSQD, na.rm = TRUE)))
 
