@@ -1397,7 +1397,7 @@ prediction_MSQD_noclosure <- prediction_MSQD_noclosure %>%
   rename(Estimate.logMSQDLandings.closure = Estimate.logMSQDLandings) 
 Estimate.logMSQDLandings <- prediction_MSQD[,5]
 prediction_MSQD_noclosure <- cbind.data.frame(prediction_MSQD_noclosure, Estimate.logMSQDLandings) %>%
-  filter(LANDING_YEAR>2011)
+  filter(LANDING_YEAR>2013)
 prediction_MSQD_noclosure$LANDING_YEAR   <- as.integer(prediction_MSQD_noclosure$LANDING_YEAR)
 
 prediction_sel <- prediction_MSQD_noclosure [,-1]
@@ -1461,30 +1461,30 @@ gg_msqd
 
 
 # Northern anchovy
-set.seed(123)
-prediction_NANC_noclosure <- cbind(predict(fit_qNANC,
-                                newdata = data.frame(
-                                  NANC_Price_z = dataset_nanc_landing$NANC_Price_z,
-                                  Price.Fishmeal.AFI_z = dataset_nanc_landing$Price.Fishmeal.AFI_z,
-                                  port_ID = dataset_nanc_landing$port_ID,
-                                  NANC_Landings = dataset_nanc_landing$NANC_Landings,
-                                  MSQD_SPAWN_SDM_90 = dataset_nanc_landing$MSQD_SPAWN_SDM_90,
-                                  NANC_SDM_20 = dataset_nanc_landing$NANC_SDM_20,
-                                  PSDN.Total.Closure = 0,
-                                  Length_z = dataset_nanc_landing$Length_z,
-                                  PSDN_SDM_60 = dataset_nanc_landing$PSDN_SDM_60,
-                                  MSQD.Open = dataset_nanc_landing$MSQD.Open,
-                                  PSDN.Open = 1,
-                                  port_cluster_ID = dataset_nanc_landing$port_cluster_ID)),
-                                  dataset_nanc_landing)
-saveRDS(prediction_NANC_noclosure, file = "prediction_NANC_noclosure.rds")
 
+# set.seed(123)
+# prediction_NANC_noclosure <- cbind(predict(fit_qNANC,
+#                                 newdata = data.frame(
+#                                   NANC_Price_z = dataset_nanc_landing$NANC_Price_z,
+#                                   Price.Fishmeal.AFI_z = dataset_nanc_landing$Price.Fishmeal.AFI_z,
+#                                   port_ID = dataset_nanc_landing$port_ID,
+#                                   NANC_Landings = dataset_nanc_landing$NANC_Landings,
+#                                   MSQD_SPAWN_SDM_90 = dataset_nanc_landing$MSQD_SPAWN_SDM_90,
+#                                   NANC_SDM_20 = dataset_nanc_landing$NANC_SDM_20,
+#                                   PSDN.Total.Closure = 0,
+#                                   Length_z = dataset_nanc_landing$Length_z,
+#                                   PSDN_SDM_60 = dataset_nanc_landing$PSDN_SDM_60,
+#                                   MSQD.Open = dataset_nanc_landing$MSQD.Open,
+#                                   PSDN.Open = 1,
+#                                   port_cluster_ID = dataset_nanc_landing$port_cluster_ID)),
+#                                   dataset_nanc_landing)
+# saveRDS(prediction_NANC_noclosure, file = "prediction_NANC_noclosure.rds")
 prediction_NANC_noclosure <- readRDS(file = "prediction_NANC_noclosure.rds")
 prediction_NANC_noclosure <- prediction_NANC_noclosure %>%
   rename(Estimate.logNANCLandings.closure = Estimate.logNANCLandings) 
-Estimate.logNANCLandings <- prediction_MSQD[,5]
+Estimate.logNANCLandings <- prediction_NANC[,5]
 prediction_NANC_noclosure <- cbind.data.frame(prediction_NANC_noclosure, Estimate.logNANCLandings) %>%
-  filter(LANDING_YEAR>2011)
+  filter(LANDING_YEAR>2013)
 prediction_NANC_noclosure$LANDING_YEAR   <- as.integer(prediction_NANC_noclosure$LANDING_YEAR)
 
 prediction_sel <- prediction_NANC_noclosure [,-1]
@@ -1518,7 +1518,6 @@ df_cluster_NANC <- prediction_sel %>%
   mutate(Est_landings_mean_MA = ifelse(Date < "July 2015", Landings_mean_MA, Est_landings_mean_MA))
 
 
-
 # Plot
 cond_label_nanc <- as_labeller(c("6-CWA" = "PNW sardine specialists\n(Coastal Washington Ports)",
                                  "6-CLW" = "PNW sardine specialists\n(Columbia River OR)",
@@ -1532,9 +1531,8 @@ gg_nanc <- ggplot(df_cluster_NANC) +
   geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Predicted landing (closure)"), size = 0.75,linetype="dashed") +
   geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA.closure, color = "Predicted landing (no closure)"), size = 0.75,linetype="dashed") +
   geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 1) + 
-  facet_wrap(~port_cluster_ID, labeller = cond_label_msqd, ncol = 3) +
+  facet_wrap(~port_cluster_ID, labeller = cond_label_nanc, ncol = 3) +
   theme(legend.position="right") +
-  # ggtitle("Market squid predictions") +
   scale_x_continuous(name = "")  +
   scale_y_continuous(name = "ln(Landings)") +
   scale_color_manual(name = "Variable: ",
@@ -1542,14 +1540,3 @@ gg_nanc <- ggplot(df_cluster_NANC) +
                                 "Predicted landing (closure)" = "green")) + 
   theme(axis.text.x = element_text(size = 7))
 gg_nanc
-
-
-
-
-
-
-
-
-
-
-
