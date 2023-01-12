@@ -1018,17 +1018,17 @@ gg_int_2
 
 # Predict
 
-# set.seed(123)
-# prediction_MSQD <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
-# saveRDS(prediction_MSQD, file = "prediction_MSQD.rds")
-#
-# set.seed(123)
-# prediction_NANC <- cbind(predict(fit_qNANC), dataset_nanc_landing)
-# saveRDS(prediction_NANC, file = "prediction_NANC.rds")
-#
-# set.seed(123)
-# prediction_PSDN <- cbind(predict(fit_qPSDN), dataset_psdn_landing)
-# saveRDS(prediction_PSDN, file = "prediction_PSDN.rds")
+set.seed(123)
+prediction_MSQD <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
+saveRDS(prediction_MSQD, file = "prediction_MSQD.rds")
+
+set.seed(123)
+prediction_NANC <- cbind(predict(fit_qNANC), dataset_nanc_landing)
+saveRDS(prediction_NANC, file = "prediction_NANC.rds")
+
+set.seed(123)
+prediction_PSDN <- cbind(predict(fit_qPSDN), dataset_psdn_landing)
+saveRDS(prediction_PSDN, file = "prediction_PSDN.rds")
 
 prediction_MSQD <- readRDS(file = "prediction_MSQD.rds")
 prediction_NANC <- readRDS(file = "prediction_NANC.rds")
@@ -1230,15 +1230,13 @@ gg_psdn <- ggplot(df_cluster_PSDN) +
 
 
 gg_msqd 
-
 gg_psdn
-  
 gg_nanc
 
 
 #----------------------------------------
 ### Aggregate plots
-#### By Cluster 
+#### By cluster/port 
 
 ####  Marker squid
 prediction_sel <- prediction_MSQD[,-1]
@@ -1372,7 +1370,6 @@ gg_nanc <- ggplot(df_cluster_NANC) +
   scale_color_manual(name = "Variable: ",
                      values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
 
-
 gg_psdn <- ggplot(df_cluster_PSDN) + 
   geom_line(mapping = aes(x = Date, y = Landings_MA, color = "Actual landings"), size = 0.75) + 
   geom_line(mapping = aes(x = Date, y = Est_landings_MA, color = "Estimated landings (MA)"), size = 1) +
@@ -1398,12 +1395,11 @@ gg_psdn <- ggplot(df_cluster_PSDN) +
 ### Predict if sardine would have been open
 # prediction_mod <- cbind(predict(fit_qMSQD_Spawning, newdata = data.frame(MSQD_Landings = dataset_msqd$MSQD_Landings,
 #                                            MSQD_SPAWN_SDM_90 = dataset_msqd$MSQD_SPAWN_SDM_90,
-#                                            PSDN_SDM.Open = dataset_msqd$PSDN_SDM.Open,
+#                                            PSDN_SDM.Open = 1,
 #                                            cluster = dataset_msqd$cluster,
 #                                            port_ID = dataset_msqd$port_ID, 
 #                                            PSDN.Closure = 0), dataset_msqd) 
 # 
-
 # # NOT RUN {
 # ## fit a model
 # fit <- brm(rating ~ treat + period + carry + (1|subject), 
