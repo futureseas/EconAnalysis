@@ -197,7 +197,7 @@ for (p in list) {
 ###############################################
 ### Analyze convergence ###
 
-launch_shinystan(fit_qMSQD)
+# launch_shinystan(fit_qMSQD)
 # launch_shinystan(fit_qPSDN)
 # launch_shinystan(fit_qNANC)
 
@@ -216,15 +216,15 @@ launch_shinystan(fit_qMSQD)
 # gs4_create("MSQD_landings_results", sheets = df)
 
 
-tab_model <-
-  sjPlot::tab_model(fit_qPSDN)
-
-df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
-colnames(df) <- df[1,]
-df <- df[-1,]
-gs4_create("PSDN_landings_results", sheets = df)
-#
+# tab_model <-
+#   sjPlot::tab_model(fit_qPSDN)
 # 
+# df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
+# colnames(df) <- df[1,]
+# df <- df[-1,]
+# gs4_create("PSDN_landings_results", sheets = df)
+
+ 
 # tab_model <-
 #   sjPlot::tab_model(fit_qNANC)
 # 
@@ -254,15 +254,12 @@ gs4_create("PSDN_landings_results", sheets = df)
 # ######## Check correlation ###########
 # 
 # dataset_select <- dataset_msqd_landing %>%
-#   dplyr::select(MSQD_SPAWN_SDM_90_z,
-#                 PSDN_SDM_60_z,
-#                 NANC_SDM_20_z,
+#   dplyr::select(MSQD_SPAWN_SDM_90,
+#                 PSDN_SDM_60,
+#                 NANC_SDM_20,
 #                 Length_z,
 #                 MSQD_Price_z, 
-#                 PSDN_Price_z, 
-#                 diesel.price.AFI_z, 
-#                 Price.Fishmeal.AFI_z,
-#                 avg_set_MSQD_z)
+#                 Price.Fishmeal.AFI_z)
 # res <- as.data.frame(cor(dataset_select))
 # round(res, 2)
 

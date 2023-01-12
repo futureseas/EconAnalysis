@@ -162,19 +162,20 @@ prior_lognormal <- c(
   prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open),
   prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = PSDN_SDM_60:PSDN.Open),
   prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = MSQD_SPAWN_SDM_90:MSQD.Open),
+  prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = PSDN.Total.Closure),
   prior(exponential(1), class = sigma, resp = NANCPricez),
   prior(exponential(1), class = sigma, resp = logNANCLandings),
   prior(lkj(2),         class = rescor))
 
 ## Estimate model
 set.seed(66)
-fit_qNANC <-
+fit_qNANC2 <-
   brm(data = dataset_nanc_landing,
       family = gaussian,
       price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qNANC")
+      file = "Estimations/fit_qNANC2")
 
-fit_qNANC <- add_criterion(fit_qNANC, "loo", overwrite = TRUE)
+fit_qNANC2 <- add_criterion(fit_qNANC2, "loo", overwrite = TRUE)
