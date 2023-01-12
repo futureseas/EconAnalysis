@@ -85,7 +85,7 @@ dataset_msqd_landing <- dataset_msqd %>%
   mutate(n_total = n()) %>%
   group_by(cluster_port) %>% 
   mutate(obs = n(), perc = n()/n_total) %>% 
-  filter(perc > 0.05)
+  filter(perc > 0.04)
 
 ### Check number of observations
 dataset_msqd_landing %>% select('cluster_port', 'obs', 'perc') %>% unique()

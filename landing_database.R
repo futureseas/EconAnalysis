@@ -79,11 +79,11 @@ rm(PacFIN.month.aggregate)
 
 
 ### Selecting port using results from cluster analysis (10% of the revenue for at least one cluster)
-PacFIN.month.dataset <- PacFIN.month.dataset %>%
-  dplyr::filter(PORT_AREA_CODE == "SDA" | PORT_AREA_CODE == "LAA" |
-                  PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA" | 
-                  PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "CLW" | 
-                  PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS")
+# PacFIN.month.dataset <- PacFIN.month.dataset %>%
+#   dplyr::filter(PORT_AREA_CODE == "SDA" | PORT_AREA_CODE == "LAA" |
+#                   PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA" | 
+#                   PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "CLW" | 
+#                   PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS")
 
 
 ### Create ID data and change NaN to NA ###
