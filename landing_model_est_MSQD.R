@@ -1,13 +1,18 @@
+
 ###########################
 ### SQUID Landing model ###
 ###########################
 
 #----------------------------
 # Setup #
+
+## Take month out from price eq factor(LANDING_MONTH) #
 rm(list = ls(all.names = TRUE)) 
 gc()
 
 library("googlesheets4")
+
+  
 gs4_auth(
   email = "fequezad@ucsc.edu",
   path = NULL,
@@ -43,7 +48,8 @@ dataset_msqd <- dataset %>%
   dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, 
                 LANDING_YEAR, LANDING_MONTH,
                 MSQD_SPAWN_SDM_90, MSQD_SDM_90, MSQD_Landings, MSQD_Price, 
-                PSDN_Landings, NANC_Landings, PSDN_Price, NANC_Price, 
+                # PSDN_Landings, NANC_Landings, 
+                PSDN_Price, NANC_Price, 
                 PSDN_SDM_60, NANC_SDM_20,
                 MSQD_Price_z, PSDN_Price_z, MSQD_SPAWN_SDM_90_z, MSQD_SDM_90_z, 
                 PSDN_SDM_60_z, NANC_SDM_20_z,
@@ -52,47 +58,55 @@ dataset_msqd <- dataset %>%
                 diesel.price, diesel.price.AFI, diesel.price_z, diesel.price.AFI_z,
                 Length, Length_z, avg_set_MSQD, avg_set_MSQD_z) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>%
-  dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>%
-  dplyr::mutate(NANC_Landings = coalesce(NANC_Landings, 0)) %>%
+  # dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>%
+  # dplyr::mutate(NANC_Landings = coalesce(NANC_Landings, 0)) %>%
   mutate(MSQD_Landings = ifelse(MSQD_Landings<= 0, 0, MSQD_Landings)) %>%
   mutate(MSQD_Landings = ifelse(MSQD_Landings< 0.0001, 0, MSQD_Landings)) %>%
-  mutate(PSDN_Landings = ifelse(PSDN_Landings<= 0, 0, MSQD_Landings)) %>%
-  mutate(PSDN_Landings = ifelse(PSDN_Landings< 0.0001, 0, MSQD_Landings)) %>%
-  mutate(NANC_Landings = ifelse(NANC_Landings<= 0, 0, MSQD_Landings)) %>%
-  mutate(NANC_Landings = ifelse(NANC_Landings< 0.0001, 0, MSQD_Landings)) %>%
-  dplyr::mutate(PSDN.Participation = ifelse(PSDN_Landings > 0, 1, 0)) %>% 
+  # mutate(PSDN_Landings = ifelse(PSDN_Landings<= 0, 0, MSQD_Landings)) %>%
+  # mutate(PSDN_Landings = ifelse(PSDN_Landings< 0.0001, 0, MSQD_Landings)) %>%
+  # mutate(NANC_Landings = ifelse(NANC_Landings<= 0, 0, MSQD_Landings)) %>%
+  # mutate(NANC_Landings = ifelse(NANC_Landings< 0.0001, 0, MSQD_Landings)) %>%
+  # dplyr::mutate(PSDN.Participation = ifelse(PSDN_Landings > 0, 1, 0)) %>% 
   dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
   dplyr::mutate(ln_MSQD_Landings = log(MSQD_Landings)) %>%
   filter(group_all == 1 | group_all == 2 | group_all == 4 | group_all == 5 | group_all == 7) %>%
-  filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA") %>%
+  mutate(cluster_port = paste(group_all, PORT_AREA_CODE, sep = "-", collapse = NULL)) %>%
   drop_na()
 
+# filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA") %>%
 # dataset_msqd %>% group_by(PORT_AREA_CODE) %>% summarize(n_freq = n()/nrow(dataset_msqd))
 
 
 #### Convert variables to factor #### HERE I CHANGE THE ID
+dataset_msqd$port_cluster_ID    <- factor(dataset_msqd$cluster_port)
 dataset_msqd$port_ID            <- factor(dataset_msqd$PORT_AREA_CODE)
-dataset_msqd$cluster            <- factor(dataset_msqd$group_all)
+dataset_msqd$MSQD.Close         <- factor((1 - dataset_msqd$MSQD.Open))
+
+
 class(dataset_msqd$port_ID)
-class(dataset_msqd$cluster)
+class(dataset_msqd$port_cluster_ID)
 class(dataset_msqd$PSDN.Total.Closure)
 
 
 dataset_msqd_landing <- dataset_msqd %>%
   dplyr::filter(MSQD_Landings > 0) %>%
-  dplyr::filter(MSQD.Open == 1) 
+  dplyr::filter(MSQD.Open == 1) %>%
+  mutate(n_total = n()) %>%
+  group_by(cluster_port) %>% 
+  mutate(obs = n(), perc = n()/n_total) %>% 
+  filter(perc > 0.05)
 
-
-#### Check number of observation by port area ####
-n_obs_port_area <- dataset_msqd_landing %>% group_by(PORT_AREA_CODE) %>%
+### Check number of observations
+dataset_msqd_landing %>% select('cluster_port', 'obs', 'perc') %>% unique()
+dataset_msqd_landing %>% group_by(PORT_AREA_CODE) %>%
   summarize(n_obs = n()) %>% mutate(per = scales::percent(n_obs / sum(n_obs)))
+nrow(dataset_msqd_landing)
 
-
-### Descriptive statistics 
+### Descriptive statistics
 desc_data <- dataset_msqd_landing %>%
-  subset(select = c(Length, MSQD_Landings, MSQD_Price, 
-                    MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,  
+  subset(select = c(Length, MSQD_Landings, MSQD_Price,
+                    MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,
                     PSDN.Open, Price.Fishmeal.AFI))
 
 table <- psych::describe(desc_data, fast=TRUE) %>%
@@ -103,17 +117,20 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 5, "Prob(presence): PSDN", vars)) %>%
   mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
   mutate(vars = ifelse(vars == 7, "Fraction of month open: PSDN", vars)) %>%
-  mutate(vars = ifelse(vars == 8, "Fishmeal price", vars)) 
+  mutate(vars = ifelse(vars == 8, "Fishmeal price", vars))
+# 
+# gs4_create("SummaryMonthly_Q_MSQD", sheets = table)
+# rm(desc_data, table)
 
-gs4_create("SummaryMonthly_Q_MSQD", sheets = table)
-rm(desc_data, table)
+
+### Correlation 
 
 
 #-------------------------------------------------------------------
 ## Check stationarity in the panel dataset
 library("plm")
 
-dataset_msqd_landing$Date <- 
+dataset_msqd_landing$Date <-
   zoo::as.yearmon(paste(dataset_msqd_landing$LANDING_YEAR, dataset_msqd_landing$LANDING_MONTH), "%Y %m")
 
 pDataset <- dataset_msqd_landing %>% mutate(Unique_ID = paste(VESSEL_NUM, PORT_AREA_CODE, sep = " ")) %>%
@@ -131,6 +148,10 @@ purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
+round(cor(dataset_msqd_landing$Price.Fishmeal.AFI, dataset_msqd_landing$diesel.price.AFI_z), 2)
+
+cors4 <- plyr::ddply(dataset_msqd_landing, c("PORT_AREA_CODE"), summarise, cor = round(cor(Price.Fishmeal.AFI, diesel.price.AFI_z), 2))
+
 
 ## -------------------------------------------------------------------
 ### Market squid landing model ###
@@ -139,13 +160,12 @@ rm(pDataset)
 # library('fastDummies')
 # dataset_msqd <- dummy_cols(dataset_msqd, select_columns = 'cluster')
 
-write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv", row.names = FALSE)
+write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD_close.csv", row.names = FALSE)
 
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(MSQD_Landings) ~
-  1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + PSDN.Total.Closure + Length_z +
- (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z + PSDN.Total.Closure | cluster) +
- (1 + MSQD_SPAWN_SDM_90_z + MSQD_Price_z + PSDN_SDM_60_z:PSDN.Open:MSQD_SPAWN_SDM_90_z + NANC_SDM_20_z:MSQD_SPAWN_SDM_90_z + PSDN_SDM_60_z:PSDN.Open + NANC_SDM_20_z | port_ID))
+  1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + diesel.price.AFI_z + MSQD.Close + Length_z +
+ (1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + diesel.price.AFI_z + MSQD.Close | port_cluster_ID))
 
 
 # Create priors
@@ -153,24 +173,26 @@ prior_lognormal <- c(
   prior(lognormal(0,1), class = b,     resp = MSQDPricez,      coef = Price.Fishmeal.AFI_z),
   prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = Length_z),
   prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_Price_z),
-  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90_z),
-  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90_z:NANC_SDM_20_z),
-  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90_z:PSDN_SDM_60_z:PSDN.Open),
-  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = NANC_SDM_20_z),
-  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = PSDN_SDM_60_z:PSDN.Open),
+  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90),
+  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90:NANC_SDM_20),
+  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open),
+  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = NANC_SDM_20),
+  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = PSDN_SDM_60:PSDN.Open),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = PSDN.Total.Closure),
   prior(exponential(1), class = sigma, resp = MSQDPricez),
   prior(exponential(1), class = sigma, resp = logMSQDLandings),
   prior(lkj(2),         class = rescor))
 
-set.seed(123)
- fit_qMSQD <-
+set.seed(66)
+ fit_qMSQD_close2 <-
    brm(data = dataset_msqd_landing,
        family = gaussian,
        price_model + landing_model + set_rescor(TRUE),
        prior = prior_lognormal,
-       iter = 2000, warmup = 1000, chains = 4, cores = 4,
+       iter = 3000, warmup = 1000, chains = 4, cores = 4,
        control = list(max_treedepth = 15, adapt_delta = 0.99),
-       file = "Estimations/fit_qMSQD_v2")
+       file = "Estimations/fit_qMSQD_close2")
 
-fit_qMSQD <- add_criterion(fit_qMSQD, "loo", overwrite = TRUE)
+fit_qMSQD_close2 <- add_criterion(fit_qMSQD_close2, "loo", overwrite = TRUE)
+
+
