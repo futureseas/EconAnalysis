@@ -1011,34 +1011,51 @@ gg_int_2
   # 
   # gg1$facet$params$labeller <- cluster_label
   # gg1
-  
+
+################################## 
+# Separate hurdle model 
+# 
+#  hu <- plot(conditional_effects(fit_qPSDN, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="hu"), 
+#             plot = FALSE, ask = FALSE)
+#  mu <- plot(conditional_effects(fit_qPSDN, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="mu"), 
+#             plot = FALSE, ask = FALSE)
+# 
+#  mu[[1]] + hu[[1]] + plot_layout(nrow = 2)
+# 
+
+#  hu <- plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="hu"), 
+#               plot = FALSE, ask = FALSE) 
+#  mu <- plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="mu"), 
+#               plot = FALSE, ask = FALSE) 
+# 
+#  mu[[1]] + hu[[1]] + plot_layout(nrow = 2) 
+#
 
 ##########################################################################
 ### Predictions ###
 
 # Predict
 
-set.seed(123)
-prediction_MSQD <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
-saveRDS(prediction_MSQD, file = "prediction_MSQD.rds")
-
-set.seed(123)
-prediction_NANC <- cbind(predict(fit_qNANC), dataset_nanc_landing)
-saveRDS(prediction_NANC, file = "prediction_NANC.rds")
-
-set.seed(123)
-prediction_PSDN <- cbind(predict(fit_qPSDN), dataset_psdn_landing)
-saveRDS(prediction_PSDN, file = "prediction_PSDN.rds")
+# set.seed(123)
+# prediction_MSQD <- cbind(predict(fit_qMSQD), dataset_msqd_landing)
+# saveRDS(prediction_MSQD, file = "prediction_MSQD.rds")
+# 
+# set.seed(123)
+# prediction_NANC <- cbind(predict(fit_qNANC), dataset_nanc_landing)
+# saveRDS(prediction_NANC, file = "prediction_NANC.rds")
+# 
+# set.seed(123)
+# prediction_PSDN <- cbind(predict(fit_qPSDN), dataset_psdn_landing)
+# saveRDS(prediction_PSDN, file = "prediction_PSDN.rds")
 
 prediction_MSQD <- readRDS(file = "prediction_MSQD.rds")
 prediction_NANC <- readRDS(file = "prediction_NANC.rds")
 prediction_PSDN <- readRDS(file = "prediction_PSDN.rds")
 
 
-
 library(zoo)
 
-####  Marker squid
+###  Marker squid
 prediction_sel <- prediction_MSQD[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
@@ -1048,17 +1065,10 @@ prediction_sel <- prediction_sel[,-1]
 #   summarize(SSR = sum(abs(ln_MSQD_Landings - Estimate.logMSQDLandings))/n())
 # 
 # prediction_sel %>% group_by(port_cluster_ID) %>%
-#   summarize(SSR = cor(ln_MSQD_Landings, Estimate.logMSQDLandings))
+#   summarize(cor = cor(ln_MSQD_Landings, Estimate.logMSQDLandings))
 # 
 # prediction_sel %>% group_by(port_cluster_ID) %>%
-#   summarize(SSR = mean(Est.Error.logMSQDLandings))
-
-prediction_sel %>% group_by(port_cluster_ID) %>%
-  summarize(R_2 = (var(Estimate.logMSQDLandings) / 
-                     (var(Estimate.logMSQDLandings) +  
-                        var(Estimate.logMSQDLandings - ln_MSQD_Landings)))) %>% ungroup()
-
-
+#   summarize(mean_error = mean(Est.Error.logMSQDLandings))
 
 # by cluster
 df_cluster_MSQD <- prediction_sel %>% 
@@ -1077,30 +1087,12 @@ df_cluster_MSQD <- prediction_sel %>%
   mutate(Landings_mean_MA     = rollapply(data = Landings_mean    , 
                                           width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
 
-
-
-
-
-#### Using the data estimation -- Northern anchovy
+### Northern anchovy
 
 prediction_sel <- prediction_NANC[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
-
-# prediction_sel %>% group_by(port_cluster_ID) %>%
-#   summarize(SSR = mean(Est.Error.logNANCLandings))
-# 
-# prediction_sel %>% group_by(port_cluster_ID) %>%
-#   summarize(SSR = sum(abs(ln_NANC_Landings - Estimate.logNANCLandings))/n())
-# 
-# prediction_sel %>% group_by(port_cluster_ID) %>%
-#   summarize(SSR = cor(ln_NANC_Landings, Estimate.logNANCLandings))
-
-prediction_sel %>% group_by(port_cluster_ID) %>%
-  summarize(R_2 = (var(Estimate.logNANCLandings) / 
-                     (var(Estimate.logNANCLandings) +  
-                        var(Estimate.logNANCLandings - ln_NANC_Landings)))) %>% ungroup()
 
 df_cluster_NANC <- prediction_sel %>% 
   dplyr::select(Estimate.logNANCLandings, ln_NANC_Landings, 
@@ -1119,28 +1111,16 @@ df_cluster_NANC <- prediction_sel %>%
                                           width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
 
 
-#### Using the data estimation -- Pacific sardine
-
-
+### Pacific sardine
 prediction_sel <- prediction_PSDN[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
 prediction_sel <- prediction_sel[,-1]
 
 # prediction_sel %>% group_by(port_cluster_ID) %>%
-#   summarize(SSR = mean(Est.Error.logPSDNLandings))
-# 
-# prediction_sel %>% group_by(port_cluster_ID) %>%
-#   summarize(SSR = sum(abs(ln_PSDN_Landings - Estimate.logPSDNLandings))/n())
-# 
-# prediction_sel %>% group_by(port_cluster_ID) %>%
-#   summarize(SSR = cor(ln_PSDN_Landings, Estimate.logPSDNLandings))
-# 
-prediction_sel %>% group_by(port_cluster_ID) %>%
-  summarize(R_2 = (var(Estimate.logPSDNLandings) / 
-                     (var(Estimate.logPSDNLandings) +  
-                        var(Estimate.logPSDNLandings - ln_PSDN_Landings)))) %>% ungroup()
-
+#   summarize(R_2 = (var(Estimate.logPSDNLandings) / 
+#                      (var(Estimate.logPSDNLandings) +  
+#                         var(Estimate.logPSDNLandings - ln_PSDN_Landings)))) %>% ungroup()
 
 
 df_cluster_PSDN <- prediction_sel %>% 
@@ -1161,8 +1141,6 @@ df_cluster_PSDN <- prediction_sel %>%
 
 
 # Plot
-
-
 cond_label_msqd <- as_labeller(c("1-LAA" = "Southern CCS small-scale\nsquid-specialists (Los Angeles)",
                                  "1-SBA" = "Southern CCS small-scale\nsquid-specialists (Santa Barbara)",
                                  "4-LAA" = "Southern CCS industrial\nsquid-specialists (Los Angeles)",
@@ -1193,18 +1171,22 @@ cond_label_nanc <- as_labeller(c("6-CWA" = "PNW sardine specialists\n(Coastal Wa
                                  "7-LAA" = "Southern CCS forage fish\ndiverse (Los Angeles)"))
 
 
+### Figure S2
+
 gg_msqd <- ggplot(df_cluster_MSQD) + 
   geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
   geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
   facet_wrap(~port_cluster_ID, labeller = cond_label_msqd, ncol = 3) +
-  theme(legend.position="none") +
+  theme(legend.position="right") +
   # ggtitle("Market squid predictions") +
   scale_x_continuous(name = "")  +
   scale_y_continuous(name = "ln(Landings)") +
   scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
+                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85")) + 
+  theme(axis.text.x = element_text(size = 7))
+gg_msqd
 
-
+### Figure S3
 gg_nanc <- ggplot(df_cluster_NANC) + 
   geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
   geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
@@ -1212,179 +1194,176 @@ gg_nanc <- ggplot(df_cluster_NANC) +
   theme(legend.position="right") +
   # ggtitle("Northern anchovy predictions") +
   scale_x_continuous(name = "")  +
-  scale_y_continuous(name = "") +
+  scale_y_continuous(name = "ln(Landings)") +
   scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
+                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85")) +
+  theme(axis.text.x = element_text(size = 7))
+gg_nanc
 
-
+### Figure S4
 gg_psdn <- ggplot(df_cluster_PSDN) + 
   geom_line(mapping = aes(x = Date, y = Landings_mean_MA, color = "Actual landings"), size = 0.75) + 
   geom_line(mapping = aes(x = Date, y = Est_landings_mean_MA, color = "Estimated landings (MA)"), size = 1) +
   facet_wrap(~port_cluster_ID, labeller = cond_label_psdn, ncol = 3) + 
-  theme(legend.position="none") +
+  theme(legend.position="right") +
   scale_color_manual(name = "Variable: ",
                      values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85")) +
   # ggtitle("Pacific sardine predictions") +
-  scale_x_continuous(name = "Date")  +
-  scale_y_continuous(name = "") 
-
-
-gg_msqd 
+  scale_x_continuous(name = "")  +
+  scale_y_continuous(name = "ln(Landings)") +  
+  theme(axis.text.x = element_text(size = 7))
 gg_psdn
-gg_nanc
 
 
-#----------------------------------------
-### Aggregate plots
-#### By cluster/port 
-
-####  Marker squid
-prediction_sel <- prediction_MSQD[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-
-#### Market squid
-df_cluster_MSQD <- prediction_sel %>% 
-  dplyr::select(Estimate.logMSQDLandings, ln_MSQD_Landings, 
-                LANDING_YEAR, LANDING_MONTH, port_cluster_ID) %>%
-  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
-  mutate(Date = zoo::as.yearmon(Date)) %>%
-  group_by(Date, port_cluster_ID) %>% 
-  summarise(Est_landings = sum(Estimate.logMSQDLandings), Landings = sum(ln_MSQD_Landings)) %>% 
-  group_by(port_cluster_ID) %>%
-  arrange(port_cluster_ID, Date) %>%
-  mutate(Est_landings_MA = rollapply(data = Est_landings, 
-                                          width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
-  mutate(Landings_MA     = rollapply(data = Landings    , 
-                                          width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
-
-### Compute bayes R-squared
-df_cluster_MSQD %>% ungroup() %>% summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) 
-
-df_cluster_MSQD %>% group_by(port_cluster_ID) %>%
-  summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) %>% ungroup()
-
-
-#### Pacific sardine
-prediction_sel <- prediction_PSDN[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-
-df_cluster_PSDN <- prediction_sel %>% 
-  dplyr::select(Estimate.logPSDNLandings, ln_PSDN_Landings, 
-                LANDING_YEAR, LANDING_MONTH, port_cluster_ID) %>%
-  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
-  mutate(Date = zoo::as.yearmon(Date)) %>%
-  group_by(Date, port_cluster_ID) %>% 
-  summarise(Est_landings = sum(Estimate.logPSDNLandings), Landings = sum(ln_PSDN_Landings)) %>% 
-  group_by(port_cluster_ID) %>%
-  arrange(port_cluster_ID, Date) %>%
-  mutate(Est_landings_MA = rollapply(data = Est_landings, 
-                                     width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
-  mutate(Landings_MA     = rollapply(data = Landings    , 
-                                     width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
-
-df_cluster_PSDN %>% ungroup() %>% summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) 
-df_cluster_PSDN %>% group_by(port_cluster_ID) %>%
-  summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) %>% ungroup()
-
-
-#### Northern anchovy
-prediction_sel <- prediction_NANC[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-prediction_sel <- prediction_sel[,-1]
-
-df_cluster_NANC <- prediction_sel %>% 
-  dplyr::select(Estimate.logNANCLandings, ln_NANC_Landings, 
-                LANDING_YEAR, LANDING_MONTH, port_cluster_ID) %>%
-  mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
-  mutate(Date = zoo::as.yearmon(Date)) %>%
-  group_by(Date, port_cluster_ID) %>% 
-  summarise(Est_landings = sum(Estimate.logNANCLandings), Landings = sum(ln_NANC_Landings)) %>% 
-  group_by(port_cluster_ID) %>%
-  arrange(port_cluster_ID, Date) %>%
-  mutate(Est_landings_MA = rollapply(data = Est_landings, 
-                                     width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
-  mutate(Landings_MA     = rollapply(data = Landings    , 
-                                     width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
-
-
-df_cluster_NANC %>% ungroup() %>% summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) 
-df_cluster_NANC %>% group_by(port_cluster_ID) %>%
-  summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) %>% ungroup()
-
-
-
-cond_label_msqd <- as_labeller(c("1-LAA" = "Southern CCS small-scale\nsquid-specialists (Los Angeles)",
-                                 "1-SBA" = "Southern CCS small-scale\nsquid-specialists (Santa Barbara)",
-                                 "4-LAA" = "Southern CCS industrial\nsquid-specialists (Los Angeles)",
-                                 "4-MNA" = "Southern CCS industrial\nsquid-specialists (Monterey)",
-                                 "4-SBA" = "Southern CCS industrial\nsquid-specialists (Santa Barbara)",
-                                 "5-LAA" = "Roving industrial sardine-squid\ngeneralists (Los Angeles)",
-                                 "5-SBA" = "Roving industrial sardine-squid\ngeneralists (Santa Barbara)",
-                                 "7-LAA" = "Southern CCS forage fish\ndiverse (Los Angeles)",
-                                 "7-SBA" = "Southern CCS forage fish\ndiverse (Santa Barbara)"))
-
-cond_label_psdn <- as_labeller(c("3-CLO" = "PNW sardine opportunists\n(Columbia River OR)",
-                                 "4-LAA" = "Southern CCS industrial\nsquid-specialists (Los Angeles)",
-                                 "4-SBA" = "Southern CCS industrial\nsquid-specialists (Santa Barbara)",
-                                 "4-MNA" = "Southern CCS industrial\nsquid-specialists (Monterey)",
-                                 "5-LAA" = "Roving industrial sardine-squid\ngeneralists (Los Angeles)",
-                                 "5-CLO" = "Roving industrial sardine-squid\ngeneralists (Columbia River OR)",
-                                 "5-CLW" = "Roving industrial sardine-squid\ngeneralists (Columbia River WA)",
-                                 "6-CLO" = "PNW sardine specialists\n(Columbia River OR)",
-                                 "7-MNA" = "Southern CCS forage fish\ndiverse (Monterey)",
-                                 "7-LAA" = "Southern CCS forage fish\ndiverse (Los Angeles)"))
-
-cond_label_nanc <- as_labeller(c("6-CWA" = "PNW sardine specialists\n(Coastal Washington Ports)",
-                                 "6-CLW" = "PNW sardine specialists\n(Columbia River OR)",
-                                 "6-CLO" = "PNW sardine specialists\n(Columbia River WA)",
-                                 "7-SBA" = "Southern CCS forage fish\ndiverse (Santa Barbara)",
-                                 "7-SDA" = "Southern CCS forage fish\ndiverse (San Diego)",
-                                 "7-MNA" = "Southern CCS forage fish\ndiverse (Monterey)",
-                                 "7-LAA" = "Southern CCS forage fish\ndiverse (Los Angeles)"))
-
-gg_msqd <- ggplot(df_cluster_MSQD) + 
-  geom_line(mapping = aes(x = Date, y = Landings_MA, color = "Actual landings"), size = 0.75) + 
-  geom_line(mapping = aes(x = Date, y = Est_landings_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~port_cluster_ID, labeller = cond_label_msqd, ncol = 2) +
-  theme(legend.position="none") +
-  ggtitle("(a) Market squid predictions") +
-  scale_x_continuous(name = "")  +
-  scale_y_continuous(name = "ln(Landings)") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
-
-
-gg_nanc <- ggplot(df_cluster_NANC) + 
-  geom_line(mapping = aes(x = Date, y = Landings_MA, color = "Actual landings"), size = 0.75) + 
-  geom_line(mapping = aes(x = Date, y = Est_landings_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~port_cluster_ID, labeller = cond_label_nanc, ncol = 1) +
-  theme(legend.position="right") +
-  ggtitle("(c) Northern anchovy predictions") +
-  scale_x_continuous(name = "")  +
-  scale_y_continuous(name = "") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
-
-gg_psdn <- ggplot(df_cluster_PSDN) + 
-  geom_line(mapping = aes(x = Date, y = Landings_MA, color = "Actual landings"), size = 0.75) + 
-  geom_line(mapping = aes(x = Date, y = Est_landings_MA, color = "Estimated landings (MA)"), size = 1) +
-  facet_wrap(~port_cluster_ID, labeller = cond_label_psdn, ncol = 3) + 
-  theme(legend.position="none") +
-  scale_color_manual(name = "Variable: ",
-                     values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85")) +
-  ggtitle("Pacific sardine predictions") +
-  scale_x_continuous(name = "Date")  +
-  scale_y_continuous(name = "") 
-
-
-  gg_msqd  
-  gg_psdn 
-  gg_nanc
+# #----------------------------------------
+# ### Aggregate plots
+# #### By cluster/port 
+# 
+# ####  Marker squid
+# prediction_sel <- prediction_MSQD[,-1]
+# prediction_sel <- prediction_sel[,-1]
+# prediction_sel <- prediction_sel[,-1]
+# prediction_sel <- prediction_sel[,-1]
+# 
+# #### Market squid
+# df_cluster_MSQD <- prediction_sel %>% 
+#   dplyr::select(Estimate.logMSQDLandings, ln_MSQD_Landings, 
+#                 LANDING_YEAR, LANDING_MONTH, port_cluster_ID) %>%
+#   mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
+#   mutate(Date = zoo::as.yearmon(Date)) %>%
+#   group_by(Date, port_cluster_ID) %>% 
+#   summarise(Est_landings = sum(Estimate.logMSQDLandings), Landings = sum(ln_MSQD_Landings)) %>% 
+#   group_by(port_cluster_ID) %>%
+#   arrange(port_cluster_ID, Date) %>%
+#   mutate(Est_landings_MA = rollapply(data = Est_landings, 
+#                                           width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
+#   mutate(Landings_MA     = rollapply(data = Landings    , 
+#                                           width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
+# 
+# ### Compute bayes R-squared
+# df_cluster_MSQD %>% ungroup() %>% summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) 
+# df_cluster_MSQD %>% group_by(port_cluster_ID) %>%
+#   summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) %>% ungroup()
+# 
+# 
+# #### Pacific sardine
+# prediction_sel <- prediction_PSDN[,-1]
+# prediction_sel <- prediction_sel[,-1]
+# prediction_sel <- prediction_sel[,-1]
+# prediction_sel <- prediction_sel[,-1]
+# 
+# df_cluster_PSDN <- prediction_sel %>% 
+#   dplyr::select(Estimate.logPSDNLandings, ln_PSDN_Landings, 
+#                 LANDING_YEAR, LANDING_MONTH, port_cluster_ID) %>%
+#   mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
+#   mutate(Date = zoo::as.yearmon(Date)) %>%
+#   group_by(Date, port_cluster_ID) %>% 
+#   summarise(Est_landings = sum(Estimate.logPSDNLandings), Landings = sum(ln_PSDN_Landings)) %>% 
+#   group_by(port_cluster_ID) %>%
+#   arrange(port_cluster_ID, Date) %>%
+#   mutate(Est_landings_MA = rollapply(data = Est_landings, 
+#                                      width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
+#   mutate(Landings_MA     = rollapply(data = Landings    , 
+#                                      width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
+# 
+# df_cluster_PSDN %>% ungroup() %>% summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) 
+# df_cluster_PSDN %>% group_by(port_cluster_ID) %>%
+#   summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) %>% ungroup()
+# 
+# 
+# #### Northern anchovy
+# prediction_sel <- prediction_NANC[,-1]
+# prediction_sel <- prediction_sel[,-1]
+# prediction_sel <- prediction_sel[,-1]
+# prediction_sel <- prediction_sel[,-1]
+# 
+# df_cluster_NANC <- prediction_sel %>% 
+#   dplyr::select(Estimate.logNANCLandings, ln_NANC_Landings, 
+#                 LANDING_YEAR, LANDING_MONTH, port_cluster_ID) %>%
+#   mutate(Date = paste(LANDING_YEAR, LANDING_MONTH,sep="-")) %>% 
+#   mutate(Date = zoo::as.yearmon(Date)) %>%
+#   group_by(Date, port_cluster_ID) %>% 
+#   summarise(Est_landings = sum(Estimate.logNANCLandings), Landings = sum(ln_NANC_Landings)) %>% 
+#   group_by(port_cluster_ID) %>%
+#   arrange(port_cluster_ID, Date) %>%
+#   mutate(Est_landings_MA = rollapply(data = Est_landings, 
+#                                      width = 3, FUN = mean, align = "right", fill = NA, na.rm = T)) %>%
+#   mutate(Landings_MA     = rollapply(data = Landings    , 
+#                                      width = 3, FUN = mean, align = "right", fill = NA, na.rm = T))
+# 
+# 
+# df_cluster_NANC %>% ungroup() %>% summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) 
+# df_cluster_NANC %>% group_by(port_cluster_ID) %>%
+#   summarize(R_2 = (var(Est_landings) / (var(Est_landings) +  var(Est_landings - Landings)))) %>% ungroup()
+# 
+# 
+# 
+# cond_label_msqd <- as_labeller(c("1-LAA" = "Southern CCS small-scale\nsquid-specialists (Los Angeles)",
+#                                  "1-SBA" = "Southern CCS small-scale\nsquid-specialists (Santa Barbara)",
+#                                  "4-LAA" = "Southern CCS industrial\nsquid-specialists (Los Angeles)",
+#                                  "4-MNA" = "Southern CCS industrial\nsquid-specialists (Monterey)",
+#                                  "4-SBA" = "Southern CCS industrial\nsquid-specialists (Santa Barbara)",
+#                                  "5-LAA" = "Roving industrial sardine-squid\ngeneralists (Los Angeles)",
+#                                  "5-SBA" = "Roving industrial sardine-squid\ngeneralists (Santa Barbara)",
+#                                  "7-LAA" = "Southern CCS forage fish\ndiverse (Los Angeles)",
+#                                  "7-SBA" = "Southern CCS forage fish\ndiverse (Santa Barbara)"))
+# 
+# cond_label_psdn <- as_labeller(c("3-CLO" = "PNW sardine opportunists\n(Columbia River OR)",
+#                                  "4-LAA" = "Southern CCS industrial\nsquid-specialists (Los Angeles)",
+#                                  "4-SBA" = "Southern CCS industrial\nsquid-specialists (Santa Barbara)",
+#                                  "4-MNA" = "Southern CCS industrial\nsquid-specialists (Monterey)",
+#                                  "5-LAA" = "Roving industrial sardine-squid\ngeneralists (Los Angeles)",
+#                                  "5-CLO" = "Roving industrial sardine-squid\ngeneralists (Columbia River OR)",
+#                                  "5-CLW" = "Roving industrial sardine-squid\ngeneralists (Columbia River WA)",
+#                                  "6-CLO" = "PNW sardine specialists\n(Columbia River OR)",
+#                                  "7-MNA" = "Southern CCS forage fish\ndiverse (Monterey)",
+#                                  "7-LAA" = "Southern CCS forage fish\ndiverse (Los Angeles)"))
+# 
+# cond_label_nanc <- as_labeller(c("6-CWA" = "PNW sardine specialists\n(Coastal Washington Ports)",
+#                                  "6-CLW" = "PNW sardine specialists\n(Columbia River OR)",
+#                                  "6-CLO" = "PNW sardine specialists\n(Columbia River WA)",
+#                                  "7-SBA" = "Southern CCS forage fish\ndiverse (Santa Barbara)",
+#                                  "7-SDA" = "Southern CCS forage fish\ndiverse (San Diego)",
+#                                  "7-MNA" = "Southern CCS forage fish\ndiverse (Monterey)",
+#                                  "7-LAA" = "Southern CCS forage fish\ndiverse (Los Angeles)"))
+# 
+# gg_msqd <- ggplot(df_cluster_MSQD) + 
+#   geom_line(mapping = aes(x = Date, y = Landings_MA, color = "Actual landings"), size = 0.75) + 
+#   geom_line(mapping = aes(x = Date, y = Est_landings_MA, color = "Estimated landings (MA)"), size = 1) +
+#   facet_wrap(~port_cluster_ID, labeller = cond_label_msqd, ncol = 2) +
+#   theme(legend.position="none") +
+#   ggtitle("(a) Market squid predictions") +
+#   scale_x_continuous(name = "")  +
+#   scale_y_continuous(name = "ln(Landings)") +
+#   scale_color_manual(name = "Variable: ",
+#                      values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
+# 
+# 
+# gg_nanc <- ggplot(df_cluster_NANC) + 
+#   geom_line(mapping = aes(x = Date, y = Landings_MA, color = "Actual landings"), size = 0.75) + 
+#   geom_line(mapping = aes(x = Date, y = Est_landings_MA, color = "Estimated landings (MA)"), size = 1) +
+#   facet_wrap(~port_cluster_ID, labeller = cond_label_nanc, ncol = 1) +
+#   theme(legend.position="right") +
+#   ggtitle("(c) Northern anchovy predictions") +
+#   scale_x_continuous(name = "")  +
+#   scale_y_continuous(name = "") +
+#   scale_color_manual(name = "Variable: ",
+#                      values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85"))
+# 
+# gg_psdn <- ggplot(df_cluster_PSDN) + 
+#   geom_line(mapping = aes(x = Date, y = Landings_MA, color = "Actual landings"), size = 0.75) + 
+#   geom_line(mapping = aes(x = Date, y = Est_landings_MA, color = "Estimated landings (MA)"), size = 1) +
+#   facet_wrap(~port_cluster_ID, labeller = cond_label_psdn, ncol = 3) + 
+#   theme(legend.position="none") +
+#   scale_color_manual(name = "Variable: ",
+#                      values = c("Estimated landings (MA)" = "royalblue", "Actual landings" = "gray85")) +
+#   ggtitle("Pacific sardine predictions") +
+#   scale_x_continuous(name = "Date")  +
+#   scale_y_continuous(name = "") 
+# 
+#   gg_msqd  
+#   gg_psdn 
+#   gg_nanc
 
 
 
@@ -1393,47 +1372,18 @@ gg_psdn <- ggplot(df_cluster_PSDN) +
 ### Other code 
   
 ### Predict if sardine would have been open
-# prediction_mod <- cbind(predict(fit_qMSQD_Spawning, newdata = data.frame(MSQD_Landings = dataset_msqd$MSQD_Landings,
-#                                            MSQD_SPAWN_SDM_90 = dataset_msqd$MSQD_SPAWN_SDM_90,
-#                                            PSDN_SDM.Open = 1,
-#                                            cluster = dataset_msqd$cluster,
-#                                            port_ID = dataset_msqd$port_ID, 
-#                                            PSDN.Closure = 0), dataset_msqd) 
-# 
-# # NOT RUN {
-# ## fit a model
-# fit <- brm(rating ~ treat + period + carry + (1|subject), 
-#            data = inhaler)
-# 
-# ## compute expected predictions
-# fitted_values <- fitted(fit)
-# head(fitted_values)
-# 
-# ## plot expected predictions against actual response
-# dat <- as.data.frame(cbind(Y = standata(fit)$Y, fitted_values))
-# ggplot(dat) + geom_point(aes(x = Estimate, y = Y))
-# # }
-# # NOT RUN {
-# # }
-
-
-# Separate hurdle model 
-# 
-#  hu <- plot(conditional_effects(fit_qPSDN, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="hu"), 
-#             plot = FALSE, ask = FALSE)
-#  mu <- plot(conditional_effects(fit_qPSDN, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="mu"), 
-#             plot = FALSE, ask = FALSE)
-# 
-#  mu[[1]] + hu[[1]] + plot_layout(nrow = 2)
-# 
- 
-#  hu <- plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="hu"), 
-#               plot = FALSE, ask = FALSE) 
-#  mu <- plot(conditional_effects(fit_qMSQD_gamma, "PSDN_SDM:MSQD_SDM", surface=TRUE, dpar="mu"), 
-#               plot = FALSE, ask = FALSE) 
-# 
-#  mu[[1]] + hu[[1]] + plot_layout(nrow = 2) 
-#   
-
-
+prediction_mod <- cbind(predict(fit_qMSQD, 
+                                newdata = data.frame(
+                                  MSQD_Price_z = dataset_msqd_landing$MSQD_Price_z,
+                                  Price.Fishmeal.AFI_z = dataset_msqd_landing$Price.Fishmeal.AFI_z,
+                                  port_ID = dataset_msqd_landing$port_ID,
+                                  MSQD_Landings = dataset_msqd_landing$MSQD_Landings,
+                                  MSQD_SPAWN_SDM_90 = dataset_msqd_landing$MSQD_SPAWN_SDM_90,
+                                  NANC_SDM_20 = dataset_msqd_landing $NANC_SDM_20,
+                                  PSDN.Total.Closure = 0,
+                                  Length_z = dataset_msqd_landing$Length_z,
+                                  PSDN_SDM_60 = dataset_msqd_landing$PSDN_SDM_60,
+                                  PSDN.Open = 1,
+                                  port_cluster_ID = dataset_msqd_landing$port_cluster_ID),
+                                  dataset_msqd_landing))
 
