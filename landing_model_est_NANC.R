@@ -139,12 +139,11 @@ rm(pDataset)
 
 
 ## -------------------------------------------------------------------
-### Market squid landing model ###
+### Anchovy landing model ###
 write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv", row.names = FALSE)
-price_model <- bf(NANC_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
-
 
 ## Define landing equation
+price_model <- bf(NANC_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(NANC_Landings) ~
   1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure + Length_z +
  (1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure | port_cluster_ID))

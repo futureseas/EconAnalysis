@@ -36,20 +36,18 @@ library('XML')
 theme_set(theme_sjplot())
 
 ##### Read landing models
-fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD_v6.RDS"))
-launch_shinystan(fit_qMSQD)
-
-fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN_v5.RDS"))
-fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC_v4.RDS"))
+fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
+fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
+fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
 
 #### Read database 
-dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD_v3.csv")
-dataset_nanc_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_NANC_v4.csv")
-dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_PSDN_v5.csv")
+dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv")
+dataset_nanc_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv")
+dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_PSDN.csv")
 
 
 # summary(fit_qMSQD)
- summary(fit_qPSDN)
+# summary(fit_qPSDN)
 # summary(fit_qNANC)
 
 ############################
