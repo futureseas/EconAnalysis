@@ -1,5 +1,5 @@
 #########################
-#### Anchovy catches #### 
+#### CPS catches #### 
 #########################
 
 library(data.table)
@@ -23,17 +23,27 @@ Tickets4 <- fread("C:/Data/PacFIN data/FutureSeasIII_1981_1989.csv")
 Tickets<-rbind(Tickets1, Tickets2, Tickets3, Tickets4)
 rm(Tickets1, Tickets2, Tickets3, Tickets4)
 
-
+port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
+Tickets <- Tickets %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
 
 
 ## Subset the data to get remove columns not relevant to this analysis. This will speed things up.
-Tickets <- dplyr::select(Tickets, c(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS, LANDING_YEAR, LANDING_MONTH, 
-                                    AGENCY_CODE, PACFIN_PORT_CODE))
-options(scipen=999)  
-Tickets_anchovy <- Tickets %>% dplyr::filter(PACFIN_SPECIES_CODE == 'MSQD') %>% 
-  group_by(LANDING_YEAR, PACFIN_PORT_CODE) %>%
-    summarize(MSQD_Landings = sum(LANDED_WEIGHT_MTONS))
+Tickets <- dplyr::select(Tickets, c(PACFIN_SPECIES_CODE, LANDED_WEIGHT_MTONS, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, 
+                                    AGENCY_CODE, PORT_AREA_CODE))
 
-write.csv(Tickets_anchovy,"C:\\Data\\squid_landings_by_port_year.csv", row.names = FALSE)
+
+
+
+options(scipen=999)  
+Tickets_CPS <- Tickets %>% dplyr::filter(PACFIN_SPECIES_CODE == 'PSDN' | 
+                                         PACFIN_SPECIES_CODE == 'NANC' | 
+                                         PACFIN_SPECIES_CODE == 'MSQD' |
+                                         PACFIN_SPECIES_CODE == 'JMCK' |
+                                         PACFIN_SPECIES_CODE == 'CMCK' |
+                                         PACFIN_SPECIES_CODE == 'UMCK') %>% 
+  group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE, PACFIN_SPECIES_CODE) %>%
+    summarize(Total.Landings.MTONS = sum(LANDED_WEIGHT_MTONS))
+
+write.csv(Tickets_CPS,"C:\\Data\\daily_CPS_landings_by_port_area.csv", row.names = FALSE)
 
   
