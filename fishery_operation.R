@@ -84,11 +84,11 @@ landings.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~ PACFIN_SPECIES_CODE + LANDI
 landings.year.2000_2014 <- landings.year %>% filter(LANDING_YEAR <2015) %>% mutate(period="2000-2014")
 landings.year.2015_2020 <- landings.year %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
 
-landings.avg.year.2000_2014 <- landings.year.2000_2014 %>% group_by(PACFIN_SPECIES_CODE, VESSEL_NUM, period) %>%
+landings.avg.year.2000_2014 <- landings.year.2000_2014 %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR, period) %>%
   summarize(avg_landings = mean(LANDED_WEIGHT_MTONS.sum.sum)) %>% group_by(PACFIN_SPECIES_CODE, period) %>%
   summarize(avg_landings_species = mean(avg_landings))
 
-landings.avg.year.2015_2020  <- landings.year.2015_2020 %>% group_by(PACFIN_SPECIES_CODE, VESSEL_NUM, period) %>%
+landings.avg.year.2015_2020  <- landings.year.2015_2020 %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR, period) %>%
   summarize(avg_landings = mean(LANDED_WEIGHT_MTONS.sum.sum)) %>% group_by(PACFIN_SPECIES_CODE, period) %>%
   summarize(avg_landings_species = mean(avg_landings))
 
@@ -126,11 +126,11 @@ revenue.year.2000_2014 <- revenue.year %>% filter(LANDING_YEAR <2015)  %>% mutat
 revenue.year.2015_2020 <- revenue.year %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
 
 
-revenue.avg.year.2000_2014 <- revenue.year.2000_2014 %>% group_by(PACFIN_SPECIES_CODE, VESSEL_NUM, period) %>%
+revenue.avg.year.2000_2014 <- revenue.year.2000_2014 %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR, period) %>%
   summarize(avg_revenue = mean(AFI_EXVESSEL_REVENUE.sum.sum)) %>% group_by(PACFIN_SPECIES_CODE, period) %>%
   summarize(avg_revenue_species = mean(avg_revenue))
 
-revenue.avg.year.2015_2020 <- revenue.year.2015_2020 %>% group_by(PACFIN_SPECIES_CODE, VESSEL_NUM, period) %>%
+revenue.avg.year.2015_2020 <- revenue.year.2015_2020 %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR, period) %>%
   summarize(avg_revenue = mean(AFI_EXVESSEL_REVENUE.sum.sum)) %>% group_by(PACFIN_SPECIES_CODE, period) %>%
   summarize(avg_revenue_species = mean(avg_revenue))
 
@@ -185,9 +185,9 @@ rm(g1, g2, g3, g4, landings.year,
 # Calculate vessel landings by port and year
 landings.by.port.year <- PacFIN.month %>% 
   group_by(PACFIN_SPECIES_CODE, PORT_AREA_CODE, LANDING_YEAR, AGENCY_CODE, VESSEL_NUM) %>%
-  summarize(annual_landings = LANDED_WEIGHT_MTONS.sum) %>%
+  summarize(annual_landings = sum(LANDED_WEIGHT_MTONS.sum)) %>%
   group_by(PACFIN_SPECIES_CODE, PORT_AREA_CODE, LANDING_YEAR, AGENCY_CODE) %>%
-  summarize(avg_annual_landings = annual_landings)
+  summarize(avg_annual_landings = mean(annual_landings))
 
 landings.by.port.year.PRE <- landings.by.port.year %>% filter(LANDING_YEAR <2015)
 landings.by.port.avg.year <- landings.by.port.year.PRE %>%
@@ -262,7 +262,7 @@ gg2 <- ggplot(landings.by.port.avg.year, aes(fill=PACFIN_SPECIES_CODE,
     "CLW" = "Columbia\nRiver (WA)", "CWA" = "Washington\nCoastal Ports", 
     "MRA" = "Morro\nBay", "NPS" = "North Puget\nSound")) +
   scale_color_brewer(palette="Set2") + ggtitle("(b) 2015-2020") +    
-  scale_y_continuous(limits = c(0, 499), breaks = seq(0, 499, 100))
+  scale_y_continuous(limits = c(0, 1500), breaks = seq(0, 1500, 500))
 
 gg1 / gg2
 rm(landings.by.port.avg.year, landings.by.port.year, 
@@ -381,53 +381,71 @@ sdm.by.species <- PacFIN.month.CPS.nvessels %>%
   dplyr::rename(Landings_MSQD = LANDED_WEIGHT_MTONS_MSQD) %>% 
   dplyr::rename(Landings_NANC = LANDED_WEIGHT_MTONS_NANC)
 
-area_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara",
-                            `MNA` = "Monterey", `CLO` = "Columbia River (OR)", 
-                            `CWA` = "Washington Coastal Ports"))
 
-sdm.by.species$Date <- zoo::as.yearmon(paste(sdm.by.species$LANDING_YEAR, sdm.by.species$LANDING_MONTH, sep='-'))
+sdm.by.species.v2 <- PacFIN.month.CPS %>%
+  dplyr::select(LANDING_YEAR, PSDN_SDM_60, MSQD_SDM_90_JS_CPUE,
+                MSQD_SDM_90, MSQD_SPAWN_SDM_90, MSQD_SPAWN_SDM_90_v2, DCRB_LANDING, 
+                NANC_SDM_20, MSQD_recruitment, LANDED_WEIGHT_MTONS.sum, 
+                PACFIN_SPECIES_CODE, PORT_AREA_CODE, VESSEL_NUM) %>% 
+  filter(LANDING_YEAR >= 2000 & LANDING_YEAR <= 2019) %>%
+  group_by(LANDING_YEAR, PORT_AREA_CODE, PACFIN_SPECIES_CODE, VESSEL_NUM) %>% 
+  summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
+            NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
+            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=TRUE),
+            LANDED_WEIGHT_MTONS = sum(LANDED_WEIGHT_MTONS.sum, na.rm = TRUE)) %>%
+  group_by(LANDING_YEAR, PORT_AREA_CODE, PACFIN_SPECIES_CODE) %>% 
+  summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
+            NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
+            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm=TRUE),
+            LANDED_WEIGHT_MTONS = mean(LANDED_WEIGHT_MTONS, na.rm = TRUE)) %>%
+  pivot_wider(id_cols = c("LANDING_YEAR", "PORT_AREA_CODE",
+                          "PSDN_SDM_60", "NANC_SDM_20", "MSQD_SPAWN_SDM_90"), 
+              names_from = PACFIN_SPECIES_CODE,
+              values_from = c("LANDED_WEIGHT_MTONS")) %>% 
+  dplyr::rename(Landings_PSDN = PSDN) %>% 
+  dplyr::rename(Landings_MSQD = MSQD) %>% 
+  dplyr::rename(Landings_NANC = NANC)
+
+
+area_names <- as_labeller(c(`LAA` = "Los Angeles", `SBA` = "Santa Barbara",
+                            `MNA` = "Monterey", `CLO` = "Columbia River (OR)", `CLW` = "Columbia River (WA)", 
+                            `CWA` = "Washington Coastal Ports", `SFA` = "San Francisco"))
+
+# sdm.by.species$Date <- zoo::as.yearmon(paste(sdm.by.species$LANDING_YEAR, sdm.by.species$LANDING_MONTH, sep='-'))
 
 
 # Create sardine plot
-sdm.by.species.PSDN <- sdm.by.species %>% 
-  filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "CLO") %>% 
+sdm.by.species.PSDN <- sdm.by.species.v2 %>% 
+  filter(PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "CLO"| PORT_AREA_CODE == "LAA") %>% 
   mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "MNA", "CLO")) %>%
   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
   summarize(PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE), 
-            Landings_PSDN = sum(Landings_PSDN, na.rm = TRUE),
-            n_vessel_PSDN = mean(n_vessel_PSDN, na.rm = TRUE)) %>% 
-  mutate(RATIO = (Landings_PSDN / n_vessel_PSDN)) %>%
+            Landings_PSDN = sum(Landings_PSDN, na.rm = TRUE)) %>% 
+  mutate(RATIO = (Landings_PSDN)) %>%
   mutate(RATIO = ifelse(is.na(RATIO), 0, RATIO))
 
 
 
 # Create anchovy plot
-sdm.by.species.NANC <- sdm.by.species %>% 
-  filter(PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
-  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "SBA", "MNA", "CWA")) %>%
+sdm.by.species.NANC <- sdm.by.species.v2 %>% 
+  filter(PORT_AREA_CODE == "CLO" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
+  mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "SBA", "MNA", "CLO")) %>%
   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
   summarize(NANC_SDM_20 = mean(NANC_SDM_20, na.rm = TRUE), 
-            Landings_NANC = sum(Landings_NANC, na.rm = TRUE),
-            n_vessel_NANC = mean(n_vessel_NANC, na.rm = TRUE)) %>% 
-  mutate(RATIO = (Landings_NANC / n_vessel_NANC)) %>%
+            Landings_NANC = sum(Landings_NANC, na.rm = TRUE)) %>% 
+  mutate(RATIO = (Landings_NANC)) %>%
   mutate(RATIO = ifelse(is.na(RATIO), 0, RATIO))
 
 
 # Plot all squid SDMs outputs
 
-sdm.by.species.MSQD <- sdm.by.species %>% 
+sdm.by.species.MSQD <- sdm.by.species.v2 %>% 
   filter(PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "MNA") %>% 
   mutate(PORT_AREA_CODE = fct_relevel(PORT_AREA_CODE, "LAA", "SBA", "MNA")) %>%
   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(MSQD_SDM_90_JS_cpue = mean(MSQD_SDM_90_JS_cpue, na.rm = TRUE),
-            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
-            MSQD_SDM_90 = mean(MSQD_SDM_90, na.rm = TRUE),
-            MSQD_SPAWN_SDM_90_v2 = mean(MSQD_SPAWN_SDM_90_v2, na.rm = TRUE),
-            MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
-            MSQD_recruitment = mean(MSQD_recruitment, na.rm=TRUE),
-            Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE),
-            n_vessel_MSQD = mean(n_vessel_PSDN, na.rm = TRUE)) %>% 
-  mutate(RATIO = (Landings_MSQD / n_vessel_MSQD)) %>%
+  summarize(MSQD_SPAWN_SDM_90 = mean(MSQD_SPAWN_SDM_90, na.rm = TRUE),
+            Landings_MSQD = sum(Landings_MSQD, na.rm = TRUE)) %>% 
+  mutate(RATIO = (Landings_MSQD)) %>%
   mutate(RATIO = ifelse(is.na(RATIO), 0, RATIO))
 
 
@@ -452,7 +470,7 @@ g2 <-  ggplot(sdm.by.species.NANC) +
   geom_line(mapping = aes(x = LANDING_YEAR, y = RATIO, color = "Landings by active vessel"), size = 0.5) +
   geom_line(mapping = aes(x = LANDING_YEAR, y = NANC_SDM_20*coeff2, color = "Probability of presence"),
             size = 0.5, linetype = "dashed") +
-  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("SBA", "MNA", "CWA")), labeller = area_names,  ncol = 3) +
+  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("MNA", "SBA", "CLO")), labeller = area_names,  ncol = 4) +
   geom_text(data = cors2, 
             aes(x = Inf, y = Inf, 
                 label = paste("r=", cor, sep="")),
@@ -471,7 +489,7 @@ g4 <- ggplot(sdm.by.species.MSQD) +
   geom_line(mapping = aes(x = LANDING_YEAR, y = RATIO), size = 0.5, color = "grey") +
   geom_line(mapping = aes(x = LANDING_YEAR, y = MSQD_SPAWN_SDM_90*coeff4),
             size = 0.5, linetype = "dashed", color = "blue") +
-  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 3) +
+  facet_wrap(~ factor(PORT_AREA_CODE, levels=c("LAA", "SBA", "MNA")), labeller = area_names,  ncol = 4) +
   geom_text(data = cors4, 
             aes(x = Inf, y = Inf, 
                 label = paste("r=", cor, sep="")),
@@ -482,14 +500,14 @@ g4 <- ggplot(sdm.by.species.MSQD) +
         axis.text = element_text(size = 7), axis.title = element_text(size = 8), legend.position="right") +
   ggtitle("(a) Market squid (spawning aggregation model; 90 km radius)")
 
-coeff4 <- 10000
-coeff1 <- 1000
-coeff2 <- 500
+coeff4 <- 15000
+coeff1 <- 3000
+coeff2 <- 1500
 
 g4 / g1 / g2
 
-rm(g1, g2, g4, cors1, cors2, cors4, sdm.by.species.MSQD, sdm.by.species.NANC, sdm.by.species.PSDN,
-   coeff1, coeff2, coeff4, area_names)
+# rm(g1, g2, g4, cors1, cors2, cors4, sdm.by.species.MSQD, sdm.by.species.NANC, sdm.by.species.PSDN,
+#    coeff1, coeff2, coeff4, area_names)
 
 
 #####################
