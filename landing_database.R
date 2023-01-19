@@ -478,45 +478,64 @@ rm(fuel.prices, fuel.prices.CA, fuel.prices.OR, fuel.prices.WA, fuel.prices.stat
 
 #---------------------------------------------------------------------------------------
 ### Include wages
-wages2000 <- read.csv(here::here("Data", "Wages", "2000.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
-wages2015 <- read.csv(here::here("Data", "Wages", "2015.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
-wages2016 <- read.csv(here::here("Data", "Wages", "2016.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
-wages2017 <- read.csv(here::here("Data", "Wages", "2017.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
-wages2018 <- read.csv(here::here("Data", "Wages", "2018.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
-wages2019 <- read.csv(here::here("Data", "Wages", "2019.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
-wages2020 <- read.csv(here::here("Data", "Wages", "2020.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
 
+library(data.table)
 
+file_names_finfish <- dir(path = here::here("Data", "Wages"), pattern = "114111 Finfish fishing")
+file_names_finfish <- paste(here::here("Data", "Wages"), file_names_finfish, sep = "/")
+wages <- file_names_finfish %>% purrr::map_df(~fread(.)) %>%
+  dplyr::select(c('area_fips', 'year', 'qtr', 'area_title', 'month1_emplvl', 'month2_emplvl', 'month3_emplvl', 'total_qtrly_wages')) %>%
+  dplyr::filter(area_title == "California -- Statewide" | area_fips == 53000 | area_fips == 41000 ) %>%
+  dplyr::rename(LANDING_YEAR = year) %>% dplyr::rename(LANDING_QUARTER = qtr) %>% dplyr::rename(AGENCY_CODE = area_title) %>%
+  mutate(wages =  total_qtrly_wages / (month1_emplvl + month2_emplvl + month3_emplvl)) %>%
+  dplyr::select(c('LANDING_YEAR', 'LANDING_QUARTER', 'AGENCY_CODE', 'wages')) %>% 
+  mutate(AGENCY_CODE = ifelse(AGENCY_CODE == "California -- Statewide", "C", ifelse(AGENCY_CODE == "Oregon -- Statewide", "O", "W")))
 
-wages_2015_2020 <- rbind(wages2000, wages2015, wages2016, wages2017,
-                         wages2018, wages2019, wages2020)
+# file_names_shellfish <- dir(path = here::here("Data", "Wages"), pattern = "114112 Shellfish fishing")
+# file_names_shellfish <- paste(here::here("Data", "Wages"), file_names_shellfish, sep = "/")
+# wages_shellfish <- file_names_shellfish %>% purrr::map_df(~fread(.)) %>%
+#   dplyr::select(c('area_fips', 'year', 'qtr', 'area_title', 'month1_emplvl', 'month2_emplvl', 'month3_emplvl', 'total_qtrly_wages')) %>%
+#   dplyr::filter(area_title == "California -- Statewide" | area_fips == 53000 | area_fips == 41000 ) %>%
+#   dplyr::rename(LANDING_YEAR = year) %>% dplyr::rename(LANDING_QUARTER = qtr) %>% dplyr::rename(AGENCY_CODE = area_title) %>%
+#   mutate(wages_sf =  total_qtrly_wages / (month1_emplvl + month2_emplvl + month3_emplvl)) %>%
+#   dplyr::select(c('LANDING_YEAR', 'LANDING_QUARTER', 'AGENCY_CODE', 'wages_sf')) %>% 
+#   mutate(AGENCY_CODE = ifelse(AGENCY_CODE == "California -- Statewide", "C", ifelse(AGENCY_CODE == "Oregon -- Statewide", "O", "W")))
+# # 
+# wages$wages_sf <- wages_shellfish$wages_sf
+# wages$Date <- zoo::as.yearqtr(paste(wages$LANDING_YEAR, 
+#                                     wages$LANDING_QUARTER, sep='-'))
+# cors <- plyr::ddply(drop_na(wages), c("AGENCY_CODE"), summarise, cor = round(cor(wages, wages_sf), 2))
+# ggplot2::ggplot(wages) +
+#   ggplot2::geom_line(ggplot2::aes(x=Date, y=wages_sf),
+#                      color="#63a1c9", size=1, alpha=0.75, linetype=1) +
+#   ggplot2::geom_line(ggplot2::aes(x=Date, y=wages), 
+#                      color="#69b3a2", size=1, alpha=0.5, linetype=1) + 
+#   ggplot2::facet_wrap(~AGENCY_CODE) + 
+#   ggplot2::geom_text(data = cors, 
+#                      ggplot2::aes(x = Inf, y = Inf, 
+#                 label = paste("r=", cor, sep="")),
+#             hjust = 1, vjust = 1)
 
-
-
-wages <- readxl::read_excel(here::here("Data", "Wages", "wageall.xls"), sheet = "wageall")
-
-
-
-wages_fishing <- wages %>%
-  dplyr::select(c('year', 'state', 'sic', 'naics','aearn_q1',	'aearn_q2',	'aearn_q3', 'aearn_q4')) %>%
-  dplyr::filter(sic == 912 | naics == 114111) %>% filter(state != "AK") %>% filter(year > 1999) %>%
-  dplyr::rename(LANDING_YEAR = year) %>% dplyr::rename(AGENCY_CODE = state) %>% 
-  mutate(AGENCY_CODE = ifelse(AGENCY_CODE == "CA", "C", ifelse(AGENCY_CODE == "OR", "O", "W"))) %>%
-  dplyr::select(-c('sic', 'naics'))
-wages_fishing[wages_fishing == 0] <- NA
-
-wages_fishing_long <- gather(wages_fishing, LANDING_QUARTER, wages, aearn_q1:aearn_q4, factor_key=TRUE) %>%
-  mutate(LANDING_QUARTER = ifelse(LANDING_QUARTER == "aearn_q1", 1, 
-                                  ifelse(LANDING_QUARTER == "aearn_q2", 2,
-                                         ifelse(LANDING_QUARTER == "aearn_q3", 3, 4))))
+# wages <- readxl::read_excel(here::here("Data", "Wages", "wageall.xls"), sheet = "wageall")
+# wages_fishing <- wages %>%
+#   dplyr::select(c('year', 'state', 'sic', 'naics','aearn_q1',	'aearn_q2',	'aearn_q3', 'aearn_q4')) %>%
+#   dplyr::filter(sic == 912 | naics == 114111) %>% filter(state != "AK") %>% filter(year > 1999) %>%
+#   dplyr::rename(LANDING_YEAR = year) %>% dplyr::rename(AGENCY_CODE = state) %>% 
+#   mutate(AGENCY_CODE = ifelse(AGENCY_CODE == "CA", "C", ifelse(AGENCY_CODE == "OR", "O", "W"))) %>%
+#   dplyr::select(-c('sic', 'naics'))
+# wages_fishing[wages_fishing == 0] <- NA
+# wages_fishing_long <- gather(wages_fishing, LANDING_QUARTER, wages, aearn_q1:aearn_q4, factor_key=TRUE) %>%
+#   mutate(LANDING_QUARTER = ifelse(LANDING_QUARTER == "aearn_q1", 1, 
+#                                   ifelse(LANDING_QUARTER == "aearn_q2", 2,
+#                                          ifelse(LANDING_QUARTER == "aearn_q3", 3, 4))))
 
 ## Merge wages to dataset
 dataset$LANDING_QUARTER <- lubridate::quarter(dataset$LANDING_MONTH)
-dataset <- merge(dataset, wages_fishing_long, by = c('LANDING_YEAR', 'LANDING_QUARTER', 'AGENCY_CODE'), all.x = TRUE, all.y = FALSE)
+dataset <- merge(dataset, wages, by = c('LANDING_YEAR', 'LANDING_QUARTER', 'AGENCY_CODE'), all.x = TRUE, all.y = FALSE)
 
 ## Deflect prices
 dataset$wages.AFI <- dataset$wages*dataset$defl
-rm(wages_fishing_long, wages_fishing, wages)
+rm(wages)
 
 
 #---------------------------------------------------------------------------------------

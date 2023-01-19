@@ -55,7 +55,8 @@ dataset_msqd <- dataset %>%
                 PSDN.Open, MSQD.Open, Price.Fishmeal, Price.Fishmeal_z, 
                 Price.Fishmeal.AFI, Price.Fishmeal.AFI_z,
                 diesel.price, diesel.price.AFI, diesel.price_z, diesel.price.AFI_z,
-                Length, Length_z, avg_set_MSQD, avg_set_MSQD_z) %>% 
+                Length, Length_z, avg_set_MSQD, avg_set_MSQD_z,
+                wages_z, wages.AFI_z) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>%
   mutate(MSQD_Landings = ifelse(MSQD_Landings<= 0, 0, MSQD_Landings)) %>%
   mutate(MSQD_Landings = ifelse(MSQD_Landings< 0.0001, 0, MSQD_Landings)) %>%
@@ -113,11 +114,6 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
 # rm(desc_data, table)
 
 
-### Correlation between diesel price and fish meal price
-round(cor(dataset_msqd_landing$Price.Fishmeal.AFI, dataset_msqd_landing$diesel.price.AFI_z), 2)
-plyr::ddply(dataset_msqd_landing, c("PORT_AREA_CODE"), summarise, cor = round(cor(Price.Fishmeal.AFI, diesel.price.AFI_z), 2))
-
-
 #-------------------------------------------------------------------
 ## Check stationarity in the panel dataset
 library("plm")
@@ -144,6 +140,7 @@ rm(pDataset)
 ## -------------------------------------------------------------------
 ### Market squid landing model ###
 
+dataset_msqd_landing <- dataset_msqd_landing %>% mutate(wages.AFI_z = -(wages.AFI_z))
 dataset_select <- dataset_msqd_landing %>% ungroup() %>% #filter(LANDING_YEAR < 2015) %>%
   dplyr::select(MSQD_SPAWN_SDM_90,
                 PSDN_SDM_60,
@@ -152,7 +149,7 @@ dataset_select <- dataset_msqd_landing %>% ungroup() %>% #filter(LANDING_YEAR < 
                 MSQD_Price_z,
                 Price.Fishmeal.AFI_z,
                 diesel.price.AFI_z,
-                # wages.AFI_z,
+                wages.AFI_z,
                 MSQD_Landings)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
@@ -161,8 +158,8 @@ write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD.c
 
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(MSQD_Landings) ~
-  1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + Length_z +
- (1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure | port_cluster_ID))
+  1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + wages.AFI_z + Length_z +
+ (1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + wages.AFI_z | port_cluster_ID))
 
 
 # Create priors
@@ -171,6 +168,7 @@ prior_lognormal <- c(
   prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = Length_z),
   prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_Price_z),
   prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90),
+  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = wages.AFI_z),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90:NANC_SDM_20),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = NANC_SDM_20),
@@ -181,15 +179,15 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(66)
- fit_qMSQD <-
+ fit_qMSQD_wages <-
    brm(data = dataset_msqd_landing,
        family = gaussian,
        price_model + landing_model + set_rescor(TRUE),
        prior = prior_lognormal,
        iter = 2000, warmup = 1000, chains = 4, cores = 4,
        control = list(max_treedepth = 15, adapt_delta = 0.99),
-       file = "Estimations/fit_qMSQD")
+       file = "Estimations/fit_qMSQD_wages")
 
-fit_qMSQD <- add_criterion(fit_qMSQD, "loo", overwrite = TRUE)
+fit_qMSQD_wages <- add_criterion(fit_qMSQD_wages, "loo", overwrite = TRUE)
 
 
