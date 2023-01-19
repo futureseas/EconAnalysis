@@ -141,7 +141,7 @@ rm(pDataset)
 ### Market squid landing model ###
 
 dataset_msqd_landing <- dataset_msqd_landing %>% mutate(wages.AFI_z = -(wages.AFI_z))
-dataset_select <- dataset_msqd_landing %>% ungroup() %>% #filter(LANDING_YEAR < 2015) %>%
+dataset_select <- dataset_msqd_landing %>% ungroup() %>%
   dplyr::select(MSQD_SPAWN_SDM_90,
                 PSDN_SDM_60,
                 NANC_SDM_20,
