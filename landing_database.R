@@ -478,7 +478,24 @@ rm(fuel.prices, fuel.prices.CA, fuel.prices.OR, fuel.prices.WA, fuel.prices.stat
 
 #---------------------------------------------------------------------------------------
 ### Include wages
+wages2000 <- read.csv(here::here("Data", "Wages", "2000.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
+wages2015 <- read.csv(here::here("Data", "Wages", "2015.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
+wages2016 <- read.csv(here::here("Data", "Wages", "2016.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
+wages2017 <- read.csv(here::here("Data", "Wages", "2017.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
+wages2018 <- read.csv(here::here("Data", "Wages", "2018.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
+wages2019 <- read.csv(here::here("Data", "Wages", "2019.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
+wages2020 <- read.csv(here::here("Data", "Wages", "2020.q1-q4 114111 NAICS 114111 Finfish fishing.csv"))
+
+
+
+wages_2015_2020 <- rbind(wages2000, wages2015, wages2016, wages2017,
+                         wages2018, wages2019, wages2020)
+
+
+
 wages <- readxl::read_excel(here::here("Data", "Wages", "wageall.xls"), sheet = "wageall")
+
+
 
 wages_fishing <- wages %>%
   dplyr::select(c('year', 'state', 'sic', 'naics','aearn_q1',	'aearn_q2',	'aearn_q3', 'aearn_q4')) %>%
