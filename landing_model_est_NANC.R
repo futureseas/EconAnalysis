@@ -139,6 +139,20 @@ rm(pDataset)
 
 ## -------------------------------------------------------------------
 ### Anchovy landing model ###
+
+dataset_select <- dataset_nanc_landing %>% ungroup() %>% #filter(LANDING_YEAR < 2015) %>%
+  dplyr::select(MSQD_SPAWN_SDM_90,
+                PSDN_SDM_60,
+                NANC_SDM_20,
+                Length_z,
+                NANC_Price_z,
+                Price.Fishmeal.AFI_z,
+                diesel.price.AFI_z,
+                #wages.AFI_z,
+                NANC_Landings)
+res <- as.data.frame(cor(dataset_select))
+round(res, 2)
+
 write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv", row.names = FALSE)
 
 ## Define landing equation

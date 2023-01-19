@@ -142,6 +142,22 @@ rm(pDataset)
 
 ## -------------------------------------------------------------------
 ### Sardine landing model ###
+
+dataset_select <- dataset_psdn_landing %>% ungroup() %>% #filter(LANDING_YEAR < 2015) %>%
+  dplyr::select(MSQD_SPAWN_SDM_90,
+                PSDN_SDM_60,
+                NANC_SDM_20,
+                Length_z,
+                PSDN_Price_z,
+                Price.Fishmeal.AFI_z,
+                diesel.price.AFI_z,
+                #wages.AFI_z,
+                PSDN_Landings)
+res <- as.data.frame(cor(dataset_select))
+round(res, 2)
+
+
+
 write.csv(dataset_psdn_landing,"C:\\Data\\PacFIN data\\dataset_estimation_PSDN.csv", row.names = FALSE)
 
 price_model   <- bf(PSDN_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))

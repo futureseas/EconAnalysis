@@ -144,6 +144,19 @@ rm(pDataset)
 ## -------------------------------------------------------------------
 ### Market squid landing model ###
 
+dataset_select <- dataset_msqd_landing %>% ungroup() %>% #filter(LANDING_YEAR < 2015) %>%
+  dplyr::select(MSQD_SPAWN_SDM_90,
+                PSDN_SDM_60,
+                NANC_SDM_20,
+                Length_z,
+                MSQD_Price_z,
+                Price.Fishmeal.AFI_z,
+                diesel.price.AFI_z,
+                # wages.AFI_z,
+                MSQD_Landings)
+res <- as.data.frame(cor(dataset_select))
+round(res, 2)
+
 write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv", row.names = FALSE)
 
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
