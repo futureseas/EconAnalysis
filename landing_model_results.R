@@ -86,7 +86,8 @@ newdf <- data.frame(
   PSDN.Open = fitdata$PSDN.Open,
   NANC_SDM_20 = fitdata$NANC_SDM_20,
   PSDN.Total.Closure = fitdata$PSDN.Total.Closure,
-  Length_z = fitdata$Length_z)
+  Length_z = fitdata$Length_z,
+  wages.AFI_z = fitdata$wages.AFI)
 fit_qMSQD_subset <- extract_draws(fit_qMSQD, newdata = newdf, allow_new_levels = T)
 y_pred <- brms::posterior_linpred(fit_qMSQD, newdata = newdf, allow_new_levels = T, resp = 'logMSQDLandings')
 var_fit <- apply(y_pred, 1, var)

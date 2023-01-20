@@ -51,7 +51,8 @@ dataset_psdn <- dataset %>%
                 Price.Fishmeal, Price.Fishmeal_z, 
                 Price.Fishmeal.AFI, Price.Fishmeal.AFI_z,
                 diesel.price.AFI, diesel.price.AFI_z,
-                Length, Length_z) %>% 
+                Length, Length_z, 
+                wages.AFI, wages.AFI_z) %>% 
   dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>%
   mutate(PSDN_Landings = ifelse(PSDN_Landings<= 0, 0, PSDN_Landings)) %>%
   mutate(PSDN_Landings = ifelse(PSDN_Landings< 0.0001, 0, PSDN_Landings)) %>%
@@ -62,6 +63,7 @@ dataset_psdn <- dataset %>%
   filter(group_all == 3 | group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>%
   mutate(cluster_port = paste(group_all, PORT_AREA_CODE, sep = "-", collapse = NULL)) %>%
   mutate(diesel.price.AFI_z = -1*diesel.price.AFI_z) %>%
+  mutate(wages.AFI_z = -1*wages.AFI_z) %>%
   drop_na()
   
   
@@ -70,7 +72,7 @@ dataset_psdn <- dataset %>%
   # dataset_psdn %>% group_by(PORT_AREA_CODE) %>% summarize(n_freq = n()/nrow(dataset_psdn))
 
 
-#### Convert variables to factor #### HERE I CHANGE THE ID
+#### Convert variables to factor 
 dataset_psdn$port_cluster_ID    <- factor(dataset_psdn$cluster_port)
 dataset_psdn$port_ID            <- factor(dataset_psdn$PORT_AREA_CODE)
 class(dataset_psdn$port_ID)
@@ -108,7 +110,7 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 7, "Fraction of month open: MSQD", vars)) %>%
   mutate(vars = ifelse(vars == 8, "Fishmeal price", vars))
 
-# gs4_create("SummaryMonthly_Q_PSDN_v4", sheets = table)
+# gs4_create("SummaryMonthly_Q_PSDN", sheets = table)
 # rm(desc_data, table)
 
 ### Correlation between diesel price and fishmeal price
@@ -143,7 +145,8 @@ rm(pDataset)
 ## -------------------------------------------------------------------
 ### Sardine landing model ###
 
-dataset_select <- dataset_psdn_landing %>% ungroup() %>% #filter(LANDING_YEAR < 2015) %>%
+#### Check correlation
+dataset_select <- dataset_psdn_landing %>% ungroup() %>% 
   dplyr::select(MSQD_SPAWN_SDM_90,
                 PSDN_SDM_60,
                 NANC_SDM_20,
@@ -151,19 +154,18 @@ dataset_select <- dataset_psdn_landing %>% ungroup() %>% #filter(LANDING_YEAR < 
                 PSDN_Price_z,
                 Price.Fishmeal.AFI_z,
                 diesel.price.AFI_z,
-                #wages.AFI_z,
+                wages.AFI_z,
                 PSDN_Landings)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
 
-
+#### Estimate model
 write.csv(dataset_psdn_landing,"C:\\Data\\PacFIN data\\dataset_estimation_PSDN.csv", row.names = FALSE)
-
 price_model   <- bf(PSDN_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(PSDN_Landings) ~
-                       1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction + Length_z +
-                      (1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction + | port_cluster_ID))
+                       1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction + wages.AFI_z + Length_z +
+                      (1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction + wages.AFI_z | port_cluster_ID))
 
 get_prior(data = dataset_psdn_landing,
           family = gaussian,
@@ -175,6 +177,7 @@ prior_lognormal <- c(
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = Length_z),
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = PSDN_Price_z),
   prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60),
+  prior(lognormal(0,1), class = b,     resp = logPSDNLandings, coef = wages.AFI_z),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60:NANC_SDM_20),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open),
   prior(normal(0,1),    class = b,     resp = logPSDNLandings, coef = NANC_SDM_20),
@@ -191,8 +194,6 @@ fit_qPSDN <-
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qPSDN")
-
-fit_qPSDN <- add_criterion(fit_qPSDN, "loo", overwrite = TRUE)
+      file = "Estimations/fit_qPSDN_wages")
 
 

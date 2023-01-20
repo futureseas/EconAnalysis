@@ -51,7 +51,8 @@ dataset_nanc <- dataset %>%
                 Price.Fishmeal, Price.Fishmeal_z, 
                 Price.Fishmeal.AFI, Price.Fishmeal.AFI_z,
                 diesel.price.AFI_z,
-                Length, Length_z) %>% 
+                Length, Length_z, 
+                wages.AFI, wages.AFI_z) %>% 
   dplyr::mutate(NANC_Landings = coalesce(NANC_Landings, 0)) %>%
   mutate(NANC_Landings = ifelse(NANC_Landings<= 0, 0, NANC_Landings)) %>%
   mutate(NANC_Landings = ifelse(NANC_Landings< 0.0001, 0, NANC_Landings)) %>%
@@ -60,6 +61,8 @@ dataset_nanc <- dataset %>%
   dplyr::mutate(ln_NANC_Landings = log(NANC_Landings)) %>%
   mutate(cluster_port = paste(group_all, PORT_AREA_CODE, sep = "-", collapse = NULL)) %>%
     filter(group_all == 6 | group_all == 7) %>%
+  mutate(diesel.price.AFI_z = -1*diesel.price.AFI_z) %>%
+  mutate(wages.AFI_z = -1*wages.AFI_z) %>%
   drop_na()
 
 # filter(PORT_AREA_CODE != "CLO") %>%
@@ -135,12 +138,9 @@ purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
 rm(pDataset)
 
 
-
-
 ## -------------------------------------------------------------------
 ### Anchovy landing model ###
-
-dataset_select <- dataset_nanc_landing %>% ungroup() %>% #filter(LANDING_YEAR < 2015) %>%
+dataset_select <- dataset_nanc_landing %>% ungroup() %>% 
   dplyr::select(MSQD_SPAWN_SDM_90,
                 PSDN_SDM_60,
                 NANC_SDM_20,
@@ -148,18 +148,18 @@ dataset_select <- dataset_nanc_landing %>% ungroup() %>% #filter(LANDING_YEAR < 
                 NANC_Price_z,
                 Price.Fishmeal.AFI_z,
                 diesel.price.AFI_z,
-                #wages.AFI_z,
+                wages.AFI_z,
                 NANC_Landings)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
-write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv", row.names = FALSE)
+write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC_wages.csv", row.names = FALSE)
 
 ## Define landing equation
 price_model <- bf(NANC_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(NANC_Landings) ~
-  1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure + Length_z +
- (1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure | port_cluster_ID))
+  1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure + wages.AFI_z + Length_z +
+ (1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure + wages.AFI_z | port_cluster_ID))
 
 ## Create priors
 get_prior(data = dataset_nanc_landing,
@@ -171,6 +171,7 @@ prior_lognormal <- c(
   prior(lognormal(0,1), class = b,     resp = logNANCLandings, coef = Length_z),
   prior(lognormal(0,1), class = b,     resp = logNANCLandings, coef = NANC_Price_z),
   prior(lognormal(0,1), class = b,     resp = logNANCLandings, coef = NANC_SDM_20),
+  prior(lognormal(0,1), class = b,     resp = logNANCLandings, coef = wages.AFI_z),
   prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = NANC_SDM_20:PSDN_SDM_60:PSDN.Open),
   prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open),
   prior(normal(0,1),    class = b,     resp = logNANCLandings, coef = PSDN_SDM_60:PSDN.Open),
@@ -189,6 +190,5 @@ fit_qNANC <-
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qNANC")
+      file = "Estimations/fit_qNANC_wages")
 
-fit_qNANC <- add_criterion(fit_qNANC, "loo", overwrite = TRUE)

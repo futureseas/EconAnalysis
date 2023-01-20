@@ -65,13 +65,15 @@ dataset_msqd <- dataset %>%
   dplyr::mutate(ln_MSQD_Landings = log(MSQD_Landings)) %>%
   filter(group_all == 1 | group_all == 2 | group_all == 4 | group_all == 5 | group_all == 7) %>%
   mutate(cluster_port = paste(group_all, PORT_AREA_CODE, sep = "-", collapse = NULL)) %>%
+  mutate(diesel.price.AFI_z = -1*diesel.price.AFI_z) %>%
+  mutate(wages.AFI_z = -1*wages.AFI_z) %>%
   drop_na()
 
 # filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA") %>%
 # dataset_msqd %>% group_by(PORT_AREA_CODE) %>% summarize(n_freq = n()/nrow(dataset_msqd))
 
 
-#### Convert variables to factor #### HERE I CHANGE THE ID
+#### Convert variables to factor 
 dataset_msqd$port_cluster_ID    <- factor(dataset_msqd$cluster_port)
 dataset_msqd$port_ID            <- factor(dataset_msqd$PORT_AREA_CODE)
 
@@ -140,7 +142,6 @@ rm(pDataset)
 ## -------------------------------------------------------------------
 ### Market squid landing model ###
 
-dataset_msqd_landing <- dataset_msqd_landing %>% mutate(wages.AFI_z = -(wages.AFI_z))
 dataset_select <- dataset_msqd_landing %>% ungroup() %>%
   dplyr::select(MSQD_SPAWN_SDM_90,
                 PSDN_SDM_60,
@@ -154,7 +155,7 @@ dataset_select <- dataset_msqd_landing %>% ungroup() %>%
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
-write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD_wages.csv", row.names = FALSE)
+write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv", row.names = FALSE)
 
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(MSQD_Landings) ~
