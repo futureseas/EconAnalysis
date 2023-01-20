@@ -178,7 +178,7 @@ prior_lognormal <- c(
   prior(exponential(1), class = sigma, resp = logMSQDLandings),
   prior(lkj(2),         class = rescor))
 
-set.seed(66)
+set.seed(123)
  fit_qMSQD_wages <-
    brm(data = dataset_msqd_landing,
        family = gaussian,
