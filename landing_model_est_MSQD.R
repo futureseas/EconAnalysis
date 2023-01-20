@@ -154,7 +154,7 @@ dataset_select <- dataset_msqd_landing %>% ungroup() %>%
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
-write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv", row.names = FALSE)
+write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD_wages.csv", row.names = FALSE)
 
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(MSQD_Landings) ~
@@ -179,7 +179,7 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(123)
- fit_qMSQD_wages <-
+ fit_qMSQD <-
    brm(data = dataset_msqd_landing,
        family = gaussian,
        price_model + landing_model + set_rescor(TRUE),
@@ -187,7 +187,3 @@ set.seed(123)
        iter = 2000, warmup = 1000, chains = 4, cores = 4,
        control = list(max_treedepth = 15, adapt_delta = 0.99),
        file = "Estimations/fit_qMSQD_wages")
-
-fit_qMSQD_wages <- add_criterion(fit_qMSQD_wages, "loo", overwrite = TRUE)
-
-

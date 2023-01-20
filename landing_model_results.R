@@ -36,7 +36,7 @@ library('XML')
 theme_set(theme_sjplot())
 
 ##### Read landing models
-fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
+fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD_wages.RDS"))
 fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
 fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
 
@@ -59,43 +59,44 @@ dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimatio
 # summary(fit_qNANC)
 
 ############################
-# Calculate R2
+# Calculate Bayesian R2
 
-# ## Compute Bayesian R2
-# y_pred <- brms::posterior_linpred(fit_qMSQD, resp = 'logMSQDLandings') 
-# var_fit <- apply(y_pred, 1, var)
-# var_res <- as.matrix(fit_qMSQD, pars = c("sigma"))^2
-# rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
-# hist(rsq_bayes$sigma_logMSQDLandings)
-# print(c(median(rsq_bayes$sigma_logMSQDLandings), mean(rsq_bayes$sigma_logMSQDLandings),
-#         sd(rsq_bayes$sigma_logMSQDLandings)))
-# 
-# cluster_groups <- fit_qMSQD$data %>% dplyr::select("port_cluster_ID") %>% unique()
-# list = as.list(cluster_groups$port_cluster_ID)
-# 
-# for (p in list) {
-# fitdata <- subset(fit_qMSQD$data, port_cluster_ID == p)
-# newdf <- data.frame(
-#   port_cluster_ID = p,
-#   MSQD_Price_z = fitdata$MSQD_Price_z,
-#   Price.Fishmeal.AFI_z = fitdata$Price.Fishmeal.AFI_z,
-#   MSQD_Landings = fitdata$MSQD_Landings,
-#   MSQD_SPAWN_SDM_90 = fitdata$MSQD_SPAWN_SDM_90,
-#   MSQD_Price_z = fitdata$MSQD_Price_z,
-#   PSDN_SDM_60 = fitdata$PSDN_SDM_60,
-#   PSDN.Open = fitdata$PSDN.Open,
-#   NANC_SDM_20 = fitdata$NANC_SDM_20,
-#   PSDN.Total.Closure = fitdata$PSDN.Total.Closure,
-#   Length_z = fitdata$Length_z)
-# fit_qMSQD_subset <- extract_draws(fit_qMSQD, newdata = newdf, allow_new_levels = T)
-# y_pred <- brms::posterior_linpred(fit_qMSQD, newdata = newdf, allow_new_levels = T, resp = 'logMSQDLandings')
-# var_fit <- apply(y_pred, 1, var)
-# var_res <- as.matrix(fit_qMSQD_subset$resps$logMSQDLandings$dpars$sigma)^2
-# rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
-# print(mean(rsq_bayes$V1))
-# print(p)
-# }
-# 
+## Market squid
+y_pred <- brms::posterior_linpred(fit_qMSQD, resp = 'logMSQDLandings')
+var_fit <- apply(y_pred, 1, var)
+var_res <- as.matrix(fit_qMSQD, pars = c("sigma"))^2
+rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
+hist(rsq_bayes$sigma_logMSQDLandings)
+print(c(median(rsq_bayes$sigma_logMSQDLandings), mean(rsq_bayes$sigma_logMSQDLandings),
+        sd(rsq_bayes$sigma_logMSQDLandings)))
+
+cluster_groups <- fit_qMSQD$data %>% dplyr::select("port_cluster_ID") %>% unique()
+list = as.list(cluster_groups$port_cluster_ID)
+
+for (p in list) {
+fitdata <- subset(fit_qMSQD$data, port_cluster_ID == p)
+newdf <- data.frame(
+  port_cluster_ID = p,
+  MSQD_Price_z = fitdata$MSQD_Price_z,
+  Price.Fishmeal.AFI_z = fitdata$Price.Fishmeal.AFI_z,
+  MSQD_Landings = fitdata$MSQD_Landings,
+  MSQD_SPAWN_SDM_90 = fitdata$MSQD_SPAWN_SDM_90,
+  MSQD_Price_z = fitdata$MSQD_Price_z,
+  PSDN_SDM_60 = fitdata$PSDN_SDM_60,
+  PSDN.Open = fitdata$PSDN.Open,
+  NANC_SDM_20 = fitdata$NANC_SDM_20,
+  PSDN.Total.Closure = fitdata$PSDN.Total.Closure,
+  Length_z = fitdata$Length_z)
+fit_qMSQD_subset <- extract_draws(fit_qMSQD, newdata = newdf, allow_new_levels = T)
+y_pred <- brms::posterior_linpred(fit_qMSQD, newdata = newdf, allow_new_levels = T, resp = 'logMSQDLandings')
+var_fit <- apply(y_pred, 1, var)
+var_res <- as.matrix(fit_qMSQD_subset$resps$logMSQDLandings$dpars$sigma)^2
+rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
+print(mean(rsq_bayes$V1))
+print(p)
+}
+
+## Pacific Sardine
 # y_pred <- brms::posterior_linpred(fit_qPSDN, resp = 'logPSDNLandings') 
 # var_fit <- apply(y_pred, 1, var)
 # var_res <- as.matrix(fit_qPSDN, pars = c("sigma"))^2
@@ -128,7 +129,8 @@ dataset_psdn_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimatio
 #   print(median(rsq_bayes$V1))
 #   print(p)
 # }
-# 
+
+## Northern anchovy
 # y_pred <- brms::posterior_linpred(fit_qNANC, resp = 'logNANCLandings') 
 # var_fit <- apply(y_pred, 1, var)
 # var_res <- as.matrix(fit_qNANC, pars = c("sigma"))^2
