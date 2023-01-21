@@ -153,7 +153,7 @@ dataset_select <- dataset_nanc_landing %>% ungroup() %>%
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
 
-write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC_wages.csv", row.names = FALSE)
+write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv", row.names = FALSE)
 
 ## Define landing equation
 price_model <- bf(NANC_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))

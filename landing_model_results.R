@@ -37,8 +37,8 @@ theme_set(theme_sjplot())
 
 ##### Read landing models
 fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD_wages.RDS"))
-fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
-fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
+fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN_wages.RDS"))
+fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC_wages.RDS"))
 
 #### Read database 
 dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv")
