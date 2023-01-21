@@ -37,8 +37,8 @@ theme_set(theme_sjplot())
 
 ##### Read landing models
 fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD_wages.RDS"))
-fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN_wages.RDS"))
-fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC_wages.RDS"))
+fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
+fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
 
 #### Read database 
 dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv")
@@ -97,75 +97,77 @@ print(mean(rsq_bayes$V1))
 print(p)
 }
 
-## Pacific Sardine
-# y_pred <- brms::posterior_linpred(fit_qPSDN, resp = 'logPSDNLandings') 
-# var_fit <- apply(y_pred, 1, var)
-# var_res <- as.matrix(fit_qPSDN, pars = c("sigma"))^2
-# rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
-# hist(rsq_bayes$sigma_logPSDNLandings)
-# print(c(median(rsq_bayes$sigma_logPSDNLandings), mean(rsq_bayes$sigma_logPSDNLandings),
-#         sd(rsq_bayes$sigma_logPSDNLandings)))
-# 
-# cluster_groups <- fit_qPSDN$data %>% dplyr::select("port_cluster_ID") %>% unique()
-# list = as.list(cluster_groups$port_cluster_ID)
-# 
-# for (p in list) {
-#   fitdata <- subset(fit_qPSDN$data, port_cluster_ID == p)
-#   newdf <- data.frame(
-#     port_cluster_ID = p,
-#     PSDN_Price_z = fitdata$PSDN_Price_z,
-#     Price.Fishmeal.AFI_z = fitdata$Price.Fishmeal.AFI_z,
-#     PSDN_Landings = fitdata$PSDN_Landings,
-#     MSQD_SPAWN_SDM_90 = fitdata$MSQD_SPAWN_SDM_90,
-#     PSDN_SDM_60 = fitdata$PSDN_SDM_60,
-#     MSQD.Open = fitdata$MSQD.Open,
-#     NANC_SDM_20 = fitdata$NANC_SDM_20,
-#     WA.Restriction = fitdata$WA.Restriction,
-#     Length_z = fitdata$Length_z)
-#   fit_qPSDN_subset <- extract_draws(fit_qPSDN, newdata = newdf, allow_new_levels = T)
-#   y_pred <- brms::posterior_linpred(fit_qPSDN, newdata = newdf, allow_new_levels = T, resp = 'logPSDNLandings')
-#   var_fit <- apply(y_pred, 1, var)
-#   var_res <- as.matrix(fit_qPSDN_subset$resps$logPSDNLandings$dpars$sigma)^2
-#   rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
-#   print(median(rsq_bayes$V1))
-#   print(p)
-# }
+# Pacific Sardine
+y_pred <- brms::posterior_linpred(fit_qPSDN, resp = 'logPSDNLandings')
+var_fit <- apply(y_pred, 1, var)
+var_res <- as.matrix(fit_qPSDN, pars = c("sigma"))^2
+rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
+hist(rsq_bayes$sigma_logPSDNLandings)
+print(c(median(rsq_bayes$sigma_logPSDNLandings), mean(rsq_bayes$sigma_logPSDNLandings),
+        sd(rsq_bayes$sigma_logPSDNLandings)))
 
-## Northern anchovy
-# y_pred <- brms::posterior_linpred(fit_qNANC, resp = 'logNANCLandings') 
-# var_fit <- apply(y_pred, 1, var)
-# var_res <- as.matrix(fit_qNANC, pars = c("sigma"))^2
-# rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
-# hist(rsq_bayes$sigma_logNANCLandings)
-# print(c(median(rsq_bayes$sigma_logNANCLandings), mean(rsq_bayes$sigma_logNANCLandings),
-#         sd(rsq_bayes$sigma_logNANCLandings)))
-# 
-# 
-# cluster_groups <- fit_qNANC$data %>% dplyr::select("port_cluster_ID") %>% unique()
-# list = as.list(cluster_groups$port_cluster_ID)
-# 
-# for (p in list) {
-#   fitdata <- subset(fit_qNANC$data, port_cluster_ID == p)
-#   newdf <- data.frame(data.frame(
-#     port_cluster_ID = p,
-#     NANC_Price_z = fitdata$NANC_Price_z,
-#     Price.Fishmeal.AFI_z = fitdata$Price.Fishmeal.AFI_z,
-#     NANC_Landings = fitdata$NANC_Landings,
-#     MSQD_SPAWN_SDM_90 = fitdata$MSQD_SPAWN_SDM_90,
-#     PSDN_SDM_60 = fitdata$PSDN_SDM_60,
-#     PSDN.Open = fitdata$PSDN.Open,
-#     MSQD.Open = fitdata$MSQD.Open,
-#     NANC_SDM_20 = fitdata$NANC_SDM_20,
-#     PSDN.Total.Closure = fitdata$PSDN.Total.Closure,
-#     Length_z = fitdata$Length_z))
-#   fit_qNANC_subset <- extract_draws(fit_qNANC, newdata = newdf, allow_new_levels = T)
-#   y_pred <- brms::posterior_linpred(fit_qNANC, newdata = newdf, allow_new_levels = T, resp = 'logNANCLandings')
-#   var_fit <- apply(y_pred, 1, var)
-#   var_res <- as.matrix(fit_qNANC_subset$resps$logNANCLandings$dpars$sigma)^2
-#   rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
-#   print(mean(rsq_bayes$V1))
-#   print(p)
-# }
+cluster_groups <- fit_qPSDN$data %>% dplyr::select("port_cluster_ID") %>% unique()
+list = as.list(cluster_groups$port_cluster_ID)
+
+for (p in list) {
+  fitdata <- subset(fit_qPSDN$data, port_cluster_ID == p)
+  newdf <- data.frame(
+    port_cluster_ID = p,
+    PSDN_Price_z = fitdata$PSDN_Price_z,
+    Price.Fishmeal.AFI_z = fitdata$Price.Fishmeal.AFI_z,
+    PSDN_Landings = fitdata$PSDN_Landings,
+    MSQD_SPAWN_SDM_90 = fitdata$MSQD_SPAWN_SDM_90,
+    PSDN_SDM_60 = fitdata$PSDN_SDM_60,
+    MSQD.Open = fitdata$MSQD.Open,
+    NANC_SDM_20 = fitdata$NANC_SDM_20,
+    WA.Restriction = fitdata$WA.Restriction,
+    Length_z = fitdata$Length_z,
+    wages.AFI_z = fitdata$wages.AFI)
+  fit_qPSDN_subset <- extract_draws(fit_qPSDN, newdata = newdf, allow_new_levels = T)
+  y_pred <- brms::posterior_linpred(fit_qPSDN, newdata = newdf, allow_new_levels = T, resp = 'logPSDNLandings')
+  var_fit <- apply(y_pred, 1, var)
+  var_res <- as.matrix(fit_qPSDN_subset$resps$logPSDNLandings$dpars$sigma)^2
+  rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
+  print(median(rsq_bayes$V1))
+  print(p)
+}
+
+# Northern anchovy
+y_pred <- brms::posterior_linpred(fit_qNANC, resp = 'logNANCLandings')
+var_fit <- apply(y_pred, 1, var)
+var_res <- as.matrix(fit_qNANC, pars = c("sigma"))^2
+rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
+hist(rsq_bayes$sigma_logNANCLandings)
+print(c(median(rsq_bayes$sigma_logNANCLandings), mean(rsq_bayes$sigma_logNANCLandings),
+        sd(rsq_bayes$sigma_logNANCLandings)))
+
+
+cluster_groups <- fit_qNANC$data %>% dplyr::select("port_cluster_ID") %>% unique()
+list = as.list(cluster_groups$port_cluster_ID)
+
+for (p in list) {
+  fitdata <- subset(fit_qNANC$data, port_cluster_ID == p)
+  newdf <- data.frame(data.frame(
+    port_cluster_ID = p,
+    NANC_Price_z = fitdata$NANC_Price_z,
+    Price.Fishmeal.AFI_z = fitdata$Price.Fishmeal.AFI_z,
+    NANC_Landings = fitdata$NANC_Landings,
+    MSQD_SPAWN_SDM_90 = fitdata$MSQD_SPAWN_SDM_90,
+    PSDN_SDM_60 = fitdata$PSDN_SDM_60,
+    PSDN.Open = fitdata$PSDN.Open,
+    MSQD.Open = fitdata$MSQD.Open,
+    NANC_SDM_20 = fitdata$NANC_SDM_20,
+    PSDN.Total.Closure = fitdata$PSDN.Total.Closure,
+    Length_z = fitdata$Length_z,
+    wages.AFI_z = fitdata$wages.AFI))
+  fit_qNANC_subset <- extract_draws(fit_qNANC, newdata = newdf, allow_new_levels = T)
+  y_pred <- brms::posterior_linpred(fit_qNANC, newdata = newdf, allow_new_levels = T, resp = 'logNANCLandings')
+  var_fit <- apply(y_pred, 1, var)
+  var_res <- as.matrix(fit_qNANC_subset$resps$logNANCLandings$dpars$sigma)^2
+  rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
+  print(mean(rsq_bayes$V1))
+  print(p)
+}
 
 
 ############################
