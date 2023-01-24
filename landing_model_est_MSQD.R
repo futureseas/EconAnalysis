@@ -165,7 +165,7 @@ landing_model <- bf(log(MSQD_Landings) ~
 
 # Create priors
 prior_lognormal <- c(
-  prior(lognormal(4,1), class = b,     resp = MSQDPricez,      coef = Price.Fishmeal.AFI_z),
+  prior(lognormal(2,1), class = b,     resp = MSQDPricez,      coef = Price.Fishmeal.AFI_z),
   prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = Length_z),
   prior(lognormal(4,1), class = b,     resp = logMSQDLandings, coef = MSQD_Price_z),
   prior(lognormal(4,1), class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90),
