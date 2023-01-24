@@ -36,7 +36,7 @@ library('XML')
 theme_set(theme_sjplot())
 
 ##### Read landing models
-fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
+fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD_wages.RDS"))
 fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
 fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
 
@@ -199,7 +199,7 @@ for (p in list) {
 ###############################################
 ### Analyze convergence ###
 
-# launch_shinystan(fit_qMSQD)
+launch_shinystan(fit_qMSQD)
 # launch_shinystan(fit_qPSDN)
 # launch_shinystan(fit_qNANC)
 
@@ -276,18 +276,17 @@ gg1 + gg2 + gg3
 #------------------------------------------------------
 # ### Compare multilevel effects ###
 # as_draws_df(fit_qMSQD, add_chain = T) %>%
-#   ggplot(aes(x = sd_cluster__logMSQDLandings_Intercept)) +
+#   ggplot(aes(x = sd_port_cluster_ID__logMSQDLandings_MSQD_Price_z)) +
 #   geom_density(size = 0, fill = "orange1", alpha = 3/4) +
-#   geom_density(aes(x = sd_port_ID__logMSQDLandings_Intercept),
+#   geom_density(aes(x = sd_port_cluster_ID__logMSQDLandings_MSQD_Price_z),
 #                size = 0, fill = "orange4", alpha = 3/4) +
 #   scale_y_continuous(NULL, breaks = NULL) +
 #   labs(title = expression(sigma), subtitle = "Market squid SDM") +
 #   annotate("text", x = 2, y = 1/10, label = "Port area", color = "orange4") +
 #   annotate("text", x = 2, y = 1/5, label = "Cluster", color = "orange1") +
 #   theme_fivethirtyeight()
-
-
-
+# 
+# str(xx)
 ######################################################################
 ############# Explanatory variables by clusters-port ################
 #####################################################################
