@@ -137,7 +137,7 @@ purtest(pDataset$PSDN_Price, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
-# purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$Price.Fishmeal.AFI_z, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
 
@@ -158,6 +158,10 @@ dataset_select <- dataset_psdn_landing %>% ungroup() %>%
                 PSDN_Landings)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
+
+dataset_psdn_landing %>% ungroup() %>% group_by(LANDING_MONTH, LANDING_YEAR, PORT_AREA_CODE) %>%
+  summarize(price = mean(PSDN_Price), price_fm = mean(Price.Fishmeal.AFI)) %>% group_by(PORT_AREA_CODE) %>%
+  summarize(cor=cor(price, price_fm))
 
 
 #### Estimate model

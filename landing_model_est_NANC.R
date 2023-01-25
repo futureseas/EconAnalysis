@@ -133,7 +133,7 @@ purtest(pDataset$NANC_Price, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
-# purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "trend", test = "Pm")
 
 rm(pDataset)
 
@@ -152,6 +152,10 @@ dataset_select <- dataset_nanc_landing %>% ungroup() %>%
                 NANC_Landings)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
+
+dataset_nanc_landing %>% ungroup() %>% group_by(LANDING_MONTH, LANDING_YEAR, PORT_AREA_CODE) %>%
+  summarize(price_nanc = mean(NANC_Price), price_fm = mean(Price.Fishmeal.AFI)) %>% group_by(PORT_AREA_CODE) %>%
+  summarize(cor=cor(price_nanc, price_fm))
 
 write.csv(dataset_nanc_landing,"C:\\Data\\PacFIN data\\dataset_estimation_NANC.csv", row.names = FALSE)
 

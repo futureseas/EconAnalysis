@@ -43,6 +43,15 @@ dataset <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation.csv")
 
 ### Market squid ###
 
+# dataset_select <- dataset %>%
+#   dplyr::select(PSDN_Price,
+#                 MSQD_Price,
+#                 NANC_Price,
+#                 Price.Fishmeal) %>% drop_na()
+# res <- as.data.frame(cor(dataset_select))
+# round(res, 2)
+
+
 #### Select data for estimation, replace N/A landings to zero ####
 dataset_msqd <- dataset %>%
   dplyr::select(PORT_AREA_ID, PORT_AREA_CODE, VESSEL_NUM, group_all, 
@@ -135,7 +144,7 @@ purtest(pDataset$MSQD_Price, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$MSQD_SPAWN_SDM_90, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$PSDN_SDM_60, pmax = 4, exo = "intercept", test = "Pm")
 purtest(pDataset$NANC_SDM_20, pmax = 4, exo = "intercept", test = "Pm")
-# purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
+purtest(pDataset$Price.Fishmeal.AFI, pmax = 4, exo = "intercept", test = "Pm")
 
 rm(pDataset)
 
@@ -154,6 +163,11 @@ dataset_select <- dataset_msqd_landing %>% ungroup() %>%
                 MSQD_Landings)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
+
+dataset_msqd_landing %>% ungroup() %>% group_by(LANDING_MONTH, LANDING_YEAR, PORT_AREA_CODE) %>%
+  summarize(price = mean(MSQD_Price), price_fm = mean(Price.Fishmeal.AFI)) %>% group_by(PORT_AREA_CODE) %>%
+  summarize(cor=cor(price, price_fm))
+
 
 write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv", row.names = FALSE)
 
@@ -187,4 +201,4 @@ set.seed(123)
        prior = prior_lognormal,
        iter = 2000, warmup = 1000, chains = 4, cores = 4,
        control = list(max_treedepth = 15, adapt_delta = 0.99),
-       file = "Estimations/fit_qMSQD_wages")
+       file = "Estimations/fit_qMSQD_wages_prior")
