@@ -109,7 +109,7 @@ nrow(dataset_msqd_landing)
 desc_data <- dataset_msqd_landing %>%
   subset(select = c(Length, MSQD_Landings, MSQD_Price,
                     MSQD_SPAWN_SDM_90, PSDN_SDM_60, NANC_SDM_20,
-                    PSDN.Open, Price.Fishmeal.AFI))
+                    Price.Fishmeal.AFI))
 
 table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 1, "Vessel Length", vars))%>%
@@ -120,9 +120,9 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 6, "Prob(presence): NANC", vars)) %>%
   mutate(vars = ifelse(vars == 7, "Fraction of month open: PSDN", vars)) %>%
   mutate(vars = ifelse(vars == 8, "Fishmeal price", vars))
-# 
-# gs4_create("SummaryMonthly_Q_MSQD", sheets = table)
-# rm(desc_data, table)
+
+gs4_create("SummaryMonthly_Q_MSQD", sheets = table)
+rm(desc_data, table)
 
 
 #-------------------------------------------------------------------

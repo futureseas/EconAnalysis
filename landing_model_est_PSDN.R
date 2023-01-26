@@ -110,8 +110,8 @@ table <- psych::describe(desc_data, fast=TRUE) %>%
   mutate(vars = ifelse(vars == 7, "Fraction of month open: MSQD", vars)) %>%
   mutate(vars = ifelse(vars == 8, "Fishmeal price", vars))
 
-# gs4_create("SummaryMonthly_Q_PSDN", sheets = table)
-# rm(desc_data, table)
+gs4_create("SummaryMonthly_Q_PSDN", sheets = table)
+rm(desc_data, table)
 
 ### Correlation between diesel price and fishmeal price
 round(cor(dataset_psdn_landing$Price.Fishmeal.AFI, dataset_psdn_landing$diesel.price.AFI_z), 2)
