@@ -36,7 +36,7 @@ library('XML')
 theme_set(theme_sjplot())
 
 ##### Read landing models
-fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD_wages.RDS"))
+fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
 fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
 fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
 
@@ -207,28 +207,26 @@ launch_shinystan(fit_qMSQD)
 ### Create result tables ###
 
 
-# tab_model <-
-#   sjPlot::tab_model(fit_qMSQD)
-# df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
-# colnames(df) <- df[1,]
-# df <- df[-1,]
-# gs4_create("MSQD_landings_results", sheets = df)
+tab_model <-
+  sjPlot::tab_model(fit_qMSQD)
+df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
+colnames(df) <- df[1,]
+df <- df[-1,]
+gs4_create("MSQD_landings_results", sheets = df)
 
-# 
-# tab_model <-
-#   sjPlot::tab_model(fit_qPSDN)
-# df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
-# colnames(df) <- df[1,]
-# df <- df[-1,]
-# #gs4_create("PSDN_landings_results", sheets = df)
-# 
-# 
-# tab_model <-
-#   sjPlot::tab_model(fit_qNANC)
-# df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
-# colnames(df) <- df[1,]
-# df <- df[-1,]
-# #gs4_create("NANC_landings_results", sheets = df)
+tab_model <-
+  sjPlot::tab_model(fit_qPSDN)
+df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
+colnames(df) <- df[1,]
+df <- df[-1,]
+gs4_create("PSDN_landings_results", sheets = df)
+
+tab_model <-
+  sjPlot::tab_model(fit_qNANC)
+df <- data.frame(readHTMLTable(htmlParse(tab_model))[1])
+colnames(df) <- df[1,]
+df <- df[-1,]
+gs4_create("NANC_landings_results", sheets = df)
 
 
 # ### Population parameters ###
