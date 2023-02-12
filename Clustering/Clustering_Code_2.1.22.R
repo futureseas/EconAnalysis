@@ -548,5 +548,5 @@ RAW$VESSEL_NUM<-Vessel_IDs
 RAW<-merge(RAW, PAM_Vessel_Groups, by="VESSEL_NUM")
 RAW<-RAW[c(-1)]
 Group_Stats<-RAW %>% group_by(group_all.x) %>% summarise_each(funs(mean, se=sd(.)/sqrt(n())))
-Group_Stats$DISTANCE_A_mean/10000
+Group_Stats$DISTANCE_A_mean/1000
 Group_Stats$AVG_REVENUE_mean
