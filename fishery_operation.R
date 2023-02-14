@@ -322,7 +322,7 @@ g2 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(
                      limits = c("LANDED_WEIGHT_MTONS.sum.sum", "AFI_PRICE_PER_MTON.mean.mean"),
                      labels=c("AFI_PRICE_PER_MTON.mean.mean" = "Price", "LANDED_WEIGHT_MTONS.sum.sum" = "Landings"))  
 
-coeff3 <- 0.5
+coeff3 <- 0.8
 df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "NANC")
 df$AFI_PRICE_PER_MTON.mean.mean <- df$AFI_PRICE_PER_MTON.mean.mean * coeff3
 df <- gather(df, key = Variable, value = value,
@@ -341,6 +341,94 @@ g3 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(
 (g1 / g2 / g3)
 
 rm(df, g1, g2, g3, landing.year, landing.price.year.sel, coeff1, coeff2, coeff3, price.year)
+
+
+#----------------------------------
+## Figure 3X. Evolution of annual total landings and average fishmeal prices ##
+
+## Calculate average price and total landings by species per month
+landing.year <- summaryBy(LANDED_WEIGHT_MTONS.sum ~
+                            PACFIN_SPECIES_CODE + LANDING_YEAR + VESSEL_NUM, FUN=sum_mean_fun, data=PacFIN.month)
+
+landing.year <- landing.year %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
+  summarize(LANDED_WEIGHT_MTONS.sum.sum = mean(LANDED_WEIGHT_MTONS.sum.sum))
+
+
+### Include world's fish meal price as instrument
+fish.meal <- read.csv(here::here("Data", "Instruments", "PFISHUSDM.csv"), header = TRUE, stringsAsFactors = FALSE)
+fish.meal$DATE <- as.Date(fish.meal$DATE, format = "%m/%d/%Y") 
+fish.meal$LANDING_YEAR  <- lubridate::year(fish.meal$DATE)
+fish.meal$LANDING_MONTH <- lubridate::month(fish.meal$DATE)
+fish.meal <- fish.meal %>% dplyr::select(-c('DATE')) %>% dplyr::rename(Price.Fishmeal = PFISHUSDM)
+PacFIN.month <- merge(PacFIN.month, fish.meal, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
+Deflactor <- read.csv(file = "C:\\Data\\PacFIN data\\deflactor.csv")
+PacFIN.month <- merge(PacFIN.month, Deflactor, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
+rm(Deflactor)
+PacFIN.month$Price.Fishmeal.AFI <- PacFIN.month$Price.Fishmeal*PacFIN.month$defl
+rm(fish.meal)
+
+price.year <- summaryBy(Price.Fishmeal.AFI ~
+                          PACFIN_SPECIES_CODE + LANDING_YEAR, FUN=sum_mean_fun, data=PacFIN.month)
+
+landing.price.year <- merge(landing.year, price.year, by = c("PACFIN_SPECIES_CODE", "LANDING_YEAR"))
+landing.price.year.sel <- landing.price.year %>% 
+  dplyr::select("LANDED_WEIGHT_MTONS.sum.sum", "Price.Fishmeal.AFI.mean",
+                "PACFIN_SPECIES_CODE", "LANDING_YEAR")
+
+# Graph landings v/s number of vessels
+coeff1 <- 0.75
+df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "MSQD")
+df$Price.Fishmeal.AFI.mean <- df$Price.Fishmeal.AFI.mean * coeff1 
+df <- gather(df, key = Variable, value = value,
+             c("LANDED_WEIGHT_MTONS.sum.sum", "Price.Fishmeal.AFI.mean"))
+g1 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+  geom_point() +
+  ggtitle("(a) Market squid") +
+  scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff1, name = "Price (USD/Ton)")) +
+  theme(legend.position="none") + scale_x_continuous(name = element_blank()) + 
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + # ggtitle("(b) Market Squid")  +  
+  scale_color_brewer(palette="Paired",
+                     limits = c("LANDED_WEIGHT_MTONS.sum.sum", "Price.Fishmeal.AFI.mean"),
+                     labels=c("Price.Fishmeal.AFI.mean" = "Price fishmeal", "LANDED_WEIGHT_MTONS.sum.sum" = "Landings"))
+
+coeff2 <- 0.75
+df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "PSDN")
+df$Price.Fishmeal.AFI.mean <- df$Price.Fishmeal.AFI.mean * coeff2 
+df <- gather(df, key = Variable, value = value,
+             c("LANDED_WEIGHT_MTONS.sum.sum", "Price.Fishmeal.AFI.mean"))
+
+g2 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+  geom_point() +
+  scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff2, name = "Price (USD/Ton)")) + 
+  theme(legend.position="none") + scale_x_continuous(name = element_blank()) +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("(b) Pacific sardine")  + guides(colour=guide_legend(title="Variables: ")) + 
+  scale_color_brewer(palette="Paired",
+                     limits = c("LANDED_WEIGHT_MTONS.sum.sum", "Price.Fishmeal.AFI.mean"),
+                     labels=c("Price.Fishmeal.AFI.mean" = "Price fishmeal", "LANDED_WEIGHT_MTONS.sum.sum" = "Landings"))  
+
+coeff3 <- 0.5
+df <- landing.price.year.sel %>% filter(PACFIN_SPECIES_CODE == "NANC")
+df$Price.Fishmeal.AFI.mean <- df$Price.Fishmeal.AFI.mean * coeff3
+df <- gather(df, key = Variable, value = value,
+             c("LANDED_WEIGHT_MTONS.sum.sum", "Price.Fishmeal.AFI.mean"))
+g3 <- ggplot(df, aes(x=LANDING_YEAR, y = value, colour = Variable)) + geom_line(size=1) +
+  geom_point() +
+  scale_y_continuous(name = "Landings (M Tons)", sec.axis = sec_axis(~./coeff3, name = "Price (USD/Ton)")) + 
+  theme(legend.position="bottom") + scale_x_continuous(name = "Year") +
+  theme(plot.title = element_text(size=9, face="bold.italic"), 
+        axis.text = element_text(size = 7), axis.title = element_text(size = 8)) + 
+  ggtitle("(c) Northern anchovy")  + guides(colour=guide_legend(title="Variables: ")) + 
+  scale_color_brewer(palette="Paired",
+                     limits = c("LANDED_WEIGHT_MTONS.sum.sum", "Price.Fishmeal.AFI.mean"),
+                     labels=c("Price.Fishmeal.AFI.mean" = "Price fishmeal", "LANDED_WEIGHT_MTONS.sum.sum" = "Landings"))  
+
+(g1 / g2 / g3)
+
+rm(df, g1, g2, g3, landing.year, landing.price.year.sel, coeff1, coeff2, coeff3, price.year)
+
 
 
 
@@ -603,7 +691,7 @@ g4 / g1 / g2
 #   sqd.logbook.vessel <- read.csv("C:\\Data\\CDFW CPS logbooks\\MarketSquidVesselDataExtract.csv") %>%
 #     dplyr::rename(lat = SetLatitude) %>%
 #     dplyr::rename(lon = SetLongitude) %>%
-#     dplyr::rename(LogSerialNumber = ï..LogSerialNumber) %>%
+#     dplyr::rename(LogSerialNumber = ?..LogSerialNumber) %>%
 #     mutate(vessel="CA Vessel") %>%
 #     mutate(date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
 #     mutate(LANDING_YEAR = year(date)) %>%

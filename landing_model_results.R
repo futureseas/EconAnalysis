@@ -39,6 +39,31 @@ theme_set(theme_sjplot())
 fit_qMSQD <- readRDS(here::here("Estimations", "fit_qMSQD.RDS"))
 fit_qPSDN <- readRDS(here::here("Estimations", "fit_qPSDN.RDS"))
 fit_qNANC <- readRDS(here::here("Estimations", "fit_qNANC.RDS"))
+fit_qMSQD_NRC <- readRDS(here::here("Estimations", "fit_qMSQD_NRC.RDS"))
+fit_qPSDN_NRC <- readRDS(here::here("Estimations", "fit_qPSDN_NRC.RDS"))
+fit_qNANC_NRC <- readRDS(here::here("Estimations", "fit_qNANC_NRC.RDS"))
+
+# fit_qMSQD     <- add_criterion(fit_qMSQD, c("loo"), overwrite = TRUE)
+# fit_qPSDN     <- add_criterion(fit_qPSDN, c("loo"), overwrite = TRUE)
+# fit_qNANC     <- add_criterion(fit_qNANC, c("loo"), overwrite = TRUE)
+# fit_qMSQD_NRC <- add_criterion(fit_qMSQD_NRC, c("loo"), overwrite = TRUE)
+# fit_qPSDN_NRC <- add_criterion(fit_qPSDN_NRC, c("loo"), overwrite = TRUE)
+# fit_qNANC_NRC <- add_criterion(fit_qNANC_NRC, c("loo"), overwrite = TRUE)
+# 
+# 
+(loo1 <- loo(fit_qMSQD, r_eff = NA))
+(loo2 <- loo(fit_qMSQD_NRC, r_eff = NA))
+loo_compare(loo1, loo2)
+
+(loo1 <- loo(fit_qPSDN, r_eff = NA))
+(loo2 <- loo(fit_qPSDN_NRC, r_eff = NA))
+loo_compare(loo1, loo2)
+
+(loo1 <- loo(fit_qNANC, r_eff = NA))
+(loo2 <- loo(fit_qNANC_NRC, r_eff = NA))
+loo_compare(loo1, loo2)
+# 
+
 
 #### Read database 
 dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv")

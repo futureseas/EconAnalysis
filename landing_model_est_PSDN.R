@@ -51,8 +51,9 @@ dataset_psdn <- dataset %>%
                 Price.Fishmeal, Price.Fishmeal_z, 
                 Price.Fishmeal.AFI, Price.Fishmeal.AFI_z,
                 diesel.price.AFI, diesel.price.AFI_z,
-                Length, Length_z, 
-                wages.AFI, wages.AFI_z) %>% 
+                Length, Length_z
+                #, wages.AFI, wages.AFI_z
+                ) %>% 
   dplyr::mutate(PSDN_Landings = coalesce(PSDN_Landings, 0)) %>%
   mutate(PSDN_Landings = ifelse(PSDN_Landings<= 0, 0, PSDN_Landings)) %>%
   mutate(PSDN_Landings = ifelse(PSDN_Landings< 0.0001, 0, PSDN_Landings)) %>%
@@ -63,7 +64,7 @@ dataset_psdn <- dataset %>%
   filter(group_all == 3 | group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>%
   mutate(cluster_port = paste(group_all, PORT_AREA_CODE, sep = "-", collapse = NULL)) %>%
   mutate(diesel.price.AFI_z = -1*diesel.price.AFI_z) %>%
-  mutate(wages.AFI_z = -1*wages.AFI_z) %>%
+  #mutate(wages.AFI_z = -1*wages.AFI_z) %>%
   drop_na()
   
   
@@ -154,7 +155,7 @@ dataset_select <- dataset_psdn_landing %>% ungroup() %>%
                 PSDN_Price_z,
                 Price.Fishmeal.AFI_z,
                 diesel.price.AFI_z,
-                wages.AFI_z,
+                #wages.AFI_z,
                 PSDN_Landings)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
@@ -204,7 +205,7 @@ set.seed(66)
 #       control = list(max_treedepth = 15, adapt_delta = 0.99),
 #       file = "Estimations/fit_qPSDN")
 
-fit_qPSDN <-
+fit_qPSDN_NRC <-
   brm(data = dataset_psdn_landing,
       family = gaussian,
       price_model + landing_model_NRC + set_rescor(TRUE),
@@ -213,4 +214,5 @@ fit_qPSDN <-
       control = list(max_treedepth = 15, adapt_delta = 0.99),
       file = "Estimations/fit_qPSDN_NRC")
 
+fit_qPSDN_NRC <- add_criterion(fit_qPSDN_NRC, c("loo", "waic"))
 

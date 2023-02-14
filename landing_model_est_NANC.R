@@ -51,8 +51,9 @@ dataset_nanc <- dataset %>%
                 Price.Fishmeal, Price.Fishmeal_z, 
                 Price.Fishmeal.AFI, Price.Fishmeal.AFI_z,
                 diesel.price.AFI_z,
-                Length, Length_z, 
-                wages.AFI, wages.AFI_z) %>% 
+                Length, Length_z 
+                #, wages.AFI, wages.AFI_z
+                ) %>% 
   dplyr::mutate(NANC_Landings = coalesce(NANC_Landings, 0)) %>%
   mutate(NANC_Landings = ifelse(NANC_Landings<= 0, 0, NANC_Landings)) %>%
   mutate(NANC_Landings = ifelse(NANC_Landings< 0.0001, 0, NANC_Landings)) %>%
@@ -62,7 +63,7 @@ dataset_nanc <- dataset %>%
   mutate(cluster_port = paste(group_all, PORT_AREA_CODE, sep = "-", collapse = NULL)) %>%
     filter(group_all == 6 | group_all == 7) %>%
   mutate(diesel.price.AFI_z = -1*diesel.price.AFI_z) %>%
-  mutate(wages.AFI_z = -1*wages.AFI_z) %>%
+  #mutate(wages.AFI_z = -1*wages.AFI_z) %>%
   drop_na()
 
 # filter(PORT_AREA_CODE != "CLO") %>%
@@ -148,7 +149,7 @@ dataset_select <- dataset_nanc_landing %>% ungroup() %>%
                 NANC_Price_z,
                 Price.Fishmeal.AFI_z,
                 diesel.price.AFI_z,
-                wages.AFI_z,
+                #wages.AFI_z,
                 NANC_Landings)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
@@ -201,7 +202,7 @@ set.seed(66)
 #       control = list(max_treedepth = 15, adapt_delta = 0.99),
 #       file = "Estimations/fit_qNANC")
 
-fit_qNANC <-
+fit_qNANC_NRC <-
   brm(data = dataset_nanc_landing,
       family = gaussian,
       price_model + landing_model_NRC + set_rescor(TRUE),
@@ -210,3 +211,4 @@ fit_qNANC <-
       control = list(max_treedepth = 15, adapt_delta = 0.99),
       file = "Estimations/fit_qNANC_NRC")
 
+fit_qNANC_NRC <- add_criterion(fit_qNANC_NRC, c("loo", "waic"))

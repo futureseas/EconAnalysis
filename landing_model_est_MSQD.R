@@ -64,8 +64,9 @@ dataset_msqd <- dataset %>%
                 PSDN.Open, MSQD.Open, Price.Fishmeal, Price.Fishmeal_z, 
                 Price.Fishmeal.AFI, Price.Fishmeal.AFI_z,
                 diesel.price, diesel.price.AFI, diesel.price_z, diesel.price.AFI_z,
-                Length, Length_z, avg_set_MSQD, avg_set_MSQD_z,
-                wages_z, wages.AFI_z) %>% 
+                Length, Length_z, avg_set_MSQD, avg_set_MSQD_z
+                #, wages_z, wages.AFI_z
+                ) %>% 
   dplyr::mutate(MSQD_Landings = coalesce(MSQD_Landings, 0)) %>%
   mutate(MSQD_Landings = ifelse(MSQD_Landings<= 0, 0, MSQD_Landings)) %>%
   mutate(MSQD_Landings = ifelse(MSQD_Landings< 0.0001, 0, MSQD_Landings)) %>%
@@ -75,7 +76,7 @@ dataset_msqd <- dataset %>%
   filter(group_all == 1 | group_all == 2 | group_all == 4 | group_all == 5 | group_all == 7) %>%
   mutate(cluster_port = paste(group_all, PORT_AREA_CODE, sep = "-", collapse = NULL)) %>%
   mutate(diesel.price.AFI_z = -1*diesel.price.AFI_z) %>%
-  mutate(wages.AFI_z = -1*wages.AFI_z) %>%
+  #mutate(wages.AFI_z = -1*wages.AFI_z) %>%
   drop_na()
 
 # filter(PORT_AREA_CODE == "SBA" | PORT_AREA_CODE == "LAA" | PORT_AREA_CODE == "MNA") %>%
@@ -159,7 +160,7 @@ dataset_select <- dataset_msqd_landing %>% ungroup() %>%
                 MSQD_Price_z,
                 Price.Fishmeal.AFI_z,
                 diesel.price.AFI_z,
-                wages.AFI_z,
+                #wages.AFI_z,
                 MSQD_Landings)
 res <- as.data.frame(cor(dataset_select))
 round(res, 2)
@@ -167,6 +168,10 @@ round(res, 2)
 dataset_msqd_landing %>% ungroup() %>% group_by(LANDING_MONTH, LANDING_YEAR, PORT_AREA_CODE) %>%
   summarize(price = mean(MSQD_Price), price_fm = mean(Price.Fishmeal.AFI)) %>% group_by(PORT_AREA_CODE) %>%
   summarize(cor=cor(price, price_fm))
+
+dataset_msqd_landing %>% ungroup() %>% group_by(LANDING_MONTH, LANDING_YEAR, PORT_AREA_CODE) %>%
+  summarize(landings = mean(MSQD_Landings), price_fm = mean(Price.Fishmeal.AFI)) %>% group_by(PORT_AREA_CODE) %>%
+  summarize(cor=cor(landings, price_fm))
 
 
 write.csv(dataset_msqd_landing,"C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv", row.names = FALSE)
@@ -205,7 +210,7 @@ prior_lognormal <- c(
 #        file = "Estimations/fit_qMSQD")
 
  set.seed(123)
- fit_qMSQD <-
+ fit_qMSQD_NRC <-
    brm(data = dataset_msqd_landing,
        family = gaussian,
        price_model + landing_model_NRC + set_rescor(TRUE),
@@ -213,4 +218,6 @@ prior_lognormal <- c(
        iter = 2000, warmup = 1000, chains = 4, cores = 4,
        control = list(max_treedepth = 15, adapt_delta = 0.99),
        file = "Estimations/fit_qMSQD_NRC")
+ 
+ fit_qMSQD_NRC <- add_criterion(fit_qMSQD_NRC, c("loo", "waic"))
  

@@ -29,6 +29,54 @@ PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
 
 ### Descriptive statistics ###
 
+# ### Figure. Annual revenue by cluster 
+# PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
+# PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
+# PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
+# PacFIN.month <- PacFIN.month %>% mutate(
+#   PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OMCK",PACFIN_SPECIES_CODE, 
+#                                ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
+#                                       ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
+#                                              ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
+# 
+# total.revenue.clusters <- PacFIN.month %>% 
+#   group_by(group_all, VESSEL_NUM, LANDING_YEAR, PACFIN_SPECIES_CODE) %>%
+#   summarize(sum.vessel.revenue.year = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+#   group_by(group_all, LANDING_YEAR, PACFIN_SPECIES_CODE) %>%
+#   summarize(mean.revenue.year = sum(sum.vessel.revenue.year)) %>%
+#   group_by(group_all, PACFIN_SPECIES_CODE) %>%
+#   summarize(annual.revenue = sum(mean.revenue.year)) 
+#   
+# 
+# cond_label <- as_labeller(c("1" = "Southern CCS small-scale\nsquid-specialists",
+#                             "2" = "Southern CCS small-scale\nCPS-opportunists",
+#                             "3" = "PNW sardine\nopportunists",
+#                             "4" = "Southern CCS industrial\nsquid-specialists",
+#                             "5" = "Roving industrial\nsardine-squid generalists",
+#                             "6" = "PNW sardine\nspecialists",
+#                             "7" = "Southern CCS\nforage fish diverse",
+#                             "8" = "PNW albacore-crab\ngeneralists"))
+# 
+# ggplot(total.revenue.clusters, aes(fill=PACFIN_SPECIES_CODE, 
+#                                     y=annual.revenue, x = PACFIN_SPECIES_CODE)) +
+#     geom_bar(position="dodge", stat="identity") + 
+#     facet_wrap(~ group_all, labeller = cond_label, ncol = 4) +
+#     scale_fill_viridis(discrete = T, labels=c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
+#                                             "PSDN" = "Pacific Sardine", "OMCK" = "Mackerels",
+#                                             "OTHER" = "Non-CPS")) + xlab("") + 
+#   theme(axis.title = element_text(size = 9)) +
+#   ylab("Average annual revenue (USD)") + theme(legend.position="none") +
+#   guides(fill=guide_legend(title="Species: "))  + 
+#   scale_x_discrete(labels=c(
+#     "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy", 
+#     "PSDN" = "Pacific\nSardine", "OMCK" = "Mackerels",
+#     "OTHER" = "Non-CPS")) +
+#   scale_color_brewer(palette="Set2") 
+
+
+
+
+
 ## Figure 9. Number of active vessel by clusters
 nvessel.year <- PacFIN.month %>% dplyr::filter(LANDED_WEIGHT_MTONS.sum > 0) %>%
   dplyr::select(LANDING_YEAR, VESSEL_NUM, group_all) %>% unique() %>% 
