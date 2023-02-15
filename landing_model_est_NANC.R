@@ -211,4 +211,4 @@ fit_qNANC_NRC <-
       control = list(max_treedepth = 15, adapt_delta = 0.99),
       file = "Estimations/fit_qNANC_NRC")
 
-fit_qNANC_NRC <- add_criterion(fit_qNANC_NRC, c("loo", "waic"))
+fit_qNANC_NRC <- add_criterion(fit_qNANC_NRC, c("loo"))

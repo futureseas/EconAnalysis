@@ -43,6 +43,39 @@ fit_qMSQD_NRC <- readRDS(here::here("Estimations", "fit_qMSQD_NRC.RDS"))
 fit_qPSDN_NRC <- readRDS(here::here("Estimations", "fit_qPSDN_NRC.RDS"))
 fit_qNANC_NRC <- readRDS(here::here("Estimations", "fit_qNANC_NRC.RDS"))
 
+summary(fit_qMSQD_NRC)
+y_pred <- brms::posterior_linpred(fit_qMSQD_NRC, resp = 'logMSQDLandings')
+var_fit <- apply(y_pred, 1, var)
+var_res <- as.matrix(fit_qMSQD_NRC, pars = c("sigma"))^2
+rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
+hist(rsq_bayes$sigma_logMSQDLandings)
+print(c(median(rsq_bayes$sigma_logMSQDLandings), mean(rsq_bayes$sigma_logMSQDLandings),
+        sd(rsq_bayes$sigma_logMSQDLandings)))
+
+summary(fit_qPSDN_NRC)
+y_pred <- brms::posterior_linpred(fit_qPSDN_NRC, resp = 'logPSDNLandings')
+var_fit <- apply(y_pred, 1, var)
+var_res <- as.matrix(fit_qPSDN_NRC, pars = c("sigma"))^2
+rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
+hist(rsq_bayes$sigma_logPSDNLandings)
+print(c(median(rsq_bayes$sigma_logPSDNLandings), mean(rsq_bayes$sigma_logPSDNLandings),
+        sd(rsq_bayes$sigma_logPSDNLandings)))
+
+summary(fit_qNANC_NRC)
+y_pred <- brms::posterior_linpred(fit_qNANC_NRC, resp = 'logNANCLandings')
+var_fit <- apply(y_pred, 1, var)
+var_res <- as.matrix(fit_qNANC_NRC, pars = c("sigma"))^2
+rsq_bayes <- as.data.frame(var_fit / (var_fit + var_res))
+hist(rsq_bayes$sigma_logNANCLandings)
+print(c(median(rsq_bayes$sigma_logNANCLandings), mean(rsq_bayes$sigma_logNANCLandings),
+        sd(rsq_bayes$sigma_logNANCLandings)))
+
+
+# For squid, 21 divergent transitions! (+20 new divergent transition, lower LOO, (but not significant), similar R^2)
+# For sardine (+1 divergent transition, lower LOO (but not significant), lower R^2 to 0.43)
+# For anchovy (+1 new divergent transition, lower significant LOO, lower R^2 to 0.31)
+
+
 # fit_qMSQD     <- add_criterion(fit_qMSQD, c("loo"), overwrite = TRUE)
 # fit_qPSDN     <- add_criterion(fit_qPSDN, c("loo"), overwrite = TRUE)
 # fit_qNANC     <- add_criterion(fit_qNANC, c("loo"), overwrite = TRUE)
@@ -50,20 +83,17 @@ fit_qNANC_NRC <- readRDS(here::here("Estimations", "fit_qNANC_NRC.RDS"))
 # fit_qPSDN_NRC <- add_criterion(fit_qPSDN_NRC, c("loo"), overwrite = TRUE)
 # fit_qNANC_NRC <- add_criterion(fit_qNANC_NRC, c("loo"), overwrite = TRUE)
 # 
+# (loo1 <- loo(fit_qMSQD, r_eff = NA))
+# (loo2 <- loo(fit_qMSQD_NRC, r_eff = NA))
+# loo_compare(loo1, loo2)
 # 
-(loo1 <- loo(fit_qMSQD, r_eff = NA))
-(loo2 <- loo(fit_qMSQD_NRC, r_eff = NA))
-loo_compare(loo1, loo2)
-
-(loo1 <- loo(fit_qPSDN, r_eff = NA))
-(loo2 <- loo(fit_qPSDN_NRC, r_eff = NA))
-loo_compare(loo1, loo2)
-
-(loo1 <- loo(fit_qNANC, r_eff = NA))
-(loo2 <- loo(fit_qNANC_NRC, r_eff = NA))
-loo_compare(loo1, loo2)
+# (loo1 <- loo(fit_qPSDN, r_eff = NA))
+# (loo2 <- loo(fit_qPSDN_NRC, r_eff = NA))
+# loo_compare(loo1, loo2)
 # 
-
+# (loo1 <- loo(fit_qNANC, r_eff = NA))
+# (loo2 <- loo(fit_qNANC_NRC, r_eff = NA))
+# loo_compare(loo1, loo2)
 
 #### Read database 
 dataset_msqd_landing <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation_MSQD.csv")
@@ -224,7 +254,7 @@ for (p in list) {
 ###############################################
 ### Analyze convergence ###
 
-launch_shinystan(fit_qMSQD)
+# launch_shinystan(fit_qMSQD)
 # launch_shinystan(fit_qPSDN)
 # launch_shinystan(fit_qNANC)
 

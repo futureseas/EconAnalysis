@@ -219,5 +219,5 @@ prior_lognormal <- c(
        control = list(max_treedepth = 15, adapt_delta = 0.99),
        file = "Estimations/fit_qMSQD_NRC")
  
- fit_qMSQD_NRC <- add_criterion(fit_qMSQD_NRC, c("loo", "waic"))
+ fit_qMSQD_NRC <- add_criterion(fit_qMSQD_NRC, c("loo"))
  

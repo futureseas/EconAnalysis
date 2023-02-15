@@ -214,5 +214,5 @@ fit_qPSDN_NRC <-
       control = list(max_treedepth = 15, adapt_delta = 0.99),
       file = "Estimations/fit_qPSDN_NRC")
 
-fit_qPSDN_NRC <- add_criterion(fit_qPSDN_NRC, c("loo", "waic"))
+fit_qPSDN_NRC <- add_criterion(fit_qPSDN_NRC, c("loo"))
 
