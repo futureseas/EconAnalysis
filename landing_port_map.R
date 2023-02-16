@@ -216,7 +216,7 @@ MSQD_plot <- ggplot() +
   geom_point(data = port_data_MSQD, 
              aes(x = lon, y = lat, color = factor(group_all)), 
              position = position_dodge(width = 1.15), 
-             size = 10, 
+             size = 8, 
              shape = 20, alpha = 0.75) +
   coord_sf(xlim = c(-129, -116), ylim = c(33, 49)) +
   mytheme + 
@@ -263,7 +263,7 @@ NANC_plot_legend <- ggplot() +
   geom_sf(data = state_map_data, fill = NA, size = .4) +
   geom_point(data = port_data_NANC, 
              aes(x = lon, y = lat, colour = factor(group_all)), 
-             size = 10, 
+             size = 8, 
              shape = 20, alpha = 0.75) +
   coord_sf(xlim = c(-129, -116), ylim = c(33, 49)) +
   mytheme + 
