@@ -27,7 +27,7 @@ port_data <- read.csv(here::here("Data", "Ports", "port_areas.csv")) %>%
 port_data <- port_data %>%
   mutate(port_group_name = ifelse(PORT_AREA_CODE == "NPS", "N. Puget Sound", port_group_name)) %>%
   mutate(port_group_name = ifelse(PORT_AREA_CODE == "SPS", "S. Puget Sound", port_group_name)) %>%
-  mutate(port_group_name = ifelse(PORT_AREA_CODE == "CWA", "Coastal Washington Ports", port_group_name)) %>%
+  mutate(port_group_name = ifelse(PORT_AREA_CODE == "CWA", "Coastal Washington\nPorts", port_group_name)) %>%
   mutate(port_group_name = ifelse(PORT_AREA_CODE == "CLW", "Columbia River (WA)", port_group_name)) %>%
   mutate(port_group_name = ifelse(PORT_AREA_CODE == "CLO", "Columbia River (OR)", port_group_name)) %>%
   mutate(port_group_name = ifelse(PORT_AREA_CODE == "TLA", "Tillamook", port_group_name)) %>%
@@ -64,8 +64,8 @@ port_data <- port_data %>%
     PORT_AREA_CODE == "NPS" ~ -4,
     PORT_AREA_CODE == "SPS" ~ -4,
     PORT_AREA_CODE == "CWA" ~ -4,
-    PORT_AREA_CODE == "CLW" ~ -3,
-    PORT_AREA_CODE == "CLO" ~ -2.5,
+    PORT_AREA_CODE == "CLW" ~ -3.5,
+    PORT_AREA_CODE == "CLO" ~ -4,
     PORT_AREA_CODE == "TLA" ~ -1.3,
     PORT_AREA_CODE == "NPA" ~ -1.3,
     PORT_AREA_CODE == "CBA" ~ -1.3,
@@ -86,7 +86,7 @@ port_data <- port_data %>%
       PORT_AREA_CODE == "SPS" ~ 0.8,
       PORT_AREA_CODE == "CWA" ~ 0.6,
       PORT_AREA_CODE == "CLW" ~ 0.5,
-      PORT_AREA_CODE == "CLO" ~ 0,
+      PORT_AREA_CODE == "CLO" ~ -0.5,
       PORT_AREA_CODE == "TLA" ~ 0,
       PORT_AREA_CODE == "NPA" ~ 0,
       PORT_AREA_CODE == "CBA" ~ 0,
@@ -202,7 +202,6 @@ state_names <- geom_text(data = state_map_data
 
 
 group.colors <- c("1" = "#fde725",
-                  "2" = "#90d743", 
                   '3' = "#35b779", 
                   "4" = "#0d0887", 
                   "5" = "#31688e", 
