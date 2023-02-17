@@ -32,7 +32,7 @@ for (y in 2000:2018) {
     for (j in 1:nrow(port_area_coord)) {
       
       # Open the monthly file that contain SDM by location
-      dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/sardine/sard_",
+      dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/anchovy/anch_",
                                    paste0(as.character(m),
                                           paste0("_", paste0(as.character(y),"_GAM.nc")))))
       
@@ -75,7 +75,7 @@ for (y in 2000:2018) {
                   LANDING_MONTH = m, 
                   LANDING_DAY = z, 
                   PORT_AREA_CODE = as.character(port_area_coord[j, 1]), 
-                  nanc_SDM = SDM_mean)
+                  NANC_SDM = SDM_mean)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
       readr::write_csv(sdm.nanc, file = "Participation/SDM_code/sdm.nanc.csv")
@@ -88,7 +88,7 @@ for (y in 2000:2018) {
     for (j in 1:nrow(port_area_coord)) {
       
       # Open the monthly file that contain SDM by location
-      dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/sardine/sard_",
+      dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/anchovy/anch_",
                                    paste0(as.character(m),
                                           paste0("_2019_GAM.nc"))))
       

@@ -21,35 +21,35 @@ port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.c
 #----------------
 # Pacific sardine
 
-sdm.psdn <- tibble(LANDING_YEAR = integer(),
+sdm.phrg <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
                    LANDING_DAY = integer(),
                    PORT_AREA_CODE = character(),
-                   PSDN_SDM = integer())
+                   PHRG_SDM = integer())
 
 for (y in 2000:2018) {
   for (m in 1:12) {
     for (j in 1:nrow(port_area_coord)) {
       
       # Open the monthly file that contain SDM by location
-      dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/sardine/sard_",
+      dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/herring/herr_",
                                    paste0(as.character(m),
                                           paste0("_", paste0(as.character(y),"_GAM.nc")))))
       
       set_long <- ncdf4::ncvar_get(dat, "lon")
       set_lat <- ncdf4::ncvar_get(dat, "lat")
-      psdn.date.sdm <- ncdf4::ncvar_get(dat, "time")
-      psdn.sdm <- ncdf4::ncvar_get(dat, "predGAM")
+      phrg.date.sdm <- ncdf4::ncvar_get(dat, "time")
+      phrg.sdm <- ncdf4::ncvar_get(dat, "predGAM")
       ncdf4::nc_close(dat)			
       
       # Reshape the 3D array so we can map it, change the time field to be date
-      dimnames(psdn.sdm) <- list(set_long = set_long, set_lat = set_lat, psdn.date.sdm = psdn.date.sdm)
-      sdmMelt <- reshape2::melt(psdn.sdm, value.name = "psdn.sdm")
-      sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$psdn.date.sdm)	
+      dimnames(phrg.sdm) <- list(set_long = set_long, set_lat = set_lat, phrg.date.sdm = phrg.date.sdm)
+      sdmMelt <- reshape2::melt(phrg.sdm, value.name = "phrg.sdm")
+      sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$phrg.date.sdm)	
       
       sdmMelt <- sdmMelt %>%
         group_by(set_lat, set_long, set_date) %>%
-        summarize(exp_prob = mean(psdn.sdm, na.rm = T))	%>%
+        summarize(exp_prob = mean(phrg.sdm, na.rm = T))	%>%
         ungroup(.)  
       sdmMelt <- sdmMelt %>% group_by(set_lat, set_long) %>%
         dplyr::mutate(ID_location = cur_group_id()) %>%
@@ -70,15 +70,15 @@ for (y in 2000:2018) {
       for (z in 1:max(sdmMelt$LANDING_DAY)) {
         dat_prob <- sdmMelt %>% dplyr::filter(LANDING_DAY == 28)  
         SDM_mean = mean(dat_prob$exp_prob, na.rm = TRUE)
-        sdm.psdn <- sdm.psdn %>%
+        sdm.phrg <- sdm.phrg %>%
           add_row(LANDING_YEAR = y, 
                   LANDING_MONTH = m, 
                   LANDING_DAY = z, 
                   PORT_AREA_CODE = as.character(port_area_coord[j, 1]), 
-                  PSDN_SDM = SDM_mean)
+                  PHRG_SDM = SDM_mean)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.psdn, file = "Participation/SDM_code/sdm.psdn.csv")
+      readr::write_csv(sdm.phrg, file = "Participation/SDM_code/sdm.phrg.csv")
     }
   }
 }
@@ -88,24 +88,24 @@ for (y in 2000:2018) {
     for (j in 1:nrow(port_area_coord)) {
       
       # Open the monthly file that contain SDM by location
-      dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/sardine/sard_",
+      dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/herring/herr_",
                                    paste0(as.character(m),
                                           paste0("_2019_GAM.nc"))))
       
       set_long <- ncdf4::ncvar_get(dat, "lon")
       set_lat <- ncdf4::ncvar_get(dat, "lat")
-      psdn.date.sdm <- ncdf4::ncvar_get(dat, "time")
-      psdn.sdm <- ncdf4::ncvar_get(dat, "predGAM")
+      phrg.date.sdm <- ncdf4::ncvar_get(dat, "time")
+      phrg.sdm <- ncdf4::ncvar_get(dat, "predGAM")
       ncdf4::nc_close(dat)			
       
       # Reshape the 3D array so we can map it, change the time field to be date
-      dimnames(psdn.sdm) <- list(set_long = set_long, set_lat = set_lat, psdn.date.sdm = psdn.date.sdm)
-      sdmMelt <- reshape2::melt(psdn.sdm, value.name = "psdn.sdm")
-      sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$psdn.date.sdm)	
+      dimnames(phrg.sdm) <- list(set_long = set_long, set_lat = set_lat, phrg.date.sdm = phrg.date.sdm)
+      sdmMelt <- reshape2::melt(phrg.sdm, value.name = "phrg.sdm")
+      sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$phrg.date.sdm)	
       
       sdmMelt <- sdmMelt %>%
         group_by(set_lat, set_long, set_date) %>%
-        summarize(exp_prob = mean(psdn.sdm, na.rm = T))	%>%
+        summarize(exp_prob = mean(phrg.sdm, na.rm = T))	%>%
         ungroup(.)  
       sdmMelt <- sdmMelt %>% group_by(set_lat, set_long) %>%
         dplyr::mutate(ID_location = cur_group_id()) %>%
@@ -126,14 +126,14 @@ for (y in 2000:2018) {
       for (z in 1:max(sdmMelt$LANDING_DAY)) {
         dat_prob <- sdmMelt %>% dplyr::filter(LANDING_DAY == 28)  
         SDM_mean = mean(dat_prob$exp_prob, na.rm = TRUE)
-        sdm.psdn <- sdm.psdn %>%
+        sdm.phrg <- sdm.phrg %>%
           add_row(LANDING_YEAR = 2019, 
                   LANDING_MONTH = m, 
                   LANDING_DAY = z, 
                   PORT_AREA_CODE = as.character(port_area_coord[j, 1]), 
-                  PSDN_SDM = SDM_mean)
+                  PHRG_SDM = SDM_mean)
       }
       print(paste("Year:", 2019, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.psdn, file = "Participation/SDM_code/sdm.psdn.csv")
+      readr::write_csv(sdm.phrg, file = "Participation/SDM_code/sdm.phrg.csv")
     }
   }

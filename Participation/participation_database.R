@@ -126,7 +126,7 @@ Tickets %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 #-----------------------------------------------
 ### Merge data to SDM 
 
-#... (STILL COMPUTING DAILY SDM)
+#... (STILL COMPUTING SDMs Daily)
 
 
 
@@ -151,7 +151,7 @@ Tickets %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 # Include outside option only when vessel participate in the fishery during 
 #---------------------------------------------------------------------------
 library(tidyr)
-Tickets_3 <- complete(Tickets_2, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+Tickets_exp <- complete(Tickets, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
   mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
   mutate(FTID = ifelse(is.na(FTID), paste('NP-',1:n()), FTID))
 
