@@ -133,3 +133,17 @@
 # port_owner_city$diversity[which(!is.finite(port_owner_city$diversity))] <- 0
 # port_owner_city <- port_owner_city %>% group_by(cluster) %>% summarize(diversity_cluster = mean(diversity))
 
+# #-----------------------------------------------------
+# ####Find the dominant port by value of each fishing trip ( = target species). 
+# Boats<-dcast(Tickets, FTID ~ PORT_AREA_CODE, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
+# row.names(Boats) <- Boats$FTID
+# FTID<-Boats$FTID
+# Boats<-Boats[,-(1)]
+# X<-as.data.frame(colnames(Boats)[apply(Boats,1,which.max)])
+# colnames(X)<-"Port_Dominant"
+# Trip_Port_Dominant<-as.data.frame(cbind(FTID,X))
+# Tickets<-merge(Tickets, Trip_Port_Dominant, by = 'FTID')
+# rm(Trip_Port_Dominant, X, Boats)
+
+
+
