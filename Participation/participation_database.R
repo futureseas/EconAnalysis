@@ -107,14 +107,17 @@ rm(FF_Vessels, FTID_Value)
 
 #-----------------------------------------------------
 ### Create port-species choice
-Tickets2 <- Tickets %>% 
+Tickets <- Tickets %>% 
   mutate(selection = paste(PORT_AREA_CODE, Species_Dominant, sep = "-", collapse = NULL)) %>%
   mutate(dDelete = ifelse(FTID == "142301E" & LANDING_YEAR == 2020, 1, 0)) %>%
            filter(dDelete == 0) %>% select(-c(dDelete))
 
-# Tickets_FTID <- Tickets2 %>% filter(FTID == "142301E")
-# Tickets_check <- Tickets2 %>% group_by(FTID) %>% summarize(n_obs = n())
+# Tickets_FTID <- Tickets %>% filter(FTID == "142301E")
+# Tickets_check <- Tickets %>% group_by(FTID) %>% summarize(n_obs = n())
 
+
+### How many vessels?
+Tickets %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 
 # ------------------------------------------------------------------
 ## Merge location data to SDM outputs
@@ -133,7 +136,6 @@ sdm.psdn <- tibble(LANDING_YEAR = integer(),
 
 for (y in min.year:max.year) {
   for (m in 1:12) {
-    
     
     
     dat <- ncdf4::nc_open(paste0("G:/My Drive/Project/Data/SDM/sardine/sard_", 
