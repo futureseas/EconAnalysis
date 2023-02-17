@@ -57,8 +57,8 @@ participation_data.save <- participation_data %>%
 
 # #-----------------------------------------------------------------------------
 # # ## Sampling choice data including revenue##
-# source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums_participation.R")
-# 
+
+source("C:\\GitHub\\EconAnalysis\\Functions\\sampled_rums_participation.R")
 samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
                          min_year = 2012, max_year = 2015,
                          min_year_prob = 2013, max_year_prob = 2014,

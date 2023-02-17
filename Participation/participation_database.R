@@ -120,17 +120,21 @@ Tickets2 <- Tickets %>%
 ## Merge location data to SDM outputs
 
 # Pacific sardine
+min.year = 2000
+max.year = 2020
 
-sdm.psdn.all <- tibble(LANDING_YEAR = integer(),
-                       LANDING_MONTH = integer(),
-                       LANDING_DAY = integer(),
-                       PORT_NAME = character(),
-                       AGENCY_CODE = character(),
-                       psdn.sdm = integer(), 
-                       psdn.date.sdm = integer())
+sdm.psdn <- tibble(LANDING_YEAR = integer(),
+                   LANDING_MONTH = integer(),
+                   LANDING_DAY = integer(),
+                   PORT_AREA_CODE = character(),
+                   AGENCY_CODE = character(),
+                   psdn.sdm = integer(), 
+                   psdn.date.sdm = integer())
 
 for (y in min.year:max.year) {
   for (m in 1:12) {
+    
+    
     
     dat <- ncdf4::nc_open(paste0("G:/My Drive/Project/Data/SDM/sardine/sard_", 
                                  paste0(as.character(m), 
