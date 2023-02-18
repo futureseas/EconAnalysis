@@ -131,6 +131,46 @@ Tickets %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 #... (STILL COMPUTING SDMs Daily)
 
 
+#-----------------------------------------------------------------------------
+### Obtain (year) price by port from PacFIN landing data
+
+# PacFIN_dat <- read.csv(file = here::here("Data", "PacFin.csv"))
+# price_PSDN <- PacFIN_dat %>%
+#   dplyr::filter(Species_code == "PSDN") %>%
+#   group_by(Landing_year) %>%
+#   summarize(price.PSDN = mean(Price, na.rm = T)) %>%
+#   dplyr::rename(set_year = Landing_year)
+# 
+# psdn.logbook <- merge(psdn.logbook,price_PSDN,by=c('set_year'),all.x = TRUE) 
+
+#---------------------------------------------------------------
+### Merge storm warning signals
+
+# warnings.signals <- read.csv(file = "G://My Drive//Data//Storm Warnings//WCports_mww_events09-16.csv")
+# warnings.signals <- warnings.signals %>% 
+#   select("pcid", "d_issued", "d_expired", "hurricane", "gale", "smcraft", "mww_other") %>%
+#   dplyr::rename(PACFIN_PORT_CODE = pcid) 
+# port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
+# warnings.signals <- warnings.signals %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
+# warnings.signals$d_issued  <- as.Date(warnings.signals$d_issued, "%d%b%Y %H:%M:%OS")
+# warnings.signals$d_expired <- as.Date(warnings.signals$d_expired, "%d%b%Y %H:%M:%OS")
+# warnings.signals <- warnings.signals %>% unique() 
+# library(sqldf)
+# df1 <- participation_data
+# df2 <- warnings.signals
+# warnings.signals <-  sqldf("select df1.*, df2.hurricane, df2.gale, df2.smcraft, df2.mww_other
+#                                       from df1 left join df2 on
+#                                       (df1.Port_Dominant = df2.PORT_AREA_CODE) AND 
+#                                       (df1.set_date between df2.d_issued and df2.d_expired)") 
+# warnings.signals <- warnings.signals %>% unique() %>% 
+#   select("trip_id", "hurricane", "gale", "smcraft", "mww_other")
+# warnings.signals <- warning.signals %>% group_by(trip_id) %>%
+#   summarise(hurricane = sum(hurricane), gale = sum(gale), 
+#             smcraft = sum(smcraft), mww_other = sum(mww_other))
+# warnings.signals[is.na(warnings.signals)] <- 0
+# participation_data <- merge(participation_data, warnings.signals, 
+#                             by=c("trip_id"), all.x = TRUE)
+
 
 #---------------------------------------------------------------------------------------
 ### Include outside option only when vessel participate in the fishery during last year?
