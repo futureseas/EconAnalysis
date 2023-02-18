@@ -27,7 +27,9 @@ sdm.phrg <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
                    LANDING_DAY = integer(),
                    PORT_AREA_CODE = character(),
-                   PHRG_SDM = integer())
+                   PHRG_SDM_30 = numeric(),
+                   PHRG_SDM_90 = numeric(),
+                   PHRG_SDM_220 = numeric())
 
 for (y in 2000:2018) {
   for (m in 1:12) {
@@ -65,19 +67,27 @@ for (y in 2000:2018) {
         mutate(dist = dist / 1000) %>% select(-c(set_long, set_lat))
       
       sdmMelt <- merge(sdmMelt, dist_to_ID, by = c('ID_location'), all.x = TRUE, all.y = FALSE) %>% 
-        mutate(LANDING_DAY = day(set_date)) %>% dplyr::filter(dist <= 200)
+        mutate(LANDING_DAY = day(set_date))
       
       
       # Calculate daily SDM level within port radius
       for (z in 1:max(sdmMelt$LANDING_DAY)) {
-        dat_prob <- sdmMelt %>% dplyr::filter(LANDING_DAY == 28)  
-        SDM_mean = mean(dat_prob$exp_prob, na.rm = TRUE)
+        dat_prob_30  <- sdmMelt %>% dplyr::filter(dist <= 30)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_90  <- sdmMelt %>% dplyr::filter(dist <= 90)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_220 <- sdmMelt %>% dplyr::filter(dist <= 220) %>% dplyr::filter(LANDING_DAY == z)
+        SDM_mean_30  <- mean(dat_prob_30$exp_prob, na.rm = TRUE)
+        SDM_mean_90  <- mean(dat_prob_90$exp_prob, na.rm = TRUE)
+        SDM_mean_220 <- mean(dat_prob_220$exp_prob, na.rm = TRUE)
         sdm.phrg <- sdm.phrg %>%
           add_row(LANDING_YEAR = y, 
                   LANDING_MONTH = m, 
                   LANDING_DAY = z, 
                   PORT_AREA_CODE = as.character(port_area_coord[j, 1]), 
-                  PHRG_SDM = SDM_mean)
+                  PHRG_SDM_30  = SDM_mean_30, 
+                  PHRG_SDM_90  = SDM_mean_90, 
+                  PHRG_SDM_220 = SDM_mean_220)
+        rm(dat_prob_30, dat_prob_90, dat_prob_220, 
+           SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
       readr::write_csv(sdm.phrg, file = "Participation/SDM_code/sdm.phrg.csv")
@@ -121,19 +131,26 @@ for (y in 2000:2018) {
         mutate(dist = dist / 1000) %>% select(-c(set_long, set_lat))
       
       sdmMelt <- merge(sdmMelt, dist_to_ID, by = c('ID_location'), all.x = TRUE, all.y = FALSE) %>% 
-        mutate(LANDING_DAY = day(set_date)) %>% dplyr::filter(dist <= 200)
-      
+        mutate(LANDING_DAY = day(set_date))
       
       # Calculate daily SDM level within port radius
       for (z in 1:max(sdmMelt$LANDING_DAY)) {
-        dat_prob <- sdmMelt %>% dplyr::filter(LANDING_DAY == 28)  
-        SDM_mean = mean(dat_prob$exp_prob, na.rm = TRUE)
+        dat_prob_30  <- sdmMelt %>% dplyr::filter(dist <= 30)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_90  <- sdmMelt %>% dplyr::filter(dist <= 90)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_220 <- sdmMelt %>% dplyr::filter(dist <= 220) %>% dplyr::filter(LANDING_DAY == z)
+        SDM_mean_30  <- mean(dat_prob_30$exp_prob, na.rm = TRUE)
+        SDM_mean_90  <- mean(dat_prob_90$exp_prob, na.rm = TRUE)
+        SDM_mean_220 <- mean(dat_prob_220$exp_prob, na.rm = TRUE)
         sdm.phrg <- sdm.phrg %>%
           add_row(LANDING_YEAR = 2019, 
                   LANDING_MONTH = m, 
                   LANDING_DAY = z, 
                   PORT_AREA_CODE = as.character(port_area_coord[j, 1]), 
-                  PHRG_SDM = SDM_mean)
+                  PHRG_SDM_30  = SDM_mean_30, 
+                  PHRG_SDM_90  = SDM_mean_90, 
+                  PHRG_SDM_220 = SDM_mean_220)
+        rm(dat_prob_30, dat_prob_90, dat_prob_220, 
+           SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", 2019, "; month:", m, "--", "Port area:",j))
       readr::write_csv(sdm.phrg, file = "Participation/SDM_code/sdm.phrg.csv")
