@@ -5,7 +5,7 @@
 rm(list=ls())
 gc()
 
-#Try also 30, 60, 90
+#Try also 30, 60, 90 and 220
 
 ###Load packages and set working directory
 
@@ -27,7 +27,10 @@ sdm.psdn <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
                    LANDING_DAY = integer(),
                    PORT_AREA_CODE = character(),
-                   PSDN_SDM = integer())
+                   PSDN_SDM_30 = numeric(),
+                   PSDN_SDM_60 = numeric(),
+                   PSDN_SDM_90 = numeric(),
+                   PSDN_SDM_220 = numeric())
 
 for (y in 2000:2018) {
   for (m in 1:12) {
@@ -65,19 +68,29 @@ for (y in 2000:2018) {
         mutate(dist = dist / 1000) %>% select(-c(set_long, set_lat))
       
       sdmMelt <- merge(sdmMelt, dist_to_ID, by = c('ID_location'), all.x = TRUE, all.y = FALSE) %>% 
-        mutate(LANDING_DAY = day(set_date)) %>% dplyr::filter(dist <= 200)
-      
+        mutate(LANDING_DAY = day(set_date)) 
       
       # Calculate daily SDM level within port radius
       for (z in 1:max(sdmMelt$LANDING_DAY)) {
-        dat_prob <- sdmMelt %>% dplyr::filter(LANDING_DAY == 28)  
-        SDM_mean = mean(dat_prob$exp_prob, na.rm = TRUE)
+        dat_prob_30  <- sdmMelt %>% dplyr::filter(dist <= 30)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_60  <- sdmMelt %>% dplyr::filter(dist <= 60)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_90  <- sdmMelt %>% dplyr::filter(dist <= 90)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_220 <- sdmMelt %>% dplyr::filter(dist <= 220) %>% dplyr::filter(LANDING_DAY == z)
+        SDM_mean_30  <- mean(dat_prob_30$exp_prob, na.rm = TRUE)
+        SDM_mean_60  <- mean(dat_prob_60$exp_prob, na.rm = TRUE)
+        SDM_mean_90  <- mean(dat_prob_90$exp_prob, na.rm = TRUE)
+        SDM_mean_220 <- mean(dat_prob_220$exp_prob, na.rm = TRUE)
         sdm.psdn <- sdm.psdn %>%
           add_row(LANDING_YEAR = y, 
                   LANDING_MONTH = m, 
                   LANDING_DAY = z, 
                   PORT_AREA_CODE = as.character(port_area_coord[j, 1]), 
-                  PSDN_SDM = SDM_mean)
+                  PSDN_SDM_30  = SDM_mean_30, 
+                  PSDN_SDM_60  = SDM_mean_60, 
+                  PSDN_SDM_90  = SDM_mean_90, 
+                  PSDN_SDM_220 = SDM_mean_220)
+        rm(dat_prob_30, dat_prob_60, dat_prob_90, dat_prob_220, 
+           SDM_mean_30, SDM_mean_60, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
       readr::write_csv(sdm.psdn, file = "Participation/SDM_code/sdm.psdn.csv")
@@ -121,19 +134,30 @@ for (y in 2000:2018) {
         mutate(dist = dist / 1000) %>% select(-c(set_long, set_lat))
       
       sdmMelt <- merge(sdmMelt, dist_to_ID, by = c('ID_location'), all.x = TRUE, all.y = FALSE) %>% 
-        mutate(LANDING_DAY = day(set_date)) %>% dplyr::filter(dist <= 200)
+        mutate(LANDING_DAY = day(set_date))
       
       
       # Calculate daily SDM level within port radius
       for (z in 1:max(sdmMelt$LANDING_DAY)) {
-        dat_prob <- sdmMelt %>% dplyr::filter(LANDING_DAY == 28)  
-        SDM_mean = mean(dat_prob$exp_prob, na.rm = TRUE)
+        dat_prob_30  <- sdmMelt %>% dplyr::filter(dist <= 30)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_60  <- sdmMelt %>% dplyr::filter(dist <= 60)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_90  <- sdmMelt %>% dplyr::filter(dist <= 90)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_220 <- sdmMelt %>% dplyr::filter(dist <= 220) %>% dplyr::filter(LANDING_DAY == z)
+        SDM_mean_30  <- mean(dat_prob_30$exp_prob, na.rm = TRUE)
+        SDM_mean_60  <- mean(dat_prob_60$exp_prob, na.rm = TRUE)
+        SDM_mean_90  <- mean(dat_prob_90$exp_prob, na.rm = TRUE)
+        SDM_mean_220 <- mean(dat_prob_220$exp_prob, na.rm = TRUE)
         sdm.psdn <- sdm.psdn %>%
           add_row(LANDING_YEAR = 2019, 
                   LANDING_MONTH = m, 
                   LANDING_DAY = z, 
                   PORT_AREA_CODE = as.character(port_area_coord[j, 1]), 
-                  PSDN_SDM = SDM_mean)
+                  PSDN_SDM_30  = SDM_mean_30, 
+                  PSDN_SDM_60  = SDM_mean_60, 
+                  PSDN_SDM_90  = SDM_mean_90, 
+                  PSDN_SDM_220 = SDM_mean_220)
+        rm(dat_prob_30, dat_prob_60, dat_prob_90, dat_prob_220, 
+           SDM_mean_30, SDM_mean_60, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", 2019, "; month:", m, "--", "Port area:",j))
       readr::write_csv(sdm.psdn, file = "Participation/SDM_code/sdm.psdn.csv")
