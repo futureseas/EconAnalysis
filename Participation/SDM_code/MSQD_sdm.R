@@ -2,6 +2,9 @@
 ## Calculate SDM outputs to PORT_AREA_CODE ##
 #############################################
 
+
+### Try 30, 90, 200
+
 rm(list=ls())
 gc()
 

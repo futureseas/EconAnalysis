@@ -5,6 +5,8 @@
 rm(list=ls())
 gc()
 
+#Try also 30, 60, 90
+
 ###Load packages and set working directory
 
 library(data.table)

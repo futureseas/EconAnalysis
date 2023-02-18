@@ -172,6 +172,9 @@ Tickets %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 #                             by=c("trip_id"), all.x = TRUE)
 
 
+### WHERE IS THE WIND and CURRENTS DATAAAAAAA!!!!!
+
+
 #---------------------------------------------------------------------------------------
 ### Include outside option only when vessel participate in the fishery during last year?
 
