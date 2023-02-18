@@ -117,6 +117,8 @@ Tickets <- Tickets %>%
 
 # Tickets_FTID <- Tickets %>% filter(FTID == "142301E")
 # Tickets_check <- Tickets %>% group_by(FTID) %>% summarize(n_obs = n())
+# Tickets <- Tickets %>% group_by(FTID) %>% mutate(n_obs = n()) %>% 
+#   ungroup() %>% filter(n_obs==1)
 
 
 ### How many vessels?
@@ -130,75 +132,25 @@ Tickets %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 
 
 
+#---------------------------------------------------------------------------------------
+### Include outside option only when vessel participate in the fishery during last year?
 
-#-----------------------------------------------------
-### Expand database 
-### Include outside option? Then, expand data when variables are not observed.
-
-# #### Se first how many trips per day
-# n_trips_per_day <- Tickets_clust_2 %>% 
-#   dplyr::select('VESSEL_NUM', 'FTID', 'LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY') %>% 
-#   unique() %>% 
-#   group_by(VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
-#   summarize(n_trips = n()) 
-# 
-# hist(n_trips_per_day$n_trips, 
-#      main = '', 
-#      xlab	= 'Number of trips per day')
-
-
-#---------------------------------------------------------------------------
-# Include outside option only when vessel participate in the fishery during 
-#---------------------------------------------------------------------------
-library(tidyr)
 Tickets_exp <- complete(Tickets, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
   mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
   mutate(FTID = ifelse(is.na(FTID), paste('NP-',1:n()), FTID))
-
-  Tickets_3 <- Tickets_3 %>% group_by(FTID) %>% mutate(n_obs = n()) %>% 
-    ungroup() %>% filter(n_obs==1)
-
-
-# #-----------------------------------------------------
-# ### Create each vessel's choice set 
-# 
-# ### --- Start with all the port areas in the database. 
-# ### --- Later, based on the inertia? 
-# 
-# # freq_selection <- count(Tickets_clust_2, 'selection')
-# # gs4_create("freq_selection", sheets = freq_selection)
-# 
-# choice_set <- Tickets_3 %>% dplyr::select('selection') %>% unique()
-# choice_set_by_vessel    <- expand.grid(VESSEL_NUM = unique(Tickets_3$VESSEL_NUM), choice_set = unique(Tickets_3$selection))
-# choice_set_by_vessel_v2 <- Tickets_3 %>% dplyr::select('selection', 'VESSEL_NUM') %>% unique()
-# 
-# gc()
-# memory.limit(9999999999)
-# Tickets_4 <- merge(Tickets_3, choice_set_by_vessel_v2, by = ('VESSEL_NUM'), all.x = TRUE, all.y = TRUE, allow.cartesian=TRUE)
-# gc()
-# participation_df <- Tickets_4 %>% mutate(choice = ifelse(selection.x == selection.y, 1, 0))
-# head(participation_df, 25)
-
 
 
 #-----------------------------------------------------
 ### Merge with cluster data...
 PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
-Tickets_clust <- merge(Tickets_3, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+Tickets_clust <- merge(Tickets_exp, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 rm(PAM_Vessel_Groups)
-
 Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 
 
-### Save logbooks ###
+#------------------------------------------------------
+### Save participation data ###
 write.csv(Tickets_clust, "C:\\Data\\PacFIN data\\participation_data.csv", row.names = FALSE)
 
 
-# #####################################################
-# #### OTHER ANALYSIS ####
-# 
-# # ### How many tickets per species?
-# 
-# # freq_dominant_species <- count(Tickets, 'Species_Dominant')
-# # gs4_create("freq_dominant_species_participation", sheets = freq_dominant_species)
-# 
+

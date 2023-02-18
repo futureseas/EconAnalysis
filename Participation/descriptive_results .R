@@ -76,6 +76,24 @@ PacFIN.month.CPS <- PacFIN.month %>%
 ### Descriptive figures ###
 ###########################
 
+
+#### Se first how many trips per day
+# n_trips_per_day <- Tickets_clust_2 %>% 
+#   dplyr::select('VESSEL_NUM', 'FTID', 'LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY') %>% 
+#   unique() %>% 
+#   group_by(VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+#   summarize(n_trips = n()) 
+# 
+# hist(n_trips_per_day$n_trips, 
+#      main = '', 
+#      xlab	= 'Number of trips per day')
+
+### How many tickets per species?
+# freq_dominant_species <- count(Tickets, 'Species_Dominant')
+# gs4_create("freq_dominant_species_participation", sheets = freq_dominant_species)
+ 
+
+
 #----------------------------------
 ## Figure 1. Annual average landings by port area ##
 
