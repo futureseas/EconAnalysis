@@ -141,15 +141,19 @@ Tickets_exp <- complete(Tickets, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDIN
 
 
 #-----------------------------------------------------
-### Merge with cluster data...
+### Merge with cluster data
+
 PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
 Tickets_clust <- merge(Tickets_exp, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 rm(PAM_Vessel_Groups)
 Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 
+### How many vessels?
+Tickets_clust %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 
 #------------------------------------------------------
-### Save participation data ###
+### Save participation data
+
 write.csv(Tickets_clust, "C:\\Data\\PacFIN data\\participation_data.csv", row.names = FALSE)
 
 
