@@ -30,7 +30,7 @@ sdm.psdn <- tibble(LANDING_YEAR = integer(),
                    PSDN_SDM_90 = numeric(),
                    PSDN_SDM_220 = numeric())
 
-for (y in 2000:2018) {
+for (y in 2015:2018) {
   for (m in 1:12) {
     for (j in 1:nrow(port_area_coord)) {
       
@@ -91,7 +91,7 @@ for (y in 2000:2018) {
            SDM_mean_30, SDM_mean_60, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.psdn, file = "Participation/SDM_code/sdm.psdn.csv")
+      readr::write_csv(sdm.psdn, file = "Participation/SDM_code/sdm.psdn_v2.csv")
     }
   }
 }
@@ -158,6 +158,6 @@ for (y in 2000:2018) {
            SDM_mean_30, SDM_mean_60, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", 2019, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.psdn, file = "Participation/SDM_code/sdm.psdn.csv")
+      readr::write_csv(sdm.psdn, file = "Participation/SDM_code/sdm.psdn_v2.csv")
     }
   }
