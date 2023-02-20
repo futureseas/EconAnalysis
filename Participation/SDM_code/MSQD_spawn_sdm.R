@@ -89,7 +89,7 @@ for (y in 2000:2019) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.msqd, file = "Participation/SDM_code/sdm.msqd.csv")
+      readr::write_csv(sdm.msqd, file = "Participation/SDM_code/sdm_msqd_spawn.csv")
     }
   }
 }
