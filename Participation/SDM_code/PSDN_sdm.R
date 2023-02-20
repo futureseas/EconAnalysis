@@ -97,7 +97,7 @@ for (y in 2015:2018) {
 }
 
 ### Add 2019 data until august
-  for (m in 1:12) {
+  for (m in 1:8) {
     for (j in 1:nrow(port_area_coord)) {
       
       # Open the monthly file that contain SDM by location
