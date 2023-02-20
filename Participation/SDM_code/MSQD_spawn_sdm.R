@@ -47,7 +47,7 @@ for (y in 2000:2019) {
       # Reshape the 3D array so we can map it, change the time field to be date
       dimnames(msqd.sdm) <- list(set_long = set_long, set_lat = set_lat, msqd.date.sdm = msqd.date.sdm)
       sdmMelt <- reshape2::melt(msqd.sdm, value.name = "msqd.sdm")
-      # sdmMelt$tim <- as.integer(sdmMelt$tim)
+      sdmMelt$msqd.date.sdm <- as.integer(sdmMelt$msqd.date.sdm)
       sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$msqd.date.sdm)	
       
       sdmMelt <- sdmMelt %>%
