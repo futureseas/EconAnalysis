@@ -3,6 +3,22 @@
 # DELETED CODE
 #--------------------
 
+
+#-----------------------------------------------------------------------------
+### Obtain (year) price by port from PacFIN landing data
+
+# PacFIN_dat <- read.csv(file = here::here("Data", "PacFin.csv"))
+# price_PSDN <- PacFIN_dat %>%
+#   dplyr::filter(Species_code == "PSDN") %>%
+#   group_by(Landing_year) %>%
+#   summarize(price.PSDN = mean(Price, na.rm = T)) %>%
+#   dplyr::rename(set_year = Landing_year)
+# 
+# psdn.logbook <- merge(psdn.logbook,price_PSDN,by=c('set_year'),all.x = TRUE) 
+
+
+
+
 # #-----------------------------------------------------
 # ## Case study Squid ##
 # # Which vessels are landing in Oregon

@@ -31,7 +31,7 @@ sdm.msqd <- tibble(LANDING_YEAR = integer(),
                    MSQD_SPAWN_SDM_90 = numeric(),
                    MSQD_SPAWN_SDM_220 = numeric())
 
-for (y in 2000:2019) {
+for (y in 2010:2019) {
   for (m in 1:12) {
     for (j in 1:nrow(port_area_coord)) {
       dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/squid_spawn/squidSpawn_", 
@@ -89,7 +89,7 @@ for (y in 2000:2019) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.msqd, file = "Participation/SDM_code/sdm_msqd_spawn.csv")
+      readr::write_csv(sdm.msqd, file = "Participation/SDM_code/sdm_msqd_spawn_2.csv")
     }
   }
 }
