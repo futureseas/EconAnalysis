@@ -189,13 +189,17 @@ sVmelt3 <- sVmelt3 %>% select(-c("date"))
 sVmelt <- rbind(sVmelt1, sVmelt2, sVmelt3)
 rm(sVmelt1, sVmelt2, sVmelt3)
 
+coord <- sVmelt %>% filter(LANDING_YEAR == 2015) %>% filter(LANDING_MONTH == 6) 
+coord <- coord %>% dplyr::select(c(lat, lon)) %>% unique()
+saveRDS(coord, "C:/Data/Wind&Current/coord_currents.rds")
+
 ##########################################################################################################################
 ##########################################################################################################################
 
 
 # Get distance by coordinate to port j and save it
 gc()
-coord <- sUmelt %>% dplyr::select(c(lat, lon)) %>% unique()
+coord <- readRDS("C:/Data/Wind&Current/coord_currents.rds")  
 port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 
 for (j in 1:nrow(port_area_coord)) {
@@ -205,8 +209,8 @@ for (j in 1:nrow(port_area_coord)) {
     })) %>%
     mutate(dist = dist / 1000)
   
-  write.csv(distPorts, paste0("C:/Data/Wind&Current/port_dist/portDist_currents_",
-                              paste0(as.character(j), ".csv")), row.names = FALSE)
+  saveRDS(distPorts, paste0("C:/Data/Wind&Current/port_dist/portDist_currents_",
+                              paste0(as.character(j), ".rds")))
 }
 
 
@@ -220,11 +224,11 @@ for (y in 2011:2019) {
     sU <- sUmelt %>% filter(LANDING_YEAR == y) %>% filter(LANDING_MONTH == m)    
     sV <- sVmelt %>% filter(LANDING_YEAR == y) %>% filter(LANDING_MONTH == m)
     currents <- merge(sU, sV, by = c("lat", "lon", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"))      
-    write.csv(currents, paste0("C:/Data/Wind&Current/monthly_data/currents/currents_",
+    saveRDS(currents, paste0("C:/Data/Wind&Current/monthly_data/currents/currents_",
                            paste0(as.character(m),
                                   paste0("_",
                                          paste0(as.character(y),
-                                                ".csv")))), row.names = FALSE)
+                                                ".rds")))), row.names = FALSE)
     rm(sU, sV, currents)
   }
 }
@@ -254,13 +258,13 @@ port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.c
 y=2000
 m=1
 for (j in 1:nrow(port_area_coord)) {
-  distP <- read_csv(paste0("C:/Data/Wind&Current/port_dist/portDist_",
-                               paste0(as.character(j), ".csv")))
-  currents <- read_csv(paste0("C:/Data/Wind&Current/monthly_data/currents/currents_", 
+  distP <- readRDS(paste0("C:/Data/Wind&Current/port_dist/portDist_currents_",
+                               paste0(as.character(j), ".rds")))
+  currents <- readRDS(paste0("C:/Data/Wind&Current/monthly_data/currents/currents_", 
                           paste0(as.character(m),
                                  paste0("_",   
                                         paste0(as.character(y),
-                                               ".csv")))))
+                                               ".rds")))))
   
   currents_port <- merge(currents, distP, by = c('lat', 'lon'), all.x = TRUE, all.y = FALSE) 
   
@@ -292,5 +296,5 @@ for (j in 1:nrow(port_area_coord)) {
        currentsV_mean_30, currentsV_mean_90, currentsV_mean_220)
   }
   print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-  readr::write_csv(currents_means, file = "C:/Data/Wind&Current/currents_U_V_2011-2019.csv")
+  saveRDS(currents_means, file = "C:/Data/Wind&Current/currents_U_V_2011-2019.rds")
 }
