@@ -186,9 +186,29 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 # xxx %>% select('FTID_unique') %>% unique() %>% summarize(n_tickets = n())
 # xxx %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------
+## Clean dataset for discrete choice model  
+## Add unique trip_ID and add set_date, set_year, set_day and set_month 
+## (exclude weird period from expanding data)
+
+Tickets_clust$trip_id <- udpipe::unique_identifier(Tickets_clust, fields = c("FTID_unique"))
+Tickets_clust$set_date<-as.Date(with(
+  Tickets_clust,
+  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
+  "%Y-%m-%d")
+participation_data <- Tickets_clust %>% drop_na(set_date) %>% 
+  dplyr::rename(set_day = LANDING_DAY) %>%
+  dplyr::rename(set_month = LANDING_MONTH) %>%
+  dplyr::rename(set_year = LANDING_YEAR)%>%
+  dplyr::select("VESSEL_NUM", "trip_id", "set_date", "set_year", "set_month", "set_day", "selection",
+                "PORT_AREA_CODE", "Species_Dominant", "Landings_lbs", "Revenue", "Price_lbs", 
+                "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90", "PSDN_SDM_220", 
+                "hurricane", "gale", "smcraft", "mww_other", "group_all")
+
 #------------------------------------------------------
 ### Save participation data
-saveRDS(Tickets_clust, "C:\\Data\\PacFIN data\\participation_data.rds")
+saveRDS(participation_data, "C:\\Data\\PacFIN data\\participation_data.rds")
 
 
 
