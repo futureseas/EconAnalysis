@@ -108,10 +108,6 @@ Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]
 Tickets<-as.data.frame(Tickets)
 rm(FF_Vessels, FTID_Value)
 
-#-------------------------------------------------------------------
-# Filter relevant row (targeted species in dominant port)
-
-
 
 #-----------------------------------------------------
 ### Create port-species choice
@@ -125,9 +121,8 @@ Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) %>%
 #    ungroup() %>% filter(n_obs==2)
 # Tickets_FTID <- Tickets %>% filter(FTID == "142301E")
 
-
-### How many vessels?
-Tickets %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
+# ### How many vessels?
+# Tickets %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 
 #-----------------------------------------------
 ### Merge data to SDM 
@@ -161,20 +156,20 @@ warnings.signals <-  sqldf("select df1.*, df2.hurricane, df2.gale, df2.smcraft, 
                                       (df1.PORT_AREA_CODE = df2.PORT_AREA_CODE) AND
                                       (df1.date between df2.d_issued and df2.d_expired)")
 warnings.signals <- warnings.signals %>% unique() %>%
-  select("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID",  "hurricane", "gale", "smcraft", "mww_other")
-warnings.signals <- warnings.signals %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, FTID) %>%
+  select("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID_unique", "hurricane", "gale", "smcraft", "mww_other")
+warnings.signals <- warnings.signals %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, FTID_unique) %>%
   summarise(hurricane = sum(hurricane), gale = sum(gale),
             smcraft = sum(smcraft), mww_other = sum(mww_other))
 warnings.signals[is.na(warnings.signals)] <- 0
 Tickets_storm <- merge(Tickets_SDM, warnings.signals,
-                       by=c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID"), all.x = TRUE, all.y = TRUE)
+                       by=c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID_unique"), all.x = TRUE, all.y = TRUE)
 
 
 #---------------------------------------------------------------------------------------
 ### Expand database to include outside option (when vessel do not have fish ticket.)
 Tickets_exp <- complete(Tickets_storm, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
   mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
-  mutate(FTID = ifelse(is.na(FTID), paste('NP-',1:n()), FTID))
+  mutate(FTID_unique = ifelse(is.na(FTID_unique), paste('NP-',1:n()), FTID_unique))
 
 #-----------------------------------------------------
 ### Merge with cluster data
@@ -188,13 +183,12 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 # PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
 # xxx <- merge(Tickets_storm, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 # xxx <- xxx[!is.na(xxx$group_all), ]
-# xxx %>% select('FTID') %>% unique() %>% summarize(n_tickets = n()) 
+# xxx %>% select('FTID_unique') %>% unique() %>% summarize(n_tickets = n())
 # xxx %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 
 #------------------------------------------------------
 ### Save participation data
-
-write.csv(Tickets_clust, "C:\\Data\\PacFIN data\\participation_data.csv", row.names = FALSE)
+saveRDS(Tickets_clust, "C:\\Data\\PacFIN data\\participation_data.rds")
 
 
 

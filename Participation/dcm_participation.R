@@ -3,8 +3,8 @@
 ########################################################################################
 
 ### Note: Thanks Peter for sharing the code used in Hicks's paper. 
-### I modify it a little to be used with CPS logbooks. A trip would be similiar to a ticket, 
-### a "set" similar to haul, and coordinates "set" and "up" are the same. 
+### I modify it a little to be used with PacFIN data. A trip would be similar to a ticket, 
+### a "set" similar to also a ticket, and coordinates "set" and "up" are the same. 
 
 gc()
 rm(list=ls())
@@ -26,13 +26,13 @@ rm(list=ls())
 #-----------------------------------------------------------------------------
 
 ## Read participation database ##
-participation_data <- read.csv("C:\\Data\\PacFIN data\\participation_data.csv")
+participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
 
 #-----------------------------------------------------------------------------
 # Clean dataset for discrete choice model (no haul in this case)
 
-participation_data$trip_id <- udpipe::unique_identifier(participation_data, fields = c("FTID", "VESSEL_NUM"))
+participation_data$trip_id <- udpipe::unique_identifier(participation_data, fields = c("FTID_unique"))
 participation_data$set_date<-as.Date(with(
    participation_data,
    paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
