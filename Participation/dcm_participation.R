@@ -8,7 +8,6 @@
 
 gc()
 rm(list=ls())
-memory.limit(9999999999)
 
 ## Load packages ##
 # library(ggplot2)
@@ -27,13 +26,13 @@ memory.limit(9999999999)
 #-----------------------------------------------------------------------------
 
 ## Read participation database ##
-participation_data <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\participation_data.csv")
+participation_data <- read.csv("C:\\Data\\PacFIN data\\participation_data.csv")
 
 
 #-----------------------------------------------------------------------------
 # Clean dataset for discrete choice model (no haul in this case)
 
-participation_data$trip_id <- udpipe::unique_identifier(participation_data, fields = c("FTID"))
+participation_data$trip_id <- udpipe::unique_identifier(participation_data, fields = c("FTID", "VESSEL_NUM"))
 participation_data$set_date<-as.Date(with(
    participation_data,
    paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),

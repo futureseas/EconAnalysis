@@ -113,12 +113,18 @@ wind_means <- tibble(LANDING_YEAR = integer(),
                      LANDING_MONTH = integer(),
                      LANDING_DAY = integer(),
                      PORT_AREA_CODE = character(),
-                     windV_30 = numeric(),
-                     windV_90 = numeric(),
-                     windV_220 = numeric(),
-                     windU_30 = numeric(),
-                     windU_90 = numeric(),
-                     windU_220 = numeric())
+                     windV_mean_30 = numeric(),
+                     windV_mean_90 = numeric(),
+                     windV_mean_220 = numeric(),
+                     windU_mean_30 = numeric(),
+                     windU_mean_90 = numeric(),
+                     windU_mean_220 = numeric(),
+                     windV_max_30 = numeric(),
+                     windV_max_90 = numeric(),
+                     windV_max_220 = numeric(),
+                     windU_max_30 = numeric(),
+                     windU_max_90 = numeric(),
+                     windU_max_220 = numeric())
 
 port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 
@@ -126,16 +132,13 @@ port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.c
 for (y in 2000:2020) {
   for (m in 1:12) {
     for (j in 1:nrow(port_area_coord)) {
-      
       distPorts <- readRDS(paste0("C:/Data/Wind&Current/port_dist/portDist_",
                                 paste0(as.character(j), ".rds")))
-      
       wind <- read.csv(paste0("C:/Data/Wind&Current/monthly_data/wind_", 
                             paste0(as.character(m),
                                    paste0("_",   
                                           paste0(as.character(y),
                                                  ".csv")))))
-    
       wind_port <- merge(wind, distPorts, by = c('lat', 'lon'), all.x = TRUE, all.y = FALSE) 
     
       # Calculate daily wind within port radius
@@ -149,21 +152,31 @@ for (y in 2000:2020) {
         windU_mean_30  <- mean(wind_30$Uwind, na.rm = TRUE)
         windU_mean_90  <- mean(wind_90$Uwind, na.rm = TRUE)
         windU_mean_220 <- mean(wind_220$Uwind, na.rm = TRUE)
+        windV_max_30  <- max(wind_30$Vwind, na.rm = TRUE)
+        windV_max_90  <- max(wind_90$Vwind, na.rm = TRUE)
+        windV_max_220 <- max(wind_220$Vwind, na.rm = TRUE)
+        windU_max_30  <- max(wind_30$Uwind, na.rm = TRUE)
+        windU_max_90  <- max(wind_90$Uwind, na.rm = TRUE)
+        windU_max_220 <- max(wind_220$Uwind, na.rm = TRUE)
         
         wind_means <- wind_means %>%
           add_row(LANDING_YEAR = y, 
                   LANDING_MONTH = m, 
                   LANDING_DAY = z, 
                   PORT_AREA_CODE = as.character(port_area_coord[j, 1]), 
-                  windV_30  = windV_mean_30, 
-                  windV_90  = windV_mean_90, 
-                  windV_220 = windV_mean_220, 
-                  windU_30  = windU_mean_30, 
-                  windU_90  = windU_mean_90, 
-                  windU_220 = windU_mean_220)
-        rm(wind_30, wind_90, wind_220, 
-           windU_mean_30, windU_mean_90, windU_mean_220,
-           windV_mean_30, windV_mean_90, windV_mean_220)
+                  windV_mean_30  = windV_mean_30, 
+                  windV_mean_90  = windV_mean_90, 
+                  windV_mean_220 = windV_mean_220, 
+                  windU_mean_30  = windU_mean_30, 
+                  windU_mean_90  = windU_mean_90, 
+                  windU_mean_220 = windU_mean_220, 
+                  windV_max_30  = windV_max_30, 
+                  windV_max_90  = windV_max_90, 
+                  windV_max_220 = windV_max_220, 
+                  windU_max_30  = windU_max_30, 
+                  windU_max_90  = windU_max_90, 
+                  windU_max_220 = windU_max_220)
+        rm(wind_30, wind_90, wind_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
       saveRDS(wind_means, file = "C:/Data/Wind&Current/wind_U_V_2000-2020.RDS")
