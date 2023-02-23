@@ -38,71 +38,69 @@ library(geosphere)
 #   gc()
 # 
 # 
-# #------------------------------------------------------              
+#------------------------------------------------------
 # datV <- ncdf4::nc_open(paste0("C:/Data/Wind&Current/Vwind_ERA5_1980-2020.nc"))
 #   names(datV$var)
-#   
+# 
 #   lon <- ncdf4::ncvar_get(datV, "lon")
 #   lat <- ncdf4::ncvar_get(datV, "lat")
 #   date <- ncdf4::ncvar_get(datV, "wind_time")
 #   Vwind <- ncdf4::ncvar_get(datV, "Vwind")
-#   ncdf4::nc_close(datV)		
-#   
+#   ncdf4::nc_close(datV)
+# 
 #   # Reshape the 3D array so we can map it, change the time field to be date
 #   dimnames(Vwind) <- list(lon = lon[,1], lat = lat[1,], date = as.integer(date))
 #   VwindMelt <- reshape2::melt(Vwind, value.name = "Vwind") %>% filter(date >= 36524)
 #   rm(lat, lon, date, Vwind, datV)
 #   gc()
-#   VwindMelt$date <- as.Date("1900-01-01") + days(VwindMelt$date)	
+#   VwindMelt$date <- as.Date("1900-01-01") + days(VwindMelt$date)
 #   str(VwindMelt)
 #   gc()
-#   VwindMelt <- VwindMelt %>% 
+#   VwindMelt <- VwindMelt %>%
 #     mutate(LANDING_DAY = day(date)) %>%
 #     mutate(LANDING_MONTH = month(date)) %>%
-#     mutate(LANDING_YEAR = year(date)) 
+#     mutate(LANDING_YEAR = year(date))
 #   VwindMelt <- VwindMelt %>% select(-c("date"))
-#   gc()  
+#   gc()
+# 
+#   coord <- VwindMelt %>% filter(LANDING_YEAR == 2010) %>% filter(LANDING_MONTH == 6) 
+#   coord <- coord %>% dplyr::select(c(lat, lon)) %>% unique()
+#   saveRDS(coord, "C:/Data/Wind&Current/coord_wind.rds")
+# 
+# #------------------------------------------------------      
+# ## Merge data and save it by month
 #   
-  
+# for (y in 2002:2020) {
+#   for (m in 1:12) {
+#     gc()
+#     Uwind <- UwindMelt %>% filter(LANDING_YEAR == y) %>% filter(LANDING_MONTH == m)    
+#     Vwind <- VwindMelt %>% filter(LANDING_YEAR == y) %>% filter(LANDING_MONTH == m)
+#     wind <- merge(Uwind, Vwind, by = c("lat", "lon", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"))      
+#     write.csv(wind, paste0("C:/Data/Wind&Current/monthly_data/wind_",
+#                            paste0(as.character(m),
+#                                   paste0("_",
+#                                          paste0(as.character(y),
+#                                                 ".csv")))), row.names = FALSE)
+#     rm(Uwind, Vwind, wind)
+#   }
+# }
 
-#------------------------------------------------------      
-## Merge data and save it by month
-  
-for (y in 2002:2020) {
-  for (m in 1:12) {
-    gc()
-    Uwind <- UwindMelt %>% filter(LANDING_YEAR == y) %>% filter(LANDING_MONTH == m)    
-    Vwind <- VwindMelt %>% filter(LANDING_YEAR == y) %>% filter(LANDING_MONTH == m)
-    wind <- merge(Uwind, Vwind, by = c("lat", "lon", "LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY"))      
-    write.csv(wind, paste0("C:/Data/Wind&Current/monthly_data/wind_",
-                           paste0(as.character(m),
-                                  paste0("_",
-                                         paste0(as.character(y),
-                                                ".csv")))), row.names = FALSE)
-    rm(Uwind, Vwind, wind)
-  }
-}
-
-### RUN FROM HERE!!! ###
 
 #------------------------------------------------------  
 # Get distance by coordinate to port j and save it
 
-coord <- VwindMelt %>% dplyr::select(c(lat, lon)) %>% unique()
-
-port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
-
-for (j in 1:nrow(port_area_coord)) {
-  distPorts <- coord %>%
-    mutate(dist = by(., 1:nrow(.), function(row) {
-      distHaversine(c(row$lon, row$lat), c(port_area_coord[j,]$lon, port_area_coord[j,]$lat))
-    })) %>%
-    mutate(dist = dist / 1000)
-  
-  write.csv(distPorts, paste0("C:/Data/Wind&Current/port_dist/portDist_",
-                              paste0(as.character(j), ".csv")), row.names = FALSE)
-}
-
+# coord <- readRDS("C:/Data/Wind&Current/coord_wind.rds")  
+# port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
+# 
+# for (j in 1:nrow(port_area_coord)) {
+#   distPorts <- coord %>%
+#     mutate(dist = by(., 1:nrow(.), function(row) {
+#       distHaversine(c(row$lon, row$lat), c(port_area_coord[j,]$lon, port_area_coord[j,]$lat))
+#     })) %>%
+#     mutate(dist = dist / 1000)
+#   
+#   saveRDS(distPorts, paste0("C:/Data/Wind&Current/port_dist/portDist_", paste0(as.character(j),".rds")))
+# }
 
 
 #-------------------------------------------------------
@@ -125,22 +123,22 @@ wind_means <- tibble(LANDING_YEAR = integer(),
 port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 
 
-# for (y in 2000:2020) {
-#   for (m in 1:12) {
-  y=2000
-  m=1
-  for (j in 1:nrow(port_area_coord)) {
-    distPorts <- read_csv(paste0("C:/Data/Wind&Current/port_dist/portDist_",
-                                paste0(as.character(j), ".csv")))
-    wind <- read_csv(paste0("C:/Data/Wind&Current/monthly_data/wind_", 
+for (y in 2000:2020) {
+  for (m in 1:12) {
+    for (j in 1:nrow(port_area_coord)) {
+      
+      distPorts <- readRDS(paste0("C:/Data/Wind&Current/port_dist/portDist_",
+                                paste0(as.character(j), ".rds")))
+      
+      wind <- read.csv(paste0("C:/Data/Wind&Current/monthly_data/wind_", 
                             paste0(as.character(m),
                                    paste0("_",   
                                           paste0(as.character(y),
                                                  ".csv")))))
     
-    wind_port <- merge(wind, distPorts, by = c('lat', 'lon'), all.x = TRUE, all.y = FALSE) 
+      wind_port <- merge(wind, distPorts, by = c('lat', 'lon'), all.x = TRUE, all.y = FALSE) 
     
-    # Calculate daily SDM level within port radius
+      # Calculate daily wind within port radius
       for (z in 1:max(wind_port$LANDING_DAY)) {
         wind_30  <- wind_port %>% dplyr::filter(dist <= 30)  %>% dplyr::filter(LANDING_DAY == z)
         wind_90  <- wind_port %>% dplyr::filter(dist <= 90)  %>% dplyr::filter(LANDING_DAY == z)
@@ -165,8 +163,11 @@ port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.c
                   windU_220 = windU_mean_220)
         rm(wind_30, wind_90, wind_220, 
            windU_mean_30, windU_mean_90, windU_mean_220,
-           windv_mean_30, windv_mean_90, windv_mean_220)
-       }
-     print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-     readr::write_csv(wind_means, file = "C:/Data/Wind&Current/wind_U_V_2000-2020.csv")
- }
+           windV_mean_30, windV_mean_90, windV_mean_220)
+      }
+      print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
+      saveRDS(wind_means, file = "C:/Data/Wind&Current/wind_U_V_2000-2020.RDS")
+    }
+  }
+}
+ 
