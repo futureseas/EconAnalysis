@@ -4,59 +4,46 @@
 
 rm(list = ls(all.names = TRUE)) 
 gc()
-# load("stan_fit.RData")
 
-#---------------------------
-### Load packages
-library(bookdown)
-library(brms)
-library(cluster)
-library(cmdstanr)
+##Load packages and set working directory
+
 library(data.table)
-library(distances)
-library(doBy)
 library(dplyr)
-library(fastDummies)
-library(forcats)
-library(ggplot2)
-library(here)
-library(hrbrthemes)
-library(kableExtra)
-library(lmtest)
 library(lubridate)
-library(magrittr)
-library(Rcpp)
-library(patchwork)
-library(plm)
-library(papaja)
-library(reshape)
-library(reshape2)
-library(rstan)
-library(scales)
-library(sjlabelled)
-library(texreg)
 library(tidyr)
-library(tidyverse)
-library(tinytex)
-library(viridis)
-library(xtable)
-library(zoo)
+library(geosphere)
 
-#---------------------------
-### Load functions
-meanfun <- function(x, ...){
-  c(mean=mean(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
-}
-sumfun <- function(x, ...){
-  c(sum=sum(x, na.rm=TRUE, ...)) #, v=var(x, na.rm=TRUE, ...), l=length(x))
-}
-sum_mean_fun <- function(x, ...){
-  c(mean=mean(x, na.rm=TRUE, ...), sum=sum(x, na.rm=TRUE, ...)) #, l=length(x))
-}
+#-----------------------------------------------------
+### Load in the data
+Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
+Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
+Tickets_raw<-rbind(Tickets1, Tickets2)
+rm(Tickets1, Tickets2)
 
-#---------------------------
-### Read monthly data created in "~\data_processing_vessels.R" ###
-PacFIN.month <- read.csv(file ="C:\\Data\\PacFIN data\\PacFIN_month.csv")
+#-----------------------------------------------------
+### Add port area
+port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
+Tickets_raw <- Tickets_raw %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
+rm(port_area)
+
+
+#-----------------------------------------------------
+###Subset the data to remove columns not relevant to this analysis. This will speed things up.
+Tickets <- select(Tickets_raw, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_NAME, PORT_AREA_CODE,
+                                 VESSEL_NUM, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE,
+                                 PACFIN_GEAR_CODE, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, VESSEL_OWNER_NAME,
+                                 VESSEL_OWNER_ADDRESS_STATE, VESSEL_OWNER_ADDRESS_STREET, FISHER_LICENSE_NUM, AFI_PRICE_PER_POUND, 
+                                 VESSEL_OWNER_ADDRESS_CITY, REMOVAL_TYPE_CODE, NUM_OF_DAYS_FISHED, CATCH_AREA_CODE)) %>% 
+  filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
+
+
+#-----------------------------------------------------
+### Create unique trip ID
+Tickets$FTID_unique <- udpipe::unique_identifier(Tickets, fields = c("FTID", "VESSEL_NUM", "LANDING_YEAR"))
+
+
+#-----------------------------------------------------
+###Subset the data to remove columns not relevant to this analysis. This will speed things up.
 
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
 PacFIN.month<- within(PacFIN.month, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
@@ -71,28 +58,9 @@ PacFIN.month.CPS <- PacFIN.month %>%
   dplyr::filter(PACFIN_SPECIES_CODE %in% 
                   c("OMCK", "MSQD", "NANC", "PSDN"))
 
-
 ###########################
 ### Descriptive figures ###
 ###########################
-
-
-#### Se first how many trips per day
-# n_trips_per_day <- Tickets_clust_2 %>% 
-#   dplyr::select('VESSEL_NUM', 'FTID', 'LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY') %>% 
-#   unique() %>% 
-#   group_by(VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
-#   summarize(n_trips = n()) 
-# 
-# hist(n_trips_per_day$n_trips, 
-#      main = '', 
-#      xlab	= 'Number of trips per day')
-
-### How many tickets per species?
-# freq_dominant_species <- count(Tickets, 'Species_Dominant')
-# gs4_create("freq_dominant_species_participation", sheets = freq_dominant_species)
- 
-
 
 #----------------------------------
 ## Figure 1. Annual average landings by port area ##
@@ -806,5 +774,23 @@ g4_2 / g1_2 / g2_2
 
 
 # rm(g1, g2, g3, g4, g5, g6, sdm.by.species, coeff1, coeff2, coeff3, coeff4, coeff5, coeff6 , area_names, landing.price.year.sel)
+
+
+#### Se first how many trips per day
+# n_trips_per_day <- Tickets_clust_2 %>% 
+#   dplyr::select('VESSEL_NUM', 'FTID', 'LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY') %>% 
+#   unique() %>% 
+#   group_by(VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+#   summarize(n_trips = n()) 
+# 
+# hist(n_trips_per_day$n_trips, 
+#      main = '', 
+#      xlab	= 'Number of trips per day')
+
+### How many tickets per species?
+# freq_dominant_species <- count(Tickets, 'Species_Dominant')
+# gs4_create("freq_dominant_species_participation", sheets = freq_dominant_species)
+
+
 
 

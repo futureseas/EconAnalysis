@@ -25,6 +25,7 @@ rm(Tickets1, Tickets2)
 port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
 Tickets_raw <- Tickets_raw %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
 rm(port_area)
+
 #-----------------------------------------------------
 ###Subset the data to remove columns not relevant to this analysis. This will speed things up.
 Tickets <- select(Tickets_raw, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_NAME, PORT_AREA_CODE,
@@ -225,34 +226,58 @@ registerDoParallel(cl)
 
 dummys <- foreach::foreach(ii = 1:nrow(tow_dates),
                             .packages = c("dplyr", 'lubridate')) %dopar% {
-                              xx <- 1
-                              temp_dat <- tow_dates[xx, ]
-                              dumP <- participation_data %>% ungroup %>% dplyr::filter(trip_id != temp_dat$trip_id,
-                                                         set_date %within% temp_dat$days_inter_part,
-                                                         VESSEL_NUM == temp_dat$VESSEL_NUM,
-                                                         selection != "No-Participation")
-                              dumP <- dumP %>% distinct(trip_id, .keep_all = T)
-                              #Add dummy coefficient
-                              dumP_val <- nrow(dumP)
+                              ii <- 1
+                              temp_dat <- tow_dates[ii, ]
+                              dumP <- participation_data %>% ungroup %>% 
+                                dplyr::filter(trip_id != temp_dat$trip_id,
+                                              set_date %within% temp_dat$days_inter_part,
+                                              VESSEL_NUM == temp_dat$VESSEL_NUM,
+                                              selection != "No-Participation")
+                              dumP2 <- dumP %>% distinct(trip_id, .keep_all = T)
+                              dumP_val <- nrow(dumP2)
+                              temp_dat$dummy_prev_part <- dumP_val
                               temp_dat$dummy_prev_days_part <- dumP_val
-                              temp_dat[which(td1$dummy_prev_days_part != 0), 'dummy_prev_days_part'] <- 1
+                              temp_dat[which(temp_dat$dummy_prev_part != 0), 'dummy_prev_part'] <- 1
                               
                               ### Maybe add $1000 > per year on revenue from CPS 
                               ### and CPS catch composition last year of 5% in CPS
                               
+                              dumP <- participation_data %>% ungroup %>%
+                                dplyr::filter(trip_id != temp_dat$trip_id,
+                                              set_date %within% temp_dat$days_inter_part,
+                                              VESSEL_NUM == temp_dat$VESSEL_NUM,
+                                              selection != "No-Participation")
+                              dumP_rev <- sum(dumP$Revenue)
+                              temp_dat$revenue_year <- dumP_rev
+                              
+                              dumP_CPS <- participation_data %>% ungroup %>%
+                                dplyr::filter(trip_id != temp_dat$trip_id,
+                                              set_date %within% temp_dat$days_inter_part,
+                                              VESSEL_NUM == temp_dat$VESSEL_NUM,
+                                              selection != "No-Participation") %>%
+                                dplyr::filter(Species_Dominant == "PSDN" | Species_Dominant == "MSQD" | Species_Dominant == "NANC"| 
+                                                Species_Dominant == "CMCK"| Species_Dominant == "JMCK"| Species_Dominant == "UMCK" )
+                              dumP_CPS_rev <- sum(dumP_CPS$Revenue)
+                              temp_dat$revenue_CPS_year <- dumP_CPS_rev
                               return(temp_dat)
                             }
+
 print("Done with participation dummy, annual revenue and CPS diversification")
+
+
+
+
+
 td1 <- ldply(dummys)
 stopCluster(cl)
 
 #filter database when Non-participation but no fishing in 'ndays_participation'
-hauls_wo_exit <- sampled_hauls %>% dplyr::filter(fished == 1) %>%
-  mutate(exit = ifelse((selection == "No-Participation" & 
-                          dummy_prev_days_part == 0), 1, 0)) %>% 
-  dplyr::select(fished_haul, exit) %>%
-  dplyr::filter(exit == 0) %>% 
-  dplyr::select(fished_haul) %>% unique()
+# hauls_wo_exit <- sampled_hauls %>% dplyr::filter(fished == 1) %>%
+#   mutate(exit = ifelse((selection == "No-Participation" & 
+#                           dummy_prev_days_part == 0), 1, 0)) %>% 
+#   dplyr::select(fished_haul, exit) %>%
+#   dplyr::filter(exit == 0) %>% 
+#   dplyr::select(fished_haul) %>% unique()
 
 participation_data_filtered <- data.table::setDT(participation_data)[fished_haul %chin% hauls_wo_exit$fished_haul]   
 
