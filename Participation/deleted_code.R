@@ -4,6 +4,26 @@
 #--------------------
 
 
+# #For each tow in the focus year, sample other tows
+# #Hauls in focus year
+# hauls <- dist_hauls %>% dplyr::filter(set_year == focus_year) %>% arrange(trip_id)
+
+###############
+
+
+# dbp <- as.data.frame(dbp)
+# 
+# #Add number of values to sample
+# dbp$n_samp <- dbp$prop * nhauls_sampled
+# 
+# #Round the values to integers
+# dbp$n_samp <- round(dbp$n_samp)
+# 
+# #Top off the highest value
+# max_dbp <- which(dbp$prop == max(dbp$prop))
+# dbp[max_dbp, 'n_samp'] <- dbp[max_dbp, 'n_samp'] + (nhauls_sampled - sum(round(dbp$n_samp)))
+
+
 #-----------------------------------------------------------------------------
 ### Obtain (year) price by port from PacFIN landing data
 

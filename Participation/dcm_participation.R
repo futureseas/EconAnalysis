@@ -30,10 +30,10 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
 
 #-----------------------------------------------------------------------------
-## Sampling choice data including revenue ##
+## Sampling choice data including expected revenue and past behavior dummies ##
 
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
-samps <- sampled_rums(data_in = participation_data.save, cluster = 1,
+samps <- sampled_rums(data_in = participation_data, cluster = 1,
                          min_year = 2012, max_year = 2015,
                          min_year_prob = 2013, max_year_prob = 2014,
                          ndays = 60, ndays_participation = 365, nhauls_sampled = 4,

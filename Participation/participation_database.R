@@ -135,8 +135,8 @@ psdn.sdm[is.na(psdn.sdm)] <- 0
 Tickets_SDM <- merge(Tickets, psdn.sdm, by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE)
 
 #---------------------------------------------------------------
-### Merge storm warning signals (there is no hurricane...)
-### Future: merge wind and current data 
+### Merge storm warning signals 
+# Note: There is no hurricane...
 
 warnings.signals <- read.csv(file = "G://My Drive//Data//Storm Warnings//WCports_mww_events09-16.csv")
 warnings.signals <- warnings.signals %>%
@@ -166,14 +166,20 @@ Tickets_storm <- merge(Tickets_SDM, warnings.signals,
 
 
 #---------------------------------------------------------------------------------------
+## Incorporate wind data 
+
+readRDS("C:/Data/Wind&Current/wind_U_V_2000-2020.RDS")
+
+
+#---------------------------------------------------------------------------------------
 ### Expand database to include outside option (when vessel do not have fish ticket.)
 Tickets_exp <- complete(Tickets_storm, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
   mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
   mutate(FTID_unique = ifelse(is.na(FTID_unique), paste('NP-',1:n()), FTID_unique))
 
+
 #-----------------------------------------------------
 ### Merge with cluster data
-
 PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
 Tickets_clust <- merge(Tickets_exp, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 rm(PAM_Vessel_Groups)
@@ -197,6 +203,7 @@ Tickets_clust$set_date<-as.Date(with(
   Tickets_clust,
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
   "%Y-%m-%d")
+
 participation_data <- Tickets_clust %>% drop_na(set_date) %>% 
   dplyr::rename(set_day = LANDING_DAY) %>%
   dplyr::rename(set_month = LANDING_MONTH) %>%
@@ -206,9 +213,53 @@ participation_data <- Tickets_clust %>% drop_na(set_date) %>%
                 "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90", "PSDN_SDM_220", 
                 "hurricane", "gale", "smcraft", "mww_other", "group_all")
 
+#---------------------------------------------------------------------------------------
+## Filter non-participation
+participation_data$part_date <- participation_data$set_date - days(365)
+tow_dates <- participation_data %>% dplyr::select(VESSEL_NUM, trip_id, selection, set_date, part_date)
+tow_dates$days_inter_part <- interval(tow_dates$part_date, tow_dates$set_date)
+
+library(doParallel)
+cl <- makeCluster(2)
+registerDoParallel(cl)
+
+dummys <- foreach::foreach(ii = 1:nrow(tow_dates),
+                            .packages = c("dplyr", 'lubridate')) %dopar% {
+                              xx <- 1
+                              temp_dat <- tow_dates[xx, ]
+                              dumP <- participation_data %>% ungroup %>% dplyr::filter(trip_id != temp_dat$trip_id,
+                                                         set_date %within% temp_dat$days_inter_part,
+                                                         VESSEL_NUM == temp_dat$VESSEL_NUM,
+                                                         selection != "No-Participation")
+                              dumP <- dumP %>% distinct(trip_id, .keep_all = T)
+                              #Add dummy coefficient
+                              dumP_val <- nrow(dumP)
+                              temp_dat$dummy_prev_days_part <- dumP_val
+                              temp_dat[which(td1$dummy_prev_days_part != 0), 'dummy_prev_days_part'] <- 1
+                              
+                              ### Maybe add $1000 > per year on revenue from CPS 
+                              ### and CPS catch composition last year of 5% in CPS
+                              
+                              return(temp_dat)
+                            }
+print("Done with participation dummy, annual revenue and CPS diversification")
+td1 <- ldply(dummys)
+stopCluster(cl)
+
+#filter database when Non-participation but no fishing in 'ndays_participation'
+hauls_wo_exit <- sampled_hauls %>% dplyr::filter(fished == 1) %>%
+  mutate(exit = ifelse((selection == "No-Participation" & 
+                          dummy_prev_days_part == 0), 1, 0)) %>% 
+  dplyr::select(fished_haul, exit) %>%
+  dplyr::filter(exit == 0) %>% 
+  dplyr::select(fished_haul) %>% unique()
+
+participation_data_filtered <- data.table::setDT(participation_data)[fished_haul %chin% hauls_wo_exit$fished_haul]   
+
+
 #------------------------------------------------------
 ### Save participation data
-saveRDS(participation_data, "C:\\Data\\PacFIN data\\participation_data.rds")
+saveRDS(participation_data_filtered, "C:\\Data\\PacFIN data\\participation_data.rds")
 
 
 
