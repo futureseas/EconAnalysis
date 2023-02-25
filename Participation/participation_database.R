@@ -23,25 +23,24 @@ rm(Tickets1, Tickets2)
 #-----------------------------------------------------
 ### Add port area
 port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
-Tickets_raw <- Tickets_raw %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
+Tickets_raw <- Tickets_raw %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE) %>% 
+  filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
 rm(port_area)
 
 #-----------------------------------------------------
 ###Subset the data to remove columns not relevant to this analysis. This will speed things up.
 Tickets <- select(Tickets_raw, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_NAME, PORT_AREA_CODE,
-                                 VESSEL_NUM, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE,
+                                 VESSEL_NUM, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, 
+                                 LANDED_WEIGHT_MTONS, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE,
                                  PACFIN_GEAR_CODE, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, VESSEL_OWNER_NAME,
-                                 VESSEL_OWNER_ADDRESS_STATE, VESSEL_OWNER_ADDRESS_STREET, FISHER_LICENSE_NUM, AFI_PRICE_PER_POUND, 
-                                 VESSEL_OWNER_ADDRESS_CITY, REMOVAL_TYPE_CODE, NUM_OF_DAYS_FISHED, CATCH_AREA_CODE)) %>% 
-  filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
+                                 FISHER_LICENSE_NUM, AFI_PRICE_PER_POUND, NUM_OF_DAYS_FISHED, CATCH_AREA_CODE)) %>%
+  mutate(AFI_PRICE_PER_MTONS = AFI_PRICE_PER_POUND/0.000453592)
 
 
 Tickets$FTID_unique <- udpipe::unique_identifier(Tickets, fields = c("FTID", "VESSEL_NUM", "LANDING_YEAR"))
 
-
-
 #-----------------------------------------------------
-####Find the dominant species by value of each fishing trip ( = target species). 
+### Find the dominant species by value of each fishing trip (i.e., target species). 
 
 Boats <- dcast(Tickets, FTID_unique ~ PACFIN_SPECIES_CODE, fun.aggregate=sum, value.var="AFI_EXVESSEL_REVENUE", fill=0)
 row.names(Boats) <- Boats$FTID_unique
@@ -56,12 +55,18 @@ rm(Trip_Species_Dominant, X, Boats)
 
 #-----------------------------------------------------
 ### Aggregate species in a FTID 
-Tickets <- Tickets %>% group_by(FTID_unique, FTID, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, 
-                                PACFIN_SPECIES_COMMON_NAME, PACFIN_SPECIES_CODE,
-                                Species_Dominant, PORT_AREA_CODE) %>% 
-  summarize(Landings_lbs = sum(LANDED_WEIGHT_LBS), 
+Tickets <- Tickets %>% group_by(AGENCY_CODE, FTID_unique, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE,
+                                VESSEL_NUM, PACFIN_SPECIES_CODE, Species_Dominant
+                                #PORT_NAME, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_OWNER_NAME, PACFIN_GEAR_CODE, 
+                                #FISHER_LICENSE_NUM, NUM_OF_DAYS_FISHED, CATCH_AREA_CODE, PACFIN_SPECIES_COMMON_NAME
+                                ) %>% 
+  summarize(Landings_mtons = sum(LANDED_WEIGHT_MTONS),
+            Landings_lbs = sum(LANDED_WEIGHT_LBS),
             Revenue  = sum(AFI_EXVESSEL_REVENUE),
-            Price_lbs = mean(AFI_PRICE_PER_POUND))
+            Price_lbs = mean(AFI_PRICE_PER_POUND),
+            Price_mtons = mean(AFI_PRICE_PER_MTONS)) %>%
+  mutate(dDelete = ifelse(FTID == "142301E" & LANDING_YEAR == 2020, 1, 0)) %>%
+  filter(dDelete == 0) %>% select(-c(dDelete))
 
 
 #-------------------------------------------------------------------------------------
@@ -75,12 +80,12 @@ FF_Tickets<-Tickets[which((Tickets$Species_Dominant == "PSDN" & Tickets$Revenue 
                           (Tickets$Species_Dominant == "JMCK" & Tickets$Revenue > 0) |
                           (Tickets$Species_Dominant == "UMCK" & Tickets$Revenue > 0) |
                           (Tickets$Species_Dominant == "ALBC" &
-                           Tickets$PACFIN_SPECIES_COMMON_NAME == "NORTHERN ANCHOVY")),]
+                           Tickets$PACFIN_SPECIES_CODE == "NANC")),]
 
 ## Aggregate mackerels in one category
-FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "CMCK"] <- "MACKEREL")
-FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "JMCK"] <- "MACKEREL")
-FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "UMCK"] <- "MACKEREL")
+FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "CMCK"] <- "OMCK")
+FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "JMCK"] <- "OMCK")
+FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "UMCK"] <- "OMCK")
 
 
 ###Creating a filter here to only retain vessels with more than 10 forage fish landings (tickets where FF is the dominant species)
@@ -104,23 +109,20 @@ names(FF_Vessels)[1]<-"VESSEL_NUM"
 ###Subset from the complete data set to only retain records associated with these Vessels
 ###Remove records associated with landings of zero value; this is likely bycatch
 
-Tickets<-Tickets[which(Tickets$Revenue > 0),]
-Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM]
+Tickets<-Tickets[which(Tickets$Revenue > 0),] # 137,971 row deleted
+Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM] # 1,927,235 row deleted
 Tickets<-as.data.frame(Tickets)
 rm(FF_Vessels, FTID_Value)
 
+saveRDS(Tickets, "C:/Data/PacFIN data/Tickets_filtered.rds")
 
 #-----------------------------------------------------
 ### Create port-species choice
-Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) %>% 
-   mutate(selection = paste(PORT_AREA_CODE, Species_Dominant, sep = "-", collapse = NULL)) %>%
-   mutate(dDelete = ifelse(FTID == "142301E" & LANDING_YEAR == 2020, 1, 0)) %>%
-            filter(dDelete == 0) %>% select(-c(dDelete))
-
+Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) %>% # 44,069 row deleted 
+   mutate(selection = paste(PORT_AREA_CODE, Species_Dominant, sep = "-", collapse = NULL)) 
 
 # Tickets_check <- Tickets %>% group_by(FTID) %>% mutate(n_obs = n()) %>% 
 #    ungroup() %>% filter(n_obs==2)
-# Tickets_FTID <- Tickets %>% filter(FTID == "142301E")
 
 # ### How many vessels?
 # Tickets %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
@@ -265,7 +267,7 @@ dummys <- foreach::foreach(ii = 1:nrow(tow_dates),
 print("Done with participation dummy, annual revenue and CPS diversification")
 
 
-
+<<<WORK FROM HERE!>>>
 
 
 td1 <- ldply(dummys)
