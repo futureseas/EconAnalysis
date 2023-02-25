@@ -114,7 +114,7 @@ Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM] # 1,927,235 row
 Tickets<-as.data.frame(Tickets)
 rm(FF_Vessels, FTID_Value)
 
-saveRDS(Tickets, "C:/Data/PacFIN data/Tickets_filtered.rds")
+# saveRDS(Tickets, "C:/Data/PacFIN data/Tickets_filtered.rds")
 
 #-----------------------------------------------------
 ### Create port-species choice
@@ -127,56 +127,10 @@ Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) %>% # 44,
 # ### How many vessels?
 # Tickets %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 
-#-----------------------------------------------
-### Merge data to SDM 
-#... (STILL COMPUTING SDMs Daily for squid (spawn), squid, anchovy, herring, jack mackerel and chub mackerel)
-
-# Pacific sardine
-psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
-psdn.sdm[is.na(psdn.sdm)] <- 0
-
-Tickets_SDM <- merge(Tickets, psdn.sdm, by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE)
-
-#---------------------------------------------------------------
-### Merge storm warning signals 
-# Note: There is no hurricane...
-
-warnings.signals <- read.csv(file = "G://My Drive//Data//Storm Warnings//WCports_mww_events09-16.csv")
-warnings.signals <- warnings.signals %>%
-  select("pcid", "d_issued", "d_expired", "hurricane", "gale", "smcraft", "mww_other") %>%
-  dplyr::rename(PACFIN_PORT_CODE = pcid)
-port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
-warnings.signals <- warnings.signals %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
-warnings.signals$d_issued  <- as.Date(warnings.signals$d_issued, "%d%b%Y %H:%M:%OS")
-warnings.signals$d_expired <- as.Date(warnings.signals$d_expired, "%d%b%Y %H:%M:%OS")
-warnings.signals <- warnings.signals %>% dplyr::select(-c(PACFIN_PORT_CODE)) %>% unique()
-library(sqldf)
-df1 <- Tickets_SDM
-df2 <- warnings.signals
-df1$date<-as.Date(with(df1,paste(LANDING_YEAR,LANDING_MONTH,LANDING_DAY,sep="-")),"%Y-%m-%d")
-warnings.signals <-  sqldf("select df1.*, df2.hurricane, df2.gale, df2.smcraft, df2.mww_other
-                                      from df1 left join df2 on
-                                      (df1.PORT_AREA_CODE = df2.PORT_AREA_CODE) AND
-                                      (df1.date between df2.d_issued and df2.d_expired)")
-warnings.signals <- warnings.signals %>% unique() %>%
-  select("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID_unique", "hurricane", "gale", "smcraft", "mww_other")
-warnings.signals <- warnings.signals %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, FTID_unique) %>%
-  summarise(hurricane = sum(hurricane), gale = sum(gale),
-            smcraft = sum(smcraft), mww_other = sum(mww_other))
-warnings.signals[is.na(warnings.signals)] <- 0
-Tickets_storm <- merge(Tickets_SDM, warnings.signals,
-                       by=c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID_unique"), all.x = TRUE, all.y = TRUE)
-
-
-#---------------------------------------------------------------------------------------
-## Incorporate wind data 
-
-readRDS("C:/Data/Wind&Current/wind_U_V_2000-2020.RDS")
-
 
 #---------------------------------------------------------------------------------------
 ### Expand database to include outside option (when vessel do not have fish ticket.)
-Tickets_exp <- complete(Tickets_storm, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+Tickets_exp <- complete(Tickets, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
   mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
   mutate(FTID_unique = ifelse(is.na(FTID_unique), paste('NP-',1:n()), FTID_unique))
 
@@ -212,9 +166,7 @@ participation_data <- Tickets_clust %>% drop_na(set_date) %>%
   dplyr::rename(set_month = LANDING_MONTH) %>%
   dplyr::rename(set_year = LANDING_YEAR)%>%
   dplyr::select("VESSEL_NUM", "trip_id", "set_date", "set_year", "set_month", "set_day", "selection",
-                "PORT_AREA_CODE", "Species_Dominant", "Landings_lbs", "Revenue", "Price_lbs", 
-                "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90", "PSDN_SDM_220", 
-                "hurricane", "gale", "smcraft", "mww_other", "group_all")
+                "PORT_AREA_CODE", "Species_Dominant", "Landings_mtons", "Revenue", "Price_mtons")
 
 #---------------------------------------------------------------------------------------
 ## Filter non-participation
@@ -223,12 +175,11 @@ tow_dates <- participation_data %>% dplyr::select(VESSEL_NUM, trip_id, selection
 tow_dates$days_inter_part <- interval(tow_dates$part_date, tow_dates$set_date)
 
 library(doParallel)
-cl <- makeCluster(2)
+cl <- makeCluster(4)
 registerDoParallel(cl)
 
 dummys <- foreach::foreach(ii = 1:nrow(tow_dates),
                             .packages = c("dplyr", 'lubridate')) %dopar% {
-                              ii <- 1
                               temp_dat <- tow_dates[ii, ]
                               dumP <- participation_data %>% ungroup %>% 
                                 dplyr::filter(trip_id != temp_dat$trip_id,
@@ -263,15 +214,15 @@ dummys <- foreach::foreach(ii = 1:nrow(tow_dates),
                               temp_dat$revenue_CPS_year <- dumP_CPS_rev
                               return(temp_dat)
                             }
-
 print("Done with participation dummy, annual revenue and CPS diversification")
 
+saveRDS(dummys, "dummys.rds")
+td <- ldply(dummys)
+stopCluster(cl)
 
 <<<WORK FROM HERE!>>>
+  
 
-
-td1 <- ldply(dummys)
-stopCluster(cl)
 
 #filter database when Non-participation but no fishing in 'ndays_participation'
 # hauls_wo_exit <- sampled_hauls %>% dplyr::filter(fished == 1) %>%
@@ -281,8 +232,54 @@ stopCluster(cl)
 #   dplyr::filter(exit == 0) %>% 
 #   dplyr::select(fished_haul) %>% unique()
 
-participation_data_filtered <- data.table::setDT(participation_data)[fished_haul %chin% hauls_wo_exit$fished_haul]   
+# participation_data_filtered <- data.table::setDT(participation_data)[fished_haul %chin% hauls_wo_exit$fished_haul]   
 
+
+#-----------------------------------------------
+### Merge data to SDM 
+#... (STILL COMPUTING SDMs Daily for squid (spawn), squid, anchovy, herring, jack mackerel and chub mackerel)
+
+# Pacific sardine
+psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
+psdn.sdm[is.na(psdn.sdm)] <- 0
+
+Tickets_SDM <- merge(Tickets, psdn.sdm, by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE)
+
+
+# #---------------------------------------------------------------
+# ### Merge storm warning signals 
+# # Note: There is no hurricane...
+# 
+# warnings.signals <- read.csv(file = "G://My Drive//Data//Storm Warnings//WCports_mww_events09-16.csv")
+# warnings.signals <- warnings.signals %>%
+#   select("pcid", "d_issued", "d_expired", "hurricane", "gale", "smcraft", "mww_other") %>%
+#   dplyr::rename(PACFIN_PORT_CODE = pcid)
+# port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
+# warnings.signals <- warnings.signals %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
+# warnings.signals$d_issued  <- as.Date(warnings.signals$d_issued, "%d%b%Y %H:%M:%OS")
+# warnings.signals$d_expired <- as.Date(warnings.signals$d_expired, "%d%b%Y %H:%M:%OS")
+# warnings.signals <- warnings.signals %>% dplyr::select(-c(PACFIN_PORT_CODE)) %>% unique()
+# library(sqldf)
+# df1 <- Tickets_SDM
+# df2 <- warnings.signals
+# df1$date<-as.Date(with(df1,paste(LANDING_YEAR,LANDING_MONTH,LANDING_DAY,sep="-")),"%Y-%m-%d")
+# warnings.signals <-  sqldf("select df1.*, df2.hurricane, df2.gale, df2.smcraft, df2.mww_other
+#                                       from df1 left join df2 on
+#                                       (df1.PORT_AREA_CODE = df2.PORT_AREA_CODE) AND
+#                                       (df1.date between df2.d_issued and df2.d_expired)")
+# warnings.signals <- warnings.signals %>% unique() %>%
+#   select("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID_unique", "hurricane", "gale", "smcraft", "mww_other")
+# warnings.signals <- warnings.signals %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, FTID_unique) %>%
+#   summarise(hurricane = sum(hurricane), gale = sum(gale),
+#             smcraft = sum(smcraft), mww_other = sum(mww_other))
+# warnings.signals[is.na(warnings.signals)] <- 0
+# Tickets_storm <- merge(Tickets_SDM, warnings.signals,
+#                        by=c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID_unique"), all.x = TRUE, all.y = TRUE)
+# 
+# #---------------------------------------------------------------------------------------
+# ## Incorporate wind data 
+# 
+# readRDS("C:/Data/Wind&Current/wind_U_V_2000-2020.RDS")
 
 #------------------------------------------------------
 ### Save participation data
