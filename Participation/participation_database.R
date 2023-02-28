@@ -152,6 +152,17 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 # xxx %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 
 
+#-----------------------------------------------
+### Merge data to SDM 
+#... (STILL COMPUTING SDMs Daily for squid (spawn), squid, anchovy, herring, jack mackerel and chub mackerel)
+
+# Pacific sardine
+psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
+psdn.sdm[is.na(psdn.sdm)] <- 0
+
+Tickets_SDM <- merge(Tickets_part, psdn.sdm, by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE)
+
+
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Clean dataset for discrete choice model  
 ## Add unique trip_ID and add set_date, set_year, set_day and set_month 
@@ -277,23 +288,21 @@ library(hrbrthemes)
 #   scale_fill_discrete(labels = c("No (45.3%)", "Yes (54.7%)")) +
 #   ggtitle("At least half of a year participating (8,440 obs)")
 # 
-
-ggplot(data=participation_filtered3, aes(x=Revenue_MA, group=partDummy, fill=partDummy)) +
-  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-  theme_ipsum()  +
-  xlab("Revenue previous year") +
-  guides(fill=guide_legend(title="Participating?")) +
-  scale_fill_discrete(labels = c("No", "Yes")) +
-  ggtitle("Revenue within year? (150 days participating)")
-
-ggplot(data=participation_filtered3, aes(x=perc_CPS, group=partDummy, fill=partDummy)) +
-  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-  theme_ipsum()  +
-  xlab("Previous days participating in a year") +
-  guides(fill=guide_legend(title="Participating?")) +
-  scale_fill_discrete(labels = c("No", "Yes")) +
-  ggtitle("Revenue share from CPS within year?  (150 days participating)")
-
+# ggplot(data=participation_filtered, aes(x=Revenue_MA, group=partDummy, fill=partDummy)) +
+#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+#   theme_ipsum()  +
+#   xlab("Revenue previous year") +
+#   guides(fill=guide_legend(title="Participating?")) +
+#   scale_fill_discrete(labels = c("No", "Yes")) +
+#   ggtitle("Revenue within year? (150 days participating)")
+# 
+# ggplot(data=participation_filtered, aes(x=perc_CPS, group=partDummy, fill=partDummy)) +
+#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+#   theme_ipsum()  +
+#   xlab("Previous days participating in a year") +
+#   guides(fill=guide_legend(title="Participating?")) +
+#   scale_fill_discrete(labels = c("No", "Yes")) +
+#   ggtitle("Revenue share from CPS within year?  (150 days participating)")
 
 participation_filtered <- participation_data %>% 
   filter(participation_ndays >= 150) %>%
@@ -310,20 +319,10 @@ Tickets_part <- merge(Tickets_clust, participation_filtered,
 # participation_data_filtered <- data.table::setDT(participation_data)[fished_haul %chin% hauls_wo_exit$fished_haul]   
 
 
-#-----------------------------------------------
-### Merge data to SDM 
-#... (STILL COMPUTING SDMs Daily for squid (spawn), squid, anchovy, herring, jack mackerel and chub mackerel)
-
-# Pacific sardine
-psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
-psdn.sdm[is.na(psdn.sdm)] <- 0
-
-Tickets_SDM <- merge(Tickets, psdn.sdm, by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE)
-
 
 #------------------------------------------------------
 ### Save participation data
-saveRDS(Tickets_SDM, "C:\\Data\\PacFIN data\\participation_data.rds")
+saveRDS(Tickets_part, "C:\\Data\\PacFIN data\\participation_data.rds")
 
 
 
