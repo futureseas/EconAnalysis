@@ -160,7 +160,7 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
 psdn.sdm[is.na(psdn.sdm)] <- 0
 
-Tickets_SDM <- merge(Tickets_part, psdn.sdm, by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE)
+Tickets_SDM <- merge(Tickets_clust, psdn.sdm, by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE)
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
