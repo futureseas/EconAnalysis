@@ -160,7 +160,9 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
 psdn.sdm[is.na(psdn.sdm)] <- 0
 
-Tickets_SDM <- merge(Tickets_clust, psdn.sdm, by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE)
+Tickets_SDM <- merge(Tickets_clust, psdn.sdm, 
+                     by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
+                     all.x = TRUE, all.y = FALSE)
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -211,8 +213,7 @@ participation_data <- Tickets_clust %>%
   mutate(perc_CPS = CPS_revenue_MA / Revenue_MA) %>%
   mutate(partDummy = as.factor(partDummy))
 
-library(hrbrthemes)
-
+# library(hrbrthemes)
 # participation_data %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_data))
 # ggplot(data=participation_data, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
 #   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
@@ -315,9 +316,6 @@ Tickets_part <- merge(Tickets_clust, participation_filtered,
                       all.x = TRUE, all.y = FALSE) %>% 
   filter(filter == 1) %>% 
   dplyr::select(-c("filter"))
-
-# participation_data_filtered <- data.table::setDT(participation_data)[fished_haul %chin% hauls_wo_exit$fished_haul]   
-
 
 
 #------------------------------------------------------
