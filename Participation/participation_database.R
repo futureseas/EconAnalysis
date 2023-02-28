@@ -12,6 +12,8 @@ library(dplyr)
 library(lubridate)
 library(tidyr)
 library(geosphere)
+library(tidyverse)  
+
 
 #-----------------------------------------------------
 ### Load in the data
@@ -161,7 +163,7 @@ Tickets_clust$set_date<-as.Date(with(
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
   "%Y-%m-%d")
 
-participation_data <- Tickets_clust %>% drop_na(set_date) %>% 
+Tickets_clust <- Tickets_clust %>% drop_na(set_date) %>% 
   dplyr::rename(set_day = LANDING_DAY) %>%
   dplyr::rename(set_month = LANDING_MONTH) %>%
   dplyr::rename(set_year = LANDING_YEAR)%>%
@@ -170,67 +172,107 @@ participation_data <- Tickets_clust %>% drop_na(set_date) %>%
 
 #---------------------------------------------------------------------------------------
 ## Filter non-participation
-participation_data$part_date <- participation_data$set_date - days(365)
-tow_dates <- participation_data %>% dplyr::select(VESSEL_NUM, trip_id, selection, set_date, part_date)
-tow_dates$days_inter_part <- interval(tow_dates$part_date, tow_dates$set_date)
 
-library(doParallel)
-cl <- makeCluster(4)
-registerDoParallel(cl)
+library(fpp2)           # working with time series data
+library(zoo)            # working with time series data
 
-dummys <- foreach::foreach(ii = 1:nrow(tow_dates),
-                            .packages = c("dplyr", 'lubridate')) %dopar% {
-                              temp_dat <- tow_dates[ii, ]
-                              dumP <- participation_data %>% ungroup %>% 
-                                dplyr::filter(trip_id != temp_dat$trip_id,
-                                              set_date %within% temp_dat$days_inter_part,
-                                              VESSEL_NUM == temp_dat$VESSEL_NUM,
-                                              selection != "No-Participation")
-                              dumP2 <- dumP %>% distinct(trip_id, .keep_all = T)
-                              dumP_val <- nrow(dumP2)
-                              temp_dat$dummy_prev_part <- dumP_val
-                              temp_dat$dummy_prev_days_part <- dumP_val
-                              temp_dat[which(temp_dat$dummy_prev_part != 0), 'dummy_prev_part'] <- 1
-                              
-                              ### Maybe add $1000 > per year on revenue from CPS 
-                              ### and CPS catch composition last year of 5% in CPS
-                              
-                              dumP <- participation_data %>% ungroup %>%
-                                dplyr::filter(trip_id != temp_dat$trip_id,
-                                              set_date %within% temp_dat$days_inter_part,
-                                              VESSEL_NUM == temp_dat$VESSEL_NUM,
-                                              selection != "No-Participation")
-                              dumP_rev <- sum(dumP$Revenue)
-                              temp_dat$revenue_year <- dumP_rev
-                              
-                              dumP_CPS <- participation_data %>% ungroup %>%
-                                dplyr::filter(trip_id != temp_dat$trip_id,
-                                              set_date %within% temp_dat$days_inter_part,
-                                              VESSEL_NUM == temp_dat$VESSEL_NUM,
-                                              selection != "No-Participation") %>%
-                                dplyr::filter(Species_Dominant == "PSDN" | Species_Dominant == "MSQD" | Species_Dominant == "NANC"| 
-                                                Species_Dominant == "CMCK"| Species_Dominant == "JMCK"| Species_Dominant == "UMCK" )
-                              dumP_CPS_rev <- sum(dumP_CPS$Revenue)
-                              temp_dat$revenue_CPS_year <- dumP_CPS_rev
-                              return(temp_dat)
-                            }
-print("Done with participation dummy, annual revenue and CPS diversification")
+n_days_participation = 365
 
-saveRDS(dummys, "dummys.rds")
-td <- ldply(dummys)
-stopCluster(cl)
+participation_data <- Tickets_clust %>% 
+  mutate(CPS_revenue = 
+    ifelse(Species_Dominant == "PSDN", Revenue,
+    ifelse(Species_Dominant == "NANC", Revenue,
+    ifelse(Species_Dominant == "MSQD", Revenue,
+    ifelse(Species_Dominant == "PSDN", Revenue,
+    ifelse(Species_Dominant == "CMCK", Revenue,
+    ifelse(Species_Dominant == "JMCK" , Revenue,
+    ifelse(Species_Dominant == "UMCK" , Revenue, 0)))))))) %>%
+  mutate(CPS_revenue = ifelse(selection == "No-Participation", 0, CPS_revenue)) %>% 
+  mutate(partDummy = ifelse(selection == "No-Participation", 0, 1)) %>%
+  dplyr::select(VESSEL_NUM, set_date, set_year, partDummy, CPS_revenue, Revenue) %>% unique() %>%
+  dplyr::arrange(VESSEL_NUM, set_date) %>%
+  group_by(VESSEL_NUM) %>%
+  mutate(participation_ndays = rollsum(partDummy, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
+  mutate(CPS_revenue_MA = rollsum(CPS_revenue, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
+  mutate(Revenue_MA = rollsum(Revenue, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
+  ungroup() %>% 
+  filter(is.na(participation_ndays) == 0) %>%
+  mutate(perc_CPS = CPS_revenue_MA / Revenue_MA) %>%
+  mutate(partDummy = as.factor(partDummy))
 
-<<<WORK FROM HERE!>>>
-  
+# library(hrbrthemes)
+# ggplot(data=participation_data, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+#   theme_ipsum()  +
+#   xlab("Previous days participating in a year") + 
+#   xlab("Number of observations") + 
+#   guides(fill=guide_legend(title="Participating?")) +
+#   scale_fill_discrete(labels = c("No", "Yes")) + 
+#   ggtitle("No filter")
+# 
+# participation_filtered1 <- participation_data %>% 
+#   filter(participation_ndays >= 30) %>%
+#   dplyr::arrange(VESSEL_NUM, set_date)
+# 
+# ggplot(data=participation_filtered1, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+#   theme_ipsum()  +
+#   xlab("Previous days participating in a year") + 
+#   guides(fill=guide_legend(title="Participating?")) +
+#   scale_fill_discrete(labels = c("No", "Yes")) + 
+#   ggtitle("At least 30 days of the previous year participating")
+# 
+# participation_filtered2 <- participation_data %>% 
+#   filter(participation_ndays >= 90) %>%
+#   dplyr::arrange(VESSEL_NUM, set_date)
+# 
+# ggplot(data=participation_filtered2, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+#   theme_ipsum()  +
+#   xlab("Previous days participating in a year") + 
+#   guides(fill=guide_legend(title="Participating?")) +
+#   scale_fill_discrete(labels = c("No", "Yes")) + 
+#   ggtitle("At least 90 days of the previous year participating")
+# 
+# participation_filtered3 <- participation_data %>% 
+#   filter(participation_ndays >= 183) %>%
+#   dplyr::arrange(VESSEL_NUM, set_date)
+# 
+# ggplot(data=participation_filtered3, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+#   theme_ipsum()  +
+#   xlab("Previous days participating in a year") + 
+#   guides(fill=guide_legend(title="Participating?")) +
+#   scale_fill_discrete(labels = c("No", "Yes")) + 
+#   ggtitle("At least half of the previous year participating")
+# 
+# ggplot(data=participation_filtered3, aes(x=Revenue_MA, group=partDummy, fill=partDummy)) +
+#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+#   theme_ipsum()  +
+#   xlab("Revenue previous year") + 
+#   guides(fill=guide_legend(title="Participating?")) +
+#   scale_fill_discrete(labels = c("No", "Yes")) + 
+#   ggtitle("Revenue during previous year?")
+# 
+# ggplot(data=participation_filtered3, aes(x=perc_CPS, group=partDummy, fill=partDummy)) +
+#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+#   theme_ipsum()  +
+#   xlab("Previous days participating in a year") + 
+#   guides(fill=guide_legend(title="Participating?")) +
+#   scale_fill_discrete(labels = c("No", "Yes")) + 
+#   ggtitle("What about revenue share from CPS in the previous year?")
 
+participation_filtered <- participation_data %>% 
+  filter(participation_ndays >= 183) %>%
+  dplyr::arrange(VESSEL_NUM, set_date) %>%
+  dplyr::select(VESSEL_NUM, set_date) %>% 
+  unique() %>% mutate(filter = 1)
 
-#filter database when Non-participation but no fishing in 'ndays_participation'
-# hauls_wo_exit <- sampled_hauls %>% dplyr::filter(fished == 1) %>%
-#   mutate(exit = ifelse((selection == "No-Participation" & 
-#                           dummy_prev_days_part == 0), 1, 0)) %>% 
-#   dplyr::select(fished_haul, exit) %>%
-#   dplyr::filter(exit == 0) %>% 
-#   dplyr::select(fished_haul) %>% unique()
+Tickets_part <- merge(Tickets_clust, participation_filtered,
+                      by = c("VESSEL_NUM", "set_date"), 
+                      all.x = TRUE, all.y = FALSE) %>% 
+  filter(filter == 1) %>% 
+  dplyr::select(-c("filter"))
 
 # participation_data_filtered <- data.table::setDT(participation_data)[fished_haul %chin% hauls_wo_exit$fished_haul]   
 
@@ -246,44 +288,9 @@ psdn.sdm[is.na(psdn.sdm)] <- 0
 Tickets_SDM <- merge(Tickets, psdn.sdm, by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE)
 
 
-# #---------------------------------------------------------------
-# ### Merge storm warning signals 
-# # Note: There is no hurricane...
-# 
-# warnings.signals <- read.csv(file = "G://My Drive//Data//Storm Warnings//WCports_mww_events09-16.csv")
-# warnings.signals <- warnings.signals %>%
-#   select("pcid", "d_issued", "d_expired", "hurricane", "gale", "smcraft", "mww_other") %>%
-#   dplyr::rename(PACFIN_PORT_CODE = pcid)
-# port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
-# warnings.signals <- warnings.signals %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
-# warnings.signals$d_issued  <- as.Date(warnings.signals$d_issued, "%d%b%Y %H:%M:%OS")
-# warnings.signals$d_expired <- as.Date(warnings.signals$d_expired, "%d%b%Y %H:%M:%OS")
-# warnings.signals <- warnings.signals %>% dplyr::select(-c(PACFIN_PORT_CODE)) %>% unique()
-# library(sqldf)
-# df1 <- Tickets_SDM
-# df2 <- warnings.signals
-# df1$date<-as.Date(with(df1,paste(LANDING_YEAR,LANDING_MONTH,LANDING_DAY,sep="-")),"%Y-%m-%d")
-# warnings.signals <-  sqldf("select df1.*, df2.hurricane, df2.gale, df2.smcraft, df2.mww_other
-#                                       from df1 left join df2 on
-#                                       (df1.PORT_AREA_CODE = df2.PORT_AREA_CODE) AND
-#                                       (df1.date between df2.d_issued and df2.d_expired)")
-# warnings.signals <- warnings.signals %>% unique() %>%
-#   select("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID_unique", "hurricane", "gale", "smcraft", "mww_other")
-# warnings.signals <- warnings.signals %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, FTID_unique) %>%
-#   summarise(hurricane = sum(hurricane), gale = sum(gale),
-#             smcraft = sum(smcraft), mww_other = sum(mww_other))
-# warnings.signals[is.na(warnings.signals)] <- 0
-# Tickets_storm <- merge(Tickets_SDM, warnings.signals,
-#                        by=c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID_unique"), all.x = TRUE, all.y = TRUE)
-# 
-# #---------------------------------------------------------------------------------------
-# ## Incorporate wind data 
-# 
-# readRDS("C:/Data/Wind&Current/wind_U_V_2000-2020.RDS")
-
 #------------------------------------------------------
 ### Save participation data
-saveRDS(participation_data_filtered, "C:\\Data\\PacFIN data\\participation_data.rds")
+saveRDS(Tickets_SDM, "C:\\Data\\PacFIN data\\participation_data.rds")
 
 
 

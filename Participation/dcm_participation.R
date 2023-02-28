@@ -36,7 +36,7 @@ source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_p
 samps <- sampled_rums(data_in = participation_data, cluster = 1,
                          min_year = 2012, max_year = 2015,
                          min_year_prob = 2013, max_year_prob = 2014,
-                         ndays = 60, ndays_participation = 365, nhauls_sampled = 4,
+                         ndays = 30, ndays_participation = 365, nhauls_sampled = 4,
                          seed = 42, ncores = 2, rev_scale = 100)
 
 
@@ -51,6 +51,45 @@ saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_se
 #################################
 ## Create additional variables ##
 #################################
+
+
+# #---------------------------------------------------------------
+# ### Merge storm warning signals 
+# # Note: There is no hurricane...
+# 
+# warnings.signals <- read.csv(file = "G://My Drive//Data//Storm Warnings//WCports_mww_events09-16.csv")
+# warnings.signals <- warnings.signals %>%
+#   select("pcid", "d_issued", "d_expired", "hurricane", "gale", "smcraft", "mww_other") %>%
+#   dplyr::rename(PACFIN_PORT_CODE = pcid)
+# port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
+# warnings.signals <- warnings.signals %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
+# warnings.signals$d_issued  <- as.Date(warnings.signals$d_issued, "%d%b%Y %H:%M:%OS")
+# warnings.signals$d_expired <- as.Date(warnings.signals$d_expired, "%d%b%Y %H:%M:%OS")
+# warnings.signals <- warnings.signals %>% dplyr::select(-c(PACFIN_PORT_CODE)) %>% unique()
+# library(sqldf)
+# df1 <- Tickets_SDM
+# df2 <- warnings.signals
+# df1$date<-as.Date(with(df1,paste(LANDING_YEAR,LANDING_MONTH,LANDING_DAY,sep="-")),"%Y-%m-%d")
+# warnings.signals <-  sqldf("select df1.*, df2.hurricane, df2.gale, df2.smcraft, df2.mww_other
+#                                       from df1 left join df2 on
+#                                       (df1.PORT_AREA_CODE = df2.PORT_AREA_CODE) AND
+#                                       (df1.date between df2.d_issued and df2.d_expired)")
+# warnings.signals <- warnings.signals %>% unique() %>%
+#   select("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID_unique", "hurricane", "gale", "smcraft", "mww_other")
+# warnings.signals <- warnings.signals %>% group_by(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, FTID_unique) %>%
+#   summarise(hurricane = sum(hurricane), gale = sum(gale),
+#             smcraft = sum(smcraft), mww_other = sum(mww_other))
+# warnings.signals[is.na(warnings.signals)] <- 0
+# Tickets_storm <- merge(Tickets_SDM, warnings.signals,
+#                        by=c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "FTID_unique"), all.x = TRUE, all.y = TRUE)
+# 
+# #---------------------------------------------------------------------------------------
+# ## Incorporate wind data 
+# 
+# readRDS("C:/Data/Wind&Current/wind_U_V_2000-2020.RDS")
+
+## DO A HISTOGRAM WITH THE WIND SPEED ##
+
 
 #---------------------------------------------------------------
 ## Obtain (year) price by port from PacFIN landing data
