@@ -185,14 +185,14 @@ Tickets_SDM <- Tickets_SDM %>% drop_na(set_date) %>%
                 "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90","PSDN_SDM_220")
 
 #---------------------------------------------------------------------------------------
-## Filter non-participation
+## Create data to filter non-participation
 
 library(fpp2)           # working with time series data
 library(zoo)            # working with time series data
 
 n_days_participation = 365
 
-participation_data <- Tickets_SDM %>% 
+participation_data_all <- Tickets_SDM %>% 
   mutate(CPS_revenue = 
     ifelse(Species_Dominant == "PSDN", Revenue,
     ifelse(Species_Dominant == "NANC", Revenue,
@@ -214,99 +214,108 @@ participation_data <- Tickets_SDM %>%
   mutate(perc_CPS = CPS_revenue_MA / Revenue_MA) %>%
   mutate(partDummy = as.factor(partDummy))
 
-# library(hrbrthemes)
-# participation_data %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_data))
-# ggplot(data=participation_data, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
-#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-#   theme_ipsum()  +
-#   ylab("Number of observations") +
-#   xlab("Days participating within a year") +
-#   guides(fill=guide_legend(title="Participating?")) +
-#   scale_fill_discrete(labels = c("No (92.12%)", "Yes (7.88%)")) +
-#   ggtitle("No filter  (1,673,427 obs)")
-#
-# participation_filtered <- participation_data %>%
-#   filter(participation_ndays >= 30) %>%
-#   dplyr::arrange(VESSEL_NUM, set_date)
-# participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
-# ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
-#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-#   theme_ipsum()  +
-#   ylab("Number of observations") +
-#   xlab("Days participating within a year") +
-#   guides(fill=guide_legend(title="Participating?")) +
-#   scale_fill_discrete(labels = c("No (79.7%)", "Yes (20.3%)")) +
-#   ggtitle("At least 30 days participating within a year (574,756 obs)")
-#  
-# participation_filtered <- participation_data %>%
-#   filter(participation_ndays >= 90) %>%
-#   dplyr::arrange(VESSEL_NUM, set_date)
-# participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
-# ggplot(data=participation_filtered2, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
-#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-#   theme_ipsum()  +
-#     ylab("Number of observations") +
-#     xlab("Days participating within a year") +
-#   guides(fill=guide_legend(title="Participating?")) +
-#   scale_fill_discrete(labels = c("No (65.9%)", "Yes (34.1%)")) +
-#   ggtitle("At least 90 days participating within a year (151,240 obs)")
-# 
-# participation_filtered <- participation_data %>%
-#   filter(participation_ndays >= 120) %>%
-#   dplyr::arrange(VESSEL_NUM, set_date)
-# participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
-# ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
-#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-#   theme_ipsum()  +
-#   ylab("Number of observations") +
-#   xlab("Days participating within a year") +
-#   guides(fill=guide_legend(title="Participating?")) +
-#   scale_fill_discrete(labels = c("No (41.5%)", "Yes (58.5%)")) +
-#   ggtitle("At least 120 days participating within a year (69,213 obs)")
 
-# participation_filtered <- participation_data %>%
-#   filter(participation_ndays >= 150) %>%
-#   dplyr::arrange(VESSEL_NUM, set_date)
-# participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
-# ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
-#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-#   theme_ipsum()  +
-#   ylab("Number of observations") +
-#   xlab("Days participating within a year") +
-#   guides(fill=guide_legend(title="Participating?")) +
-#   scale_fill_discrete(labels = c("No (51.8%)", "Yes (48.2%)")) +
-#   ggtitle("At least 150 days participating within a year (26,955 obs)")
+# ----------
+## Plots with filtered data 
 
-# participation_filtered <- participation_data %>%
-#   filter(participation_ndays >= 180) %>%
-#   dplyr::arrange(VESSEL_NUM, set_date)
-# participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
-# ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
-#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-#   theme_ipsum()  +
-#   ylab("Number of observations") +
-#   xlab("Days participating within a year") +
-#   guides(fill=guide_legend(title="Participating?")) +
-#   scale_fill_discrete(labels = c("No (45.3%)", "Yes (54.7%)")) +
-#   ggtitle("At least half of a year participating (8,440 obs)")
-# 
-# ggplot(data=participation_filtered, aes(x=Revenue_MA, group=partDummy, fill=partDummy)) +
-#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-#   theme_ipsum()  +
-#   xlab("Revenue previous year") +
-#   guides(fill=guide_legend(title="Participating?")) +
-#   scale_fill_discrete(labels = c("No", "Yes")) +
-#   ggtitle("Revenue within year? (150 days participating)")
-# 
-# ggplot(data=participation_filtered, aes(x=perc_CPS, group=partDummy, fill=partDummy)) +
-#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-#   theme_ipsum()  +
-#   xlab("Previous days participating in a year") +
-#   guides(fill=guide_legend(title="Participating?")) +
-#   scale_fill_discrete(labels = c("No", "Yes")) +
-#   ggtitle("Revenue share from CPS within year?  (150 days participating)")
+library(hrbrthemes)
+participation_data <- participation_data_all %>% filter(group_all == 4)
+participation_data %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_data)) %>%
+ggplot(data=participation_data, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+  theme_ipsum()  +
+  ylab("Number of observations") +
+  xlab("Days participating within a year") +
+  guides(fill=guide_legend(title="Participating?")) +
+  scale_fill_discrete(labels = c("No (92.12%)", "Yes (7.88%)")) +
+  ggtitle("No filter  (1,673,427 obs)")
 
-participation_filtered <- participation_data %>% 
+participation_filtered <- participation_data %>%
+  filter(participation_ndays >= 30) %>%
+  dplyr::arrange(VESSEL_NUM, set_date)
+participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
+ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+  theme_ipsum()  +
+  ylab("Number of observations") +
+  xlab("Days participating within a year") +
+  guides(fill=guide_legend(title="Participating?")) +
+  scale_fill_discrete(labels = c("No (79.7%)", "Yes (20.3%)")) +
+  ggtitle("At least 30 days participating within a year (574,756 obs)")
+
+participation_filtered <- participation_data %>%
+  filter(participation_ndays >= 90) %>%
+  dplyr::arrange(VESSEL_NUM, set_date)
+participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
+ggplot(data=participation_filtered2, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+  theme_ipsum()  +
+    ylab("Number of observations") +
+    xlab("Days participating within a year") +
+  guides(fill=guide_legend(title="Participating?")) +
+  scale_fill_discrete(labels = c("No (65.9%)", "Yes (34.1%)")) +
+  ggtitle("At least 90 days participating within a year (151,240 obs)")
+
+participation_filtered <- participation_data %>%
+  filter(participation_ndays >= 120) %>%
+  dplyr::arrange(VESSEL_NUM, set_date)
+participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
+ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+  theme_ipsum()  +
+  ylab("Number of observations") +
+  xlab("Days participating within a year") +
+  guides(fill=guide_legend(title="Participating?")) +
+  scale_fill_discrete(labels = c("No (41.5%)", "Yes (58.5%)")) +
+  ggtitle("At least 120 days participating within a year (69,213 obs)")
+
+participation_filtered <- participation_data %>%
+  filter(participation_ndays >= 150) %>%
+  dplyr::arrange(VESSEL_NUM, set_date)
+participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
+ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+  theme_ipsum()  +
+  ylab("Number of observations") +
+  xlab("Days participating within a year") +
+  guides(fill=guide_legend(title="Participating?")) +
+  scale_fill_discrete(labels = c("No (51.8%)", "Yes (48.2%)")) +
+  ggtitle("At least 150 days participating within a year (26,955 obs)")
+
+participation_filtered <- participation_data %>%
+  filter(participation_ndays >= 180) %>%
+  dplyr::arrange(VESSEL_NUM, set_date)
+participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
+ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+  theme_ipsum()  +
+  ylab("Number of observations") +
+  xlab("Days participating within a year") +
+  guides(fill=guide_legend(title="Participating?")) +
+  scale_fill_discrete(labels = c("No (45.3%)", "Yes (54.7%)")) +
+  ggtitle("At least half of a year participating (8,440 obs)")
+
+ggplot(data=participation_filtered, aes(x=Revenue_MA, group=partDummy, fill=partDummy)) +
+  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+  theme_ipsum()  +
+  xlab("Revenue previous year") +
+  guides(fill=guide_legend(title="Participating?")) +
+  scale_fill_discrete(labels = c("No", "Yes")) +
+  ggtitle("Revenue within year? (150 days participating)")
+
+ggplot(data=participation_filtered, aes(x=perc_CPS, group=partDummy, fill=partDummy)) +
+  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+  theme_ipsum()  +
+  xlab("Previous days participating in a year") +
+  guides(fill=guide_legend(title="Participating?")) +
+  scale_fill_discrete(labels = c("No", "Yes")) +
+  ggtitle("Revenue share from CPS within year?  (150 days participating)")
+
+
+#-----------------------------------------------
+## filter non-participation
+
+participation_filtered <- participation_data_all %>% 
   filter(participation_ndays >= 150) %>%
   dplyr::arrange(VESSEL_NUM, set_date) %>%
   dplyr::select(VESSEL_NUM, set_date) %>% 
