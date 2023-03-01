@@ -203,7 +203,7 @@ participation_data_all <- Tickets_SDM %>%
     ifelse(Species_Dominant == "UMCK" , Revenue, 0)))))))) %>%
   mutate(CPS_revenue = ifelse(selection == "No-Participation", 0, CPS_revenue)) %>% 
   mutate(partDummy = ifelse(selection == "No-Participation", 0, 1)) %>%
-  dplyr::select(VESSEL_NUM, set_date, set_year, partDummy, CPS_revenue, Revenue) %>% unique() %>%
+  dplyr::select(VESSEL_NUM, set_date, set_year, partDummy, CPS_revenue, Revenue, group_all) %>% unique() %>%
   dplyr::arrange(VESSEL_NUM, set_date) %>%
   group_by(VESSEL_NUM) %>%
   mutate(participation_ndays = rollsum(partDummy, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
