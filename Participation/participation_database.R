@@ -218,50 +218,50 @@ participation_data_all <- Tickets_SDM %>%
 # ----------
 ## Plots with filtered data 
 
-ndays_filter <- 90
-cluster <- 4
+# ndays_filter <- 90
+# ndays_filter_t <- 30
+# cluster <- 5
+# 
+# participation_filtered <- participation_data_all %>% filter(group_all == cluster) %>%
+#   mutate(Dfilter = ifelse(partDummy == 0 & participation_ndays < ndays_filter, 0, 1)) %>%
+#   mutate(Dfilter = ifelse(partDummy == 1 & participation_ndays < ndays_filter_t, 0, Dfilter)) %>%
+#   filter(Dfilter == 1) %>%
+#   #filter(participation_ndays >= ndays_filter) %>%
+#   dplyr::arrange(VESSEL_NUM, set_date)
+#   
+# perc <- participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
+# x1 <- trunc(perc$perc[1]*100*10^2)/10^2
+# x2 <- trunc(perc$perc[2]*100*10^2)/10^2
+# 
+# library(hrbrthemes)
+# ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+#   theme_ipsum()  +
+#   ylab("Number of observations") +
+#   xlab("Days participating within a year") +
+#   guides(fill=guide_legend(title="Participating?")) +
+#   scale_fill_discrete(labels = c(paste0("No (", paste0(x1,"%)")), paste0("Yes (", paste0(x2,"%)")))) +
+#   ggtitle(paste0("At least ",
+#     paste0(ndays_filter,
+#     paste0(" participating within a year (",
+#     paste0(formatC(nrow(participation_filtered), format="d", big.mark=","), " obs)")))),
+#     subtitle = paste0("...and ", paste0(ndays_filter_t, " days participating for rows with tickets")))
 
-
-participation_filtered <- participation_data_all %>% filter(group_all == cluster) %>%
-  mutate(Dfilter = ifelse(partDummy == 0 & participation_ndays < ndays_filter, 0, 1)) %>%
-  mutate(Dfilter = ifelse(partDummy == 1 & participation_ndays < ndays_filter/3, 0, Dfilter)) %>%
-  filter(Dfilter == 1) %>%
-  #filter(participation_ndays >= ndays_filter) %>%
-  dplyr::arrange(VESSEL_NUM, set_date)
-  
-perc <- participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
-x1 <- trunc(perc$perc[1]*100*10^2)/10^2
-x2 <- trunc(perc$perc[2]*100*10^2)/10^2
-
-library(hrbrthemes)
-ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
-  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-  theme_ipsum()  +
-  ylab("Number of observations") +
-  xlab("Days participating within a year") +
-  guides(fill=guide_legend(title="Participating?")) +
-  scale_fill_discrete(labels = c(paste0("No (", paste0(x1,"%)")), paste0("Yes (", paste0(x2,"%)")))) +
-  ggtitle(paste0("At least ",
-    paste0(ndays_filter,
-    paste0("participating within a year (",
-    paste0(formatC(nrow(participation_filtered), format="d", big.mark=","), " obs)")))),
-    subtitle = paste0("...and ", paste0(ndays_filter/3, " days participating for rows with tickets")))
-
-ggplot(data=participation_filtered, aes(x=Revenue_MA, group=partDummy, fill=partDummy)) +
-  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-  theme_ipsum()  +
-  xlab("Revenue within a year") +
-  guides(fill=guide_legend(title="Participating?")) +
-  scale_fill_discrete(labels = c(paste0("No (", paste0(x1,"%)")), paste0("Yes (", paste0(x2,"%)")))) +
-  ggtitle("Revenue within year?")
-
-ggplot(data=participation_filtered, aes(x=perc_CPS, group=partDummy, fill=partDummy)) +
-  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-  theme_ipsum()  +
-  xlab("Days participating within a year") +
-  guides(fill=guide_legend(title="Participating?")) +
-  scale_fill_discrete(labels = c(paste0("No (", paste0(x1,"%)")), paste0("Yes (", paste0(x2,"%)")))) +
-  ggtitle("Revenue share from CPS within year?")
+# ggplot(data=participation_filtered, aes(x=Revenue_MA, group=partDummy, fill=partDummy)) +
+#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+#   theme_ipsum()  +
+#   xlab("Revenue within a year") +
+#   guides(fill=guide_legend(title="Participating?")) +
+#   scale_fill_discrete(labels = c(paste0("No (", paste0(x1,"%)")), paste0("Yes (", paste0(x2,"%)")))) +
+#   ggtitle("Revenue within year?")
+# 
+# ggplot(data=participation_filtered, aes(x=perc_CPS, group=partDummy, fill=partDummy)) +
+#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+#   theme_ipsum()  +
+#   xlab("Days participating within a year") +
+#   guides(fill=guide_legend(title="Participating?")) +
+#   scale_fill_discrete(labels = c(paste0("No (", paste0(x1,"%)")), paste0("Yes (", paste0(x2,"%)")))) +
+#   ggtitle("Revenue share from CPS within year?")
 
 
 #-----------------------------------------------
