@@ -170,18 +170,19 @@ Tickets_SDM <- merge(Tickets_clust, psdn.sdm,
 ## Add unique trip_ID and add set_date, set_year, set_day and set_month 
 ## (exclude weird period from expanding data)
 
-Tickets_clust$trip_id <- udpipe::unique_identifier(Tickets_clust, fields = c("FTID_unique"))
-Tickets_clust$set_date<-as.Date(with(
-  Tickets_clust,
+Tickets_SDM$trip_id <- udpipe::unique_identifier(Tickets_SDM, fields = c("FTID_unique"))
+Tickets_SDM$set_date<-as.Date(with(
+  Tickets_SDM,
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
   "%Y-%m-%d")
 
-Tickets_clust <- Tickets_clust %>% drop_na(set_date) %>% 
+Tickets_SDM <- Tickets_SDM %>% drop_na(set_date) %>% 
   dplyr::rename(set_day = LANDING_DAY) %>%
   dplyr::rename(set_month = LANDING_MONTH) %>%
   dplyr::rename(set_year = LANDING_YEAR)%>%
   dplyr::select("VESSEL_NUM", "trip_id", "set_date", "set_year", "set_month", "set_day", "selection",
-                "PORT_AREA_CODE", "Species_Dominant", "Landings_mtons", "Revenue", "Price_mtons")
+                "PORT_AREA_CODE", "Species_Dominant", "Landings_mtons", "Revenue", "Price_mtons", "group_all",
+                "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90","PSDN_SDM_220")
 
 #---------------------------------------------------------------------------------------
 ## Filter non-participation
@@ -191,7 +192,7 @@ library(zoo)            # working with time series data
 
 n_days_participation = 365
 
-participation_data <- Tickets_clust %>% 
+participation_data <- Tickets_SDM %>% 
   mutate(CPS_revenue = 
     ifelse(Species_Dominant == "PSDN", Revenue,
     ifelse(Species_Dominant == "NANC", Revenue,
@@ -311,7 +312,7 @@ participation_filtered <- participation_data %>%
   dplyr::select(VESSEL_NUM, set_date) %>% 
   unique() %>% mutate(filter = 1)
 
-Tickets_part <- merge(Tickets_clust, participation_filtered,
+Tickets_part <- merge(Tickets_SDM, participation_filtered,
                       by = c("VESSEL_NUM", "set_date"), 
                       all.x = TRUE, all.y = FALSE) %>% 
   filter(filter == 1) %>% 
