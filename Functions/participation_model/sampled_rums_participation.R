@@ -13,7 +13,6 @@
 #' @param min_year_prob Minimum year used to compute sample probabilities
 #' @param max_year_prob Maximum year used to compute sample probabilities
 #' @param ndays Number of previous days data to use in revenue expectations
-#' @param ndays_participation
 #' @param nhauls_sampled Number of hauls -- trips -- to sample from the full data set, additional to the selection
 #' @param seed Seed for sampling tows
 #' @param ncores Number of cores to use
@@ -25,8 +24,8 @@ sampled_rums <- function(data_in, cluster = 1,
                          min_year = 2010, max_year = 2012,
                          min_year_prob = 2010, max_year_prob = 2012,
                          min_year = 2010, max_year = 2012,  
-                         ndays = 60, ndays_participation = 365, 
-                         nhauls_sampled = 50, seed = 300, 
+                         ndays = 30, 
+                         nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale) {
 
   ###############
@@ -50,12 +49,11 @@ sampled_rums <- function(data_in, cluster = 1,
   
   data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
   cluster <- 4
-  min_year_prob <- 2013
-  max_year_prob <- 2013
-  min_year <- 2010
+  min_year_prob <- 2006
+  max_year_prob <- 2014
+  min_year <- 2000
   max_year <- 2019
   ndays <- 30
-  ndays_participation <- 365
   nhauls_sampled <- 5
   seed <- 300
   ncores <- 2
