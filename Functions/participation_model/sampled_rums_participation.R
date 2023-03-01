@@ -49,11 +49,11 @@ sampled_rums <- function(data_in, cluster = 1,
   library(mlogit)
   
   data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-  cluster <- 1
+  cluster <- 4
   min_year_prob <- 2013
   max_year_prob <- 2013
-  min_year <- 2012
-  max_year <- 2015
+  min_year <- 2010
+  max_year <- 2019
   ndays <- 30
   ndays_participation <- 365
   nhauls_sampled <- 5
