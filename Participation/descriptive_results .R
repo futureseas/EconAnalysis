@@ -37,8 +37,15 @@ Tickets <- Tickets %>% mutate(
                                       ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
                                              ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
 
+Tickets$date<-as.Date(with(
+  Tickets,
+  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
+  "%Y-%m-%d")
+
+
 Tickets.CPS <- Tickets %>% 
   dplyr::filter(PACFIN_SPECIES_CODE %in% c("OMCK", "MSQD", "NANC", "PSDN"))
+
 
 
 
@@ -48,11 +55,45 @@ Tickets.CPS <- Tickets %>%
 
 #-------------------------------------------
 ### How many tickets per day?
+colnames(Tickets)
+n_tickets_by_day <- Tickets %>% 
+  select(FTID_unique, date, VESSEL_NUM) %>%
+  unique() %>% group_by(VESSEL_NUM, date) %>%
+  summarize(n_tickets = n()) %>% group_by(n_tickets) %>%
+  summarize(n_obs = n())
 
 
+barplot(height=n_tickets_by_day$n_obs, names=as.factor(n_tickets_by_day$n_tickets), 
+        col=rgb(0.8,0.1,0.1,0.6),
+        xlab="Number of tickets in a day", 
+        ylab="Frequency"
+)
+
+ggplot(n_tickets_by_day, aes(x=as.factor(n_tickets), y=n_obs)) + 
+  geom_bar(stat = "identity", width=0.4) + ylab("Frequency") + xlab("Number of tickets in a day")
 
 
+#---------------------------------------------------------------------------
+## How long trips last???
 
+# Logbooks CFDW
+logbooks.dat.msqd <- read.csv(file = "C:/Data/Logbooks/CDFW CPS Logbooks/MarketSquidVesselDataExtract.csv")
+colnames(logbooks.dat.msqd)
+  day_in_sea <- logbooks.dat.msqd %>% 
+    select(LogSerialNumber, LogDateString) %>% 
+    unique() %>% 
+    group_by(LogSerialNumber) %>%
+    summarize(n_days = n()) %>% group_by(n_days) %>%
+    summarize(n_obs = n())
+  
+  ggplot(day_in_sea, aes(x=as.factor(n_days), y=n_obs)) + 
+    geom_bar(stat = "identity", width=0.4) + ylab("Frequency") + xlab("Number of tickets in a day") + 
+    ggtitle("(a) Market squid logbooks from CDFW")
+  
+  
+  <<<CONTINUE HERE>>>
+  
+  
 
 #----------------------------------
 ## Figure 1. Average annual landings, prices and revenues by species ##

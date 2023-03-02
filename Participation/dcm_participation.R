@@ -38,7 +38,7 @@ saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_se
 
 
 ## Restore the object
-# samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\sample_choice_set.rds")
+# samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set.rds")
 
 
 
