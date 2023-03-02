@@ -276,7 +276,7 @@ sampled_rums <- function(data_in, cluster = 4,
   estPSDN <- lm(Landings_mtons ~ PSDN_SDM_90 + factor(VESSEL_NUM) + factor(set_month) + factor(Closure), data=datPanel_PSDN)
 
   ## Calculate revenue and dummies
-  dummys2 <- foreach::foreach(ii = 1:nrow(td1),
+  dummys2 <- foreach::foreach(ii = 1:nrow(td),
     .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
       process_dummys2(xx = ii, td1 = td, dat1 = dat, landPSDN = estPSDN)
