@@ -10,18 +10,12 @@ gc()
 rm(list=ls())
 
 ## Load packages ##
-# library(ggplot2)
-# library(plyr)
-# library(dplyr)
-# library(lubridate)
-# library(reshape2)
-# library(devtools)
-# library(maps)
-# library(doParallel)
+library(doParallel)
 library(tidyr)
-# library(tidyverse)
+library(plm)
+library(tidyverse)
+library(lubridate)
 # library(mlogit)
-# library(parallel)
 
 
 #-----------------------------------------------------------------------------
@@ -33,11 +27,11 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 ## Sampling choice data including expected revenue and past behavior dummies ##
 
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
-samps <- sampled_rums(data_in = participation_data, cluster = 1,
-                         min_year = 2012, max_year = 2015,
-                         min_year_prob = 2013, max_year_prob = 2014,
-                         ndays = 30, ndays_participation = 365, nhauls_sampled = 4,
-                         seed = 42, ncores = 2, rev_scale = 100)
+samps <- sampled_rums(data_in = participation_data, cluster = 4,
+                         min_year = 2002, max_year = 2019,
+                         min_year_prob = 2006, max_year_prob = 2016,
+                         ndays = 30, nhauls_sampled = 5,
+                         seed = 42, ncores = 4, rev_scale = 1000)
 
 
 saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set.rds")
@@ -51,7 +45,6 @@ saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_se
 #################################
 ## Create additional variables ##
 #################################
-
 
 # #---------------------------------------------------------------
 # ### Merge storm warning signals 

@@ -20,67 +20,65 @@
 
 #' @export
 
-sampled_rums <- function(data_in, cluster = 1,
-                         min_year = 2010, max_year = 2012,
-                         min_year_prob = 2010, max_year_prob = 2012,
-                         min_year = 2010, max_year = 2012,  
+sampled_rums <- function(data_in, cluster = 4,
+                         min_year = 2001, max_year = 2020,
+                         min_year_prob = 2006, max_year_prob = 2014,
                          ndays = 30, 
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale) {
 
-  ###############
-  # Delete
-
-  gc()
-  rm(list=ls())
-
-  ## Load packages ##
-  library(ggplot2)
-  library(plyr)
-  library(dplyr)
-  library(lubridate)
-  library(reshape2)
-  library(devtools)
-  library(maps)
-  library(doParallel)
-  library(tidyr)
-  library(tidyverse)
-  library(mlogit)
-  
-  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-  cluster <- 4
-  min_year_prob <- 2006
-  max_year_prob <- 2014
-  min_year <- 2000
-  max_year <- 2019
-  ndays <- 30
-  nhauls_sampled <- 5
-  seed <- 300
-  ncores <- 2
-  rev_scale <- 100
-
-  ###############
+  # ###############
+  # # Delete
+  # 
+  # gc()
+  # rm(list=ls())
+  # 
+  # ## Load packages ##
+  # library(ggplot2)
+  # library(plyr)
+  # library(dplyr)
+  # library(lubridate)
+  # library(reshape2)
+  # library(devtools)
+  # library(maps)
+  # library(doParallel)
+  # library(tidyr)
+  # library(tidyverse)
+  # library(mlogit)
+  # library(plm)
+  # 
+  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+  # cluster <- 4
+  # min_year_prob <- 2006
+  # max_year_prob <- 2016
+  # min_year <- 2002
+  # max_year <- 2019
+  # ndays <- 30
+  # nhauls_sampled <- 5
+  # seed <- 300
+  # ncores <- 4
+  # rev_scale <- 100
+  # 
+  # ###############
   
   #---------------------------------------------------------------
   ## Filter the data
 
-  dat <- data_in %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
-                                     group_all %in% cluster)
+  dat <- data_in 
   
   #--------------------------------
   ## Define hauls data used for estimation (in this case, are the trips)
   
-  hauls <- dat %>% 
+  hauls <- dat %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
+                                 group_all %in% cluster) %>% 
     distinct(trip_id, .keep_all = T) %>% 
-    dplyr::select(trip_id, VESSEL_NUM,  set_year, set_month, set_day, Revenue, selection
-                  #, PSDN_SDM_30, PSDN_SDM_60, PSDN_SDM_90, PSDN_SDM_220
-                  ) %>% 
-    as.data.frame
+    dplyr::select(trip_id, VESSEL_NUM,  set_year, set_month, set_day, Revenue, selection,
+                  PSDN_SDM_30, PSDN_SDM_60, PSDN_SDM_90, PSDN_SDM_220) %>% as.data.frame
 
   ## Select hauls used to calculate probability for the choice set
   dist_hauls_catch_shares <- hauls %>% dplyr::filter(set_year >= min_year_prob, set_year <= max_year_prob)
+    dist_hauls_catch_shares <- dist_hauls_catch_shares[dist_hauls_catch_shares$selection != "No-Participation", ]
   
-
   #---------------------------------------------------------------
   ## Create probabilities for sampling choice set
   ## For this, we compute the average vessel catch and port composition by month
@@ -115,16 +113,16 @@ sampled_rums <- function(data_in, cluster = 1,
 
   dbp <- dbp %>%
     group_by(selection, set_month) %>%
-    summarize(prop = mean(catch_composition))
-
+    summarize(prop = mean(catch_composition)) 
   
+
   ### Create factor by month and graph composition
   cl <- makeCluster(ncores)
   registerDoParallel(cl)
   
   dbp3 <- foreach::foreach(ll = 1:12, .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
     dbp2 <- dbp %>% dplyr::filter(set_month == ll)  %>%  
-      mutate(prop = ifelse(prop == 0,0.001,prop))
+      mutate(prop = ifelse(prop == 0,0.00001,prop))
       factor <- 1/sum(dbp2$prop)
     dbp2 <- dbp2 %>% 
       mutate(prop = prop * factor)
@@ -133,24 +131,32 @@ sampled_rums <- function(data_in, cluster = 1,
   }
 
   dbp_month <- as.data.frame(do.call(rbind.data.frame, dbp3))
-  dbp_month <- dbp_month[dbp_month$selection != "No-Participation", ]
   
-  ## Create example plot with the proportion used to sample the choice set.
+  # dbp_test <- dbp_month %>% group_by(set_month) %>%
+  #   summarize(sum_prop = sum(prop)) 
   
-  # dbp_month_plot <- dbp_month %>% 
-  #   filter(prop > 0) %>% 
-  #   filter(selection != "LAA-MAKO")
-  # months <- as_labeller(c("1" = "January", 
-  #                         "2" = "February", 
-  #                         "3" = "March", 
-  #                         "4" = "Aprill", 
-  #                         "5" = "May", 
-  #                         "6" = "June", 
-  #                         "7" = "July", 
-  #                         "8" = "August", 
-  #                         "9" = "September", 
-  #                         "10" = "October", 
-  #                         "11" = "November", 
+  # ## Create example plot with the proportion used to sample the choice set.
+  # 
+  # dbp_month_plot <- dbp_month %>%
+  #   filter(prop > 0.01) %>% 
+  #   filter(set_month <= 4) %>%
+  #   mutate(selection = as.factor(selection)) %>%
+  #   mutate(selection = fct_relevel(selection, "LAA-MSQD", "SBA-MSQD", "MRA-MSQD", "MNA-MSQD", 
+  #                                  "LAA-PSDN", "SBA-PSDN", "MNA-PSDN", 
+  #                                  "LAA-NANC", "MNA-NANC", 
+  #                                  "LAA-CMCK", "LAA-PBNT", "SFA-DCRB"))
+  # 
+  # months <- as_labeller(c("1" = "January",
+  #                         "2" = "February",
+  #                         "3" = "March",
+  #                         "4" = "Aprill",
+  #                         "5" = "May",
+  #                         "6" = "June",
+  #                         "7" = "July",
+  #                         "8" = "August",
+  #                         "9" = "September",
+  #                         "10" = "October",
+  #                         "11" = "November",
   #                         "12" = "December"))
   # 
   # library(viridis)
@@ -164,20 +170,22 @@ sampled_rums <- function(data_in, cluster = 1,
   #         legend.position="bottom"
   #   #    ,axis.text.x = element_text(size=7, angle=90)
   #   ) +
-  #   scale_fill_discrete(labels=c("LAA-CMCK" = "Chub mackerrel - Los Angeles", 
-  #                              "LAA-JMCK" = "Jack mackerel - Los Angeles", 
+  #   scale_fill_manual(labels=c("LAA-CMCK" = "Chub mackerrel - Los Angeles",
   #                              "LAA-MSQD" = "Market squid - Los Angeles",
   #                              "LAA-NANC" = "Northern anchovy - Los Angeles",
+  #                              "LAA-PBNT" = "Pacific Bonito - Los Angeles",
   #                              "LAA-PSDN" = "Pacific sardine - Los Angeles",
-  #                              "LAA-SABL" = "Sablefish - Los Angeles",
-  #                              "LAA-WBAS" = "White seabass - Los Angeles",
+  #                              "MNA-MSQD" = "Market squid - Monterey",
+  #                              "MNA-NANC" = "Northern anchovy - Monterey",
+  #                              "MNA-PSDN" = "Pacific sardine - Monterey",
+  #                              "MRA-MSQD" = "Market squid - Morro Bay",
   #                              "SBA-MSQD" = "Market squid - Santa Barbara",
-  #                              "SBA-NANC" = "Northern anchovy - Santa Barbara",
   #                              "SBA-PSDN" = "Pacific sardine - Santa Barbara",
-  #                              "SBA-WBAS" = "White seabass - Santa Barbara",
-  #                              "SDA-MSQD" = "Market squid - San Diego")) +
-  #   guides(fill=guide_legend(title="Species / Port areas: ")) 
-
+  #                              "SFA-DCRB" = "Dungeness Crab - San Francisco"),
+  #                     values=c("#08519c", "#049cdb", "#6baed6","#2171b5", "#85db5b", "#4aa72f", "#248b37",
+  #                              "#e1dc0d", "#f0eb00", "#d94701", "#6a51a3", "#969696")) +
+  #   guides(fill=guide_legend(title="Species / Port areas: "))
+  # 
 
   #-----------------------------------------------------------------------------
   ## Sample Hauls
@@ -189,9 +197,6 @@ sampled_rums <- function(data_in, cluster = 1,
   #Sample hauls and calculate distances
   #For each haul in the focus year, sample nhauls_sampled tows
 
-  
-  # source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sample_hauls_participation.R")
-  
   sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls),
                                     .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
                                       
@@ -237,38 +242,47 @@ sampled_rums <- function(data_in, cluster = 1,
   sampled_hauls$prev_days_date <- sampled_hauls$set_date - days(ndays)
   sampled_hauls$prev_year_set_date <- sampled_hauls$set_date - days(365)
   sampled_hauls$prev_year_days_date <- sampled_hauls$prev_days_date - days(365)
-  sampled_hauls$participation_date <- sampled_hauls$set_date - days(ndays_participation)
-
-  
 
   #-----------------------------------------------------------------------------
   ### Calculate interval between previous day and year
   
   #What were the average revenues in each location
-  tow_dates <- sampled_hauls %>%
+  td <- sampled_hauls %>%
     dplyr::select(fished_haul, set_date, prev_days_date, prev_year_set_date, prev_year_days_date,
-                  fished_VESSEL_NUM, selection, participation_date)
+                  fished_VESSEL_NUM, selection)
 
   #calculate intervals
-  tow_dates$days_inter_part <- interval(tow_dates$participation_date, tow_dates$set_date)
-  tow_dates$days_inter <- interval(tow_dates$prev_days_date, tow_dates$set_date)
-  tow_dates$prev_year_days_inter <- interval(tow_dates$prev_year_days_date, tow_dates$prev_year_set_date)
+  td$days_inter <- interval(td$prev_days_date, td$set_date)
+  td$prev_year_days_inter <- interval(td$prev_year_days_date, td$prev_year_set_date)
 
   #add in the fleet name
-  tow_dates$fleet_name <- 1
-  td1 <- tow_dates
+  td$fleet_name <- cluster
+  
+  #add species 
+  td <- td %>% mutate(species = ifelse(selection == "No-Participation", NA, str_sub(td$selection, start= -4)))
 
 
   #-----------------------------------------------------------------------------
-  ### Calculate revenues from each period and process dummy variables
+  ### Calculate revenues from each period and process dummy variables for past behavior
+  
+  ## Estimate models
+  datPanel <- dat %>% 
+    filter(group_all == cluster) %>%
+    filter(selection != "No-Participation")
+  
+  datPanel_PSDN <- datPanel %>% filter(Species_Dominant == "PSDN") %>%
+    dplyr::mutate(Closure = ifelse(set_year > 2015, 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse((set_year == 2015 & set_month >= 7), 1, Closure)) 
+  estPSDN <- lm(Landings_mtons ~ PSDN_SDM_90 + factor(VESSEL_NUM) + factor(set_month) + factor(Closure), data=datPanel_PSDN)
 
+  ## Calculate revenue and dummies
   dummys2 <- foreach::foreach(ii = 1:nrow(td1),
     .packages = c("dplyr", 'lubridate')) %dopar% {
-      source("C:\\GitHub\\EconAnalysis\\Functions\\process_dummys2_participation.R")
-      process_dummys2(xx = ii, td2 = td1, dat1 = dat)
+      source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
+      process_dummys2(xx = ii, td1 = td, dat1 = dat, landPSDN = estPSDN)
     }
   print("Done calculating dummys and revenues")
-  td1 <- ldply(dummys2)
+  td2 <- ldply(dummys2)
   stopCluster(cl)
   
 
@@ -276,22 +290,22 @@ sampled_rums <- function(data_in, cluster = 1,
   ## Create additional dummys
   
   #Convert set_date to character string to merge with the sampled_hauls
-  tow_dates$set_date_chr <- as.character(tow_dates$set_date)
-  td1$set_date_chr <- as.character(td1$set_date)
+  td$set_date_chr <- as.character(tow_dates$set_date)
+  td2$set_date_chr <- as.character(td2$set_date)
   sampled_hauls$set_date_chr <- as.character(sampled_hauls$set_date)
 
   #create dummy for prev days fishing
-  td1[which(td1$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
-  td1[which(td1$dummy_prev_year_days != 0), 'dummy_prev_year_days'] <- 1
+  td2[which(td1$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
+  td2[which(td1$dummy_prev_year_days != 0), 'dummy_prev_year_days'] <- 1
 
-  td1[which(td1$mean_rev != 0), 'dummy_miss'] <- 0
-  td1[which(td1$mean_rev == 0), 'dummy_miss'] <- 1
-  td1[which(td1$selection == "No-Participation"), 'dummy_miss'] <- 0
+  td2[which(td1$mean_rev != 0), 'dummy_miss'] <- 0
+  td2[which(td1$mean_rev == 0), 'dummy_miss'] <- 1
+  td2[which(td1$selection == "No-Participation"), 'dummy_miss'] <- 0
 
-  td1$mean_rev_adj <- td1$mean_rev / rev_scale
+  td2$mean_rev_adj <- td1$mean_rev / rev_scale
 
   sampled_hauls <- cbind(sampled_hauls,
-    td1[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
+    td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
   
   return(sampled_hauls)
 }

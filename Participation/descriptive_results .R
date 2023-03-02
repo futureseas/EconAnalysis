@@ -18,7 +18,6 @@ library(viridis)
 library(patchwork)
 
 
-
 ### How many tickets per day???
 
 #----------------------------------------------------------------
