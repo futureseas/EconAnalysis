@@ -3,8 +3,7 @@
 ########################################################################################
 
 ### Note: Thanks Peter for sharing the code used in Hicks's paper. 
-### I modify it a little to be used with PacFIN data. A trip would be similar to a ticket, 
-### a "set" similar to also a ticket, and coordinates "set" and "up" are the same. 
+### I modify it to be used with PacFIN data.
 
 gc()
 rm(list=ls())
