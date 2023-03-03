@@ -45,17 +45,17 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 samps <- sampled_rums(data_in = participation_data, cluster = 4,
-                         min_year = 2002, max_year = 2019,
+                         min_year = 2004, max_year = 2018,
                          min_year_prob = 2006, max_year_prob = 2016,
                          ndays = 30, nhauls_sampled = 5,
                          seed = 42, ncores = 4, rev_scale = 1000)
 
 
-saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set.rds")
+saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 
 
 ## Restore the object
-# samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set.rds")
+# samps_c4 <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 
 
 
