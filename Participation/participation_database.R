@@ -192,6 +192,8 @@ library(fpp2)           # working with time series data
 library(zoo)            # working with time series data
 
 n_days_participation = 365
+ndays_filter <- 90
+ndays_filter_t <- 30
 
 participation_data_all <- Tickets_SDM %>% 
   mutate(CPS_revenue = 
@@ -219,17 +221,15 @@ participation_data_all <- Tickets_SDM %>%
 # ----------
 ## Plots with filtered data 
 
-# ndays_filter <- 90
-# ndays_filter_t <- 30
-# cluster <- 5
-# 
+# cluster <- 4
+# # 
 # participation_filtered <- participation_data_all %>% filter(group_all == cluster) %>%
 #   mutate(Dfilter = ifelse(partDummy == 0 & participation_ndays < ndays_filter, 0, 1)) %>%
 #   mutate(Dfilter = ifelse(partDummy == 1 & participation_ndays < ndays_filter_t, 0, Dfilter)) %>%
 #   filter(Dfilter == 1) %>%
 #   #filter(participation_ndays >= ndays_filter) %>%
 #   dplyr::arrange(VESSEL_NUM, set_date)
-#   
+# 
 # perc <- participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
 # x1 <- trunc(perc$perc[1]*100*10^2)/10^2
 # x2 <- trunc(perc$perc[2]*100*10^2)/10^2
@@ -268,9 +268,10 @@ participation_data_all <- Tickets_SDM %>%
 #-----------------------------------------------
 ## filter non-participation
 
+
 participation_filtered <- participation_data_all %>%
-  mutate(Dfilter = ifelse(partDummy == 0 & participation_ndays < 90, 0, 1)) %>%
-  mutate(Dfilter = ifelse(partDummy == 1 & participation_ndays < 30, 0, Dfilter)) %>%
+  mutate(Dfilter = ifelse(partDummy == 0 & participation_ndays < ndays_filter, 0, 1)) %>%
+  mutate(Dfilter = ifelse(partDummy == 1 & participation_ndays < ndays_filter_t, 0, Dfilter)) %>%
   filter(Dfilter == 1) %>%
   #filter(participation_ndays >= ndays_filter) %>%
   dplyr::arrange(VESSEL_NUM, set_date) %>%

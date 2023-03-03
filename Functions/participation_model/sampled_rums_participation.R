@@ -29,24 +29,7 @@ sampled_rums <- function(data_in, cluster = 4,
 
   # ###############
   # # Delete
-  # 
-  # gc()
-  # rm(list=ls())
-  # 
-  # ## Load packages ##
-  # library(ggplot2)
-  # library(plyr)
-  # library(dplyr)
-  # library(lubridate)
-  # library(reshape2)
-  # library(devtools)
-  # library(maps)
-  # library(doParallel)
-  # library(tidyr)
-  # library(tidyverse)
-  # library(mlogit)
-  # library(plm)
-  # 
+  #
   # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
   # cluster <- 4
   # min_year_prob <- 2006
@@ -289,20 +272,15 @@ sampled_rums <- function(data_in, cluster = 4,
   #-----------------------------------------------------------------------------
   ## Create additional dummys
   
-  #Convert set_date to character string to merge with the sampled_hauls
-  td$set_date_chr <- as.character(tow_dates$set_date)
-  td2$set_date_chr <- as.character(td2$set_date)
-  sampled_hauls$set_date_chr <- as.character(sampled_hauls$set_date)
-
   #create dummy for prev days fishing
-  td2[which(td1$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
-  td2[which(td1$dummy_prev_year_days != 0), 'dummy_prev_year_days'] <- 1
+  td2[which(td2$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
+  td2[which(td2$dummy_prev_year_days != 0), 'dummy_prev_year_days'] <- 1
 
-  td2[which(td1$mean_rev != 0), 'dummy_miss'] <- 0
-  td2[which(td1$mean_rev == 0), 'dummy_miss'] <- 1
-  td2[which(td1$selection == "No-Participation"), 'dummy_miss'] <- 0
+  td2[which(td2$mean_rev != 0), 'dummy_miss'] <- 0
+  td2[which(td2$mean_rev == 0), 'dummy_miss'] <- 1
+  td2[which(td2$selection == "No-Participation"), 'dummy_miss'] <- 0
 
-  td2$mean_rev_adj <- td1$mean_rev / rev_scale
+  td2$mean_rev_adj <- td2$mean_rev / rev_scale
 
   sampled_hauls <- cbind(sampled_hauls,
     td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
