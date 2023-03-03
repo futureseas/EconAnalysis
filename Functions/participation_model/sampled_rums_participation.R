@@ -282,7 +282,7 @@ sampled_rums <- function(data_in, cluster = 4,
       process_dummys2(xx = ii, td1 = td, dat1 = dat, landPSDN = estPSDN)
     }
   print("Done calculating dummys and revenues")
-  td2 <- ldply(dummys2)
+  td2 <- plyr::ldply(dummys2)
   stopCluster(cl)
   
 

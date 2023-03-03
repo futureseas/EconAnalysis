@@ -60,13 +60,14 @@ rm(Trip_Species_Dominant, X, Boats)
 Tickets <- Tickets %>% group_by(AGENCY_CODE, FTID_unique, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE,
                                 VESSEL_NUM, PACFIN_SPECIES_CODE, Species_Dominant
                                 #PORT_NAME, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_OWNER_NAME, PACFIN_GEAR_CODE, 
-                                #FISHER_LICENSE_NUM, NUM_OF_DAYS_FISHED, CATCH_AREA_CODE, PACFIN_SPECIES_COMMON_NAME
+                                #FISHER_LICENSE_NUM, CATCH_AREA_CODE, PACFIN_SPECIES_COMMON_NAME
                                 ) %>% 
   summarize(Landings_mtons = sum(LANDED_WEIGHT_MTONS),
             Landings_lbs = sum(LANDED_WEIGHT_LBS),
             Revenue  = sum(AFI_EXVESSEL_REVENUE),
             Price_lbs = mean(AFI_PRICE_PER_POUND),
-            Price_mtons = mean(AFI_PRICE_PER_MTONS)) %>%
+            Price_mtons = mean(AFI_PRICE_PER_MTONS),
+            max_days_sea = max(NUM_OF_DAYS_FISHED)) %>%
   mutate(dDelete = ifelse(FTID == "142301E" & LANDING_YEAR == 2020, 1, 0)) %>%
   filter(dDelete == 0) %>% select(-c(dDelete))
 
@@ -181,8 +182,8 @@ Tickets_SDM <- Tickets_SDM %>% drop_na(set_date) %>%
   dplyr::rename(set_month = LANDING_MONTH) %>%
   dplyr::rename(set_year = LANDING_YEAR)%>%
   dplyr::select("VESSEL_NUM", "trip_id", "set_date", "set_year", "set_month", "set_day", "selection",
-                "PORT_AREA_CODE", "Species_Dominant", "Landings_mtons", "Revenue", "Price_mtons", "group_all",
-                "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90","PSDN_SDM_220")
+                "PORT_AREA_CODE", "Species_Dominant", "Landings_mtons", "Revenue", "Price_mtons", "max_days_sea",
+                "group_all", "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90","PSDN_SDM_220")
 
 #---------------------------------------------------------------------------------------
 ## Create data to filter non-participation
