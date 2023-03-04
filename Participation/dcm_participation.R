@@ -210,16 +210,19 @@ samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE
 #                      values = c("Small craft" = "#ff9224", "Gale" = "#D22B2B"))
 
 
-#------------------#
-## Estimate model ##
-#------------------#
+#-------------------------#
+## Format as mlogit.data ##
+#-------------------------#
 
-#Format as mlogit.data
-rdo <- samps %>% dplyr::select(fished, fished_haul,dummy_miss, mean_rev, mean_rev_adj, selection, 
-                               fished_VESSEL_NUM, set_date, wind_max_220_mh, 
+#------------------------------------
+## Subset database
+
+rdo <- samps %>% dplyr::select(fished, fished_haul,dummy_miss, mean_rev, mean_rev_adj, 
+                               selection, fished_VESSEL_NUM, set_date, wind_max_220_mh, 
                                dummy_prev_days, dummy_prev_year_days)
 
 # rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(fished_haul)) %>% as.data.frame
+
 
 #-----------------------------------------------------------------------------
 ## Fit mlogit models returning the coefficients, the models, and the data going into the model
