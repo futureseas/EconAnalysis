@@ -308,7 +308,11 @@ the_tows <- mlogit.data(rdo4, shape = 'long', choice = 'fished', alt.var = 'sele
 res <- mlogit(fished ~  
                 wind_max_220_mh + dummy_prev_days + dummy_miss + mean_rev_adj | 1, 
               the_tows, reflevel = 'No-Participation')
-summary(res)
+res2 <- mlogit(fished ~  
+                wind_max_220_mh + dummy_prev_days + dummy_miss + mean_rev_adj + PSDN.Closure | 1 , 
+              the_tows, reflevel = 'No-Participation')
+
+summary(res2)
 
 
 ## Random-coefficient model
