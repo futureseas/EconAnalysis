@@ -14,7 +14,6 @@ library(tidyr)
 library(plm)
 library(tidyverse)
 library(lubridate)
-# library(mlogit)
 
 
 #-----------------------------------------------------------------------------
@@ -152,8 +151,6 @@ samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE
 #   ylab("Frequency") + xlab("Maximum daily wind (miles/hour) within 220km radious") + 
 #   scale_color_manual(name = "Warnings:", values = c("Small craft" = "#ff9224", "Gale" = "#D22B2B"))
 
-
-
 # #---------------------------------------------------------------
 # # Merge storm warning signals to check correlation between data
 # 
@@ -209,99 +206,135 @@ samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE
 #   scale_color_manual(name = "Threshold:", 
 #                      values = c("Small craft" = "#ff9224", "Gale" = "#D22B2B"))
 
+#------------------------------------------
+## Dummy for each species
+samps <- samps %>% mutate(dPSDN = ifelse(grepl("PSDN", selection) == TRUE, 1, 0)) 
+samps <- samps %>% mutate(dMSQD = ifelse(grepl("MSQD", selection) == TRUE, 1, 0)) 
+samps <- samps %>% mutate(dNANC = ifelse(grepl("NANC", selection) == TRUE, 1, 0)) 
+samps <- samps %>% mutate(dCMCK = ifelse(grepl("CMCK", selection) == TRUE, 1, 0)) 
+samps <- samps %>% mutate(dJMCK = ifelse(grepl("JMCK", selection) == TRUE, 1, 0)) 
+
+#------------------------------------------
+## Incorporate closure dummy for Pacific sardine
+
+samps <- samps %>% 
+  dplyr::mutate(PSDN.Closure = ifelse(set_date > "2015-07-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = PSDN.Closure * dPSDN)
+
+
+
+#------------------------------------------
+## Weekend dummy
+
+#------------------------------------------
+## 
+
 
 #-------------------------#
 ## Format as mlogit.data ##
 #-------------------------#
+
+
 
 #------------------------------------
 ## Subset database
 
 rdo <- samps %>% dplyr::select(fished, fished_haul,dummy_miss, mean_rev, mean_rev_adj, 
                                selection, fished_VESSEL_NUM, set_date, wind_max_220_mh, 
-                               dummy_prev_days, dummy_prev_year_days)
+                               dummy_prev_days, dummy_prev_year_days, PSDN.Closure)
 
 # rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(fished_haul)) %>% as.data.frame
 
 
-# #-----------------------------------------------------------------------------
-# ## Fit mlogit models returning the coefficients, the models, and the data going into the model
-# 
-# #Fit the model for everything at once
-# library(data.table)
-# library(mlogit)
-# 
-# 
-# ## Drop choice cards that received no choice
-# # rdo2 <- rdo %>% 
-# #   group_by(fished_haul) %>% 
-# #   mutate(full = sum(fished)) %>% 
-# #   filter(full!=0) %>% 
-# #   select(-c(full))
-# 
-# 
-# # Check hauls in same day (only 30)
-# fished_haul_select <- rdo %>%
-#   group_by(fished_VESSEL_NUM, set_date) %>%
-#   mutate(ncount = n()) %>% dplyr::filter(ncount == 5) %>% ungroup() %>%
-#   select('fished_haul') %>% unique()
-# 
-# rdo <- data.table::setDT(rdo)[fished_haul %chin% fished_haul_select$fished_haul]
-# 
-# 
-# rdo2 <- as.data.frame(rdo[order(rdo$fished_VESSEL_NUM, rdo$fished_haul, -rdo$fished),]) %>%
+#-------------------------------------------
+## Drop choice cards that received no choice
+
+rdo2 <- rdo %>%
+  group_by(fished_haul) %>%
+  mutate(full = sum(fished)) %>%
+  filter(full!=0) %>%
+  select(-c(full))
+
+
+#----------------------------------------------------
+## Check hauls in same day (filter trips in same day)
+
+fished_haul_select <- rdo2 %>%
+  group_by(fished_VESSEL_NUM, set_date) %>%
+  mutate(ncount = n()) %>%
+  ungroup() %>% dplyr::filter(ncount == min(ncount)) %>%
+  select('fished_haul') %>%
+  unique()
+rdo2 <- data.table::setDT(rdo2)[fished_haul %chin% fished_haul_select$fished_haul]
+
+
+#----------------------------------------------------
+## Exclude NA winds (previous problem with ports...)
+
+rdo_vessels_out <- rdo2 %>% filter(is.na(wind_max_220_mh)) %>% select(fished_haul) %>% unique()
+`%ni%` <- Negate(`%in%`)
+rdo3 <- data.table::setDT(rdo2)[fished_haul %ni% rdo_vessels_out$fished_haul]
+
+
+#----------------------------------------------------------
+## Organize data for estimation
+rdo4 <- as.data.frame(rdo3[order(rdo3$fished_VESSEL_NUM, rdo3$fished_haul, -rdo3$fished),]) %>%
+  drop_na()
+# %>%
 #   group_by(fished_VESSEL_NUM) %>%
 #   dplyr::mutate(fished_VESSEL_ID = cur_group_id()) %>%
 #   ungroup() %>% dplyr::select(-c('fished_VESSEL_NUM')) %>%
 #   group_by(set_date) %>%
 #   dplyr::mutate(time = cur_group_id()) %>%
-#   ungroup() %>% dplyr::select(-c('set_date'))
-# 
-# 
-# write.csv(rdo2,"C:\\GitHub\\EconAnalysis\\Data\\sampled_mixed_logit_data.csv", row.names = FALSE)
-# 
-# 
-# str(rdo2)
-# 
-# 
-# 
-# ## Maybe create new fished_haul number within VESSEL_NUM?
-# 
-# the_tows <- mlogit.data(rdo2, shape = 'long', choice = 'fished', alt.var = 'selection', 
-#                         id.var = "fished_VESSEL_ID", chid.var = "fished_haul")
-# 
-# # drop.index
-# # mf <- mFormula(fished ~ dummy_miss | 1 | mean_rev_adj)
-# # res <- mlogit(mf, the_tows)
-# # summary(res)
-# 
-# res <- mlogit(fished ~ dummy_miss + mean_rev_adj,
-#               the_tows, reflevel = 'No-Participation', panel = TRUE, 
+#   ungroup() %>% dplyr::select(-c('set_date')) %>%
+
+
+#----------------------------------------------------------
+## Save data to run with Stata
+
+write.csv(rdo4,"C:\\GitHub\\EconAnalysis\\Data\\sampled_mixed_logit_data.csv", row.names = FALSE)
+
+
+#-----------------------------#
+## Fit discrete choice model ##
+#-----------------------------#
+
+## Create mlogit.data 
+library(mlogit)
+the_tows <- mlogit.data(rdo4, shape = 'long', choice = 'fished', alt.var = 'selection', 
+                          id.var = "fished_VESSEL_NUM", chid.var = "fished_haul")
+
+## Fit model
+res <- mlogit(fished ~  
+                wind_max_220_mh + dummy_prev_days + dummy_miss + mean_rev_adj | 1, 
+              the_tows, reflevel = 'No-Participation')
+summary(res)
+
+
+## Random-coefficient model
+# res_rc <- mlogit(fished ~ dummy_miss + mean_rev_adj,
+#               the_tows, reflevel = 'No-Participation', panel = TRUE,
 #               rpar = c(mean_rev_adj = "n"),
 #               correlation = FALSE, R = 100, halton = NA)
-# summary(res)
-# 
-# 
-# ###
-# # Error in if (abs(x - oldx) < ftol) { : 
-# #     missing value where TRUE/FALSE needed --- Export to Stata?
-# 
-# #--------------------------------------------------------------------
-# #Generate and format the predictions
-# fits <- fitted(res, outcome = FALSE)
-# mfits <- reshape2::melt(fits) %>% 
-#   dplyr::rename(fished_haul = Var1) %>%
-#   dplyr::rename(selection_pred = Var2)
-# 
-# ## -- Correct prediction using max probability value -- ##
-# pred_tows <- mfits %>% group_by(fished_haul) %>% filter(value == max(value)) %>% as.data.frame
-# pred_tows <- merge(rdo, pred_tows, by = "fished_haul") %>% filter(fished == TRUE) %>% 
-#   mutate(correct = ifelse(selection_pred == selection, 1, 0))
-# correct_prediction <- sum(pred_tows$correct) / nrow(pred_tows) #score 1
-# correct_prediction
-# 
-# 
-# pred_tows2 <- pred_tows %>% dplyr::filter(selection != "No-Participation")
-# correct_prediction <- sum(pred_tows2$correct) / nrow(pred_tows2) #score 1
-# correct_prediction
+
+
+
+#---------------------------------------#
+## Generate and format the predictions ##
+#---------------------------------------#
+
+fits <- fitted(res, outcome = FALSE)
+mfits <- reshape2::melt(fits) %>%
+  dplyr::rename(fished_haul = Var1) %>%
+  dplyr::rename(selection_pred = Var2)
+
+## Compare to correct prediction using max probability value
+pred_tows <- mfits %>% group_by(fished_haul) %>% filter(value == max(value)) %>% as.data.frame
+pred_tows <- merge(rdo, pred_tows, by = "fished_haul") %>% 
+  filter(fished == TRUE) %>%
+  mutate(correct = ifelse(selection_pred == selection, 1, 0))
+correct_prediction <- sum(pred_tows$correct) / nrow(pred_tows) 
+
+correct_prediction # 60% accuracy!
+
 

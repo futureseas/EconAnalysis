@@ -26,8 +26,11 @@ rm(Tickets1, Tickets2)
 ### Add port area
 port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
 Tickets_raw <- Tickets_raw %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE) %>% 
-  filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") 
+  filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") %>% 
+  drop_na(PORT_AREA_CODE)
 rm(port_area)
+
+
 
 #-----------------------------------------------------
 ###Subset the data to remove columns not relevant to this analysis. This will speed things up.
@@ -117,11 +120,11 @@ Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM] # 1,927,235 row
 Tickets<-as.data.frame(Tickets)
 rm(FF_Vessels, FTID_Value)
 
-# saveRDS(Tickets, "C:/Data/PacFIN data/Tickets_filtered.rds")
+saveRDS(Tickets, "C:/Data/PacFIN data/Tickets_filtered.rds")
 
 #-----------------------------------------------------
-### Create port-species choice
-Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) %>% # 44,069 row deleted 
+### Create port-species choice 
+Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) %>% # 44,035 row deleted 
    mutate(selection = paste(PORT_AREA_CODE, Species_Dominant, sep = "-", collapse = NULL)) 
 
 # Tickets_check <- Tickets %>% group_by(FTID) %>% mutate(n_obs = n()) %>% 
