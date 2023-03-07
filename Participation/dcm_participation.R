@@ -327,7 +327,7 @@ summary(res2)
 ## Generate and format the predictions ##
 #---------------------------------------#
 
-fits <- fitted(res, outcome = FALSE)
+fits <- fitted(res2, outcome = FALSE)
 mfits <- reshape2::melt(fits) %>%
   dplyr::rename(fished_haul = Var1) %>%
   dplyr::rename(selection_pred = Var2)
