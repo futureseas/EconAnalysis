@@ -230,6 +230,14 @@ samps <- samps %>%
 ## 
 
 
+#------------------------------------------
+## Participation dummy 
+
+samps <- samps %>% 
+  dplyr::mutate(dParticipate = ifelse(selection == "No-Participation", 0, 1)) 
+
+
+
 #-------------------------#
 ## Format as mlogit.data ##
 #-------------------------#
@@ -241,10 +249,7 @@ samps <- samps %>%
 
 rdo <- samps %>% dplyr::select(fished, fished_haul,dummy_miss, mean_rev, mean_rev_adj, 
                                selection, fished_VESSEL_NUM, set_date, wind_max_220_mh, 
-                               dummy_prev_days, dummy_prev_year_days, PSDN.Closure)
-
-# rdo <- rdo %>% group_by(fished_haul) %>% mutate(alt_tow = 1:length(fished_haul)) %>% as.data.frame
-
+                               dummy_prev_days, dummy_prev_year_days, PSDN.Closure, dParticipate)
 
 #-------------------------------------------
 ## Drop choice cards that received no choice
@@ -279,14 +284,13 @@ rdo3 <- data.table::setDT(rdo2)[fished_haul %ni% rdo_vessels_out$fished_haul]
 #----------------------------------------------------------
 ## Organize data for estimation
 rdo4 <- as.data.frame(rdo3[order(rdo3$fished_VESSEL_NUM, rdo3$fished_haul, -rdo3$fished),]) %>%
-  drop_na()
-# %>%
-#   group_by(fished_VESSEL_NUM) %>%
-#   dplyr::mutate(fished_VESSEL_ID = cur_group_id()) %>%
-#   ungroup() %>% dplyr::select(-c('fished_VESSEL_NUM')) %>%
-#   group_by(set_date) %>%
-#   dplyr::mutate(time = cur_group_id()) %>%
-#   ungroup() %>% dplyr::select(-c('set_date')) %>%
+  drop_na() %>%
+  group_by(fished_VESSEL_NUM) %>%
+  dplyr::mutate(fished_VESSEL_ID = cur_group_id()) %>%
+  ungroup() %>% dplyr::select(-c('fished_VESSEL_NUM')) %>%
+  group_by(set_date) %>%
+  dplyr::mutate(time = cur_group_id()) %>%
+  ungroup() %>% dplyr::select(-c('set_date')) 
 
 
 #----------------------------------------------------------
@@ -295,50 +299,49 @@ rdo4 <- as.data.frame(rdo3[order(rdo3$fished_VESSEL_NUM, rdo3$fished_haul, -rdo3
 write.csv(rdo4,"C:\\GitHub\\EconAnalysis\\Data\\sampled_mixed_logit_data.csv", row.names = FALSE)
 
 
-#-----------------------------#
-## Fit discrete choice model ##
-#-----------------------------#
-
-## Create mlogit.data 
-library(mlogit)
-the_tows <- mlogit.data(rdo4, shape = 'long', choice = 'fished', alt.var = 'selection', 
-                          id.var = "fished_VESSEL_NUM", chid.var = "fished_haul")
-
-## Fit model
-res <- mlogit(fished ~  
-                wind_max_220_mh + dummy_prev_days + dummy_miss + mean_rev_adj | 1, 
-              the_tows, reflevel = 'No-Participation')
-res2 <- mlogit(fished ~  
-                wind_max_220_mh + dummy_prev_days + dummy_miss + mean_rev_adj + PSDN.Closure | 1 , 
-              the_tows, reflevel = 'No-Participation')
-
-summary(res2)
 
 
-## Random-coefficient model
-# res_rc <- mlogit(fished ~ dummy_miss + mean_rev_adj,
-#               the_tows, reflevel = 'No-Participation', panel = TRUE,
-#               rpar = c(mean_rev_adj = "n"),
-#               correlation = FALSE, R = 100, halton = NA)
-
-
-
-#---------------------------------------#
-## Generate and format the predictions ##
-#---------------------------------------#
-
-fits <- fitted(res2, outcome = FALSE)
-mfits <- reshape2::melt(fits) %>%
-  dplyr::rename(fished_haul = Var1) %>%
-  dplyr::rename(selection_pred = Var2)
-
-## Compare to correct prediction using max probability value
-pred_tows <- mfits %>% group_by(fished_haul) %>% filter(value == max(value)) %>% as.data.frame
-pred_tows <- merge(rdo, pred_tows, by = "fished_haul") %>% 
-  filter(fished == TRUE) %>%
-  mutate(correct = ifelse(selection_pred == selection, 1, 0))
-correct_prediction <- sum(pred_tows$correct) / nrow(pred_tows) 
-
-correct_prediction # 60% accuracy!
-
+# #-----------------------------#
+# ## Fit discrete choice model ##
+# #-----------------------------#
+# 
+# ## Create mlogit.data 
+# library(mlogit)
+# the_tows <- mlogit.data(rdo4, shape = 'long', choice = 'fished', alt.var = 'selection', 
+#                           id.var = "fished_VESSEL_NUM", chid.var = "fished_haul")
+# 
+# ## Fit model
+# res <- mlogit(fished ~  
+#   wind_max_220_mh + dummy_prev_days + dummy_prev_year_days + dummy_miss + mean_rev_adj + PSDN.Closure + dParticipate | 0, 
+#   the_tows, reflevel = 'No-Participation', rpar=c(dParticipate = "n"), 
+#   R = 100, halton = NA, panel = TRUE)
+# 
+# 
+# summary(res)
+# 
+# 
+#               
+# #---------------------------------------#
+# ## Generate and format the predictions ##
+# #---------------------------------------#
+# 
+# fits <- fitted(res2, outcome = FALSE)
+# mfits <- reshape2::melt(fits) %>%
+#   dplyr::rename(fished_haul = Var1) %>%
+#   dplyr::rename(selection_pred = Var2)
+# 
+# ## Compare to correct prediction using max probability value
+# pred_tows <- mfits %>% group_by(fished_haul) %>% filter(value == max(value)) %>% as.data.frame
+# pred_tows <- merge(rdo4, pred_tows, by = "fished_haul") %>% 
+#   filter(fished == TRUE) %>%
+#   mutate(correct = ifelse(selection_pred == selection, 1, 0))
+#   sum(pred_tows$correct) / nrow(pred_tows) # 60% accuracy!
+# 
+# 
+# pred_tows2 <- mfits %>% group_by(fished_haul) %>% filter(value == max(value)) %>% as.data.frame
+# pred_tows2 <- merge(rdo4, pred_tows2, by = "fished_haul") %>% 
+#   filter(fished == TRUE) %>%
+#   mutate(correct = ifelse(selection_pred == selection, 1, 0)) %>%
+#   filter(selection != "No-Participation")
+#   sum(pred_tows2$correct) / nrow(pred_tows2) ## 52% accuracy!
 

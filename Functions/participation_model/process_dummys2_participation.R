@@ -65,6 +65,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat, landPSDN = estPSDN){
   if (sel != "No-Participation") {
     if (species == "PSDN") {
       
+      #it should be species average availability last month converted to landings x actual hedonic prices by port/species.
+      
       dum_rev <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
                                                     set_date %within% temp_dat$days_inter,
                                                     group_all %in% fltz,

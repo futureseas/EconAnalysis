@@ -27,22 +27,22 @@ sampled_rums <- function(data_in, cluster = 4,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale) {
 
-  # ###############
-  # # Delete
-  #
-  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-  # cluster <- 4
-  # min_year_prob <- 2006
-  # max_year_prob <- 2016
-  # min_year <- 2002
-  # max_year <- 2019
-  # ndays <- 30
-  # nhauls_sampled <- 5
-  # seed <- 300
-  # ncores <- 4
-  # rev_scale <- 100
-  # 
-  # ###############
+  ###############
+  # Delete
+
+  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+  cluster <- 4
+  min_year_prob <- 2006
+  max_year_prob <- 2016
+  min_year <- 2004
+  max_year <- 2018
+  ndays <- 30
+  nhauls_sampled <- 5
+  seed <- 300
+  ncores <- 4
+  rev_scale <- 100
+
+  ###############
   
   #---------------------------------------------------------------
   ## Filter the data
@@ -66,6 +66,8 @@ sampled_rums <- function(data_in, cluster = 4,
   ## Create probabilities for sampling choice set
   ## For this, we compute the average vessel catch and port composition by month
   ## (The choice set varies depending on the month of the year)
+
+  # nrow(dist_hauls_catch_shares %>% select("selection") %>% unique())
 
   dbp <- dist_hauls_catch_shares %>% 
     group_by(selection, VESSEL_NUM, set_year, set_month) %>% 
