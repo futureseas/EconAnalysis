@@ -20,40 +20,29 @@ library(lubridate)
 ## Read participation database ##
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
-
 #-----------------------------------------------------------------------------
-# ## Days at sea
-# ### Should we filter by number of days in the sea???? ###
-#
+## Day at sea: Should we filter by number of days in the sea?
+
 # day_in_sea <- participation_data %>% 
-#   select(trip_id, max_days_sea) %>% 
-#   unique() %>%  
-#   group_by(max_days_sea) %>%
-#   summarize(n_obs = n()) %>% drop_na() 
-# # %>%
-# #   filter(max_days_sea <= 8)
-# ggplot(day_in_sea, aes(x=as.factor(max_days_sea), y=n_obs)) + 
-#   geom_bar(stat = "identity", width=0.4) + ylab("Number of tickets") + xlab("Number of days in the sea") + 
-#   theme(plot.title = element_text(face = "bold", size = 12),
-#         axis.ticks = element_line(colour = "grey70", size = 0.2),
-#         panel.grid.minor = element_blank())
+#   dplyr::filter(max_days_sea == 1)
+
 
 #-----------------------------------------------------------------------------
 ## Sampling choice data including expected revenue and past behavior dummies ##
 ### Note: Increase ndays to 60? Then reduce dummy_miss (30% right now) ##
 
-# source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
-# samps <- sampled_rums(data_in = participation_data, cluster = 5,
-#                          min_year = 2004, max_year = 2018,
-#                          min_year_prob = 2006, max_year_prob = 2016,
-#                          ndays = 30, nhauls_sampled = 5,
-#                          seed = 42, ncores = 4, rev_scale = 1000)
-# saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c5.rds")
+source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
+samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+                         min_year = 2013, max_year = 2018,
+                         min_year_prob = 2013, max_year_prob = 2018,
+                         ndays = 30, nhauls_sampled = 4,
+                         seed = 42, ncores = 4, rev_scale = 1000)
+saveRDS(samps1, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 
 
 ## Restore the object
-samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
-samps <- samps %>% 
+# samps1 <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
+samps <- samps1 %>% 
   mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
 samps %>% group_by(dummy_miss) %>% summarize(n_obs = n(), perc = n()/nrow(samps))
   
@@ -96,6 +85,7 @@ wind <- wind_2020_2020 %>%
     "%Y-%m-%d")) %>%
   select(c("PORT_AREA_CODE", "set_date", "wind_mean_220_mh", "wind_max_220_mh")) %>% 
   unique()
+
 
 samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE) %>%
   mutate(wind_mean_220_mh = ifelse(selection == "No-Participation", 0, wind_mean_220_mh)) %>%
@@ -217,17 +207,41 @@ samps <- samps %>% mutate(dJMCK = ifelse(grepl("JMCK", selection) == TRUE, 1, 0)
 #------------------------------------------
 ## Incorporate closure dummy for Pacific sardine
 
-samps <- samps %>% 
-  dplyr::mutate(PSDN.Closure = ifelse(set_date > "2015-07-01", 1, 0)) %>%
+samps <- samps %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 1, 0)) %>% 
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 0)) %>%
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2015-04-28", 1, 0)) %>% 
   dplyr::mutate(PSDN.Closure = PSDN.Closure * dPSDN)
 
+
+#-----------------------------------------------
+## Incorporate closure dummy for market squid
 
 
 #------------------------------------------
 ## Weekend dummy
 
+
 #------------------------------------------
-## 
+## WA dummy for sardine
+
+# Include WA dummy for sardine!
+samps <- samps %>% 
+  dplyr::mutate(WA.Closure = ifelse(set_month >= 1 & set_month <= 3 &
+            (PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS" |
+             PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5"), 1, 0)) 
 
 
 #------------------------------------------
@@ -237,14 +251,10 @@ samps <- samps %>%
   dplyr::mutate(dParticipate = ifelse(selection == "No-Participation", 0, 1)) 
 
 
-
 #-------------------------#
 ## Format as mlogit.data ##
 #-------------------------#
 
-
-
-#------------------------------------
 ## Subset database
 
 rdo <- samps %>% dplyr::select(fished, fished_haul,dummy_miss, mean_rev, mean_rev_adj, 

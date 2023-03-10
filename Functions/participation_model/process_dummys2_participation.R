@@ -4,17 +4,19 @@
 #' @param xx Index value
 #' @param td1 The tow dates
 #' @param dat1 The Data
-#' @param 
+#' @param SDM.PSDN
+#' @param qPSDN1
 #' @export
 
-process_dummys2 <- function(xx, td1 = td, dat1 = dat, landPSDN = estPSDN){
+process_dummys2 <- function(xx, td1 = td, dat1 = dat, qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm){
   
 
   # ### Delete
-  # xx <- 1
+  # xx <- 3
   # td1 <- td
   # dat1 <- dat
-  # landPSDN <- estPSDN
+  # qPSDN1 <- qPSDN
+  # SDM.PSDN <- psdn.sdm
   # ###
   
   temp_dat <- td1[xx, ]
@@ -23,6 +25,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat, landPSDN = estPSDN){
   fltz <- temp_dat$fleet_name
   sel  <- temp_dat$selection
   species  <- temp_dat$species
+  port  <- temp_dat$port
   
 
   ########################################################################################################
@@ -56,6 +59,19 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat, landPSDN = estPSDN){
   dum30y_val <- nrow(dum30y)
   
   
+  #-----------------------------------------------------------------------------------------------
+  # Same decision that day before? 
+  dum1 <- dat1 %>% ungroup %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
+                                               VESSEL_NUM == temp_dat$fished_VESSEL_NUM,
+                                               selection == sel)
+  
+  dum1 <- dum1 %>% distinct(trip_id, .keep_all = T)
+  
+  #Add dummy coefficient
+  dum1_val <- nrow(dum1)
+  
+  
+  
   ##############################################################################################
   ## Calculate revenues (obtained by all the fleet within XX days, excluding the actual haul) ##
   ## Include SDM for species available...                                                      ##
@@ -65,22 +81,36 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat, landPSDN = estPSDN){
   if (sel != "No-Participation") {
     if (species == "PSDN") {
       
-      #it should be species average availability last month converted to landings x actual hedonic prices by port/species.
+      ## Obtain SDM previous day for the species/port combination
+      sdm <- SDM.PSDN %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
+                                        PORT_AREA_CODE %in% port)
       
-      dum_rev <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
-                                                    set_date %within% temp_dat$days_inter,
-                                                    group_all %in% fltz,
-                                                    selection %in% sel) %>% dplyr::mutate(Closure = 0) 
+      ## Obtain average price at species/port combination last 30 days (not including current day)
+      price <- dat1 %>% dplyr::filter(set_date %within% temp_dat$days_inter,
+                                      PORT_AREA_CODE %in% port,
+                                      Species_Dominant %in% species)
+
+      # Create database to predict landings
+      dum_rev <- temp_dat
+      dum_rev$VESSEL_NUM <- dum_rev$fished_VESSEL_NUM
+      dum_rev$Closure <- 0
+      dum_rev$lag_PSDN_SDM_90 <- sdm$PSDN_SDM_90
+      dum_rev$set_year <- year(dum_rev$set_date)
+      dum_rev$set_month  <- month(dum_rev$set_date)
+      dum_rev$Price_mton <- mean(price$Price_mtons) 
       
-      prediction <- as.data.frame(predict(landPSDN, dum_rev, interval = "prediction"))
+      # Predict landings
+      prediction <- as.data.frame(predict(qPSDN1, dum_rev, interval = "prediction"))
+      
+      # Calculate expected revenues
       dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
-      dum_rev <- dum_rev %>% distinct(trip_id, .keep_all = T)
       
+
     } else {
       
       dum_rev <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
                                                   set_date %within% temp_dat$days_inter,
-                                                  group_all %in% fltz,
+                                                  group_all %in% fltz, ## Check if this is too restrictive...
                                                   selection %in% sel)
       dum_rev <- dum_rev %>% distinct(trip_id, .keep_all = T)
     
@@ -98,6 +128,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat, landPSDN = estPSDN){
   temp_dat$mean_rev <- mean_rev
   temp_dat$dummy_prev_days <- dum30_val
   temp_dat$dummy_prev_year_days <- dum30y_val
+  temp_dat$dummy_last_day <- dum1_val
 
   return(temp_dat)
 }

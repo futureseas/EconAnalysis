@@ -21,8 +21,8 @@
 #' @export
 
 sampled_rums <- function(data_in, cluster = 4,
-                         min_year = 2001, max_year = 2020,
-                         min_year_prob = 2006, max_year_prob = 2014,
+                         min_year = 2010, max_year = 2020,
+                         min_year_prob = 2012, max_year_prob = 2018,
                          ndays = 30, 
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale) {
@@ -32,10 +32,10 @@ sampled_rums <- function(data_in, cluster = 4,
 
   data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
   cluster <- 4
-  min_year_prob <- 2006
-  max_year_prob <- 2016
-  min_year <- 2004
-  max_year <- 2018
+  min_year_prob <- 2012
+  max_year_prob <- 2018
+  min_year <- 2010
+  max_year <- 2020
   ndays <- 30
   nhauls_sampled <- 5
   seed <- 300
@@ -48,6 +48,44 @@ sampled_rums <- function(data_in, cluster = 4,
   ## Filter the data
 
   dat <- data_in 
+  
+  
+  #-----------------------------------------------------------------------------
+  ## Estimate models for landings
+  datPanel <- dat %>% 
+    dplyr::filter(selection != "No-Participation") %>% 
+    dplyr::filter(set_year >= min_year, set_year <= max_year)
+
+  ### Pacific sardine landing model ###
+  datPanel_PSDN <- datPanel %>% filter(Species_Dominant == "PSDN") %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 1, 0)) %>% 
+    dplyr::mutate(Closure = ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2015-04-28", 1, 0))
+
+  # Estimate
+  qPSDN <- lm(Landings_mtons ~ lag_PSDN_SDM_90 + factor(VESSEL_NUM) + factor(set_month) + 
+                factor(set_year) + factor(Closure), data = datPanel_PSDN)
+  
+  # summary(qPSDN)
+  
+  ## Create table for paper (all species)
+  # qPSDN <- estimatr::lm_robust(Landings_mtons ~ lag_PSDN_SDM_90 +
+  #                                factor(VESSEL_NUM) + factor(set_month) + factor(set_year) + factor(Closure),
+  #                              data = datPanel_PSDN, clusters = group_all, se_type = "stata")
+  # modelsummary::modelsummary(qPSDN, output = "landings_models.docx")
+  
   
   #--------------------------------
   ## Define hauls data used for estimation (in this case, are the trips)
@@ -225,19 +263,18 @@ sampled_rums <- function(data_in, cluster = 4,
   
   #Obtain previous day, year and day/year date
   sampled_hauls$prev_days_date <- sampled_hauls$set_date - days(ndays)
+  sampled_hauls$prev_day_date <- sampled_hauls$set_date - days(1)
   sampled_hauls$prev_year_set_date <- sampled_hauls$set_date - days(365)
   sampled_hauls$prev_year_days_date <- sampled_hauls$prev_days_date - days(365)
 
   #-----------------------------------------------------------------------------
   ### Calculate interval between previous day and year
   
-  #What were the average revenues in each location
   td <- sampled_hauls %>%
-    dplyr::select(fished_haul, set_date, prev_days_date, prev_year_set_date, prev_year_days_date,
+    dplyr::select(fished_haul, set_date, prev_days_date, prev_year_set_date, prev_year_days_date, prev_day_date,
                   fished_VESSEL_NUM, selection)
 
-  #calculate intervals
-  td$days_inter <- interval(td$prev_days_date, td$set_date)
+  td$days_inter <- interval(td$prev_days_date, td$prev_day_date)
   td$prev_year_days_inter <- interval(td$prev_year_days_date, td$prev_year_set_date)
 
   #add in the fleet name
@@ -245,26 +282,23 @@ sampled_rums <- function(data_in, cluster = 4,
   
   #add species 
   td <- td %>% mutate(species = ifelse(selection == "No-Participation", NA, str_sub(td$selection, start= -4)))
+  
+  #add port 
+  td <- td %>% mutate(ports = ifelse(selection == "No-Participation", NA, str_sub(td$selection, end= 3)))
 
 
   #-----------------------------------------------------------------------------
   ### Calculate revenues from each period and process dummy variables for past behavior
   
-  ## Estimate models
-  datPanel <- dat %>% 
-    filter(group_all == cluster) %>%
-    filter(selection != "No-Participation")
+  psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
+  psdn.sdm[is.na(psdn.sdm)] <- 0
+  psdn.sdm$set_date <- ymd(paste(psdn.sdm$LANDING_YEAR, psdn.sdm$LANDING_MONTH, psdn.sdm$LANDING_DAY, sep = "-"))
   
-  datPanel_PSDN <- datPanel %>% filter(Species_Dominant == "PSDN") %>%
-    dplyr::mutate(Closure = ifelse(set_year > 2015, 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse((set_year == 2015 & set_month >= 7), 1, Closure)) 
-  estPSDN <- lm(Landings_mtons ~ PSDN_SDM_90 + factor(VESSEL_NUM) + factor(set_month) + factor(Closure), data=datPanel_PSDN)
-
-  ## Calculate revenue and dummies
+  
   dummys2 <- foreach::foreach(ii = 1:nrow(td),
     .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
-      process_dummys2(xx = ii, td1 = td, dat1 = dat, landPSDN = estPSDN)
+      process_dummys2(xx = ii, td1 = td, dat1 = dat, qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm)
     }
   print("Done calculating dummys and revenues")
   td2 <- plyr::ldply(dummys2)
@@ -274,18 +308,23 @@ sampled_rums <- function(data_in, cluster = 4,
   #-----------------------------------------------------------------------------
   ## Create additional dummys
   
-  #create dummy for prev days fishing
+  # Create dummy for prev days fishing
   td2[which(td2$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
   td2[which(td2$dummy_prev_year_days != 0), 'dummy_prev_year_days'] <- 1
-
+  td2[which(td2$dummy_last_day != 0), 'dummy_last_day'] <- 1
   td2[which(td2$mean_rev != 0), 'dummy_miss'] <- 0
   td2[which(td2$mean_rev == 0), 'dummy_miss'] <- 1
+  
+  # Change dummies to zero for "No-Participation"
   td2[which(td2$selection == "No-Participation"), 'dummy_miss'] <- 0
-
+  td2[which(td2$selection == "No-Participation"), 'dummy_prev_days'] <- 0
+  td2[which(td2$selection == "No-Participation"), 'dummy_prev_year_days'] <- 0
+  td2[which(td2$selection == "No-Participation"), 'dummy_last_day'] <- 0
+  
   td2$mean_rev_adj <- td2$mean_rev / rev_scale
 
   sampled_hauls <- cbind(sampled_hauls,
-    td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
+    td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
   
   return(sampled_hauls)
 }

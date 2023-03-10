@@ -160,7 +160,10 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 ### Merge data to SDM 
 #... (STILL COMPUTING SDMs Daily for squid (spawn), squid, anchovy, herring, jack mackerel and chub mackerel)
 
-# Pacific sardine
+#######################
+### Pacific sardine ###
+#######################
+
 psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
 psdn.sdm[is.na(psdn.sdm)] <- 0
 
@@ -168,6 +171,29 @@ Tickets_SDM <- merge(Tickets_clust, psdn.sdm,
                      by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
                      all.x = TRUE, all.y = FALSE)
 
+## lagged SDM
+
+Tickets_SDM$set_date<-as.Date(with(
+  Tickets_SDM,
+  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
+  "%Y-%m-%d")
+psdn.sdm$set_date<-as.Date(with(
+  psdn.sdm,
+  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
+  "%Y-%m-%d")
+
+Tickets_SDM$prev_days_date <- Tickets_SDM$set_date - days(1)
+
+psdn.sdm <- psdn.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
+  rename(lag_PSDN_SDM_30 = PSDN_SDM_30) %>%
+  rename(lag_PSDN_SDM_60 = PSDN_SDM_60) %>%
+  rename(lag_PSDN_SDM_90 = PSDN_SDM_90) %>%
+  rename(lag_PSDN_SDM_220 = PSDN_SDM_220) %>%
+  rename(prev_days_date = set_date)
+
+Tickets_SDM <- merge(Tickets_SDM, psdn.sdm, 
+                     by = (c('prev_days_date', 'PORT_AREA_CODE')),
+                     all.x = TRUE, all.y = FALSE)
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Clean dataset for discrete choice model  
@@ -175,18 +201,14 @@ Tickets_SDM <- merge(Tickets_clust, psdn.sdm,
 ## (exclude weird period from expanding data)
 
 Tickets_SDM$trip_id <- udpipe::unique_identifier(Tickets_SDM, fields = c("FTID_unique"))
-Tickets_SDM$set_date<-as.Date(with(
-  Tickets_SDM,
-  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
-  "%Y-%m-%d")
-
 Tickets_SDM <- Tickets_SDM %>% drop_na(set_date) %>% 
   dplyr::rename(set_day = LANDING_DAY) %>%
   dplyr::rename(set_month = LANDING_MONTH) %>%
   dplyr::rename(set_year = LANDING_YEAR)%>%
   dplyr::select("VESSEL_NUM", "trip_id", "set_date", "set_year", "set_month", "set_day", "selection",
                 "PORT_AREA_CODE", "Species_Dominant", "Landings_mtons", "Revenue", "Price_mtons", "max_days_sea",
-                "group_all", "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90","PSDN_SDM_220")
+                "group_all", "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90","PSDN_SDM_220",
+                "lag_PSDN_SDM_30", "lag_PSDN_SDM_60", "lag_PSDN_SDM_90","lag_PSDN_SDM_220")
 
 #---------------------------------------------------------------------------------------
 ## Create data to filter non-participation

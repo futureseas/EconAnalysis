@@ -130,6 +130,25 @@ Tickets.CPS <- Tickets %>%
 # gg0 / (gg1 + gg2)
 
 
+#-----------------------------------------------------------------------------
+# ## Days at sea
+# ### Should we filter by number of days in the sea???? ###
+#
+# participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+# day_in_sea <- participation_data %>% 
+#   select(trip_id, max_days_sea) %>% 
+#   unique() %>%  
+#   group_by(max_days_sea) %>%
+#   summarize(n_obs = n()) %>% drop_na() 
+# # %>%
+# #   filter(max_days_sea <= 8)
+# ggplot(day_in_sea, aes(x=as.factor(max_days_sea), y=n_obs)) + 
+#   geom_bar(stat = "identity", width=0.4) + ylab("Number of tickets") + xlab("Number of days in the sea") + 
+#   theme(plot.title = element_text(face = "bold", size = 12),
+#         axis.ticks = element_line(colour = "grey70", size = 0.2),
+#         panel.grid.minor = element_blank())
+
+
 #----------------------------------
 # ## Figure 1. Average annual landings, prices and revenues by species ##
 # 
