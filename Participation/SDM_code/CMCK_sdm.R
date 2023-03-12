@@ -29,13 +29,13 @@ ncdf4::nc_close(dat)
 dimnames(cmck.sdm) <- list(set_long = set_long, set_lat = set_lat, cmck.date.sdm = cmck.date.sdm)
 sdmMelt <- reshape2::melt(cmck.sdm, value.name = "cmck.sdm")
 coord <- sdmMelt %>% dplyr::select(c(set_lat, set_long)) %>% unique()
-saveRDS(coord, "Participation/SDM_code/coord_sdm_cmck.rds")
+saveRDS(coord, "Participation/SDM_code/port_dist_cmck/coord_sdm_cmck.rds")
 
 
 #------------------------------------------------------
 # Get distance by coordinate to port j and save it
 
-coord <- readRDS("Participation/SDM_code/coord_sdm_cmck.rds")
+coord <- readRDS("Participation/SDM_code/port_dist_cmck/coord_sdm_cmck.rds")
 port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 
 for (j in 1:nrow(port_area_coord)) {
@@ -43,15 +43,14 @@ for (j in 1:nrow(port_area_coord)) {
     mutate(dist = by(., 1:nrow(.), function(row) {
       distHaversine(c(row$set_long, row$set_lat), c(port_area_coord[j,]$lon, port_area_coord[j,]$lat))
     })) %>%
-    mutate(dist = dist / 1000)
+    mutate(dist = dist / 1000) %>% 
+    dplyr::filter(dist <= 220)
   
   saveRDS(distPorts, paste0("Participation/SDM_code/port_dist_cmck/portDist_", paste0(as.character(j),".rds")))
 }
 
-
-
-#----------------
-# Pacific sardine
+#------------------------------------------------------
+# Calculate SDM per day
 
 sdm.cmck <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
@@ -109,7 +108,7 @@ for (y in 2000:2018) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.cmck, file = "Participation/SDM_code/sdm.cmck.csv")
+      saveRDS(sdm.cmck, file = "Participation/SDM_code/sdm_cmck.rds")
     }
   }
 }
@@ -161,6 +160,6 @@ for (y in 2000:2018) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.cmck, file = "Participation/SDM_code/sdm.cmck.csv")
+      saveRDS(sdm.cmck, file = "Participation/SDM_code/sdm_cmck.rds")
     }
   }

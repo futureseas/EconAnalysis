@@ -5,8 +5,6 @@
 rm(list=ls())
 gc()
 
-### Try 30, 90, 200
-
 ###Load packages and set working directory
 
 library(data.table)
@@ -15,43 +13,43 @@ library(lubridate)
 library(tidyr)
 library(geosphere)
 
+#------------------------------------------------------
+# Get SDM coordinates
+dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/squid_spawn/squidSpawn_6_2010_envelope.nc"))
 
-# #------------------------------------------------------
-# # Get SDM coordinates
-# dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/squid_spawn/squidSpawn_6_2010_envelope.nc"))
-# 
-#   set_long <- ncdf4::ncvar_get(dat, "lon")
-#   set_lat <- ncdf4::ncvar_get(dat, "lat")
-#   msqd.date.sdm <- ncdf4::ncvar_get(dat, "time")
-#   msqd.sdm <- ncdf4::ncvar_get(dat, "pred")
-#   ncdf4::nc_close(dat)
-#   
-#   # Reshape the 3D array so we can map it, change the time field to be date
-#   dimnames(msqd.sdm) <- list(set_long = set_long, set_lat = set_lat, msqd.date.sdm = msqd.date.sdm)
-#   sdmMelt <- reshape2::melt(msqd.sdm, value.name = "msqd.sdm")
-#   coord <- sdmMelt %>% dplyr::select(c(set_lat, set_long)) %>% unique()
-#   saveRDS(coord, "Participation/SDM_code/port_dist_msqd_spawn/coord_sdm_msqd_spawn.rds")
-# 
-# 
-# #------------------------------------------------------  
-# # Get distance by coordinate to port j and save it
-# 
-# coord <- readRDS("Participation/SDM_code/port_dist_msqd_spawn/coord_sdm_msqd_spawn.rds")
-# port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
-# 
-# for (j in 1:nrow(port_area_coord)) {
-#   distPorts <- coord %>%
-#     mutate(dist = by(., 1:nrow(.), function(row) {
-#       distHaversine(c(row$set_long, row$set_lat), c(port_area_coord[j,]$lon, port_area_coord[j,]$lat))
-#     })) %>%
-#     mutate(dist = dist / 1000)
-# 
-#   saveRDS(distPorts, paste0("Participation/SDM_code/port_dist_msqd_spawn/portDist_", paste0(as.character(j),".rds")))
-# }
+  set_long <- ncdf4::ncvar_get(dat, "lon")
+  set_lat <- ncdf4::ncvar_get(dat, "lat")
+  msqd.date.sdm <- ncdf4::ncvar_get(dat, "time")
+  msqd.sdm <- ncdf4::ncvar_get(dat, "pred")
+  ncdf4::nc_close(dat)
+
+  # Reshape the 3D array so we can map it, change the time field to be date
+  dimnames(msqd.sdm) <- list(set_long = set_long, set_lat = set_lat, msqd.date.sdm = msqd.date.sdm)
+  sdmMelt <- reshape2::melt(msqd.sdm, value.name = "msqd.sdm")
+  coord <- sdmMelt %>% dplyr::select(c(set_lat, set_long)) %>% unique()
+  saveRDS(coord, "Participation/SDM_code/port_dist_msqd_spawn/coord_sdm_msqd_spawn.rds")
 
 
-#----------------
-# Market squid SDM
+#------------------------------------------------------
+# Get distance by coordinate to port j and save it
+
+coord <- readRDS("Participation/SDM_code/port_dist_msqd_spawn/coord_sdm_msqd_spawn.rds")
+port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
+
+for (j in 1:nrow(port_area_coord)) {
+  distPorts <- coord %>%
+    mutate(dist = by(., 1:nrow(.), function(row) {
+      distHaversine(c(row$set_long, row$set_lat), c(port_area_coord[j,]$lon, port_area_coord[j,]$lat))
+    })) %>%
+    mutate(dist = dist / 1000) %>% 
+    dplyr::filter(dist <= 220)
+
+  saveRDS(distPorts, paste0("Participation/SDM_code/port_dist_msqd_spawn/portDist_", paste0(as.character(j),".rds")))
+}
+
+
+#------------------------------------------------------
+# Calculate SDM per day
 
 sdm.msqd <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
@@ -84,7 +82,7 @@ for (y in 2000:2019) {
       sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$msqd.date.sdm)	
       
       # Merge to distance from port area to a set of coordinates
-      distPorts <- readRDS(paste0("Participation/SDM_code/port_dist_msqd/portDist_",
+      distPorts <- readRDS(paste0("Participation/SDM_code/port_dist_msqd_spawn/portDist_",
                                   paste0(as.character(j), ".rds")))
       sdmMelt <- merge(sdmMelt, distPorts, by = c('set_lat', 'set_long'), all.x = TRUE, all.y = FALSE) %>% 
         mutate(LANDING_DAY = day(set_date)) 
@@ -110,7 +108,7 @@ for (y in 2000:2019) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      saveRDS(sdm.msqd, file = "Participation/SDM_code/sdm_msqd_spawn_v2.rds")
+      saveRDS(sdm.msqd, file = "Participation/SDM_code/sdm_msqd_spawn.rds")
     }
   }
 }

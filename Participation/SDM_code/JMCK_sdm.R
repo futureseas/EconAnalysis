@@ -2,8 +2,6 @@
 ## Calculate SDM outputs to PORT_AREA_CODE ##
 #############################################
 
-### Try 30, 90, 200
-
 rm(list=ls())
 gc()
 
@@ -17,7 +15,7 @@ library(geosphere)
 
 #------------------------------------------------------
 # Get SDM coordinates
-dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/squid_spawn/squidSpawn_6_2010_envelope.nc"))
+dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/jack/jack_6_2010_GAM.nc"))
 
 set_long <- ncdf4::ncvar_get(dat, "lon")
 set_lat <- ncdf4::ncvar_get(dat, "lat")
@@ -29,13 +27,13 @@ ncdf4::nc_close(dat)
 dimnames(jmck.sdm) <- list(set_long = set_long, set_lat = set_lat, jmck.date.sdm = jmck.date.sdm)
 sdmMelt <- reshape2::melt(jmck.sdm, value.name = "jmck.sdm")
 coord <- sdmMelt %>% dplyr::select(c(set_lat, set_long)) %>% unique()
-saveRDS(coord, "Participation/SDM_code/coord_sdm_jmck.rds")
+saveRDS(coord, "Participation/SDM_code/port_dist_jmck/coord_sdm_jmck.rds")
 
 
 #------------------------------------------------------
 # Get distance by coordinate to port j and save it
 
-coord <- readRDS("Participation/SDM_code/coord_sdm_jmck.rds")
+coord <- readRDS("Participation/SDM_code/port_dist_jmck/coord_sdm_jmck.rds")
 port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 
 for (j in 1:nrow(port_area_coord)) {
@@ -43,15 +41,15 @@ for (j in 1:nrow(port_area_coord)) {
     mutate(dist = by(., 1:nrow(.), function(row) {
       distHaversine(c(row$set_long, row$set_lat), c(port_area_coord[j,]$lon, port_area_coord[j,]$lat))
     })) %>%
-    mutate(dist = dist / 1000)
+    mutate(dist = dist / 1000) %>% 
+    dplyr::filter(dist <= 220)
   
   saveRDS(distPorts, paste0("Participation/SDM_code/port_dist_jmck/portDist_", paste0(as.character(j),".rds")))
 }
 
 
-
-#----------------
-# Pacific sardine
+#------------------------------------------------------
+# Calculate SDM per day
 
 sdm.jmck <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
@@ -109,12 +107,12 @@ for (y in 2000:2018) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.jmck, file = "Participation/SDM_code/sdm.jmck.csv")
+      saveRDS(sdm.jmck, file = "Participation/SDM_code/sdm_jmck.rds")
     }
   }
 }
 
-  for (m in 1:12) {
+  for (m in 1:8) {
     for (j in 1:nrow(port_area_coord)) {
       y = 2019
       # Open the monthly file that contain SDM by location
@@ -159,6 +157,6 @@ for (y in 2000:2018) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.jmck, file = "Participation/SDM_code/sdm.jmck.csv")
+      saveRDS(sdm.jmck, file = "Participation/SDM_code/sdm_jmck.rds")
     }
   }

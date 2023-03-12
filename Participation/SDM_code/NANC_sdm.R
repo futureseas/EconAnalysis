@@ -89,9 +89,9 @@ for (y in 2000:2018) {
       
       # Calculate daily SDM level within port radius
       for (z in 1:max(sdmMelt$LANDING_DAY)) {
-        dat_prob_20  <- sdmMelt %>% dplyr::filter(dist <= 20)  %>% dplyr::filter(LANDING_DAY == z)
-        dat_prob_30  <- sdmMelt %>% dplyr::filter(dist <= 30)  %>% dplyr::filter(LANDING_DAY == z)
-        dat_prob_90  <- sdmMelt %>% dplyr::filter(dist <= 90)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_20  <- sdmMelt %>% dplyr::filter(dist <= 20) %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_30  <- sdmMelt %>% dplyr::filter(dist <= 30) %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_90  <- sdmMelt %>% dplyr::filter(dist <= 90) %>% dplyr::filter(LANDING_DAY == z)
         dat_prob_220 <- sdmMelt %>% dplyr::filter(dist <= 220) %>% dplyr::filter(LANDING_DAY == z)
         SDM_mean_20  <- mean(dat_prob_20$nanc.sdm, na.rm = TRUE)
         SDM_mean_30  <- mean(dat_prob_30$nanc.sdm, na.rm = TRUE)

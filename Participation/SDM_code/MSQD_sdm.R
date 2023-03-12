@@ -2,9 +2,6 @@
 ## Calculate SDM outputs to PORT_AREA_CODE ##
 #############################################
 
-
-### Try 30, 90, 200
-
 rm(list=ls())
 gc()
 
@@ -44,15 +41,15 @@ for (j in 1:nrow(port_area_coord)) {
     mutate(dist = by(., 1:nrow(.), function(row) {
       distHaversine(c(row$set_long, row$set_lat), c(port_area_coord[j,]$lon, port_area_coord[j,]$lat))
     })) %>%
-    mutate(dist = dist / 1000)
+    mutate(dist = dist / 1000) %>% 
+    dplyr::filter(dist <= 220)
   
   saveRDS(distPorts, paste0("Participation/SDM_code/port_dist_msqd/portDist_", paste0(as.character(j),".rds")))
 }
 
 
-
-#----------------
-# Pacific sardine
+#------------------------------------------------------
+# Calculate SDM per day
 
 sdm.msqd <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
@@ -110,14 +107,14 @@ for (y in 2000:2018) {
              SDM_mean_30, SDM_mean_90, SDM_mean_220)
         }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      saveRDS(sdm.msqd, file = "Participation/SDM_code/sdm.msqd.rds")
+      saveRDS(sdm.msqd, file = "Participation/SDM_code/sdm_msqd.rds")
     }
   }
 }
 
 
 
-  for (m in 1:12) {
+  for (m in 1:8) {
     for (j in 1:nrow(port_area_coord)) {
       
       y = 2019
@@ -164,7 +161,7 @@ for (y in 2000:2018) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      saveRDS(sdm.msqd, file = "Participation/SDM_code/sdm.msqd.rds")
+      saveRDS(sdm.msqd, file = "Participation/SDM_code/sdm_msqd.rds")
     }
   }
 
