@@ -29,13 +29,13 @@ ncdf4::nc_close(dat)
 dimnames(phrg.sdm) <- list(set_long = set_long, set_lat = set_lat, phrg.date.sdm = phrg.date.sdm)
 sdmMelt <- reshape2::melt(phrg.sdm, value.name = "phrg.sdm")
 coord <- sdmMelt %>% dplyr::select(c(set_lat, set_long)) %>% unique()
-saveRDS(coord, "Participation/SDM_code/coord_sdm_phrg.rds")
+saveRDS(coord, "Participation/SDM_code/port_dist_phrg/coord_sdm_phrg.rds")
 
 
 #------------------------------------------------------
 # Get distance by coordinate to port j and save it
 
-coord <- readRDS("Participation/SDM_code/coord_sdm_phrg.rds")
+coord <- readRDS("Participation/SDM_code/port_dist_phrg/coord_sdm_phrg.rds")
 port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 
 for (j in 1:nrow(port_area_coord)) {
@@ -43,7 +43,8 @@ for (j in 1:nrow(port_area_coord)) {
     mutate(dist = by(., 1:nrow(.), function(row) {
       distHaversine(c(row$set_long, row$set_lat), c(port_area_coord[j,]$lon, port_area_coord[j,]$lat))
     })) %>%
-    mutate(dist = dist / 1000)
+    mutate(dist = dist / 1000) %>% 
+    dplyr::filter(dist <= 220)
   
   saveRDS(distPorts, paste0("Participation/SDM_code/port_dist_phrg/portDist_", paste0(as.character(j),".rds")))
 }
@@ -109,7 +110,7 @@ for (y in 2000:2018) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.phrg, file = "Participation/SDM_code/sdm.phrg.csv")
+      saveRDS(sdm.phrg, file = "Participation/SDM_code/sdm_phrg.rds")
     }
   }
 }
@@ -159,7 +160,7 @@ for (y in 2000:2018) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year: 2019; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.phrg, file = "Participation/SDM_code/sdm.phrg.csv")
+      saveRDS(sdm.phrg, file = "Participation/SDM_code/sdm_phrg.rds")
     }
   }
 

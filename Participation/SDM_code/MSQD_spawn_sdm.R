@@ -30,13 +30,13 @@ library(geosphere)
 #   dimnames(msqd.sdm) <- list(set_long = set_long, set_lat = set_lat, msqd.date.sdm = msqd.date.sdm)
 #   sdmMelt <- reshape2::melt(msqd.sdm, value.name = "msqd.sdm")
 #   coord <- sdmMelt %>% dplyr::select(c(set_lat, set_long)) %>% unique()
-#   saveRDS(coord, "Participation/SDM_code/coord_sdm_msqd_spawn.rds")
+#   saveRDS(coord, "Participation/SDM_code/port_dist_msqd_spawn/coord_sdm_msqd_spawn.rds")
 # 
 # 
 # #------------------------------------------------------  
 # # Get distance by coordinate to port j and save it
 # 
-# coord <- readRDS("Participation/SDM_code/coord_sdm_msqd_spawn.rds")
+# coord <- readRDS("Participation/SDM_code/port_dist_msqd_spawn/coord_sdm_msqd_spawn.rds")
 # port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 # 
 # for (j in 1:nrow(port_area_coord)) {
@@ -110,7 +110,7 @@ for (y in 2000:2019) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      saveRDS(sdm.msqd, file = "Participation/SDM_code/sdm_msqd_spawn.rds")
+      saveRDS(sdm.msqd, file = "Participation/SDM_code/sdm_msqd_spawn_v2.rds")
     }
   }
 }

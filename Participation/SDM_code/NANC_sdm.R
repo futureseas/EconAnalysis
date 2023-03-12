@@ -2,8 +2,6 @@
 ## Calculate SDM outputs to PORT_AREA_CODE ##
 #############################################
 
-## Try 20, 30, 90, 220
-
 rm(list=ls())
 gc()
 
@@ -29,13 +27,13 @@ dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/anchovy/anch_6_2010_GAM.nc"))
   dimnames(nanc.sdm) <- list(set_long = set_long, set_lat = set_lat, nanc.date.sdm = nanc.date.sdm)
   sdmMelt <- reshape2::melt(nanc.sdm, value.name = "nanc.sdm")
   coord <- sdmMelt %>% dplyr::select(c(set_lat, set_long)) %>% unique()
-  saveRDS(coord, "Participation/SDM_code/coord_sdm_nanc.rds")
+  saveRDS(coord, "Participation/SDM_code/port_dist_nanc/coord_sdm_nanc.rds")
 
 
 #------------------------------------------------------
 # Get distance by coordinate to port j and save it
 
-coord <- readRDS("Participation/SDM_code/coord_sdm_nanc.rds")
+coord <- readRDS("Participation/SDM_code/port_dist_nanc/coord_sdm_nanc.rds")
 port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 
 for (j in 1:nrow(port_area_coord)) {
@@ -43,8 +41,9 @@ for (j in 1:nrow(port_area_coord)) {
     mutate(dist = by(., 1:nrow(.), function(row) {
       distHaversine(c(row$set_long, row$set_lat), c(port_area_coord[j,]$lon, port_area_coord[j,]$lat))
     })) %>%
-    mutate(dist = dist / 1000)
-
+    mutate(dist = dist / 1000) %>% 
+    dplyr::filter(dist <= 220)
+  
   saveRDS(distPorts, paste0("Participation/SDM_code/port_dist_nanc/portDist_", paste0(as.character(j),".rds")))
 }
 
@@ -111,7 +110,7 @@ for (y in 2000:2018) {
            SDM_mean_20, SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.nanc, file = "Participation/SDM_code/sdm.nanc.csv")
+      saveRDS(sdm.nanc, file = "Participation/SDM_code/sdm_nanc.rds")
     }
   }
 }
@@ -163,8 +162,6 @@ for (m in 1:8) {
            SDM_mean_20, SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year: 2019; month:", m, "--", "Port area:",j))
-      readr::write_csv(sdm.nanc, file = "Participation/SDM_code/sdm.nanc.csv")
+      saveRDS(sdm.nanc, file = "Participation/SDM_code/sdm_nanc.rds")
     }
   }
-
-
