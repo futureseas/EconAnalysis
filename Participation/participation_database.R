@@ -176,8 +176,6 @@ jmck.sdm[is.na(jmck.sdm)] <- 0
 msqd_spawn.sdm[is.na(msqd_spawn.sdm)] <- 0
 
 
-<<< WORK FROM HERE!!! >>>          
-                                        
 Tickets_SDM <- merge(Tickets_clust, psdn.sdm, 
                      by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
                      all.x = TRUE, all.y = FALSE)
@@ -208,10 +206,36 @@ Tickets_SDM$set_date<-as.Date(with(
   Tickets_SDM,
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
   "%Y-%m-%d")
+
 psdn.sdm$set_date<-as.Date(with(
   psdn.sdm,
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
   "%Y-%m-%d")
+msqd.sdm$set_date<-as.Date(with(
+  msqd.sdm,
+  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
+  "%Y-%m-%d")
+nanc.sdm$set_date<-as.Date(with(
+  nanc.sdm,
+  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
+  "%Y-%m-%d")
+jmck.sdm$set_date<-as.Date(with(
+  jmck.sdm,
+  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
+  "%Y-%m-%d")
+cmck.sdm$set_date<-as.Date(with(
+  cmck.sdm,
+  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
+  "%Y-%m-%d")
+phrg.sdm$set_date<-as.Date(with(
+  phrg.sdm,
+  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
+  "%Y-%m-%d")
+msqd_spawn.sdm$set_date<-as.Date(with(
+  msqd_spawn.sdm,
+  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
+  "%Y-%m-%d")
+
 Tickets_SDM$prev_days_date <- Tickets_SDM$set_date - days(1)
 
 ### lagged SDM(PSDN)
@@ -228,7 +252,6 @@ Tickets_SDM <- merge(Tickets_SDM, psdn.sdm,
 ### lagged SDM(MSQD)
 msqd.sdm <- msqd.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   rename(lag_MSQD_SDM_30 =  MSQD_SDM_30) %>%
-  rename(lag_MSQD_SDM_60 =  MSQD_SDM_60) %>%
   rename(lag_MSQD_SDM_90 =  MSQD_SDM_90) %>%
   rename(lag_MSQD_SDM_220 = MSQD_SDM_220) %>%
   rename(prev_days_date = set_date)
@@ -238,8 +261,8 @@ Tickets_SDM <- merge(Tickets_SDM, msqd.sdm,
 
 ### lagged SDM(NANC)
 nanc.sdm <- nanc.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
+  rename(lag_NANC_SDM_20  = NANC_SDM_20) %>%
   rename(lag_NANC_SDM_30  = NANC_SDM_30) %>%
-  rename(lag_NANC_SDM_60  = NANC_SDM_60) %>%
   rename(lag_NANC_SDM_90  = NANC_SDM_90) %>%
   rename(lag_NANC_SDM_220 = NANC_SDM_220) %>%
   rename(prev_days_date = set_date)
@@ -247,10 +270,9 @@ Tickets_SDM <- merge(Tickets_SDM, nanc.sdm,
                      by = (c('prev_days_date', 'PORT_AREA_CODE')),
                      all.x = TRUE, all.y = FALSE)
 
-### lagged SDM(MSQD)
-phrg.sdm <- msqd.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
+### lagged SDM(PHRG)
+phrg.sdm <- phrg.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   rename(lag_PHRG_SDM_30  = PHRG_SDM_30) %>%
-  rename(lag_PHRG_SDM_60  = PHRG_SDM_60) %>%
   rename(lag_PHRG_SDM_90  = PHRG_SDM_90) %>%
   rename(lag_PHRG_SDM_220 = PHRG_SDM_220) %>%
   rename(prev_days_date = set_date)
@@ -258,10 +280,9 @@ Tickets_SDM <- merge(Tickets_SDM, phrg.sdm,
                      by = (c('prev_days_date', 'PORT_AREA_CODE')),
                      all.x = TRUE, all.y = FALSE)
 
-### lagged SDM(MSQD)
+### lagged SDM(CMCK)
 cmck.sdm <- cmck.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   rename(lag_CMCK_SDM_30  = CMCK_SDM_30) %>%
-  rename(lag_CMCK_SDM_60  = CMCK_SDM_60) %>%
   rename(lag_CMCK_SDM_90  = CMCK_SDM_90) %>%
   rename(lag_CMCK_SDM_220 = CMCK_SDM_220) %>%
   rename(prev_days_date = set_date)
@@ -270,29 +291,24 @@ Tickets_SDM <- merge(Tickets_SDM, cmck.sdm,
                      all.x = TRUE, all.y = FALSE)
 
 ### lagged SDM(MSQD)
-jmck.sdm <- msqd.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  rename(lag_PSDN_SDM_30 = PSDN_SDM_30) %>%
-  rename(lag_PSDN_SDM_60 = PSDN_SDM_60) %>%
-  rename(lag_PSDN_SDM_90 = PSDN_SDM_90) %>%
-  rename(lag_PSDN_SDM_220 = PSDN_SDM_220) %>%
+jmck.sdm <- jmck.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
+  rename(lag_JMCK_SDM_30  = JMCK_SDM_30) %>%
+  rename(lag_JMCK_SDM_90  = JMCK_SDM_90) %>%
+  rename(lag_JMCK_SDM_220 = JMCK_SDM_220) %>%
   rename(prev_days_date = set_date)
-Tickets_SDM <- merge(Tickets_SDM, psdn.sdm, 
+Tickets_SDM <- merge(Tickets_SDM, jmck.sdm, 
                      by = (c('prev_days_date', 'PORT_AREA_CODE')),
                      all.x = TRUE, all.y = FALSE)
 
-### lagged SDM(MSQD)
-msqd_spawn.sdm <- msqd.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  rename(lag_PSDN_SDM_30 = PSDN_SDM_30) %>%
-  rename(lag_PSDN_SDM_60 = PSDN_SDM_60) %>%
-  rename(lag_PSDN_SDM_90 = PSDN_SDM_90) %>%
-  rename(lag_PSDN_SDM_220 = PSDN_SDM_220) %>%
+### lagged SDM(MSQD_SPAWN)
+msqd_spawn.sdm <- msqd_spawn.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
+  rename(lag_MSQD_SPAWN_SDM_30  = MSQD_SPAWN_SDM_30) %>%
+  rename(lag_MSQD_SPAWN_SDM_90  = MSQD_SPAWN_SDM_90) %>%
+  rename(lag_MSQD_SPAWN_SDM_220 = MSQD_SPAWN_SDM_220) %>%
   rename(prev_days_date = set_date)
-Tickets_SDM <- merge(Tickets_SDM, psdn.sdm, 
+Tickets_SDM <- merge(Tickets_SDM, msqd_spawn.sdm, 
                      by = (c('prev_days_date', 'PORT_AREA_CODE')),
                      all.x = TRUE, all.y = FALSE)
-
-
-
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Clean dataset for discrete choice model  
