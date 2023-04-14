@@ -321,9 +321,13 @@ write.csv(rdo4,"C:\\GitHub\\EconAnalysis\\Data\\sampled_mixed_logit_data.csv", r
 #                           id.var = "fished_VESSEL_NUM", chid.var = "fished_haul")
 # 
 # ## Fit model
-# res <- mlogit(fished ~  
-#   wind_max_220_mh + dummy_prev_days + dummy_prev_year_days + dummy_miss + mean_rev_adj + PSDN.Closure + dParticipate | 0, 
-#   the_tows, reflevel = 'No-Participation', rpar=c(dParticipate = "n"), 
+
+## mFormula(fished ~ Generic coeff (alt variable) | Individual variable | Alternative specific coefficient )
+
+# f <- mFormula(fished ~ wind_max_220_mh + dummy_prev_days + dummy_prev_year_days + dummy_miss + mean_rev_adj + PSDN.Closure + dParticipate | 0 | 0)
+# head(model.matrix(f, the_tows))
+
+# res <- mlogit(f, the_tows, reflevel = 'No-Participation', rpar=c(dParticipate = "n"), 
 #   R = 100, halton = NA, panel = TRUE)
 # 
 # 

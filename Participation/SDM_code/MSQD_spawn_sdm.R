@@ -62,7 +62,7 @@ sdm.msqd <- tibble(LANDING_YEAR = integer(),
 port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 
 
-for (y in 2000:2019) {
+for (y in 2017:2019) {
   for (m in 1:12) {
     for (j in 1:nrow(port_area_coord)) {
       dat <- ncdf4::nc_open(paste0("G:/My Drive/Data/SDM/squid_spawn/squidSpawn_", 
@@ -108,7 +108,7 @@ for (y in 2000:2019) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      saveRDS(sdm.msqd, file = "Participation/SDM_code/sdm_msqd_spawn.rds")
+      saveRDS(sdm.msqd, file = "Participation/SDM_code/sdm_msqd_spawn_v2.rds")
     }
   }
 }
