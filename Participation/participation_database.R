@@ -207,6 +207,7 @@ Tickets_SDM$set_date<-as.Date(with(
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
   "%Y-%m-%d")
 
+
 psdn.sdm$set_date<-as.Date(with(
   psdn.sdm,
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
@@ -219,16 +220,16 @@ nanc.sdm$set_date<-as.Date(with(
   nanc.sdm,
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
   "%Y-%m-%d")
-jmck.sdm$set_date<-as.Date(with(
-  jmck.sdm,
+phrg.sdm$set_date<-as.Date(with(
+  phrg.sdm,
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
   "%Y-%m-%d")
 cmck.sdm$set_date<-as.Date(with(
   cmck.sdm,
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
   "%Y-%m-%d")
-phrg.sdm$set_date<-as.Date(with(
-  phrg.sdm,
+jmck.sdm$set_date<-as.Date(with(
+  jmck.sdm,
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
   "%Y-%m-%d")
 msqd_spawn.sdm$set_date<-as.Date(with(
@@ -290,7 +291,7 @@ Tickets_SDM <- merge(Tickets_SDM, cmck.sdm,
                      by = (c('prev_days_date', 'PORT_AREA_CODE')),
                      all.x = TRUE, all.y = FALSE)
 
-### lagged SDM(MSQD)
+### lagged SDM(JMCK)
 jmck.sdm <- jmck.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   rename(lag_JMCK_SDM_30  = JMCK_SDM_30) %>%
   rename(lag_JMCK_SDM_90  = JMCK_SDM_90) %>%
@@ -323,7 +324,21 @@ Tickets_SDM <- Tickets_SDM %>% drop_na(set_date) %>%
   dplyr::select("VESSEL_NUM", "trip_id", "set_date", "set_year", "set_month", "set_day", "selection",
                 "PORT_AREA_CODE", "Species_Dominant", "Landings_mtons", "Revenue", "Price_mtons", "max_days_sea",
                 "group_all", "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90","PSDN_SDM_220",
-                "lag_PSDN_SDM_30", "lag_PSDN_SDM_60", "lag_PSDN_SDM_90","lag_PSDN_SDM_220")
+                "MSQD_SDM_30", "MSQD_SDM_90", "MSQD_SDM_220", 
+                "NANC_SDM_20", "NANC_SDM_30", "NANC_SDM_90", "NANC_SDM_220",
+                "PHRG_SDM_30", "PHRG_SDM_90" , "PHRG_SDM_220",
+                "CMCK_SDM_30", "CMCK_SDM_90", "CMCK_SDM_220",
+                "JMCK_SDM_30", "JMCK_SDM_90", "JMCK_SDM_220",
+                "MSQD_SPAWN_SDM_30", "MSQD_SPAWN_SDM_90", "MSQD_SPAWN_SDM_220",
+                "lag_PSDN_SDM_30", "lag_PSDN_SDM_60", "lag_PSDN_SDM_90", "lag_PSDN_SDM_220",
+                "lag_MSQD_SDM_30", "lag_MSQD_SDM_90", "lag_MSQD_SDM_220",       
+                "lag_NANC_SDM_20", "lag_NANC_SDM_30", "lag_NANC_SDM_90", "lag_NANC_SDM_220",       
+                "lag_PHRG_SDM_30", "lag_PHRG_SDM_90", "lag_PHRG_SDM_220",       
+                "lag_CMCK_SDM_30", "lag_CMCK_SDM_90", "lag_CMCK_SDM_220",       
+                "lag_JMCK_SDM_30", "lag_JMCK_SDM_90", "lag_JMCK_SDM_220",
+                "lag_MSQD_SPAWN_SDM_30", "lag_MSQD_SPAWN_SDM_90", "lag_MSQD_SPAWN_SDM_220") 
+
+
 
 #---------------------------------------------------------------------------------------
 ## Create data to filter non-participation
