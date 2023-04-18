@@ -35,7 +35,7 @@ sampled_rums <- function(data_in, cluster = 4,
   min_year_prob <- 2012
   max_year_prob <- 2018
   min_year <- 2010
-  max_year <- 2020
+  max_year <- 2019
   ndays <- 30
   nhauls_sampled <- 5
   seed <- 300
