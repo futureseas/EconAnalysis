@@ -29,7 +29,11 @@ sampled_rums <- function(data_in, cluster = 4,
 
   ###############
   # Delete
-
+  library(doParallel)
+  library(tidyr)
+  library(plm)
+  library(tidyverse)
+  library(lubridate)
   data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
   cluster <- 4
   min_year_prob <- 2012
@@ -74,13 +78,25 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::mutate(Closure = ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 0)) %>%
     dplyr::mutate(Closure = ifelse(set_date >= "2015-04-28", 1, 0))
 
-  # Estimate
   qPSDN <- lm(Landings_mtons ~ lag_PSDN_SDM_90 + factor(VESSEL_NUM) + factor(set_month) + 
                 factor(set_year) + factor(Closure), data = datPanel_PSDN)
   
-  # summary(qPSDN)
+ 
+  ### Market squid landing model ### (Maybe use lagged prices?)
+  datPanel_MSQD<- datPanel %>% filter(Species_Dominant == "MSQD") %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2010-12-17" & set_date < "2011-03-31", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2011-11-18" & set_date < "2012-03-31", 1, 0)) %>%
+    dplyr::mutate(Closure = ifelse(set_date >= "2012-11-21" & set_date < "2013-03-31", 1, 0))
+  
+  qMSQD <- lm(Landings_mtons ~ lag_MSQD_SDM_90 + factor(VESSEL_NUM) + factor(set_month) + 
+                factor(set_year) + factor(Closure), data = datPanel_MSQD)
+  
+  summary(qMSQD)
+
   
   ## Create table for paper (all species)
+  # summary(qPSDN)
+  # summary(qMSQD)
   # qPSDN <- estimatr::lm_robust(Landings_mtons ~ lag_PSDN_SDM_90 +
   #                                factor(VESSEL_NUM) + factor(set_month) + factor(set_year) + factor(Closure),
   #                              data = datPanel_PSDN, clusters = group_all, se_type = "stata")
