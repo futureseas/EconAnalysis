@@ -79,27 +79,32 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::mutate(Closure = ifelse(set_date >= "2015-04-28", 1, 0))
 
   qPSDN <- lm(Landings_mtons ~ lag_PSDN_SDM_90 + factor(VESSEL_NUM) + factor(set_month) + 
-                factor(set_year) + factor(Closure), data = datPanel_PSDN)
+                factor(set_year) + factor(PORT_AREA_CODE) + factor(Closure), data = datPanel_PSDN)
   
- 
+  # summary(qPSDN)
+  
+  # qPSDN <- estimatr::lm_robust(Landings_mtons ~ lag_PSDN_SDM_90 +
+  #                                factor(VESSEL_NUM) + factor(set_month) + factor(set_year) + factor(Closure),
+  #                              data = datPanel_PSDN, clusters = group_all, se_type = "stata")
+  
+  
   ### Market squid landing model ### (Maybe use lagged prices? ADD WEEKEND!)
   datPanel_MSQD<- datPanel %>% filter(Species_Dominant == "MSQD") %>%
     dplyr::mutate(Closure = ifelse(set_date >= "2010-12-17" & set_date < "2011-03-31", 1, 0)) %>%
     dplyr::mutate(Closure = ifelse(set_date >= "2011-11-18" & set_date < "2012-03-31", 1, 0)) %>%
     dplyr::mutate(Closure = ifelse(set_date >= "2012-11-21" & set_date < "2013-03-31", 1, 0))
   
-  qMSQD <- lm(Landings_mtons ~ lag_MSQD_SDM_90 + factor(VESSEL_NUM) + factor(set_month) + 
-                factor(set_year) + factor(Closure), data = datPanel_MSQD)
+  datPanel_MSQD <- datPanel_MSQD %>% dplyr::mutate(weekend = ifelse(chron::is.weekend(set_date), 1, 0))
+  
+  
+  qMSQD <- lm(Landings_mtons ~ lag_MSQD_SDM_90 + factor(set_month) +
+                factor(VESSEL_NUM) + factor(set_year) + factor(Closure) + 
+                factor(weekend) + factor(PORT_AREA_CODE), data = datPanel_MSQD)
   
   summary(qMSQD)
-
   
   ## Create table for paper (all species)
-  # summary(qPSDN)
-  # summary(qMSQD)
-  # qPSDN <- estimatr::lm_robust(Landings_mtons ~ lag_PSDN_SDM_90 +
-  #                                factor(VESSEL_NUM) + factor(set_month) + factor(set_year) + factor(Closure),
-  #                              data = datPanel_PSDN, clusters = group_all, se_type = "stata")
+  
   # modelsummary::modelsummary(qPSDN, output = "landings_models.docx")
   
   
