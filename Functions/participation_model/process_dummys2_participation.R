@@ -116,7 +116,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
       
 
-    } if (species == "MSQD") {
+    } else if (species == "MSQD") {
       
       ## Obtain SDM previous day for the species/port combination
       sdm <- SDM.MSQD %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
@@ -142,7 +142,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       # Calculate expected revenues
       dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
       
-    } if (species == "NANC") {
+    } else if (species == "NANC") {
       
       ## Obtain SDM previous day for the species/port combination
       sdm <- SDM.NANC %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
@@ -168,7 +168,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
       
       
-    } if (species == "PHRG") {
+    } else if (species == "PHRG") {
       
       ## Obtain SDM previous day for the species/port combination
       sdm <- SDM.PHRG %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
