@@ -27,26 +27,27 @@ sampled_rums <- function(data_in, cluster = 4,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale) {
 
-  ###############
-  # Delete
-  library(doParallel)
-  library(tidyr)
-  library(plm)
-  library(tidyverse)
-  library(lubridate)
-  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-  cluster <- 4
-  min_year_prob <- 2012
-  max_year_prob <- 2018
-  min_year <- 2010
-  max_year <- 2019
-  ndays <- 30
-  nhauls_sampled <- 5
-  seed <- 300
-  ncores <- 4
-  rev_scale <- 100
-
-  ###############
+  # ###############
+  # # Delete
+  # gc()
+  # library(doParallel)
+  # library(tidyr)
+  # library(plm)
+  # library(tidyverse)
+  # library(lubridate)
+  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+  # cluster <- 4
+  # min_year_prob <- 2012
+  # max_year_prob <- 2018
+  # min_year <- 2010
+  # max_year <- 2019
+  # ndays <- 30
+  # nhauls_sampled <- 5
+  # seed <- 300
+  # ncores <- 4
+  # rev_scale <- 100
+  # 
+  # ###############
   
   #---------------------------------------------------------------
   ## Filter the data
@@ -115,39 +116,54 @@ sampled_rums <- function(data_in, cluster = 4,
   
   # ##############
   # ### Jack Mackerel
-  # datPanel_JMCK <- datPanel %>% filter(Species_Dominant == "JMCK") 
-  # qJMCK <- lm(Landings_mtons ~ lag_JMCK_SDM_90 + factor(VESSEL_NUM) + factor(set_year) + factor(set_month) + factor(PORT_AREA_CODE), data = datPanel_JMCK)
+  # datPanel_JMCK <- datPanel %>% filter(Species_Dominant == "JMCK")
+  # qJMCK <- plm(Landings_mtons ~ lag_JMCK_SDM_30 + factor(VESSEL_NUM) + factor(set_year) + factor(set_month), data = datPanel_JMCK)
   # summary(qJMCK)
-  # 
-  # 
+  # # 
+  # # 
   # ##############
   # ### Chub mackerel
-  # datPanel_CMCK <- datPanel %>% filter(Species_Dominant == "CMCK") 
-  # qCMCK <- lm(Landings_mtons ~ lag_CMCK_SDM_90 + factor(VESSEL_NUM) + factor(set_year) + factor(set_month), data = datPanel_CMCK)
+  # datPanel_CMCK <- datPanel %>% filter(Species_Dominant == "CMCK")
+  # qCMCK <- lm(Landings_mtons ~ lag_CMCK_SDM_30 + factor(VESSEL_NUM) + factor(set_year) + factor(set_month), data = datPanel_CMCK)
   # summary(qCMCK)
   
   
+  
   #########################################
-  ## Create table for paper (all species)
+  # ## Create table for paper (all species)
+  # 
+  #   models <- list(
+  #   "Pacific sardine"     = qPSDN,
+  #   "Market squid" = qMSQD,
+  #   "Northern anchovy"     = qNANC,
+  #   "Pacific herring" = qPHRG)
+  # 
+  # gm <- modelsummary::gof_map
+  # options(OutDec=".")
+  # modelsummary::modelsummary(models, fmt = 2, 
+  #                            coef_omit = "^(?!.*tercept|.*SDM)",
+  #                            gof_map = c("nobs", "adj.r.squared"),
+  #                            statistic = "({std.error}){stars}",
+  #                            
+  #                            coef_rename = c("lag_PSDN_SDM_60" = "SDM^PSDN_t-1 (<60km)",
+  #                                            "lag_MSQD_SDM_90" = "SDM^MSQD_t-1  (<90km)",
+  #                                            "lag_NANC_SDM_30" = "SDM^NANC_t-1  (<30km)",
+  #                                            "lag_PHRG_SDM_220" = "SDM^PHRG_t-1  (<220km)"),
+  #                            output = "landings_models.docx")
   
-    models <- list(
-    "Pacific sardine"     = qPSDN,
-    "Market squid" = qMSQD,
-    "Northern anchovy"     = qNANC,
-    "Pacific herring" = qPHRG)
-  modelsummary::modelsummary(models, output = "landings_models.docx")
   
+
+
   
-  
-  
-  #--------------------------------
+    #--------------------------------
   ## Define hauls data used for estimation (in this case, are the trips)
   
   hauls <- dat %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
                                  group_all %in% cluster) %>% 
     distinct(trip_id, .keep_all = T) %>% 
     dplyr::select(trip_id, VESSEL_NUM,  set_year, set_month, set_day, Revenue, selection,
-                  PSDN_SDM_30, PSDN_SDM_60, PSDN_SDM_90, PSDN_SDM_220) %>% as.data.frame
+                  lag_NANC_SDM_30, lag_PSDN_SDM_60, lag_MSQD_SDM_90, lag_PHRG_SDM_220,
+                  NANC_SDM_30, PSDN_SDM_60, MSQD_SDM_90, PHRG_SDM_220) %>% as.data.frame
 
   ## Select hauls used to calculate probability for the choice set
   dist_hauls_catch_shares <- hauls %>% dplyr::filter(set_year >= min_year_prob, set_year <= max_year_prob)
@@ -347,11 +363,26 @@ sampled_rums <- function(data_in, cluster = 4,
   psdn.sdm[is.na(psdn.sdm)] <- 0
   psdn.sdm$set_date <- ymd(paste(psdn.sdm$LANDING_YEAR, psdn.sdm$LANDING_MONTH, psdn.sdm$LANDING_DAY, sep = "-"))
   
+  msqd.sdm <- readRDS(file = 'Participation/SDM_code/sdm_msqd.rds')
+  msqd.sdm[is.na(msqd.sdm)] <- 0
+  msqd.sdm$set_date <- ymd(paste(msqd.sdm$LANDING_YEAR, msqd.sdm$LANDING_MONTH, msqd.sdm$LANDING_DAY, sep = "-"))
   
-  dummys2 <- foreach::foreach(ii = 1:nrow(td),
+  nanc.sdm <- readRDS(file = 'Participation/SDM_code/sdm_nanc.rds')
+  nanc.sdm[is.na(nanc.sdm)] <- 0
+  nanc.sdm$set_date <- ymd(paste(nanc.sdm$LANDING_YEAR, nanc.sdm$LANDING_MONTH, nanc.sdm$LANDING_DAY, sep = "-"))
+  
+  phrg.sdm <- readRDS(file = 'Participation/SDM_code/sdm_phrg.rds')
+  phrg.sdm[is.na(phrg.sdm)] <- 0
+  phrg.sdm$set_date <- ymd(paste(phrg.sdm$LANDING_YEAR, phrg.sdm$LANDING_MONTH, phrg.sdm$LANDING_DAY, sep = "-"))
+  
+    dummys2 <- foreach::foreach(ii = 1:nrow(td),
     .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
-      process_dummys2(xx = ii, td1 = td, dat1 = dat, qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm)
+      process_dummys2(xx = ii, td1 = td, dat1 = dat, 
+                      qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm,
+                      qMSQD1 = qMSQD, SDM.MSQD = msqd.sdm,
+                      qNANC1 = qNANC, SDM.NANC = nanc.sdm,
+                      qPHRG1 = qPHRG, SDM.PHRG = phrg.sdm)
     }
   print("Done calculating dummys and revenues")
   td2 <- plyr::ldply(dummys2)

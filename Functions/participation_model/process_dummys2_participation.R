@@ -4,11 +4,21 @@
 #' @param xx Index value
 #' @param td1 The tow dates
 #' @param dat1 The Data
-#' @param SDM.PSDN
 #' @param qPSDN1
+#' @param qMSQD1 
+#' @param qNANC1
+#' @param qPHRG1
+#' @param SDM.PSDN
+#' @param SDM.MSQD
+#' @param SDM.NANC
+#' @param SDM.PHRG
 #' @export
 
-process_dummys2 <- function(xx, td1 = td, dat1 = dat, qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm){
+process_dummys2 <- function(xx, td1 = td, dat1 = dat, 
+                            qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm,
+                            qMSQD1 = qMSQD, SDM.MSQD = msqd.sdm,
+                            qNANC1 = qNANC, SDM.NANC = nanc.sdm,
+                            qPHRG1 = qPHRG, SDM.PHRG = phrg.sdm){
   
 
   # ### Delete
@@ -93,8 +103,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat, qPSDN1 = qPSDN, SDM.PSDN =
       # Create database to predict landings
       dum_rev <- temp_dat
       dum_rev$VESSEL_NUM <- dum_rev$fished_VESSEL_NUM
-      dum_rev$Closure <- 0
-      dum_rev$lag_PSDN_SDM_90 <- sdm$PSDN_SDM_90
+      # dum_rev$Closure <- 0
+      dum_rev$lag_PSDN_SDM_90 <- sdm$PSDN_SDM_60
       dum_rev$set_year <- year(dum_rev$set_date)
       dum_rev$set_month  <- month(dum_rev$set_date)
       dum_rev$Price_mton <- mean(price$Price_mtons) 
@@ -106,6 +116,84 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat, qPSDN1 = qPSDN, SDM.PSDN =
       dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
       
 
+    } if (species == "MSQD") {
+      
+      ## Obtain SDM previous day for the species/port combination
+      sdm <- SDM.MSQD %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
+                                        PORT_AREA_CODE %in% port)
+      
+      ## Obtain average price at species/port combination last 30 days (not including current day)
+      price <- dat1 %>% dplyr::filter(set_date %within% temp_dat$days_inter,
+                                      PORT_AREA_CODE %in% port,
+                                      Species_Dominant %in% species)
+      
+      # Create database to predict landings
+      dum_rev <- temp_dat
+      dum_rev$VESSEL_NUM <- dum_rev$fished_VESSEL_NUM
+      # dum_rev$Closure <- 0
+      dum_rev$lag_MSQD_SDM_90 <- sdm$MSQD_SDM_90
+      dum_rev$set_year <- year(dum_rev$set_date)
+      dum_rev$set_month  <- month(dum_rev$set_date)
+      dum_rev$Price_mton <- mean(price$Price_mtons) 
+      
+      # Predict landings
+      prediction <- as.data.frame(predict(qMSQD1, dum_rev, interval = "prediction"))
+      
+      # Calculate expected revenues
+      dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
+      
+    } if (species == "NANC") {
+      
+      ## Obtain SDM previous day for the species/port combination
+      sdm <- SDM.NANC %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
+                                        PORT_AREA_CODE %in% port)
+      
+      ## Obtain average price at species/port combination last 30 days (not including current day)
+      price <- dat1 %>% dplyr::filter(set_date %within% temp_dat$days_inter,
+                                      PORT_AREA_CODE %in% port,
+                                      Species_Dominant %in% species)
+      
+      # Create database to predict landings
+      dum_rev <- temp_dat
+      dum_rev$VESSEL_NUM <- dum_rev$fished_VESSEL_NUM
+      dum_rev$lag_NANC_SDM_30 <- sdm$NANC_SDM_30
+      dum_rev$set_year <- year(dum_rev$set_date)
+      dum_rev$set_month  <- month(dum_rev$set_date)
+      dum_rev$Price_mton <- mean(price$Price_mtons) 
+      
+      # Predict landings
+      prediction <- as.data.frame(predict(qNANC1, dum_rev, interval = "prediction"))
+      
+      # Calculate expected revenues
+      dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
+      
+      
+    } if (species == "PHRG") {
+      
+      ## Obtain SDM previous day for the species/port combination
+      sdm <- SDM.PHRG %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
+                                        PORT_AREA_CODE %in% port)
+      
+      ## Obtain average price at species/port combination last 30 days (not including current day)
+      price <- dat1 %>% dplyr::filter(set_date %within% temp_dat$days_inter,
+                                      PORT_AREA_CODE %in% port,
+                                      Species_Dominant %in% species)
+      
+      # Create database to predict landings
+      dum_rev <- temp_dat
+      dum_rev$VESSEL_NUM <- dum_rev$fished_VESSEL_NUM
+      dum_rev$lag_PHRG_SDM_9220 <- sdm$PHRG_SDM_220
+      dum_rev$set_year <- year(dum_rev$set_date)
+      dum_rev$set_month  <- month(dum_rev$set_date)
+      dum_rev$Price_mton <- mean(price$Price_mtons) 
+      
+      # Predict landings
+      prediction <- as.data.frame(predict(qPHRG1, dum_rev, interval = "prediction"))
+      
+      # Calculate expected revenues
+      dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
+      
+      
     } else {
       
       dum_rev <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
