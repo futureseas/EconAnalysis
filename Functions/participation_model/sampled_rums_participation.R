@@ -30,29 +30,32 @@ sampled_rums <- function(data_in, cluster = 4,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale) {
 
-  # ###############
-  # Delete
-  gc()
-  library(doParallel)
-  library(tidyr)
-  library(plm)
-  library(tidyverse)
-  library(lubridate)
-  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-  cluster <- 4
-  min_year_prob <- 2012
-  max_year_prob <- 2017
-  min_year_est <- 2005
-  max_year_est <- 2014
-  min_year <- 2012
-  max_year <- 2017
-  ndays <- 30
-  nhauls_sampled <- 5
-  seed <- 300
-  ncores <- 4
-  rev_scale <- 100
-  # 
-  # ###############
+  # # ###############
+  # # Delete
+  # gc()
+  # library(doParallel)
+  # library(tidyr)
+  # library(plm)
+  # library(tidyverse)
+  # library(lubridate)
+  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
+  #   mutate(Vessel.length = as.numeric(Vessel.length),
+  #          Vessel.weight = as.numeric(Vessel.weight),
+  #          Vessel.horsepower = as.numeric(Vessel.horsepower))
+  # cluster <- 4
+  # min_year_prob <- 2012
+  # max_year_prob <- 2017
+  # min_year_est <- 2012
+  # max_year_est <- 2019
+  # min_year <- 2012
+  # max_year <- 2017
+  # ndays <- 30
+  # nhauls_sampled <- 5
+  # seed <- 300
+  # ncores <- 4
+  # rev_scale <- 100
+  # # 
+  # # ###############
   
   #---------------------------------------------------------------
   ## Filter the data
@@ -66,9 +69,7 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::filter(selection != "No-Participation") %>% 
     dplyr::filter(set_year >= min_year_est, set_year <= max_year_est)
   
-  ## INCLUDE VESSEL CHARACTERISTICS....
-
-  
+ 
   ################
   ### Pacific sardine landing model ###
   datPanel_PSDN <- datPanel %>% filter(Species_Dominant == "PSDN") %>%
@@ -88,11 +89,8 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::mutate(Closure = ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 0)) %>%
     dplyr::mutate(Closure = ifelse(set_date >= "2015-04-28", 1, 0)) %>% filter(Closure == 0)  
 
-  qPSDN <- lm(Landings_mtons ~ lag_PSDN_SDM_60  + poly(set_year, 2) + factor(set_month) + factor(PORT_AREA_CODE) + factor(group_all), 
-              data = datPanel_PSDN)
-  summary(qPSDN)
-  
-  
+  qPSDN <- lm(Landings_mtons ~ lag_PSDN_SDM_60 + factor(set_month) + poly(set_year, 3) + Vessel.length + Vessel.horsepower, data = datPanel_PSDN)
+
   # qPSDN <- estimatr::lm_robust(Landings_mtons ~ lag_PSDN_SDM_90 +
   #                                factor(VESSEL_NUM)  + factor(set_year) + factor(Closure),
   #                              data = datPanel_PSDN, clusters = group_all, se_type = "stata")
@@ -105,40 +103,38 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::mutate(Closure = ifelse(set_date >= "2012-11-21" & set_date < "2013-03-31", 1, 0)) %>% 
     dplyr::mutate(weekend = ifelse(chron::is.weekend(set_date), 1, 0)) %>%
     filter(weekend == 0) %>%  filter(Closure == 0)
-  qMSQD <- lm(Landings_mtons ~ lag_MSQD_SDM_90 + poly(set_year, 2) + factor(set_month) + factor(PORT_AREA_CODE) + factor(group_all), data = datPanel_MSQD)
-  summary(qMSQD)
-  
-  
+  qMSQD <- lm(Landings_mtons ~ lag_MSQD_SDM_90 + factor(set_month) + poly(set_year, 3) + Vessel.length + Vessel.horsepower, data = datPanel_MSQD)
+
   ##############
-  ### Pacific herring landing model 
-  datPanel_PHRG <- datPanel %>% filter(Species_Dominant == "PHRG") 
-  qPHRG <- lm(Landings_mtons ~ lag_PHRG_SDM_220 + poly(set_year, 2) + factor(set_month) + factor(PORT_AREA_CODE) + factor(group_all), data = datPanel_PHRG)
-  summary(qPHRG)
-  
-  
+  ## Pacific herring landing model
+  datPanel_PHRG <- datPanel %>% filter(Species_Dominant == "PHRG")
+  qPHRG <- lm(Landings_mtons ~ lag_PHRG_SDM_220 + factor(set_month) + poly(set_year, 3) + Vessel.length + Vessel.horsepower, data = datPanel_PHRG)
+
   ##############
   ### Northern anchovy
   datPanel_NANC <- datPanel %>% filter(Species_Dominant == "NANC") 
-  qNANC <- lm(Landings_mtons ~ lag_NANC_SDM_30 + poly(set_year, 2) + factor(set_month) + factor(PORT_AREA_CODE) + factor(group_all), data = datPanel_NANC)
-  summary(qNANC)
+  qNANC <- lm(Landings_mtons ~ lag_NANC_SDM_20 + factor(set_month) + Vessel.length + Vessel.horsepower, data = datPanel_NANC)
   
-  
-  # ##############
-  # ### Jack Mackerel
+  ##############
+  ### Jack Mackerel
   # datPanel_JMCK <- datPanel %>% filter(Species_Dominant == "JMCK")
-  # qJMCK <- lm(Landings_mtons ~ lag_JMCK_SDM_30 + factor(VESSEL_NUM) + factor(set_month) + set_year, data = datPanel_JMCK)
-  # summary(qJMCK)
-  # #
-  # #
+  # qJMCK <- lm(Landings_mtons ~ lag_JMCK_SDM_30 + factor(set_month) + poly(set_year, 3) + Vessel.length + Vessel.horsepower, data = datPanel_JMCK)
+  
   # ##############
   # ### Chub mackerel
   # datPanel_CMCK <- datPanel %>% filter(Species_Dominant == "CMCK")
-  # qCMCK <- lm(Landings_mtons ~ lag_CMCK_SDM_30 + factor(VESSEL_NUM) + factor(set_month) + set_year, data = datPanel_CMCK)
+  # qCMCK <- lm(Landings_mtons ~ lag_CMCK_SDM_30 + factor(set_month) + Vessel.length + Vessel.horsepower, data = datPanel_CMCK)
+  
+
+  # summary(qPSDN)
+  # summary(qMSQD)
+  # summary(qPHRG)
+  # summary(qNANC)
+  # summary(qJMCK)
   # summary(qCMCK)
   
   
-  
-  #########################################
+  # ########################################
   # ## Create table for paper (all species)
   # 
   #   models <- list(
@@ -149,22 +145,18 @@ sampled_rums <- function(data_in, cluster = 4,
   # 
   # gm <- modelsummary::gof_map
   # options(OutDec=".")
-  # modelsummary::modelsummary(models, fmt = 2, 
-  #                            coef_omit = "^(?!.*SDM)", #.*tercept|
+  # modelsummary::modelsummary(models, fmt = 2,
+  #                            # coef_omit = "^(?!.*tercept|.*SDM)", 
   #                            gof_map = c("nobs", "adj.r.squared"),
   #                            statistic = "({std.error}){stars}",
-  #                            
   #                            coef_rename = c("lag_PSDN_SDM_60" = "SDM^PSDN_t-1 (<60km)",
   #                                            "lag_MSQD_SDM_90" = "SDM^MSQD_t-1  (<90km)",
-  #                                            "lag_NANC_SDM_30" = "SDM^NANC_t-1  (<30km)",
+  #                                            "lag_NANC_SDM_20" = "SDM^NANC_t-1  (<20km)",
   #                                            "lag_PHRG_SDM_220" = "SDM^PHRG_t-1  (<220km)"),
-  #                            output = "landings_models.docx")
+  #                            output = "landings_models_no_vessel_FE.docx")
   
   
-
-
-  
-    #--------------------------------
+  #--------------------------------
   ## Define hauls data used for estimation (in this case, are the trips)
   
   hauls <- dat %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
@@ -407,17 +399,21 @@ sampled_rums <- function(data_in, cluster = 4,
   td2[which(td2$dummy_last_day != 0), 'dummy_last_day'] <- 1
   td2[which(td2$mean_rev != 0), 'dummy_miss'] <- 0
   td2[which(td2$mean_rev == 0), 'dummy_miss'] <- 1
+  td2[which(td2$mean_rev_SDM != 0), 'dummy_miss_SDM'] <- 0
+  td2[which(td2$mean_rev_SDM == 0), 'dummy_miss_SDM'] <- 1
   
   # Change dummies to zero for "No-Participation"
   td2[which(td2$selection == "No-Participation"), 'dummy_miss'] <- 0
+  td2[which(td2$selection == "No-Participation"), 'dummy_miss_SDM'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_days'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_year_days'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_last_day'] <- 0
-  
+
+  td2$mean_rev_SDM_adj <- td2$mean_rev_SDM / rev_scale  
   td2$mean_rev_adj <- td2$mean_rev / rev_scale
 
   sampled_hauls <- cbind(sampled_hauls,
-    td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
+    td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", "dummy_miss", "dummy_miss_SDM", 'mean_rev', 'mean_rev_adj', 'mean_rev_SDM', 'mean_rev_SDM_adj')] )
   
   return(sampled_hauls)
 }

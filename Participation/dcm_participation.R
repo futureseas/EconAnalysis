@@ -18,7 +18,10 @@ library(lubridate)
 
 #-----------------------------------------------------------------------------
 ## Read participation database ##
-participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
+  mutate(Vessel.length = as.numeric(Vessel.length),
+         Vessel.weight = as.numeric(Vessel.weight),
+         Vessel.horsepower = as.numeric(Vessel.horsepower))
 
 #-----------------------------------------------------------------------------
 ## Day at sea: Should we filter by number of days in the sea?
@@ -33,9 +36,9 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-                         min_year = 2013, max_year = 2018,
-                         min_year_prob = 2013, max_year_prob = 2018,
-                         min_year_est = 2005, max_year_est = 2020,
+                         min_year = 2012, max_year = 2018,
+                         min_year_prob = 2013, max_year_prob = 2017,
+                         min_year_est = 2012, max_year_est = 2019,
                          ndays = 30, nhauls_sampled = 4,
                          seed = 42, ncores = 4, rev_scale = 1000)
 saveRDS(samps1, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")

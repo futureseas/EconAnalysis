@@ -101,19 +101,26 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
                                       Species_Dominant %in% species)
 
       # Create database to predict landings
-      dum_rev <- temp_dat
-      dum_rev$VESSEL_NUM <- dum_rev$fished_VESSEL_NUM
+      dum_rev_SDM <- temp_dat
+      dum_rev_SDM$VESSEL_NUM <- dum_rev_SDM$fished_VESSEL_NUM
       # dum_rev$Closure <- 0
-      dum_rev$lag_PSDN_SDM_60 <- sdm$PSDN_SDM_60
-      dum_rev$set_year <- year(dum_rev$set_date)
-      dum_rev$set_month  <- month(dum_rev$set_date)
-      dum_rev$Price_mton <- mean(price$Price_mtons) 
+      dum_rev_SDM$lag_PSDN_SDM_60 <- sdm$PSDN_SDM_60
+      dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
+      dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
+      dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
       
       # Predict landings
-      prediction <- as.data.frame(predict(qPSDN1, dum_rev, interval = "prediction"))
+      prediction <- as.data.frame(predict(qPSDN1, dum_rev_SDM, interval = "prediction"))
       
       # Calculate expected revenues
-      dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
+      dum_rev_SDM$Revenue <- prediction$fit * dum_rev_SDM$Price_mton
+      
+      #---------------------------------------------------------------------------------
+      dum_rev <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
+                                                    set_date %within% temp_dat$days_inter,
+                                                    group_all %in% fltz, ## Check if this is too restrictive...
+                                                    selection %in% sel)
+      dum_rev <- dum_rev %>% distinct(trip_id, .keep_all = T)
       
 
     } else if (species == "MSQD") {
@@ -128,19 +135,28 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
                                       Species_Dominant %in% species)
       
       # Create database to predict landings
-      dum_rev <- temp_dat
-      dum_rev$VESSEL_NUM <- dum_rev$fished_VESSEL_NUM
+      dum_rev_SDM <- temp_dat
+      dum_rev_SDM$VESSEL_NUM <- dum_rev_SDM$fished_VESSEL_NUM
       # dum_rev$Closure <- 0
-      dum_rev$lag_MSQD_SDM_90 <- sdm$MSQD_SDM_90
-      dum_rev$set_year <- year(dum_rev$set_date)
-      dum_rev$set_month  <- month(dum_rev$set_date)
-      dum_rev$Price_mton <- mean(price$Price_mtons) 
+      dum_rev_SDM$lag_MSQD_SDM_90 <- sdm$MSQD_SDM_90
+      dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
+      dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
+      dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
       
       # Predict landings
-      prediction <- as.data.frame(predict(qMSQD1, dum_rev, interval = "prediction"))
+      prediction <- as.data.frame(predict(qMSQD1, dum_rev_SDM, interval = "prediction"))
       
       # Calculate expected revenues
-      dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
+      dum_rev_SDM$Revenue <- prediction$fit * dum_rev_SDM$Price_mton
+      
+      
+      #---------------------------------------------------------------------------------
+      dum_rev <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
+                                                    set_date %within% temp_dat$days_inter,
+                                                    group_all %in% fltz, ## Check if this is too restrictive...
+                                                    selection %in% sel)
+      dum_rev <- dum_rev %>% distinct(trip_id, .keep_all = T)
+      
       
     } else if (species == "NANC") {
       
@@ -154,18 +170,25 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
                                       Species_Dominant %in% species)
       
       # Create database to predict landings
-      dum_rev <- temp_dat
-      dum_rev$VESSEL_NUM <- dum_rev$fished_VESSEL_NUM
-      dum_rev$lag_NANC_SDM_30 <- sdm$NANC_SDM_30
-      dum_rev$set_year <- year(dum_rev$set_date)
-      dum_rev$set_month  <- month(dum_rev$set_date)
-      dum_rev$Price_mton <- mean(price$Price_mtons) 
+      dum_rev_SDM <- temp_dat
+      dum_rev_SDM$VESSEL_NUM <- dum_rev_SDM$fished_VESSEL_NUM
+      dum_rev_SDM$lag_NANC_SDM_30 <- sdm$NANC_SDM_30
+      dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
+      dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
+      dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
       
       # Predict landings
-      prediction <- as.data.frame(predict(qNANC1, dum_rev, interval = "prediction"))
+      prediction <- as.data.frame(predict(qNANC1, dum_rev_SDM, interval = "prediction"))
       
       # Calculate expected revenues
-      dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
+      dum_rev_SDM$Revenue <- prediction$fit * dum_rev_SDM$Price_mton
+      
+      #---------------------------------------------------------------------------------
+      dum_rev <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
+                                                    set_date %within% temp_dat$days_inter,
+                                                    group_all %in% fltz, ## Check if this is too restrictive...
+                                                    selection %in% sel)
+      dum_rev <- dum_rev %>% distinct(trip_id, .keep_all = T)
       
       
     } else if (species == "PHRG") {
@@ -180,18 +203,25 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
                                       Species_Dominant %in% species)
       
       # Create database to predict landings
-      dum_rev <- temp_dat
-      dum_rev$VESSEL_NUM <- dum_rev$fished_VESSEL_NUM
-      dum_rev$lag_PHRG_SDM_220 <- sdm$PHRG_SDM_220
-      dum_rev$set_year <- year(dum_rev$set_date)
-      dum_rev$set_month  <- month(dum_rev$set_date)
-      dum_rev$Price_mton <- mean(price$Price_mtons) 
+      dum_rev_SDM <- temp_dat
+      dum_rev_SDM$VESSEL_NUM <- dum_rev_SDM$fished_VESSEL_NUM
+      dum_rev_SDM$lag_PHRG_SDM_220 <- sdm$PHRG_SDM_220
+      dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
+      dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
+      dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
       
       # Predict landings
-      prediction <- as.data.frame(predict(qPHRG1, dum_rev, interval = "prediction"))
+      prediction <- as.data.frame(predict(qPHRG1, dum_rev_SDM, interval = "prediction"))
       
       # Calculate expected revenues
-      dum_rev$Revenue <- prediction$fit * dum_rev$Price_mton
+      dum_rev_SDM$Revenue <- prediction$fit * dum_rev_SDM$Price_mton
+      
+      #---------------------------------------------------------------------------------
+      dum_rev <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
+                                                    set_date %within% temp_dat$days_inter,
+                                                    group_all %in% fltz, ## Check if this is too restrictive...
+                                                    selection %in% sel)
+      dum_rev <- dum_rev %>% distinct(trip_id, .keep_all = T)
       
       
     } else {
@@ -205,14 +235,19 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     }
     
     #Calculate revenue
+    mean_rev_SDM <- mean(dum_rev_SDM$Revenue, na.rm = TRUE)
+    mean_rev_SDM <- replace(mean_rev_SDM, is.na(mean_rev_SDM), 0)
     mean_rev <- mean(dum_rev$Revenue, na.rm = TRUE)
     mean_rev <- replace(mean_rev, is.na(mean_rev), 0)
     
+    
   } else {
+    mean_rev_SDM <- 0
     mean_rev <- 0
   }
   
   # Include new information in temp_dat
+  temp_dat$mean_rev_SDM <- mean_rev_SDM
   temp_dat$mean_rev <- mean_rev
   temp_dat$dummy_prev_days <- dum30_val
   temp_dat$dummy_prev_year_days <- dum30y_val

@@ -34,8 +34,9 @@ rm(port_area)
 
 #-----------------------------------------------------
 ###Subset the data to remove columns not relevant to this analysis. This will speed things up.
+ls(Tickets_raw) 
 Tickets <- select(Tickets_raw, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_NAME, PORT_AREA_CODE,
-                                 VESSEL_NUM, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, 
+                                 VESSEL_NUM, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_HORSEPOWER, 
                                  LANDED_WEIGHT_MTONS, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE,
                                  PACFIN_GEAR_CODE, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, VESSEL_OWNER_NAME,
                                  FISHER_LICENSE_NUM, AFI_PRICE_PER_POUND, NUM_OF_DAYS_FISHED, CATCH_AREA_CODE)) %>%
@@ -59,10 +60,24 @@ rm(Trip_Species_Dominant, X, Boats)
 
 
 #-----------------------------------------------------
+### Compute vessel characteristics
+
+Vessel.chr <- Tickets %>% 
+  dplyr::select(c(VESSEL_NUM, VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_HORSEPOWER, LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>% 
+  drop_na %>% 
+  unique() %>%
+  group_by(VESSEL_NUM) %>% 
+  summarize(Vessel.length = names(which.max(table(VESSEL_LENGTH))), 
+            Vessel.weight = names(which.max(table(VESSEL_WEIGHT))), 
+            Vessel.horsepower = names(which.max(table(VESSEL_HORSEPOWER)))) %>% 
+  unique() 
+
+
+#-----------------------------------------------------
 ### Aggregate species in a FTID 
 Tickets <- Tickets %>% group_by(AGENCY_CODE, FTID_unique, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE,
                                 VESSEL_NUM, PACFIN_SPECIES_CODE, Species_Dominant
-                                #PORT_NAME, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_OWNER_NAME, PACFIN_GEAR_CODE, 
+                                #PORT_NAME, VESSEL_NAME, VESSEL_OWNER_NAME, PACFIN_GEAR_CODE, 
                                 #FISHER_LICENSE_NUM, CATCH_AREA_CODE, PACFIN_SPECIES_COMMON_NAME
                                 ) %>% 
   summarize(Landings_mtons = sum(LANDED_WEIGHT_MTONS),
@@ -156,6 +171,11 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 # xxx %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 
 
+### Merge vessel chr
+Tickets_chr <- merge(Tickets_clust, Vessel.chr, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+
+
+
 #-----------------------------------------------
 ### Merge data to SDM 
 
@@ -176,7 +196,7 @@ jmck.sdm[is.na(jmck.sdm)] <- 0
 msqd_spawn.sdm[is.na(msqd_spawn.sdm)] <- 0
 
 
-Tickets_SDM <- merge(Tickets_clust, psdn.sdm,
+Tickets_SDM <- merge(Tickets_chr, psdn.sdm,
                      by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
                      all.x = TRUE, all.y = FALSE)
 Tickets_SDM <- merge(Tickets_SDM, msqd.sdm,
@@ -354,7 +374,8 @@ Tickets_SDM <- Tickets_SDM %>% drop_na(set_date) %>%
                 "lag_PHRG_SDM_30", "lag_PHRG_SDM_90", "lag_PHRG_SDM_220",       
                 "lag_CMCK_SDM_30", "lag_CMCK_SDM_90", "lag_CMCK_SDM_220",       
                 "lag_JMCK_SDM_30", "lag_JMCK_SDM_90", "lag_JMCK_SDM_220",
-                "lag_MSQD_SPAWN_SDM_30", "lag_MSQD_SPAWN_SDM_90", "lag_MSQD_SPAWN_SDM_220") 
+                "lag_MSQD_SPAWN_SDM_30", "lag_MSQD_SPAWN_SDM_90", "lag_MSQD_SPAWN_SDM_220",
+                "Vessel.length", "Vessel.weight", "Vessel.horsepower") 
 
 
 
