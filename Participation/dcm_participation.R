@@ -35,6 +35,7 @@ source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_p
 samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
                          min_year = 2013, max_year = 2018,
                          min_year_prob = 2013, max_year_prob = 2018,
+                         min_year_est = 2005, max_year_est = 2020,
                          ndays = 30, nhauls_sampled = 4,
                          seed = 42, ncores = 4, rev_scale = 1000)
 saveRDS(samps1, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
