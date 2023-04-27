@@ -30,7 +30,7 @@ sampled_rums <- function(data_in, cluster = 4,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale) {
 
-  # # ###############
+  # ###############
   # # Delete
   # gc()
   # library(doParallel)
@@ -54,12 +54,11 @@ sampled_rums <- function(data_in, cluster = 4,
   # seed <- 300
   # ncores <- 4
   # rev_scale <- 100
-  # # 
+  # #
   # # ###############
   
   #---------------------------------------------------------------
   ## Filter the data
-
   dat <- data_in 
   
   
@@ -133,6 +132,8 @@ sampled_rums <- function(data_in, cluster = 4,
   # summary(qJMCK)
   # summary(qCMCK)
   
+  # datPanelcor <- datPanel %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% drop_na() %>% unique()
+  # cor(datPanelcor$Vessel.horsepower, datPanelcor$Vessel.length)
   
   # ########################################
   # ## Create table for paper (all species)

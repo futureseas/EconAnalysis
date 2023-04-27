@@ -91,6 +91,16 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   if (sel != "No-Participation") {
     if (species == "PSDN") {
       
+      ## Obtain vessel length and horsepower
+      vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>% 
+        dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+      vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower)) %>% 
+        dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+      if (is.na(vessel.hp$Vessel.horsepower)) {
+        vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% 
+          unique() %>% dplyr::filter(Vessel.length == mean(vessel.length$Vessel.length))
+      }
+
       ## Obtain SDM previous day for the species/port combination
       sdm <- SDM.PSDN %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
                                         PORT_AREA_CODE %in% port)
@@ -107,7 +117,10 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       dum_rev_SDM$lag_PSDN_SDM_60 <- sdm$PSDN_SDM_60
       dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
       dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
-      dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
+      dum_rev_SDM$Price_mton <- mean(price$Price_mtons)
+      dum_rev_SDM$Vessel.length <- mean(vessel.length$Vessel.length) 
+      dum_rev_SDM$Vessel.horsepower <- mean(vessel.hp$Vessel.horsepower, na.rm = TRUE)
+      
       
       # Predict landings
       prediction <- as.data.frame(predict(qPSDN1, dum_rev_SDM, interval = "prediction"))
@@ -124,6 +137,16 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
 
     } else if (species == "MSQD") {
+      
+      ## Obtain vessel length and horsepower
+      vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>% 
+        dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+      vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower)) %>% 
+        dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+      if (is.na(vessel.hp$Vessel.horsepower)) {
+        vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% 
+          unique() %>% dplyr::filter(Vessel.length == mean(vessel.length$Vessel.length))
+      }
       
       ## Obtain SDM previous day for the species/port combination
       sdm <- SDM.MSQD %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
@@ -142,6 +165,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
       dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
       dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
+      dum_rev_SDM$Vessel.length <- mean(vessel.length$Vessel.length) 
+      dum_rev_SDM$Vessel.horsepower <- mean(vessel.hp$Vessel.horsepower, na.rm = TRUE)
       
       # Predict landings
       prediction <- as.data.frame(predict(qMSQD1, dum_rev_SDM, interval = "prediction"))
@@ -160,6 +185,16 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
     } else if (species == "NANC") {
       
+      ## Obtain vessel length and horsepower
+      vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>% 
+        dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+      vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower)) %>% 
+        dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+      if (is.na(vessel.hp$Vessel.horsepower)) {
+        vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% 
+          unique() %>% dplyr::filter(Vessel.length == mean(vessel.length$Vessel.length))
+      }
+      
       ## Obtain SDM previous day for the species/port combination
       sdm <- SDM.NANC %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
                                         PORT_AREA_CODE %in% port)
@@ -176,6 +211,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
       dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
       dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
+      dum_rev_SDM$Vessel.length <- mean(vessel.length$Vessel.length) 
+      dum_rev_SDM$Vessel.horsepower <- mean(vessel.hp$Vessel.horsepower, na.rm = TRUE)
       
       # Predict landings
       prediction <- as.data.frame(predict(qNANC1, dum_rev_SDM, interval = "prediction"))
@@ -193,6 +230,16 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
     } else if (species == "PHRG") {
       
+      ## Obtain vessel length and horsepower
+      vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>% 
+        dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+      vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower)) %>% 
+        dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+      if (is.na(vessel.hp$Vessel.horsepower)) {
+        vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% 
+          unique() %>% dplyr::filter(Vessel.length == mean(vessel.length$Vessel.length))
+      }
+      
       ## Obtain SDM previous day for the species/port combination
       sdm <- SDM.PHRG %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
                                         PORT_AREA_CODE %in% port)
@@ -209,6 +256,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
       dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
       dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
+      dum_rev_SDM$Vessel.length <- mean(vessel.length$Vessel.length) 
+      dum_rev_SDM$Vessel.horsepower <- mean(vessel.hp$Vessel.horsepower, na.rm = TRUE)
       
       # Predict landings
       prediction <- as.data.frame(predict(qPHRG1, dum_rev_SDM, interval = "prediction"))

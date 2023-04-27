@@ -62,14 +62,34 @@ rm(Trip_Species_Dominant, X, Boats)
 #-----------------------------------------------------
 ### Compute vessel characteristics
 
-Vessel.chr <- Tickets %>% 
-  dplyr::select(c(VESSEL_NUM, VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_HORSEPOWER, LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>% 
+# nrow(Tickets %>% 
+#   dplyr::select(c(VESSEL_NUM)) %>% 
+#   drop_na %>% 
+#   unique())
+
+Vessel.chr.lenght <- Tickets %>% 
+  dplyr::select(c(VESSEL_NUM, VESSEL_LENGTH, LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>% 
   drop_na %>% 
   unique() %>%
   group_by(VESSEL_NUM) %>% 
-  summarize(Vessel.length = names(which.max(table(VESSEL_LENGTH))), 
-            Vessel.weight = names(which.max(table(VESSEL_WEIGHT))), 
-            Vessel.horsepower = names(which.max(table(VESSEL_HORSEPOWER)))) %>% 
+  summarize(Vessel.length = names(which.max(table(VESSEL_LENGTH)))) %>% 
+  unique() 
+
+
+Vessel.chr.weight <- Tickets %>% 
+  dplyr::select(c(VESSEL_NUM, VESSEL_WEIGHT, LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>% 
+  drop_na %>% 
+  unique() %>%
+  group_by(VESSEL_NUM) %>% 
+  summarize(Vessel.weight = names(which.max(table(VESSEL_WEIGHT)))) %>% 
+  unique() 
+
+Vessel.chr.horsepower <- Tickets %>% 
+  dplyr::select(c(VESSEL_NUM, VESSEL_HORSEPOWER, LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>% 
+  drop_na %>% 
+  unique() %>%
+  group_by(VESSEL_NUM) %>% 
+  summarize(Vessel.horsepower = names(which.max(table(VESSEL_HORSEPOWER)))) %>% 
   unique() 
 
 
@@ -172,9 +192,9 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 
 
 ### Merge vessel chr
-Tickets_chr <- merge(Tickets_clust, Vessel.chr, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
-
-
+Tickets_chr <- merge(Tickets_clust, Vessel.chr.lenght, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+Tickets_chr <- merge(Tickets_chr, Vessel.chr.weight, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+Tickets_chr <- merge(Tickets_chr, Vessel.chr.horsepower, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 
 #-----------------------------------------------
 ### Merge data to SDM 
