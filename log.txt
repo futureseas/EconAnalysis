@@ -1,0 +1,106 @@
+Starting iteration 1 
+Starting iteration 4 
+Starting iteration 3 
+[1] 1
+Type: EXEC 
+Starting iteration 5 
+[1] 2
+[1] 4
+[1] 3
+[1] 5
+Type: EXEC 
+Type: EXEC 
+Starting iteration 6 
+Type: EXEC 
+Starting iteration 8 
+Type: EXEC 
+Starting iteration 7 
+Starting iteration 9 
+[1] 7
+Type: EXEC 
+Starting iteration 10 
+[1] 6
+[1] 9
+[1] 8
+[1] 10
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+Starting iteration 2 
+Starting iteration 4 
+Starting iteration 1 
+[1] 1
+[1] 4
+[1] 2
+Type: EXEC 
+Type: EXEC 
+Starting iteration 5 
+Starting iteration 6 
+[1] 3
+[1] 5
+Type: EXEC 
+Type: EXEC 
+ation 7 
+Starting iteration 8 
+[1] 6
+[1] 7
+[1] 8
+Type: EXEC 
+Starting iteration 9 
+Type: EXEC 
+Starting iteration 10 
+[1] 10
+[1] 9
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+Type: EXEC 
+[1] 1
+Type: EXEC 
+[1] 2
+Type: EXEC 
+[1] 4
+Type: EXEC 
+[1] 3
+Type: EXEC 
+[1] 7
+Type: EXEC 
+[1] 5
+Type: EXEC 
+[1] 8
+Type: EXEC 
+[1] 6
+Type: EXEC 
+[1] 10
+Type: EXEC 
+[1] 9
+Type: EXEC 
+[1] 12
+Type: EXEC 
+[1] 11
+Type: EXEC 
+[1] 13
+Type: EXEC 
+[1] 14
+Type: EXEC 
+[1] 16
+Type: EXEC 
+[1] 18
+Type: EXEC 
+[1] 15
+[1] 17
+[1] 19
+[1] 20
+Type: DONE 
+Type: DONE 
+Type: DONE 
+Type: DONE 

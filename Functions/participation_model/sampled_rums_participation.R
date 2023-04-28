@@ -164,8 +164,8 @@ sampled_rums <- function(data_in, cluster = 4,
                                  group_all %in% cluster) %>% 
     distinct(trip_id, .keep_all = T) %>% 
     dplyr::select(trip_id, VESSEL_NUM,  set_year, set_month, set_day, Revenue, selection,
-                  lag_NANC_SDM_30, lag_PSDN_SDM_60, lag_MSQD_SDM_90, lag_PHRG_SDM_220,
-                  NANC_SDM_30, PSDN_SDM_60, MSQD_SDM_90, PHRG_SDM_220) %>% as.data.frame
+                  lag_NANC_SDM_20, lag_PSDN_SDM_60, lag_MSQD_SDM_90, lag_PHRG_SDM_220,
+                  NANC_SDM_20, PSDN_SDM_60, MSQD_SDM_90, PHRG_SDM_220) %>% as.data.frame
 
   ## Select hauls used to calculate probability for the choice set
   dist_hauls_catch_shares <- hauls %>% dplyr::filter(set_year >= min_year_prob, set_year <= max_year_prob)

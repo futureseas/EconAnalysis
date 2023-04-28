@@ -22,11 +22,17 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   
 
   # ### Delete
-  # xx <- 3
+  # xx <- 9296
   # td1 <- td
   # dat1 <- dat
-  # qPSDN1 <- qPSDN
+  # qPSDN1 <- qPSDN 
   # SDM.PSDN <- psdn.sdm
+  # qMSQD1 <- qMSQD 
+  # SDM.MSQD <- msqd.sdm
+  # qNANC1 <- qNANC
+  # SDM.NANC <- nanc.sdm
+  # qPHRG1 <- qPHRG
+  # SDM.PHRG <- phrg.sdm
   # ###
   
   temp_dat <- td1[xx, ]
@@ -207,7 +213,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       # Create database to predict landings
       dum_rev_SDM <- temp_dat
       dum_rev_SDM$VESSEL_NUM <- dum_rev_SDM$fished_VESSEL_NUM
-      dum_rev_SDM$lag_NANC_SDM_30 <- sdm$NANC_SDM_30
+      dum_rev_SDM$lag_NANC_SDM_20 <- sdm$NANC_SDM_20
       dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
       dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
       dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
@@ -275,6 +281,9 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
     } else {
       
+      dum_rev_SDM <- NULL
+      dum_rev_SDM$Revenue <- NA
+      
       dum_rev <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
                                                   set_date %within% temp_dat$days_inter,
                                                   group_all %in% fltz, ## Check if this is too restrictive...
@@ -302,6 +311,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$dummy_prev_year_days <- dum30y_val
   temp_dat$dummy_last_day <- dum1_val
 
+  print(xx)
   return(temp_dat)
 }
   

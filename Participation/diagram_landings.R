@@ -11,8 +11,8 @@ digraph surveillance_diagram {    # 'digraph' means 'directional graph', then th
   # graph statement
   #################
   graph [layout = dot,
-         rankdir = TB,            # layout top-to-bottom
-         fontsize = 10]
+         rankdir = LR,            # layout top-to-bottom
+         fontsize = 12]
   
 
   # nodes (circles)
@@ -26,15 +26,21 @@ digraph surveillance_diagram {    # 'digraph' means 'directional graph', then th
   c3 [label = 'Distance\ntravelled'] 
   p1 [label = 'Demand']
   p2 [label = 'Supply']
+  p3 [label = 'International\ncatches']
   Prices [label = 'Prices']
   Prices [label = 'Prices']
-  Cost [label = 'Cost',
+  Cost [label = 'Expected\nCost',
             fontcolor = red]
-  Revenue [label = 'Revenue',
+  Revenue [label = 'Expected\nRevenue',
             fontcolor = darkgreen]
   l1 [label = 'Closures'] 
   Landings [style = filled, 
-            label = 'Landings or\nParticipation',
+            label = 'Landings of\nspecies S at port J',
+            fontcolor = black,
+            fillcolor = PowderBlue]
+
+  Participation [style = filled, 
+            label = 'Participation in \nfishery S at port J',
             fontcolor = black,
             fillcolor = PowderBlue]
 
@@ -47,19 +53,26 @@ digraph surveillance_diagram {    # 'digraph' means 'directional graph', then th
                           fontcolor = red,
                           color = red]
                           
-  Revenue -> Landings [label = '-',
+  Participation -> Landings [label = '+',
+                          fontcolor = darkgreen,
+                          color = darkgreen]
+
+  Revenue -> Participation [label = '-',
                           fontcolor = darkgreen,
                           color = darkgreen]
                           
   Landings -> p2 [label = 'Local supply (+)',
                           fontcolor = darkgreen,
-                          color = darkgreen,
-                          style = dashed]
+                          color = darkgreen]
+                      
+  p3 -> p2 [label = '(+)',
+                          fontcolor = darkgreen,
+                          color = darkgreen]
+                          
                           
   Landings -> r1 [label = '-',
                           fontcolor = red,
-                          color = red,
-                          style = dashed]
+                          color = red]
                           
   r1 -> l1 [label = '-',
                           fontcolor = red,
@@ -73,7 +86,7 @@ digraph surveillance_diagram {    # 'digraph' means 'directional graph', then th
                                       fontcolor = darkgreen,
                                       color = darkgreen]
                                       
-  {l1 Cost} -> Landings [label = '-',
+  {l1 Cost} -> Participation [label = '-',
                                       fontcolor = red,
                                       color = red]
                                       
