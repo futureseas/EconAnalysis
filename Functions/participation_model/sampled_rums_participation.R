@@ -393,7 +393,7 @@ sampled_rums <- function(data_in, cluster = 4,
   #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
   
     dummys2 <- foreach::foreach(ii = 1:nrow(td),
-    .packages = c("dplyr", 'lubridate')) %do% {
+    .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
       process_dummys2(xx = ii, td1 = td, dat1 = dat, 
                       qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm,

@@ -347,7 +347,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$dummy_prev_year_days <- dum30y_val
   temp_dat$dummy_last_day <- dum1_val
 
-  print(xx)
+  # print(xx)
   return(temp_dat)
 }
   
