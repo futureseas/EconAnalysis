@@ -54,8 +54,7 @@ sampled_rums <- function(data_in, cluster = 4,
   # seed <- 300
   # ncores <- 4
   # rev_scale <- 100
-  # #
-  # # ###############
+  # ################
   
   #---------------------------------------------------------------
   ## Filter the data
@@ -377,8 +376,24 @@ sampled_rums <- function(data_in, cluster = 4,
   phrg.sdm[is.na(phrg.sdm)] <- 0
   phrg.sdm$set_date <- ymd(paste(phrg.sdm$LANDING_YEAR, phrg.sdm$LANDING_MONTH, phrg.sdm$LANDING_DAY, sep = "-"))
   
+  # tab.maxdays.psdn <- psdn.sdm %>% 
+  #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
+  #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
+  # 
+  # tab.maxdays.msqd <- msqd.sdm %>% 
+  #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
+  #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
+  # 
+  # tab.maxdays.nanc <- nanc.sdm %>% 
+  #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
+  #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
+  # 
+  # tab.maxdays.phrg <- phrg.sdm %>% 
+  #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
+  #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
+  
     dummys2 <- foreach::foreach(ii = 1:nrow(td),
-    .packages = c("dplyr", 'lubridate')) %dopar% {
+    .packages = c("dplyr", 'lubridate')) %do% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
       process_dummys2(xx = ii, td1 = td, dat1 = dat, 
                       qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm,
@@ -417,5 +432,15 @@ sampled_rums <- function(data_in, cluster = 4,
     td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", "dummy_miss", "dummy_miss_SDM", 'mean_rev', 'mean_rev_adj', 'mean_rev_SDM', 'mean_rev_SDM_adj')] )
   
   return(sampled_hauls)
+  
+  
+  
+  #### FUTURE TASK! ####
+  ### Calculated expected distances, and multiply by port fuel prices
+  #### Expected distances are the distance traveled by any vessel in the last 30 days to capture species S in port J
+  #### Usea catch areas, and calculate distance by row to port of landings
+  #### I should calculate also distance from port of choice set to port of gravity. 
+  
+  
 }
   

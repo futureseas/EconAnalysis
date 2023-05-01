@@ -22,12 +22,12 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   
 
   # ### Delete
-  # xx <- 9296
+  # xx <- 14239
   # td1 <- td
   # dat1 <- dat
-  # qPSDN1 <- qPSDN 
+  # qPSDN1 <- qPSDN
   # SDM.PSDN <- psdn.sdm
-  # qMSQD1 <- qMSQD 
+  # qMSQD1 <- qMSQD
   # SDM.MSQD <- msqd.sdm
   # qNANC1 <- qNANC
   # SDM.NANC <- nanc.sdm
@@ -108,8 +108,17 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       }
 
       ## Obtain SDM previous day for the species/port combination
-      sdm <- SDM.PSDN %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
-                                        PORT_AREA_CODE %in% port)
+      if (temp_dat$prev_day_date >= as.Date("2017-04-20") & temp_dat$prev_day_date <= as.Date("2017-04-30")) {
+        sdm1 <- SDM.PSDN %>% dplyr::filter(set_date == "2017-04-19", PORT_AREA_CODE %in% port)
+        sdm2 <- SDM.PSDN %>% dplyr::filter(set_date == "2017-05-01", PORT_AREA_CODE %in% port)
+        sdm <- rbind(sdm1, sdm2)
+      } else if (temp_dat$prev_day_date >= as.Date("2010-12-27") & temp_dat$prev_day_date <= as.Date("2010-12-31")) {
+        sdm1 <- SDM.PSDN %>% dplyr::filter(set_date == "2010-12-26", PORT_AREA_CODE %in% port)
+        sdm2 <- SDM.PSDN %>% dplyr::filter(set_date == "2011-01-01", PORT_AREA_CODE %in% port)
+        sdm <- rbind(sdm1, sdm2)
+      } else {
+        sdm <- SDM.PSDN %>% dplyr::filter(set_date %in% temp_dat$prev_day_date, PORT_AREA_CODE %in% port)
+      }
       
       ## Obtain average price at species/port combination last 30 days (not including current day)
       price <- dat1 %>% dplyr::filter(set_date %within% temp_dat$days_inter,
@@ -120,7 +129,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       dum_rev_SDM <- temp_dat
       dum_rev_SDM$VESSEL_NUM <- dum_rev_SDM$fished_VESSEL_NUM
       # dum_rev$Closure <- 0
-      dum_rev_SDM$lag_PSDN_SDM_60 <- sdm$PSDN_SDM_60
+      dum_rev_SDM$lag_PSDN_SDM_60 <- mean(sdm$PSDN_SDM_60)
       dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
       dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
       dum_rev_SDM$Price_mton <- mean(price$Price_mtons)
@@ -154,9 +163,18 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
           unique() %>% dplyr::filter(Vessel.length == mean(vessel.length$Vessel.length))
       }
       
-      ## Obtain SDM previous day for the species/port combination
-      sdm <- SDM.MSQD %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
-                                        PORT_AREA_CODE %in% port)
+      ## Obtain SDM previous day for the species/port combination (USE WITHIN IF SDM NOT AVAILABLE...)
+      if (temp_dat$prev_day_date >= as.Date("2017-04-20") & temp_dat$prev_day_date <= as.Date("2017-04-30")) {
+        sdm1 <- SDM.MSQD %>% dplyr::filter(set_date == "2017-04-19", PORT_AREA_CODE %in% port)
+        sdm2 <- SDM.MSQD %>% dplyr::filter(set_date == "2017-05-01", PORT_AREA_CODE %in% port)
+        sdm <- rbind(sdm1, sdm2)
+      } else if (temp_dat$prev_day_date >= as.Date("2010-12-27") & temp_dat$prev_day_date <= as.Date("2010-12-31")) {
+        sdm1 <- SDM.MSQD %>% dplyr::filter(set_date == "2010-12-26", PORT_AREA_CODE %in% port)
+        sdm2 <- SDM.MSQD %>% dplyr::filter(set_date == "2011-01-01", PORT_AREA_CODE %in% port)
+        sdm <- rbind(sdm1, sdm2)
+      } else {
+        sdm <- SDM.MSQD %>% dplyr::filter(set_date %in% temp_dat$prev_day_date, PORT_AREA_CODE %in% port)
+      }
       
       ## Obtain average price at species/port combination last 30 days (not including current day)
       price <- dat1 %>% dplyr::filter(set_date %within% temp_dat$days_inter,
@@ -167,7 +185,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       dum_rev_SDM <- temp_dat
       dum_rev_SDM$VESSEL_NUM <- dum_rev_SDM$fished_VESSEL_NUM
       # dum_rev$Closure <- 0
-      dum_rev_SDM$lag_MSQD_SDM_90 <- sdm$MSQD_SDM_90
+      dum_rev_SDM$lag_MSQD_SDM_90 <- mean(sdm$MSQD_SDM_90)
       dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
       dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
       dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
@@ -202,8 +220,17 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       }
       
       ## Obtain SDM previous day for the species/port combination
-      sdm <- SDM.NANC %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
-                                        PORT_AREA_CODE %in% port)
+      if (temp_dat$prev_day_date >= as.Date("2017-04-20") & temp_dat$prev_day_date <= as.Date("2017-04-30")) {
+        sdm1 <- SDM.NANC %>% dplyr::filter(set_date == "2017-04-19", PORT_AREA_CODE %in% port)
+        sdm2 <- SDM.NANC %>% dplyr::filter(set_date == "2017-05-01", PORT_AREA_CODE %in% port)
+        sdm <- rbind(sdm1, sdm2)
+      } else if (temp_dat$prev_day_date >= as.Date("2010-12-27") & temp_dat$prev_day_date <= as.Date("2010-12-31")) {
+        sdm1 <- SDM.NANC %>% dplyr::filter(set_date == "2010-12-26", PORT_AREA_CODE %in% port)
+        sdm2 <- SDM.NANC %>% dplyr::filter(set_date == "2011-01-01", PORT_AREA_CODE %in% port)
+        sdm <- rbind(sdm1, sdm2)
+      } else {
+        sdm <- SDM.NANC %>% dplyr::filter(set_date %in% temp_dat$prev_day_date, PORT_AREA_CODE %in% port)
+      }
       
       ## Obtain average price at species/port combination last 30 days (not including current day)
       price <- dat1 %>% dplyr::filter(set_date %within% temp_dat$days_inter,
@@ -213,7 +240,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       # Create database to predict landings
       dum_rev_SDM <- temp_dat
       dum_rev_SDM$VESSEL_NUM <- dum_rev_SDM$fished_VESSEL_NUM
-      dum_rev_SDM$lag_NANC_SDM_20 <- sdm$NANC_SDM_20
+      dum_rev_SDM$lag_NANC_SDM_20 <- mean(sdm$NANC_SDM_20)
       dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
       dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
       dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
@@ -247,8 +274,17 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       }
       
       ## Obtain SDM previous day for the species/port combination
-      sdm <- SDM.PHRG %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
-                                        PORT_AREA_CODE %in% port)
+      if (temp_dat$prev_day_date >= as.Date("2017-04-20") & temp_dat$prev_day_date <= as.Date("2017-04-30")) {
+        sdm1 <- SDM.PHRG %>% dplyr::filter(set_date == "2017-04-19", PORT_AREA_CODE %in% port)
+        sdm2 <- SDM.PHRG %>% dplyr::filter(set_date == "2017-05-01", PORT_AREA_CODE %in% port)
+        sdm <- rbind(sdm1, sdm2)
+      } else if (temp_dat$prev_day_date >= as.Date("2010-12-27") & temp_dat$prev_day_date <= as.Date("2010-12-31")) {
+        sdm1 <- SDM.PHRG %>% dplyr::filter(set_date == "2010-12-26", PORT_AREA_CODE %in% port)
+        sdm2 <- SDM.PHRG %>% dplyr::filter(set_date == "2011-01-01", PORT_AREA_CODE %in% port)
+        sdm <- rbind(sdm1, sdm2)
+      } else {
+        sdm <- SDM.PHRG %>% dplyr::filter(set_date %in% temp_dat$prev_day_date, PORT_AREA_CODE %in% port)
+      }
       
       ## Obtain average price at species/port combination last 30 days (not including current day)
       price <- dat1 %>% dplyr::filter(set_date %within% temp_dat$days_inter,
@@ -258,7 +294,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       # Create database to predict landings
       dum_rev_SDM <- temp_dat
       dum_rev_SDM$VESSEL_NUM <- dum_rev_SDM$fished_VESSEL_NUM
-      dum_rev_SDM$lag_PHRG_SDM_220 <- sdm$PHRG_SDM_220
+      dum_rev_SDM$lag_PHRG_SDM_220 <- mean(sdm$PHRG_SDM_220)
       dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
       dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
       dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
