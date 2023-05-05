@@ -1,56 +1,15 @@
-######################################
-### Read block maps for each state ###
-######################################
+###############################################################
+### OBTAIN LOGBOOK DATA WITH FTID TO MERGE WITH PACFIN DATA ###
+###############################################################
 
-rm(list=ls())
-gc()
-
-###Load packages and set working directory
-
-library(data.table)
 library(dplyr)
-library(lubridate)
-library(tidyr)
-library(tidyverse)  
-
-
-#-----------------------------------------------------
-### Load in the data
-part.data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-
-CATCH_AREAS <- part.data %>% 
-  group_by(CATCH_AREA_CODE, AREA_TYPE_CODE) %>% 
-  summarize(n_obs = n()) %>% 
-  filter(AREA_TYPE_CODE == 1) 
-
-numbers_only <- function(x) !grepl("\\D", x)
-part.data$numbers <- numbers_only(part.data$CATCH_AREA_CODE)
-
-part.data <- part.data %>% 
-  mutate(CATCH_AREA_CODE = ifelse(numbers == TRUE, as.numeric(CATCH_AREA_CODE), NA)) %>%
-  mutate(CATCH_AREA_CODE = as.numeric(CATCH_AREA_CODE)) %>%
-  mutate(CATCH_AREA_CODE = ifelse(AREA_TYPE_CODE != 1, NA, CATCH_AREA_CODE))
-
-### Open layers
-setwd("C:/GitHub/EconAnalysis/Participation/BlockAreas")
-
-library(maptools)
-library(rgeos)
-landuse <- readShapePoly("NOAA_Block/NonWDFWFisheryManagementAreas - NOAA Coastal Trawl Logbook Block") 
-data <- as.data.frame(landuse) %>% select(c(BlockNumbe, CentroidLo, CentroidLa))
-part.data.merge <- merge(part.data, data, 
-                         by.x = 'CATCH_AREA_CODE', 
-                         by.y = 'BlockNumbe', all.x = TRUE, all.y = FALSE)
+library(tidyverse) 
+library(readxl)
 
 ###-------------------------------------------
 # Link to logbook -- MARKET SQUID
 
 ## Oregon Squid
-Tickets <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv") 
-Tickets_FTID <- Tickets %>% dplyr::select(FTID)
-Tickets_filtered <- Tickets %>% filter(FTID == 42012)
-
-
 sqd.logbook.OR.2016 <- readxl::read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2016") %>%
   dplyr::rename(set_number = `Set #`) %>%
   mutate(Lat = Lat + min...9/60) %>%
@@ -241,8 +200,16 @@ psdn.logbook.WA.NO_FTID <- read_excel("C:\\Data\\Logbooks\\WDFW CPS logbooks\\WA
 
 
 ### Merge all logbooks with FTID ### 
-logbooks.FTID <- rbind(sqd.logbook, nanc.logbook, psdn.logbook)
+logbooks.FTID <- rbind(sqd.logbook, nanc.logbook, psdn.logbook) %>% 
+  filter(lat >= 30) %>% filter(lat <= 50) %>% 
+  mutate(lon = ifelse(lon > 0, lon*(-1), lon)) %>%
+  filter(lon <= -115) %>% filter(lon >= -130)
 
+
+logbooks.coord <- logbooks.FTID %>%
+  group_by(FTID) %>% summarize(lat_logbook = mean(lat), lon_loogbook = mean(lon))
+
+saveRDS(logbooks.coord, "C:\\Data\\Logbooks\\logbooks_FTID.rds")
 
 
 

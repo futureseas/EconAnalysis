@@ -39,7 +39,7 @@ Tickets <- select(Tickets_raw, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH,
                                  VESSEL_NUM, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_HORSEPOWER, 
                                  LANDED_WEIGHT_MTONS, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE,
                                  PACFIN_GEAR_CODE, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, VESSEL_OWNER_NAME,
-                                 FISHER_LICENSE_NUM, AFI_PRICE_PER_POUND, NUM_OF_DAYS_FISHED, CATCH_AREA_CODE, AREA_TYPE_CODE)) %>%
+                                 FISHER_LICENSE_NUM, AFI_PRICE_PER_POUND, NUM_OF_DAYS_FISHED)) %>%
   mutate(AFI_PRICE_PER_MTONS = AFI_PRICE_PER_POUND/0.000453592)
 
 
@@ -95,7 +95,7 @@ Vessel.chr.horsepower <- Tickets %>%
 
 #-----------------------------------------------------
 ### Aggregate species in a FTID 
-Tickets <- Tickets %>% group_by(AGENCY_CODE, FTID_unique, FTID, AREA_TYPE_CODE, CATCH_AREA_CODE, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE,
+Tickets <- Tickets %>% group_by(AGENCY_CODE, FTID_unique, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE,
                                 VESSEL_NUM, PACFIN_SPECIES_CODE, Species_Dominant
                                 #PORT_NAME, VESSEL_NAME, VESSEL_OWNER_NAME, PACFIN_GEAR_CODE, 
                                 #FISHER_LICENSE_NUM, CATCH_AREA_CODE, PACFIN_SPECIES_COMMON_NAME
@@ -395,8 +395,7 @@ Tickets_SDM <- Tickets_SDM %>% drop_na(set_date) %>%
                 "lag_CMCK_SDM_30", "lag_CMCK_SDM_90", "lag_CMCK_SDM_220",       
                 "lag_JMCK_SDM_30", "lag_JMCK_SDM_90", "lag_JMCK_SDM_220",
                 "lag_MSQD_SPAWN_SDM_30", "lag_MSQD_SPAWN_SDM_90", "lag_MSQD_SPAWN_SDM_220",
-                "Vessel.length", "Vessel.weight", "Vessel.horsepower",
-                "CATCH_AREA_CODE", "AREA_TYPE_CODE") 
+                "Vessel.length", "Vessel.weight", "Vessel.horsepower") 
 
 
 
