@@ -16,234 +16,74 @@ library(tidyverse)
 
 #-----------------------------------------------------
 ### Load in the data
-part.data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
+Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
+Tickets_raw<-rbind(Tickets1, Tickets2)
+logbooks_FTID <- readRDS("C:\\Data\\Logbooks\\logbooks_FTID.rds")
 
-CATCH_AREAS <- part.data %>% 
-  group_by(CATCH_AREA_CODE, AREA_TYPE_CODE) %>% 
-  summarize(n_obs = n()) %>% 
-  filter(AREA_TYPE_CODE == 1) 
 
-numbers_only <- function(x) !grepl("\\D", x)
-part.data$numbers <- numbers_only(part.data$CATCH_AREA_CODE)
+Tickets <- Tickets_raw %>% dplyr::select(c(CATCH_AREA_CODE, AREA_TYPE_CODE, FTID, PACFIN_SPECIES_CODE))
 
-part.data <- part.data %>% 
-  mutate(CATCH_AREA_CODE = ifelse(numbers == TRUE, as.numeric(CATCH_AREA_CODE), NA)) %>%
+# CATCH_AREAS <- Tickets %>% 
+#   group_by(CATCH_AREA_CODE, AREA_TYPE_CODE) %>% 
+#   summarize(n_obs = n()) %>% 
+#   filter(AREA_TYPE_CODE == 1) 
+
+# numbers_only <- function(x) !grepl("\\D", x)
+# Tickets$numbers <- numbers_only(Tickets$CATCH_AREA_CODE)
+
+table <- as.data.frame(table(Tickets_catch$CATCH_AREA_CODE, Tickets_catch$AREA_TYPE_CODE)) 
+Tickets_catch <- Tickets %>% 
+  filter(CATCH_AREA_CODE != 'UNKN') %>%
+  filter(CATCH_AREA_CODE != '0000') %>%
+  filter(AREA_TYPE_CODE == 1 | AREA_TYPE_CODE == 5) %>% 
   mutate(CATCH_AREA_CODE = as.numeric(CATCH_AREA_CODE)) %>%
-  mutate(CATCH_AREA_CODE = ifelse(AREA_TYPE_CODE != 1, NA, CATCH_AREA_CODE))
+  mutate(CATCH_AREA_CODE = ifelse(CATCH_AREA_CODE == 0, NA, CATCH_AREA_CODE)) %>%
+  dplyr::select(CATCH_AREA_CODE, AREA_TYPE_CODE, FTID, PACFIN_SPECIES_CODE) %>% unique() %>%
+  drop_na() %>%
+  subset(!(AREA_TYPE_CODE == 1 & CATCH_AREA_CODE < 101)) %>%
+  subset(!(AREA_TYPE_CODE == 1 & CATCH_AREA_CODE > 1444)) %>%
+  subset(!(AREA_TYPE_CODE == 5 & CATCH_AREA_CODE > 13))
+
+
+# Tickets_catch_n <- Tickets_catch %>% 
+#   group_by(FTID, PACFIN_SPECIES_CODE) %>% 
+#   mutate(n_rep = n()) %>% ungroup() %>% filter(n_rep == 2) %>%
+#   ifelse()
 
 ### Open layers
 setwd("C:/GitHub/EconAnalysis/Participation/BlockAreas")
 
 library(maptools)
 library(rgeos)
-landuse <- readShapePoly("NOAA_Block/NonWDFWFisheryManagementAreas - NOAA Coastal Trawl Logbook Block") 
-data <- as.data.frame(landuse) %>% select(c(BlockNumbe, CentroidLo, CentroidLa))
-part.data.merge <- merge(part.data, data, 
-                         by.x = 'CATCH_AREA_CODE', 
-                         by.y = 'BlockNumbe', all.x = TRUE, all.y = FALSE)
+catch_area_1 <- readShapePoly("NOAA_Block/NonWDFWFisheryManagementAreas - NOAA Coastal Trawl Logbook Block") 
+data_1 <- as.data.frame(catch_area_1) %>% select(c(BlockNumbe, CentroidLo, CentroidLa)) %>%
+  rename(CATCH_AREA_CODE = BlockNumbe) %>%
+  rename(lon_ca = CentroidLo) %>%
+  rename(lat_ca = CentroidLa)
 
-###-------------------------------------------
-# Link to logbook -- MARKET SQUID
+ticket.merge <- merge(Tickets_catch, data_1, 
+                         by = c('CATCH_AREA_CODE'), all.x = TRUE, all.y = FALSE)
 
-## Oregon Squid
-Tickets <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv") 
-Tickets_FTID <- Tickets %>% dplyr::select(FTID)
-Tickets_filtered <- Tickets %>% filter(FTID == 42012)
+catch_area_2 <- readShapePoly("MajorFishingArea/MajorFishingArea - Recreational Marine Area Code.shp")
+centr <- gCentroid(catch_area_2, byid = TRUE)
+centr <- SpatialPointsDataFrame(centr, data= catch_area_2@data) 
+data_2 <- as.data.frame(centr) %>% mutate(AreaName = as.character(AreaName)) %>%
+  mutate(AreaName = ifelse(AreaName == '8-1', 8, ifelse(AreaName == "8-2", "8", AreaName))) %>%
+  mutate(AreaName = ifelse(AreaName == '2-1', 2, ifelse(AreaName == "2-2", "2", AreaName))) %>%
+  mutate(AreaName = as.numeric(AreaName)) %>% group_by(AreaName) %>%
+  summarize(lat_ca2 = mean(y), lon_ca2 = mean(x)) %>% drop_na() %>%
+  rename(CATCH_AREA_CODE = AreaName) 
 
-
-sqd.logbook.OR.2016 <- readxl::read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2016") %>%
-  dplyr::rename(set_number = `Set #`) %>%
-  mutate(Lat = Lat + min...9/60) %>%
-  mutate(Long = Long + min...11/60) %>%
-  mutate(AGENCY_CODE="O") %>%
-  dplyr::rename(lat = Lat) %>%
-  dplyr::rename(lon = Long) %>%
-  dplyr::rename(VESSEL_NUM = FedDoc) %>%
-  mutate(set_date = as.Date(Date,format="%Y-%m-%d")) %>%
-  dplyr::rename(FTID = `Ticket #`) %>%
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>% 
-  drop_na(set_number) %>% 
-  mutate(ind = ifelse(set_number <= lag(set_number), row_number(), NA)) %>%
-  fill(ind) %>% 
-  mutate(ind = ifelse(is.na(ind), 1, ind)) %>% 
-  group_by(ind) %>%
-  fill(FTID, .direction = "downup") %>% 
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
-  ungroup()
-
-sqd.logbook.OR.2018 <- read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2018") %>%
-  mutate(Lat = Lat + Min/60) %>%
-  mutate(Long = Long + mins/60) %>%
-  mutate(AGENCY_CODE="O") %>%
-  dplyr::rename(lat = Lat) %>%
-  dplyr::rename(lon = Long) %>%
-  dplyr::rename(VESSEL_NUM = `Doc #`) %>%
-  tidyr::fill(VESSEL_NUM) %>%
-  mutate(set_date = as.Date(`Log Date`,format="%Y-%m-%d")) %>%
-  dplyr::rename(FTID = `Fish Ticket #`) %>%
-  dplyr::rename(set_number = `Set No.`) %>%
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
-  drop_na(set_number) %>%  
-  mutate(ind = ifelse(set_number <= lag(set_number), row_number(), NA)) %>%
-  fill(ind) %>% 
-  mutate(ind = ifelse(is.na(ind), 1, ind)) %>% 
-  group_by(ind) %>%
-  fill(FTID, .direction = "downup") %>% 
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
-  ungroup()
-
-sqd.logbook.OR.2019 <- read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2019") %>%
-  dplyr::rename(set_number = Set) %>%
-  mutate(lat = Lat + lat/60) %>%
-  mutate(lon = Long + long/60) %>%
-  mutate(AGENCY_CODE="O") %>%
-  dplyr::rename(VESSEL_NUM = `doc number`) %>%
-  mutate(set_date = as.Date(`Fishing date`,format="%Y-%m-%d")) %>%
-  dplyr::rename(FTID = `Fish ticket`) %>%
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
-  drop_na(set_number) %>% 
-  mutate(ind = ifelse(set_number <= lag(set_number), row_number(), NA)) %>%
-  fill(ind) %>% 
-  mutate(ind = ifelse(is.na(ind), 1, ind)) %>% 
-  group_by(ind) %>%
-  fill(FTID, .direction = "downup") %>% 
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
-  ungroup()
-
-sqd.logbook.OR.2020 <- read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2020") %>%
-  dplyr::rename(set_number = `Set No.`) %>%
-  mutate(Lat = Lat + Min/60) %>%
-  mutate(Long = Long + mins/60) %>%
-  mutate(AGENCY_CODE="O") %>%
-  dplyr::rename(lat = Lat) %>%
-  dplyr::rename(lon = Long) %>%
-  dplyr::rename(VESSEL_NUM = `Doc #`) %>%
-  mutate(set_date = as.Date(`log date`,format="%Y-%m-%d")) %>%
-  dplyr::rename(FTID = `Fish Ticket #`) %>%
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
-  drop_na(set_number) %>%  
-  mutate(ind = ifelse(set_number <= lag(set_number), row_number(), NA)) %>%
-  fill(ind) %>% 
-  mutate(ind = ifelse(is.na(ind), 1, ind)) %>% 
-  group_by(ind) %>%
-  fill(FTID, .direction = "downup") %>% 
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
-  ungroup()
-
-sqd.logbook.OR <- rbind(sqd.logbook.OR.2016, sqd.logbook.OR.2018, sqd.logbook.OR.2019, sqd.logbook.OR.2020) %>%
-  drop_na(FTID) %>%
-  mutate(lat = ifelse(lat == 0, NA, lat)) %>%
-  mutate(lon = ifelse(lon == 0, NA, lon)) %>%
-  drop_na(lon) %>%
-  drop_na(lat) %>%
-  filter(FTID != "No landing") %>%
-  filter(FTID != "no landing")
-
-sqd.logbook.OR <-sqd.logbook.OR[ -c(1) ]
-
-rm(sqd.logbook.OR.2016, sqd.logbook.OR.2018, sqd.logbook.OR.2019, sqd.logbook.OR.2020)
+ticket.catch.area <- merge(ticket.merge, data_2, 
+                      by = c('CATCH_AREA_CODE'), all.x = TRUE, all.y = FALSE) %>%
+  mutate(lon_ca = ifelse(is.na(lon_ca), lon_ca2, lon_ca)) %>%
+  mutate(lat_ca = ifelse(is.na(lat_ca), lat_ca2, lat_ca)) %>%
+  dplyr::select(c(lat_ca, lon_ca, FTID, PACFIN_SPECIES_CODE)) %>%
+  drop_na()
 
 
-## California Squid
-sqd.logbook.vessel <- read_csv("C:\\Data\\Logbooks\\CDFW CPS logbooks\\MarketSquidVesselDataExtract.csv") %>%
-  dplyr::rename(lat = SetLatitude) %>%
-  dplyr::rename(lon = SetLongitude) %>%
-  dplyr::rename(VESSEL_NUM = VesselID) %>%
-  dplyr::rename(FTID = LandingReceipts) %>%
-  dplyr::rename(set_number = SetNumber) %>%
-  mutate(AGENCY_CODE="C") %>%
-  mutate(set_date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
-  drop_na(FTID) %>%
-  mutate(lat = ifelse(lat == 0, NA, lat)) %>%
-  mutate(lon = ifelse(lon == 0, NA, lon)) %>%
-  drop_na(lon) %>%
-  drop_na(lat)
-
-sqd.logbook.light.brail <- read_csv("C:\\Data\\Logbooks\\CDFW CPS logbooks\\MarketSquidLightBrailLogDataExtract.csv") %>%
-  dplyr::rename(lat = Lat_DD) %>%
-  dplyr::rename(lon = Long_DD) %>%
-  dplyr::rename(VESSEL_NUM = VesselID) %>%
-  dplyr::rename(FTID = LandingReceipt) %>%
-  mutate(AGENCY_CODE="C") %>%
-  mutate(set_date = as.Date(LogDateString,format="%m/%d/%Y")) %>%
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID')) %>%
-  drop_na(FTID) %>%
-  mutate(lat = ifelse(lat == 0, NA, lat)) %>%
-  mutate(lon = ifelse(lon == 0, NA, lon)) %>%
-  drop_na(lon) %>%
-  drop_na(lat) %>% 
-  group_by(FTID) %>% 
-  mutate(set_number = 1:n()) %>% 
-  ungroup()
-
-sqd.logbook <- rbind(sqd.logbook.OR, sqd.logbook.vessel,sqd.logbook.light.brail) %>% mutate(PACFIN_SPECIES_CODE = "MSQD")
-rm(sqd.logbook.OR, sqd.logbook.vessel,sqd.logbook.light.brail)
-
-###-------------------------------------------
-# Link to logbook -- NORTHERN ANCHOVY
-nanc.logbook.OR <- readxl::read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Anchovy logbooks.xlsx", sheet = "2016") %>%
-  dplyr::rename("lat_D" = "Lat (D)") %>% 
-  dplyr::rename("lat_min" = "Lat (DM)") %>%
-  mutate(lat = lat_D + lat_min/60) %>%
-  dplyr::rename("lon_D" = "Long (D)") %>% 
-  dplyr::rename("lon_min" = "Long (Decimal Min)")  %>% 
-  mutate(lon = lon_D + lon_min/60) %>%
-  mutate(AGENCY_CODE ="O") %>%
-  dplyr::rename(VESSEL_NUM = FedDoc) %>%
-  mutate(set_date = as.Date(Date,format="%Y-%m-%d")) %>%
-  dplyr::rename(FTID = Ticket) %>%
-  dplyr::rename(set_number = Set) %>%
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
-  mutate(lat = ifelse(lat == 0, NA, lat)) %>%
-  mutate(lon = ifelse(lon == 0, NA, lon)) %>%
-  drop_na(lon) %>%
-  drop_na(lat) %>%
-  filter(FTID != "No ticket") 
-
-nanc.logbook <- nanc.logbook.OR %>% mutate(PACFIN_SPECIES_CODE = "NANC")
-rm(nanc.logbook.OR)
-
-
-# PACIFIC SARDINE
-## Oregon
-psdn.logbook.OR <- read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Sardine logbooks.xlsx", sheet = "Sardine") %>%
-  mutate(lat = Lat + LatMin/60) %>%
-  mutate(lon = Long + LongMin/60) %>%
-  mutate(AGENCY_CODE = "O") %>%
-  dplyr::rename(VESSEL_NUM = FedDoc) %>%
-  dplyr::rename(set_number = Set) %>%
-  dplyr::rename(FTID = Ticket) %>%
-  mutate(set_date = as.Date(Date,format="%Y-%m-%d")) %>%
-  dplyr::rename(effort = Sard) %>%
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'set_number', 'FTID')) %>%
-  mutate(lat = ifelse(lat == 0, NA, lat)) %>%
-  mutate(lon = ifelse(lon == 0, NA, lon)) %>%
-  drop_na(lon) %>%
-  drop_na(lat) %>%
-  filter(FTID != "No ticket") 
-
-psdn.logbook <- psdn.logbook.OR %>% mutate(PACFIN_SPECIES_CODE = "PSDN")
-
-psdn.logbook.WA.NO_FTID <- read_excel("C:\\Data\\Logbooks\\WDFW CPS logbooks\\WA Sardine Logbook Flatfile Data Reques 20-15485.xlsx") %>%
-  mutate(lat = `Latitude Degrees` + `Latitude Minutes`/60) %>%
-  mutate(lon = `Longitude Degrees` + `Longitude Minutes`/60) %>%
-  mutate(AGENCY_CODE = "W") %>%
-  dplyr::rename(VESSEL_NUM = `Vessel`) %>%
-  dplyr::rename(set_number = `Set Number`) %>%
-  mutate(set_date = as.Date(`Fishing Date`,format="%Y-%m-%d")) %>%
-  dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'set_number')) %>%
-  mutate(FTID = NA) %>%
-  mutate(lat = ifelse(lat == 0, NA, lat)) %>%
-  mutate(lon = ifelse(lon == 0, NA, lon)) %>%
-  drop_na(lon) %>%
-  drop_na(lat)
-
-
-### Merge all logbooks with FTID ### 
-logbooks.FTID <- rbind(sqd.logbook, nanc.logbook, psdn.logbook)
-
-
+saveRDS(ticket.catch.area, "catchareas_FTID.rds")
 
 
 
