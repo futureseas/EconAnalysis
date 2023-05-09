@@ -139,6 +139,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
       # Predict landings
       prediction <- as.data.frame(predict(qPSDN1, dum_rev_SDM, interval = "prediction"))
+      prediction$fit <- exp(prediction$fit)
       
       # Calculate expected revenues
       dum_rev_SDM$Revenue <- prediction$fit * dum_rev_SDM$Price_mton
@@ -194,6 +195,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
       # Predict landings
       prediction <- as.data.frame(predict(qMSQD1, dum_rev_SDM, interval = "prediction"))
+      prediction$fit <- exp(prediction$fit)
       
       # Calculate expected revenues
       dum_rev_SDM$Revenue <- prediction$fit * dum_rev_SDM$Price_mton
@@ -240,7 +242,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       # Create database to predict landings
       dum_rev_SDM <- temp_dat
       dum_rev_SDM$VESSEL_NUM <- dum_rev_SDM$fished_VESSEL_NUM
-      dum_rev_SDM$lag_NANC_SDM_20 <- mean(sdm$NANC_SDM_20)
+      dum_rev_SDM$lag_NANC_SDM_220 <- mean(sdm$NANC_SDM_220)
       dum_rev_SDM$set_year <- year(dum_rev_SDM$set_date)
       dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
       dum_rev_SDM$Price_mton <- mean(price$Price_mtons) 
@@ -249,6 +251,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
       # Predict landings
       prediction <- as.data.frame(predict(qNANC1, dum_rev_SDM, interval = "prediction"))
+      prediction$fit <- exp(prediction$fit)
       
       # Calculate expected revenues
       dum_rev_SDM$Revenue <- prediction$fit * dum_rev_SDM$Price_mton
@@ -303,6 +306,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
       # Predict landings
       prediction <- as.data.frame(predict(qPHRG1, dum_rev_SDM, interval = "prediction"))
+      prediction$fit <- exp(prediction$fit)
       
       # Calculate expected revenues
       dum_rev_SDM$Revenue <- prediction$fit * dum_rev_SDM$Price_mton
