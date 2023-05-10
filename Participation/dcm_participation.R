@@ -32,9 +32,8 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %
 
 #-----------------------------------------------------------------------------
 ## Sampling choice data including expected revenue and past behavior dummies ##
-### Note: Increase ndays to 60? Then reduce dummy_miss (30% right now) ##
 
-# source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
+source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 # samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
 #                          min_year = 2013, max_year = 2017,
 #                          min_year_prob = 2013, max_year_prob = 2017,

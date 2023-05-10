@@ -30,31 +30,31 @@ sampled_rums <- function(data_in, cluster = 4,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale) {
 
-  # ###############
-  # # Delete
-  # gc()
-  # library(doParallel)
-  # library(tidyr)
-  # library(plm)
-  # library(tidyverse)
-  # library(lubridate)
-  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
-  #   mutate(Vessel.length = as.numeric(Vessel.length),
-  #          Vessel.weight = as.numeric(Vessel.weight),
-  #          Vessel.horsepower = as.numeric(Vessel.horsepower))
-  # cluster <- 4
-  # min_year_prob <- 2012
-  # max_year_prob <- 2017
-  # min_year_est <- 2012
-  # max_year_est <- 2019
-  # min_year <- 2012
-  # max_year <- 2017
-  # ndays <- 30
-  # nhauls_sampled <- 5
-  # seed <- 300
-  # ncores <- 4
-  # rev_scale <- 100
-  # ################
+  ###############
+  # Delete
+  gc()
+  library(doParallel)
+  library(tidyr)
+  library(plm)
+  library(tidyverse)
+  library(lubridate)
+  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
+    mutate(Vessel.length = as.numeric(Vessel.length),
+           Vessel.weight = as.numeric(Vessel.weight),
+           Vessel.horsepower = as.numeric(Vessel.horsepower))
+  cluster <- 4
+  min_year_prob <- 2012
+  max_year_prob <- 2017
+  min_year_est <- 2012
+  max_year_est <- 2019
+  min_year <- 2012
+  max_year <- 2017
+  ndays <- 30
+  nhauls_sampled <- 5
+  seed <- 300
+  ncores <- 4
+  rev_scale <- 100
+  ################
   
   #---------------------------------------------------------------
   ## Filter the data
@@ -62,12 +62,72 @@ sampled_rums <- function(data_in, cluster = 4,
   
   
   #-----------------------------------------------------------------------------
-  ## Estimate models for landings (conditional vessel have decide to participate)
+  ## Estimate models for prices 
   datPanel <- dat %>% 
     dplyr::filter(selection != "No-Participation") %>% 
     dplyr::filter(set_year >= min_year_est, set_year <= max_year_est)
   
- 
+  mod_summaries <- list()  
+  mod_estimate <- list() 
+  for(ii in min_year_est:max_year_est) {
+    datPanel_X <- datPanel %>% filter(set_year == ii)
+    mod_estimate[[ii-(min_year_est-1)]] <- lm(Price_mtons ~ factor(Species_Dominant) +
+                                   factor(PORT_AREA_CODE) + 
+                                   factor(set_month) +
+                                   Vessel.length, data = datPanel_X)
+    
+    mod_summaries[[ii-(min_year_est-1)]] <- summary(lm(Price_mtons ~ factor(Species_Dominant) +
+                                           factor(PORT_AREA_CODE) + 
+                                           factor(set_month) +
+                                           Vessel.length, data = datPanel_X))
+  }
+
+  mod_summaries 
+  
+  #-----------------------------------------------------------------------------
+  ## Estimate models for landings
+  
+  mod_landings <- lm(Landings_mtons ~ factor(Species_Dominant) + factor(PORT_AREA_CODE) + 
+                                poly(set_year, 3) + 
+                                factor(set_month) +
+                                Vessel.length + Vessel.horsepower, data = datPanel)
+  
+  
+  
+  mod_landings_estimate <- lm(Landings_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
+                                poly(set_year, 3) + 
+                                factor(set_month) +
+           Vessel.length + Vessel.horsepower, data = datPanel)
+  
+  mod_landings_estimate_l <- lm(Landings_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
+                                factor(set_month) +
+                                Vessel.length + Vessel.horsepower, data = datPanel)
+  
+  mod_landings_estimate_exp <- lm(Landings_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
+                                factor(Species_Dominant):factor(set_month) +
+                                Vessel.length + Vessel.horsepower, data = datPanel)
+  
+  options(max.print = 10)
+  
+  summary(mod_landings)
+  # Adjusted R-squared:  0.4734
+  summary(mod_landings_estimate)
+  # Adjusted R-squared:  0.5236
+  summary(mod_landings_estimate_exp)
+  # Adjusted R-squared:  0.542 
+
+  
+    
+  #calculate BIC of model1
+  BIC(mod_landings)
+  BIC(mod_landings_estimate)
+  BIC(mod_landings_estimate_exp)
+  
+  
+  
+  #-----------------------------------------------------------------------------
+  ## Estimate models for landings using SDM (conditional vessel have decide to participate)
+
   ################
   ### Pacific sardine landing model ###
   datPanel_PSDN <- datPanel %>% filter(Species_Dominant == "PSDN") %>%
