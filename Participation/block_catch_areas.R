@@ -32,7 +32,7 @@ Tickets <- Tickets_raw %>% dplyr::select(c(CATCH_AREA_CODE, AREA_TYPE_CODE, FTID
 # numbers_only <- function(x) !grepl("\\D", x)
 # Tickets$numbers <- numbers_only(Tickets$CATCH_AREA_CODE)
 
-table <- as.data.frame(table(Tickets_catch$CATCH_AREA_CODE, Tickets_catch$AREA_TYPE_CODE)) 
+table <- as.data.frame(table(Tickets$CATCH_AREA_CODE, Tickets$AREA_TYPE_CODE)) 
 Tickets_catch <- Tickets %>% 
   filter(CATCH_AREA_CODE != 'UNKN') %>%
   filter(CATCH_AREA_CODE != '0000') %>%

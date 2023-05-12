@@ -98,8 +98,7 @@ sqd.logbook.OR <- rbind(sqd.logbook.OR.2016, sqd.logbook.OR.2018, sqd.logbook.OR
   filter(FTID != "No landing") %>%
   filter(FTID != "no landing")
 
-sqd.logbook.OR <-sqd.logbook.OR[ -c(1) ]
-
+sqd.logbook.OR <- sqd.logbook.OR[ -c(1) ] 
 rm(sqd.logbook.OR.2016, sqd.logbook.OR.2018, sqd.logbook.OR.2019, sqd.logbook.OR.2020)
 
 
@@ -207,7 +206,7 @@ logbooks.FTID <- rbind(sqd.logbook, nanc.logbook, psdn.logbook) %>%
 
 
 logbooks.coord <- logbooks.FTID %>%
-  group_by(FTID) %>% summarize(lat_logbook = mean(lat), lon_loogbook = mean(lon))
+  group_by(FTID, PACFIN_SPECIES_CODE) %>% summarize(lat_logbook = mean(lat), lon_logbook = mean(lon))
 
 saveRDS(logbooks.coord, "C:\\Data\\Logbooks\\logbooks_FTID.rds")
 

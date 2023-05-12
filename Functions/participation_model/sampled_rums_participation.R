@@ -321,8 +321,8 @@ sampled_rums <- function(data_in, cluster = 4,
   #                              "SBA-MSQD" = "Market squid - Santa Barbara",
   #                              "SBA-PSDN" = "Pacific sardine - Santa Barbara",
   #                              "SFA-DCRB" = "Dungeness Crab - San Francisco"),
-  #                     values=c("#08519c", "#049cdb", "#6baed6","#2171b5", "#85db5b", "#4aa72f", "#248b37",
-  #                              "#e1dc0d", "#f0eb00", "#d94701", "#6a51a3", "#969696")) +
+  #                     values=c("#08519c", "#049cdb", "#6baed6","#2171b5", "#85db5b", "#4aa72f",
+  #                              "#248b37", "#e1dc0d", "#f0eb00", "#d94701", "#6a51a3", "#969696")) +
   #   guides(fill=guide_legend(title="Species / Port areas: "))
   # 
 
@@ -470,7 +470,6 @@ sampled_rums <- function(data_in, cluster = 4,
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_year_days'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_last_day'] <- 0
 
-  td2$mean_rev_SDM_adj <- td2$mean_rev_SDM / rev_scale  
   td2$mean_rev_adj <- td2$mean_rev / rev_scale
 
   sampled_hauls <- cbind(sampled_hauls,

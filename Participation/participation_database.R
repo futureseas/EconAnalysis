@@ -362,8 +362,29 @@ msqd_spawn.sdm <- msqd_spawn.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LAND
 Tickets_SDM <- merge(Tickets_SDM, msqd_spawn.sdm, 
                      by = (c('prev_days_date', 'PORT_AREA_CODE')),
                      all.x = TRUE, all.y = FALSE)
+saveRDS(Tickets_SDM, "Tickets_temp.rds")
 
+#-----------------------------------------------
+### Merge data to fishing locations
+Tickets_SDM <- readRDS("Tickets_temp.rds")
 
+loogbook_coord <- readRDS("C:\\Data\\Logbooks\\logbooks_FTID.rds")
+catch_area_coord <- readRDS("C:/GitHub/EconAnalysis/Participation/BlockAreas/catchareas_FTID.rds")
+
+Tickets_coord <- merge(Tickets_SDM, loogbook_coord, 
+                     by = (c('FTID', 'PACFIN_SPECIES_CODE')),
+                     all.x = TRUE, all.y = FALSE)
+Tickets_coord <- merge(Tickets_coord, catch_area_coord, 
+                       by = (c('FTID', 'PACFIN_SPECIES_CODE')),
+                       all.x = TRUE, all.y = FALSE)
+
+Tickets_coord <-  Tickets_coord %>%
+  mutate(lon = ifelse(is.na(lon_logbook), lon_ca, lon_logbook)) %>%
+  mutate(lat = ifelse(is.na(lat_logbook), lat_ca, lat_logbook))
+
+### Calculate distances from Ports to catch areas
+
+## Get PORT_AREA_CODE coordinates.
 
 
 
@@ -373,8 +394,8 @@ Tickets_SDM <- merge(Tickets_SDM, msqd_spawn.sdm,
 ## Add unique trip_ID and add set_date, set_year, set_day and set_month 
 ## (exclude weird period from expanding data)
 
-Tickets_SDM$trip_id <- udpipe::unique_identifier(Tickets_SDM, fields = c("FTID_unique"))
-Tickets_SDM <- Tickets_SDM %>% drop_na(set_date) %>% 
+Tickets_coord$trip_id <- udpipe::unique_identifier(Tickets_coord, fields = c("FTID_unique"))
+Tickets_coord <- Tickets_coord %>% drop_na(set_date) %>% 
   dplyr::rename(set_day = LANDING_DAY) %>%
   dplyr::rename(set_month = LANDING_MONTH) %>%
   dplyr::rename(set_year = LANDING_YEAR)%>%
@@ -395,7 +416,8 @@ Tickets_SDM <- Tickets_SDM %>% drop_na(set_date) %>%
                 "lag_CMCK_SDM_30", "lag_CMCK_SDM_90", "lag_CMCK_SDM_220",       
                 "lag_JMCK_SDM_30", "lag_JMCK_SDM_90", "lag_JMCK_SDM_220",
                 "lag_MSQD_SPAWN_SDM_30", "lag_MSQD_SPAWN_SDM_90", "lag_MSQD_SPAWN_SDM_220",
-                "Vessel.length", "Vessel.weight", "Vessel.horsepower") 
+                "Vessel.length", "Vessel.weight", "Vessel.horsepower", "lat", "lon",
+                "lon_logbook", "lon_ca", "lat_logbook", "lat_ca") 
 
 
 
@@ -407,7 +429,7 @@ library(zoo)            # working with time series data
 
 n_days_participation = 365
 
-participation_data_all <- Tickets_SDM %>% 
+participation_data_all <- Tickets_coord %>% 
   mutate(CPS_revenue = 
     ifelse(Species_Dominant == "PSDN", Revenue,
     ifelse(Species_Dominant == "NANC", Revenue,
@@ -493,7 +515,7 @@ participation_filtered <- participation_data_all %>%
   dplyr::select(VESSEL_NUM, set_date) %>% 
   unique() %>% mutate(filter = 1)
 
-Tickets_part <- merge(Tickets_SDM, participation_filtered,
+Tickets_part <- merge(Tickets_coord, participation_filtered,
                       by = c("VESSEL_NUM", "set_date"), 
                       all.x = TRUE, all.y = FALSE) %>% 
   filter(filter == 1) %>% 
@@ -503,6 +525,13 @@ Tickets_part <- merge(Tickets_SDM, participation_filtered,
 #------------------------------------------------------
 ### Save participation data
 saveRDS(Tickets_part, "C:\\Data\\PacFIN data\\participation_data.rds")
+
+
+# ### How many row have coordinates? 91%!
+# ticket_part_2 <- Tickets_part %>% dplyr::filter(selection != "No-Participation")
+# ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat)))/nrow(ticket_part_2))
+# ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat_logbook)))/nrow(ticket_part_2))
+# ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat_ca)))/nrow(ticket_part_2))
 
 
 
