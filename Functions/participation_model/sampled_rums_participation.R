@@ -65,63 +65,48 @@ sampled_rums <- function(data_in, cluster = 4,
   ## Estimate models for prices 
   datPanel <- dat %>% 
     dplyr::filter(selection != "No-Participation") %>% 
-    dplyr::filter(set_year >= min_year_est, set_year <= max_year_est)
-  
-  mod_summaries <- list()  
-  mod_estimate <- list() 
-  for(ii in min_year_est:max_year_est) {
-    datPanel_X <- datPanel %>% filter(set_year == ii)
-    mod_estimate[[ii-(min_year_est-1)]] <- lm(Price_mtons ~ factor(Species_Dominant) +
-                                   factor(PORT_AREA_CODE) + 
-                                   factor(set_month) +
-                                   Vessel.length, data = datPanel_X)
+    dplyr::filter(set_year >= min_year_est, set_year <= max_year_est) %>%
+    dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
+    dplyr::mutate(ln_Price_mtons = log(Price_mtons)) 
     
-    mod_summaries[[ii-(min_year_est-1)]] <- summary(lm(Price_mtons ~ factor(Species_Dominant) +
-                                           factor(PORT_AREA_CODE) + 
-                                           factor(set_month) +
-                                           Vessel.length, data = datPanel_X))
-  }
-
-  mod_summaries 
+  # mod_estimate <- list() 
+  # for(ii in min_year_est:max_year_est) {
+  #   datPanel_X <- datPanel %>% filter(set_year == ii)
+  #   mod_estimate[[ii]] <- lm(Price_mtons ~ factor(Species_Dominant) + factor(PORT_AREA_CODE) + 
+  #                                  factor(set_month) + Vessel.length, data = datPanel_X)
+  # }
+  
+  model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant) + 
+                      factor(PORT_AREA_CODE) + 
+                      factor(set_month) + 
+                      poly(set_year, 3) + 
+                      Vessel.length + 
+                      Vessel.horsepower, 
+                    data = datPanel)
   
   #-----------------------------------------------------------------------------
   ## Estimate models for landings
-  
-  mod_landings <- lm(Landings_mtons ~ factor(Species_Dominant) + factor(PORT_AREA_CODE) + 
-                                poly(set_year, 3) + 
-                                factor(set_month) +
-                                Vessel.length + Vessel.horsepower, data = datPanel)
-  
-  
-  
-  mod_landings_estimate <- lm(Landings_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
-                                poly(set_year, 3) + 
-                                factor(set_month) +
-           Vessel.length + Vessel.horsepower, data = datPanel)
-  
-  mod_landings_estimate_l <- lm(Landings_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
-                                factor(set_month) +
-                                Vessel.length + Vessel.horsepower, data = datPanel)
-  
-  mod_landings_estimate_exp <- lm(Landings_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
-                                factor(Species_Dominant):factor(set_month) +
-                                Vessel.length + Vessel.horsepower, data = datPanel)
-  
-  options(max.print = 10)
-  
-  summary(mod_landings)
-  # Adjusted R-squared:  0.4734
-  summary(mod_landings_estimate)
-  # Adjusted R-squared:  0.5236
-  summary(mod_landings_estimate_exp)
-  # Adjusted R-squared:  0.542 
 
+  model_landings <- lm(ln_Landings_mtons ~ factor(Species_Dominant) +
+                           factor(PORT_AREA_CODE) +
+                           poly(set_year, 3) +
+                           factor(set_month) +
+                           Vessel.length +
+                           Vessel.horsepower,
+                         data = datPanel)
   
-    
-  #calculate BIC of model1
-  BIC(mod_landings)
-  BIC(mod_landings_estimate)
-  BIC(mod_landings_estimate_exp)
+  
+  # ---------------------------------------------------------------------------- 
+  #   models <- list(
+  #   "ln(Landings)"  = model_landings,
+  #   "ln(Prices)"     = model_price)
+  # 
+  # gm <- modelsummary::gof_map
+  # options(OutDec=".")
+  # modelsummary::modelsummary(models, fmt = 2,
+  #                            gof_map = c("nobs", "adj.r.squared"),
+  #                            statistic = "({std.error}){stars}",
+  #                            output = "general_landings_price_models.docx")
   
   
   
@@ -150,10 +135,7 @@ sampled_rums <- function(data_in, cluster = 4,
 
   qPSDN <- lm(ln_Landings_mtons ~ lag_PSDN_SDM_60 + factor(set_month) + poly(set_year, 3) + Vessel.length + Vessel.horsepower, data = datPanel_PSDN)
   summary(qPSDN)
-  # qPSDN <- estimatr::lm_robust(Landings_mtons ~ lag_PSDN_SDM_90 +
-  #                                factor(VESSEL_NUM)  + factor(set_year) + factor(Closure),
-  #                              data = datPanel_PSDN, clusters = group_all, se_type = "stata")
-  
+
   ##############
   ### Market squid landing model ### (Maybe use lagged prices? ADD WEEKEND!)
   datPanel_MSQD <- datPanel %>% filter(Species_Dominant == "MSQD") %>%
@@ -463,7 +445,9 @@ sampled_rums <- function(data_in, cluster = 4,
                       qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm,
                       qMSQD1 = qMSQD, SDM.MSQD = msqd.sdm,
                       qNANC1 = qNANC, SDM.NANC = nanc.sdm,
-                      qPHRG1 = qPHRG, SDM.PHRG = phrg.sdm)
+                      qPHRG1 = qPHRG, SDM.PHRG = phrg.sdm,
+                      model_price1 = model_price,
+                      model_landings1 = model_landings)
     }
   print("Done calculating dummys and revenues")
   td2 <- plyr::ldply(dummys2)
@@ -479,12 +463,9 @@ sampled_rums <- function(data_in, cluster = 4,
   td2[which(td2$dummy_last_day != 0), 'dummy_last_day'] <- 1
   td2[which(td2$mean_rev != 0), 'dummy_miss'] <- 0
   td2[which(td2$mean_rev == 0), 'dummy_miss'] <- 1
-  td2[which(td2$mean_rev_SDM != 0), 'dummy_miss_SDM'] <- 0
-  td2[which(td2$mean_rev_SDM == 0), 'dummy_miss_SDM'] <- 1
-  
+
   # Change dummies to zero for "No-Participation"
   td2[which(td2$selection == "No-Participation"), 'dummy_miss'] <- 0
-  td2[which(td2$selection == "No-Participation"), 'dummy_miss_SDM'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_days'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_year_days'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_last_day'] <- 0
@@ -493,7 +474,7 @@ sampled_rums <- function(data_in, cluster = 4,
   td2$mean_rev_adj <- td2$mean_rev / rev_scale
 
   sampled_hauls <- cbind(sampled_hauls,
-    td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", "dummy_miss", "dummy_miss_SDM", 'mean_rev', 'mean_rev_adj', 'mean_rev_SDM', 'mean_rev_SDM_adj')] )
+    td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
   
   return(sampled_hauls)
   

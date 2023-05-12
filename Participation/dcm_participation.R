@@ -34,45 +34,47 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %
 ## Sampling choice data including expected revenue and past behavior dummies ##
 
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
-# samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-#                          min_year = 2013, max_year = 2017,
-#                          min_year_prob = 2013, max_year_prob = 2017,
-#                          min_year_est = 2012, max_year_est = 2019,
-#                          ndays = 60, nhauls_sampled = 4,
-#                          seed = 42, ncores = 4, rev_scale = 1000)
-# saveRDS(samps1, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
+samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+                         min_year = 2013, max_year = 2017,
+                         min_year_prob = 2013, max_year_prob = 2017,
+                         min_year_est = 2012, max_year_est = 2019,
+                         ndays = 60, nhauls_sampled = 4,
+                         seed = 42, ncores = 4, rev_scale = 1000)
+saveRDS(samps1, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 
 
 ## Restore the object
 samps1 <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
+
 samps <- samps1 %>% 
-  mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA)) %>%
-  mutate(dummy_miss_both = ifelse(dummy_miss == 1 & dummy_miss_SDM == 1, 1, 0))
+  mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+# %>%
+#   mutate(dummy_miss_both = ifelse(dummy_miss == 1 & dummy_miss_SDM == 1, 1, 0))
 
-compare <- samps %>% 
-  filter(dummy_miss == 0 & dummy_miss_SDM == 0) %>% 
-  filter(selection != "No-Participation") %>% 
-  select(c(mean_rev_adj, mean_rev_SDM_adj))
+# compare <- samps %>% 
+#   filter(dummy_miss == 0 & dummy_miss_SDM == 0) %>% 
+#   filter(selection != "No-Participation") %>% 
+#   select(c(mean_rev_adj, mean_rev_SDM_adj))
+# 
+# long <- reshape2::melt(compare)
+# 
+# ggplot(long, aes(value, fill = variable)) +
+#   geom_density(alpha=.5) +
+#   xlab("Revenue")
 
-long <- reshape2::melt(compare)
-
-ggplot(long, aes(value, fill = variable)) +
-  geom_density(alpha=.5) +
-  xlab("Revenue")
-
-samps %>%
-  filter(selection != "No-Participation") %>%
-  group_by(dummy_miss_both) %>%
-  summarize(n_obs = n(), perc = n()/nrow(samps))
+# samps %>%
+#   filter(selection != "No-Participation") %>%
+#   group_by(dummy_miss_both) %>%
+#   summarize(n_obs = n(), perc = n()/nrow(samps))
 samps %>%
   filter(selection != "No-Participation") %>%
   group_by(dummy_miss) %>%
   summarize(n_obs = n(), perc = n()/nrow(samps))
-samps %>%
-  filter(selection != "No-Participation") %>%
-  group_by(dummy_miss_SDM) %>%
-  summarize(n_obs = n(), perc = n()/nrow(samps))
-  
+# samps %>%
+#   filter(selection != "No-Participation") %>%
+#   group_by(dummy_miss_SDM) %>%
+#   summarize(n_obs = n(), perc = n()/nrow(samps))
+
 
 #-------------------------------#
 ## Create additional variables ##
