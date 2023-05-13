@@ -382,12 +382,6 @@ Tickets_coord <-  Tickets_coord %>%
   mutate(lon = ifelse(is.na(lon_logbook), lon_ca, lon_logbook)) %>%
   mutate(lat = ifelse(is.na(lat_logbook), lat_ca, lat_logbook))
 
-### Calculate distances from Ports to catch areas
-
-## Get PORT_AREA_CODE coordinates.
-
-
-
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Clean dataset for discrete choice model  
@@ -522,16 +516,37 @@ Tickets_part <- merge(Tickets_coord, participation_filtered,
   dplyr::select(-c("filter"))
 
 
-#------------------------------------------------------
-### Save participation data
-saveRDS(Tickets_part, "C:\\Data\\PacFIN data\\participation_data.rds")
 
+### Calculate distances from Ports to catch areas
 
-# ### How many row have coordinates? 91%!
-# ticket_part_2 <- Tickets_part %>% dplyr::filter(selection != "No-Participation")
-# ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat)))/nrow(ticket_part_2))
+## Get PORT_AREA_CODE coordinates.
+# Load port georeferenced data
+ports <- read_csv("Data/Ports/port_areas.csv") %>% drop_na() %>%
+  rename(PORT_AREA_CODE = port_group_code) %>%
+  rename(lat_port = lat) %>%
+  rename(lon_port = lon) %>%
+  dplyr::select(-c(port_group_name))
+
+# Compare port distances
+Tickets_dist <- merge(Tickets_part, ports, by = c("PORT_AREA_CODE"), all.x = TRUE, all.y = FALSE) 
+gc()
+Tickets_dist <- Tickets_dist %>% rowwise() %>%
+  mutate(dist = ifelse(is.na(lat), NA, geosphere::distm(c(lon_port, lat_port), c(lon, lat), fun = distHaversine))) %>%
+  mutate(dist = dist/1000) %>% ungroup()
+
+### How many row have coordinates? 91%!
+# ticket_part_2 <- Tickets_dist %>% dplyr::filter(selection != "No-Participation")
+# ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(dist)))/nrow(ticket_part_2))
+# ticket_part_2 %>% mutate(dist = ifelse(dist > 220, NA, dist)) %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(dist)))/nrow(ticket_part_2))
 # ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat_logbook)))/nrow(ticket_part_2))
 # ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat_ca)))/nrow(ticket_part_2))
 
+Tickets_dist <- Tickets_dist %>% mutate(dist = ifelse(dist > 220, NA, dist))
+hist(Tickets_dist$dist)
+
+
+#------------------------------------------------------
+### Save participation data
+saveRDS(Tickets_dist, "C:\\Data\\PacFIN data\\participation_data.rds")
 
 
