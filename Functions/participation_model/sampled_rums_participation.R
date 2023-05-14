@@ -56,25 +56,65 @@ sampled_rums <- function(data_in, cluster = 4,
   rev_scale <- 100
   ################
   
-  #---------------------------------------------------------------
-  ## Filter the data
   dat <- data_in 
   
-  
   #-----------------------------------------------------------------------------
-  ## Estimate models for prices 
+  ## Filter the data for estimations
+  
   datPanel <- dat %>% 
     dplyr::filter(selection != "No-Participation") %>% 
     dplyr::filter(set_year >= min_year_est, set_year <= max_year_est) %>%
     dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
     dplyr::mutate(ln_Price_mtons = log(Price_mtons)) 
-    
-  # mod_estimate <- list() 
-  # for(ii in min_year_est:max_year_est) {
-  #   datPanel_X <- datPanel %>% filter(set_year == ii)
-  #   mod_estimate[[ii]] <- lm(Price_mtons ~ factor(Species_Dominant) + factor(PORT_AREA_CODE) + 
-  #                                  factor(set_month) + Vessel.length, data = datPanel_X)
-  # }
+  
+  #-----------------------------------------------------------------------------
+  ## Calculate landing's center of gravity each vessel and link to closest port
+  
+  library(raster)    
+  Ticket_Coords<-aggregate(Revenue ~ VESSEL_NUM + PORT_AREA_CODE + lat_port + lon_port, 
+                           data=datPanel, FUN=sum)
+  Permit_ID<-as.data.frame(unique(Ticket_Coords$VESSEL_NUM))
+  names(Permit_ID)<-"VESSEL_NUM"
+  List <- as.list(as.character(Permit_ID$VESSEL_NUM))
+  Permit_COG<-NULL
+  
+  ### Run function 
+  source("C:/GitHub/EconAnalysis/Clustering/CGI_Function.R")
+  for (i in 1:length(List)) {
+    Permit = List[i]
+    Single_Permit<- Ticket_Coords[which(Ticket_Coords$VESSEL_NUM==Permit),]
+    Single_COG<-cgi(x=Single_Permit$lon_port, y=Single_Permit$lat_port, z=Single_Permit$Revenue, plot=F)
+    Single_COG <- data.frame(
+      lon = c(Single_COG$xaxe1[1], Single_COG$xaxe1[2], Single_COG$xaxe2[1], Single_COG$xaxe2[2], Single_COG$xcg),
+      lat = c(Single_COG$yaxe1[1], Single_COG$yaxe1[2], Single_COG$yaxe2[1], Single_COG$yaxe2[2], Single_COG$ycg),
+      group = c("A", "A", "B", "B","C"))
+    Point_Coord<-Single_COG[which(Single_COG$group=="C"),]
+    Line_Coord_A<-Single_COG[which(Single_COG$group=="A"),]
+    Line_Coord_B<-Single_COG[which(Single_COG$group=="B"),]
+    Distance_A<-pointDistance(c(Line_Coord_A[1,1], Line_Coord_A[1,2]), c(Line_Coord_A[2,1],  Line_Coord_A[2,2]), lonlat=TRUE)
+    Distance_B<-pointDistance(c(Line_Coord_B[1,1], Line_Coord_B[1,2]), c(Line_Coord_B[2,1],  Line_Coord_B[2,2]), lonlat=TRUE)
+    Value<-as.data.frame(c(Permit, Point_Coord$lon, Point_Coord$lat, Distance_A, Distance_B))
+    names(Value)<-c("uniqueid", "lon_cg", "lat_cg", "DISTANCE_A", "DISTANCE_B")
+    Permit_COG<-rbind(Permit_COG, Value)
+  }
+  
+  ###Any vessel with NaN Values only landed at 1 port, so we change those values to 0
+  Permit_COG$DISTANCE_A <- sub(NaN, 0, Permit_COG$DISTANCE_A)
+  Permit_COG$DISTANCE_B <- sub(NaN, 0, Permit_COG$DISTANCE_B)
+  Permit_COG$DISTANCE_A<-as.numeric(Permit_COG$DISTANCE_A)
+  Permit_COG$DISTANCE_B<-as.numeric(Permit_COG$DISTANCE_B)
+  
+  ###Produce dissimilarity matrix and pairwise comparisons following methods above
+  Permit_COG<-Permit_COG[c(1,2,3)]
+  names(Permit_COG)[1]<-"VESSEL_NUM"
+  rm(Ticket_Coords, List, Permit_ID, Distance_A, Distance_B,
+     Point_Coord, Single_Permit, Single_COG, i, Permit, Value, Line_Coord_A, Line_Coord_B)
+  
+  ### Obtain closest port?
+  
+  
+  #-----------------------------------------------------------------------------
+  ## Estimate models for landings and prices 
   
   model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant) + 
                       factor(PORT_AREA_CODE) + 
@@ -83,6 +123,13 @@ sampled_rums <- function(data_in, cluster = 4,
                       Vessel.length + 
                       Vessel.horsepower, 
                     data = datPanel)
+  
+  # mod_estimate <- list() 
+  # for(ii in min_year_est:max_year_est) {
+  #   datPanel_X <- datPanel %>% filter(set_year == ii)
+  #   mod_estimate[[ii]] <- lm(Price_mtons ~ factor(Species_Dominant) + factor(PORT_AREA_CODE) + 
+  #                                  factor(set_month) + Vessel.length, data = datPanel_X)
+  # }
   
   #-----------------------------------------------------------------------------
   ## Estimate models for landings
@@ -377,15 +424,30 @@ sampled_rums <- function(data_in, cluster = 4,
   print("Done sampling hauls")
   sampled_hauls <- plyr::ldply(sampled_hauls)
   
+  # add port and species 
+  sampled_hauls <- sampled_hauls %>% mutate(species = ifelse(selection == "No-Participation", NA, str_sub(td$selection, start= -4)))
+  sampled_hauls <- sampled_hauls %>% mutate(PORT_AREA_CODE = ifelse(selection == "No-Participation", NA, str_sub(td$selection, end= 3)))
+  
+  
+  #-----------------------------------------------
+  ### Merge coordinates of port landed and center of gravity with participation data,
+  ### Calculate distances and multiply by fuel prices
+  port_coord <- read.csv("C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv")
+  port_coord <- port_coord[c(-2)]
+  
+  <<CONTINUE HERE!>>
+
+  
+  #-----------------------------------------------------------------------------
+  ### Calculate interval between previous day and year
+  
   #Obtain previous day, year and day/year date
   sampled_hauls$prev_days_date <- sampled_hauls$set_date - days(ndays)
   sampled_hauls$prev_day_date <- sampled_hauls$set_date - days(1)
   sampled_hauls$prev_year_set_date <- sampled_hauls$set_date - days(365)
   sampled_hauls$prev_year_days_date <- sampled_hauls$prev_days_date - days(365)
-
-  #-----------------------------------------------------------------------------
-  ### Calculate interval between previous day and year
   
+  # Database to use in iterations
   td <- sampled_hauls %>%
     dplyr::select(fished_haul, set_date, prev_days_date, prev_year_set_date, prev_year_days_date, prev_day_date,
                   fished_VESSEL_NUM, selection)
@@ -402,22 +464,19 @@ sampled_rums <- function(data_in, cluster = 4,
   #add port 
   td <- td %>% mutate(ports = ifelse(selection == "No-Participation", NA, str_sub(td$selection, end= 3)))
 
-
   #-----------------------------------------------------------------------------
   ### Calculate revenues from each period and process dummy variables for past behavior
   
+  ## Load SDMs to be used in function to calculate expected revenue and cost below
   psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
   psdn.sdm[is.na(psdn.sdm)] <- 0
   psdn.sdm$set_date <- ymd(paste(psdn.sdm$LANDING_YEAR, psdn.sdm$LANDING_MONTH, psdn.sdm$LANDING_DAY, sep = "-"))
-  
   msqd.sdm <- readRDS(file = 'Participation/SDM_code/sdm_msqd.rds')
   msqd.sdm[is.na(msqd.sdm)] <- 0
   msqd.sdm$set_date <- ymd(paste(msqd.sdm$LANDING_YEAR, msqd.sdm$LANDING_MONTH, msqd.sdm$LANDING_DAY, sep = "-"))
-  
   nanc.sdm <- readRDS(file = 'Participation/SDM_code/sdm_nanc.rds')
   nanc.sdm[is.na(nanc.sdm)] <- 0
   nanc.sdm$set_date <- ymd(paste(nanc.sdm$LANDING_YEAR, nanc.sdm$LANDING_MONTH, nanc.sdm$LANDING_DAY, sep = "-"))
-  
   phrg.sdm <- readRDS(file = 'Participation/SDM_code/sdm_phrg.rds')
   phrg.sdm[is.na(phrg.sdm)] <- 0
   phrg.sdm$set_date <- ymd(paste(phrg.sdm$LANDING_YEAR, phrg.sdm$LANDING_MONTH, phrg.sdm$LANDING_DAY, sep = "-"))
@@ -425,20 +484,17 @@ sampled_rums <- function(data_in, cluster = 4,
   # tab.maxdays.psdn <- psdn.sdm %>% 
   #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
-  # 
   # tab.maxdays.msqd <- msqd.sdm %>% 
   #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
-  # 
   # tab.maxdays.nanc <- nanc.sdm %>% 
   #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
-  # 
   # tab.maxdays.phrg <- phrg.sdm %>% 
   #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
   
-    dummys2 <- foreach::foreach(ii = 1:nrow(td),
+  dummys2 <- foreach::foreach(ii = 1:nrow(td),
     .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
       process_dummys2(xx = ii, td1 = td, dat1 = dat, 
@@ -452,10 +508,6 @@ sampled_rums <- function(data_in, cluster = 4,
   print("Done calculating dummys and revenues")
   td2 <- plyr::ldply(dummys2)
   stopCluster(cl)
-  
-
-  #-----------------------------------------------------------------------------
-  ## Create additional dummys
   
   # Create dummy for prev days fishing
   td2[which(td2$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
@@ -475,6 +527,9 @@ sampled_rums <- function(data_in, cluster = 4,
   sampled_hauls <- cbind(sampled_hauls,
     td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
   
+  
+  #-----------------------------------------------
+  ## Return data
   return(sampled_hauls)
   
   
@@ -483,7 +538,6 @@ sampled_rums <- function(data_in, cluster = 4,
   #### Expected distances are the distance traveled by any vessel in the last 30 days to capture species S in port J
   #### Usea catch areas, and calculate distance by row to port of landings
   #### I should calculate also distance from port of choice set to port of gravity. 
-  
   
 }
   

@@ -24,10 +24,13 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %
          Vessel.horsepower = as.numeric(Vessel.horsepower))
 
 #-----------------------------------------------------------------------------
-## Day at sea: Should we filter by number of days in the sea?
+## Day at sea: 
 
-# day_in_sea <- participation_data %>%
-#   dplyr::filter(max_days_sea == 1)
+# hist(participation_data$max_days_sea)
+
+### How many row have day at sea variable? Just 4.3%, so I should use as filter
+# ticket_part <- participation_data %>% dplyr::filter(selection != "No-Participation")
+# ticket_part%>% summarize(perc = (nrow(ticket_part)-sum(is.na(max_days_sea)))/nrow(ticket_part))
 
 
 #-----------------------------------------------------------------------------
