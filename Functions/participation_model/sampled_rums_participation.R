@@ -435,8 +435,8 @@ sampled_rums <- function(data_in, cluster = 4,
   port_coord <- read.csv("C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv")
   port_coord <- port_coord[c(-2)]
   
-  <<CONTINUE HERE!>>
-
+  <<CONTINUE HERE! merge coord and cog, then calculate distances and multiply by fuel prices>>
+  << Also then obtain expeted distace traveled in code for revenue >>
   
   #-----------------------------------------------------------------------------
   ### Calculate interval between previous day and year
