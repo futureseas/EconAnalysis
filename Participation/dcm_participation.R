@@ -28,61 +28,42 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %
 
 # hist(participation_data$max_days_sea)
 
-### How many row have day at sea variable? Just 4.3%, so I should use as filter
+### How many row have day at sea variable? Just 4.3%, so I should not use it as filter, just as information
 # ticket_part <- participation_data %>% dplyr::filter(selection != "No-Participation")
 # ticket_part%>% summarize(perc = (nrow(ticket_part)-sum(is.na(max_days_sea)))/nrow(ticket_part))
 
 
 #-----------------------------------------------------------------------------
-## Sampling choice data including expected revenue and past behavior dummies ##
+## Sampling choice data including expected revenue, expected cost and past behavior dummies ##
+## Landing and price regression do not depend on cluster ##
 
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
-# samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-#                          min_year = 2013, max_year = 2017,
-#                          min_year_prob = 2013, max_year_prob = 2017,
-#                          min_year_est = 2012, max_year_est = 2019,
-#                          ndays = 60, nhauls_sampled = 4,
-#                          seed = 42, ncores = 4, rev_scale = 1000)
-# samps <- samps1 %>% 
-#   mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-# saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
+samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+                         min_year = 2013, max_year = 2017,
+                         min_year_prob = 2013, max_year_prob = 2017,
+                         min_year_est = 2012, max_year_est = 2019,
+                         ndays = 30, nhauls_sampled = 4,
+                         seed = 300, ncores = 4, rev_scale = 1000)
+
+samps <- samps1 %>% 
+  mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+
+saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
-# %>%
-#   mutate(dummy_miss_both = ifelse(dummy_miss == 1 & dummy_miss_SDM == 1, 1, 0))
 
-# compare <- samps %>% 
-#   filter(dummy_miss == 0 & dummy_miss_SDM == 0) %>% 
-#   filter(selection != "No-Participation") %>% 
-#   select(c(mean_rev_adj, mean_rev_SDM_adj))
-# 
-# long <- reshape2::melt(compare)
-# 
-# ggplot(long, aes(value, fill = variable)) +
-#   geom_density(alpha=.5) +
-#   xlab("Revenue")
 
-# samps %>%
-#   filter(selection != "No-Participation") %>%
-#   group_by(dummy_miss_both) %>%
-#   summarize(n_obs = n(), perc = n()/nrow(samps))
+#----------------------------------------------------------------------
+### See how many missing revenue and cost we have
 samps0 <- samps %>%
   filter(selection != "No-Participation")
 
 samps0 %>%
   group_by(dummy_miss) %>%
   summarize(n_obs = n(), perc = n()/nrow(samps0))
-# samps %>%
-#   filter(selection != "No-Participation") %>%
-#   group_by(dummy_miss_SDM) %>%
-#   summarize(n_obs = n(), perc = n()/nrow(samps))
 
-
-#-------------------------------#
-## Create additional variables ##
-#-------------------------------#
 
 #---------------------------------------------------------------
-# Incorporate wind data 
+### Incorporate wind data 
 
 ## Read wind data
 wind_2020_2020 <- readRDS("C:/Data/Wind&Current/wind_U_V_2000-2020.RDS") 
@@ -116,13 +97,12 @@ wind <- wind_2020_2020 %>%
   select(c("PORT_AREA_CODE", "set_date", "wind_mean_220_mh", "wind_max_220_mh")) %>% 
   unique()
 
-
 samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE) %>%
   mutate(wind_mean_220_mh = ifelse(selection == "No-Participation", 0, wind_mean_220_mh)) %>%
   mutate(wind_max_220_mh = ifelse(selection == "No-Participation", 0, wind_max_220_mh))
                 
-
-# ## Do a histogram with the wind speed by port (from Lisa's paper) ##
+#-------------------------------------------------------------------
+## Do a histogram with the wind speed by port (from Lisa's paper) ##
 # 
 # # Small craft -> 25–38 miles per hour
 # # Gale warnings -> 39–57 miles per hour.
@@ -171,8 +151,8 @@ samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE
 #   ylab("Frequency") + xlab("Maximum daily wind (miles/hour) within 220km radious") + 
 #   scale_color_manual(name = "Warnings:", values = c("Small craft" = "#ff9224", "Gale" = "#D22B2B"))
 
-# #---------------------------------------------------------------
-# # Merge storm warning signals to check correlation between data
+#-------------------------------------------------------------------
+# Merge storm warning signals to check correlation between data
 # 
 # warnings.signals <- read.csv(file = "G://My Drive//Data//Storm Warnings//WCports_mww_events09-16.csv")
 # warnings.signals <- warnings.signals %>%
@@ -226,42 +206,43 @@ samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE
 #   scale_color_manual(name = "Threshold:", 
 #                      values = c("Small craft" = "#ff9224", "Gale" = "#D22B2B"))
 
-#------------------------------------------
+
+#-------------------------------------------------------------------
 ## Dummy for each species
 samps <- samps %>% mutate(dPSDN = ifelse(grepl("PSDN", selection) == TRUE, 1, 0)) 
 samps <- samps %>% mutate(dMSQD = ifelse(grepl("MSQD", selection) == TRUE, 1, 0)) 
-samps <- samps %>% mutate(dNANC = ifelse(grepl("NANC", selection) == TRUE, 1, 0)) 
-samps <- samps %>% mutate(dCMCK = ifelse(grepl("CMCK", selection) == TRUE, 1, 0)) 
-samps <- samps %>% mutate(dJMCK = ifelse(grepl("JMCK", selection) == TRUE, 1, 0)) 
 
 #------------------------------------------
 ## Incorporate closure dummy for Pacific sardine
 
 samps <- samps %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 1, 0)) %>% 
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 0)) %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2015-04-28", 1, 0)) %>% 
-  dplyr::mutate(PSDN.Closure = PSDN.Closure * dPSDN)
+  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 1, 
+    ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 1, 
+    ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 1, 
+    ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 1, 
+    ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 1, 
+    ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 1,  
+    ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 1, 
+    ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 1, 
+    ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 1, 
+    ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 1, 
+    ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 1, 
+    ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 1, 
+    ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 1, 
+    ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 
+    ifelse(set_date >= "2015-04-28", 1, 0)))))))))))))))) %>% 
+    dplyr::mutate(PSDN.Closure = PSDN.Closure * dPSDN)
 
 
-#-----------------------------------------------
-## Incorporate closure dummy for market squid
-
-
-#------------------------------------------
-## Weekend dummy
+#------------------------------------------------------------------
+## Incorporate closure dummy for market squid and weekend indicator
+samps <- samps %>%
+  dplyr::mutate(MSQD.Closure = ifelse(set_date >= "2010-12-17" & set_date < "2011-03-31", 1, 
+    ifelse(set_date >= "2011-11-18" & set_date < "2012-03-31", 1, 
+    ifelse(set_date >= "2012-11-21" & set_date < "2013-03-31", 1, 0)))) %>% 
+    dplyr::mutate(Weekend = ifelse(chron::is.weekend(set_date), 1, 0)) %>% 
+  dplyr::mutate(MSQD.Closure = MSQD.Closure * dMSQD) %>% 
+  dplyr::mutate(MSQD.Weekend = Weekend * dMSQD)
 
 
 #------------------------------------------
@@ -271,7 +252,8 @@ samps <- samps %>%
 samps <- samps %>% 
   dplyr::mutate(WA.Closure = ifelse(set_month >= 1 & set_month <= 3 &
             (PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS" |
-             PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5"), 1, 0)) 
+             PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5"), 1, 0)) %>%
+  dplyr::mutate(WA.Closure.PSDN = WA.Closure * dPSDN)
 
 
 #------------------------------------------
@@ -287,12 +269,18 @@ samps <- samps %>%
 
 ## Subset database
 
-rdo <- samps %>% dplyr::select(fished, fished_haul,dummy_miss, mean_rev, mean_rev_adj, 
-                               selection, fished_VESSEL_NUM, set_date, wind_max_220_mh, 
-                               dummy_prev_days, dummy_prev_year_days, PSDN.Closure, dParticipate)
+rdo <- samps %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NUM, set_date, 
+                               wind_max_220_mh, dummy_prev_days, dummy_prev_year_days, dummy_last_day, 
+                               dummy_miss, mean_rev, mean_rev_adj, cost_port_to_catch_area, 
+                               cost_port_to_cog, travel_cost, dummy_miss_cost_cog, dummy_miss_cost_ca,
+                               dummy_miss_cost, PSDN.Closure, WA.Closure.PSDN, MSQD.Closure, 
+                               MSQD.Weekend, Weekend, dParticipate)
 
-#-------------------------------------------
-## Drop choice cards that received no choice
+saveRDS(rdo, file = "C:\\GitHub\\EconAnalysis\\Participation\\rdo_c4.rds")
+
+
+#-----------------------------------------------
+## Drop choice occasions that received no choice
 
 rdo2 <- rdo %>%
   group_by(fished_haul) %>%
@@ -302,7 +290,7 @@ rdo2 <- rdo %>%
 
 
 #----------------------------------------------------
-## Check hauls in same day (filter trips in same day)
+## Check hauls in same day (filter trips in same day)???
 
 fished_haul_select <- rdo2 %>%
   group_by(fished_VESSEL_NUM, set_date) %>%

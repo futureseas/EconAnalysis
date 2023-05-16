@@ -12,9 +12,9 @@
 #' @param max_year Maximum year used to filter the data, also RUM data is filtered to be from the max_year
 #' @param min_year_prob Minimum year used to compute sample probabilities
 #' @param max_year_prob Maximum year used to compute sample probabilities
-#' @param min_year_est Minimum year used to estimate expected landings
-#' @param max_year_est Maximum year used to estimate expected landings
-#' @param ndays Number of previous days data to use in revenue expectations -- also for prices and prev behavior dummies
+#' @param min_year_est Minimum year used to estimate expected landings. If change, we have to change tables in paper
+#' @param max_year_est Maximum year used to estimate expected landings. If change, we have to change tables in paper
+#' @param ndays Number of previous days data to use in previous behavior dummies
 #' @param nhauls_sampled Number of hauls -- trips -- to sample from the full data set, additional to the selection
 #' @param seed Seed for sampling tows
 #' @param ncores Number of cores to use
@@ -23,38 +23,38 @@
 #' @export
 
 sampled_rums <- function(data_in, cluster = 4,
-                         min_year = 2013, max_year = 2018,
-                         min_year_prob = 2013, max_year_prob = 2018,
-                         min_year_est = 2005, max_year_est = 2020,
+                         min_year = 2012, max_year = 2017,
+                         min_year_prob = 2012, max_year_prob = 2017,
+                         min_year_est = 2012, max_year_est = 2019,
                          ndays = 30, 
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale) {
 
-  ###############
-  # Delete
-  gc()
-  library(doParallel)
-  library(tidyr)
-  library(plm)
-  library(tidyverse)
-  library(lubridate)
-  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
-    mutate(Vessel.length = as.numeric(Vessel.length),
-           Vessel.weight = as.numeric(Vessel.weight),
-           Vessel.horsepower = as.numeric(Vessel.horsepower))
-  cluster <- 4
-  min_year_prob <- 2012
-  max_year_prob <- 2017
-  min_year_est <- 2012
-  max_year_est <- 2019
-  min_year <- 2012
-  max_year <- 2017
-  ndays <- 30
-  nhauls_sampled <- 5
-  seed <- 300
-  ncores <- 4
-  rev_scale <- 100
-  ################
+  # ###############
+  # # Delete
+  # gc()
+  # library(doParallel)
+  # library(tidyr)
+  # library(plm)
+  # library(tidyverse)
+  # library(lubridate)
+  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
+  #   mutate(Vessel.length = as.numeric(Vessel.length),
+  #          Vessel.weight = as.numeric(Vessel.weight),
+  #          Vessel.horsepower = as.numeric(Vessel.horsepower))
+  # cluster <- 4
+  # min_year_prob <- 2012
+  # max_year_prob <- 2017
+  # min_year_est <- 2012
+  # max_year_est <- 2019
+  # min_year <- 2012
+  # max_year <- 2017
+  # ndays <- 30
+  # nhauls_sampled <- 5
+  # seed <- 300
+  # ncores <- 4
+  # rev_scale <- 100
+  # ################
   
   dat <- data_in 
   
@@ -65,7 +65,8 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::filter(selection != "No-Participation") %>% 
     dplyr::filter(set_year >= min_year_est, set_year <= max_year_est) %>%
     dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
-    dplyr::mutate(ln_Price_mtons = log(Price_mtons)) 
+    dplyr::mutate(ln_Price_mtons = log(Price_mtons)) %>% 
+    mutate(trend = set_year-min_year_est + 1)
   
   #-----------------------------------------------------------------------------
   ## Calculate landing's center of gravity each vessel and link to closest port
@@ -110,20 +111,16 @@ sampled_rums <- function(data_in, cluster = 4,
   rm(Ticket_Coords, List, Permit_ID, Distance_A, Distance_B,
      Point_Coord, Single_Permit, Single_COG, i, Permit, Value, Line_Coord_A, Line_Coord_B)
   
-  ### Obtain closest port?
-  
-  
+
   #-----------------------------------------------------------------------------
   ## Estimate models for landings and prices 
   
   model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant) + 
                       factor(PORT_AREA_CODE) + 
-                      factor(set_month) + 
-                      poly(set_year, 3) + 
-                      Vessel.length + 
-                      Vessel.horsepower, 
+                      factor(set_month) + trend +
+                      Vessel.length, 
                     data = datPanel)
-  
+  summary(model_price)
   # mod_estimate <- list() 
   # for(ii in min_year_est:max_year_est) {
   #   datPanel_X <- datPanel %>% filter(set_year == ii)
@@ -136,14 +133,13 @@ sampled_rums <- function(data_in, cluster = 4,
 
   model_landings <- lm(ln_Landings_mtons ~ factor(Species_Dominant) +
                            factor(PORT_AREA_CODE) +
-                           poly(set_year, 3) +
-                           factor(set_month) +
-                           Vessel.length +
-                           Vessel.horsepower,
+                           factor(set_month) + trend +
+                           Vessel.length,
                          data = datPanel)
+  summary(model_landings)
   
   
-  # ---------------------------------------------------------------------------- 
+  # #----------------------------------------------------------------------------
   #   models <- list(
   #   "ln(Landings)"  = model_landings,
   #   "ln(Prices)"     = model_price)
@@ -154,7 +150,7 @@ sampled_rums <- function(data_in, cluster = 4,
   #                            gof_map = c("nobs", "adj.r.squared"),
   #                            statistic = "({std.error}){stars}",
   #                            output = "general_landings_price_models.docx")
-  
+  # 
   
   
   #-----------------------------------------------------------------------------
@@ -163,90 +159,88 @@ sampled_rums <- function(data_in, cluster = 4,
   ################
   ### Pacific sardine landing model ###
   datPanel_PSDN <- datPanel %>% filter(Species_Dominant == "PSDN") %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 1, 0)) %>% 
-    dplyr::mutate(Closure = ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2015-04-28", 1, 0)) %>% filter(Closure == 0) %>%
-    dplyr::mutate(ln_Landings_mtons = log(Landings_mtons))
-
-  qPSDN <- lm(ln_Landings_mtons ~ lag_PSDN_SDM_60 + factor(set_month) + poly(set_year, 3) + Vessel.length + Vessel.horsepower, data = datPanel_PSDN)
-  summary(qPSDN)
-
+    dplyr::mutate(Closure = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 1, 
+                            ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 1, 
+                            ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 1, 
+                            ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 1, 
+                            ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 1, 
+                            ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 1,  
+                            ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 1, 
+                            ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 1, 
+                            ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 1, 
+                            ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 1, 
+                            ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 1, 
+                            ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 1, 
+                            ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 1, 
+                            ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 
+                            ifelse(set_date >= "2015-04-28", 1, 0)))))))))))))))) %>% 
+    filter(Closure == 0) %>%
+    dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
+    mutate(trend = set_year-min_year_est + 1)
+  
+  qPSDN <- lm(ln_Landings_mtons ~ PSDN_SDM_60 +
+              + factor(set_month) + trend
+              + Vessel.length , data = datPanel_PSDN)
+  # summary(qPSDN)
+  
   ##############
   ### Market squid landing model ### (Maybe use lagged prices? ADD WEEKEND!)
   datPanel_MSQD <- datPanel %>% filter(Species_Dominant == "MSQD") %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2010-12-17" & set_date < "2011-03-31", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2011-11-18" & set_date < "2012-03-31", 1, 0)) %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2012-11-21" & set_date < "2013-03-31", 1, 0)) %>% 
+    dplyr::mutate(Closure = ifelse(set_date >= "2010-12-17" & set_date < "2011-03-31", 1, 
+                            ifelse(set_date >= "2011-11-18" & set_date < "2012-03-31", 1, 
+                            ifelse(set_date >= "2012-11-21" & set_date < "2013-03-31", 1, 0)))) %>% 
     dplyr::mutate(weekend = ifelse(chron::is.weekend(set_date), 1, 0)) %>%
-    filter(weekend == 0) %>%  filter(Closure == 0) %>%
+    filter(weekend == 0) %>%  filter(Closure == 0) %>% mutate(trend = set_year-min_year_est + 1) %>%
     dplyr::mutate(ln_Landings_mtons = log(Landings_mtons))
-  qMSQD <- lm(ln_Landings_mtons ~ lag_MSQD_SDM_90 + factor(set_month) + poly(set_year, 3) + Vessel.length + Vessel.horsepower, data = datPanel_MSQD)
-  summary(qMSQD)
-
-  ##############
-  ## Pacific herring landing model
-  datPanel_PHRG <- datPanel %>% filter(Species_Dominant == "PHRG") %>%
-    dplyr::mutate(ln_Landings_mtons = log(Landings_mtons))
-  qPHRG <- lm(ln_Landings_mtons ~ lag_PHRG_SDM_220 + factor(set_month) + poly(set_year, 3) + Vessel.length + Vessel.horsepower, data = datPanel_PHRG)
-  summary(qPHRG)
-
+  qMSQD <- lm(ln_Landings_mtons ~ MSQD_SDM_90 + 
+                factor(set_month) + trend +
+                Vessel.length, data = datPanel_MSQD)
+  # summary(qMSQD)
+  
+  
   ##############
   ### Northern anchovy
   datPanel_NANC <- datPanel %>% filter(Species_Dominant == "NANC") %>%
-    dplyr::mutate(ln_Landings_mtons = log(Landings_mtons))  
-  qNANC <- lm(ln_Landings_mtons ~ lag_NANC_SDM_220 + factor(set_month) + poly(set_year, 3) + Vessel.length + Vessel.horsepower, data = datPanel_NANC)
-  summary(qNANC)
+    dplyr::mutate(PSDN.Open = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 0, 
+                            ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 0, 
+                            ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 0, 
+                            ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 0, 
+                            ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 0, 
+                            ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 0,  
+                            ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 0, 
+                            ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 0, 
+                            ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 0, 
+                            ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 0, 
+                            ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 0, 
+                            ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 0, 
+                            ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 0, 
+                            ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 0, 
+                            ifelse(set_date >= "2015-04-28", 0, 1)))))))))))))))) %>%
+    dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% mutate(trend = set_year-min_year_est + 1)
   
-  # ##############
-  # ### Jack Mackerel
-  # datPanel_JMCK <- datPanel %>% filter(Species_Dominant == "JMCK") %>%
-  # dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) 
-  # qJMCK <- lm(Landings_mtons ~ lag_JMCK_SDM_220 + factor(set_month) + poly(set_year, 3) + Vessel.length + Vessel.horsepower, data = datPanel_JMCK)
-  # summary(qJMCK)
-  #
-  # ##############
-  # ### Chub mackerel
-  # datPanel_CMCK <- datPanel %>% filter(Species_Dominant == "CMCK") %>%
-  # dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) 
-  # qCMCK <- lm(Landings_mtons ~ lag_CMCK_SDM_30 + factor(set_month) + poly(set_year, 3) + Vessel.length + Vessel.horsepower, data = datPanel_CMCK)
-  # summary(qCMCK)
+  qNANC <- lm(ln_Landings_mtons ~ NANC_SDM_20 + PSDN.Open + PSDN_SDM_60:NANC_SDM_20:PSDN.Open +
+                factor(set_month) + trend +
+                Vessel.length, data = datPanel_NANC)
+  # summary(qNANC)
 
   # datPanelcor <- datPanel %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% drop_na() %>% unique()
   # cor(datPanelcor$Vessel.horsepower, datPanelcor$Vessel.length)
   
   
-  # ########################################
-  # ## Create table for paper (all species)
-  # 
-  #   models <- list(
-  #   "Pacific sardine"  = qPSDN,
-  #   "Market squid"     = qMSQD,
-  #   "Northern anchovy" = qNANC,
-  #   "Pacific herring"  = qPHRG)
-  # 
-  # gm <- modelsummary::gof_map
-  # options(OutDec=".")
-  # modelsummary::modelsummary(models, fmt = 2,
-  #                            # coef_omit = "^(?!.*tercept|.*SDM)",
-  #                            gof_map = c("nobs", "adj.r.squared"),
-  #                            statistic = "({std.error}){stars}",
-  #                            coef_rename = c("lag_PSDN_SDM" = "SDM^PSDN_t-1 (<60km)",
-  #                                            "lag_MSQD_SDM" = "SDM^MSQD_t-1  (<90km)",
-  #                                            "lag_NANC_SDM" = "SDM^NANC_t-1  (<20km)",
-  #                                            "lag_PHRG_SDM" = "SDM^PHRG_t-1  (<220km)"),
-  #                            output = "landings_models.docx")
+  ########################################
+  ## Create table for paper (all species)
+
+    models <- list(
+    "Pacific sardine"  = qPSDN,
+    "Market squid"     = qMSQD,
+    "Northern anchovy" = qNANC)
+
+  gm <- modelsummary::gof_map
+  options(OutDec=".")
+  modelsummary::modelsummary(models, fmt = 2,
+                             gof_map = c("nobs", "adj.r.squared"),
+                             statistic = "({std.error}){stars}",
+                             output = "landings_models.docx")
 
   
   #--------------------------------
@@ -425,43 +419,52 @@ sampled_rums <- function(data_in, cluster = 4,
   sampled_hauls <- plyr::ldply(sampled_hauls)
   
   # add port and species 
-  sampled_hauls <- sampled_hauls %>% mutate(species = ifelse(selection == "No-Participation", NA, str_sub(td$selection, start= -4)))
-  sampled_hauls <- sampled_hauls %>% mutate(PORT_AREA_CODE = ifelse(selection == "No-Participation", NA, str_sub(td$selection, end= 3)))
+  sampled_hauls <- sampled_hauls %>% mutate(species = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, start= -4)))
+  sampled_hauls <- sampled_hauls %>% mutate(PORT_AREA_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, end= 3)))
   
   
   #-----------------------------------------------
-  ### Merge coordinates of port landed and center of gravity with participation data,
-  ### Calculate distances and multiply by fuel prices
-  port_coord <- read.csv("C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv")
-  port_coord <- port_coord[c(-2)]
+  ### Merge coordinates of port landed and center of gravity with participation data, and calculate distances from port to COG
+  port_coord <- read.csv("C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv") %>% 
+    rename(PORT_AREA_CODE = port_group_code) %>% 
+    rename(lon_port = lon) %>% 
+    rename(lat_port = lat)
+    port_coord <- port_coord[c(-2)]
+  Permit_COG <- Permit_COG %>% 
+    rename(fished_VESSEL_NUM = VESSEL_NUM)
+  sampled_hauls <- merge(sampled_hauls, port_coord, by = c("PORT_AREA_CODE"), all.x = TRUE, all.y = FALSE)
+  sampled_hauls <- merge(sampled_hauls, Permit_COG, by = c("fished_VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+  rm(port_coord, Permit_COG)
+  sampled_hauls <- sampled_hauls %>% rowwise() %>%
+    mutate(dist_to_cog = ifelse(is.na(lat_port), NA, geosphere::distm(c(lon_port, lat_port), c(lon_cg, lat_cg), fun = geosphere::distHaversine))) %>%
+    mutate(dist_to_cog = dist_to_cog/1000) %>% ungroup() %>% dplyr::select(-c(lon_port, lat_port, lon_cg, lat_cg))
   
-  <<CONTINUE HERE! merge coord and cog, then calculate distances and multiply by fuel prices>>
-  << Also then obtain expeted distace traveled in code for revenue >>
   
   #-----------------------------------------------------------------------------
   ### Calculate interval between previous day and year
   
   #Obtain previous day, year and day/year date
   sampled_hauls$prev_days_date <- sampled_hauls$set_date - days(ndays)
+  sampled_hauls$prev_30days_date <- sampled_hauls$set_date - days(30)
+  sampled_hauls$prev_90days_date <- sampled_hauls$set_date - days(90)
   sampled_hauls$prev_day_date <- sampled_hauls$set_date - days(1)
   sampled_hauls$prev_year_set_date <- sampled_hauls$set_date - days(365)
   sampled_hauls$prev_year_days_date <- sampled_hauls$prev_days_date - days(365)
   
   # Database to use in iterations
   td <- sampled_hauls %>%
-    dplyr::select(fished_haul, set_date, prev_days_date, prev_year_set_date, prev_year_days_date, prev_day_date,
-                  fished_VESSEL_NUM, selection)
+    dplyr::select(fished_haul, set_date, prev_days_date, prev_30days_date, prev_90days_date,
+                  prev_year_set_date, prev_year_days_date, prev_day_date,
+                  fished_VESSEL_NUM, selection, dist_to_cog)
 
   td$days_inter <- interval(td$prev_days_date, td$prev_day_date)
+  td$days30_inter <- interval(td$prev_30days_date, td$prev_day_date)
+  td$days90_inter <- interval(td$prev_90days_date, td$prev_day_date)
   td$prev_year_days_inter <- interval(td$prev_year_days_date, td$prev_year_set_date)
 
-  #add in the fleet name
+  #add in the fleet name, species and port
   td$fleet_name <- cluster
-  
-  #add species 
   td <- td %>% mutate(species = ifelse(selection == "No-Participation", NA, str_sub(td$selection, start= -4)))
-  
-  #add port 
   td <- td %>% mutate(ports = ifelse(selection == "No-Participation", NA, str_sub(td$selection, end= 3)))
 
   #-----------------------------------------------------------------------------
@@ -477,10 +480,7 @@ sampled_rums <- function(data_in, cluster = 4,
   nanc.sdm <- readRDS(file = 'Participation/SDM_code/sdm_nanc.rds')
   nanc.sdm[is.na(nanc.sdm)] <- 0
   nanc.sdm$set_date <- ymd(paste(nanc.sdm$LANDING_YEAR, nanc.sdm$LANDING_MONTH, nanc.sdm$LANDING_DAY, sep = "-"))
-  phrg.sdm <- readRDS(file = 'Participation/SDM_code/sdm_phrg.rds')
-  phrg.sdm[is.na(phrg.sdm)] <- 0
-  phrg.sdm$set_date <- ymd(paste(phrg.sdm$LANDING_YEAR, phrg.sdm$LANDING_MONTH, phrg.sdm$LANDING_DAY, sep = "-"))
-  
+
   # tab.maxdays.psdn <- psdn.sdm %>% 
   #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
@@ -490,10 +490,33 @@ sampled_rums <- function(data_in, cluster = 4,
   # tab.maxdays.nanc <- nanc.sdm %>% 
   #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
-  # tab.maxdays.phrg <- phrg.sdm %>% 
-  #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
+
+  ### Obtain fuel prices
+  fuel.prices.CA <- readxl::read_excel(here::here("Data", "Fuel_prices", "fuelca.xls"), sheet = "fuelca")
+  fuel.prices.WA <- readxl::read_excel(here::here("Data", "Fuel_prices", "fuelwa.xls"), sheet = "fuelwa")
+  fuel.prices.OR <- readxl::read_excel(here::here("Data", "Fuel_prices", "fuelor.xls"), sheet = "fuelor")
+  Deflactor <- read.csv(file = "C:\\Data\\PacFIN data\\deflactor.csv")
+  port_area_codes <- read.csv(here::here('Data', 'Ports', 'ports_area_and_name_codes.csv'), 
+                              header = TRUE, stringsAsFactors = FALSE)
   
+  fuel.prices <- rbind(fuel.prices.CA,fuel.prices.OR,fuel.prices.WA) %>% 
+    dplyr::select(-c('portname', 'DOCKCODE', 'notes', 'pricettl', 'pxquoted')) %>%
+    dplyr::rename(PACFIN_PORT_CODE = port) %>%
+    dplyr::rename(LANDING_YEAR = YEAR) %>%
+    dplyr::rename(LANDING_MONTH = MONTH) %>%
+    dplyr::rename(LANDING_DAY = DAY) %>%
+    mutate(set_date = lubridate::make_date(LANDING_YEAR, LANDING_MONTH, LANDING_DAY))
+    fuel.prices <- merge(fuel.prices, Deflactor, 
+                       by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
+    fuel.prices$pricegal.AFI <- fuel.prices$pricegal * fuel.prices$defl
+    fuel.prices[fuel.prices == 0] <- NA
+    fuel.prices <- merge(fuel.prices, port_area_codes, 
+                       by = ("PACFIN_PORT_CODE"), all.x = TRUE, all.y = FALSE)
+    rm(fuel.prices.CA,fuel.prices.OR,fuel.prices.WA, Deflactor, port_area_codes)
+    fuel.prices <- fuel.prices %>% group_by(set_date, PORT_AREA_CODE) %>% 
+      summarize(diesel.price.AFI = mean(pricegal.AFI, na.rm = TRUE)) %>% drop_na()
+  
+  ### Calculate revenues
   dummys2 <- foreach::foreach(ii = 1:nrow(td),
     .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
@@ -501,9 +524,10 @@ sampled_rums <- function(data_in, cluster = 4,
                       qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm,
                       qMSQD1 = qMSQD, SDM.MSQD = msqd.sdm,
                       qNANC1 = qNANC, SDM.NANC = nanc.sdm,
-                      qPHRG1 = qPHRG, SDM.PHRG = phrg.sdm,
                       model_price1 = model_price,
-                      model_landings1 = model_landings)
+                      model_landings1 = model_landings,
+                      fuel.prices1 = fuel.prices,
+                      min_year_est1 = min_year_est)
     }
   print("Done calculating dummys and revenues")
   td2 <- plyr::ldply(dummys2)
@@ -515,29 +539,36 @@ sampled_rums <- function(data_in, cluster = 4,
   td2[which(td2$dummy_last_day != 0), 'dummy_last_day'] <- 1
   td2[which(td2$mean_rev != 0), 'dummy_miss'] <- 0
   td2[which(td2$mean_rev == 0), 'dummy_miss'] <- 1
+  td2[which(td2$cost_port_to_catch_area != 0), 'dummy_miss_cost_ca'] <- 0
+  td2[which(td2$cost_port_to_catch_area == 0), 'dummy_miss_cost_ca'] <- 1
+  td2[which(td2$cost_port_to_cog != 0), 'dummy_miss_cost_cog'] <- 0
+  td2[which(td2$cost_port_to_cog == 0), 'dummy_miss_cost_cog'] <- 1
+  td2[which(td2$travel_cost != 0), 'dummy_miss_cost'] <- 0
+  td2[which(td2$travel_cost == 0), 'dummy_miss_cost'] <- 1
+                      
 
   # Change dummies to zero for "No-Participation"
   td2[which(td2$selection == "No-Participation"), 'dummy_miss'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_days'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_year_days'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_last_day'] <- 0
-
+  td2[which(td2$selection == "No-Participation"), 'dummy_miss_cost_ca'] <- 0
+  td2[which(td2$selection == "No-Participation"), 'dummy_miss_cost_cog'] <- 0
+  td2[which(td2$selection == "No-Participation"), 'dummy_miss_cost'] <- 0
+  
   td2$mean_rev_adj <- td2$mean_rev / rev_scale
 
   sampled_hauls <- cbind(sampled_hauls,
-    td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", "dummy_miss", 'mean_rev', 'mean_rev_adj')] )
+    td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", 
+            "dummy_miss", 'mean_rev', 'mean_rev_adj',
+            'cost_port_to_catch_area', 'cost_port_to_cog', 'travel_cost',
+            'dummy_miss_cost_cog', 'dummy_miss_cost_ca', 'dummy_miss_cost')] )
+  
   
   
   #-----------------------------------------------
   ## Return data
   return(sampled_hauls)
-  
-  
-  #### FUTURE TASK! ####
-  ### Calculated expected distances, and multiply by port fuel prices
-  #### Expected distances are the distance traveled by any vessel in the last 30 days to capture species S in port J
-  #### Usea catch areas, and calculate distance by row to port of landings
-  #### I should calculate also distance from port of choice set to port of gravity. 
   
 }
   
