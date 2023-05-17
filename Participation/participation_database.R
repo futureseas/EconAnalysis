@@ -393,7 +393,7 @@ Tickets_coord <- Tickets_coord %>% drop_na(set_date) %>%
   dplyr::rename(set_day = LANDING_DAY) %>%
   dplyr::rename(set_month = LANDING_MONTH) %>%
   dplyr::rename(set_year = LANDING_YEAR)%>%
-  dplyr::select("VESSEL_NUM", "trip_id", "set_date", "set_year", "set_month", "set_day", "selection",
+  dplyr::select("VESSEL_NUM", "AGENCY_CODE", "trip_id", "set_date", "set_year", "set_month", "set_day", "selection",
                 "PORT_AREA_CODE", "Species_Dominant", "Landings_mtons", "Revenue", "Price_mtons", "max_days_sea",
                 "group_all", "lag_Price_mtons",
                 "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90","PSDN_SDM_220",

@@ -13,6 +13,7 @@
 #' @param model_landings1 estimated model for landings
 #' @param model_price1 estimated model for prices
 #' @param fuel.prices1 fuel data by port
+#' @param fuel.prices.state1 fuel data by port
 #' @param min_year_est1 minimum year used in estimation
 #' @export
 
@@ -23,10 +24,11 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
                             model_price1 = model_price,
                             model_landings1 = model_landings,
                             fuel.prices1 = fuel.prices,
+                            fuel.prices.state1 = fuel.prices.state,
                             min_year_est1 = min_year_est){
 
 # ### Delete
-# xx <- 14245 # 59
+# xx <- 50 #14245  # 59  # 6
 # td1 <- td
 # dat1 <- dat
 # qPSDN1 <- qPSDN
@@ -38,6 +40,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
 # model_price1 <- model_price
 # model_landings1 <- model_landings
 # fuel.prices1 <- fuel.prices
+# fuel.prices.state1 <- fuel.prices.state
 # min_year_est1 = min_year_est
 # ###
 
@@ -46,8 +49,9 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   dat1$set_date <- as_date(dat1$set_date)
   fltz <- temp_dat$fleet_name
   sel  <- temp_dat$selection
-  species  <- temp_dat$species
-  port  <- temp_dat$ports
+  species  <- temp_dat$PACFIN_SPECIES_CODE
+  port  <- temp_dat$PORT_AREA_CODE
+  state  <- temp_dat$AGENCY_CODE
 
 
   ########################################################################################################
@@ -288,8 +292,17 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   
   if (sel != "No-Participation") {
     diesel.price <- fuel.prices1 %>% ungroup %>% 
-      dplyr::filter(set_date %within% temp_dat$days90_inter, PORT_AREA_CODE == port)
+      dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE == port)
     mean_diesel_price <- mean(diesel.price$diesel.price.AFI, na.rm = TRUE)
+    Ddiesel_state_price <- 0
+    if (is.na(mean_diesel_price)) {
+      diesel.price <- fuel.prices.state1 %>% ungroup %>% 
+        dplyr::filter(LANDING_MONTH == lubridate::month(temp_dat$set_date),
+                      LANDING_YEAR == lubridate::year(temp_dat$set_date), 
+                      AGENCY_CODE == state)
+      mean_diesel_price <- mean(diesel.price$diesel.price.state.AFI, na.rm = TRUE)
+      Ddiesel_state_price <- 1
+    }
     
     expected.distance <- dat1 %>% ungroup %>% 
       dplyr::filter(set_date %within% temp_dat$days90_inter, 
@@ -308,6 +321,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     travel_cost <- 0
     exp_dist <- 0
     mean_diesel_price <- 0
+    Ddiesel_state_price <- 0
   }
   
   temp_dat$cost_port_to_catch_area <- cost_port_to_catch_area
@@ -315,8 +329,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$travel_cost <- travel_cost
   temp_dat$diesel_price <- mean_diesel_price
   temp_dat$dist_port_to_catch_area <- exp_dist
+  temp_dat$Ddiesel_state <- Ddiesel_state_price
   
-    
   ## Return data for row choice
   return(temp_dat)
 }

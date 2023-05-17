@@ -120,7 +120,7 @@ sampled_rums <- function(data_in, cluster = 4,
                       factor(set_month) + trend +
                       Vessel.length, 
                     data = datPanel)
-  summary(model_price)
+  # summary(model_price)
   # mod_estimate <- list() 
   # for(ii in min_year_est:max_year_est) {
   #   datPanel_X <- datPanel %>% filter(set_year == ii)
@@ -136,7 +136,7 @@ sampled_rums <- function(data_in, cluster = 4,
                            factor(set_month) + trend +
                            Vessel.length,
                          data = datPanel)
-  summary(model_landings)
+  # summary(model_landings)
   
   
   # #----------------------------------------------------------------------------
@@ -227,20 +227,20 @@ sampled_rums <- function(data_in, cluster = 4,
   # cor(datPanelcor$Vessel.horsepower, datPanelcor$Vessel.length)
   
   
-  ########################################
-  ## Create table for paper (all species)
-
-    models <- list(
-    "Pacific sardine"  = qPSDN,
-    "Market squid"     = qMSQD,
-    "Northern anchovy" = qNANC)
-
-  gm <- modelsummary::gof_map
-  options(OutDec=".")
-  modelsummary::modelsummary(models, fmt = 2,
-                             gof_map = c("nobs", "adj.r.squared"),
-                             statistic = "({std.error}){stars}",
-                             output = "landings_models.docx")
+  # ########################################
+  # ## Create table for paper (all species)
+  # 
+  #   models <- list(
+  #   "Pacific sardine"  = qPSDN,
+  #   "Market squid"     = qMSQD,
+  #   "Northern anchovy" = qNANC)
+  # 
+  # gm <- modelsummary::gof_map
+  # options(OutDec=".")
+  # modelsummary::modelsummary(models, fmt = 2,
+  #                            gof_map = c("nobs", "adj.r.squared"),
+  #                            statistic = "({std.error}){stars}",
+  #                            output = "landings_models.docx")
 
   
   #--------------------------------
@@ -249,9 +249,7 @@ sampled_rums <- function(data_in, cluster = 4,
   hauls <- dat %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
                                  group_all %in% cluster) %>% 
     distinct(trip_id, .keep_all = T) %>% 
-    dplyr::select(trip_id, VESSEL_NUM,  set_year, set_month, set_day, Revenue, selection,
-                  lag_NANC_SDM_220, lag_PSDN_SDM_60, lag_MSQD_SDM_90, lag_PHRG_SDM_220,
-                  NANC_SDM_220, PSDN_SDM_60, MSQD_SDM_90, PHRG_SDM_220) %>% as.data.frame
+    dplyr::select(trip_id, VESSEL_NUM, set_year, set_month, set_day, Revenue, selection) %>% as.data.frame
 
   ## Select hauls used to calculate probability for the choice set
   dist_hauls_catch_shares <- hauls %>% dplyr::filter(set_year >= min_year_prob, set_year <= max_year_prob)
@@ -419,10 +417,21 @@ sampled_rums <- function(data_in, cluster = 4,
   sampled_hauls <- plyr::ldply(sampled_hauls)
   
   # add port and species 
-  sampled_hauls <- sampled_hauls %>% mutate(species = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, start= -4)))
+  sampled_hauls <- sampled_hauls %>% mutate(PACFIN_SPECIES_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, start= -4)))
   sampled_hauls <- sampled_hauls %>% mutate(PORT_AREA_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, end= 3)))
+  sampled_hauls <- sampled_hauls %>% mutate(AGENCY_CODE = 
+                    ifelse(PORT_AREA_CODE == "BDA" | PORT_AREA_CODE == "BGA" | PORT_AREA_CODE == "CA2" |                       
+                           PORT_AREA_CODE == "CCA" | PORT_AREA_CODE == "ERA" | PORT_AREA_CODE == "LAA" |                                              
+                           PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "MRA" | PORT_AREA_CODE == "SBA" |
+                           PORT_AREA_CODE == "SDA" | PORT_AREA_CODE == "SFA", "C", 
+                    ifelse(PORT_AREA_CODE == "BRA" | PORT_AREA_CODE == "CBA" | PORT_AREA_CODE == "CLO" |
+                           PORT_AREA_CODE == "NPA" | PORT_AREA_CODE == "OR1" | PORT_AREA_CODE == "TLA", "O",
+                    ifelse(PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS" |
+                           PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5", "W", NA))))
   
-  
+  #add in the fleet name
+  sampled_hauls$fleet_name <- cluster
+
   #-----------------------------------------------
   ### Merge coordinates of port landed and center of gravity with participation data, and calculate distances from port to COG
   port_coord <- read.csv("C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv") %>% 
@@ -440,6 +449,7 @@ sampled_rums <- function(data_in, cluster = 4,
     mutate(dist_to_cog = dist_to_cog/1000) %>% ungroup() %>% dplyr::select(-c(lon_port, lat_port, lon_cg, lat_cg))
   
   
+  
   #-----------------------------------------------------------------------------
   ### Calculate interval between previous day and year
   
@@ -454,18 +464,15 @@ sampled_rums <- function(data_in, cluster = 4,
   # Database to use in iterations
   td <- sampled_hauls %>%
     dplyr::select(fished_haul, set_date, prev_days_date, prev_30days_date, prev_90days_date,
-                  prev_year_set_date, prev_year_days_date, prev_day_date,
-                  fished_VESSEL_NUM, selection, dist_to_cog)
+                  prev_year_set_date, prev_year_days_date, prev_day_date, fleet_name,
+                  fished_VESSEL_NUM, PORT_AREA_CODE, PACFIN_SPECIES_CODE, AGENCY_CODE, selection, dist_to_cog)
 
   td$days_inter <- interval(td$prev_days_date, td$prev_day_date)
   td$days30_inter <- interval(td$prev_30days_date, td$prev_day_date)
   td$days90_inter <- interval(td$prev_90days_date, td$prev_day_date)
   td$prev_year_days_inter <- interval(td$prev_year_days_date, td$prev_year_set_date)
 
-  #add in the fleet name, species and port
-  td$fleet_name <- cluster
-  td <- td %>% mutate(species = ifelse(selection == "No-Participation", NA, str_sub(td$selection, start= -4)))
-  td <- td %>% mutate(ports = ifelse(selection == "No-Participation", NA, str_sub(td$selection, end= 3)))
+  
 
   #-----------------------------------------------------------------------------
   ### Calculate revenues from each period and process dummy variables for past behavior
@@ -491,7 +498,7 @@ sampled_rums <- function(data_in, cluster = 4,
   #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
 
-  ### Obtain fuel prices
+  ### Obtain fuel prices by port and day
   fuel.prices.CA <- readxl::read_excel(here::here("Data", "Fuel_prices", "fuelca.xls"), sheet = "fuelca")
   fuel.prices.WA <- readxl::read_excel(here::here("Data", "Fuel_prices", "fuelwa.xls"), sheet = "fuelwa")
   fuel.prices.OR <- readxl::read_excel(here::here("Data", "Fuel_prices", "fuelor.xls"), sheet = "fuelor")
@@ -512,10 +519,25 @@ sampled_rums <- function(data_in, cluster = 4,
     fuel.prices[fuel.prices == 0] <- NA
     fuel.prices <- merge(fuel.prices, port_area_codes, 
                        by = ("PACFIN_PORT_CODE"), all.x = TRUE, all.y = FALSE)
-    rm(fuel.prices.CA,fuel.prices.OR,fuel.prices.WA, Deflactor, port_area_codes)
+    rm(fuel.prices.CA,fuel.prices.OR,fuel.prices.WA)
     fuel.prices <- fuel.prices %>% group_by(set_date, PORT_AREA_CODE) %>% 
       summarize(diesel.price.AFI = mean(pricegal.AFI, na.rm = TRUE)) %>% drop_na()
   
+    ## Average prices by state and month
+    fuel.prices.state <- 
+      readxl::read_excel(here::here("Data", "Fuel_prices", "state_averages.xls"), sheet = "state_averages") %>%
+      dplyr::rename(LANDING_YEAR = YEAR) %>%
+      dplyr::rename(LANDING_MONTH = MONTH) %>%
+      dplyr::rename(AGENCY_CODE = STATE) %>%
+      dplyr::rename(diesel.price.state = avgpricegal) %>%
+      dplyr::select(-c('avgpricettl')) %>%
+      mutate(AGENCY_CODE = ifelse(AGENCY_CODE == 'WA', 'W', ifelse(AGENCY_CODE == 'CA', 'C', ifelse(AGENCY_CODE == 'OR', 'O', 'A'))))
+    fuel.prices.state <- merge(fuel.prices.state, Deflactor, by = c("LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE, all.y = FALSE)
+    fuel.prices.state$diesel.price.state.AFI <- fuel.prices.state$diesel.price.state * fuel.prices.state$defl 
+    fuel.prices.state[fuel.prices.state == 0] <- NA
+    fuel.prices.state <- fuel.prices.state %>% drop_na()
+
+    
   ### Calculate revenues
   dummys2 <- foreach::foreach(ii = 1:nrow(td),
     .packages = c("dplyr", 'lubridate')) %dopar% {
@@ -527,6 +549,7 @@ sampled_rums <- function(data_in, cluster = 4,
                       model_price1 = model_price,
                       model_landings1 = model_landings,
                       fuel.prices1 = fuel.prices,
+                      fuel.prices.state1 = fuel.prices.state,
                       min_year_est1 = min_year_est)
     }
   print("Done calculating dummys and revenues")
@@ -560,7 +583,7 @@ sampled_rums <- function(data_in, cluster = 4,
             "dummy_miss", 'mean_rev', 'mean_rev_adj',
             'cost_port_to_catch_area', 'cost_port_to_cog', 'travel_cost',
             'dummy_miss_cost_ca', 'dummy_miss_cost',
-            'diesel_price', 'dist_port_to_catch_area')] )
+            'diesel_price', 'dist_port_to_catch_area', 'Ddiesel_state')] )
   
   
   
