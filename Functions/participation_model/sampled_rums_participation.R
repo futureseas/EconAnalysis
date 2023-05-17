@@ -541,8 +541,6 @@ sampled_rums <- function(data_in, cluster = 4,
   td2[which(td2$mean_rev == 0), 'dummy_miss'] <- 1
   td2[which(td2$cost_port_to_catch_area != 0), 'dummy_miss_cost_ca'] <- 0
   td2[which(td2$cost_port_to_catch_area == 0), 'dummy_miss_cost_ca'] <- 1
-  td2[which(td2$cost_port_to_cog != 0), 'dummy_miss_cost_cog'] <- 0
-  td2[which(td2$cost_port_to_cog == 0), 'dummy_miss_cost_cog'] <- 1
   td2[which(td2$travel_cost != 0), 'dummy_miss_cost'] <- 0
   td2[which(td2$travel_cost == 0), 'dummy_miss_cost'] <- 1
                       
@@ -553,7 +551,6 @@ sampled_rums <- function(data_in, cluster = 4,
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_year_days'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_last_day'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_miss_cost_ca'] <- 0
-  td2[which(td2$selection == "No-Participation"), 'dummy_miss_cost_cog'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_miss_cost'] <- 0
   
   td2$mean_rev_adj <- td2$mean_rev / rev_scale
@@ -562,7 +559,8 @@ sampled_rums <- function(data_in, cluster = 4,
     td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", 
             "dummy_miss", 'mean_rev', 'mean_rev_adj',
             'cost_port_to_catch_area', 'cost_port_to_cog', 'travel_cost',
-            'dummy_miss_cost_cog', 'dummy_miss_cost_ca', 'dummy_miss_cost')] )
+            'dummy_miss_cost_ca', 'dummy_miss_cost',
+            'diesel_price', 'dist_port_to_catch_area')] )
   
   
   

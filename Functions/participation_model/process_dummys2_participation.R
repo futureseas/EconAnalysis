@@ -288,13 +288,14 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   
   if (sel != "No-Participation") {
     diesel.price <- fuel.prices1 %>% ungroup %>% 
-      dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE == port)
+      dplyr::filter(set_date %within% temp_dat$days90_inter, PORT_AREA_CODE == port)
     mean_diesel_price <- mean(diesel.price$diesel.price.AFI, na.rm = TRUE)
     
     expected.distance <- dat1 %>% ungroup %>% 
       dplyr::filter(set_date %within% temp_dat$days90_inter, 
                     selection == sel)
     exp_dist <- mean(expected.distance$dist, na.rm = TRUE)
+    exp_dist <- replace(mean_rev, is.na(mean_rev), 0)
     
     cost_port_to_catch_area <- mean_diesel_price * exp_dist
     cost_port_to_cog <- mean_diesel_price * temp_dat$dist_to_cog
@@ -305,12 +306,17 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     cost_port_to_catch_area <- 0
     cost_port_to_cog <- 0
     travel_cost <- 0
+    exp_dist <- 0
+    mean_diesel_price <- 0
   }
   
   temp_dat$cost_port_to_catch_area <- cost_port_to_catch_area
   temp_dat$cost_port_to_cog <- cost_port_to_cog
   temp_dat$travel_cost <- travel_cost
+  temp_dat$diesel_price <- mean_diesel_price
+  temp_dat$dist_port_to_catch_area <- exp_dist
   
+    
   ## Return data for row choice
   return(temp_dat)
 }

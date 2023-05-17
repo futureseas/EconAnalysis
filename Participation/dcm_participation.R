@@ -262,7 +262,6 @@ samps <- samps %>%
 samps <- samps %>% 
   dplyr::mutate(dParticipate = ifelse(selection == "No-Participation", 0, 1)) 
 
-
 #-------------------------#
 ## Format as mlogit.data ##
 #-------------------------#
