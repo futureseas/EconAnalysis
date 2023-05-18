@@ -16,12 +16,12 @@ library(tidyverse)
 library(lubridate)
 
 
-#-----------------------------------------------------------------------------
-## Read participation database ##
-participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
-  mutate(Vessel.length = as.numeric(Vessel.length),
-         Vessel.weight = as.numeric(Vessel.weight),
-         Vessel.horsepower = as.numeric(Vessel.horsepower))
+# #-----------------------------------------------------------------------------
+# ## Read participation database ##
+# participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
+#   mutate(Vessel.length = as.numeric(Vessel.length),
+#          Vessel.weight = as.numeric(Vessel.weight),
+#          Vessel.horsepower = as.numeric(Vessel.horsepower))
 
 #-----------------------------------------------------------------------------
 ## Day at sea: 
@@ -37,30 +37,38 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %
 ## Sampling choice data including expected revenue, expected cost and past behavior dummies ##
 ## Landing and price regression do not depend on cluster ##
 
-source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
-samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-                         min_year = 2013, max_year = 2017,
-                         min_year_prob = 2013, max_year_prob = 2017,
-                         min_year_est = 2012, max_year_est = 2019,
-                         ndays = 30, nhauls_sampled = 4,
-                         seed = 300, ncores = 4, rev_scale = 1000)
+# source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
+# samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+#                          min_year = 2013, max_year = 2017,
+#                          min_year_prob = 2013, max_year_prob = 2017,
+#                          min_year_est = 2012, max_year_est = 2019,
+#                          ndays = 30, nhauls_sampled = 4,
+#                          seed = 300, ncores = 4, rev_scale = 1000)
+# 
+# samps <- samps1 %>%
+#   mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+# rm(participation_data)
+# saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 
-samps <- samps1 %>%
-  mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-
-saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
-# samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
+samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 
 
 #----------------------------------------------------------------------
-### See how many missing revenue and cost we have
-samps0 <- samps %>%
-  filter(selection != "No-Participation")
-
-samps0 %>%
-  group_by(dummy_miss) %>%
-  summarize(n_obs = n(), perc = n()/nrow(samps0))
-
+# ### See how many missing revenue and cost we have
+# samps0 <- samps %>%
+#   filter(selection != "No-Participation")
+# samps0 %>%
+#   group_by(Ddiesel_state) %>%
+#   summarize(n_obs = n(), perc = n()/nrow(samps0))
+# samps0 %>%
+#   group_by(dummy_miss) %>%
+#   summarize(n_obs = n(), perc = n()/nrow(samps0))
+# samps0 %>%
+#   group_by(dummy_miss_cost_ca) %>%
+#   summarize(n_obs = n(), perc = n()/nrow(samps0))
+# samps0 %>%
+#   group_by(dummy_miss_cost) %>%
+#   summarize(n_obs = n(), perc = n()/nrow(samps0))
 
 #---------------------------------------------------------------
 ### Incorporate wind data 
@@ -70,19 +78,16 @@ wind_2020_2020 <- readRDS("C:/Data/Wind&Current/wind_U_V_2000-2020.RDS")
 colnames(wind_2020_2020)
 
 ## Calculate wind speed (magnitude in meter/second)
-wind_2020_2020$wind_mean_30  <- sqrt((wind_2020_2020$"windV_mean_30")^2  + (wind_2020_2020$"windU_mean_30")^2)
-wind_2020_2020$wind_mean_90  <- sqrt((wind_2020_2020$"windV_mean_90")^2  + (wind_2020_2020$"windU_mean_90")^2)
-wind_2020_2020$wind_mean_220 <- sqrt((wind_2020_2020$"windV_mean_220")^2 + (wind_2020_2020$"windU_mean_220")^2) 
+# wind_2020_2020$wind_mean_30  <- sqrt((wind_2020_2020$"windV_mean_30")^2  + (wind_2020_2020$"windU_mean_30")^2)
+# wind_2020_2020$wind_mean_90  <- sqrt((wind_2020_2020$"windV_mean_90")^2  + (wind_2020_2020$"windU_mean_90")^2)
+# wind_2020_2020$wind_mean_220 <- sqrt((wind_2020_2020$"windV_mean_220")^2 + (wind_2020_2020$"windU_mean_220")^2) 
 wind_2020_2020$wind_max_30   <- sqrt((wind_2020_2020$"windV_max_30")^2  + (wind_2020_2020$"windU_max_30")^2)
 wind_2020_2020$wind_max_90   <- sqrt((wind_2020_2020$"windV_max_90")^2  + (wind_2020_2020$"windU_max_90")^2)
 wind_2020_2020$wind_max_220  <- sqrt((wind_2020_2020$"windV_max_220")^2 + (wind_2020_2020$"windU_max_220")^2) 
 
 ## Transform data from meters/second to miles/hour (multiply by 2.23694)  
 wind_2020_2020 <- wind_2020_2020 %>%
-  mutate(wind_mean_30_mh  = wind_mean_30  * 2.23694,
-         wind_mean_90_mh  = wind_mean_90  * 2.23694,
-         wind_mean_220_mh = wind_mean_220 * 2.23694,
-         wind_max_30_mh   = wind_max_30   * 2.23694,
+  mutate(wind_max_30_mh   = wind_max_30   * 2.23694,
          wind_max_90_mh   = wind_max_90   * 2.23694,
          wind_max_220_mh  = wind_max_220  * 2.23694) %>%
   mutate(PORT_AREA_CODE = as.factor(PORT_AREA_CODE)) %>%
@@ -94,12 +99,14 @@ wind_2020_2020 <- wind_2020_2020 %>%
 wind <- wind_2020_2020 %>%
   mutate(set_date = as.Date(paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-"),
     "%Y-%m-%d")) %>%
-  select(c("PORT_AREA_CODE", "set_date", "wind_mean_220_mh", "wind_max_220_mh")) %>% 
+  select(c("PORT_AREA_CODE", "set_date", "wind_max_220_mh")) %>% 
   unique()
 
-samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE) %>%
-  mutate(wind_mean_220_mh = ifelse(selection == "No-Participation", 0, wind_mean_220_mh)) %>%
-  mutate(wind_max_220_mh = ifelse(selection == "No-Participation", 0, wind_max_220_mh))
+samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE) 
+# %>%
+#   mutate(wind_mean_220_mh = ifelse(selection == "No-Participation", 0, wind_mean_220_mh)) %>%
+#   mutate(wind_max_220_mh = ifelse(selection == "No-Participation", 0, wind_max_220_mh))
+rm(wind, wind_2020_2020)
                 
 #-------------------------------------------------------------------
 ## Do a histogram with the wind speed by port (from Lisa's paper) ##
@@ -208,9 +215,11 @@ samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE
 
 
 #-------------------------------------------------------------------
-## Dummy for each species
+
+## Dummy for squid and sardine
 samps <- samps %>% mutate(dPSDN = ifelse(grepl("PSDN", selection) == TRUE, 1, 0)) 
 samps <- samps %>% mutate(dMSQD = ifelse(grepl("MSQD", selection) == TRUE, 1, 0)) 
+
 
 #------------------------------------------
 ## Incorporate closure dummy for Pacific sardine
@@ -250,7 +259,7 @@ samps <- samps %>%
 
 # Include WA dummy for sardine!
 samps <- samps %>% 
-  dplyr::mutate(WA.Closure = ifelse(set_month >= 1 & set_month <= 3 &
+  dplyr::mutate(WA.Closure = ifelse(lubridate::month(set_date) >= 1 & lubridate::month(set_date) <= 3 &
             (PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS" |
              PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5"), 1, 0)) %>%
   dplyr::mutate(WA.Closure.PSDN = WA.Closure * dPSDN)
