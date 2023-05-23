@@ -55,7 +55,7 @@ sampled_rums <- function(data_in, cluster = 4,
   # ncores <- 4
   # rev_scale <- 100
   # ################
-  
+
   dat <- data_in 
   
   #-----------------------------------------------------------------------------
@@ -66,7 +66,24 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::filter(set_year >= min_year_est, set_year <= max_year_est) %>%
     dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
     dplyr::mutate(ln_Price_mtons = log(Price_mtons)) %>% 
-    mutate(trend = set_year-min_year_est + 1)
+    mutate(trend = set_year-min_year_est + 1) %>%
+    filter(group_all == cluster)  ### NEW: Filtering by clusters to estimate pre-dcm models
+
+  
+  ## Add moving averages?
+  
+  # Moving_avg <- datPanel %>% 
+  #   group_by(selection, set_date) %>% 
+  #   summarize(Landings_mtons = sum(Landings_mtons)) %>%
+  #   ungroup() %>% 
+  #   tidyr::complete(selection, set_date) %>%  
+  #   arrange(selection, set_date) %>% group_by(selection) %>%
+  #   mutate(moving_avg = lag(zoo::rollmean(Landings_mtons, k=60, fill=NA, na.rm = TRUE, align='right'),1))  %>%
+  #   ungroup() %>% dplyr::select(c('selection', 'set_date', 'moving_avg')) %>%
+  #   dplyr::mutate(moving_avg = log(moving_avg))
+  # 
+  # datPanel <- merge(datPanel, Moving_avg, by = c('selection', 'set_date'), all.x = TRUE, all.y = FALSE)
+  
   
   #-----------------------------------------------------------------------------
   ## Calculate landing's center of gravity each vessel and link to closest port
@@ -115,12 +132,10 @@ sampled_rums <- function(data_in, cluster = 4,
   #-----------------------------------------------------------------------------
   ## Estimate models for landings and prices 
   
-  model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant) + 
-                      factor(PORT_AREA_CODE) + 
-                      factor(set_month) + trend +
-                      Vessel.length, 
+  model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
+                      factor(set_month) + trend + Vessel.length, 
                     data = datPanel)
-  # summary(model_price)
+  summary(model_price)
   # mod_estimate <- list() 
   # for(ii in min_year_est:max_year_est) {
   #   datPanel_X <- datPanel %>% filter(set_year == ii)
@@ -131,12 +146,10 @@ sampled_rums <- function(data_in, cluster = 4,
   #-----------------------------------------------------------------------------
   ## Estimate models for landings
 
-  model_landings <- lm(ln_Landings_mtons ~ factor(Species_Dominant) +
-                           factor(PORT_AREA_CODE) +
-                           factor(set_month) + trend +
-                           Vessel.length,
+  model_landings <- lm(ln_Landings_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) +
+                           factor(set_month) + trend + Vessel.length,
                          data = datPanel)
-  # summary(model_landings)
+  summary(model_landings)
   
   
   # #----------------------------------------------------------------------------
@@ -178,10 +191,10 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
     mutate(trend = set_year-min_year_est + 1)
   
-  qPSDN <- lm(ln_Landings_mtons ~ PSDN_SDM_60 +
-              + factor(set_month) + trend
-              + Vessel.length , data = datPanel_PSDN)
-  # summary(qPSDN)
+  qPSDN <- lm(ln_Landings_mtons ~ PSDN_SDM_60 + 
+              factor(set_month) + trend + 
+              Vessel.length , data = datPanel_PSDN)
+  summary(qPSDN)
   
   ##############
   ### Market squid landing model ### (Maybe use lagged prices? ADD WEEKEND!)
@@ -192,12 +205,12 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::mutate(weekend = ifelse(chron::is.weekend(set_date), 1, 0)) %>%
     filter(weekend == 0) %>%  filter(Closure == 0) %>% mutate(trend = set_year-min_year_est + 1) %>%
     dplyr::mutate(ln_Landings_mtons = log(Landings_mtons))
+  
   qMSQD <- lm(ln_Landings_mtons ~ MSQD_SDM_90 + 
                 factor(set_month) + trend +
                 Vessel.length, data = datPanel_MSQD)
-  # summary(qMSQD)
-  
-  
+  summary(qMSQD)
+
   ##############
   ### Northern anchovy
   datPanel_NANC <- datPanel %>% filter(Species_Dominant == "NANC") %>%
@@ -218,10 +231,10 @@ sampled_rums <- function(data_in, cluster = 4,
                             ifelse(set_date >= "2015-04-28", 0, 1)))))))))))))))) %>%
     dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% mutate(trend = set_year-min_year_est + 1)
   
-  qNANC <- lm(ln_Landings_mtons ~ NANC_SDM_20 + PSDN.Open + PSDN_SDM_60:NANC_SDM_20:PSDN.Open +
+  qNANC <- lm(ln_Landings_mtons ~ NANC_SDM_20 +
                 factor(set_month) + trend +
                 Vessel.length, data = datPanel_NANC)
-  # summary(qNANC)
+  summary(qNANC)
 
   # datPanelcor <- datPanel %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% drop_na() %>% unique()
   # cor(datPanelcor$Vessel.horsepower, datPanelcor$Vessel.length)
