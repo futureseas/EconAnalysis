@@ -1,0 +1,31 @@
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\GitHub\EconAnalysis\Participation\Results\Logs\preliminary.log
+  log type:  text
+ opened on:   8 Jun 2023, 16:28:25
+
+. 
+. ** Import data
+. import delimited "Stata\dcm_data.csv"
+(encoding automatically selected: ISO-8859-1)
+(19 vars, 97,705 obs)
+
+. gen id_obs = _n
+
+. gen const_r2 = 1
+
+. 
+. 
+. ** Set choice model database
+. cmset fished_vessel_id time selection
+note: case identifier _caseid generated from fished_vessel_id and time.
+note: panel by alternatives identifier _panelaltid generated from fished_vessel_id and selection.
+--Break--
+r(1);
+
+end of do-file
+
+--Break--
+r(1);
+
+. exit, clear
