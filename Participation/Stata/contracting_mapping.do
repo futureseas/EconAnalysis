@@ -17,7 +17,7 @@ cap log close
 	log using ${logs}contrmap, text replace
 
 ** Import data
-import delimited "dcm_data.csv"
+import delimited "Stata/dcm_data.csv"
 gen id_obs = _n
 /* gen delta1 = rnormal(0,0.1)
 by fished_vessel_id selection, sort: egen delta = mean(delta1)
@@ -31,58 +31,28 @@ by fished_vessel_id selection, sort : egen count1 = total(fished)
 gen s=count1/count2
 replace s = 1/(10^5) if s == 0
 gen ln_s=log(s) 
-drop count1 count2 
+gen ln_sO = ln_s if selection == "No-Participation"
+by fished_vessel_id, sort : egen ln_s0 = max(ln_sO)
+gen dif_ln_s = ln_s - ln_s0
+drop count1 count2 ln_sO ln_s0
+
+/* ** Following Berry (1994), estimate delta as ln(sj)-ln(s) = xb + delta
+reg dif_ln_s mean_rev_adj travel_cost wind_max_220_mh i.dummy_last_day msqdclosure psdnclosure msqdweekend, noconstant
+predict xb_hat
+cap drop delta0
+gen delta0 = dif_ln_s - xb_hat
+by fished_vessel_id selection, sort : egen delta = mean(delta0)
+drop xb_hat delta0 dif_ln_s */
+gen delta = dif_ln_s
+
+
+** Estimate intical conditional logit
 sort id_obs
-
-** Set choice model database
-cmset fished_vessel_id time selection
-
-*Estimate intical conditional logit
-cmclogit fished mean_rev_adj travel_cost wind_max_220_mh, ///
-	base("No-Participation") vce(cluster fished_vessel_id)
-
-gen delta = 0
-replace delta = _b[BDA_DCRB:_cons] if selection == "BDA-DCRB"
-replace delta = _b[BDA_MSQD:_cons] if selection == "BDA-MSQD"
-replace delta = _b[CBA_MSQD:_cons] if selection == "CBA-MSQD"
-replace delta = _b[ERA_MSQD:_cons] if selection == "ERA-MSQD"
-replace delta = _b[LAA_BTNA:_cons] if selection == "LAA-BTNA"
-replace delta = _b[LAA_CMCK:_cons] if selection == "LAA-CMCK"
-replace delta = _b[LAA_JMCK:_cons] if selection == "LAA-JMCK"
-replace delta = _b[LAA_MSQD:_cons] if selection == "LAA-MSQD"
-replace delta = _b[LAA_NANC:_cons] if selection == "LAA-NANC"
-replace delta = _b[LAA_PBNT:_cons] if selection == "LAA-PBNT"
-replace delta = _b[LAA_PSDN:_cons] if selection == "LAA-PSDN"
-replace delta = _b[LAA_RHRG:_cons] if selection == "LAA-RHRG"
-replace delta = _b[LAA_STNA:_cons] if selection == "LAA-STNA"
-replace delta = _b[LAA_YTNA:_cons] if selection == "LAA-YTNA"
-replace delta = _b[MNA_ALBC:_cons] if selection == "MNA-ALBC"
-replace delta = _b[MNA_CMCK:_cons] if selection == "MNA-CMCK"
-replace delta = _b[MNA_JMCK:_cons] if selection == "MNA-JMCK"
-replace delta = _b[MNA_LSKT:_cons] if selection == "MNA-LSKT"
-replace delta = _b[MNA_MSQD:_cons] if selection == "MNA-MSQD"
-replace delta = _b[MNA_NANC:_cons] if selection == "MNA-NANC"
-replace delta = _b[MNA_PSDN:_cons] if selection == "MNA-PSDN"
-replace delta = _b[MNA_UDAB:_cons] if selection == "MNA-UDAB"
-replace delta = _b[MRA_MSQD:_cons] if selection == "MRA-MSQD"
-replace delta = _b[NPA_MSQD:_cons] if selection == "NPA-MSQD"
-replace delta = _b[SBA_CMCK:_cons] if selection == "SBA-CMCK"
-replace delta = _b[SBA_JMCK:_cons] if selection == "SBA-JMCK"
-replace delta = _b[SBA_MSQD:_cons] if selection == "SBA-MSQD"
-replace delta = _b[SBA_PBNT:_cons] if selection == "SBA-PBNT"
-replace delta = _b[SBA_PSDN:_cons] if selection == "SBA-PSDN"
-replace delta = _b[SBA_UMCK:_cons] if selection == "SBA-UMCK"
-replace delta = _b[SDA_BTNA:_cons] if selection == "SDA-BTNA"
-replace delta = _b[SFA_CHNK:_cons] if selection == "SFA-CHNK"
-replace delta = _b[SFA_DCRB:_cons] if selection == "SFA-DCRB"
-replace delta = _b[SFA_MSQD:_cons] if selection == "SFA-MSQD"
-replace delta = _b[SFA_NANC:_cons] if selection == "SFA-NANC"
-
-
-*Estimate intical conditional logit
+// cmset fished_vessel_id time selection
+cmset fished_haul selection
 constraint 1 delta=1
-cmclogit fished mean_rev_adj travel_cost wind_max_220_mh delta, ///
-	base("No-Participation") noconstant constraints(1) vce(cluster fished_vessel_id)
+cmclogit fished delta, ///
+	base("No-Participation") noconstant constraints(1) 
 
 
 *Start contraction mapping
@@ -91,30 +61,80 @@ matrix start=e(b)
   qui predict phat
   cap drop p_share
   qui by fished_vessel_id selection, sort : egen p_share = mean(phat)
+  sort id_obs
   cap drop lnp_share
   qui gen lnp_share = log(p_share)
-  qui replace delta = delta + ln_s - lnp_share
-  putmata x=(lnp_share ln_s), replace
+  qui gen delta1 = delta + ln_s - lnp_share
+  qui gen deltaO = delta1 if selection == "No-Participation"
+  by fished_vessel_id, sort : egen delta0 = max(deltaO)
+  sort id_obs
+  qui replace delta1 = delta1 - delta0
+  putmata x=(delta1 delta), replace
   mata: dif=mreldif(x[.,1],x[.,2]) /*get initial relative diff between actual adn est shares*/
   mata: st_local("dif", strofreal(dif))
   di `dif'
+  replace delta = delta1
 
  while `dif'>0.001 {
  	set more off
- 	cmclogit fished mean_rev_adj travel_cost wind_max_220_mh delta, ///
- 	base("No-Participation") noconstant constraints(1) vce(cluster fished_vessel_id) ///
+ 	cmclogit fished delta, ///
+ 	base("No-Participation") noconstant constraints(1)  ///
  	from(start, copy)
  	matrix start=e(b)
-  	drop phat p_share lnp_share
+  	drop phat p_share lnp_share delta0 deltaO delta1
   	qui predict phat
   	qui by fished_vessel_id selection, sort : egen p_share = mean(phat)
+    sort id_obs
   	qui gen lnp_share = log(p_share)
-  	qui replace delta = delta + ln_s - lnp_share
-  	putmata x=(lnp_share ln_s), replace
+  	qui gen delta1 = delta + ln_s - lnp_share
+    qui gen deltaO = delta1 if selection == "No-Participation"
+    by fished_vessel_id, sort : egen delta0 = max(deltaO)
+    sort id_obs
+    qui replace delta1 = delta1 - delta0
+  	putmata x=(delta1 delta), replace
   	mata: dif=mreldif(x[.,1],x[.,2]) /*get initial relative diff between actual adn est shares*/
   	mata: st_local("dif", strofreal(dif))
   	di `dif'
+    replace delta = delta1
   }
+
+
+reg delta mean_rev_adj travel_cost wind_max_220_mh i.dummy_last_day i.msqdclosure i.psdnclosure i.msqdweekend ///
+    if fished == 1 & selection != "No-Participation", noconstant 
+  cap drop theta
+  predict theta_pred, residuals
+  by fished_vessel_id selection, sort : egen theta = mean(theta_pred)
+  sort id_obs
+
+constraint 2 theta=1
+cmclogit fished mean_rev_adj travel_cost wind_max_220_mh i.dummy_last_day i.msqdclosure i.psdnclosure i.msqdweekend theta, ///
+  base("No-Participation") noconstant constraints(2) 
+
+
+*Start contraction mapping
+matrix start=e(b)
+  cap drop phat
+  qui predict phat
+  cap drop p_share
+  qui by fished_vessel_id selection, sort : egen p_share = mean(phat)
+  sort id_obs
+  cap drop lnp_share 
+  cap drop thetaO
+  cap drop theta0
+  cap drop theta1
+  qui gen lnp_share = log(p_share)
+  qui gen theta1 = theta + ln_s - lnp_share
+  qui gen thetaO = theta1 if selection == "No-Participation"
+  by fished_vessel_id, sort : egen theta0 = max(thetaO)
+  sort id_obs
+  qui replace theta1 = theta1 - theta0
+  putmata x=(theta1 theta), replace
+  mata: dif=mreldif(x[.,1],x[.,2]) /*get initial relative diff between actual adn est shares*/
+  mata: st_local("dif", strofreal(dif))
+  di `dif'
+  replace theta = theta1
+
+
 
 // keep cntyyr lnp_share ln_s delta
 //  qui bys cntyyr: gen count=_n

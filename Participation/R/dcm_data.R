@@ -1,9 +1,6 @@
-######################################################################################## 
-## Sampling choice set for port-species model based on Peter's code for Hicks's paper ##
-########################################################################################
-
-### Note: Thanks Peter for sharing the code used in Hicks's paper. 
-### I modify it to be used with PacFIN data.
+########################################################################## 
+## Sampling choice set for port-species model based on Hicks REE paper ##
+##########################################################################
 
 gc()
 rm(list=ls())
@@ -16,14 +13,14 @@ library(tidyverse)
 library(lubridate)
 
 
-# #-----------------------------------------------------------------------------
-# ## Read participation database ##
-# participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
-#   mutate(Vessel.length = as.numeric(Vessel.length),
-#          Vessel.weight = as.numeric(Vessel.weight),
-#          Vessel.horsepower = as.numeric(Vessel.horsepower))
-
 #-----------------------------------------------------------------------------
+## Read participation database ##
+participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
+  mutate(Vessel.length = as.numeric(Vessel.length),
+         Vessel.weight = as.numeric(Vessel.weight),
+         Vessel.horsepower = as.numeric(Vessel.horsepower))
+#-----------------------------------------------------------------------------
+
 ## Day at sea: 
 
 # hist(participation_data$max_days_sea)
@@ -50,7 +47,10 @@ library(lubridate)
 # rm(participation_data)
 # saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 
-samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
+
+#----------------------------------
+## Run saved data
+samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
 
 
 #----------------------------------------------------------------------
@@ -239,7 +239,7 @@ samps <- samps %>%
     ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 1, 
     ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 
     ifelse(set_date >= "2015-04-28", 1, 0)))))))))))))))) %>% 
-    dplyr::mutate(PSDN.Closure = PSDN.Closure * dPSDN)
+    dplyr::mutate(PSDN.Closure.d = PSDN.Closure * dPSDN)
 
 
 #------------------------------------------------------------------
@@ -249,7 +249,7 @@ samps <- samps %>%
     ifelse(set_date >= "2011-11-18" & set_date < "2012-03-31", 1, 
     ifelse(set_date >= "2012-11-21" & set_date < "2013-03-31", 1, 0)))) %>% 
     dplyr::mutate(Weekend = ifelse(chron::is.weekend(set_date), 1, 0)) %>% 
-  dplyr::mutate(MSQD.Closure = MSQD.Closure * dMSQD) %>% 
+  dplyr::mutate(MSQD.Closure.d = MSQD.Closure * dMSQD) %>% 
   dplyr::mutate(MSQD.Weekend = Weekend * dMSQD)
 
 
@@ -262,7 +262,7 @@ samps <- samps %>%
             (PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS" |
              PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5"), 1, 0)) %>%
   dplyr::mutate(WA.Closure = ifelse(selection == "No-Participation", 0, WA.Closure)) %>%
-  dplyr::mutate(WA.Closure.PSDN = WA.Closure * dPSDN)
+  dplyr::mutate(WA.Closure.d = WA.Closure * dPSDN)
 
 
 #------------------------------------------
@@ -270,6 +270,14 @@ samps <- samps %>%
 
 samps <- samps %>% 
   dplyr::mutate(dParticipate = ifelse(selection == "No-Participation", 0, 1)) 
+
+
+
+#-------------------------------------------
+## Include unemployment.
+
+# << WORK HERE >>
+
 
 #-------------------------#
 ## Format as mlogit.data ##
@@ -280,7 +288,8 @@ samps <- samps %>%
 rdo <- samps %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NUM, set_date, 
                                wind_max_220_mh, dummy_prev_days, dummy_prev_year_days, dummy_last_day, 
                                mean_rev_adj, cost_port_to_catch_area, cost_port_to_cog, travel_cost,
-                               PSDN.Closure, WA.Closure.PSDN, MSQD.Closure, MSQD.Weekend, Weekend, 
+                               PSDN.Closure, WA.Closure, MSQD.Closure, Weekend,
+                               PSDN.Closure.d, WA.Closure.d, MSQD.Closure.d, MSQD.Weekend, 
                                dParticipate)
 rm(samps)
 
@@ -319,7 +328,7 @@ rm(fished_haul_select, rdo3)
 #------------------------------------------------------
 ## Save data to use in R
 
-saveRDS(rdo_R, file = "C:\\GitHub\\EconAnalysis\\Participation\\rdo_R_c4.rds")
+saveRDS(rdo_R, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\rdo_R_c4.rds")
 
 
 #----------------------------------------------------
@@ -336,8 +345,8 @@ rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_hau
   ungroup() %>% dplyr::select(-c('set_date')) 
 
 ## Save data to run with Stata
-write.csv(rdo_Stata,"C:\\GitHub\\EconAnalysis\\Participation\\dcm_data.csv", row.names = FALSE)
-saveRDS(rdo_Stata, file = "C:\\GitHub\\EconAnalysis\\Participation\\rdo_Stata_c4.rds")
+write.csv(rdo_Stata,"C:\\GitHub\\EconAnalysis\\Participation\\Stata\\dcm_data.csv", row.names = FALSE)
+saveRDS(rdo_Stata, file = "C:\\GitHub\\EconAnalysis\\Participation\\Stata\\rdo_Stata_c4.rds")
 
 
 

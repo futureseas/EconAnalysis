@@ -3,6 +3,9 @@
 ### Sample choice set for the participation model 
 ###################
 
+# NOTE: Behavior of the cluster? 
+# Check also state dependency. 1 if also choose No-Participation? Include choice from previous period?
+
 #' Format RUM data base on resampled fish tickets
 #' Function calls mlogit
 
@@ -30,31 +33,31 @@ sampled_rums <- function(data_in, cluster = 4,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale) {
 
-  # ###############
-  # # Delete
-  # gc()
-  # library(doParallel)
-  # library(tidyr)
-  # library(plm)
-  # library(tidyverse)
-  # library(lubridate)
-  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
-  #   mutate(Vessel.length = as.numeric(Vessel.length),
-  #          Vessel.weight = as.numeric(Vessel.weight),
-  #          Vessel.horsepower = as.numeric(Vessel.horsepower))
-  # cluster <- 4
-  # min_year_prob <- 2012
-  # max_year_prob <- 2017
-  # min_year_est <- 2012
-  # max_year_est <- 2019
-  # min_year <- 2012
-  # max_year <- 2017
-  # ndays <- 30
-  # nhauls_sampled <- 5
-  # seed <- 300
-  # ncores <- 4
-  # rev_scale <- 100
-  # ################
+  ###############
+  # Delete
+  gc()
+  library(doParallel)
+  library(tidyr)
+  library(plm)
+  library(tidyverse)
+  library(lubridate)
+  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
+    mutate(Vessel.length = as.numeric(Vessel.length),
+           Vessel.weight = as.numeric(Vessel.weight),
+           Vessel.horsepower = as.numeric(Vessel.horsepower))
+  cluster <- 4
+  min_year_prob <- 2012
+  max_year_prob <- 2017
+  min_year_est <- 2012
+  max_year_est <- 2019
+  min_year <- 2012
+  max_year <- 2017
+  ndays <- 30
+  nhauls_sampled <- 5
+  seed <- 300
+  ncores <- 4
+  rev_scale <- 100
+  ################
 
   dat <- data_in 
   
@@ -66,24 +69,10 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::filter(set_year >= min_year_est, set_year <= max_year_est) %>%
     dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
     dplyr::mutate(ln_Price_mtons = log(Price_mtons)) %>% 
-    mutate(trend = set_year-min_year_est + 1) %>%
-    filter(group_all == cluster)  ### NEW: Filtering by clusters to estimate pre-dcm models
+    mutate(trend = set_year-min_year_est + 1) 
+  # %>%
+  #   filter(group_all == cluster)  ### NEW: Filtering by clusters to estimate pre-dcm models
 
-  
-  ## Add moving averages?
-  
-  # Moving_avg <- datPanel %>% 
-  #   group_by(selection, set_date) %>% 
-  #   summarize(Landings_mtons = sum(Landings_mtons)) %>%
-  #   ungroup() %>% 
-  #   tidyr::complete(selection, set_date) %>%  
-  #   arrange(selection, set_date) %>% group_by(selection) %>%
-  #   mutate(moving_avg = lag(zoo::rollmean(Landings_mtons, k=60, fill=NA, na.rm = TRUE, align='right'),1))  %>%
-  #   ungroup() %>% dplyr::select(c('selection', 'set_date', 'moving_avg')) %>%
-  #   dplyr::mutate(moving_avg = log(moving_avg))
-  # 
-  # datPanel <- merge(datPanel, Moving_avg, by = c('selection', 'set_date'), all.x = TRUE, all.y = FALSE)
-  
   
   #-----------------------------------------------------------------------------
   ## Calculate landing's center of gravity each vessel and link to closest port
@@ -133,7 +122,7 @@ sampled_rums <- function(data_in, cluster = 4,
   ## Estimate models for landings and prices 
   
   model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
-                      factor(set_month) + trend + Vessel.length, 
+                     factor(set_month) + trend, 
                     data = datPanel)
   summary(model_price)
   # mod_estimate <- list() 
@@ -590,6 +579,9 @@ sampled_rums <- function(data_in, cluster = 4,
   td2[which(td2$selection == "No-Participation"), 'dummy_miss_cost'] <- 0
   
   td2$mean_rev_adj <- td2$mean_rev / rev_scale
+  td2$travel_cost <- td2$travel_cost / rev_scale
+  td2$cost_port_to_catch_area <- cost_port_to_catch_area / rev_scale
+  td2$cost_port_to_cog <- cost_port_to_cog / rev_scale
 
   sampled_hauls <- cbind(sampled_hauls,
     td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", 

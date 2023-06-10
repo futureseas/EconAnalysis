@@ -22,12 +22,12 @@ gen const_r2 = 1
 
 
 ** Set choice model database
-cmset fished_vessel_id time selection
+cmset fished_haul selection
 sort id_obs
 
 ** Estimate conditional logits (with alternative-specific constant)
 
-qui cmclogit fished, base("No-Participation") vce(cluster fished_vessel_id)
+qui cmclogit fished, base("No-Participation") 
 scalar ll0 = e(ll)
 /* preserve
 	qui predict phat
@@ -44,7 +44,7 @@ scalar ll0 = e(ll)
 	dis count2/_N*100 "%"
 restore
  */
-eststo P1: cmclogit fished mean_rev_adj travel_cost wind_max_220_mh, base("No-Participation") vce(cluster fished_vessel_id)
+eststo P1: cmclogit fished mean_rev_adj travel_cost wind_max_220_mh, base("No-Participation")
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): P1
 
@@ -85,27 +85,7 @@ preserve
 	estadd scalar perc2 = count2/_N*100: P2
 restore
 
-eststo P3: cmclogit fished mean_rev_adj travel_cost wind_max_220_mh i.dummy_last_day i.msqdclosure i.psdnclosure, base("No-Participation") vce(cluster fished_vessel_id)
-estadd scalar r2 = 1 - (e(ll)/ll0): P3
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: P3
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis count2/_N*100 "%"
-	estadd scalar perc2 = count2/_N*100: P3
-restore
-
-eststo P4: cmclogit fished mean_rev_adj travel_cost wind_max_220_mh i.dummy_last_day i.msqdclosure i.psdnclosure i.msqdweekend, base("No-Participation") vce(cluster fished_vessel_id)
+eststo P3: cmclogit fished mean_rev_adj travel_cost wind_max_220_mh, casevar(i.weekend i.msqdclosure i.psdnclosure) base("No-Participation") vce(cluster fished_vessel_id)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): P4
 preserve
