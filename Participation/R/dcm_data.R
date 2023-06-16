@@ -18,13 +18,12 @@ library(lubridate)
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
   mutate(Vessel.length = as.numeric(Vessel.length),
          Vessel.weight = as.numeric(Vessel.weight),
-         Vessel.horsepower = as.numeric(Vessel.horsepower))
+         Vessel.horsepower = as.numeric(Vessel.horsepower)) %>%
+  mutate(max_days_sea = ifelse(is.na(max_days_sea), 1, max_days_sea))
 #-----------------------------------------------------------------------------
 
-## Day at sea: 
-
+# ## Day at sea: 
 # hist(participation_data$max_days_sea)
-
 ### How many row have day at sea variable? Just 4.3%, so I should not use it as filter, just as information
 # ticket_part <- participation_data %>% dplyr::filter(selection != "No-Participation")
 # ticket_part%>% summarize(perc = (nrow(ticket_part)-sum(is.na(max_days_sea)))/nrow(ticket_part))
@@ -34,13 +33,13 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %
 ## Sampling choice data including expected revenue, expected cost and past behavior dummies ##
 ## Landing and price regression do not depend on cluster ##
 
-# source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
-# samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-#                          min_year = 2013, max_year = 2017,
-#                          min_year_prob = 2013, max_year_prob = 2017,
-#                          min_year_est = 2012, max_year_est = 2019,
-#                          ndays = 30, nhauls_sampled = 4,
-#                          seed = 300, ncores = 4, rev_scale = 1000)
+source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
+samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+                         min_year = 2013, max_year = 2017,
+                         min_year_prob = 2013, max_year_prob = 2017,
+                         min_year_est = 2012, max_year_est = 2019,
+                         ndays = 30, nhauls_sampled = 4,
+                         seed = 300, ncores = 4, rev_scale = 1000)
 # 
 # samps <- samps1 %>%
 #   mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
