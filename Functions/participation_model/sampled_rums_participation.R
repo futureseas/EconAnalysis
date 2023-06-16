@@ -4,7 +4,8 @@
 ###################
 
 # NOTE: Behavior of the cluster? 
-# Check also state dependency. 1 if also choose No-Participation? Include choice from previous period?
+# Check also state dependency -- Include choice from previous period in the actual choice set.
+# Create index!
 
 #' Format RUM data base on resampled fish tickets
 #' Function calls mlogit
@@ -376,6 +377,10 @@ sampled_rums <- function(data_in, cluster = 4,
 
   #Sample hauls and calculate distances
   #For each haul in the focus year, sample nhauls_sampled tows
+  
+  ## INCLUDE DECISION PREVIOUS DAY!
+  # hauls$prev_day_date <- sampled_hauls$set_date - days(1)
+  
 
   sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls),
                                     .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {

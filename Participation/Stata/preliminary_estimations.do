@@ -21,6 +21,7 @@ gen id_obs = _n
 gen const_r2 = 1
 
 
+cmset fished_vessel_id time selection
 ** Set choice model database
 cmset fished_haul selection
 sort id_obs
@@ -85,7 +86,10 @@ preserve
 	estadd scalar perc2 = count2/_N*100: P2
 restore
 
-eststo P3: cmclogit fished mean_rev_adj travel_cost wind_max_220_mh, casevar(i.weekend i.msqdclosure i.psdnclosure) base("No-Participation") vce(cluster fished_vessel_id)
+gen closured = msqdclosured + psdnclosured
+tab closured
+
+eststo P3: cmclogit fished mean_rev_adj travel_cost wind_max_220_mh i.closured, casevar(i.weekend) base("No-Participation") vce(cluster fished_vessel_id)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): P4
 preserve
@@ -98,11 +102,11 @@ preserve
 	gen selection_hat = 1
 	egen count1 = total(fished)
 	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: P4
+	estadd scalar perc1 = count1/_N*100: P3
 	drop if selection == "No-Participation"
 	egen count2 = total(fished)
 	dis count2/_N*100 "%"
-	estadd scalar perc2 = count2/_N*100: P4
+	estadd scalar perc2 = count2/_N*100: P3
 restore
 
 label variable mean_rev_adj "Expected revenue"

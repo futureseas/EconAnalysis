@@ -334,6 +334,9 @@ saveRDS(rdo_R, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\rdo_R_c4.rds"
 #----------------------------------------------------
 ## Stata data
 
+
+### Check how Stata time variable is constructed!
+
 # Organize data for Stata estimation
 rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_haul, -rdo_R$fished),]) %>%
   drop_na() %>%

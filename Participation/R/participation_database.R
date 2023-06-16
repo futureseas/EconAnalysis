@@ -25,16 +25,21 @@ rm(Tickets1, Tickets2)
 #-----------------------------------------------------
 ### Add port area
 port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
-Tickets_raw <- Tickets_raw %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE) %>% 
+Tickets_raw <- Tickets_raw %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
+rm(port_area)
+
+
+#-----------------------------------------------------
+### Filter by type of catch
+Tickets_raw <- Tickets_raw %>% 
   filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") %>% 
   drop_na(PORT_AREA_CODE)
-rm(port_area)
+
 
 
 
 #-----------------------------------------------------
 ###Subset the data to remove columns not relevant to this analysis. This will speed things up.
-ls(Tickets_raw) 
 Tickets <- select(Tickets_raw, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_NAME, PORT_AREA_CODE,
                                  VESSEL_NUM, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_HORSEPOWER, 
                                  LANDED_WEIGHT_MTONS, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE,
@@ -56,7 +61,7 @@ X<-as.data.frame(colnames(Boats)[apply(Boats,1,which.max)]) # Indicate the name 
 colnames(X)<-"Species_Dominant"
 Trip_Species_Dominant<-as.data.frame(cbind(FTID_unique,X))
 Tickets<-merge(Tickets, Trip_Species_Dominant, by='FTID_unique')
-rm(Trip_Species_Dominant, X, Boats)
+rm(Trip_Species_Dominant, X, Boats,FTID_unique)
 
 
 #-----------------------------------------------------
@@ -74,7 +79,6 @@ Vessel.chr.lenght <- Tickets %>%
   group_by(VESSEL_NUM) %>% 
   summarize(Vessel.length = names(which.max(table(VESSEL_LENGTH)))) %>% 
   unique() 
-
 
 Vessel.chr.weight <- Tickets %>% 
   dplyr::select(c(VESSEL_NUM, VESSEL_WEIGHT, LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>% 
@@ -127,7 +131,6 @@ FF_Tickets<-Tickets[which((Tickets$Species_Dominant == "PSDN" & Tickets$Revenue 
 FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "CMCK"] <- "OMCK")
 FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "JMCK"] <- "OMCK")
 FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "UMCK"] <- "OMCK")
-
 
 ###Creating a filter here to only retain vessels with more than 10 forage fish landings (tickets where FF is the dominant species)
 FTID_Value<-aggregate(Revenue ~ FTID_unique + VESSEL_NUM, FUN=sum, data=FF_Tickets)
@@ -191,21 +194,50 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 # xxx %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
 
 
-### Merge vessel chr
+#-----------------------------------------------------
+### Merge vessel characteristics
 Tickets_chr <- merge(Tickets_clust, Vessel.chr.lenght, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 Tickets_chr <- merge(Tickets_chr, Vessel.chr.weight, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 Tickets_chr <- merge(Tickets_chr, Vessel.chr.horsepower, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 
+
+#---------------------------------------------------------------------
+## Calculate CPUE, standardize within species and transform to tanh()
+sigmoid = function(x) {
+  1 / (1 + exp(-x))
+}
+Catch.per.trip <- Tickets_chr %>% 
+  dplyr::filter(selection != "No-Participation") %>% 
+  dplyr::select(c('VESSEL_NUM', 'FTID_unique', 'Species_Dominant', 
+                  'LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 
+                  'Landings_mtons', 'Vessel.weight', 'PORT_AREA_CODE', 
+                  'max_days_sea')) %>% 
+  mutate(max_days_sea = ifelse(is.na(max_days_sea), 1, max_days_sea)) %>% 
+  mutate(size = as.numeric(Vessel.weight)) %>% drop_na() %>% 
+  group_by(Species_Dominant, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE) %>% 
+  summarize(CPUE = sum(Landings_mtons, na.rm = TRUE)/(sum(size*max_days_sea, na.rm = TRUE))) %>%
+  ungroup() %>% group_by(Species_Dominant) %>%
+  mutate(mean.CPUE = mean(CPUE, na.rm = TRUE),
+         sd.CPUE = sd(CPUE, na.rm = TRUE)) %>% ungroup() %>%
+  mutate(CPUE.z = (CPUE - mean.CPUE)/sd.CPUE)%>%
+  mutate(CPUE_index = sigmoid(CPUE.z)) %>%
+  dplyr::select(-c('mean.CPUE', 'sd.CPUE', 'CPUE', 'CPUE.z'))
+
+Tickets_CPUE <- merge(Tickets_chr, Catch.per.trip,
+                     by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE', 'Species_Dominant')),
+                     all.x = TRUE, all.y = FALSE)
+
+
 #-----------------------------------------------
 ### Merge data to SDM 
 
-psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
-msqd.sdm <- readRDS(file = 'Participation/SDM_code/sdm_msqd.rds')
-nanc.sdm <- readRDS(file = 'Participation/SDM_code/sdm_nanc.rds')
-phrg.sdm <- readRDS(file = 'Participation/SDM_code/sdm_phrg.rds')
-cmck.sdm <- readRDS(file = 'Participation/SDM_code/sdm_cmck.rds')
-jmck.sdm <- readRDS(file = 'Participation/SDM_code/sdm_jmck.rds')
-msqd_spawn.sdm <- readRDS(file = 'Participation/SDM_code/sdm_msqd_spawn.rds')
+psdn.sdm <- read.csv(file = 'Participation/SDMs/sdm_psdn.csv')
+msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd.rds')
+nanc.sdm <- readRDS(file = 'Participation/SDMs/sdm_nanc.rds')
+phrg.sdm <- readRDS(file = 'Participation/SDMs/sdm_phrg.rds')
+cmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_cmck.rds')
+jmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_jmck.rds')
+msqd_spawn.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd_spawn.rds')
 
 psdn.sdm[is.na(psdn.sdm)] <- 0
 msqd.sdm[is.na(msqd.sdm)] <- 0
@@ -216,7 +248,7 @@ jmck.sdm[is.na(jmck.sdm)] <- 0
 msqd_spawn.sdm[is.na(msqd_spawn.sdm)] <- 0
 
 
-Tickets_SDM <- merge(Tickets_chr, psdn.sdm,
+Tickets_SDM <- merge(Tickets_CPUE, psdn.sdm,
                      by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
                      all.x = TRUE, all.y = FALSE)
 Tickets_SDM <- merge(Tickets_SDM, msqd.sdm,
@@ -239,9 +271,10 @@ Tickets_SDM <- merge(Tickets_SDM, msqd_spawn.sdm,
                      all.x = TRUE, all.y = FALSE)
 
 
-## lagged SDMs and prices
+##-------------------------------
+## Lagged SDMs and prices
 
-### Lagged date in database
+### Create date variable
 Tickets_SDM$set_date<-as.Date(with(
   Tickets_SDM,
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
@@ -364,6 +397,24 @@ Tickets_SDM <- merge(Tickets_SDM, msqd_spawn.sdm,
                      all.x = TRUE, all.y = FALSE)
 saveRDS(Tickets_SDM, "Tickets_temp.rds")
 
+
+#-----------------------------------------------
+# ### Compare CPUE_index to SDMs
+# compare.SDM.CPUE <- Tickets_SDM %>% filter(Species_Dominant == "PSDN") %>%
+#   dplyr::select(c('CPUE_index', 'PSDN_SDM_60', 'PORT_AREA_CODE', 
+#                   'LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY')) %>%
+#   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
+#   summarize(CPUE_index = mean(CPUE_index, na.rm = TRUE), 
+#             PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE))
+# library(hrbrthemes)
+# 
+# # Basic scatter plot
+# ggplot(compare.SDM.CPUE, aes(x=CPUE_index, y=PSDN_SDM_60)) +
+#   facet_wrap(~ PORT_AREA_CODE) + 
+#   geom_point( color="#69b3a2") +
+#   geom_smooth(method=lm , color="red", fill="#69b3a2", se=TRUE)
+
+
 #-----------------------------------------------
 ### Merge data to fishing locations
 Tickets_SDM <- readRDS("Tickets_temp.rds")
@@ -411,7 +462,7 @@ Tickets_coord <- Tickets_coord %>% drop_na(set_date) %>%
                 "lag_JMCK_SDM_30", "lag_JMCK_SDM_90", "lag_JMCK_SDM_220",
                 "lag_MSQD_SPAWN_SDM_30", "lag_MSQD_SPAWN_SDM_90", "lag_MSQD_SPAWN_SDM_220",
                 "Vessel.length", "Vessel.weight", "Vessel.horsepower", "lat", "lon",
-                "lon_logbook", "lon_ca", "lat_logbook", "lat_ca") 
+                "lon_logbook", "lon_ca", "lat_logbook", "lat_ca", "CPUE_index") 
 
 
 
@@ -516,7 +567,7 @@ Tickets_part <- merge(Tickets_coord, participation_filtered,
   dplyr::select(-c("filter"))
 
 
-
+#------------------------------------------------
 ### Calculate distances from Ports to catch areas
 
 ## Get PORT_AREA_CODE coordinates.
@@ -541,12 +592,11 @@ Tickets_dist <- Tickets_dist %>% rowwise() %>%
 # ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat_logbook)))/nrow(ticket_part_2))
 # ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat_ca)))/nrow(ticket_part_2))
 
-Tickets_dist <- Tickets_dist %>% mutate(dist = ifelse(dist > 220, NA, dist))
-hist(Tickets_dist$dist)
-
+Tickets_final <- Tickets_dist %>% mutate(dist = ifelse(dist > 220, NA, dist))
+hist(Tickets_final$dist)
 
 #------------------------------------------------------
 ### Save participation data
-saveRDS(Tickets_dist, "C:\\Data\\PacFIN data\\participation_data.rds")
+saveRDS(Tickets_final, "C:\\Data\\PacFIN data\\participation_data.rds")
 
 
