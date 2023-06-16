@@ -63,8 +63,9 @@ sampled_rums <- function(data_in, cluster = 4,
   dat <- data_in 
   
   #-----------------------------------------------------------------------------
-  ## Filter the data for estimations
-  
+  ## Estimate models for landings and prices 
+
+  # Filter the data for estimations of prices
   datPanel <- dat %>% 
     dplyr::filter(selection != "No-Participation") %>% 
     dplyr::filter(set_year >= min_year_est, set_year <= max_year_est) %>%
@@ -73,54 +74,7 @@ sampled_rums <- function(data_in, cluster = 4,
     mutate(trend = set_year-min_year_est + 1) 
   # %>%
   #   filter(group_all == cluster)  ### NEW: Filtering by clusters to estimate pre-dcm models
-
   
-  #-----------------------------------------------------------------------------
-  ## Calculate landing's center of gravity each vessel and link to closest port
-  
-  library(raster)    
-  Ticket_Coords<-aggregate(Revenue ~ VESSEL_NUM + PORT_AREA_CODE + lat_port + lon_port, 
-                           data=datPanel, FUN=sum)
-  Permit_ID<-as.data.frame(unique(Ticket_Coords$VESSEL_NUM))
-  names(Permit_ID)<-"VESSEL_NUM"
-  List <- as.list(as.character(Permit_ID$VESSEL_NUM))
-  Permit_COG<-NULL
-  
-  ### Run function 
-  source("C:/GitHub/EconAnalysis/Clustering/CGI_Function.R")
-  for (i in 1:length(List)) {
-    Permit = List[i]
-    Single_Permit<- Ticket_Coords[which(Ticket_Coords$VESSEL_NUM==Permit),]
-    Single_COG<-cgi(x=Single_Permit$lon_port, y=Single_Permit$lat_port, z=Single_Permit$Revenue, plot=F)
-    Single_COG <- data.frame(
-      lon = c(Single_COG$xaxe1[1], Single_COG$xaxe1[2], Single_COG$xaxe2[1], Single_COG$xaxe2[2], Single_COG$xcg),
-      lat = c(Single_COG$yaxe1[1], Single_COG$yaxe1[2], Single_COG$yaxe2[1], Single_COG$yaxe2[2], Single_COG$ycg),
-      group = c("A", "A", "B", "B","C"))
-    Point_Coord<-Single_COG[which(Single_COG$group=="C"),]
-    Line_Coord_A<-Single_COG[which(Single_COG$group=="A"),]
-    Line_Coord_B<-Single_COG[which(Single_COG$group=="B"),]
-    Distance_A<-pointDistance(c(Line_Coord_A[1,1], Line_Coord_A[1,2]), c(Line_Coord_A[2,1],  Line_Coord_A[2,2]), lonlat=TRUE)
-    Distance_B<-pointDistance(c(Line_Coord_B[1,1], Line_Coord_B[1,2]), c(Line_Coord_B[2,1],  Line_Coord_B[2,2]), lonlat=TRUE)
-    Value<-as.data.frame(c(Permit, Point_Coord$lon, Point_Coord$lat, Distance_A, Distance_B))
-    names(Value)<-c("uniqueid", "lon_cg", "lat_cg", "DISTANCE_A", "DISTANCE_B")
-    Permit_COG<-rbind(Permit_COG, Value)
-  }
-  
-  ###Any vessel with NaN Values only landed at 1 port, so we change those values to 0
-  Permit_COG$DISTANCE_A <- sub(NaN, 0, Permit_COG$DISTANCE_A)
-  Permit_COG$DISTANCE_B <- sub(NaN, 0, Permit_COG$DISTANCE_B)
-  Permit_COG$DISTANCE_A<-as.numeric(Permit_COG$DISTANCE_A)
-  Permit_COG$DISTANCE_B<-as.numeric(Permit_COG$DISTANCE_B)
-  
-  ###Produce dissimilarity matrix and pairwise comparisons following methods above
-  Permit_COG<-Permit_COG[c(1,2,3)]
-  names(Permit_COG)[1]<-"VESSEL_NUM"
-  rm(Ticket_Coords, List, Permit_ID, Distance_A, Distance_B,
-     Point_Coord, Single_Permit, Single_COG, i, Permit, Value, Line_Coord_A, Line_Coord_B)
-  
-
-  #-----------------------------------------------------------------------------
-  ## Estimate models for landings and prices 
   
   model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
                      factor(set_month) + trend, 
@@ -441,11 +395,57 @@ sampled_rums <- function(data_in, cluster = 4,
 
   #-----------------------------------------------
   ### Merge coordinates of port landed and center of gravity with participation data, and calculate distances from port to COG
+  
   port_coord <- read.csv("C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv") %>% 
     rename(PORT_AREA_CODE = port_group_code) %>% 
     rename(lon_port = lon) %>% 
     rename(lat_port = lat)
     port_coord <- port_coord[c(-2)]
+    
+  ## Calculate landing's center of gravity each vessel and link to closest port
+  datCOG <- dat %>% 
+      dplyr::filter(selection != "No-Participation") %>% 
+      dplyr::filter(set_year >= min_year, set_year <= max_year)
+    
+  library(raster)    
+  Ticket_Coords<-aggregate(Revenue ~ VESSEL_NUM + PORT_AREA_CODE + lat_port + lon_port, 
+                           data=datCOG, FUN=sum)
+  Permit_ID<-as.data.frame(unique(Ticket_Coords$VESSEL_NUM))
+  names(Permit_ID)<-"VESSEL_NUM"
+  List <- as.list(as.character(Permit_ID$VESSEL_NUM))
+  Permit_COG<-NULL
+  
+  ### Run function 
+  source("C:/GitHub/EconAnalysis/Clustering/CGI_Function.R")
+  for (i in 1:length(List)) {
+    Permit = List[i]
+    Single_Permit<- Ticket_Coords[which(Ticket_Coords$VESSEL_NUM==Permit),]
+    Single_COG<-cgi(x=Single_Permit$lon_port, y=Single_Permit$lat_port, z=Single_Permit$Revenue, plot=F)
+    Single_COG <- data.frame(
+      lon = c(Single_COG$xaxe1[1], Single_COG$xaxe1[2], Single_COG$xaxe2[1], Single_COG$xaxe2[2], Single_COG$xcg),
+      lat = c(Single_COG$yaxe1[1], Single_COG$yaxe1[2], Single_COG$yaxe2[1], Single_COG$yaxe2[2], Single_COG$ycg),
+      group = c("A", "A", "B", "B","C"))
+    Point_Coord<-Single_COG[which(Single_COG$group=="C"),]
+    Line_Coord_A<-Single_COG[which(Single_COG$group=="A"),]
+    Line_Coord_B<-Single_COG[which(Single_COG$group=="B"),]
+    Distance_A<-pointDistance(c(Line_Coord_A[1,1], Line_Coord_A[1,2]), c(Line_Coord_A[2,1],  Line_Coord_A[2,2]), lonlat=TRUE)
+    Distance_B<-pointDistance(c(Line_Coord_B[1,1], Line_Coord_B[1,2]), c(Line_Coord_B[2,1],  Line_Coord_B[2,2]), lonlat=TRUE)
+    Value<-as.data.frame(c(Permit, Point_Coord$lon, Point_Coord$lat, Distance_A, Distance_B))
+    names(Value)<-c("uniqueid", "lon_cg", "lat_cg", "DISTANCE_A", "DISTANCE_B")
+    Permit_COG<-rbind(Permit_COG, Value)
+  }
+  
+  ###Any vessel with NaN Values only landed at 1 port, so we change those values to 0
+  Permit_COG$DISTANCE_A <- sub(NaN, 0, Permit_COG$DISTANCE_A)
+  Permit_COG$DISTANCE_B <- sub(NaN, 0, Permit_COG$DISTANCE_B)
+  Permit_COG$DISTANCE_A<-as.numeric(Permit_COG$DISTANCE_A)
+  Permit_COG$DISTANCE_B<-as.numeric(Permit_COG$DISTANCE_B)
+  
+  ###Produce dissimilarity matrix and pairwise comparisons following methods above
+  Permit_COG<-Permit_COG[c(1,2,3)]
+  names(Permit_COG)[1]<-"VESSEL_NUM"
+  rm(Ticket_Coords, List, Permit_ID, Distance_A, Distance_B,
+     Point_Coord, Single_Permit, Single_COG, i, Permit, Value, Line_Coord_A, Line_Coord_B)
   Permit_COG <- Permit_COG %>% 
     rename(fished_VESSEL_NUM = VESSEL_NUM)
   sampled_hauls <- merge(sampled_hauls, port_coord, by = c("PORT_AREA_CODE"), all.x = TRUE, all.y = FALSE)
@@ -454,8 +454,6 @@ sampled_rums <- function(data_in, cluster = 4,
   sampled_hauls <- sampled_hauls %>% rowwise() %>%
     mutate(dist_to_cog = ifelse(is.na(lat_port), NA, geosphere::distm(c(lon_port, lat_port), c(lon_cg, lat_cg), fun = geosphere::distHaversine))) %>%
     mutate(dist_to_cog = dist_to_cog/1000) %>% ungroup() %>% dplyr::select(-c(lon_port, lat_port, lon_cg, lat_cg))
-  
-  
   
   #-----------------------------------------------------------------------------
   ### Calculate interval between previous day and year
