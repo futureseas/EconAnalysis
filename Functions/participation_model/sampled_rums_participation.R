@@ -80,6 +80,7 @@ sampled_rums <- function(data_in, cluster = 4,
                      factor(set_month) + trend, 
                     data = datPanel)
   summary(model_price)
+  
   # mod_estimate <- list() 
   # for(ii in min_year_est:max_year_est) {
   #   datPanel_X <- datPanel %>% filter(set_year == ii)
@@ -87,16 +88,16 @@ sampled_rums <- function(data_in, cluster = 4,
   #                                  factor(set_month) + Vessel.length, data = datPanel_X)
   # }
   
+  
   #-----------------------------------------------------------------------------
   ## Estimate models for landings
-
-  model_landings <- lm(ln_Landings_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) +
-                           factor(set_month) + trend + Vessel.length,
-                         data = datPanel)
-  summary(model_landings)
-  
-  
-  # #----------------------------------------------------------------------------
+  #
+  #
+  # model_landings <- lm(ln_Landings_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) +
+  #                          factor(set_month) + trend + Vessel.length,
+  #                        data = datPanel)
+  # summary(model_landings)
+  # 
   #   models <- list(
   #   "ln(Landings)"  = model_landings,
   #   "ln(Prices)"     = model_price)
@@ -108,84 +109,77 @@ sampled_rums <- function(data_in, cluster = 4,
   #                            statistic = "({std.error}){stars}",
   #                            output = "general_landings_price_models.docx")
   # 
-  
-  
-  #-----------------------------------------------------------------------------
+  #
   ## Estimate models for landings using SDM (conditional vessel have decide to participate)
-
-  ################
-  ### Pacific sardine landing model ###
-  datPanel_PSDN <- datPanel %>% filter(Species_Dominant == "PSDN") %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 1, 
-                            ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 1, 
-                            ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 1, 
-                            ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 1, 
-                            ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 1, 
-                            ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 1,  
-                            ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 1, 
-                            ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 1, 
-                            ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 1, 
-                            ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 1, 
-                            ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 1, 
-                            ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 1, 
-                            ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 1, 
-                            ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 
-                            ifelse(set_date >= "2015-04-28", 1, 0)))))))))))))))) %>% 
-    filter(Closure == 0) %>%
-    dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
-    mutate(trend = set_year-min_year_est + 1)
-  
-  qPSDN <- lm(ln_Landings_mtons ~ PSDN_SDM_60 + 
-              factor(set_month) + trend + 
-              Vessel.length , data = datPanel_PSDN)
-  summary(qPSDN)
-  
-  ##############
-  ### Market squid landing model ### (Maybe use lagged prices? ADD WEEKEND!)
-  datPanel_MSQD <- datPanel %>% filter(Species_Dominant == "MSQD") %>%
-    dplyr::mutate(Closure = ifelse(set_date >= "2010-12-17" & set_date < "2011-03-31", 1, 
-                            ifelse(set_date >= "2011-11-18" & set_date < "2012-03-31", 1, 
-                            ifelse(set_date >= "2012-11-21" & set_date < "2013-03-31", 1, 0)))) %>% 
-    dplyr::mutate(weekend = ifelse(chron::is.weekend(set_date), 1, 0)) %>%
-    filter(weekend == 0) %>%  filter(Closure == 0) %>% mutate(trend = set_year-min_year_est + 1) %>%
-    dplyr::mutate(ln_Landings_mtons = log(Landings_mtons))
-  
-  qMSQD <- lm(ln_Landings_mtons ~ MSQD_SDM_90 + 
-                factor(set_month) + trend +
-                Vessel.length, data = datPanel_MSQD)
-  summary(qMSQD)
-
-  ##############
-  ### Northern anchovy
-  datPanel_NANC <- datPanel %>% filter(Species_Dominant == "NANC") %>%
-    dplyr::mutate(PSDN.Open = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 0, 
-                            ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 0, 
-                            ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 0, 
-                            ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 0, 
-                            ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 0, 
-                            ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 0,  
-                            ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 0, 
-                            ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 0, 
-                            ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 0, 
-                            ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 0, 
-                            ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 0, 
-                            ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 0, 
-                            ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 0, 
-                            ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 0, 
-                            ifelse(set_date >= "2015-04-28", 0, 1)))))))))))))))) %>%
-    dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% mutate(trend = set_year-min_year_est + 1)
-  
-  qNANC <- lm(ln_Landings_mtons ~ NANC_SDM_20 +
-                factor(set_month) + trend +
-                Vessel.length, data = datPanel_NANC)
-  summary(qNANC)
-
+  #
+  # ### Pacific sardine landing model
+  # datPanel_PSDN <- datPanel %>% filter(Species_Dominant == "PSDN") %>%
+  #   dplyr::mutate(Closure = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 1, 
+  #                           ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 1, 
+  #                           ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 1, 
+  #                           ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 1, 
+  #                           ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 1, 
+  #                           ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 1,  
+  #                           ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 1, 
+  #                           ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 1, 
+  #                           ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 1, 
+  #                           ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 1, 
+  #                           ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 1, 
+  #                           ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 1, 
+  #                           ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 1, 
+  #                           ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 
+  #                           ifelse(set_date >= "2015-04-28", 1, 0)))))))))))))))) %>% 
+  #   filter(Closure == 0) %>%
+  #   dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
+  #   mutate(trend = set_year-min_year_est + 1)
+  # 
+  # qPSDN <- lm(ln_Landings_mtons ~ PSDN_SDM_60 + 
+  #             factor(set_month) + trend + 
+  #             Vessel.length , data = datPanel_PSDN)
+  # 
+  # ### Market squid landing model
+  # datPanel_MSQD <- datPanel %>% filter(Species_Dominant == "MSQD") %>%
+  #   dplyr::mutate(Closure = ifelse(set_date >= "2010-12-17" & set_date < "2011-03-31", 1, 
+  #                           ifelse(set_date >= "2011-11-18" & set_date < "2012-03-31", 1, 
+  #                           ifelse(set_date >= "2012-11-21" & set_date < "2013-03-31", 1, 0)))) %>% 
+  #   dplyr::mutate(weekend = ifelse(chron::is.weekend(set_date), 1, 0)) %>%
+  #   filter(weekend == 0) %>%  filter(Closure == 0) %>% mutate(trend = set_year-min_year_est + 1) %>%
+  #   dplyr::mutate(ln_Landings_mtons = log(Landings_mtons))
+  # 
+  # qMSQD <- lm(ln_Landings_mtons ~ MSQD_SDM_90 + 
+  #               factor(set_month) + trend +
+  #               Vessel.length, data = datPanel_MSQD)
+  # summary(qMSQD)
+  # 
+  # ### Northern anchovy
+  # datPanel_NANC <- datPanel %>% filter(Species_Dominant == "NANC") %>%
+  #   dplyr::mutate(PSDN.Open = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 0, 
+  #                           ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 0, 
+  #                           ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 0, 
+  #                           ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 0, 
+  #                           ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 0, 
+  #                           ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 0,  
+  #                           ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 0, 
+  #                           ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 0, 
+  #                           ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 0, 
+  #                           ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 0, 
+  #                           ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 0, 
+  #                           ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 0, 
+  #                           ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 0, 
+  #                           ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 0, 
+  #                           ifelse(set_date >= "2015-04-28", 0, 1)))))))))))))))) %>%
+  #   dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% mutate(trend = set_year-min_year_est + 1)
+  # 
+  # qNANC <- lm(ln_Landings_mtons ~ NANC_SDM_20 +
+  #               factor(set_month) + trend +
+  #               Vessel.length, data = datPanel_NANC)
+  # summary(qNANC)
+  #
   # datPanelcor <- datPanel %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% drop_na() %>% unique()
   # cor(datPanelcor$Vessel.horsepower, datPanelcor$Vessel.length)
-  
-  
-  # ########################################
-  # ## Create table for paper (all species)
+  #
+  #
+  ## Create table for paper (all species)
   # 
   #   models <- list(
   #   "Pacific sardine"  = qPSDN,
@@ -198,9 +192,8 @@ sampled_rums <- function(data_in, cluster = 4,
   #                            gof_map = c("nobs", "adj.r.squared"),
   #                            statistic = "({std.error}){stars}",
   #                            output = "landings_models.docx")
+  #
 
-  
-  #--------------------------------
   ## Define hauls data used for estimation (in this case, are the trips)
   
   hauls <- dat %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
@@ -216,8 +209,6 @@ sampled_rums <- function(data_in, cluster = 4,
   ## Create probabilities for sampling choice set
   ## For this, we compute the average vessel catch and port composition by month
   ## (The choice set varies depending on the month of the year)
-
-  # nrow(dist_hauls_catch_shares %>% select("selection") %>% unique())
 
   dbp <- dist_hauls_catch_shares %>% 
     group_by(selection, VESSEL_NUM, set_year, set_month) %>% 
