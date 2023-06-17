@@ -47,11 +47,11 @@ sampled_rums <- function(data_in, cluster = 4,
            Vessel.weight = as.numeric(Vessel.weight),
            Vessel.horsepower = as.numeric(Vessel.horsepower))
   cluster <- 4
-  min_year_prob <- 2012
+  min_year_prob <- 2013
   max_year_prob <- 2017
   min_year_est <- 2012
   max_year_est <- 2019
-  min_year <- 2012
+  min_year <- 2013
   max_year <- 2017
   ndays <- 30
   nhauls_sampled <- 5
@@ -72,15 +72,18 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
     dplyr::mutate(ln_Price_mtons = log(Price_mtons)) %>% 
     mutate(trend = set_year-min_year_est + 1) 
-  # %>%
-  #   filter(group_all == cluster)  ### NEW: Filtering by clusters to estimate pre-dcm models
   
+  # model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
+  #                    factor(set_month) + trend, 
+  #                   data = datPanel)
+  saveRDS(model_price, file = 'Participation\\R\\model_price_2012_2019.RDS')
+  model_price <- readRDS(file = 'Participation\\R\\model_price_2012_2019.RDS')
   
-  model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
-                     factor(set_month) + trend, 
-                    data = datPanel)
-  summary(model_price)
-  
+  # modelsummary::modelsummary(model_price, fmt = 2,
+  #                            gof_map = c("nobs", "adj.r.squared"),
+  #                            statistic = "({std.error}){stars}",
+  #                            output = "Participation\\Results\\price_model.docx")
+  #
   # mod_estimate <- list() 
   # for(ii in min_year_est:max_year_est) {
   #   datPanel_X <- datPanel %>% filter(set_year == ii)
@@ -194,6 +197,8 @@ sampled_rums <- function(data_in, cluster = 4,
   #                            output = "landings_models.docx")
   #
 
+  
+  #-----------------------------------------------------------------------------
   ## Define hauls data used for estimation (in this case, are the trips)
   
   hauls <- dat %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
@@ -205,7 +210,8 @@ sampled_rums <- function(data_in, cluster = 4,
   dist_hauls_catch_shares <- hauls %>% dplyr::filter(set_year >= min_year_prob, set_year <= max_year_prob)
     dist_hauls_catch_shares <- dist_hauls_catch_shares[dist_hauls_catch_shares$selection != "No-Participation", ]
   
-  #---------------------------------------------------------------
+    
+  #----------------------------------------------------------------------------
   ## Create probabilities for sampling choice set
   ## For this, we compute the average vessel catch and port composition by month
   ## (The choice set varies depending on the month of the year)
@@ -258,10 +264,11 @@ sampled_rums <- function(data_in, cluster = 4,
 
   dbp_month <- as.data.frame(do.call(rbind.data.frame, dbp3))
   
+  #-----------------------------------------------------------------------
+  ## Create example plot with the proportion used to sample the choice set.
   # dbp_test <- dbp_month %>% group_by(set_month) %>%
   #   summarize(sum_prop = sum(prop)) 
-  
-  # ## Create example plot with the proportion used to sample the choice set.
+  # 
   # 
   # dbp_month_plot <- dbp_month %>%
   #   filter(prop > 0.01) %>% 
@@ -313,7 +320,7 @@ sampled_rums <- function(data_in, cluster = 4,
   #   guides(fill=guide_legend(title="Species / Port areas: "))
   # 
 
-  #-----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------
   ## Sample Hauls
   
   #Set seed
