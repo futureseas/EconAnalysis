@@ -15,7 +15,7 @@ library(tidyverse)
 
 
 #-----------------------------------------------------
-### Load in the data
+### Load in the datadata:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAWElEQVR42mNgGPTAxsZmJsVqQApgmGw1yApwKcQiT7phRBuCzzCSDSHGMKINIeDNmWQlA2IigKJwIssQkHdINgxfmBBtGDEBS3KCxBc7pMQgMYE5c/AXPwAwSX4lV3pTWwAAAABJRU5ErkJggg==
 Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
 Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
 Tickets_raw<-rbind(Tickets1, Tickets2)
@@ -57,7 +57,7 @@ setwd("C:/GitHub/EconAnalysis/Participation/BlockAreas")
 library(maptools)
 library(rgeos)
 catch_area_1 <- readShapePoly("NOAA_Block/NonWDFWFisheryManagementAreas - NOAA Coastal Trawl Logbook Block") 
-data_1 <- as.data.frame(catch_area_1) %>% select(c(BlockNumbe, CentroidLo, CentroidLa)) %>%
+data_1 <- as.data.frame(catch_area_1) %>% dplyr::select(c(BlockNumbe, CentroidLo, CentroidLa)) %>%
   rename(CATCH_AREA_CODE = BlockNumbe) %>%
   rename(lon_ca = CentroidLo) %>%
   rename(lat_ca = CentroidLa)
@@ -83,7 +83,11 @@ ticket.catch.area <- merge(ticket.merge, data_2,
   drop_na()
 
 
-saveRDS(ticket.catch.area, "catchareas_FTID.rds")
+ticket.catch.area2 <- ticket.catch.area %>% ungroup() %>%
+  group_by(PACFIN_SPECIES_CODE, FTID) %>%
+  summarize(lon_ca = mean(lon_ca), lat_ca = mean(lat_ca))
+
+saveRDS(ticket.catch.area2, "catchareas_FTID.rds")
 
 
 

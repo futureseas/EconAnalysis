@@ -14,6 +14,8 @@ library(tidyr)
 library(geosphere)
 library(tidyverse)  
 
+setwd("C:/GitHub/EconAnalysis")
+
 
 #-----------------------------------------------------
 ### Load in the data
@@ -39,16 +41,16 @@ Tickets_raw <- Tickets_raw %>%
 
 
 #-----------------------------------------------------
-###Subset the data to remove columns not relevant to this analysis. This will speed things up.
-Tickets <- select(Tickets_raw, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_NAME, PORT_AREA_CODE,
+### Subset the data to remove columns not relevant to this analysis. This will speed things up.
+### Create also unique FTID
+Tickets <- dplyr::select(Tickets_raw, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_NAME, PORT_AREA_CODE,
                                  VESSEL_NUM, VESSEL_NAME, VESSEL_LENGTH, VESSEL_WEIGHT, VESSEL_HORSEPOWER, 
                                  LANDED_WEIGHT_MTONS, LANDED_WEIGHT_LBS, AFI_EXVESSEL_REVENUE,
                                  PACFIN_GEAR_CODE, PACFIN_SPECIES_CODE, PACFIN_SPECIES_COMMON_NAME, VESSEL_OWNER_NAME,
                                  FISHER_LICENSE_NUM, AFI_PRICE_PER_POUND, NUM_OF_DAYS_FISHED)) %>%
   mutate(AFI_PRICE_PER_MTONS = AFI_PRICE_PER_POUND/0.000453592)
+  Tickets$FTID_unique <- udpipe::unique_identifier(Tickets, fields = c("FTID", "VESSEL_NUM", "LANDING_YEAR"))
 
-
-Tickets$FTID_unique <- udpipe::unique_identifier(Tickets, fields = c("FTID", "VESSEL_NUM", "LANDING_YEAR"))
 
 #-----------------------------------------------------
 ### Find the dominant species by value of each fishing trip (i.e., target species). 
@@ -78,7 +80,7 @@ Vessel.chr.lenght <- Tickets %>%
   unique() %>%
   group_by(VESSEL_NUM) %>% 
   summarize(Vessel.length = names(which.max(table(VESSEL_LENGTH)))) %>% 
-  unique() 
+  unique() %>% ungroup() 
 
 Vessel.chr.weight <- Tickets %>% 
   dplyr::select(c(VESSEL_NUM, VESSEL_WEIGHT, LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>% 
@@ -86,7 +88,7 @@ Vessel.chr.weight <- Tickets %>%
   unique() %>%
   group_by(VESSEL_NUM) %>% 
   summarize(Vessel.weight = names(which.max(table(VESSEL_WEIGHT)))) %>% 
-  unique() 
+  unique() %>% ungroup()
 
 Vessel.chr.horsepower <- Tickets %>% 
   dplyr::select(c(VESSEL_NUM, VESSEL_HORSEPOWER, LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>% 
@@ -94,16 +96,13 @@ Vessel.chr.horsepower <- Tickets %>%
   unique() %>%
   group_by(VESSEL_NUM) %>% 
   summarize(Vessel.horsepower = names(which.max(table(VESSEL_HORSEPOWER)))) %>% 
-  unique() 
+  unique() %>% ungroup()
 
 
 #-----------------------------------------------------
-### Aggregate species in a FTID 
+### Aggregate species in a FTID_unique
 Tickets <- Tickets %>% group_by(AGENCY_CODE, FTID_unique, FTID, LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE,
-                                VESSEL_NUM, PACFIN_SPECIES_CODE, Species_Dominant
-                                #PORT_NAME, VESSEL_NAME, VESSEL_OWNER_NAME, PACFIN_GEAR_CODE, 
-                                #FISHER_LICENSE_NUM, CATCH_AREA_CODE, PACFIN_SPECIES_COMMON_NAME
-                                ) %>% 
+                                VESSEL_NUM, PACFIN_SPECIES_CODE, Species_Dominant) %>% 
   summarize(Landings_mtons = sum(LANDED_WEIGHT_MTONS),
             Landings_lbs = sum(LANDED_WEIGHT_LBS),
             Revenue  = sum(AFI_EXVESSEL_REVENUE),
@@ -111,8 +110,7 @@ Tickets <- Tickets %>% group_by(AGENCY_CODE, FTID_unique, FTID, LANDING_YEAR, LA
             Price_mtons = mean(AFI_PRICE_PER_MTONS),
             max_days_sea = max(NUM_OF_DAYS_FISHED)) %>%
   mutate(dDelete = ifelse(FTID == "142301E" & LANDING_YEAR == 2020, 1, 0)) %>%
-  filter(dDelete == 0) %>% select(-c(dDelete))
-
+  filter(dDelete == 0) %>% dplyr::select(-c(dDelete)) %>% ungroup()
 
 #-------------------------------------------------------------------------------------
 ### Subset to select only records where one of the CPS was the target species
@@ -149,56 +147,21 @@ FF_Vessels<-as.data.frame(FF_Vessels[which(!FF_Vessels$VESSEL_NUM=="MISSING"),])
 names(FF_Vessels)[1]<-"VESSEL_NUM"
 
 
-#----------------------------------------------------------------------------------------
-###Subset from the complete data set to only retain records associated with these Vessels
-###Remove records associated with landings of zero value; this is likely bycatch
+#-----------------------------------------------------
+### Filter rows with non-zero revenues and only keep the species dominant (no by-catch)
 
 Tickets<-Tickets[which(Tickets$Revenue > 0),] # 137,971 row deleted
-Tickets<-setDT(Tickets)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM] # 1,927,235 row deleted
-Tickets<-as.data.frame(Tickets)
-rm(FF_Vessels, FTID_Value)
-
-saveRDS(Tickets, "C:/Data/PacFIN data/Tickets_filtered.rds")
-
-#-----------------------------------------------------
-### Create port-species choice 
 Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) %>% # 44,035 row deleted 
-   mutate(selection = paste(PORT_AREA_CODE, Species_Dominant, sep = "-", collapse = NULL)) 
-
-# Tickets_check <- Tickets %>% group_by(FTID) %>% mutate(n_obs = n()) %>% 
-#    ungroup() %>% filter(n_obs==2)
-
-# ### How many vessels?
-# Tickets %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
-
-
-#---------------------------------------------------------------------------------------
-### Expand database to include outside option (when vessel do not have fish ticket.)
-Tickets_exp <- complete(Tickets, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
-  mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
-  mutate(FTID_unique = ifelse(is.na(FTID_unique), paste('NP-',1:n()), FTID_unique))
-
-
-#-----------------------------------------------------
-### Merge with cluster data
-PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
-Tickets_clust <- merge(Tickets_exp, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
-rm(PAM_Vessel_Groups)
-Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
-
-# ### How many vessels and fish tickets?
-# PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
-# xxx <- merge(Tickets_storm, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
-# xxx <- xxx[!is.na(xxx$group_all), ]
-# xxx %>% select('FTID_unique') %>% unique() %>% summarize(n_tickets = n())
-# xxx %>% select('VESSEL_NUM') %>% unique() %>% summarize(n_vessels = n())
+  mutate(selection = paste(PORT_AREA_CODE, Species_Dominant, sep = "-", collapse = NULL)) 
 
 
 #-----------------------------------------------------
 ### Merge vessel characteristics
-Tickets_chr <- merge(Tickets_clust, Vessel.chr.lenght, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+Tickets_chr <- merge(Tickets, Vessel.chr.lenght, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 Tickets_chr <- merge(Tickets_chr, Vessel.chr.weight, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 Tickets_chr <- merge(Tickets_chr, Vessel.chr.horsepower, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+
+saveRDS(Tickets_chr, "C:/Data/PacFIN data/Tickets_filtered.rds")
 
 
 #---------------------------------------------------------------------
@@ -223,208 +186,41 @@ Catch.per.trip <- Tickets_chr %>%
   mutate(CPUE_index = sigmoid(CPUE.z)) %>%
   dplyr::select(-c('mean.CPUE', 'sd.CPUE', 'CPUE', 'CPUE.z'))
 
-Tickets_CPUE <- merge(Tickets_chr, Catch.per.trip,
-                     by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE', 'Species_Dominant')),
-                     all.x = TRUE, all.y = FALSE)
+saveRDS(Catch.per.trip, "C:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds")
 
 
-#-----------------------------------------------
-### Merge data to SDM 
+#----------------------------------------------------------------------------------------
+###Subset from the complete data set to only retain records associated with these Vessels
+###Remove records associated with landings of zero value; this is likely bycatch
 
-psdn.sdm <- read.csv(file = 'Participation/SDMs/sdm_psdn.csv')
-msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd.rds')
-nanc.sdm <- readRDS(file = 'Participation/SDMs/sdm_nanc.rds')
-phrg.sdm <- readRDS(file = 'Participation/SDMs/sdm_phrg.rds')
-cmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_cmck.rds')
-jmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_jmck.rds')
-msqd_spawn.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd_spawn.rds')
+Tickets_FF<-setDT(Tickets_chr)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM] # 1,927,235 row deleted
+Tickets_FF<-as.data.frame(Tickets_FF)
+rm(FF_Vessels, FTID_Value)
 
-psdn.sdm[is.na(psdn.sdm)] <- 0
-msqd.sdm[is.na(msqd.sdm)] <- 0
-nanc.sdm[is.na(nanc.sdm)] <- 0
-phrg.sdm[is.na(phrg.sdm)] <- 0
-cmck.sdm[is.na(cmck.sdm)] <- 0
-jmck.sdm[is.na(jmck.sdm)] <- 0                     
-msqd_spawn.sdm[is.na(msqd_spawn.sdm)] <- 0
+#---------------------------------------------------------------------------------------
+### Expand database to include outside option (when vessel do not have fish ticket.)
+Tickets_exp <- complete(Tickets_FF, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+  mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
+  mutate(FTID_unique = ifelse(is.na(FTID_unique), paste('NP-',1:n()), FTID_unique))
 
 
-Tickets_SDM <- merge(Tickets_CPUE, psdn.sdm,
-                     by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-Tickets_SDM <- merge(Tickets_SDM, msqd.sdm,
-                     by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-Tickets_SDM <- merge(Tickets_SDM, nanc.sdm,
-                     by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-Tickets_SDM <- merge(Tickets_SDM, phrg.sdm,
-                     by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-Tickets_SDM <- merge(Tickets_SDM, cmck.sdm,
-                     by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-Tickets_SDM <- merge(Tickets_SDM, jmck.sdm,
-                     by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-Tickets_SDM <- merge(Tickets_SDM, msqd_spawn.sdm,
-                     by = (c('LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-
-
-##-------------------------------
-## Lagged SDMs and prices
-
-### Create date variable
-Tickets_SDM$set_date<-as.Date(with(
-  Tickets_SDM,
-  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
-  "%Y-%m-%d")
-Tickets_SDM$prev_days_date <- Tickets_SDM$set_date - days(1)
-
-### Lagged date in SDM databases
-psdn.sdm$set_date<-as.Date(with(
-  psdn.sdm,
-  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
-  "%Y-%m-%d")
-msqd.sdm$set_date<-as.Date(with(
-  msqd.sdm,
-  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
-  "%Y-%m-%d")
-nanc.sdm$set_date<-as.Date(with(
-  nanc.sdm,
-  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
-  "%Y-%m-%d")
-phrg.sdm$set_date<-as.Date(with(
-  phrg.sdm,
-  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
-  "%Y-%m-%d")
-cmck.sdm$set_date<-as.Date(with(
-  cmck.sdm,
-  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
-  "%Y-%m-%d")
-jmck.sdm$set_date<-as.Date(with(
-  jmck.sdm,
-  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
-  "%Y-%m-%d")
-msqd_spawn.sdm$set_date<-as.Date(with(
-  msqd_spawn.sdm,
-  paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
-  "%Y-%m-%d")
-
-
-### Lagged date in price database
-prices <- Tickets_SDM %>% 
-  dplyr::select(c(set_date, PORT_AREA_CODE, PACFIN_SPECIES_CODE, Price_mtons)) %>% 
-  drop_na() %>%
-  unique() %>%  
-  rename(lag_Price_mtons = Price_mtons) %>%
-  rename(prev_days_date = set_date)
-
-Tickets_SDM <- merge(Tickets_SDM, prices, 
-                     by = (c('prev_days_date', 'PORT_AREA_CODE', 'PACFIN_SPECIES_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-
-### lagged SDM(PSDN)
-psdn.sdm <- psdn.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  rename(lag_PSDN_SDM_30 = PSDN_SDM_30) %>%
-  rename(lag_PSDN_SDM_60 = PSDN_SDM_60) %>%
-  rename(lag_PSDN_SDM_90 = PSDN_SDM_90) %>%
-  rename(lag_PSDN_SDM_220 = PSDN_SDM_220) %>%
-  rename(prev_days_date = set_date)
-Tickets_SDM <- merge(Tickets_SDM, psdn.sdm, 
-                     by = (c('prev_days_date', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-
-### lagged SDM(MSQD)
-msqd.sdm <- msqd.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  rename(lag_MSQD_SDM_30 =  MSQD_SDM_30) %>%
-  rename(lag_MSQD_SDM_90 =  MSQD_SDM_90) %>%
-  rename(lag_MSQD_SDM_220 = MSQD_SDM_220) %>%
-  rename(prev_days_date = set_date)
-Tickets_SDM <- merge(Tickets_SDM, msqd.sdm, 
-                     by = (c('prev_days_date', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-
-### lagged SDM(NANC)
-nanc.sdm <- nanc.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  rename(lag_NANC_SDM_20  = NANC_SDM_20) %>%
-  rename(lag_NANC_SDM_30  = NANC_SDM_30) %>%
-  rename(lag_NANC_SDM_90  = NANC_SDM_90) %>%
-  rename(lag_NANC_SDM_220 = NANC_SDM_220) %>%
-  rename(prev_days_date = set_date)
-Tickets_SDM <- merge(Tickets_SDM, nanc.sdm, 
-                     by = (c('prev_days_date', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-
-### lagged SDM(PHRG)
-phrg.sdm <- phrg.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  rename(lag_PHRG_SDM_30  = PHRG_SDM_30) %>%
-  rename(lag_PHRG_SDM_90  = PHRG_SDM_90) %>%
-  rename(lag_PHRG_SDM_220 = PHRG_SDM_220) %>%
-  rename(prev_days_date = set_date)
-Tickets_SDM <- merge(Tickets_SDM, phrg.sdm, 
-                     by = (c('prev_days_date', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-
-### lagged SDM(CMCK)
-cmck.sdm <- cmck.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  rename(lag_CMCK_SDM_30  = CMCK_SDM_30) %>%
-  rename(lag_CMCK_SDM_90  = CMCK_SDM_90) %>%
-  rename(lag_CMCK_SDM_220 = CMCK_SDM_220) %>%
-  rename(prev_days_date = set_date)
-Tickets_SDM <- merge(Tickets_SDM, cmck.sdm, 
-                     by = (c('prev_days_date', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-
-### lagged SDM(JMCK)
-jmck.sdm <- jmck.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  rename(lag_JMCK_SDM_30  = JMCK_SDM_30) %>%
-  rename(lag_JMCK_SDM_90  = JMCK_SDM_90) %>%
-  rename(lag_JMCK_SDM_220 = JMCK_SDM_220) %>%
-  rename(prev_days_date = set_date)
-Tickets_SDM <- merge(Tickets_SDM, jmck.sdm, 
-                     by = (c('prev_days_date', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-
-### lagged SDM(MSQD_SPAWN)
-msqd_spawn.sdm <- msqd_spawn.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  rename(lag_MSQD_SPAWN_SDM_30  = MSQD_SPAWN_SDM_30) %>%
-  rename(lag_MSQD_SPAWN_SDM_90  = MSQD_SPAWN_SDM_90) %>%
-  rename(lag_MSQD_SPAWN_SDM_220 = MSQD_SPAWN_SDM_220) %>%
-  rename(prev_days_date = set_date)
-Tickets_SDM <- merge(Tickets_SDM, msqd_spawn.sdm, 
-                     by = (c('prev_days_date', 'PORT_AREA_CODE')),
-                     all.x = TRUE, all.y = FALSE)
-saveRDS(Tickets_SDM, "Tickets_temp.rds")
-
-
-#-----------------------------------------------
-# ### Compare CPUE_index to SDMs
-# compare.SDM.CPUE <- Tickets_SDM %>% filter(Species_Dominant == "PSDN") %>%
-#   dplyr::select(c('CPUE_index', 'PSDN_SDM_60', 'PORT_AREA_CODE', 
-#                   'LANDING_YEAR', 'LANDING_MONTH', 'LANDING_DAY')) %>%
-#   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-#   summarize(CPUE_index = mean(CPUE_index, na.rm = TRUE), 
-#             PSDN_SDM_60 = mean(PSDN_SDM_60, na.rm = TRUE))
-# library(hrbrthemes)
-# 
-# # Basic scatter plot
-# ggplot(compare.SDM.CPUE, aes(x=CPUE_index, y=PSDN_SDM_60)) +
-#   facet_wrap(~ PORT_AREA_CODE) + 
-#   geom_point( color="#69b3a2") +
-#   geom_smooth(method=lm , color="red", fill="#69b3a2", se=TRUE)
-
+#-----------------------------------------------------
+### Merge with cluster data
+PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
+Tickets_clust <- merge(Tickets_exp, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+rm(PAM_Vessel_Groups)
+Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 
 #-----------------------------------------------
 ### Merge data to fishing locations
-Tickets_SDM <- readRDS("Tickets_temp.rds")
 
-loogbook_coord <- readRDS("C:\\Data\\Logbooks\\logbooks_FTID.rds")
+loogbook_coord <- readRDS("C:/Data/Logbooks/logbooks_FTID.rds")
 catch_area_coord <- readRDS("C:/GitHub/EconAnalysis/Participation/BlockAreas/catchareas_FTID.rds")
 
-Tickets_coord <- merge(Tickets_SDM, loogbook_coord, 
+Tickets_coord <- merge(Tickets_clust, loogbook_coord, 
                      by = (c('FTID', 'PACFIN_SPECIES_CODE')),
                      all.x = TRUE, all.y = FALSE)
+
 Tickets_coord <- merge(Tickets_coord, catch_area_coord, 
                        by = (c('FTID', 'PACFIN_SPECIES_CODE')),
                        all.x = TRUE, all.y = FALSE)
@@ -433,36 +229,31 @@ Tickets_coord <-  Tickets_coord %>%
   mutate(lon = ifelse(is.na(lon_logbook), lon_ca, lon_logbook)) %>%
   mutate(lat = ifelse(is.na(lat_logbook), lat_ca, lat_logbook))
 
-
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Clean dataset for discrete choice model  
-## Add unique trip_ID and add set_date, set_year, set_day and set_month 
+## Add unique trip_ID, set_date, set_year, set_day and set_month 
 ## (exclude weird period from expanding data)
 
 Tickets_coord$trip_id <- udpipe::unique_identifier(Tickets_coord, fields = c("FTID_unique"))
+
+
+### Create date variable
+Tickets_coord$set_date <- 
+  as.Date(with(Tickets_coord, paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep="-")), 
+          "%Y-%m-%d")
+Tickets_coord$prev_days_date <- Tickets_coord$set_date - days(1)
+
 Tickets_coord <- Tickets_coord %>% drop_na(set_date) %>% 
   dplyr::rename(set_day = LANDING_DAY) %>%
   dplyr::rename(set_month = LANDING_MONTH) %>%
-  dplyr::rename(set_year = LANDING_YEAR)%>%
-  dplyr::select("VESSEL_NUM", "AGENCY_CODE", "trip_id", "set_date", "set_year", "set_month", "set_day", "selection",
-                "PORT_AREA_CODE", "Species_Dominant", "Landings_mtons", "Revenue", "Price_mtons", "max_days_sea",
-                "group_all", "lag_Price_mtons",
-                "PSDN_SDM_30", "PSDN_SDM_60", "PSDN_SDM_90","PSDN_SDM_220",
-                "MSQD_SDM_30", "MSQD_SDM_90", "MSQD_SDM_220",
-                "NANC_SDM_20", "NANC_SDM_30", "NANC_SDM_90", "NANC_SDM_220",
-                "PHRG_SDM_30", "PHRG_SDM_90" , "PHRG_SDM_220",
-                "CMCK_SDM_30", "CMCK_SDM_90", "CMCK_SDM_220",
-                "JMCK_SDM_30", "JMCK_SDM_90", "JMCK_SDM_220",
-                "MSQD_SPAWN_SDM_30", "MSQD_SPAWN_SDM_90", "MSQD_SPAWN_SDM_220",
-                "lag_PSDN_SDM_30", "lag_PSDN_SDM_60", "lag_PSDN_SDM_90", "lag_PSDN_SDM_220",
-                "lag_MSQD_SDM_30", "lag_MSQD_SDM_90", "lag_MSQD_SDM_220",       
-                "lag_NANC_SDM_20", "lag_NANC_SDM_30", "lag_NANC_SDM_90", "lag_NANC_SDM_220",       
-                "lag_PHRG_SDM_30", "lag_PHRG_SDM_90", "lag_PHRG_SDM_220",       
-                "lag_CMCK_SDM_30", "lag_CMCK_SDM_90", "lag_CMCK_SDM_220",       
-                "lag_JMCK_SDM_30", "lag_JMCK_SDM_90", "lag_JMCK_SDM_220",
-                "lag_MSQD_SPAWN_SDM_30", "lag_MSQD_SPAWN_SDM_90", "lag_MSQD_SPAWN_SDM_220",
-                "Vessel.length", "Vessel.weight", "Vessel.horsepower", "lat", "lon",
-                "lon_logbook", "lon_ca", "lat_logbook", "lat_ca", "CPUE_index") 
+  dplyr::rename(set_year = LANDING_YEAR) %>%
+  dplyr::select(
+    "VESSEL_NUM", "AGENCY_CODE", "trip_id", 
+    "set_date", "set_year", "set_month", "set_day", "prev_days_date",
+    "selection", "PORT_AREA_CODE", "Species_Dominant", 
+    "Landings_mtons", "Revenue", "Price_mtons", "max_days_sea",
+    "group_all", "Vessel.length", "Vessel.weight", "Vessel.horsepower", 
+    "lat", "lon", "lon_logbook", "lon_ca", "lat_logbook", "lat_ca") 
 
 
 
@@ -528,7 +319,7 @@ participation_data_all <- Tickets_coord %>%
 #     paste0(" participating within a year (",
 #     paste0(formatC(nrow(participation_filtered), format="d", big.mark=","), " obs)")))),
 #     subtitle = paste0("...and ", paste0(ndays_filter_t, " days participating for rows with tickets")))
-
+#
 # ggplot(data=participation_filtered, aes(x=Revenue_MA, group=partDummy, fill=partDummy)) +
 #   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
 #   theme_ipsum()  +
@@ -560,9 +351,10 @@ participation_filtered <- participation_data_all %>%
   dplyr::select(VESSEL_NUM, set_date) %>% 
   unique() %>% mutate(filter = 1)
 
-Tickets_part <- merge(Tickets_coord, participation_filtered,
-                      by = c("VESSEL_NUM", "set_date"), 
-                      all.x = TRUE, all.y = FALSE) %>% 
+Tickets_part <- 
+  merge(Tickets_coord, participation_filtered,
+        by = c("VESSEL_NUM", "set_date"),
+        all.x = TRUE, all.y = FALSE) %>% 
   filter(filter == 1) %>% 
   dplyr::select(-c("filter"))
 
@@ -572,7 +364,8 @@ Tickets_part <- merge(Tickets_coord, participation_filtered,
 
 ## Get PORT_AREA_CODE coordinates.
 # Load port georeferenced data
-ports <- read_csv("Data/Ports/port_areas.csv") %>% drop_na() %>%
+ports <- read_csv("Data/Ports/port_areas.csv") %>% 
+  drop_na() %>%
   rename(PORT_AREA_CODE = port_group_code) %>%
   rename(lat_port = lat) %>%
   rename(lon_port = lon) %>%
@@ -597,6 +390,15 @@ hist(Tickets_final$dist)
 
 #------------------------------------------------------
 ### Save participation data
+
 saveRDS(Tickets_final, "C:\\Data\\PacFIN data\\participation_data.rds")
-
-
+# 
+# ########################################
+# unique_tickets <- Tickets_final %>%
+#   dplyr::select(trip_id) %>%
+#   group_by(trip_id) %>%
+#   summarize(n_count = n()) %>% ungroup()
+# 
+# Tickets_check <- Tickets_final %>% group_by(trip_id) %>% summarize(n_obs = n()) %>%
+#   ungroup() %>% filter(n_obs>1)
+# #######################################

@@ -201,9 +201,16 @@ sampled_rums <- function(data_in, cluster = 4,
   #-----------------------------------------------------------------------------
   ## Define hauls data used for estimation (in this case, are the trips)
   
-  hauls <- dat %>% dplyr::filter(set_year >= min_year, set_year <= max_year,
-                                 group_all %in% cluster) %>% 
-    distinct(trip_id, .keep_all = T) %>% 
+  hauls2 <- dat %>% 
+    dplyr::filter(set_year >= min_year, set_year <= max_year, 
+                  group_all %in% cluster) 
+  
+  <<< CHECK THIS!!!>>>
+    
+    hauls <- dat %>% 
+    dplyr::filter(set_year >= min_year, set_year <= max_year, 
+                  group_all %in% cluster) %>% 
+    distinct(trip_id, .keep_all = T)  %>% 
     dplyr::select(trip_id, VESSEL_NUM, set_year, set_month, set_day, Revenue, selection) %>% as.data.frame
 
   ## Select hauls used to calculate probability for the choice set
