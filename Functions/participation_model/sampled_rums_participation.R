@@ -3,12 +3,11 @@
 ### Sample choice set for the participation model 
 ###################
 
-# NOTE: Behavior of the cluster? 
-# Check also state dependency -- Include choice from previous period in the actual choice set.
-# Create index!
-
-#' Format RUM data base on resampled fish tickets
-#' Function calls mlogit
+# WORK TO DO:
+# Behavior of the cluster? 
+# Include choice from previous period in the actual choice set.
+# Estimate price model for each species (polynomial included?) --- later
+# Use SDM last 30 days (same for CPUE index)
 
 #' @param data_in Data going in to the function; default is filt_clusts
 #' @param cluster cluster that we are analyzing 
@@ -27,8 +26,8 @@
 #' @export
 
 sampled_rums <- function(data_in, cluster = 4,
-                         min_year = 2012, max_year = 2017,
-                         min_year_prob = 2012, max_year_prob = 2017,
+                         min_year = 2013, max_year = 2017,
+                         min_year_prob = 2013, max_year_prob = 2017,
                          min_year_est = 2012, max_year_est = 2019,
                          ndays = 30, 
                          nhauls_sampled = 5, seed = 300, 
@@ -45,7 +44,8 @@ sampled_rums <- function(data_in, cluster = 4,
   data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") %>%
     mutate(Vessel.length = as.numeric(Vessel.length),
            Vessel.weight = as.numeric(Vessel.weight),
-           Vessel.horsepower = as.numeric(Vessel.horsepower))
+           Vessel.horsepower = as.numeric(Vessel.horsepower)) %>%
+    mutate(max_days_sea = ifelse(is.na(max_days_sea), 1, max_days_sea))
   cluster <- 4
   min_year_prob <- 2013
   max_year_prob <- 2017
@@ -57,161 +57,79 @@ sampled_rums <- function(data_in, cluster = 4,
   nhauls_sampled <- 5
   seed <- 300
   ncores <- 4
-  rev_scale <- 100
+  rev_scale <- 1000
   ################
 
   dat <- data_in 
   
-  #-----------------------------------------------------------------------------
-  ## Estimate models for landings and prices 
+  #-------------
+  ## Price models
+  dat_est <- readRDS("C:/Data/PacFIN data/Tickets_filtered.rds")
 
-  # Filter the data for estimations of prices
-  datPanel <- dat %>% 
-    dplyr::filter(selection != "No-Participation") %>% 
-    dplyr::filter(set_year >= min_year_est, set_year <= max_year_est) %>%
-    dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
-    dplyr::mutate(ln_Price_mtons = log(Price_mtons)) %>% 
-    mutate(trend = set_year-min_year_est + 1) 
+  datPanel <- dat_est %>% 
+      dplyr::filter(LANDING_YEAR >= min_year_est, LANDING_YEAR <= max_year_est) %>%
+      dplyr::mutate(ln_Price_mtons = log(Price_mtons)) %>% 
+      mutate(trend = LANDING_YEAR - min_year_est + 1) %>%
+      mutate(set_month = LANDING_MONTH) %>%
+      filter(Species_Dominant != "FSOL") %>% filter(Species_Dominant != "SCOR") %>%
+      filter(Species_Dominant != "STRY") %>% filter(Species_Dominant != "DSOL") %>%
+      filter(Species_Dominant != "HTRB") %>% filter(Species_Dominant != "RHRG") %>%
+      filter(Species_Dominant != "SLNS") %>% filter(Species_Dominant != "RDB1") %>%
+      filter(Species_Dominant != "BSK1") %>% filter(Species_Dominant != "TREE") %>%
+      filter(Species_Dominant != "POP2") %>% filter(Species_Dominant != "STR1") %>%
+      filter(Species_Dominant != "KFSH") %>% filter(Species_Dominant != "REX")  %>%
+      filter(Species_Dominant != "BRZ1") %>% filter(Species_Dominant != "MXR1") %>%
+      filter(Species_Dominant != "GSR1") %>% filter(Species_Dominant != "BMCK") %>%
+      filter(Species_Dominant != "ART1") %>% filter(Species_Dominant != "RTSK") %>%
+      filter(Species_Dominant != "PNK1") %>% filter(Species_Dominant != "GPRW") %>%
+      filter(Species_Dominant != "SQID") %>% filter(Species_Dominant != "MXRF") %>%
+      filter(Species_Dominant != "RCK7") %>% filter(Species_Dominant != "GBLC") %>%
+      filter(Species_Dominant != "HNY1") %>% filter(Species_Dominant != "UTNA") %>%
+      filter(Species_Dominant != "MEEL") %>% filter(Species_Dominant != "GGRD") %>%
+      filter(Species_Dominant != "MSHP") %>% filter(Species_Dominant != "GBL1") %>%
+      filter(Species_Dominant != "PNKR") %>% filter(Species_Dominant != "FLAG") %>%
+      filter(Species_Dominant != "YEY1") %>% filter(Species_Dominant != "ROSY") %>%
+      filter(Species_Dominant != "SAIL") %>% filter(Species_Dominant != "SCLP") %>%
+      filter(Species_Dominant != "RSTN") %>% filter(Species_Dominant != "PLCK") %>%
+      filter(Species_Dominant != "BCLM") %>% filter(Species_Dominant != "CKLE") %>%
+      filter(Species_Dominant != "GCLM") %>% filter(Species_Dominant != "NUSF")
+    
+    # model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
+    #                    factor(set_month) + trend, data = datPanel)
+    # saveRDS(model_price, file = 'Participation\\R\\model_price_2012_2019.RDS')
+    # model_price <- readRDS(file = 'Participation\\R\\model_price_2012_2019.RDS')
+    # 
+    # # modelsummary::modelsummary(model_price, fmt = 2,
+    # #                            gof_map = c("nobs", "adj.r.squared"),
+    # #                            statistic = "({std.error}){stars}",
+    # #                            output = "Participation\\Results\\price_model.docx")
+    # #
   
-  # model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
-  #                    factor(set_month) + trend, 
-  #                   data = datPanel)
-  saveRDS(model_price, file = 'Participation\\R\\model_price_2012_2019.RDS')
-  model_price <- readRDS(file = 'Participation\\R\\model_price_2012_2019.RDS')
-  
-  # modelsummary::modelsummary(model_price, fmt = 2,
-  #                            gof_map = c("nobs", "adj.r.squared"),
-  #                            statistic = "({std.error}){stars}",
-  #                            output = "Participation\\Results\\price_model.docx")
-  #
-  # mod_estimate <- list() 
-  # for(ii in min_year_est:max_year_est) {
-  #   datPanel_X <- datPanel %>% filter(set_year == ii)
-  #   mod_estimate[[ii]] <- lm(Price_mtons ~ factor(Species_Dominant) + factor(PORT_AREA_CODE) + 
-  #                                  factor(set_month) + Vessel.length, data = datPanel_X)
-  # }
-  
-  
-  #-----------------------------------------------------------------------------
-  ## Estimate models for landings
-  #
-  #
-  # model_landings <- lm(ln_Landings_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) +
-  #                          factor(set_month) + trend + Vessel.length,
-  #                        data = datPanel)
-  # summary(model_landings)
-  # 
-  #   models <- list(
-  #   "ln(Landings)"  = model_landings,
-  #   "ln(Prices)"     = model_price)
-  # 
-  # gm <- modelsummary::gof_map
-  # options(OutDec=".")
-  # modelsummary::modelsummary(models, fmt = 2,
-  #                            gof_map = c("nobs", "adj.r.squared"),
-  #                            statistic = "({std.error}){stars}",
-  #                            output = "general_landings_price_models.docx")
-  # 
-  #
-  ## Estimate models for landings using SDM (conditional vessel have decide to participate)
-  #
-  # ### Pacific sardine landing model
-  # datPanel_PSDN <- datPanel %>% filter(Species_Dominant == "PSDN") %>%
-  #   dplyr::mutate(Closure = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 1, 
-  #                           ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 1, 
-  #                           ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 1, 
-  #                           ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 1, 
-  #                           ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 1, 
-  #                           ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 1,  
-  #                           ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 1, 
-  #                           ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 1, 
-  #                           ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 1, 
-  #                           ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 1, 
-  #                           ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 1, 
-  #                           ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 1, 
-  #                           ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 1, 
-  #                           ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 1, 
-  #                           ifelse(set_date >= "2015-04-28", 1, 0)))))))))))))))) %>% 
-  #   filter(Closure == 0) %>%
-  #   dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% 
-  #   mutate(trend = set_year-min_year_est + 1)
-  # 
-  # qPSDN <- lm(ln_Landings_mtons ~ PSDN_SDM_60 + 
-  #             factor(set_month) + trend + 
-  #             Vessel.length , data = datPanel_PSDN)
-  # 
-  # ### Market squid landing model
-  # datPanel_MSQD <- datPanel %>% filter(Species_Dominant == "MSQD") %>%
-  #   dplyr::mutate(Closure = ifelse(set_date >= "2010-12-17" & set_date < "2011-03-31", 1, 
-  #                           ifelse(set_date >= "2011-11-18" & set_date < "2012-03-31", 1, 
-  #                           ifelse(set_date >= "2012-11-21" & set_date < "2013-03-31", 1, 0)))) %>% 
-  #   dplyr::mutate(weekend = ifelse(chron::is.weekend(set_date), 1, 0)) %>%
-  #   filter(weekend == 0) %>%  filter(Closure == 0) %>% mutate(trend = set_year-min_year_est + 1) %>%
-  #   dplyr::mutate(ln_Landings_mtons = log(Landings_mtons))
-  # 
-  # qMSQD <- lm(ln_Landings_mtons ~ MSQD_SDM_90 + 
-  #               factor(set_month) + trend +
-  #               Vessel.length, data = datPanel_MSQD)
-  # summary(qMSQD)
-  # 
-  # ### Northern anchovy
-  # datPanel_NANC <- datPanel %>% filter(Species_Dominant == "NANC") %>%
-  #   dplyr::mutate(PSDN.Open = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 0, 
-  #                           ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 0, 
-  #                           ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 0, 
-  #                           ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 0, 
-  #                           ifelse(set_date >= "2009-07-18" & set_date < "2009-09-01", 0, 
-  #                           ifelse(set_date >= "2009-09-23" & set_date < "2010-01-01", 0,  
-  #                           ifelse(set_date >= "2010-06-12" & set_date < "2010-07-01", 0, 
-  #                           ifelse(set_date >= "2010-07-22" & set_date < "2010-09-01", 0, 
-  #                           ifelse(set_date >= "2010-09-24" & set_date < "2011-01-01", 0, 
-  #                           ifelse(set_date >= "2011-03-05" & set_date < "2011-07-01", 0, 
-  #                           ifelse(set_date >= "2011-07-12" & set_date < "2011-09-01", 0, 
-  #                           ifelse(set_date >= "2011-09-21" & set_date < "2012-01-01", 0, 
-  #                           ifelse(set_date >= "2012-08-23" & set_date < "2012-09-01", 0, 
-  #                           ifelse(set_date >= "2013-08-22" & set_date < "2013-09-01", 0, 
-  #                           ifelse(set_date >= "2015-04-28", 0, 1)))))))))))))))) %>%
-  #   dplyr::mutate(ln_Landings_mtons = log(Landings_mtons)) %>% mutate(trend = set_year-min_year_est + 1)
-  # 
-  # qNANC <- lm(ln_Landings_mtons ~ NANC_SDM_20 +
-  #               factor(set_month) + trend +
-  #               Vessel.length, data = datPanel_NANC)
-  # summary(qNANC)
-  #
-  # datPanelcor <- datPanel %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% drop_na() %>% unique()
-  # cor(datPanelcor$Vessel.horsepower, datPanelcor$Vessel.length)
-  #
-  #
-  ## Create table for paper (all species)
-  # 
-  #   models <- list(
-  #   "Pacific sardine"  = qPSDN,
-  #   "Market squid"     = qMSQD,
-  #   "Northern anchovy" = qNANC)
-  # 
-  # gm <- modelsummary::gof_map
-  # options(OutDec=".")
-  # modelsummary::modelsummary(models, fmt = 2,
-  #                            gof_map = c("nobs", "adj.r.squared"),
-  #                            statistic = "({std.error}){stars}",
-  #                            output = "landings_models.docx")
-  #
+    species <- as.data.frame(datPanel %>% dplyr::select(Species_Dominant) %>% unique())
+    species.list <- c(species$Species_Dominant)
+    species.list.number <- as.data.frame(species.list)
+    mod_estimate <- list() 
+    xx <- 1
+    
+    for(ii in species.list) {
+      datPanel_X <- datPanel %>% filter(Species_Dominant == ii)
+      mod_estimate[[xx]] <- 
+        lm(ln_Price_mtons ~ factor(PORT_AREA_CODE) + factor(set_month) + trend, data = datPanel_X)
+      xx <- min(xx + 1, nrow(species))
+    }
+    rm(xx, species.list, species, datPanel, dat_est, datPanel_X)
+    species.list.number$id_number <- seq(1, nrow(species.list.number))
 
-  
   #-----------------------------------------------------------------------------
   ## Define hauls data used for estimation (in this case, are the trips)
   
-  hauls2 <- dat %>% 
-    dplyr::filter(set_year >= min_year, set_year <= max_year, 
-                  group_all %in% cluster) 
-  
-  <<< CHECK THIS!!!>>>
-    
-    hauls <- dat %>% 
-    dplyr::filter(set_year >= min_year, set_year <= max_year, 
+  hauls <- dat %>% 
+    dplyr::filter(set_year >= min_year, 
+                  set_year <= max_year, 
                   group_all %in% cluster) %>% 
     distinct(trip_id, .keep_all = T)  %>% 
-    dplyr::select(trip_id, VESSEL_NUM, set_year, set_month, set_day, Revenue, selection) %>% as.data.frame
+    dplyr::select(trip_id, VESSEL_NUM, set_year, set_month, set_day, Revenue, selection) %>% 
+      as.data.frame
 
   ## Select hauls used to calculate probability for the choice set
   dist_hauls_catch_shares <- hauls %>% dplyr::filter(set_year >= min_year_prob, set_year <= max_year_prob)
@@ -338,7 +256,9 @@ sampled_rums <- function(data_in, cluster = 4,
   #For each haul in the focus year, sample nhauls_sampled tows
   
   ## INCLUDE DECISION PREVIOUS DAY!
-  # hauls$prev_day_date <- sampled_hauls$set_date - days(1)
+  hauls$set_date <- as.Date(with(hauls, paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep="-")), 
+            "%Y-%m-%d")
+  hauls$prev_day_date <- sampled_hauls$set_date - days(1)
   
 
   sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls),

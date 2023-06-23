@@ -11,6 +11,9 @@ cd $path
 *    Preilimnary estimations (before contraction mapping)    *
 **************************************************************
 
+*** SDM by species; Price by species; Center of gravity by port: Distance by lenght; Weather alone.
+
+
 clear all
 cap log close
 	log using ${logs}preliminary, text replace
