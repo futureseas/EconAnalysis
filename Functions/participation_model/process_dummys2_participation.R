@@ -4,13 +4,13 @@
 #' @param xx Index value
 #' @param td1 The tow dates
 #' @param dat1 The Data
-#' @param qPSDN1 landing model for sardine using SDMs
-#' @param qMSQD1 landing model for squid using SDMs
-#' @param qNANC1 landing model for anchovy using SDMs
 #' @param SDM.PSDN SDM data for sardine
 #' @param SDM.MSQD SDM data for squid
 #' @param SDM.NANC SDM data for anchovy
-#' @param model_landings1 estimated model for landings
+#' @param SDM.PHRG
+#' @param SDM.JMCK 
+#' @param SDM.CMCK 
+#' @param CPUE.index
 #' @param model_price1 estimated model for prices
 #' @param fuel.prices1 fuel data by port
 #' @param fuel.prices.state1 fuel data by port
@@ -18,31 +18,34 @@
 #' @export
 
 process_dummys2 <- function(xx, td1 = td, dat1 = dat, 
-                            qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm,
-                            qMSQD1 = qMSQD, SDM.MSQD = msqd.sdm,
-                            qNANC1 = qNANC, SDM.NANC = nanc.sdm,
-                            model_price1 = model_price,
-                            model_landings1 = model_landings,
+                            SDM.PSDN = psdn.sdm,
+                            SDM.MSQD = msqd.sdm,
+                            SDM.NANC = nanc.sdm,
+                            SDM.PHRG = phrg.sdm,
+                            SDM.JMCK = jmck.sdm,
+                            SDM.CMCK = cmck.sdm,
+                            CPUE.index = CPUE_index,
+                            model_price1 = mod_estimate,
                             fuel.prices1 = fuel.prices,
                             fuel.prices.state1 = fuel.prices.state,
                             min_year_est1 = min_year_est){
 
-# ### Delete
-# xx <- 50 #14245  # 59  # 6
-# td1 <- td
-# dat1 <- dat
-# qPSDN1 <- qPSDN
-# SDM.PSDN <- psdn.sdm
-# qMSQD1 <- qMSQD
-# SDM.MSQD <- msqd.sdm
-# qNANC1 <- qNANC
-# SDM.NANC <- nanc.sdm
-# model_price1 <- model_price
-# model_landings1 <- model_landings
-# fuel.prices1 <- fuel.prices
-# fuel.prices.state1 <- fuel.prices.state
-# min_year_est1 = min_year_est
-# ###
+  ### Delete
+  xx <- 14245 # 50  # 59  # 6
+  td1 <- td
+  dat1 <- dat
+  SDM.PSDN <- psdn.sdm
+  SDM.MSQD <- msqd.sdm
+  SDM.NANC <- nanc.sdm
+  SDM.PHRG <- phrg.sdm
+  SDM.JMCK <- jmck.sdm
+  SDM.CMCK <- cmck.sdm
+  CPUE.index <- CPUE_index
+  model_price1 <- mod_estimate
+  fuel.prices1 <- fuel.prices
+  fuel.prices.state1 <- fuel.prices.state
+  min_year_est1 = min_year_est
+  ###
 
   temp_dat <- td1[xx, ]
 
@@ -69,6 +72,18 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   
   #Add dummy coefficient
   dum30_val <- nrow(dum30)
+  
+  #-----------------------------------------------------------------------------------------------
+  #Did cluster fish in past n_days at port for species X? 
+  dum30_c <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
+                                              set_date %within% temp_dat$days_inter,
+                                              selection == sel,
+                                              selection != "No-Participation",
+                                              group_all %in% fltz)
+  dum30_c <- dum30_c %>% distinct(trip_id, .keep_all = T)
+  
+  #Add dummy coefficient
+  dum30_c_val <- nrow(dum30_c)
   
   #-----------------------------------------------------------------------------------------------
   # Vessel fish in the past n_days of last year at port for species X?
@@ -102,16 +117,18 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   ## Calculate revenues ##
   ########################
   
-  ## Obtain vessel length and horsepower
-  vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>% 
-    dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
-  vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower)) %>% 
-    dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
-  if (is.na(vessel.hp$Vessel.horsepower)) {
-    vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% 
-      unique() %>% dplyr::filter(Vessel.length == mean(vessel.length$Vessel.length))
-  }
+  # ## Obtain vessel length and horsepower
+  # vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>% 
+  #   dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+  # vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower)) %>% 
+  #   dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+  # if (is.na(vessel.hp$Vessel.horsepower)) {
+  #   vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% 
+  #     unique() %>% dplyr::filter(Vessel.length == mean(vessel.length$Vessel.length))
+  # }
   
+  
+  # << SDM LAST 30 DAYS >>
   
   if (sel != "No-Participation") {
     if (species == "PSDN") {
@@ -129,16 +146,11 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
         sdm <- SDM.PSDN %>% dplyr::filter(set_date %in% temp_dat$set_date, PORT_AREA_CODE %in% port)
       }
       
-      # Create database to predict landings
-      dum_rev_SDM <- temp_dat
-      dum_rev_SDM$VESSEL_NUM <- dum_rev_SDM$fished_VESSEL_NUM
-      dum_rev_SDM$PSDN_SDM_60 <- mean(sdm$PSDN_SDM_60)
-      dum_rev_SDM$trend <- (year(dum_rev_SDM$set_date) - min_year_est1) + 1 
-      dum_rev_SDM$set_month  <- month(dum_rev_SDM$set_date)
-      dum_rev_SDM$Vessel.length <- mean(vessel.length$Vessel.length) 
-      dum_rev_SDM$Vessel.horsepower <- mean(vessel.hp$Vessel.horsepower, na.rm = TRUE)
-      dum_rev_SDM$Species_Dominant <- species
-      dum_rev_SDM$PORT_AREA_CODE <- port
+      # Create database to predict prices
+      est_price <- temp_dat
+      est_price$trend <- (year(est_price$set_date) - min_year_est1) + 1 
+      est_price$set_month  <- month(est_price$set_date)
+      est_price$PORT_AREA_CODE <- port
       
       # Predict landings and prices
       price <- as.data.frame(predict(model_price1, dum_rev_SDM, interval = "prediction"))
@@ -283,6 +295,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$dummy_prev_days <- dum30_val
   temp_dat$dummy_prev_year_days <- dum30y_val
   temp_dat$dummy_last_day <- dum1_val
+  temp_dat$dummy_clust_prev_days <- dum30_c_val
   
   
   

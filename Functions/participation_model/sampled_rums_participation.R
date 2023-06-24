@@ -3,10 +3,6 @@
 ### Sample choice set for the participation model 
 ###################
 
-# WORK TO DO:
-# Behavior of the cluster? 
-# Use SDM last 30 days (same for CPUE index)
-
 #' @param data_in Data going in to the function; default is filt_clusts
 #' @param cluster cluster that we are analyzing 
 #' @param min_year Minimum year used to filter the data
@@ -425,7 +421,8 @@ sampled_rums <- function(data_in, cluster = 4,
   td <- sampled_hauls %>%
     dplyr::select(fished_haul, set_date, prev_days_date, prev_30days_date, prev_90days_date,
                   prev_year_set_date, prev_year_days_date, prev_day_date, fleet_name,
-                  fished_VESSEL_NUM, PORT_AREA_CODE, PACFIN_SPECIES_CODE, AGENCY_CODE, selection, dist_to_cog)
+                  fished_VESSEL_NUM, PORT_AREA_CODE, PACFIN_SPECIES_CODE, AGENCY_CODE, 
+                  selection, dist_to_cog)
 
   td$days_inter <- interval(td$prev_days_date, td$prev_day_date)
   td$days30_inter <- interval(td$prev_30days_date, td$prev_day_date)
@@ -433,31 +430,36 @@ sampled_rums <- function(data_in, cluster = 4,
   td$prev_year_days_inter <- interval(td$prev_year_days_date, td$prev_year_set_date)
 
   
-
   #-----------------------------------------------------------------------------
   ### Calculate revenues from each period and process dummy variables for past behavior
   
   ## Load SDMs to be used in function to calculate expected revenue and cost below
-  psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
+  psdn.sdm <- read.csv(file = 'Participation/SDMs/sdm_psdn.csv')
   psdn.sdm[is.na(psdn.sdm)] <- 0
   psdn.sdm$set_date <- ymd(paste(psdn.sdm$LANDING_YEAR, psdn.sdm$LANDING_MONTH, psdn.sdm$LANDING_DAY, sep = "-"))
-  msqd.sdm <- readRDS(file = 'Participation/SDM_code/sdm_msqd.rds')
+  msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd.rds')
   msqd.sdm[is.na(msqd.sdm)] <- 0
   msqd.sdm$set_date <- ymd(paste(msqd.sdm$LANDING_YEAR, msqd.sdm$LANDING_MONTH, msqd.sdm$LANDING_DAY, sep = "-"))
-  nanc.sdm <- readRDS(file = 'Participation/SDM_code/sdm_nanc.rds')
+  nanc.sdm <- readRDS(file = 'Participation/SDMs/sdm_nanc.rds')
   nanc.sdm[is.na(nanc.sdm)] <- 0
   nanc.sdm$set_date <- ymd(paste(nanc.sdm$LANDING_YEAR, nanc.sdm$LANDING_MONTH, nanc.sdm$LANDING_DAY, sep = "-"))
+  phrg.sdm <- readRDS(file = 'Participation/SDMs/sdm_phrg.rds')
+  phrg.sdm[is.na(phrg.sdm)] <- 0
+  phrg.sdm$set_date <- ymd(paste(phrg.sdm$LANDING_YEAR, phrg.sdm$LANDING_MONTH, phrg.sdm$LANDING_DAY, sep = "-"))
+  jmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_jmck.rds')
+  jmck.sdm[is.na(jmck.sdm)] <- 0
+  jmck.sdm$set_date <- ymd(paste(jmck.sdm$LANDING_YEAR, jmck.sdm$LANDING_MONTH, jmck.sdm$LANDING_DAY, sep = "-"))
+  cmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_cmck.rds')
+  cmck.sdm[is.na(cmck.sdm)] <- 0
+  cmck.sdm$set_date <- ymd(paste(cmck.sdm$LANDING_YEAR, cmck.sdm$LANDING_MONTH, cmck.sdm$LANDING_DAY, sep = "-"))
+  
+  ## Load abundance index in cases without SDM
 
-  # tab.maxdays.psdn <- psdn.sdm %>% 
-  #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
-  # tab.maxdays.msqd <- msqd.sdm %>% 
-  #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
-  # tab.maxdays.nanc <- nanc.sdm %>% 
-  #   dplyr::select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
-  #   group_by(LANDING_YEAR, LANDING_MONTH) %>% summarize(max.days = max(LANDING_DAY))
-
+  CPUE_index <- readRDS(file = 'Participation/R/CPUE_index.rds')
+  CPUE_index[is.na(CPUE_index)] <- 0
+  CPUE_index$set_date <- ymd(paste(CPUE_index$LANDING_YEAR, CPUE_index$LANDING_MONTH, CPUE_index$LANDING_DAY, sep = "-"))
+  
+  
   ### Obtain fuel prices by port and day
   fuel.prices.CA <- readxl::read_excel(here::here("Data", "Fuel_prices", "fuelca.xls"), sheet = "fuelca")
   fuel.prices.WA <- readxl::read_excel(here::here("Data", "Fuel_prices", "fuelwa.xls"), sheet = "fuelwa")
@@ -503,11 +505,14 @@ sampled_rums <- function(data_in, cluster = 4,
     .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
       process_dummys2(xx = ii, td1 = td, dat1 = dat, 
-                      qPSDN1 = qPSDN, SDM.PSDN = psdn.sdm,
-                      qMSQD1 = qMSQD, SDM.MSQD = msqd.sdm,
-                      qNANC1 = qNANC, SDM.NANC = nanc.sdm,
-                      model_price1 = model_price,
-                      model_landings1 = model_landings,
+                      SDM.PSDN = psdn.sdm,
+                      SDM.MSQD = msqd.sdm,
+                      SDM.NANC = nanc.sdm,
+                      SDM.PHRG = phrg.sdm,
+                      SDM.JMCK = jmck.sdm,
+                      SDM.CMCK = cmck.sdm,
+                      CPUE.index = CPUE_index,
+                      model_price1 = mod_estimate,
                       fuel.prices1 = fuel.prices,
                       fuel.prices.state1 = fuel.prices.state,
                       min_year_est1 = min_year_est)
