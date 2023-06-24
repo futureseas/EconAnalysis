@@ -397,7 +397,6 @@ sampled_rums <- function(data_in, cluster = 4,
   Permit_COG$DISTANCE_A<-as.numeric(Permit_COG$DISTANCE_A)
   Permit_COG$DISTANCE_B<-as.numeric(Permit_COG$DISTANCE_B)
   
-  ###Produce dissimilarity matrix and pairwise comparisons following methods above
   Permit_COG<-Permit_COG[c(1,2,3)]
   names(Permit_COG)[1]<-"VESSEL_NUM"
   rm(Ticket_Coords, List, Permit_ID, Distance_A, Distance_B,
