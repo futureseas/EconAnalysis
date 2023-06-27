@@ -71,11 +71,10 @@ samps1 <- sampled_rums(data_in = participation_data_filtered, cluster = 4,
                          min_year_est = 2012, max_year_est = 2019,
                          ndays = 30, nhauls_sampled = 4,
                          seed = 300, ncores = 4, rev_scale = 1000)
-# 
-# samps <- samps1 %>%
-#   mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-# rm(participation_data)
-# saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
+  samps <- samps1 %>%
+    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+    rm(participation_data)
+    saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 
 
 #----------------------------------
@@ -88,16 +87,7 @@ samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choi
 # samps0 <- samps %>%
 #   filter(selection != "No-Participation")
 # samps0 %>%
-#   group_by(Ddiesel_state) %>%
-#   summarize(n_obs = n(), perc = n()/nrow(samps0))
-# samps0 %>%
-#   group_by(dummy_miss) %>%
-#   summarize(n_obs = n(), perc = n()/nrow(samps0))
-# samps0 %>%
-#   group_by(dummy_miss_cost_ca) %>%
-#   summarize(n_obs = n(), perc = n()/nrow(samps0))
-# samps0 %>%
-#   group_by(dummy_miss_cost) %>%
+#   group_by(dDieselState) %>%
 #   summarize(n_obs = n(), perc = n()/nrow(samps0))
 
 #---------------------------------------------------------------
@@ -306,7 +296,7 @@ samps <- samps %>%
 #-------------------------------------------
 ## Include unemployment.
 
-# << WORK HERE >>
+ << WORK HERE >>
 
 
 #-------------------------#

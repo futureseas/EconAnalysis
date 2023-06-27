@@ -151,42 +151,42 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       # Average availability in the past n_days at port
       avail30y <- SDM.PSDN %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$PSDN_SDM_60, na.rm = TRUE)
-      D_CPUE <- 0
+      dCPUE <- 0
       
     } else if (species == "MSQD") {
       
       # Average availability in the past n_days at port
       avail30y <- SDM.MSQD %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$MSQD_SDM_90, na.rm = TRUE)
-      D_CPUE <- 0
+      dCPUE <- 0
       
     } else if (species == "NANC") {
       
       # Average availability in the past n_days at port
       avail30y <- SDM.NANC %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$NANC_SDM_30, na.rm = TRUE)
-      D_CPUE <- 0
+      dCPUE <- 0
       
     } else if (species == "JMCK") {
       
       # Average availability in the past n_days at port
       avail30y <- SDM.JMCK %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$JMCK_SDM_30, na.rm = TRUE)
-      D_CPUE <- 0
+      dCPUE <- 0
       
     } else if (species == "CMCK") {
       
       # Average availability in the past n_days at port
       avail30y <- SDM.CMCK %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$CMCK_SDM_30, na.rm = TRUE)
-      D_CPUE <- 0
+      dCPUE <- 0
       
     } else if (species == "PHRG") {
       
       # Average availability in the past n_days at port
       avail30y <- SDM.PHRG %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$PHRG_SDM_30, na.rm = TRUE)
-      D_CPUE <- 0
+      dCPUE <- 0
       
     } else {
       
@@ -194,11 +194,9 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       avail30y <- CPUE.index %>% ungroup %>%
         dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port, Species_Dominant %in% species)
         avail30y <- mean(avail30y$CPUE_index, na.rm = TRUE)
-      D_CPUE <- 1
+      dCPUE <- 1
       
     }
-    
-    dummy_CPUE <- D_CPUE
     
     #Calculate availability
     mean_avail <- avail30y
@@ -231,7 +229,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   } else {
     mean_avail <- 0
     mean_price <- 0
-    dummy_CPUE <- 0
+    dCPUE <- 0
     dPrice30 <- 0
   }
   
@@ -242,7 +240,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$dummy_prev_year_days <- dum30y_val
   temp_dat$dummy_last_day <- dum1_val
   temp_dat$dummy_clust_prev_days <- dum30_c_val
-  temp_dat$dummy_CPUE <- dummy_CPUE
+  temp_dat$dCPUE <- dCPUE
   temp_dat$dPrice30 <- dPrice30
   
   
@@ -255,14 +253,14 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     diesel.price <- fuel.prices1 %>% ungroup %>% 
       dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE == port)
     mean_diesel_price <- mean(diesel.price$diesel.price.AFI, na.rm = TRUE)
-    Ddiesel_state_price <- 0
+    dDieselState_price <- 0
     if (is.na(mean_diesel_price)) {
       diesel.price <- fuel.prices.state1 %>% ungroup %>% 
         dplyr::filter(LANDING_MONTH == lubridate::month(temp_dat$set_date),
                       LANDING_YEAR == lubridate::year(temp_dat$set_date), 
                       AGENCY_CODE == state)
       mean_diesel_price <- mean(diesel.price$diesel.price.state.AFI, na.rm = TRUE)
-      Ddiesel_state_price <- 1
+      dDieselState_price <- 1
     }
     expected.distance <- dat1 %>% ungroup %>% 
       dplyr::filter(set_date %within% temp_dat$days90_inter, selection == sel)
@@ -271,12 +269,12 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   } else {
     exp_dist <- 0
     mean_diesel_price <- 0
-    Ddiesel_state_price <- 0
+    dDieselState_price <- 0
   }
   
   temp_dat$diesel_price <- mean_diesel_price
   temp_dat$dist_port_to_catch_area <- exp_dist
-  temp_dat$Ddiesel_state <- Ddiesel_state_price
+  temp_dat$dDieselState <- dDieselState_price
   
   ## Return data for row choice
   return(temp_dat)

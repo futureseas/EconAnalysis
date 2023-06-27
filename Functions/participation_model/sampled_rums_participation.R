@@ -27,28 +27,28 @@ sampled_rums <- function(data_in, cluster = 4,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale) {
 
-  ###############
-  # Delete
-  gc()
-  library(doParallel)
-  library(tidyr)
-  library(plm)
-  library(tidyverse)
-  library(lubridate)
-  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data_filtered.rds") 
-  cluster <- 4
-  min_year_prob <- 2013
-  max_year_prob <- 2017
-  min_year_est <- 2012
-  max_year_est <- 2019
-  min_year <- 2015
-  max_year <- 2016
-  ndays <- 30
-  nhauls_sampled <- 2
-  seed <- 300
-  ncores <- 4
-  rev_scale <- 1000
-  ################
+  # ###############
+  # # Delete
+  # gc()
+  # library(doParallel)
+  # library(tidyr)
+  # library(plm)
+  # library(tidyverse)
+  # library(lubridate)
+  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data_filtered.rds") 
+  # cluster <- 4
+  # min_year_prob <- 2013
+  # max_year_prob <- 2017
+  # min_year_est <- 2012
+  # max_year_est <- 2019
+  # min_year <- 2015
+  # max_year <- 2016
+  # ndays <- 30
+  # nhauls_sampled <- 2
+  # seed <- 300
+  # ncores <- 4
+  # rev_scale <- 1000
+  # ################
 
   dat <- data_in 
   
@@ -523,38 +523,27 @@ sampled_rums <- function(data_in, cluster = 4,
   stopCluster(cl)
   
   # Create dummy for prev days fishing
+  td2[which(td2$dummy_last_day != 0), 'dummy_last_day'] <- 1
   td2[which(td2$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
   td2[which(td2$dummy_prev_year_days != 0), 'dummy_prev_year_days'] <- 1
-  td2[which(td2$dummy_last_day != 0), 'dummy_last_day'] <- 1
-  td2[which(td2$mean_rev != 0), 'dummy_miss'] <- 0
-  td2[which(td2$mean_rev == 0), 'dummy_miss'] <- 1
-  td2[which(td2$cost_port_to_catch_area != 0), 'dummy_miss_cost_ca'] <- 0
-  td2[which(td2$cost_port_to_catch_area == 0), 'dummy_miss_cost_ca'] <- 1
-  td2[which(td2$travel_cost != 0), 'dummy_miss_cost'] <- 0
-  td2[which(td2$travel_cost == 0), 'dummy_miss_cost'] <- 1
-                      
-
-  # Change dummies to zero for "No-Participation"
-  td2[which(td2$selection == "No-Participation"), 'dummy_miss'] <- 0
+  td2[which(td2$dummy_clust_prev_days != 0), 'dummy_clust_prev_days'] <- 1
+ 
+  # Change variables to zero for "No-Participation"
+  td2[which(td2$selection == "No-Participation"), 'dummy_last_day'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_days'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_year_days'] <- 0
-  td2[which(td2$selection == "No-Participation"), 'dummy_last_day'] <- 0
-  td2[which(td2$selection == "No-Participation"), 'dummy_miss_cost_ca'] <- 0
-  td2[which(td2$selection == "No-Participation"), 'dummy_miss_cost'] <- 0
-  
-  td2$mean_rev_adj <- td2$mean_rev / rev_scale
-  td2$travel_cost <- td2$travel_cost / rev_scale
-  td2$cost_port_to_catch_area <- cost_port_to_catch_area / rev_scale
-  td2$cost_port_to_cog <- cost_port_to_cog / rev_scale
+  td2[which(td2$selection == "No-Participation"), 'dummy_clust_prev_days'] <- 0
+  td2[which(td2$selection == "No-Participation"), 'mean_price'] <- 0
+  td2[which(td2$selection == "No-Participation"), 'mean_avail'] <- 0
+  td2[which(td2$selection == "No-Participation"), 'diesel_price'] <- 0 
+  td2[which(td2$selection == "No-Participation"), 'dist_port_to_catch_area'] <- 0
 
+  
   sampled_hauls <- cbind(sampled_hauls,
-    td2[, c('dummy_prev_days', 'dummy_prev_year_days', "dummy_last_day", 
-            "dummy_miss", 'mean_rev', 'mean_rev_adj',
-            'cost_port_to_catch_area', 'cost_port_to_cog', 'travel_cost',
-            'dummy_miss_cost_ca', 'dummy_miss_cost',
-            'diesel_price', 'dist_port_to_catch_area', 'Ddiesel_state')] )
-  
-  
+    td2[, c('dummy_last_day', 'dummy_prev_days', 'dummy_prev_year_days', "dummy_clust_prev_days", 
+            'mean_price', 'mean_avail', 'diesel_price', 'dist_port_to_catch_area', 
+            'dCPUE', 'dPrice30', 'dDieselState')] )
+
   
   #-----------------------------------------------
   ## Return data
