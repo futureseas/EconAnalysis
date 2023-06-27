@@ -41,10 +41,10 @@ sampled_rums <- function(data_in, cluster = 4,
   max_year_prob <- 2017
   min_year_est <- 2012
   max_year_est <- 2019
-  min_year <- 2013
-  max_year <- 2017
+  min_year <- 2015
+  max_year <- 2016
   ndays <- 30
-  nhauls_sampled <- 5
+  nhauls_sampled <- 2
   seed <- 300
   ncores <- 4
   rev_scale <- 1000
@@ -515,7 +515,8 @@ sampled_rums <- function(data_in, cluster = 4,
                       model_price1 = mod_estimate,
                       fuel.prices1 = fuel.prices,
                       fuel.prices.state1 = fuel.prices.state,
-                      min_year_est1 = min_year_est)
+                      min_year_est1 = min_year_est,
+                      species.list.number1 = species.list.number)
     }
   print("Done calculating dummys and revenues")
   td2 <- plyr::ldply(dummys2)
