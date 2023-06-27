@@ -158,7 +158,6 @@ msqd_spawn.sdm <- msqd_spawn.sdm %>% select(-c(LANDING_YEAR, LANDING_MONTH, LAND
 Tickets_SDM <- merge(Tickets_SDM, msqd_spawn.sdm, 
                      by = (c('prev_days_date', 'PORT_AREA_CODE')),
                      all.x = TRUE, all.y = FALSE)
-saveRDS(Tickets_SDM, "Tickets_temp.rds")
 
 
 #-----------------------------------------------
@@ -288,7 +287,6 @@ saveRDS(Tickets_SDM, "Tickets_temp.rds")
 #
 #
 ## Create table for paper (all species)
-# 
 #   models <- list(
 #   "Pacific sardine"  = qPSDN,
 #   "Market squid"     = qMSQD,
