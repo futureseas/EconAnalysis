@@ -58,6 +58,8 @@ sdm.psdn <- tibble(LANDING_YEAR = integer(),
                    PSDN_SDM_30 = numeric(),
                    PSDN_SDM_60 = numeric())
 
+port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
+
 for (y in 2000:2020) {
   for (m in 1:12) {
     for (j in 1:nrow(port_area_coord)) {
@@ -104,7 +106,7 @@ for (y in 2000:2020) {
         rm(dat_prob_30, dat_prob_60, SDM_mean_30, SDM_mean_60)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      saveRDS(sdm.psdn, file = "Participation/SDMs/sdm_psdn.rds")
+      saveRDS(sdm.psdn, file = "Participation/SDMs/sdm_psdn_update.rds")
     }
   }
 }
