@@ -434,7 +434,7 @@ sampled_rums <- function(data_in, cluster = 4,
   ### Calculate revenues from each period and process dummy variables for past behavior
   
   ## Load SDMs to be used in function to calculate expected revenue and cost below
-  psdn.sdm <- read.csv(file = 'Participation/SDMs/sdm_psdn.csv')
+  psdn.sdm <- readRDS(file = 'Participation/SDMs/sdm_psdn.rds')
   psdn.sdm[is.na(psdn.sdm)] <- 0
   psdn.sdm$set_date <- ymd(paste(psdn.sdm$LANDING_YEAR, psdn.sdm$LANDING_MONTH, psdn.sdm$LANDING_DAY, sep = "-"))
   msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd.rds')
