@@ -41,10 +41,10 @@ sampled_rums <- function(data_in, cluster = 4,
   # max_year_prob <- 2017
   # min_year_est <- 2012
   # max_year_est <- 2019
-  # min_year <- 2015
-  # max_year <- 2016
+  # min_year <- 2013
+  # max_year <- 2017
   # ndays <- 30
-  # nhauls_sampled <- 2
+  # nhauls_sampled <- 5
   # seed <- 300
   # ncores <- 4
   # rev_scale <- 1000
@@ -268,7 +268,7 @@ sampled_rums <- function(data_in, cluster = 4,
                   by = c('prev_day_date', 'VESSEL_NUM'), 
                   all.x = TRUE, 
                   all.y = FALSE) %>%
-    mutate(prev_selection = ifelse(is.na(prev_selection), "No-Participation", prev_selection))
+    mutate(prev_selection = ifelse(prev_selection == "No-Participation", NA, prev_selection))
     
   
   #Sample hauls and calculate distances
@@ -277,8 +277,26 @@ sampled_rums <- function(data_in, cluster = 4,
   sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls),
                                     .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
                                       set.seed(seedz[ii])
-                                      if (hauls[ii, "selection"] != "No-Participation" & 
-                                          hauls[ii, "selection"] != hauls[ii, "prev_selection"]) {
+                                      
+                                      if (is.na(hauls[ii, "prev_selection"]) == TRUE) {
+                                        if (hauls[ii, "selection"] != "No-Participation") {
+                                          temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
+                                                                               set_month == as.character(hauls[ii, "set_month"])) 
+                                          samps <- temp %>% sample_n(size = (nhauls_sampled - 1), weight = prop, replace = F)
+                                          the_samples <- as.data.frame(samps[ , "selection"]) 
+                                          colnames(the_samples)[1] <- "selection"
+                                          the_samples <- the_samples %>%
+                                            add_row(selection = "No-Participation")
+                                        } else if (hauls[ii, "selection"] == "No-Participation") {
+                                          temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
+                                                                               set_month == as.character(hauls[ii, "set_month"])) 
+                                          samps <- temp %>% sample_n(size = (nhauls_sampled), weight = prop, replace = F)
+                                          the_samples <- as.data.frame(samps[ , "selection"]) 
+                                          colnames(the_samples)[1] <- "selection"
+                                        } 
+                                      } else {
+                                        if (hauls[ii, "selection"] != "No-Participation" & 
+                                            hauls[ii, "selection"] != hauls[ii, "prev_selection"]) {
                                           temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
                                                                                selection != as.character(hauls[ii, "prev_selection"]),
                                                                                set_month == as.character(hauls[ii, "set_month"])) 
@@ -314,7 +332,8 @@ sampled_rums <- function(data_in, cluster = 4,
                                           samps <- temp %>% sample_n(size = (nhauls_sampled), weight = prop, replace = F)
                                           the_samples <- as.data.frame(samps[ , "selection"]) 
                                           colnames(the_samples)[1] <- "selection"
-                                          }
+                                        }
+                                      }
                                       
                                       actual_haul <- as.data.frame(hauls[ii, "selection"])
                                       colnames(actual_haul)[1] <- "selection"
@@ -336,6 +355,9 @@ sampled_rums <- function(data_in, cluster = 4,
   print("Done sampling hauls")
   sampled_hauls <- plyr::ldply(sampled_hauls)
   
+  # test <- sampled_hauls %>% ungroup() %>% group_by(fished_haul,selection) %>% 
+  #   summarize(n_count = n())
+    
   # add port and species 
   sampled_hauls <- sampled_hauls %>% mutate(PACFIN_SPECIES_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, start= -4)))
   sampled_hauls <- sampled_hauls %>% mutate(PORT_AREA_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, end= 3)))

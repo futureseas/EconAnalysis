@@ -21,9 +21,9 @@ participation_data_filtered <- readRDS(file = "C:\\Data\\PacFIN data\\participat
 #-------------------------------------------------------------------------------
 ## Filter participation database ##
 
-# participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds") 
-
-# ## Keep trip with maximum revenue within a day 
+# participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+#
+# ## Keep trip with maximum revenue within a day
 # ## (only 5% of the data have repeated trips per day)
 # participation_data_filtered <- participation_data %>%
 #   mutate(Vessel.length = as.numeric(Vessel.length),
@@ -48,14 +48,14 @@ participation_data_filtered <- readRDS(file = "C:\\Data\\PacFIN data\\participat
 #                    'lat_ca', 'lon_ca')) %>% ungroup() %>%
 #   distinct() %>%
 #   group_by(VESSEL_NUM, set_date) %>%
-#   mutate(order = seq(1:n())) %>% ungroup() %>% 
+#   mutate(order = seq(1:n())) %>% ungroup() %>%
 #   filter(order == 1) %>%
 #   dplyr::select(-c('max_rev', 'order', 'ncount')) %>%
-#   group_by(VESSEL_NUM, set_date) 
+#   group_by(VESSEL_NUM, set_date)
 # 
-# participation_data_filtered$trip_id <- 
+# participation_data_filtered$trip_id <-
 #   udpipe::unique_identifier(participation_data_filtered, fields = c('VESSEL_NUM', 'set_date'))
-#   saveRDS(participation_data_filtered, "C:\\Data\\PacFIN data\\participation_data_filtered.rds") 
+#   saveRDS(participation_data_filtered, "C:\\Data\\PacFIN data\\participation_data_filtered.rds")
 
 #-------------------------------------------------------------------------------
 # ## Day at sea: 
@@ -77,7 +77,7 @@ samps1 <- sampled_rums(data_in = participation_data_filtered, cluster = 4,
                          seed = 300, ncores = 4, rev_scale = 1000)
   samps <- samps1 %>%
     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-    rm(participation_data)
+    rm(participation_data_filtered, samps1)
     saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 
 
