@@ -35,7 +35,7 @@ sampled_rums <- function(data_in, cluster = 4,
   # library(plm)
   # library(tidyverse)
   # library(lubridate)
-  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data_filtered.rds") 
+  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data_filtered.rds")
   # cluster <- 4
   # min_year_prob <- 2013
   # max_year_prob <- 2017
@@ -60,8 +60,7 @@ sampled_rums <- function(data_in, cluster = 4,
       dplyr::filter(LANDING_YEAR >= min_year_est, LANDING_YEAR <= max_year_est) %>%
       dplyr::mutate(ln_Price_mtons = log(Price_mtons)) %>% 
       mutate(trend = LANDING_YEAR - min_year_est + 1) %>%
-      mutate(set_month = factor(LANDING_MONTH)) %>%
-      mutate(PORT_AREA_CODE = factor(PORT_AREA_CODE)) %>%
+      mutate(set_month = LANDING_MONTH) %>%
       filter(Species_Dominant != "FSOL") %>% filter(Species_Dominant != "SCOR") %>%
       filter(Species_Dominant != "STRY") %>% filter(Species_Dominant != "DSOL") %>%
       filter(Species_Dominant != "HTRB") %>% filter(Species_Dominant != "RHRG") %>%
@@ -83,29 +82,37 @@ sampled_rums <- function(data_in, cluster = 4,
       filter(Species_Dominant != "SAIL") %>% filter(Species_Dominant != "SCLP") %>%
       filter(Species_Dominant != "RSTN") %>% filter(Species_Dominant != "PLCK") %>%
       filter(Species_Dominant != "BCLM") %>% filter(Species_Dominant != "CKLE") %>%
-      filter(Species_Dominant != "GCLM") %>% filter(Species_Dominant != "NUSF")
+      filter(Species_Dominant != "GCLM") %>% filter(Species_Dominant != "NUSF") 
+  
+  datPanel2 <- fastDummies::dummy_cols(datPanel, select_columns = 'set_month')
     
     # model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
     #                    factor(set_month) + trend, data = datPanel)
     # saveRDS(model_price, file = 'Participation\\R\\model_price_2012_2019.RDS')
     # model_price <- readRDS(file = 'Participation\\R\\model_price_2012_2019.RDS')
   
-    species <- as.data.frame(datPanel %>% dplyr::select(Species_Dominant) %>% unique())
+    species <- as.data.frame(datPanel2 %>% dplyr::select(Species_Dominant) %>% unique())
     species.list <- c(species$Species_Dominant)
     species.list.number <- as.data.frame(species.list)
     mod_estimate <- list() 
     xx <- 1
     
     for(ii in species.list) {
-      datPanel_X <- datPanel %>% filter(Species_Dominant == ii)
+      datPanel_X <- datPanel2 %>% filter(Species_Dominant == ii)
       mod_estimate[[xx]] <- 
-        lm(ln_Price_mtons ~ PORT_AREA_CODE + set_month + trend, data = datPanel_X)
+        lm(ln_Price_mtons ~ factor(PORT_AREA_CODE) + trend + 
+             set_month_1 + set_month_2 +
+             set_month_3 + set_month_4 +
+             set_month_5 + set_month_6 +
+             set_month_7 + set_month_8 +
+             set_month_9 + set_month_10 +
+             set_month_11, data = datPanel_X)
       xx <- min(xx + 1, nrow(species))
     }
-    rm(xx, species.list, species, datPanel, dat_est, datPanel_X)
+    rm(xx, species.list, species, datPanel, datPanel2, dat_est, datPanel_X)
     species.list.number$id_number <- seq(1, nrow(species.list.number))
 
-    # summary(mod_estimate[[29]])
+    # summary(mod_estimate[[28]])
     # modelsummary::modelsummary(model_price, fmt = 2,
     #                            gof_map = c("nobs", "adj.r.squared"),
     #                            statistic = "({std.error}){stars}",

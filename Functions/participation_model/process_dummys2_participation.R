@@ -33,7 +33,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
                             species.list.number1 = species.list.number){
 
   # ### Delete
-  # xx <- 18580  # 6
+  # xx <- 1580  # 6
   # td1 <- td
   # dat1 <- dat
   # SDM.PSDN <- psdn.sdm
@@ -205,7 +205,17 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     # Create database to predict prices
     est_price <- temp_dat
     est_price$trend <- (year(est_price$set_date) - min_year_est1) + 1 
-    est_price$set_month  <- month(est_price$set_date)
+    est_price$set_month_1 <- ifelse(month(est_price$set_date) == 1, 1, 0) 
+    est_price$set_month_2 <- ifelse(month(est_price$set_date) == 2, 1, 0) 
+    est_price$set_month_3 <- ifelse(month(est_price$set_date) == 3, 1, 0) 
+    est_price$set_month_4 <- ifelse(month(est_price$set_date) == 4, 1, 0) 
+    est_price$set_month_5 <- ifelse(month(est_price$set_date) == 5, 1, 0) 
+    est_price$set_month_6 <- ifelse(month(est_price$set_date) == 6, 1, 0) 
+    est_price$set_month_7 <- ifelse(month(est_price$set_date) == 7, 1, 0) 
+    est_price$set_month_8 <- ifelse(month(est_price$set_date) == 8, 1, 0) 
+    est_price$set_month_9 <- ifelse(month(est_price$set_date) == 9, 1, 0) 
+    est_price$set_month_10 <- ifelse(month(est_price$set_date) == 10, 1, 0) 
+    est_price$set_month_11 <- ifelse(month(est_price$set_date) == 11, 1, 0) 
     est_price$PORT_AREA_CODE <- port
     
     # Predict landings and prices
