@@ -63,7 +63,7 @@ port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.c
 for (y in 2000:2020) {
   for (m in 1:12) {
     for (j in 1:nrow(port_area_coord)) {
-      
+
       # Open the monthly file that contain SDM by location
       dat <- 
         ncdf4::nc_open(
@@ -94,8 +94,8 @@ for (y in 2000:2020) {
       for (z in 1:max(sdmMelt$LANDING_DAY)) {
         dat_prob_30  <- sdmMelt %>% dplyr::filter(dist <= 30)  %>% dplyr::filter(LANDING_DAY == z)
         dat_prob_60  <- sdmMelt %>% dplyr::filter(dist <= 60)  %>% dplyr::filter(LANDING_DAY == z)
-        SDM_mean_30  <- mean(dat_prob_30$exp_prob, na.rm = TRUE)
-        SDM_mean_60  <- mean(dat_prob_60$exp_prob, na.rm = TRUE)
+        SDM_mean_30  <- mean(dat_prob_30$psdn.sdm, na.rm = TRUE)
+        SDM_mean_60  <- mean(dat_prob_60$psdn.sdm, na.rm = TRUE)
         sdm.psdn <- sdm.psdn %>%
           add_row(LANDING_YEAR = y, 
                   LANDING_MONTH = m, 
