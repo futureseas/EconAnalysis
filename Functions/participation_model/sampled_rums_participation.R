@@ -60,7 +60,8 @@ sampled_rums <- function(data_in, cluster = 4,
       dplyr::filter(LANDING_YEAR >= min_year_est, LANDING_YEAR <= max_year_est) %>%
       dplyr::mutate(ln_Price_mtons = log(Price_mtons)) %>% 
       mutate(trend = LANDING_YEAR - min_year_est + 1) %>%
-      mutate(set_month = LANDING_MONTH) %>%
+      mutate(set_month = factor(LANDING_MONTH)) %>%
+      mutate(PORT_AREA_CODE = factor(PORT_AREA_CODE)) %>%
       filter(Species_Dominant != "FSOL") %>% filter(Species_Dominant != "SCOR") %>%
       filter(Species_Dominant != "STRY") %>% filter(Species_Dominant != "DSOL") %>%
       filter(Species_Dominant != "HTRB") %>% filter(Species_Dominant != "RHRG") %>%
@@ -88,12 +89,6 @@ sampled_rums <- function(data_in, cluster = 4,
     #                    factor(set_month) + trend, data = datPanel)
     # saveRDS(model_price, file = 'Participation\\R\\model_price_2012_2019.RDS')
     # model_price <- readRDS(file = 'Participation\\R\\model_price_2012_2019.RDS')
-    # 
-    # # modelsummary::modelsummary(model_price, fmt = 2,
-    # #                            gof_map = c("nobs", "adj.r.squared"),
-    # #                            statistic = "({std.error}){stars}",
-    # #                            output = "Participation\\Results\\price_model.docx")
-    # #
   
     species <- as.data.frame(datPanel %>% dplyr::select(Species_Dominant) %>% unique())
     species.list <- c(species$Species_Dominant)
@@ -104,13 +99,18 @@ sampled_rums <- function(data_in, cluster = 4,
     for(ii in species.list) {
       datPanel_X <- datPanel %>% filter(Species_Dominant == ii)
       mod_estimate[[xx]] <- 
-        lm(ln_Price_mtons ~ factor(PORT_AREA_CODE) + factor(set_month) + trend, data = datPanel_X)
+        lm(ln_Price_mtons ~ PORT_AREA_CODE + set_month + trend, data = datPanel_X)
       xx <- min(xx + 1, nrow(species))
     }
     rm(xx, species.list, species, datPanel, dat_est, datPanel_X)
     species.list.number$id_number <- seq(1, nrow(species.list.number))
 
     # summary(mod_estimate[[29]])
+    # modelsummary::modelsummary(model_price, fmt = 2,
+    #                            gof_map = c("nobs", "adj.r.squared"),
+    #                            statistic = "({std.error}){stars}",
+    #                            output = "Participation\\Results\\price_model.docx")
+    #
     
   #-----------------------------------------------------------------------------
   ## Define hauls data used for estimation (in this case, are the trips)
