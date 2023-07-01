@@ -13,75 +13,75 @@ library(tidyverse)
 library(lubridate)
 
 
-#-------------------------------------------------------------------------------
-## Read participation database ##
-
-participation_data_filtered <- readRDS(file = "C:\\Data\\PacFIN data\\participation_data_filtered.rds")
-
-#-------------------------------------------------------------------------------
-## Filter participation database ##
-
-# participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-#
-# ## Keep trip with maximum revenue within a day
-# ## (only 5% of the data have repeated trips per day)
-# participation_data_filtered <- participation_data %>%
-#   mutate(Vessel.length = as.numeric(Vessel.length),
-#          Vessel.weight = as.numeric(Vessel.weight),
-#          Vessel.horsepower = as.numeric(Vessel.horsepower)) %>%
-#   mutate(max_days_sea = ifelse(is.na(max_days_sea), 1, max_days_sea)) %>%
-#   mutate(Revenue = ifelse(selection == "No-Participation", 0, Revenue)) %>%
-#   group_by(VESSEL_NUM, set_date) %>%
-#   mutate(max_rev = ifelse(Revenue == max(Revenue, na.rm=TRUE), 1, 0)) %>% ungroup() %>%
-#   dplyr::filter(max_rev == 1) %>%
-#   distinct_at(vars(-trip_id)) %>%
-#   group_by(VESSEL_NUM, set_date) %>%
-#   mutate(ncount = n()) %>%
-#   mutate(lat_mean = mean(lat, na.rm = TRUE),
-#          lon_mean = mean(lon, na.rm = TRUE),
-#          dist_mean = mean(dist, na.rm = TRUE)) %>%
-#   mutate(lat = ifelse(ncount>1, lat_mean, lat)) %>%
-#   mutate(lon = ifelse(ncount>1, lon_mean, lon)) %>%
-#   mutate(dist = ifelse(ncount>1, dist_mean, dist)) %>%
-#   dplyr::select(-c('lat_mean', 'lon_mean', 'dist_mean',
-#                    'lat_logbook', 'lon_logbook',
-#                    'lat_ca', 'lon_ca')) %>% ungroup() %>%
-#   distinct() %>%
-#   group_by(VESSEL_NUM, set_date) %>%
-#   mutate(order = seq(1:n())) %>% ungroup() %>%
-#   filter(order == 1) %>%
-#   dplyr::select(-c('max_rev', 'order', 'ncount')) %>%
-#   group_by(VESSEL_NUM, set_date)
+# #-------------------------------------------------------------------------------
+# ## Read participation database ##
 # 
-# participation_data_filtered$trip_id <-
-#   udpipe::unique_identifier(participation_data_filtered, fields = c('VESSEL_NUM', 'set_date'))
-#   saveRDS(participation_data_filtered, "C:\\Data\\PacFIN data\\participation_data_filtered.rds")
+# participation_data_filtered <- readRDS(file = "C:\\Data\\PacFIN data\\participation_data_filtered.rds")
+# 
+# #-------------------------------------------------------------------------------
+# ## Filter participation database ##
+# 
+# # participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+# #
+# # ## Keep trip with maximum revenue within a day
+# # ## (only 5% of the data have repeated trips per day)
+# # participation_data_filtered <- participation_data %>%
+# #   mutate(Vessel.length = as.numeric(Vessel.length),
+# #          Vessel.weight = as.numeric(Vessel.weight),
+# #          Vessel.horsepower = as.numeric(Vessel.horsepower)) %>%
+# #   mutate(max_days_sea = ifelse(is.na(max_days_sea), 1, max_days_sea)) %>%
+# #   mutate(Revenue = ifelse(selection == "No-Participation", 0, Revenue)) %>%
+# #   group_by(VESSEL_NUM, set_date) %>%
+# #   mutate(max_rev = ifelse(Revenue == max(Revenue, na.rm=TRUE), 1, 0)) %>% ungroup() %>%
+# #   dplyr::filter(max_rev == 1) %>%
+# #   distinct_at(vars(-trip_id)) %>%
+# #   group_by(VESSEL_NUM, set_date) %>%
+# #   mutate(ncount = n()) %>%
+# #   mutate(lat_mean = mean(lat, na.rm = TRUE),
+# #          lon_mean = mean(lon, na.rm = TRUE),
+# #          dist_mean = mean(dist, na.rm = TRUE)) %>%
+# #   mutate(lat = ifelse(ncount>1, lat_mean, lat)) %>%
+# #   mutate(lon = ifelse(ncount>1, lon_mean, lon)) %>%
+# #   mutate(dist = ifelse(ncount>1, dist_mean, dist)) %>%
+# #   dplyr::select(-c('lat_mean', 'lon_mean', 'dist_mean',
+# #                    'lat_logbook', 'lon_logbook',
+# #                    'lat_ca', 'lon_ca')) %>% ungroup() %>%
+# #   distinct() %>%
+# #   group_by(VESSEL_NUM, set_date) %>%
+# #   mutate(order = seq(1:n())) %>% ungroup() %>%
+# #   filter(order == 1) %>%
+# #   dplyr::select(-c('max_rev', 'order', 'ncount')) %>%
+# #   group_by(VESSEL_NUM, set_date)
+# # 
+# # participation_data_filtered$trip_id <-
+# #   udpipe::unique_identifier(participation_data_filtered, fields = c('VESSEL_NUM', 'set_date'))
+# #   saveRDS(participation_data_filtered, "C:\\Data\\PacFIN data\\participation_data_filtered.rds")
+# 
+# #-------------------------------------------------------------------------------
+# # ## Day at sea: 
+# # hist(participation_data$max_days_sea)
+# ### How many row have day at sea variable? Just 4.3%, so I should not use it as filter, just as information
+# # ticket_part <- participation_data %>% dplyr::filter(selection != "No-Participation")
+# # ticket_part%>% summarize(perc = (nrow(ticket_part)-sum(is.na(max_days_sea)))/nrow(ticket_part))
+# 
+# #-------------------------------------------------------------------------------
+# ## Sampling choice data including expected revenue, expected cost and past behavior dummies ##
+# ## Landing and price regression do not depend on cluster ##
+# 
+# source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
+# samps1 <- sampled_rums(data_in = participation_data_filtered, cluster = 4,
+#                          min_year = 2013, max_year = 2017,
+#                          min_year_prob = 2013, max_year_prob = 2017,
+#                          min_year_est = 2012, max_year_est = 2019,
+#                          ndays = 30, nhauls_sampled = 5,
+#                          seed = 300, ncores = 4, rev_scale = 1000)
+#   samps <- samps1 %>%
+#     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+#     rm(participation_data_filtered, samps1)
+#     saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 
-#-------------------------------------------------------------------------------
-# ## Day at sea: 
-# hist(participation_data$max_days_sea)
-### How many row have day at sea variable? Just 4.3%, so I should not use it as filter, just as information
-# ticket_part <- participation_data %>% dplyr::filter(selection != "No-Participation")
-# ticket_part%>% summarize(perc = (nrow(ticket_part)-sum(is.na(max_days_sea)))/nrow(ticket_part))
-
-#-------------------------------------------------------------------------------
-## Sampling choice data including expected revenue, expected cost and past behavior dummies ##
-## Landing and price regression do not depend on cluster ##
-
-source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
-samps1 <- sampled_rums(data_in = participation_data_filtered, cluster = 4,
-                         min_year = 2013, max_year = 2017,
-                         min_year_prob = 2013, max_year_prob = 2017,
-                         min_year_est = 2012, max_year_est = 2019,
-                         ndays = 30, nhauls_sampled = 5,
-                         seed = 300, ncores = 4, rev_scale = 1000)
-  samps <- samps1 %>%
-    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-    rm(participation_data_filtered, samps1)
-    saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
-
-    ### No repeated alternative within trip
-    test <- samps %>% ungroup() %>% group_by(fished_haul,selection) %>% summarize(n_count = n())
+    # ### No repeated alternative within trip
+    # test <- samps %>% ungroup() %>% group_by(fished_haul,selection) %>% summarize(n_count = n())
 
 #----------------------------------
 ## Run saved data
@@ -95,15 +95,15 @@ samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choi
 # # 9.4% CPUE index 
 samps0 <- samps %>%
   filter(selection != "No-Participation")
-samps0 %>%
-  group_by(dDieselState) %>%
-  summarize(n_obs = n(), perc = n()/nrow(samps0))
-samps0 %>%
-  group_by(dPrice30) %>%
-  summarize(n_obs = n(), perc = n()/nrow(samps0))
-samps0 %>%
-  group_by(dCPUE) %>%
-  summarize(n_obs = n(), perc = n()/nrow(samps0))
+# samps0 %>%
+#   group_by(dDieselState) %>%
+#   summarize(n_obs = n(), perc = n()/nrow(samps0))
+# samps0 %>%
+#   group_by(dPrice30) %>%
+#   summarize(n_obs = n(), perc = n()/nrow(samps0))
+# samps0 %>%
+#   group_by(dCPUE) %>%
+#   summarize(n_obs = n(), perc = n()/nrow(samps0))
 
 #--------------------------------------------------------------------------
 # ### See how many times we have NA for 30 days-prices (95% of the time...)
