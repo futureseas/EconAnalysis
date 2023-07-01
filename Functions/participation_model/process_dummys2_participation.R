@@ -33,7 +33,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
                             species.list.number1 = species.list.number){
 
   # ### Delete
-  # xx <- 1580  # 6
+  # xx <- 150  # 6
   # td1 <- td
   # dat1 <- dat
   # SDM.PSDN <- psdn.sdm
@@ -200,8 +200,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     
     #Calculate availability
     mean_avail <- avail30y
-    mean_avail <- replace(mean_avail, is.na(mean_avail), 0)
-    
+
     # Create database to predict prices
     est_price <- temp_dat
     est_price$trend <- (year(est_price$set_date) - min_year_est1) + 1 
@@ -232,7 +231,6 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       price <- as.data.frame(predict(model_price1[[id_price1]], est_price, interval = "prediction"))
       price$fit <- exp(price$fit)
       mean_price <- price$fit
-      mean_price <- replace(mean_price, is.na(mean_price), 0)
       dPrice30 <- 0
     }
     
@@ -275,7 +273,6 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     expected.distance <- dat1 %>% ungroup %>% 
       dplyr::filter(set_date %within% temp_dat$days90_inter, selection == sel)
     exp_dist <- mean(expected.distance$dist, na.rm = TRUE)
-    exp_dist <- replace(exp_dist, is.na(exp_dist), 0)
   } else {
     exp_dist <- 0
     mean_diesel_price <- 0
