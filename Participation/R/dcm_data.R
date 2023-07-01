@@ -80,6 +80,8 @@ samps1 <- sampled_rums(data_in = participation_data_filtered, cluster = 4,
     rm(participation_data_filtered, samps1)
     saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
 
+    ### No repeated alternative within trip
+    test <- samps %>% ungroup() %>% group_by(fished_haul,selection) %>% summarize(n_count = n())
 
 #----------------------------------
 ## Run saved data
@@ -87,14 +89,32 @@ samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choi
 
 
 #----------------------------------------------------------------------
-# ### See how many missing revenue and cost we have
-# samps0 <- samps %>%
-#   filter(selection != "No-Participation")
-# samps0 %>%
-#   group_by(dDieselState) %>%
-#   summarize(n_obs = n(), perc = n()/nrow(samps0))
+# ### See how many times we need to use CPUE, Average 30 days prices and State diesel prices
+# # 20% State diesel prices
+# # 0.3% MA prices
+# # 9.4% CPUE index 
+samps0 <- samps %>%
+  filter(selection != "No-Participation")
+samps0 %>%
+  group_by(dDieselState) %>%
+  summarize(n_obs = n(), perc = n()/nrow(samps0))
+samps0 %>%
+  group_by(dPrice30) %>%
+  summarize(n_obs = n(), perc = n()/nrow(samps0))
+samps0 %>%
+  group_by(dCPUE) %>%
+  summarize(n_obs = n(), perc = n()/nrow(samps0))
 
-#---------------------------------------------------------------
+#--------------------------------------------------------------------------
+# ### See how many times we have NA for 30 days-prices (95% of the time...)
+sum(is.na(samps0$mean_price))
+sum(is.na(samps0$mean_avail))
+sum(is.na(samps0$diesel_price))
+sum(is.na(samps0$dist_port_to_catch_area))
+
+### REPLACE TO ZERO AND ADD DUMMY FOR NO PRICE, FUEL PRICE, DISTANCE, OR AVAILABILITY (if no SDM) (OR INCREASE INTERVAL TO 60 DAYS)
+
+#--------------------------------------------------------------------------
 ### Incorporate wind data 
 
 ## Read wind data
