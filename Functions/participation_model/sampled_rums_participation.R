@@ -355,9 +355,6 @@ sampled_rums <- function(data_in, cluster = 4,
   print("Done sampling hauls")
   sampled_hauls <- plyr::ldply(sampled_hauls)
   
-  # test <- sampled_hauls %>% ungroup() %>% group_by(fished_haul,selection) %>% 
-  #   summarize(n_count = n())
-    
   # add port and species 
   sampled_hauls <- sampled_hauls %>% mutate(PACFIN_SPECIES_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, start= -4)))
   sampled_hauls <- sampled_hauls %>% mutate(PORT_AREA_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, end= 3)))
@@ -433,7 +430,7 @@ sampled_rums <- function(data_in, cluster = 4,
   rm(port_coord, Permit_COG)
   sampled_hauls <- sampled_hauls %>% rowwise() %>%
     mutate(dist_to_cog = ifelse(is.na(lat_port), NA, geosphere::distm(c(lon_port, lat_port), c(lon_cg, lat_cg), fun = geosphere::distHaversine))) %>%
-    mutate(dist_to_cog = dist_to_cog/1000) %>% ungroup() %>% dplyr::select(-c(lon_port, lat_port, lon_cg, lat_cg))
+    mutate(dist_to_cog = dist_to_cog/1000) %>% ungroup() %>% dplyr::select(-c(lon_port, lat_port, lon_cg))
   
   #-----------------------------------------------------------------------------
   ### Calculate interval between previous day and year
@@ -451,14 +448,13 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::select(fished_haul, set_date, prev_days_date, prev_30days_date, prev_90days_date,
                   prev_year_set_date, prev_year_days_date, prev_day_date, fleet_name,
                   fished_VESSEL_NUM, PORT_AREA_CODE, PACFIN_SPECIES_CODE, AGENCY_CODE, 
-                  selection, dist_to_cog)
+                  selection)
 
   td$days_inter <- interval(td$prev_days_date, td$prev_day_date)
   td$days30_inter <- interval(td$prev_30days_date, td$prev_day_date)
   td$days90_inter <- interval(td$prev_90days_date, td$prev_day_date)
   td$prev_year_days_inter <- interval(td$prev_year_days_date, td$prev_year_set_date)
 
-  
   #-----------------------------------------------------------------------------
   ### Calculate revenues from each period and process dummy variables for past behavior
   
@@ -484,8 +480,7 @@ sampled_rums <- function(data_in, cluster = 4,
   
   ## Load abundance index in cases without SDM
 
-  CPUE_index <- readRDS(file = 'Participation/R/CPUE_index.rds')
-  CPUE_index[is.na(CPUE_index)] <- 0
+  CPUE_index <- readRDS(file = 'Participation/R/CPUE_index.rds') %>% drop_na()
   CPUE_index$set_date <- ymd(paste(CPUE_index$LANDING_YEAR, CPUE_index$LANDING_MONTH, CPUE_index$LANDING_DAY, sep = "-"))
   
   
