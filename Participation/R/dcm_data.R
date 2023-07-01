@@ -112,7 +112,7 @@ sum(is.na(samps0$mean_avail))
 sum(is.na(samps0$diesel_price))
 sum(is.na(samps0$dist_port_to_catch_area))
 
-### REPLACE TO ZERO AND ADD DUMMY FOR NO PRICE, FUEL PRICE, DISTANCE, OR AVAILABILITY (if no SDM) (OR INCREASE INTERVAL TO 60 DAYS)
+### WORK TO DO: REPLACE TO ZERO AND ADD DUMMY FOR NO PRICE, FUEL PRICE, DISTANCE, OR AVAILABILITY (if no SDM) (OR INCREASE INTERVAL TO 60 DAYS)
 
 #--------------------------------------------------------------------------
 ### Incorporate wind data 
