@@ -13,14 +13,14 @@ library(tidyverse)
 library(lubridate)
 
 
-# #-------------------------------------------------------------------------------
-# ## Read participation database ##
-# 
-# participation_data_filtered <- readRDS(file = "C:\\Data\\PacFIN data\\participation_data_filtered.rds")
-# 
+#-------------------------------------------------------------------------------
+## Read participation database ##
+
+participation_data_filtered <- readRDS(file = "C:\\Data\\PacFIN data\\participation_data_filtered.rds")
+
 # #-------------------------------------------------------------------------------
 # ## Filter participation database ##
-# 
+#
 # # participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 # #
 # # ## Keep trip with maximum revenue within a day
@@ -52,40 +52,40 @@ library(lubridate)
 # #   filter(order == 1) %>%
 # #   dplyr::select(-c('max_rev', 'order', 'ncount')) %>%
 # #   group_by(VESSEL_NUM, set_date)
-# # 
+# #
 # # participation_data_filtered$trip_id <-
 # #   udpipe::unique_identifier(participation_data_filtered, fields = c('VESSEL_NUM', 'set_date'))
 # #   saveRDS(participation_data_filtered, "C:\\Data\\PacFIN data\\participation_data_filtered.rds")
-# 
+#
 # #-------------------------------------------------------------------------------
-# # ## Day at sea: 
+# # ## Day at sea:
 # # hist(participation_data$max_days_sea)
 # ### How many row have day at sea variable? Just 4.3%, so I should not use it as filter, just as information
 # # ticket_part <- participation_data %>% dplyr::filter(selection != "No-Participation")
 # # ticket_part%>% summarize(perc = (nrow(ticket_part)-sum(is.na(max_days_sea)))/nrow(ticket_part))
-# 
-# #-------------------------------------------------------------------------------
-# ## Sampling choice data including expected revenue, expected cost and past behavior dummies ##
-# ## Landing and price regression do not depend on cluster ##
-# 
-# source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
-# samps1 <- sampled_rums(data_in = participation_data_filtered, cluster = 4,
-#                          min_year = 2013, max_year = 2017,
-#                          min_year_prob = 2013, max_year_prob = 2017,
-#                          min_year_est = 2012, max_year_est = 2019,
-#                          ndays = 30, nhauls_sampled = 5,
-#                          seed = 300, ncores = 4, rev_scale = 1000)
-#   samps <- samps1 %>%
-#     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-#     rm(participation_data_filtered, samps1)
-#     saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
+#
+#-------------------------------------------------------------------------------
+## Sampling choice data including expected revenue, expected cost and past behavior dummies ##
+## Landing and price regression do not depend on cluster ##
+
+source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
+samps1 <- sampled_rums(data_in = participation_data_filtered, cluster = 4,
+                         min_year = 2013, max_year = 2017,
+                         min_year_prob = 2013, max_year_prob = 2017,
+                         min_year_est = 2012, max_year_est = 2019,
+                         ndays = 30, nhauls_sampled = 5,
+                         seed = 300, ncores = 4, rev_scale = 1000)
+  samps <- samps1 %>%
+    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+    rm(participation_data_filtered, samps1)
+    saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4_V2.rds")
 
     # ### No repeated alternative within trip
     # test <- samps %>% ungroup() %>% group_by(fished_haul,selection) %>% summarize(n_count = n())
 
 #----------------------------------
 ## Run saved data
-samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
+samps_old <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
 
 
 #----------------------------------------------------------------------
@@ -93,7 +93,7 @@ samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choi
 # # 20% State diesel prices
 # # 0.3% MA prices
 # # 9.4% CPUE index 
-samps0 <- samps %>%
+samps0 <- samps_old %>%
   filter(selection != "No-Participation")
 # samps0 %>%
 #   group_by(dDieselState) %>%
@@ -106,18 +106,26 @@ samps0 <- samps %>%
 #   summarize(n_obs = n(), perc = n()/nrow(samps0))
 
 #--------------------------------------------------------------------------
-# ### See how many times we have NA for 30 days-prices (95% of the time...)
+# ### See how many times we have NA for 30 days-prices 
 
 
 # (1) Only NA for availability using CPUE and price using last 30 days can have a dummy of missing. See how many NaN comes from this cases.
-# (2) Distance not because it means that was not recorded
 
 sum(is.na(samps0$mean_price))
 sum(is.na(samps0$mean_avail))
 sum(is.na(samps0$diesel_price))
 sum(is.na(samps0$dist_port_to_catch_area))
+## Diesel price not a problem
+## NA in distance means that it was not recorded
 
-### WORK TO DO: REPLACE TO ZERO AND ADD DUMMY FOR NO PRICE, FUEL PRICE, DISTANCE, OR AVAILABILITY (if no SDM) (OR INCREASE INTERVAL TO 60 DAYS)
+samps1 <- samps0 %>% 
+  mutate(d_missing_price30 = ifelse((is.na(samps0$mean_price) & dPrice30 == 1), 1, 0)) %>% 
+  mutate(d_missing = ifelse((is.na(samps0$mean_avail) & dCPUE == 1), 1, 0)) 
+
+test <- samps1 %>% filter(d_missing_price30 == 1) ### All cases when we do not have price, we dont have CPUE either
+test <- samps1 %>% filter(is.na(mean_price)) ### All cases with missing values are when model could not estimate price for a species
+test2 <- samps1 %>% filter(is.na(mean_avail)) ### All cases when CPUE is not available
+
 
 #--------------------------------------------------------------------------
 ### Incorporate wind data 
