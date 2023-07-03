@@ -193,7 +193,12 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       # Average availability in the past n_days at port
       avail30y <- CPUE.index %>% ungroup %>%
         dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port, Species_Dominant %in% species)
-        avail30y <- mean(avail30y$CPUE_index, na.rm = TRUE)
+      if (length(avail30y) == 0) {
+        avail30y <- CPUE.index %>% ungroup %>%
+          dplyr::filter(set_date %within% temp_dat$days90_inter, PORT_AREA_CODE %in% port, Species_Dominant %in% species)
+        dCPUE_90 <- 1
+        }
+      avail30y <- mean(avail30y$CPUE_index, na.rm = TRUE)
       dCPUE <- 1
       
     }
@@ -221,10 +226,19 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     id_price <- species.list.number1 %>% dplyr::filter(species.list == species)
     id_price1 <- id_price$id_number
     if (length(id_price1) == 0) {
-      price30 <- dat1 %>% 
-        ungroup %>% 
+      price30 <- dat1 %>% ungroup %>%
         dplyr::filter(set_date %within% temp_dat$days30_inter, selection == sel) 
       ### If to restrictive, then use species
+      if (length(price30) == 0) {
+        price30 <- dat1 %>% ungroup %>%
+          dplyr::filter(set_date %within% temp_dat$days30_inter, PACFIN_SPECIES_CODE == specie)
+        dPrice30_species <- 1
+      }
+      if (length(price30) == 0) {
+        price30 <- dat1 %>% ungroup %>%
+          dplyr::filter(set_date %within% temp_dat$days90_inter, PACFIN_SPECIES_CODE == specie)
+        dPrice90_species <- 1
+      }
       mean_price <- mean(price30$Price_mtons, na.rm = TRUE)
       dPrice30 <- 1
       } else {
@@ -238,8 +252,11 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     mean_avail <- 0
     mean_price <- 0
     dCPUE <- 0
+    dCPUE_90 <- 0
     dPrice30 <- 0
-  }
+    dPrice30_species <- 0
+    dPrice90_species <- 0
+}
   
   # Include new information in temp_dat
   temp_dat$mean_avail <- mean_avail
@@ -249,7 +266,10 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$dummy_last_day <- dum1_val
   temp_dat$dummy_clust_prev_days <- dum30_c_val
   temp_dat$dCPUE <- dCPUE
+  temp_dat$dCPUE <- dCPUE_90
   temp_dat$dPrice30 <- dPrice30
+  temp_dat$dPrice30_s <- dPrice30_species
+  temp_dat$dPrice90_s <- dPrice90_species
   
   
   
