@@ -566,7 +566,7 @@ sampled_rums <- function(data_in, cluster = 4,
   sampled_hauls <- cbind(sampled_hauls,
     td2[, c('dummy_last_day', 'dummy_prev_days', 'dummy_prev_year_days', "dummy_clust_prev_days", 
             'mean_price', 'mean_avail', 'diesel_price', 'dist_port_to_catch_area', 
-            'dCPUE', 'dPrice30', 'dDieselState')] )
+            'dCPUE', 'dPrice30', 'dDieselState', 'dCPUE_90', 'dPrice30_species', 'dPrice90_species')] )
 
   
   #-----------------------------------------------
