@@ -78,7 +78,7 @@ library(lubridate)
 #   samps <- samps1 %>%
 #     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
 #     rm(participation_data_filtered, samps1)
-#     saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\sample_choice_set_c4.rds")
+#     saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
 
     # ### No repeated alternative within trip
     # test <- samps %>% ungroup() %>% group_by(fished_haul,selection) %>% summarize(n_count = n())
@@ -107,6 +107,11 @@ samps0 <- samps %>%
 
 #--------------------------------------------------------------------------
 # ### See how many times we have NA for 30 days-prices (95% of the time...)
+
+
+# (1) Only NA for availability using CPUE and price using last 30 days can have a dummy of missing. See how many NaN comes from this cases.
+# (2) Distance not because it means that was not recorded
+
 sum(is.na(samps0$mean_price))
 sum(is.na(samps0$mean_avail))
 sum(is.na(samps0$diesel_price))
