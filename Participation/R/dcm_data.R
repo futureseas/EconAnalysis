@@ -78,7 +78,7 @@ samps1 <- sampled_rums(data_in = participation_data_filtered, cluster = 4,
   samps <- samps1 %>%
     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
     rm(participation_data_filtered, samps1)
-    saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4_V2.rds")
+    saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4_V3.rds")
 
     # ### No repeated alternative within trip
     # test <- samps %>% ungroup() %>% group_by(fished_haul,selection) %>% summarize(n_count = n())
@@ -93,7 +93,7 @@ samps_old <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_
 # # 20% State diesel prices
 # # 0.3% MA prices
 # # 9.4% CPUE index 
-samps0 <- samps_old %>%
+samps0 <- samps %>%
   filter(selection != "No-Participation")
 # samps0 %>%
 #   group_by(dDieselState) %>%

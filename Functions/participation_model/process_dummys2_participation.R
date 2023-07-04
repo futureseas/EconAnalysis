@@ -195,19 +195,18 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       dCPUE_90 <- 0
       
     } else {
-      
       # Average availability in the past n_days at port
       avail30y <- CPUE.index %>% ungroup %>%
         dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port, Species_Dominant %in% species)
-      dCPUE_90 <- 0
-      if (length(avail30y) == 0) {
-        avail30y <- CPUE.index %>% ungroup %>%
-          dplyr::filter(set_date %within% temp_dat$days90_inter, PORT_AREA_CODE %in% port, Species_Dominant %in% species)
-        dCPUE_90 <- 1
-        }
       avail30y <- mean(avail30y$CPUE_index, na.rm = TRUE)
       dCPUE <- 1
-      
+      dCPUE_90 <- 0
+      if (is.na(avail30y)) {
+        avail30y <- CPUE.index %>% ungroup %>%
+          dplyr::filter(set_date %within% temp_dat$days90_inter, PORT_AREA_CODE %in% port, Species_Dominant %in% species)
+        avail30y <- mean(avail30y$CPUE_index, na.rm = TRUE)
+        dCPUE_90 <- 1
+      }
     }
     
     #Calculate availability
@@ -235,24 +234,26 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     if (length(id_price1) == 0) {
       price30 <- dat1 %>% ungroup %>%
         dplyr::filter(set_date %within% temp_dat$days30_inter, selection == sel) 
+      mean_price <- mean(price30$Price_mtons, na.rm = TRUE)
       dPrice30_species <- 0
       dPrice90_species <- 0
+      dPrice30 <- 1
       ### If to restrictive, then use species
-      if (length(price30) == 0) {
+      if (is.na(mean_price)) {
         price30 <- dat1 %>% ungroup %>%
           dplyr::filter(set_date %within% temp_dat$days30_inter, PACFIN_SPECIES_CODE == specie)
+        mean_price <- mean(price30$Price_mtons, na.rm = TRUE)
         dPrice30_species <- 1
         dPrice90_species <- 0
       }
-      if (length(price30) == 0) {
+      if (is.na(mean_price)) {
         price30 <- dat1 %>% ungroup %>%
           dplyr::filter(set_date %within% temp_dat$days90_inter, PACFIN_SPECIES_CODE == specie)
+        mean_price <- mean(price30$Price_mtons, na.rm = TRUE)
         dPrice30_species <- 0
         dPrice90_species <- 1
       }
-      mean_price <- mean(price30$Price_mtons, na.rm = TRUE)
-      dPrice30 <- 1
-      } else {
+    } else {
       price <- as.data.frame(predict(model_price1[[id_price1]], est_price, interval = "prediction"))
       price$fit <- exp(price$fit)
       mean_price <- price$fit
