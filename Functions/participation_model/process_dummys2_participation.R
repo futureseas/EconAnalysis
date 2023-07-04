@@ -152,6 +152,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       avail30y <- SDM.PSDN %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$PSDN_SDM_60, na.rm = TRUE)
       dCPUE <- 0
+      dCPUE_90 <- 0
       
     } else if (species == "MSQD") {
       
@@ -159,6 +160,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       avail30y <- SDM.MSQD %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$MSQD_SDM_90, na.rm = TRUE)
       dCPUE <- 0
+      dCPUE_90 <- 0
       
     } else if (species == "NANC") {
       
@@ -166,6 +168,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       avail30y <- SDM.NANC %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$NANC_SDM_30, na.rm = TRUE)
       dCPUE <- 0
+      dCPUE_90 <- 0
       
     } else if (species == "JMCK") {
       
@@ -173,6 +176,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       avail30y <- SDM.JMCK %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$JMCK_SDM_30, na.rm = TRUE)
       dCPUE <- 0
+      dCPUE_90 <- 0
       
     } else if (species == "CMCK") {
       
@@ -180,6 +184,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       avail30y <- SDM.CMCK %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$CMCK_SDM_30, na.rm = TRUE)
       dCPUE <- 0
+      dCPUE_90 <- 0
       
     } else if (species == "PHRG") {
       
@@ -187,12 +192,14 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       avail30y <- SDM.PHRG %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$PHRG_SDM_30, na.rm = TRUE)
       dCPUE <- 0
+      dCPUE_90 <- 0
       
     } else {
       
       # Average availability in the past n_days at port
       avail30y <- CPUE.index %>% ungroup %>%
         dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port, Species_Dominant %in% species)
+      dCPUE_90 <- 0
       if (length(avail30y) == 0) {
         avail30y <- CPUE.index %>% ungroup %>%
           dplyr::filter(set_date %within% temp_dat$days90_inter, PORT_AREA_CODE %in% port, Species_Dominant %in% species)
@@ -228,15 +235,19 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     if (length(id_price1) == 0) {
       price30 <- dat1 %>% ungroup %>%
         dplyr::filter(set_date %within% temp_dat$days30_inter, selection == sel) 
+      dPrice30_species <- 0
+      dPrice90_species <- 0
       ### If to restrictive, then use species
       if (length(price30) == 0) {
         price30 <- dat1 %>% ungroup %>%
           dplyr::filter(set_date %within% temp_dat$days30_inter, PACFIN_SPECIES_CODE == specie)
         dPrice30_species <- 1
+        dPrice90_species <- 0
       }
       if (length(price30) == 0) {
         price30 <- dat1 %>% ungroup %>%
           dplyr::filter(set_date %within% temp_dat$days90_inter, PACFIN_SPECIES_CODE == specie)
+        dPrice30_species <- 0
         dPrice90_species <- 1
       }
       mean_price <- mean(price30$Price_mtons, na.rm = TRUE)
@@ -246,6 +257,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       price$fit <- exp(price$fit)
       mean_price <- price$fit
       dPrice30 <- 0
+      dPrice30_species <- 0
+      dPrice90_species <- 0
     }
     
   } else {
