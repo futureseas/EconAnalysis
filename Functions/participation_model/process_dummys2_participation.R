@@ -279,7 +279,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$dummy_last_day <- dum1_val
   temp_dat$dummy_clust_prev_days <- dum30_c_val
   temp_dat$dCPUE <- dCPUE
-  temp_dat$dCPUE <- dCPUE_90
+  temp_dat$dCPUE90 <- dCPUE_90
   temp_dat$dPrice30 <- dPrice30
   temp_dat$dPrice30_s <- dPrice30_species
   temp_dat$dPrice90_s <- dPrice90_species
