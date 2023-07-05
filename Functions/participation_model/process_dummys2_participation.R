@@ -241,14 +241,14 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       ### If to restrictive, then use species
       if (is.na(mean_price)) {
         price30 <- dat1 %>% ungroup %>%
-          dplyr::filter(set_date %within% temp_dat$days30_inter, PACFIN_SPECIES_CODE == specie)
+          dplyr::filter(set_date %within% temp_dat$days30_inter, Species_Dominant == specie)
         mean_price <- mean(price30$Price_mtons, na.rm = TRUE)
         dPrice30_species <- 1
         dPrice90_species <- 0
       }
       if (is.na(mean_price)) {
         price30 <- dat1 %>% ungroup %>%
-          dplyr::filter(set_date %within% temp_dat$days90_inter, PACFIN_SPECIES_CODE == specie)
+          dplyr::filter(set_date %within% temp_dat$days90_inter, Species_Dominant == specie)
         mean_price <- mean(price30$Price_mtons, na.rm = TRUE)
         dPrice30_species <- 0
         dPrice90_species <- 1
