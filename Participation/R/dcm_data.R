@@ -89,9 +89,11 @@ samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choi
 
 
 #--------------------------------------------------------------------------
-# ### See how many times we have NA for 30 days-prices 
+# ### See how many times we have NA 
 
-# (1) Only NA for availability using CPUE and price using last 30 days can have a dummy of missing. See how many NaN comes from this cases.
+# 285 NAs for price (0.003%)
+# 2,455 NAs for availability (0.025%)
+# 20,361 Nas for dist to catch areas (20.5%)
 
 samps0 <- samps %>%
   filter(selection != "No-Participation")
@@ -109,12 +111,12 @@ sum(is.na(samps0$dist_port_to_catch_area))/nrow(samps0)
 ## Diesel price not a problem
 ## NA in distance means that it was not recorded
 
-### All cases when we do not have price, we don't have CPUE either
-psych::describe(samps0 %>% dplyr::filter(is.na(samps0$mean_price)))
+# ### All cases when we do not have price, we don't have availability either
+# psych::describe(samps0 %>% dplyr::filter(is.na(samps0$mean_price)))
 
 
-#--------------------------------------------------------------------------
-### Create dummies for missing availability and price nd convert NA to zero
+#---------------------------------------------------------------------------
+### Create dummies for missing availability and price and convert NA to zero
 
 samps1 <- samps %>% 
   mutate(dDieselState = ifelse((is.na(samps$diesel_price)), 0, dDieselState)) %>%
@@ -131,34 +133,50 @@ samps1 <- samps %>%
 
   
 #----------------------------------------------------------------------
-# ### See how many times we need to use CPUE, Average 30 days prices and State diesel prices
+# ### See how many times we need to use CPUE (30 and 90 days), average 30 days prices and State diesel prices
 # # 20.2% State diesel prices
-# # 0.3% MA prices
-# # 6.4% CPUE index (30 days)
-# # 3.0% CPUE index (90 days)
+# # 0.0001% Prices (30 days)
+# # 6.865% CPUE index (30 days)
+# # 0.005% CPUE index (90 days)
 
-samps0 %>%
+samps1 %>%
+  filter(selection != "No-Participation")  %>%
+  filter(is.na(diesel_price) == FALSE) %>%
+  mutate(total = sum(n())) %>%
   group_by(dDieselState) %>%
-  summarize(n_obs = n(), perc = n()/nrow(samps0))
-samps0 %>%
+  summarize(n_obs = n(), perc = n()/mean(total))
+
+samps1 %>%
+  filter(selection != "No-Participation")  %>%
+  filter(is.na(mean_price) == FALSE) %>%
+  mutate(total = sum(n())) %>%
   group_by(dPrice30) %>%
-  summarize(n_obs = n(), perc = n()/nrow(samps0))
-samps0 %>%
+  summarize(n_obs = n(), perc = n()/mean(total))
+
+samps1 %>%
+  filter(selection != "No-Participation")  %>%
+  filter(is.na(mean_avail) == FALSE) %>%
+  mutate(total = sum(n())) %>%
   group_by(dCPUE) %>%
-  summarize(n_obs = n(), perc = n()/nrow(samps0))
-samps0 %>%
+  summarize(n_obs = n(), perc = n()/mean(total))
+
+samps1 %>%
+  filter(selection != "No-Participation")  %>%
+  filter(is.na(mean_avail) == FALSE) %>%
+  mutate(total = sum(n())) %>%
   group_by(dCPUE90) %>%
-  summarize(n_obs = n(), perc = n()/nrow(samps0))
+  summarize(n_obs = n(), perc = n()/mean(total))
 
 
 #--------------------------------------------------------------------------
 ### Replace values for No-Participation to zero 
-samps2 <- samps1 %>% 
-  mutate(dist_to_cog = ifelse(selection == "No-Participation", 0, dist_to_cog)) 
-  mutate(lat_cg = ifelse(selection == "No-Participation", 0, lat_cg)) 
-  
-          samps1 %>% filter(selection == "No-Participation") %>% psych::describe()
+samps <- samps1 %>% 
+  mutate(dist_to_cog = ifelse(selection == "No-Participation", 0, dist_to_cog)) %>%
+  mutate(lat_cg = ifelse(selection == "No-Participation", 0, lat_cg))
+  rm(samps1, samps0)
+  # samps %>% filter(selection == "No-Participation") %>% psych::describe()
 
+  
 #--------------------------------------------------------------------------
 ### Incorporate wind data 
 
@@ -313,7 +331,8 @@ samps <- samps %>% mutate(dMSQD = ifelse(grepl("MSQD", selection) == TRUE, 1, 0)
 ## Incorporate closure dummy for Pacific sardine
 
 samps <- samps %>%
-  dplyr::mutate(PSDN.Closure = ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 1, 
+  dplyr::mutate(PSDN.Closure = 
+    ifelse(set_date >= "2008-05-29" & set_date < "2008-07-01", 1, 
     ifelse(set_date >= "2008-08-08" & set_date < "2008-09-01", 1, 
     ifelse(set_date >= "2008-09-23" & set_date < "2009-01-01", 1, 
     ifelse(set_date >= "2009-02-20" & set_date < "2009-07-01", 1, 
@@ -334,7 +353,8 @@ samps <- samps %>%
 #------------------------------------------------------------------
 ## Incorporate closure dummy for market squid and weekend indicator
 samps <- samps %>%
-  dplyr::mutate(MSQD.Closure = ifelse(set_date >= "2010-12-17" & set_date < "2011-03-31", 1, 
+  dplyr::mutate(MSQD.Closure = 
+    ifelse(set_date >= "2010-12-17" & set_date < "2011-03-31", 1, 
     ifelse(set_date >= "2011-11-18" & set_date < "2012-03-31", 1, 
     ifelse(set_date >= "2012-11-21" & set_date < "2013-03-31", 1, 0)))) %>% 
     dplyr::mutate(Weekend = ifelse(chron::is.weekend(set_date), 1, 0)) %>% 
@@ -365,9 +385,33 @@ samps <- samps %>%
 #-------------------------------------------
 ## Include unemployment.
 
- << WORK HERE >>
+unem_CA <- readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192133_ae51a3.xlsx", range = "A11:I263") %>%
+  mutate(AGENCY_CODE = "C") %>%
+  select(c('Year', 'Period', 'unemployment rate', 'AGENCY_CODE'))
 
+unem_OR <- readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192159_36a94e.xlsx", range = "A11:I263") %>%
+  mutate(AGENCY_CODE = "O")  %>%
+  select(c('Year', 'Period', 'unemployment rate', 'AGENCY_CODE'))
 
+unem_WA <- readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192208_d35a30.xlsx", range = "A11:I263") %>%
+  mutate(AGENCY_CODE = "W")  %>%
+  select(c('Year', 'Period', 'unemployment rate', 'AGENCY_CODE'))
+
+unem <- rbind(unem_CA, unem_OR, unem_WA) %>%
+  rename(set_year = Year) %>%
+  rename(set_month = Period) %>%
+  rename(unem_rate = `unemployment rate`) %>%
+  mutate(set_month = ifelse(set_month == "Jan", 1, ifelse(set_month == "Feb", 2, ifelse(set_month == "Mar", 3, 
+                     ifelse(set_month == "Apr", 4, ifelse(set_month == "May", 5, ifelse(set_month == "Jun", 6, 
+                     ifelse(set_month == "Jul", 7, ifelse(set_month == "Aug", 8, ifelse(set_month == "Sep", 9, 
+                     ifelse(set_month == "Oct", 10, ifelse(set_month == "Nov", 11, ifelse(set_month == "Dec", 12, set_month))))))))))))) 
+rm(unem_CA, unem_OR, unem_WA)
+samps <- samps %>% 
+  mutate(set_month = month(set_date), set_year = year(set_date))%>%
+  merge(unem, by = c('set_month', 'set_year', 'AGENCY_CODE'), all.x = TRUE, all.y = FALSE)
+  rm(unem)
+  
+  
 #-------------------------#
 ## Format as mlogit.data ##
 #-------------------------#
