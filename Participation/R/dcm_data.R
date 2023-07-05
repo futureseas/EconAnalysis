@@ -85,48 +85,79 @@ library(lubridate)
 
 #----------------------------------
 ## Run saved data
-    samps_old <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4_OLD.rds")
-    samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
+samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
 
-
-#----------------------------------------------------------------------
-# ### See how many times we need to use CPUE, Average 30 days prices and State diesel prices
-# # 20% State diesel prices
-# # 0.3% MA prices
-# # 9.4% CPUE index 
-samps0 <- samps %>%
-  filter(selection != "No-Participation")
-# samps0 %>%
-#   group_by(dDieselState) %>%
-#   summarize(n_obs = n(), perc = n()/nrow(samps0))
-# samps0 %>%
-#   group_by(dPrice30) %>%
-#   summarize(n_obs = n(), perc = n()/nrow(samps0))
-# samps0 %>%
-#   group_by(dCPUE) %>%
-#   summarize(n_obs = n(), perc = n()/nrow(samps0))
 
 #--------------------------------------------------------------------------
 # ### See how many times we have NA for 30 days-prices 
 
-
 # (1) Only NA for availability using CPUE and price using last 30 days can have a dummy of missing. See how many NaN comes from this cases.
+
+samps0 <- samps %>%
+  filter(selection != "No-Participation")
 
 sum(is.na(samps0$mean_price))
 sum(is.na(samps0$mean_avail))
 sum(is.na(samps0$diesel_price))
 sum(is.na(samps0$dist_port_to_catch_area))
+
+sum(is.na(samps0$mean_price))/nrow(samps0)
+sum(is.na(samps0$mean_avail))/nrow(samps0)
+sum(is.na(samps0$diesel_price))/nrow(samps0)
+sum(is.na(samps0$dist_port_to_catch_area))/nrow(samps0)
+
 ## Diesel price not a problem
 ## NA in distance means that it was not recorded
 
-samps1 <- samps0 %>% 
-  mutate(d_missing_price30 = ifelse((is.na(samps0$mean_price) & dPrice30 == 1), 1, 0)) %>% 
-  mutate(d_missing = ifelse((is.na(samps0$mean_avail) & dCPUE == 1), 1, 0)) 
+### All cases when we do not have price, we don't have CPUE either
+psych::describe(samps0 %>% dplyr::filter(is.na(samps0$mean_price)))
 
-test <- samps1 %>% filter(d_missing_price30 == 1) ### All cases when we do not have price, we dont have CPUE either
-test <- samps1 %>% filter(is.na(mean_price)) ### All cases with missing values are when model could not estimate price for a species
-test2 <- samps1 %>% filter(is.na(mean_avail)) ### All cases when CPUE is not available
 
+#--------------------------------------------------------------------------
+### Create dummies for missing availability and price nd convert NA to zero
+
+samps1 <- samps %>% 
+  mutate(dDieselState = ifelse((is.na(samps$diesel_price)), 0, dDieselState)) %>%
+  mutate(dPrice30     = ifelse((is.na(samps$mean_price)), 0, dPrice30)) %>%
+  mutate(dCPUE        = ifelse((is.na(samps$mean_avail)), 0, dCPUE)) %>%
+  mutate(dCPUE90      = ifelse((is.na(samps$mean_avail)), 0, dCPUE90)) %>%
+  mutate(d_missing    = ifelse((is.na(samps$mean_avail)), 1, 0)) %>%
+  mutate(d_missing_p  = ifelse((is.na(samps$mean_price)), 1, 0)) %>%
+  mutate(d_missing_d  = ifelse((is.na(samps$dist_port_to_catch_area)), 1, 0)) %>%
+  mutate(mean_avail   = ifelse((is.na(samps$mean_avail)), 0, mean_avail)) %>% 
+  mutate(mean_price   = ifelse((is.na(samps$mean_price)), 0, mean_price)) %>%
+  mutate(dist_port_to_catch_area_zero  = ifelse((is.na(samps$dist_port_to_catch_area)), 0, dist_port_to_catch_area)) %>%
+    dplyr::select(-c('dPrice30_s', 'dPrice90_s')) 
+
+  
+#----------------------------------------------------------------------
+# ### See how many times we need to use CPUE, Average 30 days prices and State diesel prices
+# # 20.2% State diesel prices
+# # 0.3% MA prices
+# # 6.4% CPUE index (30 days)
+# # 3.0% CPUE index (90 days)
+
+samps0 %>%
+  group_by(dDieselState) %>%
+  summarize(n_obs = n(), perc = n()/nrow(samps0))
+samps0 %>%
+  group_by(dPrice30) %>%
+  summarize(n_obs = n(), perc = n()/nrow(samps0))
+samps0 %>%
+  group_by(dCPUE) %>%
+  summarize(n_obs = n(), perc = n()/nrow(samps0))
+samps0 %>%
+  group_by(dCPUE90) %>%
+  summarize(n_obs = n(), perc = n()/nrow(samps0))
+
+
+#--------------------------------------------------------------------------
+### Replace values for No-Participation to zero 
+samps2 <- samps1 %>% 
+  mutate(dist_to_cog = ifelse(selection == "No-Participation", 0, dist_to_cog)) 
+  mutate(lat_cg = ifelse(selection == "No-Participation", 0, lat_cg)) 
+  
+          samps1 %>% filter(selection == "No-Participation") %>% psych::describe()
 
 #--------------------------------------------------------------------------
 ### Incorporate wind data 
