@@ -408,22 +408,22 @@ unem <- rbind(unem_CA, unem_OR, unem_WA) %>%
 rm(unem_CA, unem_OR, unem_WA)
 samps <- samps %>% 
   mutate(set_month = month(set_date), set_year = year(set_date))%>%
-  merge(unem, by = c('set_month', 'set_year', 'AGENCY_CODE'), all.x = TRUE, all.y = FALSE)
+  merge(unem, by = c('set_month', 'set_year', 'AGENCY_CODE'), all.x = TRUE, all.y = FALSE) %>%
+  mutate(unem_rate = ifelse(selection == "No-Participation", 0, unem_rate))
   rm(unem)
-  
-  
+
+
 #-------------------------#
 ## Format as mlogit.data ##
 #-------------------------#
 
 ## Subset database
-
-rdo <- samps %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NUM, set_date, 
-                               wind_max_220_mh, dummy_prev_days, dummy_prev_year_days, dummy_last_day, 
-                               mean_rev_adj, cost_port_to_catch_area, cost_port_to_cog, travel_cost,
-                               PSDN.Closure, WA.Closure, MSQD.Closure, Weekend,
-                               PSDN.Closure.d, WA.Closure.d, MSQD.Closure.d, MSQD.Weekend, 
-                               dParticipate)
+rdo <- samps %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NUM, set_date, set_month, set_year,
+                               mean_price, mean_avail, diesel_price, dCPUE, dPrice30, dDieselState, dCPUE90,     
+                               wind_max_220_mh, dummy_last_day, dummy_prev_days, dummy_prev_year_days, dummy_clust_prev_days,
+                               lat_cg, dist_to_cog, dist_port_to_catch_area, dist_port_to_catch_area_zero, 
+                               PSDN.Closure, WA.Closure, MSQD.Closure, Weekend, PSDN.Closure.d, WA.Closure.d, MSQD.Closure.d, MSQD.Weekend, 
+                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_d)
 rm(samps)
 
 #-----------------------------------------------------------------
@@ -436,17 +436,17 @@ rdo2 <- rdo %>%
   select(-c(full))
 rm(rdo)
 
-#----------------------------------------------------
+#--------------------------------------------------------
 ## Exclude NA winds (previous problem with ports...) NONE!
 
 rdo_vessels_out <- rdo2 %>% filter(is.na(wind_max_220_mh)) %>% select(fished_haul) %>% unique()
 `%ni%` <- Negate(`%in%`)
 rdo3 <- data.table::setDT(rdo2)[fished_haul %ni% rdo_vessels_out$fished_haul]
-rm(rdo2, rdo_vessels_out)
+rm(rdo2, rdo_vessels_out, `%ni%`)
 
 
-#------------------------------------------------------
-# Check hauls in same day (filter trips in same day)???
+#----------------------------------------------
+# Check more than one hauls in same day (None!)
 
 fished_haul_select <- rdo3 %>%
   group_by(fished_VESSEL_NUM, set_date) %>%
@@ -467,21 +467,17 @@ saveRDS(rdo_R, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\rdo_R_c4.rds"
 #----------------------------------------------------
 ## Stata data
 
-
-### Check how Stata time variable is constructed!
-
-# Organize data for Stata estimation
+# Organize data for Stata estimation (drop_na()???)
 rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_haul, -rdo_R$fished),]) %>%
-  drop_na() %>%
   group_by(fished_VESSEL_NUM) %>%
   dplyr::mutate(fished_VESSEL_ID = cur_group_id()) %>%
   ungroup() %>% dplyr::select(-c('fished_VESSEL_NUM')) %>%
   group_by(set_date) %>%
   dplyr::mutate(time = cur_group_id()) %>%
-  ungroup() %>% dplyr::select(-c('set_date')) 
+  ungroup() %>% dplyr::select(-c('set_date'))  
 
 ## Save data to run with Stata
-write.csv(rdo_Stata,"C:\\GitHub\\EconAnalysis\\Participation\\Stata\\dcm_data.csv", row.names = FALSE)
+write.csv(rdo_Stata,"C:\\GitHub\\EconAnalysis\\Participation\\Stata\\rdo_Stata_c4.csv", row.names = FALSE)
 saveRDS(rdo_Stata, file = "C:\\GitHub\\EconAnalysis\\Participation\\Stata\\rdo_Stata_c4.rds")
 
 
