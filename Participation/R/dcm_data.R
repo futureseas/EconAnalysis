@@ -85,7 +85,9 @@ samps1 <- sampled_rums(data_in = participation_data_filtered, cluster = 4,
 
 #----------------------------------
 ## Run saved data
-samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4_v3.rds")
+    samps_old <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
+    
+    samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4_v3.rds")
 
 
 #----------------------------------------------------------------------
