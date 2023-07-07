@@ -96,10 +96,9 @@ preserve
 	estadd scalar perc2 = count2/_N*100: P4
 restore
 
-eststo P5: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing d_missing_p i.dummy_last_day
-
- dist_port_to_catch_area_zero
- lat_cg
+ // EXCLUDED!
+ // dist_port_to_catch_area_zero
+ // lat_cg
 
 
 
