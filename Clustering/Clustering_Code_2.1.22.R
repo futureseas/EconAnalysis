@@ -14,8 +14,8 @@ library(NbClust)
 library(factoextra)
 
 ###I run these lines as well as they are packages I frequently use that can interfere with some of the processes below
-detach(package:raster, unload=TRUE)
-detach(package:igraph, unload=TRUE)
+# detach(package:raster, unload=TRUE)
+# detach(package:igraph, unload=TRUE)
 
 rm(list=ls())
 gc()
@@ -531,10 +531,18 @@ library(viridis)
 Group_Stats_Wide <- readRDS(here::here("Clustering", "stats_input.RDS"))
   ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
     geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
-    geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd, group=Variable), 
+    geom_errorbar(aes(ymin = mean-1.96*sd, ymax = mean+1.96*sd, group=Variable), 
                   width = 0.4, position=position_dodge(.9)) + 
-    theme_classic()  + theme(axis.text.x = element_text(angle = 90)) +
-    labs(x = "Cluster", y = "Mean (z)") + scale_fill_viridis(discrete = TRUE)
+    theme_classic()  + theme(axis.text.x = element_text(size = 11, angle = 90)) +
+    labs(x = "Fleet segment", y = "Mean (z-value)") + scale_fill_viridis(discrete = TRUE) + 
+    scale_x_discrete(labels=c('Southern CCS\nsmall-scale\nsquid specialists',
+                              'Southern CCS\nsmall-scale\nCPS opportunists',
+                              'PNW sardine\nopportunists',
+                              'Southern CCS\nindustrial\nsquid specialists',
+                              'Roving industrial\nsardine-squid\ngeneralists',
+                              'PNW sardine\nspecialists',
+                              'Southern CCS\nforage\nfish diverse',
+                              'PNW albacore-crab\ngeneralists'))
     # scale_fill_brewer(palette="YlGnBu")
   
 # rm(Group_Stats_Wide)
