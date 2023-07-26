@@ -180,8 +180,8 @@ price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(MSQD_Landings) ~
   1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + Length_z +
  (1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure | port_cluster_ID))
-landing_model_NRC <- bf(log(MSQD_Landings) ~
-  1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + Length_z)
+# landing_model_NRC <- bf(log(MSQD_Landings) ~
+#   1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + Length_z)
 
 # Create priors
 prior_lognormal <- c(
@@ -199,25 +199,25 @@ prior_lognormal <- c(
   prior(exponential(1), class = sigma, resp = logMSQDLandings),
   prior(lkj(2),         class = rescor))
 
-# set.seed(123)
-#  fit_qMSQD <-
-#    brm(data = dataset_msqd_landing,
-#        family = gaussian,
-#        price_model + landing_model + set_rescor(TRUE),
-#        prior = prior_lognormal,
-#        iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#        control = list(max_treedepth = 15, adapt_delta = 0.99),
-#        file = "Estimations/fit_qMSQD")
-
- set.seed(123)
- fit_qMSQD_NRC <-
+set.seed(123)
+ fit_qMSQD <-
    brm(data = dataset_msqd_landing,
        family = gaussian,
-       price_model + landing_model_NRC + set_rescor(TRUE),
+       price_model + landing_model + set_rescor(TRUE),
        prior = prior_lognormal,
        iter = 2000, warmup = 1000, chains = 4, cores = 4,
        control = list(max_treedepth = 15, adapt_delta = 0.99),
-       file = "Estimations/fit_qMSQD_NRC")
+       file = "Estimations/fit_qMSQD")
+
+ # set.seed(123)
+ # fit_qMSQD_NRC <-
+ #   brm(data = dataset_msqd_landing,
+ #       family = gaussian,
+ #       price_model + landing_model_NRC + set_rescor(TRUE),
+ #       prior = prior_lognormal,
+ #       iter = 2000, warmup = 1000, chains = 4, cores = 4,
+ #       control = list(max_treedepth = 15, adapt_delta = 0.99),
+ #       file = "Estimations/fit_qMSQD_NRC")
  
  fit_qMSQD_NRC <- add_criterion(fit_qMSQD_NRC, c("loo"))
  

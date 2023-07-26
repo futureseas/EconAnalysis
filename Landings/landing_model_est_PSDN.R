@@ -172,8 +172,8 @@ landing_model <- bf(log(PSDN_Landings) ~
                        1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction + Length_z +
                       (1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction | port_cluster_ID))
 
-landing_model_NRC <- bf(log(PSDN_Landings) ~
-                       1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction + Length_z)
+# landing_model_NRC <- bf(log(PSDN_Landings) ~
+#                        1 + PSDN_SDM_60 + PSDN_Price_z + PSDN_SDM_60:MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:NANC_SDM_20 + MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20 + WA.Restriction + Length_z)
 
 
 get_prior(data = dataset_psdn_landing,
@@ -196,23 +196,22 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(66)
-# fit_qPSDN <-
-#   brm(data = dataset_psdn_landing,
-#       family = gaussian,
-#       price_model + landing_model + set_rescor(TRUE),
-#       prior = prior_lognormal,
-#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#       control = list(max_treedepth = 15, adapt_delta = 0.99),
-#       file = "Estimations/fit_qPSDN")
-
-fit_qPSDN_NRC <-
+fit_qPSDN <-
   brm(data = dataset_psdn_landing,
       family = gaussian,
-      price_model + landing_model_NRC + set_rescor(TRUE),
+      price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qPSDN_NRC")
+      file = "Estimations/fit_qPSDN")
 
-fit_qPSDN_NRC <- add_criterion(fit_qPSDN_NRC, c("loo"))
+# fit_qPSDN_NRC <-
+#   brm(data = dataset_psdn_landing,
+#       family = gaussian,
+#       price_model + landing_model_NRC + set_rescor(TRUE),
+#       prior = prior_lognormal,
+#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
+#       control = list(max_treedepth = 15, adapt_delta = 0.99),
+#       file = "Estimations/fit_qPSDN_NRC")
+# fit_qPSDN_NRC <- add_criterion(fit_qPSDN_NRC, c("loo"))
 

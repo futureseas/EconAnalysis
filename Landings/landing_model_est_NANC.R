@@ -166,8 +166,8 @@ landing_model <- bf(log(NANC_Landings) ~
   1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure + Length_z +
  (1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure | port_cluster_ID))
 
-landing_model_NRC <- bf(log(NANC_Landings) ~
-  1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure + Length_z)
+# landing_model_NRC <- bf(log(NANC_Landings) ~
+#   1 + NANC_SDM_20 + NANC_Price_z + NANC_SDM_20:MSQD_SPAWN_SDM_90:MSQD.Open + NANC_SDM_20:PSDN_SDM_60:PSDN.Open + MSQD_SPAWN_SDM_90:MSQD.Open + PSDN_SDM_60:PSDN.Open + PSDN.Total.Closure + Length_z)
 
 
 
@@ -193,22 +193,21 @@ prior_lognormal <- c(
 
 ## Estimate model
 set.seed(66)
-# fit_qNANC <-
-#   brm(data = dataset_nanc_landing,
-#       family = gaussian,
-#       price_model + landing_model + set_rescor(TRUE),
-#       prior = prior_lognormal,
-#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
-#       control = list(max_treedepth = 15, adapt_delta = 0.99),
-#       file = "Estimations/fit_qNANC")
-
-fit_qNANC_NRC <-
+fit_qNANC <-
   brm(data = dataset_nanc_landing,
       family = gaussian,
-      price_model + landing_model_NRC + set_rescor(TRUE),
+      price_model + landing_model + set_rescor(TRUE),
       prior = prior_lognormal,
       iter = 2000, warmup = 1000, chains = 4, cores = 4,
       control = list(max_treedepth = 15, adapt_delta = 0.99),
-      file = "Estimations/fit_qNANC_NRC")
+      file = "Estimations/fit_qNANC")
 
-fit_qNANC_NRC <- add_criterion(fit_qNANC_NRC, c("loo"))
+# fit_qNANC_NRC <-
+#   brm(data = dataset_nanc_landing,
+#       family = gaussian,
+#       price_model + landing_model_NRC + set_rescor(TRUE),
+#       prior = prior_lognormal,
+#       iter = 2000, warmup = 1000, chains = 4, cores = 4,
+#       control = list(max_treedepth = 15, adapt_delta = 0.99),
+#       file = "Estimations/fit_qNANC_NRC")
+#   fit_qNANC_NRC <- add_criterion(fit_qNANC_NRC, c("loo"))
