@@ -83,11 +83,22 @@ class(dataset_psdn$port_cluster_ID)
 dataset_psdn_landing <- dataset_psdn %>%
   dplyr::filter(PSDN_Landings > 0) %>%
   dplyr::filter(PSDN.Open == 1) %>%
-  dplyr::filter(PSDN.Total.Closure == 0) %>%
+  dplyr::filter(PSDN.Total.Closure == 0) %>% 
   mutate(n_total = n()) %>%
-  group_by(cluster_port) %>% 
-  mutate(obs = n(), perc = n()/n_total) %>% 
-  filter(perc > 0.02) 
+  group_by(cluster_port) %>%
+  mutate(obs = n(), perc = n()/n_total) %>%
+  filter(perc > 0.02)
+
+# dataset_psdn_landing_2 <- dataset_psdn %>%
+#   dplyr::filter(PSDN_Landings > 0) %>%
+#   dplyr::filter(PSDN.Total.Closure == 0) %>%
+#   dplyr::filter(PSDN.Open != 0) %>%
+#   mutate(n_total = n()) %>%
+#   group_by(cluster_port) %>%
+#   mutate(obs = n(), perc = n()/n_total) %>%
+#   filter(perc > 0.02)
+# 
+# xx <- (nrow(dataset_psdn_landing_2)-nrow(dataset_psdn_landing))/nrow(dataset_psdn_landing_2)*100
 
 ### Check number of observations
 dataset_psdn_landing %>% select('cluster_port', 'obs', 'perc') %>% unique()
