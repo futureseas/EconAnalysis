@@ -294,6 +294,20 @@ Tickets.CPS <- Tickets %>%
 #                                 "Probability of Presence" = "#D22B2B")) + 
 #   theme(legend.position="bottom") + xlab("Landing Year")
 
+
+#----------------------------------
+## Percentage squid coming from California
+colnames(Tickets.CPS)
+Tickets.CPS.MSQD <- Tickets.CPS %>% 
+  filter(Species_Dominant == "MSQD") %>%
+  filter(LANDING_YEAR >= 2000, LANDING_YEAR <= 2020) %>%
+  group_by(AGENCY_CODE) %>%
+  summarize(Landings = sum(Landings_mtons)) %>% ungroup() %>%
+  mutate(total = sum(Landings)) %>% mutate(perc = Landings/total*100)
+  
+
+
+
 #----------------------------------
 ## Figure 3. Evolution of landings, number of vessels and availability by port area (one graph per species)
 
