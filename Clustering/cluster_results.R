@@ -99,6 +99,95 @@ ggplot(nvessel.year, aes(x=LANDING_YEAR, y = n_vessel)) +
   scale_x_continuous(name = "Year") 
 
 
+# -----------------------------------------------------------------------------------------------
+## Port composition (all ports)
+all_ports <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(PORT_AREA_CODE) %>% unique() %>% mutate(merge=1)
+all_ports_POST <- PacFIN.month  %>%   
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::filter(PSDN.Total.Closure == 1) %>% dplyr::select(PORT_AREA_CODE) %>% unique() %>% mutate(merge=1)
+
+all_vessels <- PacFIN.month  %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+all_vessels_POST <- PacFIN.month  %>%   
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::filter(PSDN.Total.Closure == 1) %>% dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+
+expand <- merge(all_ports, all_vessels, by = c('merge'), all.x = TRUE, all.y = TRUE)
+expand_POST <- merge(all_ports_POST, all_vessels_POST, by = c('merge'), all.x = TRUE, all.y = TRUE)
+rm(all_ports, all_vessels)
+rm(all_ports_POST, all_vessels_POST)
+
+expand_ALL <- merge(expand, expand_POST, by = c('VESSEL_NUM', 'PORT_AREA_CODE'), all.x = TRUE, all.y = TRUE)
+
+options(scipen=999)
+cluster.species <- PacFIN.month %>% filter(LANDING_YEAR >= 2005) %>% 
+  filter(LANDING_YEAR <= 2014) %>%
+  group_by(group_all, PORT_AREA_CODE, VESSEL_NUM) %>% 
+  summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+  group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
+
+cluster.species <- merge(expand_ALL, cluster.species, by = c('VESSEL_NUM', 'PORT_AREA_CODE'), all.x = TRUE) %>%
+  mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% group_by(VESSEL_NUM) %>%
+  mutate(group_all = ifelse(is.na(group_all),mean(group_all, na.rm = TRUE),group_all)) %>% 
+  group_by(group_all, PORT_AREA_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
+  unique() %>% filter(group_all != is.na(group_all))
+
+# cluster.species <- cluster.species[order(cluster.species$group_all, -cluster.species$Percentage),]
+# cluster.species.highest <- cluster.species %>%
+#   group_by(group_all) %>% filter(row_number()==1:5) %>% ungroup() %>% 
+#   dplyr::select('PORT_AREA_CODE') %>% unique()
+# cluster.species <- setDT(cluster.species)[PORT_AREA_CODE %chin% cluster.species.highest$PORT_AREA_CODE] 
+
+table <- as.data.frame(xtabs(Percentage ~  PORT_AREA_CODE + group_all, cluster.species))
+table <- table %>%
+  spread(key = group_all, value = Freq)
+
+# table = table[,-1]
+colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7", "Cluster 8")
+gs4_create("all_ports", sheets = table)
+
+rm(table, cluster.species, cluster.species.highest)
+
+### After ###
+options(scipen=999)
+cluster.species_POST <- PacFIN.month %>%   
+  dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
+  dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
+  dplyr::filter(PSDN.Total.Closure == 1) %>%
+  group_by(group_all, PORT_AREA_CODE, VESSEL_NUM) %>% 
+  summarise(revenue = sum(AFI_EXVESSEL_REVENUE.sum)) %>%
+  group_by(VESSEL_NUM) %>% mutate(Percentage = revenue / sum(revenue))
+
+cluster.species_POST <- merge(expand_ALL, cluster.species_POST, by = c('VESSEL_NUM', 'PORT_AREA_CODE'), all.x = TRUE) %>%
+  mutate(Percentage = ifelse(is.na(Percentage),0,Percentage)) %>% group_by(VESSEL_NUM) %>%
+  mutate(group_all = ifelse(is.na(group_all),mean(group_all, na.rm = TRUE),group_all)) %>% 
+  group_by(group_all, PORT_AREA_CODE) %>% summarise(Percentage = mean(Percentage)) %>% 
+  unique() %>% filter(group_all != is.na(group_all))
+
+# cluster.species <- cluster.species[order(cluster.species$group_all, -cluster.species$Percentage),]
+# cluster.species.highest <- cluster.species %>%
+#   group_by(group_all) %>% filter(row_number()==1:5) %>% ungroup() %>% 
+#   dplyr::select('PORT_AREA_CODE') %>% unique()
+# cluster.species <- setDT(cluster.species)[PORT_AREA_CODE %chin% cluster.species.highest$PORT_AREA_CODE] 
+
+table <- as.data.frame(xtabs(Percentage ~  PORT_AREA_CODE + group_all, cluster.species_POST))
+table <- table %>%
+  spread(key = group_all, value = Freq)
+
+# table = table[,-1]
+colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7", "Cluster 8")
+gs4_create("POST_all_ports", sheets = table)
+rm(table, cluster.species_POST, cluster.species.highest_POST)
+
+
+
+
+
+
+
 #-----------------------------------------  
 # ## Table W1. Number and percentage of light brail vessels by cluster
 #   options(scipen=999)
@@ -347,6 +436,17 @@ table <- table %>%
 colnames(table) = c("Port", "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "CLuster 7", "Cluster 8")
 # gs4_create("Table2_POST_all_species", sheets = table)
 rm(table, cluster.species_POST, cluster.species.highest_POST)
+
+
+
+
+
+
+
+
+
+
+
 
 
 # -----------------------------------------------------------------------------------------------

@@ -15,8 +15,8 @@ library(factoextra)
 library(tidyr)
 
 ###I run these lines as well as they are packages I frequently use that can interfere with some of the processes below
-detach(package:raster, unload=TRUE)
-detach(package:igraph, unload=TRUE)
+# detach(package:raster, unload=TRUE)
+# detach(package:igraph, unload=TRUE)
 
 rm(list=ls())
 gc()
