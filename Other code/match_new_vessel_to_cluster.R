@@ -54,13 +54,18 @@ distances <- merge(df, Vessel_cluster, by = c('Vessel_IDs'), all.x = TRUE, all.y
   rename(Vessel_IDs_NEW = Vessel_IDs) %>%
   rename(Vessel_IDs = col) %>%
   merge(Vessel_cluster, by = c('Vessel_IDs'), all.x = TRUE, all.y = FALSE) %>%
-  dplyr::filter(Cluster_IDs.y == 9) %>% dplyr::filter(Cluster_IDs.x != 9) %>%
-  group_by(Vessel_IDs) %>% 
+  dplyr::filter(Cluster_IDs.x == 9) %>% dplyr::filter(Cluster_IDs.y != 9) %>%
+  group_by(Vessel_IDs_NEW) %>% 
   slice(which.min(value)) 
 
-table <- distances %>% group_by(Cluster_IDs.x) %>% summarize(n_vessels = n())
+table <- distances %>% group_by(Cluster_IDs.y) %>% summarize(n_vessels = n())
 # gs4_create("New_vessels_cluster_match", sheets = table)
 
+new_entrants_ID <- distances %>% dplyr::select(Vessel_IDs_NEW, Cluster_IDs.y) %>% unique() %>%
+  rename(VESSEL_NUM = Vessel_IDs_NEW) %>%
+  rename(group_all_new = Cluster_IDs.y)
+
+saveRDS(new_entrants_ID, here::here("Clustering", "new_entrants_ID.rds"))
 
 
 
