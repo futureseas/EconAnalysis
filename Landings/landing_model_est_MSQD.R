@@ -105,11 +105,13 @@ dataset_msqd_landing <- dataset_msqd %>%
 #   dplyr::filter(MSQD_Landings > 0) %>%
 #   dplyr::filter(MSQD.Open != 0) %>%
 #   mutate(n_total = n()) %>%
-#   group_by(cluster_port) %>% 
-#   mutate(obs = n(), perc = n()/n_total) %>% 
+#   group_by(cluster_port) %>%
+#   mutate(obs = n(), perc = n()/n_total) %>%
 #   filter(perc > 0.04)
 # 
 # xx <- (nrow(dataset_msqd_landing_2)-nrow(dataset_msqd_landing))/nrow(dataset_msqd_landing_2)*100
+# cc <- (sum(dataset_msqd_landing_2$MSQD_Landings)-sum(dataset_msqd_landing$MSQD_Landings))/sum(dataset_msqd_landing_2$MSQD_Landings)*100
+
 
 ### Check number of observations
 dataset_msqd_landing %>% select('cluster_port', 'obs', 'perc') %>% unique()

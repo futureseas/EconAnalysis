@@ -99,6 +99,8 @@ dataset_psdn_landing <- dataset_psdn %>%
 #   filter(perc > 0.02)
 # 
 # xx <- (nrow(dataset_psdn_landing_2)-nrow(dataset_psdn_landing))/nrow(dataset_psdn_landing_2)*100
+# cc <- (sum(dataset_psdn_landing_2$PSDN_Landings)-sum(dataset_psdn_landing$PSDN_Landings))/sum(dataset_psdn_landing_2$PSDN_Landings)*100
+
 
 ### Check number of observations
 dataset_psdn_landing %>% select('cluster_port', 'obs', 'perc') %>% unique()
