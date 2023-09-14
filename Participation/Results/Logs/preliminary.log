@@ -1,8 +1,8 @@
----------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
        log:  C:\GitHub\EconAnalysis\Participation\Results\Logs\preliminary.log
   log type:  text
- opened on:  13 Sep 2023, 16:53:36
+ opened on:  14 Sep 2023, 12:06:36
 
 . 
 . ** Import data
@@ -50,8 +50,7 @@ Note: Data have been xtset.
 . * Variables that do not converge: dcpue dparticipate
 . * No relevant variables: waclosure waclosured
 . 
-. eststo P1: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_co
-> g ///
+. eststo P1: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
 >                 ddieselstate psdnclosured msqdclosured msqdweekend, base("No-Participation")
 note: data were cmset as panel data, and the default vcetype for panel data is vce(cluster fished_vessel_id); see cmclogit.
 note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
@@ -322,8 +321,7 @@ Legend: AIC is Akaike's information criterion.
 . ***********************************************************
 . *** Include state dependency (models to present on paper)
 . 
-. eststo B1: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_co
-> g ///
+. eststo B1: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
 >                 ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_last_day, base("No-Participation")
 note: data were cmset as panel data, and the default vcetype for panel data is vce(cluster fished_vessel_id); see cmclogit.
 note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
@@ -563,26 +561,932 @@ Legend: AIC is Akaike's information criterion.
 . restore
 
 . 
+. eststo B2: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+>                 ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_days, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel data is vce(cluster fished_vessel_id); see cmclogit.
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+note: variable 1.dummy_prev_days has 3864 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log pseudolikelihood =  -16132.95  
+Iteration 1:  Log pseudolikelihood = -15595.783  
+Iteration 2:  Log pseudolikelihood = -15567.913  
+Iteration 3:  Log pseudolikelihood = -15563.341  
+Iteration 4:  Log pseudolikelihood = -15562.278  
+Iteration 5:  Log pseudolikelihood = -15562.019  
+Iteration 6:  Log pseudolikelihood = -15561.968  
+Iteration 7:  Log pseudolikelihood =  -15561.96  
+Iteration 8:  Log pseudolikelihood = -15561.958  
+Iteration 9:  Log pseudolikelihood = -15561.958  
+Iteration 10: Log pseudolikelihood = -15561.957  
+Iteration 11: Log pseudolikelihood = -15561.957  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: _caseid                      Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(13)   =    9097.60
+Log pseudolikelihood = -15561.957                 Prob > chi2     =     0.0000
+
+                                      (Std. err. adjusted for 43 clusters in fished_vessel_id)
+----------------------------------------------------------------------------------------------
+                             |               Robust
+                      fished | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   2.465321   .4827542     5.11   0.000      1.51914    3.411502
+                  mean_price |  -.0002911   .0003037    -0.96   0.338    -.0008864    .0003041
+                diesel_price |  -.0493564   .1625075    -0.30   0.761    -.3678651    .2691524
+             wind_max_220_mh |  -.0304629   .0054135    -5.63   0.000    -.0410732   -.0198526
+                   d_missing |   2.133549   .3909236     5.46   0.000     1.367353    2.899745
+dist_port_to_catch_area_zero |  -.0078653    .002543    -3.09   0.002    -.0128495   -.0028811
+                 d_missing_d |  -2.009707   .1924111   -10.44   0.000    -2.386826   -1.632588
+                 dist_to_cog |  -.0051903   .0006583    -7.88   0.000    -.0064804   -.0039001
+                ddieselstate |  -.0144062   .0947387    -0.15   0.879    -.2000907    .1712782
+                psdnclosured |  -.2984186   .4034717    -0.74   0.460    -1.089209    .4923713
+                msqdclosured |  -16.69341      .2743   -60.86   0.000    -17.23103   -16.15579
+                 msqdweekend |  -3.343242   .1657722   -20.17   0.000     -3.66815   -3.018335
+           1.dummy_prev_days |   3.039875   .0799434    38.03   0.000     2.883188    3.196561
+-----------------------------+----------------------------------------------------------------
+BDA_DCRB                     |
+                       _cons |   -.475188   2.316483    -0.21   0.837     -5.01541    4.065034
+-----------------------------+----------------------------------------------------------------
+BDA_MSQD                     |
+                       _cons |   .7785796   .9322593     0.84   0.404    -1.048615    2.605774
+-----------------------------+----------------------------------------------------------------
+CBA_MSQD                     |
+                       _cons |   4.182202   1.233968     3.39   0.001     1.763669    6.600736
+-----------------------------+----------------------------------------------------------------
+ERA_MSQD                     |
+                       _cons |    1.33402   .8426709     1.58   0.113    -.3175849    2.985624
+-----------------------------+----------------------------------------------------------------
+LAA_BTNA                     |
+                       _cons |  -1.699007   1.216605    -1.40   0.163    -4.083508     .685494
+-----------------------------+----------------------------------------------------------------
+LAA_CMCK                     |
+                       _cons |  -1.849511   .7309366    -2.53   0.011    -3.282121   -.4169016
+-----------------------------+----------------------------------------------------------------
+LAA_JMCK                     |
+                       _cons |  -.5068418   .7109239    -0.71   0.476    -1.900227    .8865434
+-----------------------------+----------------------------------------------------------------
+LAA_MSQD                     |
+                       _cons |  -.5536739   .6709269    -0.83   0.409    -1.868666    .7613186
+-----------------------------+----------------------------------------------------------------
+LAA_NANC                     |
+                       _cons |  -3.695619   .6658132    -5.55   0.000    -5.000589   -2.390649
+-----------------------------+----------------------------------------------------------------
+LAA_PBNT                     |
+                       _cons |   -1.63376   .8579289    -1.90   0.057     -3.31527    .0477493
+-----------------------------+----------------------------------------------------------------
+LAA_PSDN                     |
+                       _cons |  -1.906126   .6851691    -2.78   0.005    -3.249033   -.5632196
+-----------------------------+----------------------------------------------------------------
+LAA_RHRG                     |
+                       _cons |  -4.753383   .8784162    -5.41   0.000    -6.475047   -3.031719
+-----------------------------+----------------------------------------------------------------
+LAA_STNA                     |
+                       _cons |  -.3569998   .9586319    -0.37   0.710    -2.235884    1.521884
+-----------------------------+----------------------------------------------------------------
+LAA_YTNA                     |
+                       _cons |  -2.217991   .8616484    -2.57   0.010    -3.906791   -.5291911
+-----------------------------+----------------------------------------------------------------
+MNA_ALBC                     |
+                       _cons |  -3.144352   1.160605    -2.71   0.007    -5.419096    -.869609
+-----------------------------+----------------------------------------------------------------
+MNA_CMCK                     |
+                       _cons |  -.8921776   .7492749    -1.19   0.234    -2.360729    .5763743
+-----------------------------+----------------------------------------------------------------
+MNA_JMCK                     |
+                       _cons |  -1.394081   .6009849    -2.32   0.020     -2.57199   -.2161725
+-----------------------------+----------------------------------------------------------------
+MNA_LSKT                     |
+                       _cons |   .8126749    .745531     1.09   0.276    -.6485389    2.273889
+-----------------------------+----------------------------------------------------------------
+MNA_MSQD                     |
+                       _cons |   -.995758   .7321396    -1.36   0.174    -2.430725    .4392092
+-----------------------------+----------------------------------------------------------------
+MNA_NANC                     |
+                       _cons |   -3.07782   .6388707    -4.82   0.000    -4.329984   -1.825657
+-----------------------------+----------------------------------------------------------------
+MNA_PSDN                     |
+                       _cons |  -3.298468   .6136004    -5.38   0.000    -4.501102   -2.095833
+-----------------------------+----------------------------------------------------------------
+MNA_UDAB                     |
+                       _cons |    1.37265   1.536769     0.89   0.372    -1.639363    4.384663
+-----------------------------+----------------------------------------------------------------
+MRA_MSQD                     |
+                       _cons |  -1.414897   .8144896    -1.74   0.082    -3.011268     .181473
+-----------------------------+----------------------------------------------------------------
+NPA_MSQD                     |
+                       _cons |   4.499123   .8988191     5.01   0.000      2.73747    6.260776
+-----------------------------+----------------------------------------------------------------
+No_Participation             |  (base alternative)
+-----------------------------+----------------------------------------------------------------
+SBA_CMCK                     |
+                       _cons |  -.9511866   .6482573    -1.47   0.142    -2.221748    .3193745
+-----------------------------+----------------------------------------------------------------
+SBA_JMCK                     |
+                       _cons |  -1.405769   1.039289    -1.35   0.176    -3.442738    .6311993
+-----------------------------+----------------------------------------------------------------
+SBA_MSQD                     |
+                       _cons |  -.4795338   .6467043    -0.74   0.458    -1.747051    .7879834
+-----------------------------+----------------------------------------------------------------
+SBA_PBNT                     |
+                       _cons |  -1.675615   1.377575    -1.22   0.224    -4.375612    1.024382
+-----------------------------+----------------------------------------------------------------
+SBA_PSDN                     |
+                       _cons |  -2.661611   .8840058    -3.01   0.003    -4.394231   -.9289918
+-----------------------------+----------------------------------------------------------------
+SBA_UMCK                     |
+                       _cons |  -.4687874   1.504301    -0.31   0.755    -3.417164    2.479589
+-----------------------------+----------------------------------------------------------------
+SDA_BTNA                     |
+                       _cons |   2.767586   2.316358     1.19   0.232    -1.772392    7.307563
+-----------------------------+----------------------------------------------------------------
+SFA_CHNK                     |
+                       _cons |   5.208849   4.073762     1.28   0.201    -2.775579    13.19328
+-----------------------------+----------------------------------------------------------------
+SFA_DCRB                     |
+                       _cons |  -.3739161   2.503761    -0.15   0.881    -5.281197    4.533365
+-----------------------------+----------------------------------------------------------------
+SFA_MSQD                     |
+                       _cons |    -.48672   .8046241    -0.60   0.545    -2.063754    1.090314
+-----------------------------+----------------------------------------------------------------
+SFA_NANC                     |
+                       _cons |  -.2735539   .8482878    -0.32   0.747    -1.936167     1.38906
+----------------------------------------------------------------------------------------------
+
+. di "R2-McFadden = " 1 - (e(ll)/ll0)
+R2-McFadden = .46867146
+
+. estadd scalar r2 = 1 - (e(ll)/ll0): B2
+
+. lrtest B2 P1, force
+
+Likelihood-ratio test
+Assumption: P1 nested within B2
+
+ LR chi2(1) = 9872.70
+Prob > chi2 =  0.0000
+
+. estadd scalar lr_p = r(p): B2
+
+. estat ic, all
+
+Information criteria
+
+---------------------------------------------------------
+       Model |          N   ll(null)  ll(model)        df
+-------------+-------------------------------------------
+          B2 |     19,832          .  -15561.96        48
+---------------------------------------------------------
+Note: BIC, AICc, and CAIC use N = number of cases. See 
+      [R] IC note.
+
+--------------------------------------------------------------------
+       Model |          AIC          BIC          AICc          CAIC
+-------------+------------------------------------------------------
+          B2 |     31219.91     31598.88      31220.15      31646.88
+--------------------------------------------------------------------
+Legend: AIC is Akaike's information criterion.
+        BIC is Bayesian information criterion.
+        AICc is corrected Akaike's information criterion.
+        CAIC is consistent Akaike's information criterion.
+
+. matrix S = r(S)
+
+. estadd scalar aic = S[1,5]: B2
+
+. estadd scalar bic = S[1,6]: B2
+
+. estadd scalar aicc = S[1,7]: B2
+
+. estadd scalar caic = S[1,8]: B2
+
+. preserve
+
+.         qui predict phat
+
+.         by fished_haul, sort: egen max_prob = max(phat) 
+
+.         drop if max_prob != phat
+(99,160 observations deleted)
+
+.         by fished_haul, sort: gen nvals = _n == 1 
+
+.         count if nvals
+  19,832
+
+.         dis _N
+19832
+
+.         gen selection_hat = 1
+
+.         egen count1 = total(fished)
+
+.         dis count1/_N*100 "%"
+67.895321%
+
+.         estadd scalar perc1 = count1/_N*100: B2
+
+. restore
+
 . 
-. * OTHER STATE DEPENDENCY VARIABLES???
+. eststo B3: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+>                 ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_year_days, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel data is vce(cluster fished_vessel_id); see cmclogit.
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+note: variable 1.dummy_prev_year_days has 7661 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log pseudolikelihood = -21195.328  
+Iteration 1:  Log pseudolikelihood = -20334.905  
+Iteration 2:  Log pseudolikelihood = -20271.018  
+Iteration 3:  Log pseudolikelihood = -20259.332  
+Iteration 4:  Log pseudolikelihood = -20256.644  
+Iteration 5:  Log pseudolikelihood = -20256.095  
+Iteration 6:  Log pseudolikelihood = -20256.009  
+Iteration 7:  Log pseudolikelihood = -20255.999  
+Iteration 8:  Log pseudolikelihood = -20255.998  
+Iteration 9:  Log pseudolikelihood = -20255.997  
+Iteration 10: Log pseudolikelihood = -20255.997  
+Iteration 11: Log pseudolikelihood = -20255.997  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: _caseid                      Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(13)   =    6622.64
+Log pseudolikelihood = -20255.997                 Prob > chi2     =     0.0000
+
+                                      (Std. err. adjusted for 43 clusters in fished_vessel_id)
+----------------------------------------------------------------------------------------------
+                             |               Robust
+                      fished | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   1.712451   .4265962     4.01   0.000     .8763379    2.548564
+                  mean_price |   -.000568   .0005527    -1.03   0.304    -.0016513    .0005153
+                diesel_price |  -.2469648   .1466913    -1.68   0.092    -.5344746    .0405449
+             wind_max_220_mh |  -.0208835   .0058543    -3.57   0.000    -.0323577   -.0094094
+                   d_missing |   1.501481   .3322441     4.52   0.000     .8502944    2.152667
+dist_port_to_catch_area_zero |  -.0124762   .0028973    -4.31   0.000    -.0181547   -.0067976
+                 d_missing_d |  -4.087852   .2795639   -14.62   0.000    -4.635787   -3.539917
+                 dist_to_cog |  -.0088513   .0006863   -12.90   0.000    -.0101964   -.0075062
+                ddieselstate |   .2606306   .1158929     2.25   0.025     .0334848    .4877764
+                psdnclosured |  -.7328582   .5537013    -1.32   0.186    -1.818093    .3523764
+                msqdclosured |  -18.42065   .2679277   -68.75   0.000    -18.94578   -17.89552
+                 msqdweekend |  -3.263466   .1612359   -20.24   0.000    -3.579482   -2.947449
+      1.dummy_prev_year_days |   .5878013   .0893554     6.58   0.000      .412668    .7629345
+-----------------------------+----------------------------------------------------------------
+BDA_DCRB                     |
+                       _cons |   5.094901   4.364685     1.17   0.243    -3.459724    13.64953
+-----------------------------+----------------------------------------------------------------
+BDA_MSQD                     |
+                       _cons |   3.795787   1.003434     3.78   0.000     1.829092    5.762482
+-----------------------------+----------------------------------------------------------------
+CBA_MSQD                     |
+                       _cons |   10.27121   1.597524     6.43   0.000     7.140119     13.4023
+-----------------------------+----------------------------------------------------------------
+ERA_MSQD                     |
+                       _cons |   6.259905   1.060288     5.90   0.000     4.181779    8.338032
+-----------------------------+----------------------------------------------------------------
+LAA_BTNA                     |
+                       _cons |   2.965285   1.893973     1.57   0.117    -.7468335    6.677404
+-----------------------------+----------------------------------------------------------------
+LAA_CMCK                     |
+                       _cons |    .793077   .7924655     1.00   0.317    -.7601268    2.346281
+-----------------------------+----------------------------------------------------------------
+LAA_JMCK                     |
+                       _cons |   1.691501   .7242097     2.34   0.020     .2720758    3.110926
+-----------------------------+----------------------------------------------------------------
+LAA_MSQD                     |
+                       _cons |   2.705942   .8178874     3.31   0.001     1.102912    4.308972
+-----------------------------+----------------------------------------------------------------
+LAA_NANC                     |
+                       _cons |  -.6668625    .650865    -1.02   0.306    -1.942534    .6088095
+-----------------------------+----------------------------------------------------------------
+LAA_PBNT                     |
+                       _cons |    2.42394   .9043619     2.68   0.007     .6514228    4.196456
+-----------------------------+----------------------------------------------------------------
+LAA_PSDN                     |
+                       _cons |   .8209001   .7149815     1.15   0.251     -.580438    2.222238
+-----------------------------+----------------------------------------------------------------
+LAA_RHRG                     |
+                       _cons |  -1.686092   .9533023    -1.77   0.077     -3.55453    .1823458
+-----------------------------+----------------------------------------------------------------
+LAA_STNA                     |
+                       _cons |   3.029089   1.108304     2.73   0.006      .856853    5.201325
+-----------------------------+----------------------------------------------------------------
+LAA_YTNA                     |
+                       _cons |   1.685432    1.06741     1.58   0.114    -.4066537    3.777518
+-----------------------------+----------------------------------------------------------------
+MNA_ALBC                     |
+                       _cons |   .2019672   1.926287     0.10   0.916    -3.573487    3.977421
+-----------------------------+----------------------------------------------------------------
+MNA_CMCK                     |
+                       _cons |   2.217658   1.006473     2.20   0.028      .245008    4.190309
+-----------------------------+----------------------------------------------------------------
+MNA_JMCK                     |
+                       _cons |    2.05868   .5989288     3.44   0.001     .8848016    3.232559
+-----------------------------+----------------------------------------------------------------
+MNA_LSKT                     |
+                       _cons |   5.172442   .9005483     5.74   0.000       3.4074    6.937485
+-----------------------------+----------------------------------------------------------------
+MNA_MSQD                     |
+                       _cons |   2.647099   .8855862     2.99   0.003     .9113825    4.382817
+-----------------------------+----------------------------------------------------------------
+MNA_NANC                     |
+                       _cons |   .2078213   .6162167     0.34   0.736    -.9999412    1.415584
+-----------------------------+----------------------------------------------------------------
+MNA_PSDN                     |
+                       _cons |  -.1544946   .6502761    -0.24   0.812    -1.429012    1.120023
+-----------------------------+----------------------------------------------------------------
+MNA_UDAB                     |
+                       _cons |   7.614742   2.779744     2.74   0.006     2.166545    13.06294
+-----------------------------+----------------------------------------------------------------
+MRA_MSQD                     |
+                       _cons |   .9743581   1.034546     0.94   0.346    -1.053315    3.002031
+-----------------------------+----------------------------------------------------------------
+NPA_MSQD                     |
+                       _cons |   11.31997   1.143406     9.90   0.000     9.078933      13.561
+-----------------------------+----------------------------------------------------------------
+No_Participation             |  (base alternative)
+-----------------------------+----------------------------------------------------------------
+SBA_CMCK                     |
+                       _cons |   1.256752   .8288761     1.52   0.129     -.367815     2.88132
+-----------------------------+----------------------------------------------------------------
+SBA_JMCK                     |
+                       _cons |   .3317791   1.267886     0.26   0.794    -2.153231    2.816789
+-----------------------------+----------------------------------------------------------------
+SBA_MSQD                     |
+                       _cons |   2.976695   .8082991     3.68   0.000     1.392458    4.560932
+-----------------------------+----------------------------------------------------------------
+SBA_PBNT                     |
+                       _cons |   1.966336   2.401498     0.82   0.413    -2.740514    6.673185
+-----------------------------+----------------------------------------------------------------
+SBA_PSDN                     |
+                       _cons |  -.4448706   .9398155    -0.47   0.636    -2.286875    1.397134
+-----------------------------+----------------------------------------------------------------
+SBA_UMCK                     |
+                       _cons |   4.069204   2.510738     1.62   0.105    -.8517525     8.99016
+-----------------------------+----------------------------------------------------------------
+SDA_BTNA                     |
+                       _cons |   9.229215   4.112681     2.24   0.025     1.168508    17.28992
+-----------------------------+----------------------------------------------------------------
+SFA_CHNK                     |
+                       _cons |   13.38276   7.424235     1.80   0.071    -1.168468      27.934
+-----------------------------+----------------------------------------------------------------
+SFA_DCRB                     |
+                       _cons |     4.9738    4.69288     1.06   0.289    -4.224077    14.17168
+-----------------------------+----------------------------------------------------------------
+SFA_MSQD                     |
+                       _cons |   3.344377    .978376     3.42   0.001     1.426796    5.261959
+-----------------------------+----------------------------------------------------------------
+SFA_NANC                     |
+                       _cons |   3.835376    1.08416     3.54   0.000     1.710461     5.96029
+----------------------------------------------------------------------------------------------
+
+. di "R2-McFadden = " 1 - (e(ll)/ll0)
+R2-McFadden = .30840388
+
+. estadd scalar r2 = 1 - (e(ll)/ll0): B3
+
+. lrtest B3 P1, force
+
+Likelihood-ratio test
+Assumption: P1 nested within B3
+
+ LR chi2(1) = 484.62
+Prob > chi2 = 0.0000
+
+. estadd scalar lr_p = r(p): B3
+
+. estat ic, all
+
+Information criteria
+
+---------------------------------------------------------
+       Model |          N   ll(null)  ll(model)        df
+-------------+-------------------------------------------
+          B3 |     19,832          .     -20256        48
+---------------------------------------------------------
+Note: BIC, AICc, and CAIC use N = number of cases. See 
+      [R] IC note.
+
+--------------------------------------------------------------------
+       Model |          AIC          BIC          AICc          CAIC
+-------------+------------------------------------------------------
+          B3 |     40607.99     40986.96      40608.23      41034.96
+--------------------------------------------------------------------
+Legend: AIC is Akaike's information criterion.
+        BIC is Bayesian information criterion.
+        AICc is corrected Akaike's information criterion.
+        CAIC is consistent Akaike's information criterion.
+
+. matrix S = r(S)
+
+. estadd scalar aic = S[1,5]: B3
+
+. estadd scalar bic = S[1,6]: B3
+
+. estadd scalar aicc = S[1,7]: B3
+
+. estadd scalar caic = S[1,8]: B3
+
+. preserve
+
+.         qui predict phat
+
+.         by fished_haul, sort: egen max_prob = max(phat) 
+
+.         drop if max_prob != phat
+(99,160 observations deleted)
+
+.         by fished_haul, sort: gen nvals = _n == 1 
+
+.         count if nvals
+  19,832
+
+.         dis _N
+19832
+
+.         gen selection_hat = 1
+
+.         egen count1 = total(fished)
+
+.         dis count1/_N*100 "%"
+58.057685%
+
+.         estadd scalar perc1 = count1/_N*100: B3
+
+. restore
+
 . 
-. *** dummy_prev_days dummy_prev_year_days dummy_clust_prev_days
+. eststo B4: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+>                 ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_clust_prev_days, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel data is vce(cluster fished_vessel_id); see cmclogit.
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+note: variable 1.dummy_clust_prev_days has 705 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log pseudolikelihood = -19958.144  
+Iteration 1:  Log pseudolikelihood = -19169.007  
+Iteration 2:  Log pseudolikelihood = -19142.645  
+Iteration 3:  Log pseudolikelihood = -19139.701  
+Iteration 4:  Log pseudolikelihood = -19139.219  
+Iteration 5:  Log pseudolikelihood = -19139.104  
+Iteration 6:  Log pseudolikelihood = -19139.079  
+Iteration 7:  Log pseudolikelihood = -19139.074  
+Iteration 8:  Log pseudolikelihood = -19139.073  
+Iteration 9:  Log pseudolikelihood = -19139.073  
+Iteration 10: Log pseudolikelihood = -19139.073  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: _caseid                      Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(13)   =    6522.77
+Log pseudolikelihood = -19139.073                 Prob > chi2     =     0.0000
+
+                                      (Std. err. adjusted for 43 clusters in fished_vessel_id)
+----------------------------------------------------------------------------------------------
+                             |               Robust
+                      fished | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   1.579554   .5451237     2.90   0.004     .5111309    2.647977
+                  mean_price |   .0000883   .0003151     0.28   0.779    -.0005293    .0007059
+                diesel_price |  -.1024379   .1397461    -0.73   0.464    -.3763352    .1714594
+             wind_max_220_mh |  -.0336125   .0056062    -6.00   0.000    -.0446005   -.0226245
+                   d_missing |   1.382614   .3721298     3.72   0.000     .6532529    2.111975
+dist_port_to_catch_area_zero |  -.0141812    .002666    -5.32   0.000    -.0194066   -.0089559
+                 d_missing_d |  -1.007294     .29455    -3.42   0.001    -1.584602   -.4299868
+                 dist_to_cog |  -.0097475   .0007248   -13.45   0.000    -.0111681   -.0083269
+                ddieselstate |   .0134131   .0896747     0.15   0.881    -.1623461    .1891723
+                psdnclosured |  -.2399029   .5120168    -0.47   0.639    -1.243437    .7636317
+                msqdclosured |  -15.97229   .2604456   -61.33   0.000    -16.48276   -15.46183
+                 msqdweekend |   -3.27557   .1575859   -20.79   0.000    -3.584433   -2.966708
+     1.dummy_clust_prev_days |   3.501936   .1495326    23.42   0.000     3.208857    3.795014
+-----------------------------+----------------------------------------------------------------
+BDA_DCRB                     |
+                       _cons |  -3.571209   2.304095    -1.55   0.121    -8.087153    .9447345
+-----------------------------+----------------------------------------------------------------
+BDA_MSQD                     |
+                       _cons |   -.058636   1.030649    -0.06   0.955    -2.078671    1.961399
+-----------------------------+----------------------------------------------------------------
+CBA_MSQD                     |
+                       _cons |    7.21091   1.628414     4.43   0.000     4.019277    10.40254
+-----------------------------+----------------------------------------------------------------
+ERA_MSQD                     |
+                       _cons |   2.527367   .8529734     2.96   0.003     .8555701    4.199164
+-----------------------------+----------------------------------------------------------------
+LAA_BTNA                     |
+                       _cons |  -1.988728   1.117667    -1.78   0.075    -4.179315     .201858
+-----------------------------+----------------------------------------------------------------
+LAA_CMCK                     |
+                       _cons |    -2.3043   .5655126    -4.07   0.000    -3.412684   -1.195915
+-----------------------------+----------------------------------------------------------------
+LAA_JMCK                     |
+                       _cons |  -1.386391    .571109    -2.43   0.015    -2.505744    -.267038
+-----------------------------+----------------------------------------------------------------
+LAA_MSQD                     |
+                       _cons |  -.8088622   .5541771    -1.46   0.144    -1.895029     .277305
+-----------------------------+----------------------------------------------------------------
+LAA_NANC                     |
+                       _cons |  -3.247487   .5761366    -5.64   0.000    -4.376694    -2.11828
+-----------------------------+----------------------------------------------------------------
+LAA_PBNT                     |
+                       _cons |  -1.227729    .662422    -1.85   0.064    -2.526052    .0705943
+-----------------------------+----------------------------------------------------------------
+LAA_PSDN                     |
+                       _cons |  -2.588893   .5928102    -4.37   0.000    -3.750779   -1.427006
+-----------------------------+----------------------------------------------------------------
+LAA_RHRG                     |
+                       _cons |  -4.923406   .9523234    -5.17   0.000    -6.789925   -3.056886
+-----------------------------+----------------------------------------------------------------
+LAA_STNA                     |
+                       _cons |  -.4406935   .9760745    -0.45   0.652    -2.353764    1.472377
+-----------------------------+----------------------------------------------------------------
+LAA_YTNA                     |
+                       _cons |  -2.243634   .7118356    -3.15   0.002    -3.638806   -.8484618
+-----------------------------+----------------------------------------------------------------
+MNA_ALBC                     |
+                       _cons |  -4.968231   1.273347    -3.90   0.000    -7.463945   -2.472516
+-----------------------------+----------------------------------------------------------------
+MNA_CMCK                     |
+                       _cons |  -1.736866   .7128554    -2.44   0.015    -3.134037   -.3396947
+-----------------------------+----------------------------------------------------------------
+MNA_JMCK                     |
+                       _cons |  -1.686912   .4893547    -3.45   0.001     -2.64603   -.7277949
+-----------------------------+----------------------------------------------------------------
+MNA_LSKT                     |
+                       _cons |   .5415077   .7084256     0.76   0.445    -.8469809    1.929996
+-----------------------------+----------------------------------------------------------------
+MNA_MSQD                     |
+                       _cons |  -1.169452   .6161275    -1.90   0.058     -2.37704    .0381354
+-----------------------------+----------------------------------------------------------------
+MNA_NANC                     |
+                       _cons |  -3.132448   .5233433    -5.99   0.000    -4.158182   -2.106714
+-----------------------------+----------------------------------------------------------------
+MNA_PSDN                     |
+                       _cons |  -3.566882   .4959302    -7.19   0.000    -4.538887   -2.594877
+-----------------------------+----------------------------------------------------------------
+MNA_UDAB                     |
+                       _cons |  -.4618538   1.592846    -0.29   0.772    -3.583774    2.660066
+-----------------------------+----------------------------------------------------------------
+MRA_MSQD                     |
+                       _cons |  -3.054357   .7581455    -4.03   0.000    -4.540294   -1.568419
+-----------------------------+----------------------------------------------------------------
+NPA_MSQD                     |
+                       _cons |   8.096551   .9793377     8.27   0.000     6.177085    10.01602
+-----------------------------+----------------------------------------------------------------
+No_Participation             |  (base alternative)
+-----------------------------+----------------------------------------------------------------
+SBA_CMCK                     |
+                       _cons |  -1.753124   .6924788    -2.53   0.011    -3.110357   -.3958901
+-----------------------------+----------------------------------------------------------------
+SBA_JMCK                     |
+                       _cons |  -2.054483   1.310531    -1.57   0.117    -4.623077    .5141098
+-----------------------------+----------------------------------------------------------------
+SBA_MSQD                     |
+                       _cons |  -.7408271   .5521302    -1.34   0.180    -1.822982    .3413282
+-----------------------------+----------------------------------------------------------------
+SBA_PBNT                     |
+                       _cons |  -3.166787   1.340443    -2.36   0.018    -5.794006   -.5395678
+-----------------------------+----------------------------------------------------------------
+SBA_PSDN                     |
+                       _cons |  -4.438157   .8923175    -4.97   0.000    -6.187067   -2.689247
+-----------------------------+----------------------------------------------------------------
+SBA_UMCK                     |
+                       _cons |  -1.559807   1.616914    -0.96   0.335      -4.7289    1.609286
+-----------------------------+----------------------------------------------------------------
+SDA_BTNA                     |
+                       _cons |    1.37084   2.343006     0.59   0.558    -3.221367    5.963047
+-----------------------------+----------------------------------------------------------------
+SFA_CHNK                     |
+                       _cons |  -.0368163   4.344913    -0.01   0.993    -8.552689    8.479056
+-----------------------------+----------------------------------------------------------------
+SFA_DCRB                     |
+                       _cons |  -4.207125    2.46797    -1.70   0.088    -9.044258     .630007
+-----------------------------+----------------------------------------------------------------
+SFA_MSQD                     |
+                       _cons |  -.5665252   .7686567    -0.74   0.461    -2.073065    .9400142
+-----------------------------+----------------------------------------------------------------
+SFA_NANC                     |
+                       _cons |  -.1789878   .8298724    -0.22   0.829    -1.805508    1.447532
+----------------------------------------------------------------------------------------------
+
+. di "R2-McFadden = " 1 - (e(ll)/ll0)
+R2-McFadden = .34653879
+
+. estadd scalar r2 = 1 - (e(ll)/ll0): B4
+
+. lrtest B4 P1, force
+
+Likelihood-ratio test
+Assumption: P1 nested within B4
+
+ LR chi2(1) = 2718.47
+Prob > chi2 =  0.0000
+
+. estadd scalar lr_p = r(p): B4
+
+. estat ic, all
+
+Information criteria
+
+---------------------------------------------------------
+       Model |          N   ll(null)  ll(model)        df
+-------------+-------------------------------------------
+          B4 |     19,832          .  -19139.07        48
+---------------------------------------------------------
+Note: BIC, AICc, and CAIC use N = number of cases. See 
+      [R] IC note.
+
+--------------------------------------------------------------------
+       Model |          AIC          BIC          AICc          CAIC
+-------------+------------------------------------------------------
+          B4 |     38374.15     38753.11      38374.38      38801.11
+--------------------------------------------------------------------
+Legend: AIC is Akaike's information criterion.
+        BIC is Bayesian information criterion.
+        AICc is corrected Akaike's information criterion.
+        CAIC is consistent Akaike's information criterion.
+
+. matrix S = r(S)
+
+. estadd scalar aic = S[1,5]: B4
+
+. estadd scalar bic = S[1,6]: B4
+
+. estadd scalar aicc = S[1,7]: B4
+
+. estadd scalar caic = S[1,8]: B4
+
+. preserve
+
+.         qui predict phat
+
+.         by fished_haul, sort: egen max_prob = max(phat) 
+
+.         drop if max_prob != phat
+(99,160 observations deleted)
+
+.         by fished_haul, sort: gen nvals = _n == 1 
+
+.         count if nvals
+  19,832
+
+.         dis _N
+19832
+
+.         gen selection_hat = 1
+
+.         egen count1 = total(fished)
+
+.         dis count1/_N*100 "%"
+60.306575%
+
+.         estadd scalar perc1 = count1/_N*100: B4
+
+. restore
+
 . 
-. esttab P1 B1 using "${tables}preliminary_regressions_state_dep_2023_09_13.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
+. eststo B5: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+>                 ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_days d_missing_p unem_rate, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel data is vce(cluster fished_vessel_id); see cmclogit.
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+note: variable 1.dummy_prev_days has 3864 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_p has 19547 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log pseudolikelihood = -16127.852  
+Iteration 1:  Log pseudolikelihood = -15590.093  
+Iteration 2:  Log pseudolikelihood = -15562.634  
+Iteration 3:  Log pseudolikelihood = -15558.162  
+Iteration 4:  Log pseudolikelihood = -15557.126  
+Iteration 5:  Log pseudolikelihood = -15556.871  
+Iteration 6:  Log pseudolikelihood = -15556.822  (not concave)
+Iteration 7:  Log pseudolikelihood = -15556.814  (not concave)
+Iteration 8:  Log pseudolikelihood = -15556.812  (not concave)
+Iteration 9:  Log pseudolikelihood = -15556.811  (not concave)
+Iteration 10: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 11: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 12: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 13: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 14: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 15: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 16: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 17: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 18: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 19: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 20: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 21: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 22: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 23: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 24: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 25: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 26: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 27: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 28: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 29: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 30: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 31: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 32: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 33: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 34: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 35: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 36: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 37: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 38: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 39: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 40: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 41: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 42: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 43: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 44: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 45: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 46: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 47: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 48: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 49: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 50: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 51: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 52: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 53: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 54: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 55: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 56: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 57: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 58: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 59: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 60: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 61: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 62: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 63: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 64: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 65: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 66: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 67: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 68: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 69: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 70: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 71: Log pseudolikelihood = -15556.811  (not concave)
+Iteration 72: Log pseudolikelihood = -15556.811  (not concave)
+--Break--
+r(1);
+
+end of do-file
+
+--Break--
+r(1);
+
+. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
+
+. eststo B5: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+>                 ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_days d_missing_p, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel data is vce(cluster fished_vessel_id); see cmclogit.
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+note: variable 1.dummy_prev_days has 3864 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_p has 19547 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log pseudolikelihood =  -16132.47  
+Iteration 1:  Log pseudolikelihood = -15595.371  
+Iteration 2:  Log pseudolikelihood = -15567.452  
+Iteration 3:  Log pseudolikelihood = -15562.879  
+Iteration 4:  Log pseudolikelihood = -15561.815  
+Iteration 5:  Log pseudolikelihood = -15561.556  
+Iteration 6:  Log pseudolikelihood = -15561.505  (not concave)
+Iteration 7:  Log pseudolikelihood = -15561.497  (not concave)
+Iteration 8:  Log pseudolikelihood = -15561.495  (not concave)
+Iteration 9:  Log pseudolikelihood = -15561.495  (not concave)
+Iteration 10: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 11: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 12: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 13: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 14: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 15: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 16: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 17: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 18: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 19: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 20: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 21: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 22: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 23: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 24: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 25: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 26: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 27: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 28: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 29: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 30: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 31: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 32: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 33: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 34: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 35: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 36: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 37: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 38: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 39: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 40: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 41: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 42: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 43: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 44: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 45: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 46: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 47: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 48: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 49: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 50: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 51: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 52: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 53: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 54: Log pseudolikelihood = -15561.494  (not concave)
+Iteration 55: Log pseudolikelihood = -15561.469  (not concave)
+Iteration 56: Log pseudolikelihood = -15561.469  (not concave)
+Iteration 57: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 58: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 59: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 60: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 61: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 62: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 63: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 64: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 65: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 66: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 67: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 68: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 69: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 70: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 71: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 72: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 73: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 74: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 75: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 76: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 77: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 78: Log pseudolikelihood = -15561.468  (not concave)
+Iteration 79: Log pseudolikelihood = -15561.468  (not concave)
+--Break--
+r(1);
+
+end of do-file
+
+--Break--
+r(1);
+
+. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
+
+. esttab P1 B1 B2 B3 B4 using "${tables}preliminary_regressions_state_dep_2023_09_14.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
 >                 label title("Table. Preliminary estimations.") /// 
 >                 stats(N r2 perc1 lr_p aic bic aicc caic, fmt(0 3) ///
 >                         labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AIC" "BIC" "AICc" "CAIC" ))  ///
 >                 replace nodepvars b(%9.3f) not nomtitle nobaselevels se  noconstant
-(output written to C:\GitHub\EconAnalysis\Participation\Results\Tables\preliminary_regressions_state_dep_2023_09_13.rtf)
+(file C:\GitHub\EconAnalysis\Participation\Results\Tables\preliminary_regressions_state_dep_2023_09_14.rtf not found)
+(output written to C:\GitHub\EconAnalysis\Participation\Results\Tables\preliminary_regressions_state_dep_2023_09_14.rtf)
 
 .   
-. ** Try again dummy price and unemployment
-. 
-. 
-. 
 . 
 . 
 . 
 end of do-file
 
-. exit, clear

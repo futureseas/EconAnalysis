@@ -108,18 +108,88 @@ preserve
 	estadd scalar perc1 = count1/_N*100: B1
 restore
 
+eststo B2: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_days, base("No-Participation")
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): B2
+lrtest B2 P1, force
+estadd scalar lr_p = r(p): B2
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: B2
+estadd scalar bic = S[1,6]: B2
+estadd scalar aicc = S[1,7]: B2
+estadd scalar caic = S[1,8]: B2
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: B2
+restore
 
-* OTHER STATE DEPENDENCY VARIABLES???
+eststo B3: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_year_days, base("No-Participation")
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): B3
+lrtest B3 P1, force
+estadd scalar lr_p = r(p): B3
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: B3
+estadd scalar bic = S[1,6]: B3
+estadd scalar aicc = S[1,7]: B3
+estadd scalar caic = S[1,8]: B3
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: B3
+restore
 
-*** dummy_prev_days dummy_prev_year_days dummy_clust_prev_days
+eststo B4: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_clust_prev_days, base("No-Participation")
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): B4
+lrtest B4 P1, force
+estadd scalar lr_p = r(p): B4
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: B4
+estadd scalar bic = S[1,6]: B4
+estadd scalar aicc = S[1,7]: B4
+estadd scalar caic = S[1,8]: B4
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: B4
+restore
 
-esttab P1 B1 using "${tables}preliminary_regressions_state_dep_2023_09_13.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
+esttab P1 B1 B2 B3 B4 using "${tables}preliminary_regressions_participation_state_dep_2023_09_14.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
 		stats(N r2 perc1 lr_p aic bic aicc caic, fmt(0 3) ///
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AIC" "BIC" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se  noconstant
   
-** Try again dummy price and unemployment
+
 
 
 
