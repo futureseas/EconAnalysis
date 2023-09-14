@@ -189,8 +189,3 @@ esttab P1 B1 B2 B3 B4 using "${tables}preliminary_regressions_participation_stat
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AIC" "BIC" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se  noconstant
   
-
-
-
-
-
