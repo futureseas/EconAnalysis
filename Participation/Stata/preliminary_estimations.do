@@ -40,6 +40,24 @@ sort id_obs
 
 
 
+******************************
+*** Calculate utilty fishery
+
+* Preferred model (see below)  
+cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_days, base("No-Participation")
+
+gen species = substr(selection,-4,.) 
+replace species = "." if species == "tion"
+gen mean_avail_modified = mean_avail
+replace mean_avail_modified = 0 if species == "MSQD"
+
+set emptycells drop
+margins, at(mean_avail=gen(mean_avail)) at(mean_avail=gen(mean_avail_modified))
+marginsplot, xdimension(_outcome)
+
+
+******************************
 ** Estimate conditional logits (with alternative-specific constant)
 
 *** Only-constant model
@@ -240,16 +258,4 @@ esttab P1 B1 B2 B3 B4 B5 using "${tables}preliminary_regressions_participation_s
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se  noconstant
 
 
-******************************
-*** Calculate utilty fishery
 
-* Note: Model B2 is the preferred!  
-
-cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_days, base("No-Participation")
-
-gen mean_avail_modified = mean_avail
-replace mean_avail_modified = 0 if PACFIN_SPECIES_CODE == "MSQD"
-
-margins
-margins, at(mean_avail=mean_avail_modified)
