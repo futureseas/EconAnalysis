@@ -17,14 +17,28 @@ cap log close
 
 ** Import data
 import delimited "Stata\rdo_Stata_c4.csv"
+replace mean_price = mean_price / 1000
 gen id_obs = _n
 gen const_r2 = 1
 
+** Merge historical selection
+preserve
+ import delimited "Stata\dbp_month_Stata_c4.csv", clear
+ tempfile dbp_month
+ save dbp_month, replace
+restore
+
+merge m:1 selection set_month using "dbp_month.dta"
+drop if _merge == 2
+replace hist_selection = 0 if _merge == 1
+drop _merge
 
 ** Set choice model database
 cmset fished_vessel_id time selection
 // cmset fished_haul selection
 sort id_obs
+
+
 
 ** Estimate conditional logits (with alternative-specific constant)
 
@@ -63,22 +77,6 @@ preserve
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: P1
 restore
-
-label variable mean_avail "Expected availability"
-label variable mean_price "Expected price"
-label variable diesel_price "Expected diesel price"
-label variable wind_max_220_mh "Maximum wind (< 220km)"
-label variable dummy_last_day "Choice has chosen last day"
-label variable d_missing "Binary: Missing availability"
-label variable d_missing_p "Binary: Missing price"
-label variable dist_port_to_catch_area "Distance to catch area"
-label variable dist_port_to_catch_area_zero "Distance to catch area"
-label variable d_missing_d "Binary: Missing distance"
-label variable lat_cg "Latitudinal Center of Gravity"
-label variable unem_rate "State unemployment rate"
-label variable dist_to_cog "Distance to Center of Gravity" 
-
-
 
 ***********************************************************
 *** Include state dependency (models to present on paper)
@@ -183,9 +181,69 @@ preserve
 	estadd scalar perc1 = count1/_N*100: B4
 restore
 
-esttab P1 B1 B2 B3 B4 using "${tables}preliminary_regressions_participation_state_dep_2023_09_14.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
+
+eststo B5: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+		ddieselstate psdnclosured msqdclosured msqdweekend i.hist_selection, base("No-Participation")
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): B5
+lrtest B5 P1, force
+estadd scalar lr_p = r(p): B5
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: B5
+estadd scalar bic = S[1,6]: B5
+estadd scalar aicc = S[1,7]: B5
+estadd scalar caic = S[1,8]: B5
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: B5
+restore
+
+********************************************************************
+label variable mean_avail "Expected availability"
+label variable mean_price "Expected price"
+label variable diesel_price "Expected diesel price"
+label variable wind_max_220_mh "Maximum wind (< 220km)"
+label variable d_missing "Binary: Missing availability"
+label variable d_missing_p "Binary: Missing price"
+label variable dist_port_to_catch_area "Distance to catch area"
+label variable dist_port_to_catch_area_zero "Distance to catch area"
+label variable d_missing_d "Binary: Missing distance"
+label variable lat_cg "Latitudinal Center of Gravity"
+label variable unem_rate "State unemployment rate"
+label variable dist_to_cog "Distance to Center of Gravity" 
+********************************************************************
+label variable ddieselstate "Binary: Diesel price by state" 
+label variable psdnclosured "Binary: PSDN Closure" 
+label variable msqdclosured "Binary: MSQD Closure"
+label variable msqdweekend  "Binary: MSQD Weekend"
+********************************************************************
+label variable dummy_last_day "Alternative has been chosen last day"
+label variable dummy_prev_days "Alternative has been chosen during the last 30 days"
+label variable dummy_prev_year_days "Alternative has been chosen during the last 30 days (previous year)"
+label variable dummy_clust_prev_days "Alternative has been chosen during the last 30 days by any member of the fleet"
+label variable hist_selection "Alternative has been historically chosen during the month (>20% revenue)"
+********************************************************************
+
+esttab P1 B1 B2 B3 B4 B5 using "${tables}preliminary_regressions_participation_state_dep_2023_09_14.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
 		stats(N r2 perc1 lr_p aic bic aicc caic, fmt(0 3) ///
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AIC" "BIC" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se  noconstant
-  
+
+
+******************************
+*** Calculate utilty fishery
+
+* Note: Model B2 is the preferred!  
+
+
+
