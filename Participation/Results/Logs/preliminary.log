@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:\GitHub\EconAnalysis\Participation\Results\Logs\preliminary.log
   log type:  text
- opened on:  15 Sep 2023, 13:30:58
+ opened on:  15 Sep 2023, 16:31:05
 
 . 
 . ** Import data
@@ -14,43 +14,6 @@
 (98,875 real changes made)
 
 . gen id_obs = _n
-
-. gen const_r2 = 1
-
-. 
-. ** Merge historical selection
-. preserve
-
-.  import delimited "Stata\dbp_month_Stata_c4.csv", clear
-(encoding automatically selected: ISO-8859-2)
-(3 vars, 24 obs)
-
-.  tempfile dbp_month
-
-.  save dbp_month, replace
-file dbp_month.dta saved
-
-. restore
-
-. 
-. merge m:1 selection set_month using "dbp_month.dta"
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                        83,455
-        from master                    83,454  (_merge==1)
-        from using                          1  (_merge==2)
-
-    Matched                            35,538  (_merge==3)
-    -----------------------------------------
-
-. drop if _merge == 2
-(1 observation deleted)
-
-. replace hist_selection = 0 if _merge == 1
-(83,454 real changes made)
-
-. drop _merge
 
 . 
 . ** Set choice model database
@@ -73,10 +36,6 @@ Note: Data have been xtset.
 
 . 
 . 
-. 
-. ******************************
-. *** Calculate utilty fishery
-. 
 . * Preferred model (see below) 
 . gen species = substr(selection,-4,.) 
 
@@ -84,7 +43,6 @@ Note: Data have been xtset.
 variable species was str4 now str16
 (19,832 real changes made)
 
-. 
 . encode species, gen(nspecies)
 
 . 
@@ -263,60 +221,27 @@ SFA_NANC                     |
 
 .         predict phat, pr
 
+.         predict V, xb
+
 .         by fished_haul, sort: egen max_prob = max(phat) 
 
 .         drop if max_prob != phat
 (99,160 observations deleted)
 
-.         tab selection
+.         summ V
 
-       selection |      Freq.     Percent        Cum.
------------------+-----------------------------------
-        BDA-MSQD |         12        0.06        0.06
-        CBA-MSQD |          4        0.02        0.08
-        ERA-MSQD |         49        0.25        0.33
-        LAA-BTNA |         12        0.06        0.39
-        LAA-CMCK |          1        0.01        0.39
-        LAA-JMCK |          9        0.05        0.44
-        LAA-MSQD |      2,666       13.44       13.88
-        LAA-PBNT |         19        0.10       13.98
-        LAA-PSDN |          8        0.04       14.02
-        LAA-YTNA |         16        0.08       14.10
-        MNA-CMCK |          2        0.01       14.11
-        MNA-JMCK |         34        0.17       14.28
-        MNA-MSQD |      3,561       17.96       32.24
-        MNA-NANC |         70        0.35       32.59
-        NPA-MSQD |         17        0.09       32.67
-No-Participation |      6,729       33.93       66.60
-        SBA-MSQD |      6,248       31.50       98.11
-        SDA-BTNA |          3        0.02       98.12
-        SFA-CHNK |          1        0.01       98.13
-        SFA-DCRB |          5        0.03       98.15
-        SFA-MSQD |        339        1.71       99.86
-        SFA-NANC |         27        0.14      100.00
------------------+-----------------------------------
-           Total |     19,832      100.00
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           V |     19,832    1.030323    .8552252          0   4.181473
 
-.         gen selection_hat = 1
+.         scalar total_V_1 = r(sum)
 
-.         egen freq = total(selection_hat), by(selection)
+.         di total_V_1
+20433.366
 
-.         keep selection freq
+.         rename V V_1
 
-.         sort selection
-
-.         quietly by selection:  gen dup = cond(_N==1,0,_n)
-
-.         drop if dup > 1
-(19,810 observations deleted)
-
-.         drop dup
-
-.         egen tot = total(freq)
-
-.         gen perc1 = freq/tot
-
-.         drop tot freq
+.         keep fished_haul V_1
 
 .         tempfile simulated1
 
@@ -333,64 +258,27 @@ file simulated1.dta saved
 
 .         predict phat, pr
 
+.         predict V, xb
+
 .         by fished_haul, sort: egen max_prob = max(phat) 
 
 .         drop if max_prob != phat
 (99,160 observations deleted)
 
-.         tab selection
+.         summ V
 
-       selection |      Freq.     Percent        Cum.
------------------+-----------------------------------
-        BDA-MSQD |         11        0.06        0.06
-        CBA-MSQD |          1        0.01        0.06
-        ERA-MSQD |         18        0.09        0.15
-        LAA-BTNA |         26        0.13        0.28
-        LAA-CMCK |          1        0.01        0.29
-        LAA-JMCK |         13        0.07        0.35
-        LAA-MSQD |      2,395       12.08       12.43
-        LAA-PBNT |         25        0.13       12.56
-        LAA-PSDN |          9        0.05       12.60
-        LAA-STNA |          2        0.01       12.61
-        LAA-YTNA |         28        0.14       12.75
-        MNA-CMCK |          2        0.01       12.76
-        MNA-JMCK |         34        0.17       12.93
-        MNA-LSKT |          1        0.01       12.94
-        MNA-MSQD |      2,924       14.74       27.68
-        MNA-NANC |         72        0.36       28.05
-        MNA-UDAB |          1        0.01       28.05
-        NPA-MSQD |         15        0.08       28.13
-No-Participation |      9,889       49.86       77.99
-        SBA-MSQD |      4,089       20.62       98.61
-        SBA-UMCK |          1        0.01       98.61
-        SDA-BTNA |          4        0.02       98.63
-        SFA-CHNK |          2        0.01       98.64
-        SFA-DCRB |          9        0.05       98.69
-        SFA-MSQD |        184        0.93       99.62
-        SFA-NANC |         76        0.38      100.00
------------------+-----------------------------------
-           Total |     19,832      100.00
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           V |     19,832    .2731476    .3500609          0   2.914542
 
-.         gen selection_hat = 1
+.         scalar total_V_2 = r(sum)
 
-.         egen freq = total(selection_hat), by(selection)
+.         di total_V_2
+5417.0634
 
-.         keep selection freq
+.         rename V V_2
 
-.         sort selection
-
-.         quietly by selection:  gen dup = cond(_N==1,0,_n)
-
-.         drop if dup > 1
-(19,806 observations deleted)
-
-.         drop dup
-
-.         egen tot = total(freq)
-
-.         gen perc2 = freq/tot
-
-.         drop tot freq
+.         keep fished_haul V_2
 
 .         tempfile simulated2
 
@@ -464,64 +352,27 @@ y1     14.416334     20.031118     10.433651             0     7.2183482
 
 .         predict phat, pr
 
+.         predict V, xb
+
 .         by fished_haul, sort: egen max_prob = max(phat) 
 
 .         drop if max_prob != phat
 (99,160 observations deleted)
 
-.         tab selection
+.         summ V
 
-       selection |      Freq.     Percent        Cum.
------------------+-----------------------------------
-        BDA-DCRB |          8        0.04        0.04
-        LAA-BTNA |        235        1.18        1.23
-        LAA-CMCK |      2,279       11.49       12.72
-        LAA-JMCK |        178        0.90       13.61
-        LAA-NANC |        254        1.28       14.90
-        LAA-PBNT |        105        0.53       15.42
-        LAA-PSDN |        670        3.38       18.80
-        LAA-STNA |         12        0.06       18.86
-        LAA-YTNA |        563        2.84       21.70
-        MNA-ALBC |          2        0.01       21.71
-        MNA-CMCK |         48        0.24       21.95
-        MNA-JMCK |         88        0.44       22.40
-        MNA-LSKT |          4        0.02       22.42
-        MNA-NANC |      3,804       19.18       41.60
-        MNA-PSDN |        322        1.62       43.22
-        MNA-UDAB |          3        0.02       43.24
-No-Participation |     10,568       53.29       96.53
-        SBA-CMCK |        360        1.82       98.34
-        SBA-JMCK |         17        0.09       98.43
-        SBA-PBNT |         24        0.12       98.55
-        SBA-PSDN |          9        0.05       98.59
-        SBA-UMCK |          6        0.03       98.62
-        SDA-BTNA |         23        0.12       98.74
-        SFA-CHNK |          2        0.01       98.75
-        SFA-DCRB |        109        0.55       99.30
-        SFA-NANC |        139        0.70      100.00
------------------+-----------------------------------
-           Total |     19,832      100.00
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           V |     19,832    .5224765    .7028868          0   4.632203
 
-.         gen selection_hat = 1
+.         scalar total_V_3 = r(sum)
 
-.         egen freq = total(selection_hat), by(selection)
+.         di total_V_3
+10361.754
 
-.         keep selection freq
+.         rename V V_3
 
-.         sort selection
-
-.         quietly by selection:  gen dup = cond(_N==1,0,_n)
-
-.         drop if dup > 1
-(19,806 observations deleted)
-
-.         drop dup
-
-.         egen tot = total(freq)
-
-.         gen perc3 = freq/tot
-
-.         drop tot freq
+.         keep fished_haul V_3
 
 .         tempfile simulated3
 
@@ -714,126 +565,187 @@ y1      2.706848     6.1395131     3.7506282      1.135863     .77172429     9.5
            _cons         _cons         _cons         _cons         _cons
 y1     12.296862     17.911646     8.3141791       4.54532     5.0988761
 
-. 
-.         predict phat, pr
+. predict phat, pr
 
-.         by fished_haul, sort: egen max_prob = max(phat) 
+. predict V, xb
 
-.         drop if max_prob != phat
+. by fished_haul, sort: egen max_prob = max(phat) 
+
+. drop if max_prob != phat
 (99,160 observations deleted)
 
-.         tab selection
+. summ V
 
-       selection |      Freq.     Percent        Cum.
------------------+-----------------------------------
-        BDA-MSQD |         12        0.06        0.06
-        CBA-MSQD |          2        0.01        0.07
-        ERA-MSQD |         33        0.17        0.24
-        LAA-BTNA |         22        0.11        0.35
-        LAA-CMCK |          1        0.01        0.35
-        LAA-JMCK |         12        0.06        0.41
-        LAA-MSQD |      2,310       11.65       12.06
-        LAA-PBNT |         23        0.12       12.18
-        LAA-PSDN |          9        0.05       12.22
-        LAA-STNA |          2        0.01       12.23
-        LAA-YTNA |         21        0.11       12.34
-        MNA-CMCK |          2        0.01       12.35
-        MNA-JMCK |         34        0.17       12.52
-        MNA-MSQD |      3,175       16.01       28.53
-        MNA-NANC |         72        0.36       28.89
-        MNA-UDAB |          1        0.01       28.90
-        NPA-MSQD |         14        0.07       28.97
-No-Participation |      8,728       44.01       72.98
-        SBA-MSQD |      5,030       25.36       98.34
-        SDA-BTNA |          3        0.02       98.36
-        SFA-CHNK |          2        0.01       98.37
-        SFA-DCRB |          9        0.05       98.41
-        SFA-MSQD |        254        1.28       99.69
-        SFA-NANC |         61        0.31      100.00
------------------+-----------------------------------
-           Total |     19,832      100.00
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           V |     19,832    .3927312    .4554775          0   3.246298
 
-.         gen selection_hat = 1
+. scalar total_V = r(sum)
 
-.         egen freq = total(selection_hat), by(selection)
+. di total_V
+7788.645
 
-.         keep selection freq
+. summ set_year
 
-.         sort selection
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    set_year |     19,832    2014.679    1.483941       2013       2017
 
-.         quietly by selection:  gen dup = cond(_N==1,0,_n)
+. scalar years = r(max) - r(min) + 1
 
-.         drop if dup > 1
-(19,808 observations deleted)
+. di years
+5
 
-.         drop dup
-
-.         egen tot = total(freq)
-
-.         gen perc = freq/tot
-
-.         drop tot freq
+. keep fished_haul V
 
 . 
-. /* keep if fished == 1
-> gen selection_hat = 1
-> egen freq = total(selection_hat), by(selection)
-> keep selection freq
-> sort selection
-> quietly by selection:  gen dup = cond(_N==1,0,_n)
-> drop if dup > 1
-> drop dup
-> egen tot = total(freq)
-> gen perc = freq/tot
-> drop tot freq */
 . 
-. merge 1:1 selection using "simulated1.dta", nogen keep(master match) 
+. *** Willigness to pay
+. di total_V
+7788.645
 
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                             2
-        from master                         2  
-        from using                          0  
+. di total_V_1
+20433.366
 
-    Matched                                22  
-    -----------------------------------------
+. di total_V_2
+5417.0634
 
-. merge 1:1 selection using "simulated2.dta", nogen keep(master match) 
+. di total_V_3
+10361.754
+
+. 
+. *** Willigness to pay (High availability squid v/s Squid collapse)
+. scalar WTP1 = (ln(total_V_1) - ln(total_V_2))/(years*abs(_b[selection:diesel_price])) 
+
+. scalar WTP2 = (ln(total_V_1) - ln(total_V_3))/(years*abs(_b[selection:diesel_price])) 
+
+. di WTP1
+.73515436
+
+. di WTP2
+.37601616
+
+. 
+. *** Willigness to pay (Historical availability of squid v/s Squid collapse)
+. scalar WTP1 = (ln(total_V) - ln(total_V_2))/(years*abs(_b[selection:diesel_price])) 
+
+. scalar WTP2 = (ln(total_V) - ln(total_V_3))/(years*abs(_b[selection:diesel_price])) 
+
+. di WTP1
+.20107039
+
+. di WTP2
+-.15806781
+
+. 
+. ******************************
+. merge 1:1 fished_haul using "simulated1.dta", nogen keep(master match) 
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                                24  
+    Matched                            19,832  
     -----------------------------------------
 
-. merge 1:1 selection using "simulated3.dta", nogen keep(master match) 
+. merge 1:1 fished_haul using "simulated2.dta", nogen keep(master match) 
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                             8
-        from master                         8  
-        from using                          0  
-
-    Matched                                16  
+    Not matched                             0
+    Matched                            19,832  
     -----------------------------------------
 
-. replace perc  = 0 if perc == .
-(0 real changes made)
+. merge 1:1 fished_haul using "simulated3.dta", nogen keep(master match) 
 
-. replace perc1 = 0 if perc1 == .
-(2 real changes made)
-
-. replace perc2 = 0 if perc2 == .
-(0 real changes made)
-
-. replace perc3 = 0 if perc3 == .
-(8 real changes made)
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            19,832  
+    -----------------------------------------
 
 . 
-. export excel using "G:\My Drive\Tables\Participation\Simulated_shares.xlsx", replace
-file G:\My Drive\Tables\Participation\Simulated_shares.xlsx saved
+. 
+. 
+. 
+end of do-file
+
+. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
+
+. *** Willigness to pay (High availability squid v/s Squid collapse)
+. gen WTP1 = (ln(V_1) - ln(V_2))/abs(_b[selection:diesel_price])
+(9,889 missing values generated)
+
+. gen WTP2 = (ln(V_1) - ln(V_3))/abs(_b[selection:diesel_price])
+(14,807 missing values generated)
 
 . 
+. *** Willigness to pay (Historical availability of squid v/s Squid collapse)
+. gen WTP3 = (ln(V) - ln(V_2))/abs(_b[selection:diesel_price]) 
+(9,889 missing values generated)
+
+. gen WTP4 = (ln(V) - ln(V_3))/abs(_b[selection:diesel_price]) 
+(15,471 missing values generated)
+
+. 
+. summ WTP1 WTP2 WTP3 WTP4
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        WTP1 |      9,943    3.825345    2.002967          0   27.45629
+        WTP2 |      5,025    1.003187    3.598082  -22.84694   21.78281
+        WTP3 |      9,943    1.230138    1.323876          0   21.20537
+        WTP4 |      4,361   -1.605465    3.374942  -27.67608   19.75806
+
+. 
+end of do-file
+
+. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
+
+. gen WTP1 = (V_1 - V_2)/abs(_b[selection:diesel_price])
+variable WTP1 already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
+
+. *** Willigness to pay (High availability squid v/s Squid collapse)
+. gen WTP1x = (V_1 - V_2)/abs(_b[selection:diesel_price])
+
+. gen WTP2x = (V_1 - V_3)/abs(_b[selection:diesel_price])
+
+. 
+. *** Willigness to pay (Historical availability of squid v/s Squid collapse)
+. gen WTP3x = (V - V_2)/abs(_b[selection:diesel_price]) 
+
+. gen WTP4x = (V - V_3)/abs(_b[selection:diesel_price]) 
+
+. 
+. summ WTP1x WTP2x WTP3x WTP4x
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+       WTP1x |     19,832    2.096393    1.628145          0   3.507756
+       WTP2x |     19,832    1.406076    3.253752  -5.868188   11.57726
+       WTP3x |     19,832    .3310914    .4152552          0   1.793896
+       WTP4x |     19,832   -.3592262    2.356507  -5.868188   8.988033
+
+. 
+end of do-file
+
+. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
+
+. summ WTP1 WTP2 WTP3 WTP4
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        WTP1 |      9,943    3.825345    2.002967          0   27.45629
+        WTP2 |      5,025    1.003187    3.598082  -22.84694   21.78281
+        WTP3 |      9,943    1.230138    1.323876          0   21.20537
+        WTP4 |      4,361   -1.605465    3.374942  -27.67608   19.75806
+
 . 
 end of do-file
 
