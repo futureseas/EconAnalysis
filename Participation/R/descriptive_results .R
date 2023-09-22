@@ -27,21 +27,21 @@ FF_Vessels <- Tickets %>% select(VESSEL_NUM) %>% unique()
 
 #----------------------------------------------------------------
 ### Change Species names for easy representation in figures
-Tickets <- within(Tickets, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "CMCK"] <- "OMCK")
-Tickets <- within(Tickets, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "JMCK"] <- "OMCK")
-Tickets <- within(Tickets, PACFIN_SPECIES_CODE[PACFIN_SPECIES_CODE == "UMCK"] <- "OMCK")
+
+Tickets <- Tickets %>% dplyr::filter(PACFIN_SPECIES_CODE != "UMCK")
 Tickets <- Tickets %>% mutate(
-  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "OMCK",PACFIN_SPECIES_CODE, 
-                               ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
-                                      ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
-                                             ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER")))))
+  PACFIN_SPECIES_CODE = ifelse(PACFIN_SPECIES_CODE == "JMCK",PACFIN_SPECIES_CODE,
+                               ifelse(PACFIN_SPECIES_CODE == "CMCK",PACFIN_SPECIES_CODE,
+                                      ifelse(PACFIN_SPECIES_CODE == "PSDN",PACFIN_SPECIES_CODE, 
+                                             ifelse(PACFIN_SPECIES_CODE == "MSQD", PACFIN_SPECIES_CODE, 
+                                                    ifelse(PACFIN_SPECIES_CODE == "NANC", PACFIN_SPECIES_CODE, "OTHER"))))))
 Tickets$date<-as.Date(with(
   Tickets,
   paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-")),
   "%Y-%m-%d")
 
 Tickets.CPS <- Tickets %>% 
-  dplyr::filter(PACFIN_SPECIES_CODE %in% c("OMCK", "MSQD", "NANC", "PSDN"))
+  dplyr::filter(PACFIN_SPECIES_CODE %in% c("JMCK", "CMCK", "MSQD", "NANC", "PSDN"))
 
 
 ###########################
@@ -150,149 +150,243 @@ Tickets.CPS <- Tickets %>%
 
 
 #----------------------------------
-# ## Figure 1. Average annual landings, prices and revenues by species ##
-# 
-# # Landings
-# landings.year <- Tickets %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
-#   summarize(Landings_mtons = sum(Landings_mtons))
-# landings.year.2000_2014 <- landings.year %>% filter(LANDING_YEAR <2015) %>% mutate(period="2000-2014")
-# landings.year.2015_2020 <- landings.year %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
-# landings.avg.year.2000_2014 <- landings.year.2000_2014 %>% group_by(PACFIN_SPECIES_CODE, period) %>%
-#   summarize(Landings_mtons = mean(Landings_mtons))
-# landings.avg.year.2015_2020 <- landings.year.2015_2020 %>% group_by(PACFIN_SPECIES_CODE, period) %>%
-#   summarize(Landings_mtons = mean(Landings_mtons))
-# landings.avg.year <- rbind.data.frame(landings.avg.year.2015_2020,landings.avg.year.2000_2014)
-# g1 <- ggplot(landings.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=Landings_mtons)) +
-#   geom_bar(position="dodge", stat="identity") + ggtitle("(a) Annual landings") + 
-#   theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
-#         axis.title = element_text(size = 8)) +
-#   theme(legend.position = "none")  +
-#   xlab("") + ylab("Landings (tons)") +
-#   scale_x_discrete(labels=c("OMCK" = "Mackerels", "OTHER" = "Non-CPS",
-#                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
-#                             "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
-# 
-# # Price
-# price.year <- Tickets %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
-#   summarize(Price_mtons = mean(Price_mtons))
-# price.year.2000_2014 <- price.year %>% filter(LANDING_YEAR <2015)  %>% mutate(period="2000-2014")
-# price.year.2015_2020 <- price.year %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
-# price.avg.year.2000_2014 <- price.year.2000_2014 %>% group_by(PACFIN_SPECIES_CODE, period) %>%
-#   summarize(Price_mtons = mean(Price_mtons))
-# price.avg.year.2015_2020 <- price.year.2015_2020 %>% group_by(PACFIN_SPECIES_CODE, period) %>%
-#   summarize(Price_mtons = mean(Price_mtons))
-# price.avg.year <- rbind.data.frame(price.avg.year.2015_2020,price.avg.year.2000_2014)
-# g2 <- ggplot(price.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=Price_mtons)) +
-#   geom_bar(position="dodge", stat="identity") + ggtitle("(b) Average price") + 
-#   theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
-#         axis.title = element_text(size = 8)) + theme(legend.position = "right") +
-#   guides(fill=guide_legend(title="Period: ")) +
-#   xlab("") + ylab("Price (USD/ton)") + 
-#   scale_x_discrete(labels=c("OMCK" = "Mackerels", "OTHER" = "Non-CPS",
-#                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
-#                             "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
-# 
-# # Availability average
-# psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
-# psdn.sdm[is.na(psdn.sdm)] <- 0
-# Tickets <- merge(Tickets, psdn.sdm, 
-#                  by = (c('LANDING_YEAR', 
-#                          'LANDING_MONTH', 
-#                          'LANDING_DAY', 
-#                          'PORT_AREA_CODE')),
-#                  all.x = TRUE, 
-#                  all.y = FALSE)
-# psdn.sdm.mean <- psdn.sdm %>% group_by(LANDING_YEAR) %>% summarize(SDM = mean(PSDN_SDM_90))
-# psdn.sdm.mean.2000_2014 <- psdn.sdm.mean %>% filter(LANDING_YEAR <2015)  %>% mutate(period="2000-2014")
-# psdn.sdm.mean.2015_2020 <- psdn.sdm.mean %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
-# psdn.sdm.avg.year.2000_2014 <- psdn.sdm.mean.2000_2014 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="PSDN")
-# psdn.sdm.avg.year.2015_2020 <- psdn.sdm.mean.2015_2020 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="PSDN")
-# psdn.sdm.avg.year <- rbind.data.frame(psdn.sdm.avg.year.2015_2020, psdn.sdm.avg.year.2000_2014)
-# g3 <- ggplot(psdn.sdm.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=SDM)) +
-#   geom_bar(position="dodge", stat="identity") + ggtitle("(c) Average probability of presence") + 
-#   theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
-#         axis.title = element_text(size = 8)) + theme(legend.position = "none") +
-#   xlab("") + ylab("Average probability of presence") +
-#   scale_x_discrete(labels=c("OMCK" = "Mackerels", "OTHER" = "Non-CPS",
-#                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
-#                             "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
-# 
-# 
-# # Number of vessels
-# n_vessels <- Tickets %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR, VESSEL_NUM) %>% summarize(Revenue = sum(Revenue))
-# n_vessels <- n_vessels %>% mutate(n_vessels = 1)
-# n_vessels.year <- n_vessels %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>% summarize(n_vessels = sum(n_vessels))
-# n_vessels.year.2000_2014 <- n_vessels.year %>% filter(LANDING_YEAR <2015)  %>% mutate(period="2000-2014")
-# n_vessels.year.2015_2020 <- n_vessels.year %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
-# n_vessels.avg.year.2000_2014 <- n_vessels.year.2000_2014 %>% group_by(PACFIN_SPECIES_CODE, period) %>% summarize(n_vessels = mean(n_vessels))
-# n_vessels.avg.year.2015_2020 <- n_vessels.year.2015_2020 %>% group_by(PACFIN_SPECIES_CODE, period) %>% summarize(n_vessels = mean(n_vessels))
-# n_vessels.avg.year <- rbind.data.frame(n_vessels.avg.year.2015_2020,n_vessels.avg.year.2000_2014)
-# g4 <- ggplot(n_vessels.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=n_vessels)) +
-#   geom_bar(position="dodge", stat="identity") + ggtitle("(d) Average number of vessels per year") + 
-#   theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7), 
-#         axis.title = element_text(size = 8)) + theme(legend.position = "none") +
-#   xlab("") + ylab("Average number of vessels") +
-#   scale_x_discrete(labels=c("OMCK" = "Mackerels", "OTHER" = "Non-CPS",
-#                             "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
-#                             "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
-# 
-# (g1 + g2) / (g3 + g4)
-# 
-# rm(g1, g3, g2, g4, landings.year, 
-#    landings.avg.year, landings.avg.year.2000_2014, landings.avg.year.2015_2020, 
-#    landings.year.2000_2014, landings.year.2015_2020, 
-#    price.avg.year, price.avg.year.2000_2014, price.avg.year.2015_2020, 
-#    price.year.2000_2014, price.year.2015_2020,
-#    n_vessels.avg.year, n_vessels.avg.year.2000_2014, n_vessels.avg.year.2015_2020, 
-#    n_vessels.year.2000_2014, n_vessels.year.2015_2020, 
-#    price.year, n_vessels, n_vessels.year,
-#    psdn.sdm, psdn.sdm.mean.2000_2014, psdn.sdm.mean.2015_2020,
-#    psdn.sdm.avg.year.2000_2014, psdn.sdm.avg.year.2015_2020, psdn.sdm.avg.year)
+## Figure 1. Average annual landings, prices and revenues by species ##
+
+# Landings
+landings.year <- Tickets %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
+  summarize(Landings_mtons = sum(Landings_mtons))
+landings.year.2000_2014 <- landings.year %>% filter(LANDING_YEAR <2015) %>% mutate(period="2000-2014")
+landings.year.2015_2020 <- landings.year %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
+landings.avg.year.2000_2014 <- landings.year.2000_2014 %>% group_by(PACFIN_SPECIES_CODE, period) %>%
+  summarize(Landings_mtons = mean(Landings_mtons))
+landings.avg.year.2015_2020 <- landings.year.2015_2020 %>% group_by(PACFIN_SPECIES_CODE, period) %>%
+  summarize(Landings_mtons = mean(Landings_mtons))
+landings.avg.year <- rbind.data.frame(landings.avg.year.2015_2020,landings.avg.year.2000_2014)
+g1 <- ggplot(landings.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=Landings_mtons)) +
+  geom_bar(position="dodge", stat="identity") + ggtitle("(a) Annual landings") +
+  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7),
+        axis.title = element_text(size = 8)) +
+  theme(legend.position = "none")  +
+  xlab("") + ylab("Landings (tons)") +
+  scale_x_discrete(labels=c("CMCK" = "Chub\nMackerel", "JMCK" = "Jack\nMackerel",
+                            "OTHER" = "Non-CPS",
+                            "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
+                            "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
+
+# Price
+price.year <- Tickets %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
+  summarize(Price_mtons = mean(Price_mtons))
+price.year.2000_2014 <- price.year %>% filter(LANDING_YEAR <2015)  %>% mutate(period="2000-2014")
+price.year.2015_2020 <- price.year %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
+price.avg.year.2000_2014 <- price.year.2000_2014 %>% group_by(PACFIN_SPECIES_CODE, period) %>%
+  summarize(Price_mtons = mean(Price_mtons))
+price.avg.year.2015_2020 <- price.year.2015_2020 %>% group_by(PACFIN_SPECIES_CODE, period) %>%
+  summarize(Price_mtons = mean(Price_mtons))
+price.avg.year <- rbind.data.frame(price.avg.year.2015_2020,price.avg.year.2000_2014)
+g2 <- ggplot(price.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=Price_mtons)) +
+  geom_bar(position="dodge", stat="identity") + ggtitle("(b) Average price") +
+  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7),
+        axis.title = element_text(size = 8)) + theme(legend.position = "right") +
+  guides(fill=guide_legend(title="Period: ")) +
+  xlab("") + ylab("Price (USD/ton)") +
+  scale_x_discrete(labels=c("CMCK" = "Chub\nMackerel", "JMCK" = "Jack\nMackerel",
+                            "OTHER" = "Non-CPS",
+                            "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
+                            "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
+
+
+# Availability average
+psdn.sdm <- readRDS(file = 'Participation/SDMs/sdm_psdn.rds')
+psdn.sdm[is.na(psdn.sdm)] <- 0
+Tickets <- merge(Tickets, psdn.sdm,
+                 by = (c('LANDING_YEAR',
+                         'LANDING_MONTH',
+                         'LANDING_DAY',
+                         'PORT_AREA_CODE')),
+                 all.x = TRUE,
+                 all.y = FALSE)
+psdn.sdm.mean <- psdn.sdm %>% group_by(LANDING_YEAR) %>% summarize(SDM = mean(PSDN_SDM_60))
+psdn.sdm.mean.2000_2014 <- psdn.sdm.mean %>% filter(LANDING_YEAR <2015)  %>% mutate(period="2000-2014")
+psdn.sdm.mean.2015_2020 <- psdn.sdm.mean %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
+psdn.sdm.avg.year.2000_2014 <- psdn.sdm.mean.2000_2014 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="PSDN")
+psdn.sdm.avg.year.2015_2020 <- psdn.sdm.mean.2015_2020 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="PSDN")
+psdn.sdm.avg.year <- rbind.data.frame(psdn.sdm.avg.year.2015_2020, psdn.sdm.avg.year.2000_2014)
+
+
+phrg.sdm <- readRDS(file = 'Participation/SDMs/sdm_phrg.rds')
+phrg.sdm[is.na(phrg.sdm)] <- 0
+Tickets <- merge(Tickets, phrg.sdm,
+                 by = (c('LANDING_YEAR',
+                         'LANDING_MONTH',
+                         'LANDING_DAY',
+                         'PORT_AREA_CODE')),
+                 all.x = TRUE,
+                 all.y = FALSE)
+phrg.sdm.mean <- phrg.sdm %>% group_by(LANDING_YEAR) %>% summarize(SDM = mean(PHRG_SDM_30))
+phrg.sdm.mean.2000_2014 <- phrg.sdm.mean %>% filter(LANDING_YEAR <2015)  %>% mutate(period="2000-2014")
+phrg.sdm.mean.2015_2020 <- phrg.sdm.mean %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
+phrg.sdm.avg.year.2000_2014 <- phrg.sdm.mean.2000_2014 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="PHRG")
+phrg.sdm.avg.year.2015_2020 <- phrg.sdm.mean.2015_2020 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="PHRG")
+phrg.sdm.avg.year <- rbind.data.frame(phrg.sdm.avg.year.2015_2020, phrg.sdm.avg.year.2000_2014)
+
+msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd.rds')
+msqd.sdm[is.na(msqd.sdm)] <- 0
+Tickets <- merge(Tickets, msqd.sdm,
+                 by = (c('LANDING_YEAR',
+                         'LANDING_MONTH',
+                         'LANDING_DAY',
+                         'PORT_AREA_CODE')),
+                 all.x = TRUE,
+                 all.y = FALSE)
+msqd.sdm.mean <- msqd.sdm %>% group_by(LANDING_YEAR) %>% summarize(SDM = mean(MSQD_SDM_90))
+msqd.sdm.mean.2000_2014 <- msqd.sdm.mean %>% filter(LANDING_YEAR <2015)  %>% mutate(period="2000-2014")
+msqd.sdm.mean.2015_2020 <- msqd.sdm.mean %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
+msqd.sdm.avg.year.2000_2014 <- msqd.sdm.mean.2000_2014 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="MSQD")
+msqd.sdm.avg.year.2015_2020 <- msqd.sdm.mean.2015_2020 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="MSQD")
+msqd.sdm.avg.year <- rbind.data.frame(msqd.sdm.avg.year.2015_2020, msqd.sdm.avg.year.2000_2014)
+
+jmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_jmck.rds')
+jmck.sdm[is.na(jmck.sdm)] <- 0
+Tickets <- merge(Tickets, jmck.sdm,
+                 by = (c('LANDING_YEAR',
+                         'LANDING_MONTH',
+                         'LANDING_DAY',
+                         'PORT_AREA_CODE')),
+                 all.x = TRUE,
+                 all.y = FALSE)
+jmck.sdm.mean <- jmck.sdm %>% group_by(LANDING_YEAR) %>% summarize(SDM = mean(JMCK_SDM_30))
+jmck.sdm.mean.2000_2014 <- jmck.sdm.mean %>% filter(LANDING_YEAR <2015)  %>% mutate(period="2000-2014")
+jmck.sdm.mean.2015_2020 <- jmck.sdm.mean %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
+jmck.sdm.avg.year.2000_2014 <- jmck.sdm.mean.2000_2014 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="JMCK")
+jmck.sdm.avg.year.2015_2020 <- jmck.sdm.mean.2015_2020 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="JMCK")
+jmck.sdm.avg.year <- rbind.data.frame(jmck.sdm.avg.year.2015_2020, jmck.sdm.avg.year.2000_2014)
+
+cmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_cmck.rds')
+cmck.sdm[is.na(cmck.sdm)] <- 0
+Tickets <- merge(Tickets, cmck.sdm,
+                 by = (c('LANDING_YEAR',
+                         'LANDING_MONTH',
+                         'LANDING_DAY',
+                         'PORT_AREA_CODE')),
+                 all.x = TRUE,
+                 all.y = FALSE)
+cmck.sdm.mean <- cmck.sdm %>% group_by(LANDING_YEAR) %>% summarize(SDM = mean(CMCK_SDM_30))
+cmck.sdm.mean.2000_2014 <- cmck.sdm.mean %>% filter(LANDING_YEAR <2015)  %>% mutate(period="2000-2014")
+cmck.sdm.mean.2015_2020 <- cmck.sdm.mean %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
+cmck.sdm.avg.year.2000_2014 <- cmck.sdm.mean.2000_2014 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="CMCK")
+cmck.sdm.avg.year.2015_2020 <- cmck.sdm.mean.2015_2020 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="CMCK")
+cmck.sdm.avg.year <- rbind.data.frame(cmck.sdm.avg.year.2015_2020, cmck.sdm.avg.year.2000_2014)
+
+nanc.sdm <- readRDS(file = 'Participation/SDMs/sdm_nanc.rds')
+nanc.sdm[is.na(nanc.sdm)] <- 0
+Tickets <- merge(Tickets, nanc.sdm,
+                 by = (c('LANDING_YEAR',
+                         'LANDING_MONTH',
+                         'LANDING_DAY',
+                         'PORT_AREA_CODE')),
+                 all.x = TRUE,
+                 all.y = FALSE)
+nanc.sdm.mean <- nanc.sdm %>% group_by(LANDING_YEAR) %>% summarize(SDM = mean(NANC_SDM_20))
+nanc.sdm.mean.2000_2014 <- nanc.sdm.mean %>% filter(LANDING_YEAR <2015)  %>% mutate(period="2000-2014")
+nanc.sdm.mean.2015_2020 <- nanc.sdm.mean %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
+nanc.sdm.avg.year.2000_2014 <- nanc.sdm.mean.2000_2014 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="NANC")
+nanc.sdm.avg.year.2015_2020 <- nanc.sdm.mean.2015_2020 %>% group_by(period) %>% summarize(SDM = mean(SDM)) %>% mutate(PACFIN_SPECIES_CODE="NANC")
+nanc.sdm.avg.year <- rbind.data.frame(nanc.sdm.avg.year.2015_2020, nanc.sdm.avg.year.2000_2014)
+
+sdm.avg.year <- rbind(psdn.sdm.avg.year, msqd.sdm.avg.year, nanc.sdm.avg.year,
+                      jmck.sdm.avg.year, cmck.sdm.avg.year)
+
+g3 <- ggplot(sdm.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=SDM)) +
+  geom_bar(position="dodge", stat="identity") + ggtitle("(c) Average probability of presence") +
+  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7),
+        axis.title = element_text(size = 8)) + theme(legend.position = "none") +
+  xlab("") + ylab("Average probability of presence") +
+  scale_x_discrete(labels=c("CMCK" = "Chub\nMackerel", "JMCK" = "Jack\nMackerel",
+                            "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
+                            "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
+
+# Number of vessels
+n_vessels <- Tickets %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR, VESSEL_NUM) %>% summarize(Revenue = sum(Revenue))
+n_vessels <- n_vessels %>% mutate(n_vessels = 1)
+n_vessels.year <- n_vessels %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>% summarize(n_vessels = sum(n_vessels))
+n_vessels.year.2000_2014 <- n_vessels.year %>% filter(LANDING_YEAR <2015)  %>% mutate(period="2000-2014")
+n_vessels.year.2015_2020 <- n_vessels.year %>% filter(LANDING_YEAR >=2015) %>% mutate(period="2015-2020")
+n_vessels.avg.year.2000_2014 <- n_vessels.year.2000_2014 %>% group_by(PACFIN_SPECIES_CODE, period) %>% summarize(n_vessels = mean(n_vessels))
+n_vessels.avg.year.2015_2020 <- n_vessels.year.2015_2020 %>% group_by(PACFIN_SPECIES_CODE, period) %>% summarize(n_vessels = mean(n_vessels))
+n_vessels.avg.year <- rbind.data.frame(n_vessels.avg.year.2015_2020,n_vessels.avg.year.2000_2014)
+g4 <- ggplot(n_vessels.avg.year, aes(fill=period, x=PACFIN_SPECIES_CODE, y=n_vessels)) +
+  geom_bar(position="dodge", stat="identity") + ggtitle("(d) Average number of vessels per year") +
+  theme(plot.title = element_text(size=9, face="bold.italic"), axis.text = element_text(size = 7),
+        axis.title = element_text(size = 8)) + theme(legend.position = "none") +
+  xlab("") + ylab("Average number of vessels") +
+  scale_x_discrete(labels=c("JMCK" = "Jack\nMackerel", "CMCK" = "Chub\nMackerel",
+                            "OTHER" = "Non-CPS",
+                            "MSQD" = "Market\nSquid", "NANC" = "Northern\nAnchovy",
+                            "PSDN" = "Pacific\nSardine")) +  scale_fill_brewer(palette="Paired")
+
+(g1 + g2) / (g3 + g4)
+
+rm(g1, g3, g2, g4, landings.year,
+   landings.avg.year, landings.avg.year.2000_2014, landings.avg.year.2015_2020,
+   landings.year.2000_2014, landings.year.2015_2020,
+   price.avg.year, price.avg.year.2000_2014, price.avg.year.2015_2020,
+   price.year.2000_2014, price.year.2015_2020,
+   n_vessels.avg.year, n_vessels.avg.year.2000_2014, n_vessels.avg.year.2015_2020,
+   n_vessels.year.2000_2014, n_vessels.year.2015_2020,
+   price.year, n_vessels, n_vessels.year)
+
+
 
 
 #----------------------------------
-## Figure 2. Evolution of landings, number of vessels and availability
+## Figure X. Evolution of landings, number of vessels and availability
 
 # Create dataframes
 
-# nvessel.year <- Tickets.CPS %>% 
-#   dplyr::select(PACFIN_SPECIES_CODE, LANDING_YEAR, VESSEL_NUM) %>% 
-#   unique() %>% mutate(n_vessel = 1) %>% 
-#   group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
-#   summarise(n_vessel = sum(n_vessel))
-# landing.year <- Tickets.CPS %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>% 
-#   summarize(Landings_mtons = sum(Landings_mtons)) %>% ## ADD HERE SDMs
-#   inner_join(nvessel.year, by = c("PACFIN_SPECIES_CODE", "LANDING_YEAR")) %>%
-#   dplyr::select("Landings_mtons", "n_vessel", "PACFIN_SPECIES_CODE", "LANDING_YEAR")
-# psdn.sdm <- read.csv(file = 'Participation/SDM_code/sdm_psdn.csv')
-#   psdn.sdm[is.na(psdn.sdm)] <- 0
-#   psdn.sdm.mean <- psdn.sdm %>% group_by(LANDING_YEAR) %>% 
-#     summarize(SDM = mean(PSDN_SDM_90))%>% 
-#     mutate(PACFIN_SPECIES_CODE = "PSDN") %>%
-#     merge(landing.year, by = c("PACFIN_SPECIES_CODE", 
-#                                "LANDING_YEAR"), all.y = TRUE)
-# 
-# coeff = 0.01
-# df <- psdn.sdm.mean %>% 
-#   mutate (Landings_mtons = Landings_mtons / 100000) %>%
-#   mutate(n_vessel = n_vessel * coeff)
-# 
-# ggplot(df) + 
-#   geom_line(aes(x=LANDING_YEAR, y = Landings_mtons, color = "Landings")) +
-#   geom_line(aes(x=LANDING_YEAR, y = n_vessel, color = "Number of vessels"), size = 1) +
-#   geom_line(aes(x=LANDING_YEAR, y = SDM, color = "Probability of Presence")) +
-#   facet_wrap(~ PACFIN_SPECIES_CODE, ncol = 2, labeller = as_labeller(c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy", 
-#                                                        "PSDN" = "Pacific Sardine", "OMCK" = "Mackerels"))) + 
-#   scale_y_continuous(name = "Landings (10,000 Tons) / Pr(Presence)", 
-#                      sec.axis = sec_axis(~./coeff, 
-#                                          name = "Number of vessels")) +
-#   geom_point(aes(x=LANDING_YEAR, y = Landings_mtons), color ="#66c2a5") +
-#   geom_point(aes(x=LANDING_YEAR, y = SDM), color = "#D22B2B", shape = 17) +
-#   scale_color_manual(name = "Variables:", 
-#                      values = c("Landings" = "#66c2a5",
-#                                 "Number of vessels" = "#8da0cb",
-#                                 "Probability of Presence" = "#D22B2B")) + 
-#   theme(legend.position="bottom") + xlab("Landing Year")
+nvessel.year <- Tickets.CPS %>%
+  dplyr::select(PACFIN_SPECIES_CODE, LANDING_YEAR, VESSEL_NUM) %>%
+  unique() %>% mutate(n_vessel = 1) %>%
+  group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
+  summarise(n_vessel = sum(n_vessel))
+landing.year <- Tickets.CPS %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR) %>%
+  summarize(Landings_mtons = sum(Landings_mtons)) %>% 
+  inner_join(nvessel.year, by = c("PACFIN_SPECIES_CODE", "LANDING_YEAR")) %>%
+  dplyr::select("Landings_mtons", "n_vessel", "PACFIN_SPECIES_CODE", "LANDING_YEAR")
+
+
+PSDN.sdm.mean <- psdn.sdm.mean %>% mutate(PACFIN_SPECIES_CODE = "PSDN")
+MSQD.sdm.mean <- msqd.sdm.mean %>% mutate(PACFIN_SPECIES_CODE = "MSQD")
+NANC.sdm.mean <- nanc.sdm.mean %>% mutate(PACFIN_SPECIES_CODE = "NANC")
+JMCK.sdm.mean <- jmck.sdm.mean %>% mutate(PACFIN_SPECIES_CODE = "JMCK")
+CMCK.sdm.mean <- cmck.sdm.mean %>% mutate(PACFIN_SPECIES_CODE = "CMCK")
+
+sdm.mean <- rbind(PSDN.sdm.mean, MSQD.sdm.mean, NANC.sdm.mean,
+                  JMCK.sdm.mean, CMCK.sdm.mean)
+
+df.mean <- merge(sdm.mean, landing.year, by = c("PACFIN_SPECIES_CODE", "LANDING_YEAR"), all.y = TRUE)
+
+coeff = 0.01
+df <- df.mean %>% 
+   mutate (Landings_mtons = Landings_mtons / 100000) %>%
+   mutate(n_vessel = n_vessel * coeff)
+
+ggplot(df) +
+  geom_line(aes(x=LANDING_YEAR, y = Landings_mtons, color = "Landings")) +
+  geom_line(aes(x=LANDING_YEAR, y = n_vessel, color = "Number of vessels"), size = 1) +
+  # geom_line(aes(x=LANDING_YEAR, y = SDM, color = "Probability of Presence")) +
+  facet_wrap(~ PACFIN_SPECIES_CODE, ncol = 2, labeller = as_labeller(c("MSQD" = "Market Squid", "NANC" = "Northern Anchovy",
+                                                       "PSDN" = "Pacific Sardine", "JMCK" = "Jack Mackerel",
+                                                       "CMCK" = "Chub Mackerel"))) +
+  scale_y_continuous(name = "Landings (10,000 Tons)",
+                     sec.axis = sec_axis(~./coeff,
+                                         name = "Number of vessels")) +
+  geom_point(aes(x=LANDING_YEAR, y = Landings_mtons), color ="#66c2a5") +
+  # geom_point(aes(x=LANDING_YEAR, y = SDM), color = "#D22B2B", shape = 17) +
+  scale_color_manual(name = "Variables:",
+                     values = c("Landings" = "#66c2a5",
+                                "Number of vessels" = "#8da0cb",
+                                "Probability of Presence" = "#D22B2B")) +
+  theme(legend.position="bottom") + xlab("Landing Year")
 
 
 #----------------------------------
@@ -309,7 +403,7 @@ Tickets.CPS.MSQD <- Tickets.CPS %>%
 
 
 #----------------------------------
-## Figure 3. Evolution of landings, number of vessels and availability by port area (one graph per species)
+## Figure X. Evolution of landings, number of vessels and availability by port area (one graph per species)
 
 # Create dataframes
 nvessel.year <- Tickets.CPS %>% 

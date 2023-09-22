@@ -68,7 +68,7 @@ participation_data_filtered <- readRDS("C:\\Data\\PacFIN data\\participation_dat
 ## Sampling choice data including expected revenue, expected cost and past behavior dummies ##
 ## Landing and price regression do not depend on cluster ##
 
-# source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
+source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 # samps1 <- sampled_rums(data_in = participation_data_filtered, cluster = 4,
 #                          min_year = 2013, max_year = 2017,
 #                          min_year_prob = 2013, max_year_prob = 2017,
