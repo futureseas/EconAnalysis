@@ -17,7 +17,7 @@ cap log close
 	log using ${logs}contrmap, text replace
 
 ** Import data
-import delimited "Stata/dcm_data.csv"
+import delimited "Stata\rdo_Stata_c4.csv"
 gen id_obs = _n
 /* gen delta1 = rnormal(0,0.1)
 by fished_vessel_id selection, sort: egen delta = mean(delta1)
