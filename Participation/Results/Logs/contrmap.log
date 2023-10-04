@@ -1,88 +1,794 @@
------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
        log:  C:\GitHub\EconAnalysis\Participation\Results\Logs\contrmap.log
   log type:  text
- opened on:   2 Oct 2023, 16:27:51
+ opened on:   3 Oct 2023, 13:02:56
 
 . 
 . ** Import data
-. import delimited "Stata/dcm_data.csv"
-file Stata/dcm_data.csv not found
-r(601);
-
-end of do-file
-
-r(601);
-
-. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
-
 . import delimited "Stata\rdo_Stata_c4.csv"
 (encoding automatically selected: ISO-8859-1)
 (36 vars, 118,992 obs)
 
-. 
-end of do-file
-
-. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
-
 . gen id_obs = _n
 
-. 
-end of do-file
+. replace mean_price = mean_price / 1000
+(98,875 real changes made)
 
-. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
+. /* gen delta1 = rnormal(0,0.1)
+> by fished_vessel_id selection, sort: egen delta = mean(delta1)
+> drop delta1
+>  */
+. 
+. ** Calculate the population shares
+. cap drop s ln_s
 
 . by fished_vessel_id, sort : egen count2 = total(fished)
 
 . by fished_vessel_id selection, sort : egen count1 = total(fished)
 
-. 
-end of do-file
-
-. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
-
 . gen s=count1/count2
-
-. 
-end of do-file
-
-. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
 
 . replace s = 1/(10^5) if s == 0
 (42,016 real changes made)
 
-. 
-end of do-file
-
-. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
-
 . gen ln_s=log(s) 
 
 . 
-end of do-file
-
-. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
-
+. 
+. ** Following Berry (1994), estimate delta as ln(sj)-ln(s) = xb + delta
+. 
 . gen ln_sO = ln_s if selection == "No-Participation"
 (99,160 missing values generated)
 
-. 
-end of do-file
-
-. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
-
 . by fished_vessel_id, sort : egen ln_s0 = max(ln_sO)
-
-. 
-end of do-file
-
-. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
 
 . gen dif_ln_s = ln_s - ln_s0
 
+. drop count1 count2 ln_sO ln_s0
+
+. reg dif_ln_s $exp_vars, noconstant
+
+      Source |       SS           df       MS      Number of obs   =   118,992
+-------------+----------------------------------   F(11, 118981)   =   5465.30
+       Model |  1717476.09        11   156134.19   Prob > F        =    0.0000
+    Residual |  3399082.23   118,981  28.5682776   R-squared       =    0.3357
+-------------+----------------------------------   Adj R-squared   =    0.3356
+       Total |  5116558.33   118,992  42.9991792   Root MSE        =    5.3449
+
+----------------------------------------------------------------------------------------------
+                    dif_ln_s | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+                  mean_avail |  -4.573954   .1136687   -40.24   0.000    -4.796743   -4.351165
+                  mean_price |  -.3444859   .0107561   -32.03   0.000    -.3655676   -.3234041
+                diesel_price |   -.584977   .0146464   -39.94   0.000    -.6136838   -.5562702
+             wind_max_220_mh |   .0216826   .0033738     6.43   0.000       .01507    .0282951
+                   d_missing |  -2.518689   .1230683   -20.47   0.000    -2.759901   -2.277477
+dist_port_to_catch_area_zero |   .0048364   .0006433     7.52   0.000     .0035756    .0060971
+                 d_missing_d |  -2.024799   .0562806   -35.98   0.000    -2.135108    -1.91449
+                ddieselstate |  -.0298177    .043237    -0.69   0.490    -.1145614     .054926
+                psdnclosured |  -2.300279   .1119818   -20.54   0.000    -2.519761   -2.080796
+                msqdclosured |   .4854156   .1564622     3.10   0.002     .1787523     .792079
+                 msqdweekend |  -1.062745   .0566067   -18.77   0.000    -1.173693   -.9517964
+----------------------------------------------------------------------------------------------
+
+. predict xb_hat
+(option xb assumed; fitted values)
+
+. cap drop delta0
+
+. gen delta0 = dif_ln_s - xb_hat
+
+. by fished_vessel_id selection, sort : egen delta = mean(delta0)
+
+. drop xb_hat delta0 dif_ln_s 
+
+.  
 . 
+. ** Estimate intial conditional logit
+. sort id_obs
+
+. // cmset fished_vessel_id time selection
+. cmset fished_haul selection
+note: alternatives are unbalanced across choice sets; at least one choice set does not have all possible values of selection.
+
+     Case ID variable: fished_haul
+Alternatives variable: selection
+
+. constraint 1 delta=1
+
+. cmclogit fished $exp_vars delta, ///
+>         base("No-Participation") noconstant constraints(1) 
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood = -18425.305  
+Iteration 1:  Log likelihood = -17362.569  
+Iteration 2:  Log likelihood = -17281.151  
+Iteration 3:  Log likelihood = -17270.064  
+Iteration 4:  Log likelihood = -17267.472  
+Iteration 5:  Log likelihood = -17266.938  
+Iteration 6:  Log likelihood = -17266.825  
+Iteration 7:  Log likelihood =   -17266.8  
+Iteration 8:  Log likelihood = -17266.794  
+Iteration 9:  Log likelihood = -17266.792  
+Iteration 10: Log likelihood = -17266.792  
+Iteration 11: Log likelihood = -17266.792  
+Iteration 12: Log likelihood = -17266.792  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: fished_haul                  Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(11)   =   19467.45
+Log likelihood = -17266.792                       Prob > chi2     =     0.0000
+
+ ( 1)  [selection]delta = 1
+----------------------------------------------------------------------------------------------
+                      fished | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |  -1.351786   .0894819   -15.11   0.000    -1.527167   -1.176405
+                  mean_price |   .0691744   .0237315     2.91   0.004     .0226615    .1156873
+                diesel_price |  -.5000294   .0141749   -35.28   0.000    -.5278117   -.4722472
+             wind_max_220_mh |  -.0090866    .003272    -2.78   0.005    -.0154995   -.0026736
+                   d_missing |   .5204695   .2797467     1.86   0.063     -.027824    1.068763
+dist_port_to_catch_area_zero |  -.0022074   .0005274    -4.19   0.000     -.003241   -.0011738
+                 d_missing_d |  -3.386053   .1236995   -27.37   0.000    -3.628499   -3.143606
+                ddieselstate |   .2646744   .0368077     7.19   0.000     .1925326    .3368162
+                psdnclosured |  -.8905027   .2776099    -3.21   0.001    -1.434608   -.3463973
+                msqdclosured |  -18.57949   532.3474    -0.03   0.972    -1061.961    1024.802
+                 msqdweekend |  -3.054071   .0896131   -34.08   0.000     -3.22971   -2.878433
+                       delta |          1  (constrained)
+----------------------------------------------------------------------------------------------
+
+. 
+. 
+. *Start contraction mapping
+. matrix start=e(b)
+
+.   cap drop phat
+
+.   qui predict phat
+
+.   cap drop p_share
+
+.   qui by fished_vessel_id selection, sort : egen p_share = mean(phat)
+
+.   sort id_obs
+
+.   cap drop lnp_share
+
+.   qui gen lnp_share = log(p_share)
+
+.   qui gen delta1 = delta + ln_s - lnp_share
+
+.   qui gen deltaO = delta1 if selection == "No-Participation"
+
+.   by fished_vessel_id, sort : egen delta0 = max(deltaO)
+
+.   sort id_obs
+
+.   // qui replace delta1 = delta1 - delta0
+.   putmata x=(delta1 delta), replace
+(1 matrix posted)
+
+.   mata: dif=mreldif(x[.,1],x[.,2]) /*get initial relative diff between actual and est shares*/
+
+.   mata: st_local("dif", strofreal(dif))
+
+.   di `dif'
+5.760562
+
+.   replace delta = delta1
+(118,992 real changes made)
+
+. 
+. scalar it = 1
+
+. display it
+1
+
+. 
+.  while `dif'>0.001 {
+  2.         set more off
+  3.         cmclogit fished $exp_vars delta, ///
+>         base("No-Participation") noconstant constraints(1)  ///
+>         from(start, copy)
+  4.         matrix start=e(b)
+  5.         drop phat p_share lnp_share delta0 deltaO delta1
+  6.         qui predict phat
+  7.         qui by fished_vessel_id selection, sort : egen p_share = mean(phat)
+  8.     sort id_obs
+  9.         qui gen lnp_share = log(p_share)
+ 10.         qui gen delta1 = delta + ln_s - lnp_share
+ 11.     qui gen deltaO = delta1 if selection == "No-Participation"
+ 12.     by fished_vessel_id, sort : egen delta0 = max(deltaO)
+ 13.     sort id_obs
+ 14.     // qui replace delta1 = delta1 - delta0
+.         putmata x=(delta1 delta), replace
+ 15.         mata: dif=mreldif(x[.,1],x[.,2]) /*get initial relative diff between actual adn est shares*/
+ 16.         mata: st_local("dif", strofreal(dif))
+ 17.         di `dif'
+ 18.     replace delta = delta1
+ 19.     scalar it = it + 1
+ 20.     di it
+ 21.   }
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood = -18062.197  
+Iteration 1:  Log likelihood = -17696.873  
+Iteration 2:  Log likelihood =  -17217.04  
+Iteration 3:  Log likelihood =  -17209.76  
+Iteration 4:  Log likelihood =  -17209.73  
+Iteration 5:  Log likelihood =  -17209.73  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: fished_haul                  Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(11)   =   11750.62
+Log likelihood =  -17209.73                       Prob > chi2     =     0.0000
+
+ ( 1)  [selection]delta = 1
+----------------------------------------------------------------------------------------------
+                      fished | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   .9970855   .0944332    10.56   0.000     .8119998    1.182171
+                  mean_price |   .3075041   .0369763     8.32   0.000     .2350319    .3799762
+                diesel_price |  -.4217529   .0149314   -28.25   0.000    -.4510179   -.3924879
+             wind_max_220_mh |  -.0214677   .0034121    -6.29   0.000    -.0281554   -.0147801
+                   d_missing |   2.718088   .2823977     9.63   0.000     2.164599    3.271578
+dist_port_to_catch_area_zero |  -.0077389   .0005778   -13.39   0.000    -.0088714   -.0066064
+                 d_missing_d |  -3.889393   .1283786   -30.30   0.000     -4.14101   -3.637775
+                ddieselstate |   .2236029   .0375583     5.95   0.000     .1499899    .2972158
+                psdnclosured |   .1041869   .2778323     0.37   0.708    -.4403543    .6487281
+                msqdclosured |  -24.25264   6868.002    -0.00   0.997    -13485.29    13436.78
+                 msqdweekend |  -3.251772   .0911936   -35.66   0.000    -3.430508   -3.073036
+                       delta |          1  (constrained)
+----------------------------------------------------------------------------------------------
+(1 matrix posted)
+2.337841
+(118,992 real changes made)
+2
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood = -17935.587  
+Iteration 1:  Log likelihood = -17388.545  
+Iteration 2:  Log likelihood = -17343.777  
+Iteration 3:  Log likelihood = -17341.636  
+Iteration 4:  Log likelihood = -17341.628  
+Iteration 5:  Log likelihood = -17341.628  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: fished_haul                  Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(11)   =    8292.87
+Log likelihood = -17341.628                       Prob > chi2     =     0.0000
+
+ ( 1)  [selection]delta = 1
+----------------------------------------------------------------------------------------------
+                      fished | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   2.753387   .0975605    28.22   0.000     2.562172    2.944602
+                  mean_price |   .4028179   .0427522     9.42   0.000     .3190251    .4866107
+                diesel_price |  -.3250392   .0153751   -21.14   0.000    -.3551739   -.2949045
+             wind_max_220_mh |  -.0290688   .0034902    -8.33   0.000    -.0359094   -.0222282
+                   d_missing |   4.339747   .2826228    15.36   0.000     3.785816    4.893677
+dist_port_to_catch_area_zero |  -.0118179   .0006018   -19.64   0.000    -.0129973   -.0106384
+                 d_missing_d |  -4.275188   .1302597   -32.82   0.000    -4.530493   -4.019884
+                ddieselstate |   .1816935   .0378617     4.80   0.000     .1074859    .2559011
+                psdnclosured |   .3351976   .2786976     1.20   0.229    -.2110396    .8814348
+                msqdclosured |  -29.83402   93836.08    -0.00   1.000    -183945.2    183885.5
+                 msqdweekend |  -3.365328   .0923433   -36.44   0.000    -3.546318   -3.184339
+                       delta |          1  (constrained)
+----------------------------------------------------------------------------------------------
+(1 matrix posted)
+2.001949
+(118,992 real changes made)
+3
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood = -18017.305  
+Iteration 1:  Log likelihood = -17558.835  
+Iteration 2:  Log likelihood = -17544.694  
+Iteration 3:  Log likelihood = -17544.469  
+Iteration 4:  Log likelihood = -17544.469  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: fished_haul                  Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(11)   =    7077.46
+Log likelihood = -17544.469                       Prob > chi2     =     0.0000
+
+ ( 1)  [selection]delta = 1
+----------------------------------------------------------------------------------------------
+                      fished | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   4.148859   .0995709    41.67   0.000     3.953703    4.344014
+                  mean_price |   .4348541   .0458321     9.49   0.000     .3450249    .5246833
+                diesel_price |  -.2210215   .0156866   -14.09   0.000    -.2517666   -.1902765
+             wind_max_220_mh |  -.0341451   .0035475    -9.63   0.000     -.041098   -.0271921
+                   d_missing |   5.570671   .2827972    19.70   0.000     5.016398    6.124943
+dist_port_to_catch_area_zero |  -.0148324   .0006169   -24.04   0.000    -.0160416   -.0136232
+                 d_missing_d |  -4.554438   .1310651   -34.75   0.000    -4.811321   -4.297555
+                ddieselstate |    .146638   .0380948     3.85   0.000     .0719735    .2213025
+                psdnclosured |   .4256842   .2795813     1.52   0.128    -.1222852    .9736535
+                msqdclosured |   -34.3136   770918.4    -0.00   1.000     -1511007     1510938
+                 msqdweekend |  -3.456722   .0932807   -37.06   0.000    -3.639549   -3.273895
+                       delta |          1  (constrained)
+----------------------------------------------------------------------------------------------
+(1 matrix posted)
+1.128482
+(118,992 real changes made)
+4
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood =   -18177.9  
+Iteration 1:  Log likelihood = -17783.179  
+Iteration 2:  Log likelihood = -17776.082  
+Iteration 3:  Log likelihood = -17776.012  
+Iteration 4:  Log likelihood = -17776.012  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: fished_haul                  Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(11)   =    7430.51
+Log likelihood = -17776.012                       Prob > chi2     =     0.0000
+
+ ( 1)  [selection]delta = 1
+----------------------------------------------------------------------------------------------
+                      fished | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   5.310204   .1012554    52.44   0.000     5.111748    5.508661
+                  mean_price |   .4349892   .0482647     9.01   0.000     .3403921    .5295863
+                diesel_price |  -.1157111   .0159525    -7.25   0.000    -.1469774   -.0844447
+             wind_max_220_mh |  -.0376359   .0035987   -10.46   0.000    -.0446891   -.0305826
+                   d_missing |   6.600561   .2839877    23.24   0.000     6.043955    7.157166
+dist_port_to_catch_area_zero |  -.0170214    .000629   -27.06   0.000    -.0182542   -.0157886
+                 d_missing_d |  -4.784911   .1321913   -36.20   0.000    -5.044001   -4.525821
+                ddieselstate |   .1207169   .0383275     3.15   0.002     .0455963    .1958375
+                psdnclosured |   .4908086   .2804991     1.75   0.080    -.0589596    1.040577
+                msqdclosured |   -38.8006    6529944    -0.00   1.000    -1.28e+07    1.28e+07
+                 msqdweekend |  -3.538788   .0941184   -37.60   0.000    -3.723256   -3.354319
+                       delta |          1  (constrained)
+----------------------------------------------------------------------------------------------
+(1 matrix posted)
+.9338845
+(118,992 real changes made)
+5
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood = -18375.263  
+Iteration 1:  Log likelihood = -18023.974  
+Iteration 2:  Log likelihood = -18019.754  
+Iteration 3:  Log likelihood =  -18019.73  
+Iteration 4:  Log likelihood =  -18019.73  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: fished_haul                  Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(11)   =    9007.33
+Log likelihood =  -18019.73                       Prob > chi2     =     0.0000
+
+ ( 1)  [selection]delta = 1
+----------------------------------------------------------------------------------------------
+                      fished | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   6.313886     .10225    61.75   0.000     6.113479    6.514292
+                  mean_price |   .4272261   .0483029     8.84   0.000     .3325542    .5218979
+                diesel_price |  -.0122652   .0161214    -0.76   0.447    -.0438626    .0193322
+             wind_max_220_mh |  -.0402177   .0036348   -11.06   0.000    -.0473417   -.0330937
+                   d_missing |   7.494554   .2847548    26.32   0.000     6.936445    8.052664
+dist_port_to_catch_area_zero |  -.0186332   .0006351   -29.34   0.000     -.019878   -.0173884
+                 d_missing_d |  -4.985466   .1337238   -37.28   0.000     -5.24756   -4.723373
+                ddieselstate |   .1017015   .0385391     2.64   0.008     .0261664    .1772367
+                psdnclosured |   .5526645   .2814724     1.96   0.050     .0009887     1.10434
+                msqdclosured |  -42.90757   4.66e+07    -0.00   1.000    -9.14e+07    9.14e+07
+                 msqdweekend |  -3.616083   .0948747   -38.11   0.000    -3.802035   -3.430132
+                       delta |          1  (constrained)
+----------------------------------------------------------------------------------------------
+(1 matrix posted)
+.8149287
+(118,992 real changes made)
+6
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood = -18588.731  
+Iteration 1:  Log likelihood = -18269.143  
+Iteration 2:  Log likelihood =  -18266.37  
+Iteration 3:  Log likelihood = -18266.361  
+Iteration 4:  Log likelihood = -18266.361  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: fished_haul                  Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(11)   =   11595.34
+Log likelihood = -18266.361                       Prob > chi2     =     0.0000
+
+ ( 1)  [selection]delta = 1
+----------------------------------------------------------------------------------------------
+                      fished | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   7.204157   .1030256    69.93   0.000      7.00223    7.406083
+                  mean_price |   .4233456   .0481571     8.79   0.000     .3289594    .5177319
+                diesel_price |   .0879852   .0162633     5.41   0.000     .0561097    .1198607
+             wind_max_220_mh |  -.0422352   .0036668   -11.52   0.000    -.0494219   -.0350485
+                   d_missing |   8.280335   .2854047    29.01   0.000     7.720952    8.839718
+dist_port_to_catch_area_zero |  -.0198332   .0006407   -30.96   0.000    -.0210889   -.0185775
+                 d_missing_d |  -5.155746   .1352035   -38.13   0.000     -5.42074   -4.890752
+                ddieselstate |   .0863422   .0387359     2.23   0.026     .0104213    .1622631
+                psdnclosured |   .6133578    .282495     2.17   0.030     .0596777    1.167038
+                msqdclosured |  -44.92211   1.19e+08    -0.00   1.000    -2.32e+08    2.32e+08
+                 msqdweekend |  -3.689709   .0955839   -38.60   0.000     -3.87705   -3.502368
+                       delta |          1  (constrained)
+----------------------------------------------------------------------------------------------
+(1 matrix posted)
+.7234901
+(118,992 real changes made)
+7
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood = -18808.125  
+Iteration 1:  Log likelihood = -18512.842  
+Iteration 2:  Log likelihood =  -18510.88  
+Iteration 3:  Log likelihood = -18510.875  
+Iteration 4:  Log likelihood = -18510.875  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: fished_haul                  Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(11)   =   15065.57
+Log likelihood = -18510.875                       Prob > chi2     =     0.0000
+
+ ( 1)  [selection]delta = 1
+----------------------------------------------------------------------------------------------
+                      fished | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   8.006968   .1036553    77.25   0.000     7.803808    8.210129
+                  mean_price |   .4273654   .0479813     8.91   0.000     .3333237    .5214071
+                diesel_price |   .1847333   .0163871    11.27   0.000     .1526152    .2168514
+             wind_max_220_mh |  -.0438321    .003696   -11.86   0.000    -.0510762   -.0365881
+                   d_missing |    8.98292   .2860764    31.40   0.000     8.422221     9.54362
+dist_port_to_catch_area_zero |  -.0207243   .0006457   -32.10   0.000    -.0219898   -.0194588
+                 d_missing_d |  -5.300497   .1364854   -38.84   0.000    -5.568003    -5.03299
+                ddieselstate |   .0726784   .0389254     1.87   0.062     -.003614    .1489707
+                psdnclosured |   .6719275    .283563     2.37   0.018     .1161541    1.227701
+                msqdclosured |  -44.80589   1.05e+08    -0.00   1.000    -2.06e+08    2.06e+08
+                 msqdweekend |  -3.759794   .0962461   -39.06   0.000    -3.948433   -3.571155
+                       delta |          1  (constrained)
+----------------------------------------------------------------------------------------------
+(1 matrix posted)
+1.139984
+(118,992 real changes made)
+8
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood = -19028.933  
+Iteration 1:  Log likelihood =   -18752.8  
+Iteration 2:  Log likelihood =  -18751.33  
+Iteration 3:  Log likelihood = -18751.327  
+Iteration 4:  Log likelihood = -18751.327  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: fished_haul                  Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(11)   =   19327.81
+Log likelihood = -18751.327                       Prob > chi2     =     0.0000
+
+ ( 1)  [selection]delta = 1
+----------------------------------------------------------------------------------------------
+                      fished | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   8.740677   .1041485    83.93   0.000      8.53655    8.944804
+                  mean_price |   .4423453   .0476235     9.29   0.000      .349005    .5356856
+                diesel_price |   .2778966   .0164935    16.85   0.000       .24557    .3102232
+             wind_max_220_mh |  -.0451291    .003722   -12.12   0.000    -.0524242    -.037834
+                   d_missing |   9.619219    .286718    33.55   0.000     9.057262    10.18118
+dist_port_to_catch_area_zero |  -.0213876   .0006497   -32.92   0.000    -.0226611   -.0201142
+                 d_missing_d |    -5.4255   .1375637   -39.44   0.000     -5.69512    -5.15588
+                ddieselstate |   .0598255   .0391076     1.53   0.126     -.016824    .1364751
+                psdnclosured |   .7279978   .2846723     2.56   0.011     .1700503    1.285945
+                msqdclosured |  -44.34525   7.90e+07    -0.00   1.000    -1.55e+08    1.55e+08
+                 msqdweekend |  -3.826764   .0968625   -39.51   0.000    -4.016611   -3.636917
+                       delta |          1  (constrained)
+----------------------------------------------------------------------------------------------
+(1 matrix posted)
+.984209
+(118,992 real changes made)
+9
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood = -19248.967  
+Iteration 1:  Log likelihood = -18988.298  
+Iteration 2:  Log likelihood = -18987.144  
+Iteration 3:  Log likelihood = -18987.142  
+Iteration 4:  Log likelihood = -18987.142  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: fished_haul                  Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(11)   =   24313.12
+Log likelihood = -18987.142                       Prob > chi2     =     0.0000
+
+ ( 1)  [selection]delta = 1
+----------------------------------------------------------------------------------------------
+                      fished | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   9.417955   .1045559    90.08   0.000     9.213029    9.622881
+                  mean_price |   .4697124    .047058     9.98   0.000     .3774805    .5619444
+                diesel_price |   .3675951   .0165855    22.16   0.000      .335088    .4001022
+             wind_max_220_mh |  -.0462046   .0037455   -12.34   0.000    -.0535455   -.0388636
+                   d_missing |   10.20174   .2873281    35.51   0.000      9.63859     10.7649
+dist_port_to_catch_area_zero |  -.0218824   .0006528   -33.52   0.000     -.023162   -.0206029
+                 d_missing_d |  -5.535198   .1384686   -39.97   0.000    -5.806592   -5.263805
+                ddieselstate |   .0473261   .0392823     1.20   0.228    -.0296658     .124318
+                psdnclosured |   .7813022   .2858168     2.73   0.006     .2211115    1.341493
+                msqdclosured |  -42.91018   3.68e+07    -0.00   1.000    -7.21e+07    7.21e+07
+                 msqdweekend |  -3.890963   .0974385   -39.93   0.000    -4.081939   -3.699987
+                       delta |          1  (constrained)
+----------------------------------------------------------------------------------------------
+(1 matrix posted)
+.6689021
+(118,992 real changes made)
+10
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood = -19466.897  
+Iteration 1:  Log likelihood = -19218.992  
+Iteration 2:  Log likelihood = -19218.046  
+Iteration 3:  Log likelihood = -19218.045  
+
+Conditional logit choice model                 Number of obs      =    118,992
+Case ID variable: fished_haul                  Number of cases    =      19832
+
+Alternatives variable: selection               Alts per case: min =          6
+                                                              avg =        6.0
+                                                              max =          6
+
+                                                  Wald chi2(11)   =   29968.22
+Log likelihood = -19218.045                       Prob > chi2     =     0.0000
+
+ ( 1)  [selection]delta = 1
+----------------------------------------------------------------------------------------------
+                      fished | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+selection                    |
+                  mean_avail |   10.04745   .1049333    95.75   0.000     9.841788    10.25312
+                  mean_price |   .5092013    .046485    10.95   0.000     .4180925    .6003102
+                diesel_price |    .454113   .0166706    27.24   0.000     .4214392    .4867868
+             wind_max_220_mh |  -.0470971   .0037674   -12.50   0.000    -.0544811   -.0397131
+                   d_missing |   10.74053   .2879349    37.30   0.000     10.17619    11.30487
+dist_port_to_catch_area_zero |  -.0222478   .0006555   -33.94   0.000    -.0235325   -.0209631
+                 d_missing_d |   -5.63275    .139252   -40.45   0.000    -5.905679   -5.359821
+                ddieselstate |   .0349596   .0394502     0.89   0.376    -.0423613    .1122806
+                psdnclosured |   .8316877    .286991     2.90   0.004     .2691958     1.39418
+                msqdclosured |  -45.45854   1.26e+08    -0.00   1.000    -2.47e+08    2.47e+08
+                 msqdweekend |  -3.952558   .0979817   -40.34   0.000    -4.144598   -3.760517
+                       delta |          1  (constrained)
+----------------------------------------------------------------------------------------------
+(1 matrix posted)
+.7608873
+(118,992 real changes made)
+11
+note: variable d_missing has 17454 cases that are not alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 5 cases that are not alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 6947 cases that are not alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 11708 cases that are not alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 17419 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdclosured has 19102 cases that are not alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 16500 cases that are not alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log likelihood = -19681.807  
+Iteration 1:  Log likelihood = -19444.633  
+Iteration 2:  Log likelihood =  -19443.83  (not concave)
+Iteration 3:  Log likelihood =  -19443.83  (not concave)
+Iteration 4:  Log likelihood = -19443.829  (not concave)
+Iteration 5:  Log likelihood = -19443.829  (not concave)
+Iteration 6:  Log likelihood = -19443.829  (not concave)
+Iteration 7:  Log likelihood = -19443.829  (not concave)
+Iteration 8:  Log likelihood = -19443.829  (not concave)
+Iteration 9:  Log likelihood = -19443.829  (not concave)
+Iteration 10: Log likelihood = -19443.829  (not concave)
+Iteration 11: Log likelihood = -19443.829  (not concave)
+Iteration 12: Log likelihood = -19443.829  (not concave)
+Iteration 13: Log likelihood = -19443.829  (not concave)
+Iteration 14: Log likelihood = -19443.829  (not concave)
+Iteration 15: Log likelihood = -19443.829  (not concave)
+Iteration 16: Log likelihood = -19443.829  (not concave)
+Iteration 17: Log likelihood = -19443.829  (not concave)
+Iteration 18: Log likelihood = -19443.829  (not concave)
+Iteration 19: Log likelihood = -19443.829  (not concave)
+Iteration 20: Log likelihood = -19443.829  (not concave)
+Iteration 21: Log likelihood = -19443.829  (not concave)
+Iteration 22: Log likelihood = -19443.829  (not concave)
+Iteration 23: Log likelihood = -19443.829  (not concave)
+Iteration 24: Log likelihood = -19443.829  (not concave)
+Iteration 25: Log likelihood = -19443.829  (not concave)
+Iteration 26: Log likelihood = -19443.829  (not concave)
+Iteration 27: Log likelihood = -19443.829  (not concave)
+Iteration 28: Log likelihood = -19443.829  (not concave)
+Iteration 29: Log likelihood = -19443.829  (not concave)
+Iteration 30: Log likelihood = -19443.829  (not concave)
+Iteration 31: Log likelihood = -19443.829  (not concave)
+Iteration 32: Log likelihood = -19443.829  (not concave)
+Iteration 33: Log likelihood = -19443.829  (not concave)
+Iteration 34: Log likelihood = -19443.829  (not concave)
+Iteration 35: Log likelihood = -19443.829  (not concave)
+Iteration 36: Log likelihood = -19443.829  (not concave)
+Iteration 37: Log likelihood = -19443.829  (not concave)
+Iteration 38: Log likelihood = -19443.829  (not concave)
+Iteration 39: Log likelihood = -19443.829  (not concave)
+Iteration 40: Log likelihood = -19443.829  (not concave)
+Iteration 41: Log likelihood = -19443.829  (not concave)
+Iteration 42: Log likelihood = -19443.829  (not concave)
+Iteration 43: Log likelihood = -19443.829  (not concave)
+Iteration 44: Log likelihood = -19443.829  (not concave)
+Iteration 45: Log likelihood = -19443.829  (not concave)
+Iteration 46: Log likelihood = -19443.829  (not concave)
+Iteration 47: Log likelihood = -19443.829  (not concave)
+Iteration 48: Log likelihood = -19443.829  (not concave)
+Iteration 49: Log likelihood = -19443.829  (not concave)
+Iteration 50: Log likelihood = -19443.829  (not concave)
+Iteration 51: Log likelihood = -19443.829  (not concave)
+Iteration 52: Log likelihood = -19443.829  (not concave)
+Iteration 53: Log likelihood = -19443.829  (not concave)
+Iteration 54: Log likelihood = -19443.829  (not concave)
+Iteration 55: Log likelihood = -19443.829  (not concave)
+Iteration 56: Log likelihood = -19443.829  (not concave)
+Iteration 57: Log likelihood = -19443.829  (not concave)
+Iteration 58: Log likelihood = -19443.829  (not concave)
+Iteration 59: Log likelihood = -19443.829  (not concave)
+Iteration 60: Log likelihood = -19443.829  (not concave)
+Iteration 61: Log likelihood = -19443.829  (not concave)
+Iteration 62: Log likelihood = -19443.829  (not concave)
+Iteration 63: Log likelihood = -19443.829  (not concave)
+Iteration 64: Log likelihood = -19443.829  (not concave)
+Iteration 65: Log likelihood = -19443.829  (not concave)
+Iteration 66: Log likelihood = -19443.829  (not concave)
+Iteration 67: Log likelihood = -19443.829  (not concave)
+Iteration 68: Log likelihood = -19443.829  (not concave)
+Iteration 69: Log likelihood = -19443.829  (not concave)
+Iteration 70: Log likelihood = -19443.829  (not concave)
+Iteration 71: Log likelihood = -19443.829  (not concave)
+Iteration 72: Log likelihood = -19443.829  (not concave)
+Iteration 73: Log likelihood = -19443.829  (not concave)
+Iteration 74: Log likelihood = -19443.829  (not concave)
+Iteration 75: Log likelihood = -19443.829  (not concave)
+Iteration 76: Log likelihood = -19443.829  (not concave)
+Iteration 77: Log likelihood = -19443.829  (not concave)
+Iteration 78: Log likelihood = -19443.829  (not concave)
+Iteration 79: Log likelihood = -19443.829  (not concave)
+Iteration 80: Log likelihood = -19443.829  (not concave)
+Iteration 81: Log likelihood = -19443.829  (not concave)
+Iteration 82: Log likelihood = -19443.829  (not concave)
+Iteration 83: Log likelihood = -19443.829  (not concave)
+Iteration 84: Log likelihood = -19443.829  (not concave)
+Iteration 85: Log likelihood = -19443.829  (not concave)
+Iteration 86: Log likelihood = -19443.829  (not concave)
+Iteration 87: Log likelihood = -19443.829  (not concave)
+Iteration 88: Log likelihood = -19443.829  (not concave)
+Iteration 89: Log likelihood = -19443.829  (not concave)
+Iteration 90: Log likelihood = -19443.829  (not concave)
+Iteration 91: Log likelihood = -19443.829  (not concave)
+--Break--
+r(1);
+
 end of do-file
 
-. save c:\users\fequezad\appdata\local\temp\emergency_close_stata_st.dta, replace
-(file c:\users\fequezad\appdata\local\temp\emergency_close_stata_st.dta not found)
-file c:\users\fequezad\appdata\local\temp\emergency_close_stata_st.dta saved
+--Break--
+r(1);
+
+. exit, clear
