@@ -17,6 +17,7 @@ cap log close
 ** Import data
 import delimited "Stata\rdo_Stata_c4.csv"
 replace mean_price = mean_price / 1000
+gen id_obs = _n
 
 ** Set choice model database
 cmset fished_vessel_id time selection
@@ -160,3 +161,4 @@ replace perc2 = 0 if perc2 == .
 replace perc3 = 0 if perc3 == .
 
 export excel using "G:\My Drive\Tables\Participation\Simulated_shares.xlsx", replace
+export delimited using "C:\GitHub\EconAnalysis\Participation\R\Simulated_shares.csv", replace
