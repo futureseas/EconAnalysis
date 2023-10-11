@@ -62,7 +62,7 @@ sdm.cmck <- tibble(LANDING_YEAR = integer(),
 
 port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 
-for (y in 2000:2018) {
+for (y in 2012:2018) {
   for (m in 1:12) {
     for (j in 1:nrow(port_area_coord)) {
       
@@ -163,3 +163,9 @@ for (y in 2000:2018) {
       saveRDS(sdm.cmck, file = "Participation/SDMs/sdm_cmck.rds")
     }
   }
+
+
+# cmck <- readRDS(file = "Participation/SDMs/sdm_cmck.rds") %>%
+#   dplyr::filter(LANDING_YEAR < 2012) 
+# 
+# saveRDS(cmck, file = "Participation/SDMs/sdm_cmck_pre_2012.rds")

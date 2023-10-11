@@ -16,13 +16,13 @@ library(tidyverse)
 
 setwd("C:/GitHub/EconAnalysis")
 
-
 #-----------------------------------------------------
 ### Load in the data
 Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
 Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
 Tickets_raw<-rbind(Tickets1, Tickets2)
 rm(Tickets1, Tickets2)
+
 
 #-----------------------------------------------------
 ### Add port area
@@ -67,9 +67,10 @@ rm(Trip_Species_Dominant, X, Boats,FTID_unique)
 #-----------------------------------------------------
 ### Compute vessel characteristics
 
-# nrow(Tickets %>% 
-#   dplyr::select(c(VESSEL_NUM)) %>% 
-#   drop_na %>% 
+## How many vessels?
+# nrow(Tickets %>%
+#   dplyr::select(c(VESSEL_NUM)) %>%
+#   drop_na %>%
 #   unique())
 
 Vessel.chr.lenght <- Tickets %>% 
@@ -109,6 +110,7 @@ Tickets <- Tickets %>% group_by(AGENCY_CODE, FTID_unique, FTID, LANDING_YEAR, LA
             max_days_sea = max(NUM_OF_DAYS_FISHED)) %>%
   mutate(dDelete = ifelse(FTID == "142301E" & LANDING_YEAR == 2020, 1, 0)) %>%
   filter(dDelete == 0) %>% dplyr::select(-c(dDelete)) %>% ungroup()
+
 
 #-------------------------------------------------------------------------------------
 ### Subset to select only records where one of the CPS was the target species
@@ -160,6 +162,63 @@ Tickets_chr <- merge(Tickets_chr, Vessel.chr.weight, by = c("VESSEL_NUM"), all.x
 Tickets_chr <- merge(Tickets_chr, Vessel.chr.horsepower, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 
 saveRDS(Tickets_chr, "C:/Data/PacFIN data/Tickets_filtered.rds")
+
+
+
+
+
+<<WORKING HERE>>
+#-------------------------------------------------------------------------------
+## Filter participation database ##
+
+## Keep trip with maximum revenue within a day
+## (only 5% of the data have repeated trips per day)
+
+Tickets$set_date_busy <- 
+  as.Date(with(Tickets, paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep="-")), 
+          "%Y-%m-%d")
+
+Tickets_filtered <- Tickets %>%
+  mutate(max_days_sea = ifelse(is.na(max_days_sea), 1, max_days_sea)) %>%
+  group_by(VESSEL_NUM, set_date_busy) %>%
+  mutate(max_rev = ifelse(Revenue == max(Revenue, na.rm=TRUE), 1, 0)) %>% ungroup() 
+
+%>%
+  #   dplyr::filter(max_rev == 1) %>%
+  #   distinct_at(vars(-trip_id)) %>%
+  #   group_by(VESSEL_NUM, set_date) %>%
+  #   mutate(ncount = n()) %>%
+  #   mutate(lat_mean = mean(lat, na.rm = TRUE),
+  #          lon_mean = mean(lon, na.rm = TRUE),
+  #          dist_mean = mean(dist, na.rm = TRUE)) %>%
+  #   mutate(lat = ifelse(ncount>1, lat_mean, lat)) %>%
+  #   mutate(lon = ifelse(ncount>1, lon_mean, lon)) %>%
+  #   mutate(dist = ifelse(ncount>1, dist_mean, dist)) %>%
+  #   dplyr::select(-c('lat_mean', 'lon_mean', 'dist_mean',
+#                    'lat_logbook', 'lon_logbook',
+#                    'lat_ca', 'lon_ca')) %>% ungroup() %>%
+#   distinct() %>%
+#   group_by(VESSEL_NUM, set_date) %>%
+#   mutate(order = seq(1:n())) %>% ungroup() %>%
+#   filter(order == 1) %>%
+#   dplyr::select(-c('max_rev', 'order', 'ncount')) %>%
+#   group_by(VESSEL_NUM, set_date)
+# 
+# participation_data_filtered$trip_id <-
+#   udpipe::unique_identifier(participation_data_filtered, fields = c('VESSEL_NUM', 'set_date'))
+#   saveRDS(participation_data_filtered, "C:\\Data\\PacFIN data\\participation_data_filtered.rds")
+
+
+# mutate(Revenue = ifelse(selection == "No-Participation", 0, Revenue)) %>%
+
+
+
+
+
+
+
+
+
 
 
 #---------------------------------------------------------------------
