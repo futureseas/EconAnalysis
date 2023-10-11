@@ -2,7 +2,7 @@
 ## Calculate SDM outputs to PORT_AREA_CODE ##
 #############################################
 
-### Try 30, 90, 200
+### Try 60, 90, 200
 
 rm(list=ls())
 gc()
@@ -56,9 +56,9 @@ sdm.cmck <- tibble(LANDING_YEAR = integer(),
                    LANDING_MONTH = integer(),
                    LANDING_DAY = integer(),
                    PORT_AREA_CODE = character(),
-                   CMCK_SDM_30 = numeric(),
+                   CMCK_SDM_60 = numeric(),
                    CMCK_SDM_90 = numeric(),
-                   CMCK_SDM_220 = numeric())
+                   CMCK_SDM_20 = numeric())
 
 port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 
@@ -90,22 +90,22 @@ for (y in 2000:2018) {
       
       # Calculate daily SDM level within port radius
       for (z in 1:max(sdmMelt$LANDING_DAY)) {
-        dat_prob_30  <- sdmMelt %>% dplyr::filter(dist <= 30)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_60  <- sdmMelt %>% dplyr::filter(dist <= 60)  %>% dplyr::filter(LANDING_DAY == z)
         dat_prob_90  <- sdmMelt %>% dplyr::filter(dist <= 90)  %>% dplyr::filter(LANDING_DAY == z)
-        dat_prob_220 <- sdmMelt %>% dplyr::filter(dist <= 220) %>% dplyr::filter(LANDING_DAY == z)
-        SDM_mean_30  <- mean(dat_prob_30$cmck.sdm, na.rm = TRUE)
+        dat_prob_20 <- sdmMelt %>% dplyr::filter(dist <= 20) %>% dplyr::filter(LANDING_DAY == z)
+        SDM_mean_60  <- mean(dat_prob_60$cmck.sdm, na.rm = TRUE)
         SDM_mean_90  <- mean(dat_prob_90$cmck.sdm, na.rm = TRUE)
-        SDM_mean_220 <- mean(dat_prob_220$cmck.sdm, na.rm = TRUE)
+        SDM_mean_20 <- mean(dat_prob_20$cmck.sdm, na.rm = TRUE)
         sdm.cmck <- sdm.cmck %>%
           add_row(LANDING_YEAR = y, 
                   LANDING_MONTH = m, 
                   LANDING_DAY = z, 
                   PORT_AREA_CODE = as.character(port_area_coord[j, 1]), 
-                  CMCK_SDM_30  = SDM_mean_30, 
+                  CMCK_SDM_60  = SDM_mean_60, 
                   CMCK_SDM_90  = SDM_mean_90, 
-                  CMCK_SDM_220 = SDM_mean_220)
-        rm(dat_prob_30, dat_prob_90, dat_prob_220, 
-           SDM_mean_30, SDM_mean_90, SDM_mean_220)
+                  CMCK_SDM_20 = SDM_mean_20)
+        rm(dat_prob_60, dat_prob_90, dat_prob_20, 
+           SDM_mean_60, SDM_mean_90, SDM_mean_20)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
       saveRDS(sdm.cmck, file = "Participation/SDMs/sdm_cmck.rds")
@@ -142,22 +142,22 @@ for (y in 2000:2018) {
       
       # Calculate daily SDM level within port radius
       for (z in 1:max(sdmMelt$LANDING_DAY)) {
-        dat_prob_30  <- sdmMelt %>% dplyr::filter(dist <= 30)  %>% dplyr::filter(LANDING_DAY == z)
+        dat_prob_60  <- sdmMelt %>% dplyr::filter(dist <= 60)  %>% dplyr::filter(LANDING_DAY == z)
         dat_prob_90  <- sdmMelt %>% dplyr::filter(dist <= 90)  %>% dplyr::filter(LANDING_DAY == z)
-        dat_prob_220 <- sdmMelt %>% dplyr::filter(dist <= 220) %>% dplyr::filter(LANDING_DAY == z)
-        SDM_mean_30  <- mean(dat_prob_30$cmck.sdm, na.rm = TRUE)
+        dat_prob_20 <- sdmMelt %>% dplyr::filter(dist <= 20) %>% dplyr::filter(LANDING_DAY == z)
+        SDM_mean_60  <- mean(dat_prob_60$cmck.sdm, na.rm = TRUE)
         SDM_mean_90  <- mean(dat_prob_90$cmck.sdm, na.rm = TRUE)
-        SDM_mean_220 <- mean(dat_prob_220$cmck.sdm, na.rm = TRUE)
+        SDM_mean_20 <- mean(dat_prob_20$cmck.sdm, na.rm = TRUE)
         sdm.cmck <- sdm.cmck %>%
           add_row(LANDING_YEAR = y, 
                   LANDING_MONTH = m, 
                   LANDING_DAY = z, 
                   PORT_AREA_CODE = as.character(port_area_coord[j, 1]), 
-                  CMCK_SDM_30  = SDM_mean_30, 
+                  CMCK_SDM_60  = SDM_mean_60, 
                   CMCK_SDM_90  = SDM_mean_90, 
-                  CMCK_SDM_220 = SDM_mean_220)
-        rm(dat_prob_30, dat_prob_90, dat_prob_220, 
-           SDM_mean_30, SDM_mean_90, SDM_mean_220)
+                  CMCK_SDM_20 = SDM_mean_20)
+        rm(dat_prob_60, dat_prob_90, dat_prob_20, 
+           SDM_mean_60, SDM_mean_90, SDM_mean_20)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
       saveRDS(sdm.cmck, file = "Participation/SDMs/sdm_cmck.rds")
