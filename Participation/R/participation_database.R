@@ -38,8 +38,6 @@ Tickets_raw <- Tickets_raw %>%
   drop_na(PORT_AREA_CODE)
 
 
-
-
 #-----------------------------------------------------
 ### Subset the data to remove columns not relevant to this analysis. This will speed things up.
 ### Create also unique FTID

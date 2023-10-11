@@ -27,13 +27,13 @@ ncdf4::nc_close(dat)
 dimnames(jmck.sdm) <- list(set_long = set_long, set_lat = set_lat, jmck.date.sdm = jmck.date.sdm)
 sdmMelt <- reshape2::melt(jmck.sdm, value.name = "jmck.sdm")
 coord <- sdmMelt %>% dplyr::select(c(set_lat, set_long)) %>% unique()
-saveRDS(coord, "Participation/SDM_code/port_dist_jmck/coord_sdm_jmck.rds")
+saveRDS(coord, "Participation/SDMs/port_dist_jmck/coord_sdm_jmck.rds")
 
 
 #------------------------------------------------------
 # Get distance by coordinate to port j and save it
 
-coord <- readRDS("Participation/SDM_code/port_dist_jmck/coord_sdm_jmck.rds")
+coord <- readRDS("Participation/SDMs/port_dist_jmck/coord_sdm_jmck.rds")
 port_area_coord <- read.csv("C:\\GitHub\\EconAnalysis\\Data\\Ports\\port_areas.csv") %>% drop_na()
 
 for (j in 1:nrow(port_area_coord)) {
@@ -44,7 +44,7 @@ for (j in 1:nrow(port_area_coord)) {
     mutate(dist = dist / 1000) %>% 
     dplyr::filter(dist <= 220)
   
-  saveRDS(distPorts, paste0("Participation/SDM_code/port_dist_jmck/portDist_", paste0(as.character(j),".rds")))
+  saveRDS(distPorts, paste0("Participation/SDMs/port_dist_jmck/portDist_", paste0(as.character(j),".rds")))
 }
 
 
@@ -82,7 +82,7 @@ for (y in 2000:2018) {
       sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$jmck.date.sdm)	
       
       # Merge to distance from port area to a set of coordinates
-      distPorts <- readRDS(paste0("Participation/SDM_code/port_dist_jmck/portDist_",
+      distPorts <- readRDS(paste0("Participation/SDMs/port_dist_jmck/portDist_",
                                   paste0(as.character(j), ".rds")))
       sdmMelt <- merge(sdmMelt, distPorts, by = c('set_lat', 'set_long'), all.x = TRUE, all.y = FALSE) %>% 
         mutate(LANDING_DAY = day(set_date)) 
@@ -107,7 +107,7 @@ for (y in 2000:2018) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      saveRDS(sdm.jmck, file = "Participation/SDM_code/sdm_jmck.rds")
+      saveRDS(sdm.jmck, file = "Participation/SDMs/sdm_jmck.rds")
     }
   }
 }
@@ -132,7 +132,7 @@ for (y in 2000:2018) {
       sdmMelt$set_date <- as.Date("1900-01-01") + days(sdmMelt$jmck.date.sdm)	
       
       # Merge to distance from port area to a set of coordinates
-      distPorts <- readRDS(paste0("Participation/SDM_code/port_dist_jmck/portDist_",
+      distPorts <- readRDS(paste0("Participation/SDMs/port_dist_jmck/portDist_",
                                   paste0(as.character(j), ".rds")))
       sdmMelt <- merge(sdmMelt, distPorts, by = c('set_lat', 'set_long'), all.x = TRUE, all.y = FALSE) %>% 
         mutate(LANDING_DAY = day(set_date)) 
@@ -157,6 +157,6 @@ for (y in 2000:2018) {
            SDM_mean_30, SDM_mean_90, SDM_mean_220)
       }
       print(paste("Year:", y, "; month:", m, "--", "Port area:",j))
-      saveRDS(sdm.jmck, file = "Participation/SDM_code/sdm_jmck.rds")
+      saveRDS(sdm.jmck, file = "Participation/SDMs/sdm_jmck.rds")
     }
   }
