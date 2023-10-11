@@ -164,8 +164,3 @@ for (y in 2012:2018) {
     }
   }
 
-
-# cmck <- readRDS(file = "Participation/SDMs/sdm_cmck.rds") %>%
-#   dplyr::filter(LANDING_YEAR < 2012) 
-# 
-# saveRDS(cmck, file = "Participation/SDMs/sdm_cmck_pre_2012.rds")
