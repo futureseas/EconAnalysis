@@ -192,14 +192,43 @@ saveRDS(Catch.per.trip, "C:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds")
 ###Remove records associated with landings of zero value; this is likely bycatch
 
 Tickets_FF<-setDT(Tickets_chr)[VESSEL_NUM %chin% FF_Vessels$VESSEL_NUM] # 1,927,235 row deleted
-Tickets_FF<-as.data.frame(Tickets_FF)
+Tickets_FF<-as.data.frame(Tickets_FF) 
 rm(FF_Vessels, FTID_Value)
+
+#----------------------------------------------------------------------------------------
+## Create time variable
+Tickets_FF <- Tickets_FF %>%
+  mutate(max_days_sea = ifelse(is.na(max_days_sea), 1, max_days_sea)) 
+
+Tickets_FF$set_date_busy <- 
+  as.Date(with(Tickets_FF, paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep="-")), 
+          "%Y-%m-%d")
+
+Tickets_FF <- Tickets_FF %>% mutate(set_date = set_date_busy - days(max_days_sea-1))
 
 #---------------------------------------------------------------------------------------
 ### Expand database to include outside option (when vessel do not have fish ticket.)
-Tickets_exp <- complete(Tickets_FF, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY) %>%
+Tickets_exp <- complete(Tickets_FF, VESSEL_NUM, set_date) 
+Tickets_exp_2 <- Tickets_exp %>%
+  group_by(VESSEL_NUM) %>% 
+  mutate(set_date_busy = 
+           na.locf(set_date_busy, na.rm = F)) %>%
+  mutate(participating_no_ticket = ifelse(set_date <= set_date_busy, 1, 0)) %>% ungroup() %>%
+  mutate(participating_no_ticket = ifelse(is.na(participating_no_ticket), 0, participating_no_ticket)) %>%
+  mutate(selection2 = selection_original)
+
+### Carry forward information for multidays trips (check #602991)
+Tickets_exp_3 <- Tickets_exp_2 %>% group_by(VESSEL_NUM) %>%
+  mutate(selection = ifelse(participating_no_ticket == 1, na.locf(selection, na.rm = F), selection)) %>%
+  mutate(max_days_sea = ifelse(participating_no_ticket == 1, na.locf(max_days_sea, na.rm = F), max_days_sea)) %>%
+  mutate(Vessel.length = ifelse(participating_no_ticket == 1, na.locf(Vessel.length, na.rm = F), Vessel.length)) %>%
+  mutate(Vessel.weight = ifelse(participating_no_ticket == 1, na.locf(Vessel.weight, na.rm = F), Vessel.weight)) %>%
+  mutate(Vessel.horsepower = ifelse(participating_no_ticket == 1, na.locf(Vessel.horsepower, na.rm = F), Vessel.horsepower)) %>%
+  ungroup()
+
+Tickets_exp_4 <- Tickets_exp_3 %>%
   mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
-  mutate(FTID_unique = ifelse(is.na(FTID_unique), paste('NP-',1:n()), FTID_unique))
+  mutate(FTID_unique = ifelse(is.na(FTID_unique), paste('Exp-',1:n()), FTID_unique))
 
 
 #-----------------------------------------------------
@@ -234,11 +263,20 @@ Tickets_coord <-  Tickets_coord %>%
 
 Tickets_coord$trip_id <- udpipe::unique_identifier(Tickets_coord, fields = c("FTID_unique"))
 
+Tickets_coord <- Tickets_coord %>%
+  mutate(Vessel.length = as.numeric(Vessel.length),
+         Vessel.weight = as.numeric(Vessel.weight),
+         Vessel.horsepower = as.numeric(Vessel.horsepower)) 
+
 
 ### Create date variable
-Tickets_coord$set_date <- 
+Tickets_coord$set_date_busy <- 
   as.Date(with(Tickets_coord, paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep="-")), 
           "%Y-%m-%d")
+
+Tickets_coord <- Tickets_coord %>% mutate(set_date = set_date_busy - days(max_days_sea-1))
+
+
 Tickets_coord$prev_days_date <- Tickets_coord$set_date - days(1)
 
 Tickets_coord <- Tickets_coord %>% drop_na(set_date) %>% 
@@ -247,7 +285,7 @@ Tickets_coord <- Tickets_coord %>% drop_na(set_date) %>%
   dplyr::rename(set_year = LANDING_YEAR) %>%
   dplyr::select(
     "VESSEL_NUM", "AGENCY_CODE", "trip_id", 
-    "set_date", "set_year", "set_month", "set_day", "prev_days_date",
+    "set_date", "set_date_busy", "set_year", "set_month", "set_day", "prev_days_date",
     "selection", "PORT_AREA_CODE", "Species_Dominant", 
     "Landings_mtons", "Revenue", "Price_mtons", "max_days_sea",
     "group_all", "Vessel.length", "Vessel.weight", "Vessel.horsepower", 
@@ -274,10 +312,15 @@ participation_data_all <- Tickets_coord %>%
     ifelse(Species_Dominant == "UMCK", Revenue, 0)))))))) %>%
   mutate(CPS_revenue = ifelse(selection == "No-Participation", 0, CPS_revenue)) %>% 
   mutate(partDummy = ifelse(selection == "No-Participation", 0, 1)) %>%
-  dplyr::select(VESSEL_NUM, set_date, set_year, partDummy, CPS_revenue, Revenue, group_all) %>% unique() %>%
+  dplyr::select(VESSEL_NUM, set_date, set_date_busy, set_year, partDummy, CPS_revenue, Revenue, group_all) %>% unique() %>%
   dplyr::arrange(VESSEL_NUM, set_date) %>%
   group_by(VESSEL_NUM) %>%
-  mutate(participation_ndays = rollsum(partDummy, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
+  mutate(participation_ndays = rollsum(partDummy, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center"))
+
+
+
+
+%>%
   mutate(CPS_revenue_MA = rollsum(CPS_revenue, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
   mutate(Revenue_MA = rollsum(Revenue, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
   ungroup() %>% 
