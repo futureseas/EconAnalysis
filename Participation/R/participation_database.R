@@ -125,11 +125,6 @@ FF_Tickets<-Tickets[which((Tickets$Species_Dominant == "PSDN" & Tickets$Revenue 
                           (Tickets$Species_Dominant == "ALBC" &
                            Tickets$PACFIN_SPECIES_CODE == "NANC")),]
 
-## Aggregate mackerels in one category
-FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "CMCK"] <- "OMCK")
-FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "JMCK"] <- "OMCK")
-FF_Tickets<- within(FF_Tickets, Species_Dominant[Species_Dominant == "UMCK"] <- "OMCK")
-
 ###Creating a filter here to only retain vessels with more than 10 forage fish landings (tickets where FF is the dominant species)
 FTID_Value<-aggregate(Revenue ~ FTID_unique + VESSEL_NUM, FUN=sum, data=FF_Tickets)
 FTID_Value<-FTID_Value[FTID_Value$VESSEL_NUM %in% names(which(table(FTID_Value$VESSEL_NUM) > 10)), ]
@@ -219,8 +214,11 @@ Tickets_exp <- complete(Tickets_FF_filtered, VESSEL_NUM, LANDING_YEAR, LANDING_M
 Tickets_exp$set_date <- as.Date(with(Tickets_exp, paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep="-")), "%Y-%m-%d") 
 Tickets_exp <- Tickets_exp %>% drop_na(set_date)
 
+
+#---------------------------------------------------------------------------------------
 ## Identify days that vessel is active but no fish ticket (multidays trips)
 Tickets_exp_md <- Tickets_exp %>%
+  # Create participation dummy
   group_by(VESSEL_NUM) %>% 
   mutate(set_date_busy =  zoo::na.locf(set_date_busy, na.rm = F)) %>% ungroup() %>%
   mutate(participating = ifelse(set_date <= set_date_busy, 1, 0)) %>%
@@ -228,22 +226,22 @@ Tickets_exp_md <- Tickets_exp %>%
   mutate(selection2 = selection) %>% 
   # Carry forward information in multicast trips
   group_by(VESSEL_NUM) %>%
-  mutate(selection = ifelse(participating == 1, zoo::na.locf(selection, na.rm = F), selection)) %>%
-  mutate(Landings_mtons = ifelse(participating == 1, zoo::na.locf(Landings_mtons, na.rm = F), Landings_mtons)) %>%
-  mutate(Landings_lbs = ifelse(participating == 1, zoo::na.locf(Landings_lbs, na.rm = F), Landings_lbs)) %>%
-  mutate(Revenue = ifelse(participating == 1, zoo::na.locf(Revenue, na.rm = F), Revenue)) %>%
-  mutate(Price_lbs = ifelse(participating == 1, zoo::na.locf(Price_lbs, na.rm = F), Price_lbs)) %>%
-  mutate(Price_mtons = ifelse(participating == 1, zoo::na.locf(Price_mtons, na.rm = F), Price_mtons)) %>%
-  mutate(max_days_sea = ifelse(participating == 1, zoo::na.locf(max_days_sea, na.rm = F), max_days_sea)) %>%
-  mutate(Vessel.length = ifelse(participating == 1, zoo::na.locf(Vessel.length, na.rm = F), Vessel.length)) %>%
-  mutate(Vessel.weight = ifelse(participating == 1, zoo::na.locf(Vessel.weight, na.rm = F), Vessel.weight)) %>%
-  mutate(Vessel.horsepower = ifelse(participating == 1, zoo::na.locf(Vessel.horsepower, na.rm = F), Vessel.horsepower)) %>%
-  mutate(FTID = ifelse(participating == 1, zoo::na.locf(FTID, na.rm = F), FTID)) %>%
-  mutate(FTID_unique = ifelse(participating == 1, zoo::na.locf(FTID_unique, na.rm = F), FTID_unique)) %>%
-  mutate(AGENCY_CODE = ifelse(participating == 1, zoo::na.locf(AGENCY_CODE, na.rm = F), AGENCY_CODE)) %>%
-  mutate(PORT_AREA_CODE = ifelse(participating == 1, zoo::na.locf(PORT_AREA_CODE, na.rm = F), PORT_AREA_CODE)) %>%
+  mutate(selection           = ifelse(participating == 1, zoo::na.locf(selection, na.rm = F), selection)) %>%
+  mutate(Landings_mtons      = ifelse(participating == 1, zoo::na.locf(Landings_mtons, na.rm = F), Landings_mtons)) %>%
+  mutate(Landings_lbs        = ifelse(participating == 1, zoo::na.locf(Landings_lbs, na.rm = F), Landings_lbs)) %>%
+  mutate(Revenue             = ifelse(participating == 1, zoo::na.locf(Revenue, na.rm = F), Revenue)) %>%
+  mutate(Price_lbs           = ifelse(participating == 1, zoo::na.locf(Price_lbs, na.rm = F), Price_lbs)) %>%
+  mutate(Price_mtons         = ifelse(participating == 1, zoo::na.locf(Price_mtons, na.rm = F), Price_mtons)) %>%
+  mutate(max_days_sea        = ifelse(participating == 1, zoo::na.locf(max_days_sea, na.rm = F), max_days_sea)) %>%
+  mutate(Vessel.length       = ifelse(participating == 1, zoo::na.locf(Vessel.length, na.rm = F), Vessel.length)) %>%
+  mutate(Vessel.weight       = ifelse(participating == 1, zoo::na.locf(Vessel.weight, na.rm = F), Vessel.weight)) %>%
+  mutate(Vessel.horsepower   = ifelse(participating == 1, zoo::na.locf(Vessel.horsepower, na.rm = F), Vessel.horsepower)) %>%
+  mutate(FTID                = ifelse(participating == 1, zoo::na.locf(FTID, na.rm = F), FTID)) %>%
+  mutate(FTID_unique         = ifelse(participating == 1, zoo::na.locf(FTID_unique, na.rm = F), FTID_unique)) %>%
+  mutate(AGENCY_CODE         = ifelse(participating == 1, zoo::na.locf(AGENCY_CODE, na.rm = F), AGENCY_CODE)) %>%
+  mutate(PORT_AREA_CODE      = ifelse(participating == 1, zoo::na.locf(PORT_AREA_CODE, na.rm = F), PORT_AREA_CODE)) %>%
   mutate(PACFIN_SPECIES_CODE = ifelse(participating == 1, zoo::na.locf(PACFIN_SPECIES_CODE, na.rm = F), PACFIN_SPECIES_CODE)) %>%
-  mutate(Species_Dominant = ifelse(participating == 1, zoo::na.locf(Species_Dominant, na.rm = F), Species_Dominant)) %>%
+  mutate(Species_Dominant    = ifelse(participating == 1, zoo::na.locf(Species_Dominant, na.rm = F), Species_Dominant)) %>%
   ungroup() %>%
   # Create No-Participation choice
   mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
@@ -281,10 +279,9 @@ Tickets_coord <-  Tickets_coord %>%
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Clean dataset for discrete choice model  
-## Add unique trip_ID, set_date, set_year, set_day and set_month 
-## (exclude weird period from expanding data)
+## Add set_year, set_day and set_month 
 
-Tickets_coord <- Tickets_coord %>% drop_na(set_date) %>% 
+Tickets_coord <- Tickets_coord %>% 
   dplyr::rename(set_day = LANDING_DAY) %>%
   dplyr::rename(set_month = LANDING_MONTH) %>%
   dplyr::rename(set_year = LANDING_YEAR) %>%
@@ -461,10 +458,12 @@ Tickets_final <- Tickets_final  %>%
   mutate(dist = ifelse(ncount>1, dist_mean, dist)) %>%
   dplyr::select(-c('lat_mean', 'lon_mean', 'dist_mean',
                    'lat_logbook', 'lon_logbook',
-                   'lat_ca', 'lon_ca')) %>% ungroup() %>%
+                   'lat_ca', 'lon_ca')) %>% 
+  ungroup() %>%
   distinct() %>%
   group_by(VESSEL_NUM, set_date) %>%
-  mutate(order = seq(1:n())) %>% ungroup() %>%
+  mutate(order = seq(1:n())) %>% 
+  ungroup() %>%
   filter(order == 1) %>%
   dplyr::select(-c('order', 'ncount')) 
 
