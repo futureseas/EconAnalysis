@@ -154,72 +154,11 @@ Tickets<-Tickets[which(Tickets$Revenue > 0),] # 137,971 row deleted
 Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) %>% # 44,035 row deleted 
   mutate(selection = paste(PORT_AREA_CODE, Species_Dominant, sep = "-", collapse = NULL)) 
 
-
 #-----------------------------------------------------
 ### Merge vessel characteristics
 Tickets_chr <- merge(Tickets, Vessel.chr.lenght, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 Tickets_chr <- merge(Tickets_chr, Vessel.chr.weight, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 Tickets_chr <- merge(Tickets_chr, Vessel.chr.horsepower, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
-
-saveRDS(Tickets_chr, "C:/Data/PacFIN data/Tickets_filtered.rds")
-
-
-
-
-
-<<WORKING HERE>>
-#-------------------------------------------------------------------------------
-## Filter participation database ##
-
-## Keep trip with maximum revenue within a day
-## (only 5% of the data have repeated trips per day)
-
-Tickets$set_date_busy <- 
-  as.Date(with(Tickets, paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep="-")), 
-          "%Y-%m-%d")
-
-Tickets_filtered <- Tickets %>%
-  mutate(max_days_sea = ifelse(is.na(max_days_sea), 1, max_days_sea)) %>%
-  group_by(VESSEL_NUM, set_date_busy) %>%
-  mutate(max_rev = ifelse(Revenue == max(Revenue, na.rm=TRUE), 1, 0)) %>% ungroup() 
-
-%>%
-  #   dplyr::filter(max_rev == 1) %>%
-  #   distinct_at(vars(-trip_id)) %>%
-  #   group_by(VESSEL_NUM, set_date) %>%
-  #   mutate(ncount = n()) %>%
-  #   mutate(lat_mean = mean(lat, na.rm = TRUE),
-  #          lon_mean = mean(lon, na.rm = TRUE),
-  #          dist_mean = mean(dist, na.rm = TRUE)) %>%
-  #   mutate(lat = ifelse(ncount>1, lat_mean, lat)) %>%
-  #   mutate(lon = ifelse(ncount>1, lon_mean, lon)) %>%
-  #   mutate(dist = ifelse(ncount>1, dist_mean, dist)) %>%
-  #   dplyr::select(-c('lat_mean', 'lon_mean', 'dist_mean',
-#                    'lat_logbook', 'lon_logbook',
-#                    'lat_ca', 'lon_ca')) %>% ungroup() %>%
-#   distinct() %>%
-#   group_by(VESSEL_NUM, set_date) %>%
-#   mutate(order = seq(1:n())) %>% ungroup() %>%
-#   filter(order == 1) %>%
-#   dplyr::select(-c('max_rev', 'order', 'ncount')) %>%
-#   group_by(VESSEL_NUM, set_date)
-# 
-# participation_data_filtered$trip_id <-
-#   udpipe::unique_identifier(participation_data_filtered, fields = c('VESSEL_NUM', 'set_date'))
-#   saveRDS(participation_data_filtered, "C:\\Data\\PacFIN data\\participation_data_filtered.rds")
-
-
-# mutate(Revenue = ifelse(selection == "No-Participation", 0, Revenue)) %>%
-
-
-
-
-
-
-
-
-
-
 
 #---------------------------------------------------------------------
 ## Calculate CPUE, standardize within species and transform to tanh()
@@ -258,42 +197,67 @@ rm(FF_Vessels, FTID_Value)
 ## Create time variable
 Tickets_FF <- Tickets_FF %>%
   mutate(max_days_sea = ifelse(is.na(max_days_sea), 1, max_days_sea)) 
-
 Tickets_FF$set_date_busy <- 
-  as.Date(with(Tickets_FF, paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep="-")), 
-          "%Y-%m-%d")
-
+  as.Date(with(Tickets_FF, paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep="-")), "%Y-%m-%d")
 Tickets_FF <- Tickets_FF %>% mutate(set_date = set_date_busy - days(max_days_sea-1))
+
+#-------------------------------------------------------------------------------
+## Keep trip with maximum revenue within a day (only 5% of the data have repeated trips per day)
+Tickets_FF_filtered <- Tickets_FF %>%
+  group_by(VESSEL_NUM, set_date) %>%
+  mutate(max_rev = ifelse(Revenue == max(Revenue, na.rm=TRUE), 1, 0)) %>% ungroup() %>%
+  dplyr::filter(max_rev == 1) %>%
+  dplyr::arrange(VESSEL_NUM, set_date) %>%
+  mutate(LANDING_YEAR = year(set_date)) %>%
+  mutate(LANDING_MONTH = month(set_date)) %>%
+  mutate(LANDING_DAY = day(set_date))
+
 
 #---------------------------------------------------------------------------------------
 ### Expand database to include outside option (when vessel do not have fish ticket.)
-Tickets_exp <- complete(Tickets_FF, VESSEL_NUM, set_date) 
-Tickets_exp_2 <- Tickets_exp %>%
+Tickets_exp <- complete(Tickets_FF_filtered, VESSEL_NUM, LANDING_YEAR, LANDING_MONTH, LANDING_DAY)
+Tickets_exp$set_date <- as.Date(with(Tickets_exp, paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep="-")), "%Y-%m-%d") 
+Tickets_exp <- Tickets_exp %>% drop_na(set_date)
+
+## Identify days that vessel is active but no fish ticket (multidays trips)
+Tickets_exp_md <- Tickets_exp %>%
   group_by(VESSEL_NUM) %>% 
-  mutate(set_date_busy = 
-           na.locf(set_date_busy, na.rm = F)) %>%
-  mutate(participating_no_ticket = ifelse(set_date <= set_date_busy, 1, 0)) %>% ungroup() %>%
-  mutate(participating_no_ticket = ifelse(is.na(participating_no_ticket), 0, participating_no_ticket)) %>%
-  mutate(selection2 = selection_original)
-
-### Carry forward information for multidays trips (check #602991)
-Tickets_exp_3 <- Tickets_exp_2 %>% group_by(VESSEL_NUM) %>%
-  mutate(selection = ifelse(participating_no_ticket == 1, na.locf(selection, na.rm = F), selection)) %>%
-  mutate(max_days_sea = ifelse(participating_no_ticket == 1, na.locf(max_days_sea, na.rm = F), max_days_sea)) %>%
-  mutate(Vessel.length = ifelse(participating_no_ticket == 1, na.locf(Vessel.length, na.rm = F), Vessel.length)) %>%
-  mutate(Vessel.weight = ifelse(participating_no_ticket == 1, na.locf(Vessel.weight, na.rm = F), Vessel.weight)) %>%
-  mutate(Vessel.horsepower = ifelse(participating_no_ticket == 1, na.locf(Vessel.horsepower, na.rm = F), Vessel.horsepower)) %>%
-  ungroup()
-
-Tickets_exp_4 <- Tickets_exp_3 %>%
+  mutate(set_date_busy =  zoo::na.locf(set_date_busy, na.rm = F)) %>% ungroup() %>%
+  mutate(participating = ifelse(set_date <= set_date_busy, 1, 0)) %>%
+  mutate(participating = ifelse(is.na(participating), 0, participating)) %>%
+  mutate(selection2 = selection) %>% 
+  # Carry forward information in multicast trips
+  group_by(VESSEL_NUM) %>%
+  mutate(selection = ifelse(participating == 1, zoo::na.locf(selection, na.rm = F), selection)) %>%
+  mutate(Landings_mtons = ifelse(participating == 1, zoo::na.locf(Landings_mtons, na.rm = F), Landings_mtons)) %>%
+  mutate(Landings_lbs = ifelse(participating == 1, zoo::na.locf(Landings_lbs, na.rm = F), Landings_lbs)) %>%
+  mutate(Revenue = ifelse(participating == 1, zoo::na.locf(Revenue, na.rm = F), Revenue)) %>%
+  mutate(Price_lbs = ifelse(participating == 1, zoo::na.locf(Price_lbs, na.rm = F), Price_lbs)) %>%
+  mutate(Price_mtons = ifelse(participating == 1, zoo::na.locf(Price_mtons, na.rm = F), Price_mtons)) %>%
+  mutate(max_days_sea = ifelse(participating == 1, zoo::na.locf(max_days_sea, na.rm = F), max_days_sea)) %>%
+  mutate(Vessel.length = ifelse(participating == 1, zoo::na.locf(Vessel.length, na.rm = F), Vessel.length)) %>%
+  mutate(Vessel.weight = ifelse(participating == 1, zoo::na.locf(Vessel.weight, na.rm = F), Vessel.weight)) %>%
+  mutate(Vessel.horsepower = ifelse(participating == 1, zoo::na.locf(Vessel.horsepower, na.rm = F), Vessel.horsepower)) %>%
+  mutate(FTID = ifelse(participating == 1, zoo::na.locf(FTID, na.rm = F), FTID)) %>%
+  mutate(FTID_unique = ifelse(participating == 1, zoo::na.locf(FTID_unique, na.rm = F), FTID_unique)) %>%
+  mutate(AGENCY_CODE = ifelse(participating == 1, zoo::na.locf(AGENCY_CODE, na.rm = F), AGENCY_CODE)) %>%
+  mutate(PORT_AREA_CODE = ifelse(participating == 1, zoo::na.locf(PORT_AREA_CODE, na.rm = F), PORT_AREA_CODE)) %>%
+  mutate(PACFIN_SPECIES_CODE = ifelse(participating == 1, zoo::na.locf(PACFIN_SPECIES_CODE, na.rm = F), PACFIN_SPECIES_CODE)) %>%
+  mutate(Species_Dominant = ifelse(participating == 1, zoo::na.locf(Species_Dominant, na.rm = F), Species_Dominant)) %>%
+  ungroup() %>%
+  # Create No-Participation choice
   mutate(selection = ifelse(is.na(selection), 'No-Participation', selection)) %>%
-  mutate(FTID_unique = ifelse(is.na(FTID_unique), paste('Exp-',1:n()), FTID_unique))
+  mutate(FTID_unique = ifelse(is.na(FTID_unique), paste('Exp-',1:n()), FTID_unique)) %>% 
+  # Create dummy multiday trip
+  group_by(VESSEL_NUM, FTID_unique) %>% 
+  mutate(n_days_sea = sum(participating)) %>% ungroup() %>% 
+  mutate(multiday_trip = ifelse(n_days_sea>1, 1, 0))
 
 
 #-----------------------------------------------------
 ### Merge with cluster data
 PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
-Tickets_clust <- merge(Tickets_exp, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+Tickets_clust <- merge(Tickets_exp_md, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 rm(PAM_Vessel_Groups)
 Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 
@@ -320,36 +284,17 @@ Tickets_coord <-  Tickets_coord %>%
 ## Add unique trip_ID, set_date, set_year, set_day and set_month 
 ## (exclude weird period from expanding data)
 
-Tickets_coord$trip_id <- udpipe::unique_identifier(Tickets_coord, fields = c("FTID_unique"))
-
-Tickets_coord <- Tickets_coord %>%
-  mutate(Vessel.length = as.numeric(Vessel.length),
-         Vessel.weight = as.numeric(Vessel.weight),
-         Vessel.horsepower = as.numeric(Vessel.horsepower)) 
-
-
-### Create date variable
-Tickets_coord$set_date_busy <- 
-  as.Date(with(Tickets_coord, paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep="-")), 
-          "%Y-%m-%d")
-
-Tickets_coord <- Tickets_coord %>% mutate(set_date = set_date_busy - days(max_days_sea-1))
-
-
-Tickets_coord$prev_days_date <- Tickets_coord$set_date - days(1)
-
 Tickets_coord <- Tickets_coord %>% drop_na(set_date) %>% 
   dplyr::rename(set_day = LANDING_DAY) %>%
   dplyr::rename(set_month = LANDING_MONTH) %>%
   dplyr::rename(set_year = LANDING_YEAR) %>%
   dplyr::select(
-    "VESSEL_NUM", "AGENCY_CODE", "trip_id", 
-    "set_date", "set_date_busy", "set_year", "set_month", "set_day", "prev_days_date",
+    "VESSEL_NUM", "AGENCY_CODE", 
+    "set_date", "set_date_busy", "set_year", "set_month", "set_day", 
     "selection", "PORT_AREA_CODE", "Species_Dominant", 
     "Landings_mtons", "Revenue", "Price_mtons", "max_days_sea",
     "group_all", "Vessel.length", "Vessel.weight", "Vessel.horsepower", 
-    "lat", "lon", "lon_logbook", "lon_ca", "lat_logbook", "lat_ca") 
-
+    "lat", "lon", "lon_logbook", "lon_ca", "lat_logbook", "lat_ca", "multiday_trip", "n_days_sea") 
 
 
 #---------------------------------------------------------------------------------------
@@ -371,15 +316,10 @@ participation_data_all <- Tickets_coord %>%
     ifelse(Species_Dominant == "UMCK", Revenue, 0)))))))) %>%
   mutate(CPS_revenue = ifelse(selection == "No-Participation", 0, CPS_revenue)) %>% 
   mutate(partDummy = ifelse(selection == "No-Participation", 0, 1)) %>%
-  dplyr::select(VESSEL_NUM, set_date, set_date_busy, set_year, partDummy, CPS_revenue, Revenue, group_all) %>% unique() %>%
+  dplyr::select(VESSEL_NUM, set_date, set_year, partDummy, CPS_revenue, Revenue, group_all) %>% unique() %>%
   dplyr::arrange(VESSEL_NUM, set_date) %>%
   group_by(VESSEL_NUM) %>%
-  mutate(participation_ndays = rollsum(partDummy, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center"))
-
-
-
-
-%>%
+  mutate(participation_ndays = rollsum(partDummy, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
   mutate(CPS_revenue_MA = rollsum(CPS_revenue, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
   mutate(Revenue_MA = rollsum(Revenue, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
   ungroup() %>% 
@@ -389,13 +329,13 @@ participation_data_all <- Tickets_coord %>%
 
 
 # ----------
-## Plots with filtered data 
-
+# # Plots with filtered data
+# 
 # cluster <- 5
 # ndays_filter <- 90
 # ndays_filter_t <- 30
 # 
-# participation_filtered <- participation_data_all %>% 
+# participation_filtered <- participation_data_all %>%
 #   #filter(group_all == cluster) %>%
 #   mutate(Dfilter = ifelse(partDummy == 0 & participation_ndays < ndays_filter, 0, 1)) %>%
 #   mutate(Dfilter = ifelse(partDummy == 1 & participation_ndays < ndays_filter_t, 0, Dfilter)) %>%
@@ -485,14 +425,59 @@ Tickets_dist <- Tickets_dist %>% rowwise() %>%
 # ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat_logbook)))/nrow(ticket_part_2))
 # ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat_ca)))/nrow(ticket_part_2))
 
-Tickets_final <- Tickets_dist %>% mutate(dist = ifelse(dist > 220, NA, dist))
-hist(Tickets_final$dist)
+Tickets_dist <- Tickets_dist %>% mutate(dist = ifelse(dist > 220, NA, dist))
+hist(Tickets_dist$dist)
+
+#------------------------------------------------------
+### Details before savings (e.g. create previous day, trip_id. Make vessel characteristics numeric)
+
+Tickets_final <- Tickets_dist %>%
+  mutate(Vessel.length = as.numeric(Vessel.length),
+         Vessel.weight = as.numeric(Vessel.weight),
+         Vessel.horsepower = as.numeric(Vessel.horsepower)) %>%
+  mutate(Revenue = ifelse(selection == "No-Participation", 0, Revenue)) %>%
+  mutate(dist = ifelse(selection == "No-Participation", 0, dist)) %>%
+  mutate(max_days_sea = ifelse(selection == "No-Participation", 0, max_days_sea)) %>%
+  mutate(Landings_mtons = ifelse(selection == "No-Participation", 0, Landings_mtons))
+
+Tickets_final$prev_days_date <- Tickets_final$set_date - days(1)
+Tickets_final$trip_id <- udpipe::unique_identifier(Tickets_final, fields = c('VESSEL_NUM', 'set_date'))
+
+
+#-------------------------------------------------------------------------------
+## Filter participation database ##
+
+## Keep one trip per day!
+
+Tickets_final <- Tickets_final  %>%
+  distinct_at(vars(-trip_id)) %>%
+  group_by(VESSEL_NUM, set_date) %>%
+  mutate(ncount = n()) %>%
+  mutate(lat_mean = mean(lat, na.rm = TRUE),
+         lon_mean = mean(lon, na.rm = TRUE),
+         dist_mean = mean(dist, na.rm = TRUE)) %>%
+  mutate(lat = ifelse(ncount>1, lat_mean, lat)) %>%
+  mutate(lon = ifelse(ncount>1, lon_mean, lon)) %>%
+  mutate(dist = ifelse(ncount>1, dist_mean, dist)) %>%
+  dplyr::select(-c('lat_mean', 'lon_mean', 'dist_mean',
+                   'lat_logbook', 'lon_logbook',
+                   'lat_ca', 'lon_ca')) %>% ungroup() %>%
+  distinct() %>%
+  group_by(VESSEL_NUM, set_date) %>%
+  mutate(order = seq(1:n())) %>% ungroup() %>%
+  filter(order == 1) %>%
+  dplyr::select(-c('max_rev', 'order', 'ncount')) 
+
+Tickets_final$trip_id <- udpipe::unique_identifier(Tickets_final, fields = c('VESSEL_NUM', 'set_date'))
+
+
 
 #------------------------------------------------------
 ### Save participation data
 
 saveRDS(Tickets_final, "C:\\Data\\PacFIN data\\participation_data.rds")
 # 
+
 # ########################################
 # unique_tickets <- Tickets_final %>%
 #   dplyr::select(trip_id) %>%
