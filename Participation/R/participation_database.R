@@ -466,7 +466,7 @@ Tickets_final <- Tickets_final  %>%
   group_by(VESSEL_NUM, set_date) %>%
   mutate(order = seq(1:n())) %>% ungroup() %>%
   filter(order == 1) %>%
-  dplyr::select(-c('max_rev', 'order', 'ncount')) 
+  dplyr::select(-c('order', 'ncount')) 
 
 Tickets_final$trip_id <- udpipe::unique_identifier(Tickets_final, fields = c('VESSEL_NUM', 'set_date'))
 
