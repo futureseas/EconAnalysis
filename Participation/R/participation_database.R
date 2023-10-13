@@ -48,6 +48,7 @@ Tickets <- dplyr::select(Tickets_raw, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING
                                  FISHER_LICENSE_NUM, AFI_PRICE_PER_POUND, NUM_OF_DAYS_FISHED)) %>%
   mutate(AFI_PRICE_PER_MTONS = AFI_PRICE_PER_POUND/0.000453592)
   Tickets$FTID_unique <- udpipe::unique_identifier(Tickets, fields = c("FTID", "VESSEL_NUM", "LANDING_YEAR"))
+  # saveRDS(Tickets, "C:/Data/PacFIN data/Tickets_filtered.rds")
 
 
 #-----------------------------------------------------

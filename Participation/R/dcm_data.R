@@ -12,38 +12,31 @@ library(plm)
 library(tidyverse)
 library(lubridate)
 
-
 #-------------------------------------------------------------------------------
 ## Read participation database ##
-
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
-
 #-------------------------------------------------------------------------------
-# ## Day at sea:
-# hist(participation_data$max_days_sea)
-### How many row have day at sea variable? Just 4.3%, so I should not use it as filter, just as information
-# ticket_part <- participation_data %>% dplyr::filter(selection != "No-Participation")
-# ticket_part%>% summarize(perc = (nrow(ticket_part)-sum(is.na(max_days_sea)))/nrow(ticket_part))
+## Day at sea:
+ticket_part <- participation_data %>% dplyr::filter(selection != "No-Participation")
+hist(ticket_part$max_days_sea)
 
 #-------------------------------------------------------------------------------
 ## Sampling choice data including expected revenue, expected cost and past behavior dummies ##
-## Landing and price regression do not depend on cluster ##
-
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
-# samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-#                          min_year = 2013, max_year = 2017,
-#                          min_year_prob = 2013, max_year_prob = 2017,
-#                          min_year_est = 2012, max_year_est = 2019,
-#                          ndays = 30, nhauls_sampled = 5,
-#                          seed = 300, ncores = 4, rev_scale = 1000)
-#   samps <- samps1 %>%
-#     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-#     rm(participation_data_filtered, samps1)
-#     saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4_V3.rds")
-#   test <- samps %>% ungroup() %>% group_by(fished_haul,selection) %>% summarize(n_count = n())
-#   max(test$n_count)
-#   rm(test)
+samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+                         min_year = 2013, max_year = 2017,
+                         min_year_prob = 2013, max_year_prob = 2017,
+                         min_year_est = 2012, max_year_est = 2019,
+                         ndays = 30, nhauls_sampled = 5,
+                         seed = 300, ncores = 4, rev_scale = 1000, sample_choices = TRUE)
+  samps <- samps1 %>%
+    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+    rm(participation_data_filtered, samps1)
+    saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4_sampled.rds")
+  test <- samps %>% ungroup() %>% group_by(fished_haul,selection) %>% summarize(n_count = n())
+  max(test$n_count)
+  rm(test)
 
 #----------------------------------
 ## Run saved data

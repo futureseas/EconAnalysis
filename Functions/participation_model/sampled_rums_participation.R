@@ -16,6 +16,7 @@
 #' @param seed Seed for sampling tows
 #' @param ncores Number of cores to use
 #' @param rev_scale Scale the revenue by this factor
+#' @param sample_choices whether we want to sample choices or not
 
 #' @export
 
@@ -25,82 +26,60 @@ sampled_rums <- function(data_in, cluster = 4,
                          min_year_est = 2012, max_year_est = 2019,
                          ndays = 30, 
                          nhauls_sampled = 5, seed = 300, 
-                         ncores, rev_scale) {
+                         ncores, rev_scale, sample_choices = TRUE) {
 
-  # ###############
-  # # Delete
-  # gc()
-  # library(doParallel)
-  # library(tidyr)
-  # library(plm)
-  # library(tidyverse)
-  # library(lubridate)
-  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data_filtered.rds")
-  # cluster <- 4
-  # min_year_prob <- 2013
-  # max_year_prob <- 2017
-  # min_year_est <- 2012
-  # max_year_est <- 2019
-  # min_year <- 2013
-  # max_year <- 2017
-  # ndays <- 30
-  # nhauls_sampled <- 5
-  # seed <- 300
-  # ncores <- 4
-  # rev_scale <- 1000
-  # ################
+  ###############
+  # Delete
+  gc()
+  library(doParallel)
+  library(tidyr)
+  library(plm)
+  library(tidyverse)
+  library(lubridate)
+  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+  cluster <- 4
+  min_year_prob <- 2013
+  max_year_prob <- 2017
+  min_year_est <- 2012
+  max_year_est <- 2019
+  min_year <- 2013
+  max_year <- 2017
+  ndays <- 30
+  nhauls_sampled <- 5
+  seed <- 300
+  ncores <- 4
+  rev_scale <- 1000
+  sample_choices <- TRUE
+  ################
 
   dat <- data_in 
   
   #-------------
   ## Price models
   dat_est <- readRDS("C:/Data/PacFIN data/Tickets_filtered.rds")
-
   datPanel <- dat_est %>% 
       dplyr::filter(LANDING_YEAR >= min_year_est, LANDING_YEAR <= max_year_est) %>%
-      dplyr::mutate(ln_Price_mtons = log(Price_mtons)) %>% 
+      dplyr::filter(AFI_PRICE_PER_MTONS>0)%>%
+      dplyr::mutate(ln_Price_mtons = log(AFI_PRICE_PER_MTONS)) %>% 
       mutate(trend = LANDING_YEAR - min_year_est + 1) %>%
-      mutate(set_month = LANDING_MONTH) %>%
-      filter(Species_Dominant != "FSOL") %>% filter(Species_Dominant != "SCOR") %>%
-      filter(Species_Dominant != "STRY") %>% filter(Species_Dominant != "DSOL") %>%
-      filter(Species_Dominant != "HTRB") %>% filter(Species_Dominant != "RHRG") %>%
-      filter(Species_Dominant != "SLNS") %>% filter(Species_Dominant != "RDB1") %>%
-      filter(Species_Dominant != "BSK1") %>% filter(Species_Dominant != "TREE") %>%
-      filter(Species_Dominant != "POP2") %>% filter(Species_Dominant != "STR1") %>%
-      filter(Species_Dominant != "KFSH") %>% filter(Species_Dominant != "REX")  %>%
-      filter(Species_Dominant != "BRZ1") %>% filter(Species_Dominant != "MXR1") %>%
-      filter(Species_Dominant != "GSR1") %>% filter(Species_Dominant != "BMCK") %>%
-      filter(Species_Dominant != "ART1") %>% filter(Species_Dominant != "RTSK") %>%
-      filter(Species_Dominant != "PNK1") %>% filter(Species_Dominant != "GPRW") %>%
-      filter(Species_Dominant != "SQID") %>% filter(Species_Dominant != "MXRF") %>%
-      filter(Species_Dominant != "RCK7") %>% filter(Species_Dominant != "GBLC") %>%
-      filter(Species_Dominant != "HNY1") %>% filter(Species_Dominant != "UTNA") %>%
-      filter(Species_Dominant != "MEEL") %>% filter(Species_Dominant != "GGRD") %>%
-      filter(Species_Dominant != "MSHP") %>% filter(Species_Dominant != "GBL1") %>%
-      filter(Species_Dominant != "PNKR") %>% filter(Species_Dominant != "FLAG") %>%
-      filter(Species_Dominant != "YEY1") %>% filter(Species_Dominant != "ROSY") %>%
-      filter(Species_Dominant != "SAIL") %>% filter(Species_Dominant != "SCLP") %>%
-      filter(Species_Dominant != "RSTN") %>% filter(Species_Dominant != "PLCK") %>%
-      filter(Species_Dominant != "BCLM") %>% filter(Species_Dominant != "CKLE") %>%
-      filter(Species_Dominant != "GCLM") %>% filter(Species_Dominant != "NUSF") 
-  
-  datPanel2 <- fastDummies::dummy_cols(datPanel, select_columns = 'set_month')
-    
-    # model_price <- lm(ln_Price_mtons ~ factor(Species_Dominant):factor(PORT_AREA_CODE) + 
-    #                    factor(set_month) + trend, data = datPanel)
-    # saveRDS(model_price, file = 'Participation\\R\\model_price_2012_2019.RDS')
-    # model_price <- readRDS(file = 'Participation\\R\\model_price_2012_2019.RDS')
-  
-    species <- as.data.frame(datPanel2 %>% dplyr::select(Species_Dominant) %>% unique())
-    species.list <- c(species$Species_Dominant)
-    species.list.number <- as.data.frame(species.list)
-    mod_estimate <- list() 
-    xx <- 1
-    
-    for(ii in species.list) {
-      datPanel_X <- datPanel2 %>% filter(Species_Dominant == ii)
-      mod_estimate[[xx]] <- 
-        lm(ln_Price_mtons ~ factor(PORT_AREA_CODE) + trend + 
+      mutate(set_month = LANDING_MONTH) %>% 
+    group_by(PACFIN_SPECIES_CODE) %>% 
+    mutate(obs = n(), n_port = n_distinct(PORT_AREA_CODE)) %>% 
+    ungroup() %>% 
+    filter(obs>1) %>% 
+    filter(n_port>1) %>% 
+    arrange(obs)
+  datPanel2 <- fastDummies::dummy_cols(datPanel, select_columns = 'set_month') 
+  species <- as.data.frame(datPanel2 %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique())
+  species.list <- c(species$PACFIN_SPECIES_CODE)
+  species.list.number <- as.data.frame(species.list)
+  mod_estimate <- list() 
+  xx <- 1
+   
+  for(ii in species.list) {
+    datPanel_X <- datPanel2 %>% filter(PACFIN_SPECIES_CODE == ii)
+    mod_estimate[[xx]] <- 
+      lm(ln_Price_mtons ~ factor(PORT_AREA_CODE) + trend + 
              set_month_1 + set_month_2 +
              set_month_3 + set_month_4 +
              set_month_5 + set_month_6 +
@@ -112,7 +91,7 @@ sampled_rums <- function(data_in, cluster = 4,
     rm(xx, species.list, species, datPanel, datPanel2, dat_est, datPanel_X)
     species.list.number$id_number <- seq(1, nrow(species.list.number))
 
-    # summary(mod_estimate[[28]])
+    # summary(mod_estimate[[1]])
     # modelsummary::modelsummary(model_price, fmt = 2,
     #                            gof_map = c("nobs", "adj.r.squared"),
     #                            statistic = "({std.error}){stars}",
@@ -130,246 +109,251 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::select(trip_id, VESSEL_NUM, set_year, set_month, set_day, Revenue, selection) %>% 
       as.data.frame
 
-  ## Select hauls used to calculate probability for the choice set
-  dist_hauls_catch_shares <- hauls %>% dplyr::filter(set_year >= min_year_prob, set_year <= max_year_prob)
-    dist_hauls_catch_shares <- dist_hauls_catch_shares[dist_hauls_catch_shares$selection != "No-Participation", ]
-  
     
   #----------------------------------------------------------------------------
-  ## Create probabilities for sampling choice set
-  ## For this, we compute the average vessel catch and port composition by month
-  ## (The choice set varies depending on the month of the year)
-
-  dbp <- dist_hauls_catch_shares %>% 
-    group_by(selection, VESSEL_NUM, set_year, set_month) %>% 
-    summarize(sum_rev = sum(Revenue, na.rm = TRUE)) %>%
-    group_by(selection, VESSEL_NUM, set_month) %>%
-    summarize(mean_rev = mean(sum_rev, na.rm = TRUE)) %>%
-    group_by(VESSEL_NUM, set_month) %>%
-    mutate(tot_rev = sum(mean_rev, na.rm = TRUE)) %>% ungroup() %>%
-    mutate(catch_composition = mean_rev/tot_rev)
     
-  full_choice_set <- dist_hauls_catch_shares %>%
-    dplyr::select(selection) %>% unique() %>% mutate(merge=1)
-  
-  all_vessels <- dist_hauls_catch_shares %>% 
-    dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
-  
-  all_month <- dist_hauls_catch_shares %>% 
-    dplyr::select(set_month) %>% unique() %>% mutate(merge=1)
-
-  expand <- merge(full_choice_set, all_vessels, 
-                  by = c('merge'), all.x = TRUE, all.y = TRUE)
-  
-  expand <- merge(expand, all_month, 
-                  by = c('merge'), all.x = TRUE, all.y = TRUE)
-  
-  dbp <- merge(expand, dbp, by = c('VESSEL_NUM', 'selection', 'set_month'), all.x = TRUE) %>%
-    mutate(catch_composition = ifelse(is.na(catch_composition),0,catch_composition))
-
-  dbp <- dbp %>%
-    group_by(selection, set_month) %>%
-    summarize(prop = mean(catch_composition)) 
-  
-
-  ### Create factor by month and graph composition
-  cl <- makeCluster(ncores)
-  registerDoParallel(cl)
-  
-  dbp3 <- foreach::foreach(ll = 1:12, .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
-    dbp2 <- dbp %>% dplyr::filter(set_month == ll)  %>%  
-      mutate(prop = ifelse(prop == 0,0.00001,prop))
+  if (sample_choices == TRUE) {
+    ## Select hauls used to calculate probability for the choice set
+    dist_hauls_catch_shares <- hauls %>% dplyr::filter(set_year >= min_year_prob, set_year <= max_year_prob)
+    dist_hauls_catch_shares <- dist_hauls_catch_shares[dist_hauls_catch_shares$selection != "No-Participation", ]
+    
+    ## Create probabilities for sampling choice set
+    ## For this, we compute the average vessel catch and port composition by month
+    ## (The choice set varies depending on the month of the year)
+    dbp <- dist_hauls_catch_shares %>% 
+      group_by(selection, VESSEL_NUM, set_year, set_month) %>% 
+      summarize(sum_rev = sum(Revenue, na.rm = TRUE)) %>%
+      group_by(selection, VESSEL_NUM, set_month) %>%
+      summarize(mean_rev = mean(sum_rev, na.rm = TRUE)) %>%
+      group_by(VESSEL_NUM, set_month) %>%
+      mutate(tot_rev = sum(mean_rev, na.rm = TRUE)) %>% ungroup() %>%
+      mutate(catch_composition = mean_rev/tot_rev)
+    
+    full_choice_set <- dist_hauls_catch_shares %>%
+      dplyr::select(selection) %>% unique() %>% mutate(merge=1)
+    
+    all_vessels <- dist_hauls_catch_shares %>% 
+      dplyr::select(VESSEL_NUM) %>% unique() %>% mutate(merge=1)
+    
+    all_month <- dist_hauls_catch_shares %>% 
+      dplyr::select(set_month) %>% unique() %>% mutate(merge=1)
+    
+    expand <- merge(full_choice_set, all_vessels, 
+                    by = c('merge'), all.x = TRUE, all.y = TRUE)
+    
+    expand <- merge(expand, all_month, 
+                    by = c('merge'), all.x = TRUE, all.y = TRUE)
+    
+    dbp <- merge(expand, dbp, by = c('VESSEL_NUM', 'selection', 'set_month'), all.x = TRUE) %>%
+      mutate(catch_composition = ifelse(is.na(catch_composition),0,catch_composition))
+    
+    dbp <- dbp %>%
+      group_by(selection, set_month) %>%
+      summarize(prop = mean(catch_composition)) 
+    
+    
+    ### Create factor by month and graph composition
+    cl <- makeCluster(ncores)
+    registerDoParallel(cl)
+    
+    dbp3 <- foreach::foreach(ll = 1:12, .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
+      dbp2 <- dbp %>% dplyr::filter(set_month == ll)  %>%  
+        mutate(prop = ifelse(prop == 0,0.00001,prop))
       factor <- 1/sum(dbp2$prop)
-    dbp2 <- dbp2 %>% 
-      mutate(prop = prop * factor)
-    sum(dbp2$prop)
-    return(dbp2)
-  }
-
-  dbp_month <- as.data.frame(do.call(rbind.data.frame, dbp3))
-  
-  ############################################################################
-  ## Create example plot with the proportion used to sample the choice set.
-  #
-  # dbp_test <- dbp_month %>% group_by(set_month) %>%
-  #   summarize(sum_prop = sum(prop)) 
-  # 
-  # 
-  # dbp_month_plot <- dbp_month %>%
-  #   filter(prop > 0.01) %>% 
-  #   filter(set_month <= 4) %>%
-  #   mutate(selection = as.factor(selection)) %>%
-  #   mutate(selection = fct_relevel(selection, "LAA-MSQD", "SBA-MSQD", "MRA-MSQD", "MNA-MSQD", 
-  #                                  "LAA-PSDN", "SBA-PSDN", "MNA-PSDN", 
-  #                                  "LAA-NANC", "MNA-NANC", 
-  #                                  "LAA-CMCK", "LAA-PBNT", "SFA-DCRB"))
-  # 
-  # months <- as_labeller(c("1" = "January",
-  #                         "2" = "February",
-  #                         "3" = "March",
-  #                         "4" = "Aprill",
-  #                         "5" = "May",
-  #                         "6" = "June",
-  #                         "7" = "July",
-  #                         "8" = "August",
-  #                         "9" = "September",
-  #                         "10" = "October",
-  #                         "11" = "November",
-  #                         "12" = "December"))
-  # 
-  # library(viridis)
-  # ggplot(dbp_month_plot, aes(x=selection, y=prop, fill = selection)) +
-  #   geom_bar(stat='identity')+
-  #   facet_grid(~set_month,scales="free", space="free_x", labeller = months) + ylab("Proportion") +
-  #   theme(
-  #         axis.title.x=element_blank(),
-  #         axis.text.x=element_blank(),
-  #         axis.ticks.x=element_blank(),
-  #         legend.position="bottom"
-  #   #    ,axis.text.x = element_text(size=7, angle=90)
-  #   ) +
-  #   scale_fill_manual(labels=c("LAA-CMCK" = "Chub mackerrel - Los Angeles",
-  #                              "LAA-MSQD" = "Market squid - Los Angeles",
-  #                              "LAA-NANC" = "Northern anchovy - Los Angeles",
-  #                              "LAA-PBNT" = "Pacific Bonito - Los Angeles",
-  #                              "LAA-PSDN" = "Pacific sardine - Los Angeles",
-  #                              "MNA-MSQD" = "Market squid - Monterey",
-  #                              "MNA-NANC" = "Northern anchovy - Monterey",
-  #                              "MNA-PSDN" = "Pacific sardine - Monterey",
-  #                              "MRA-MSQD" = "Market squid - Morro Bay",
-  #                              "SBA-MSQD" = "Market squid - Santa Barbara",
-  #                              "SBA-PSDN" = "Pacific sardine - Santa Barbara",
-  #                              "SFA-DCRB" = "Dungeness Crab - San Francisco"),
-  #                     values=c("#08519c", "#049cdb", "#6baed6","#2171b5", "#85db5b", "#4aa72f",
-  #                              "#248b37", "#e1dc0d", "#f0eb00", "#d94701", "#6a51a3", "#969696")) +
-  #   guides(fill=guide_legend(title="Species / Port areas: "))
-  ############################################################################
-
-  #-----------------------------------------------------------------------
-  ## Sample Hauls
-  
-  # Set seed
-  set.seed(seed)
-  seedz <- sample(1:1e7, size = nrow(hauls))
-
-  
-  # Include decision previous day!
-  hauls$set_date <- as.Date(
-    with(hauls, paste(set_year, set_month, set_day, sep="-")), "%Y-%m-%d")
-  hauls$prev_day_date <- hauls$set_date - days(1)
-  
-  selection_prev_days <- hauls %>% 
-    dplyr::select(c('selection', 'set_date', 'VESSEL_NUM')) %>%
-    unique() %>%
-    rename(prev_day_date = set_date) %>%
-    rename(prev_selection = selection)
-  
-  hauls <- merge(hauls, selection_prev_days,
-                  by = c('prev_day_date', 'VESSEL_NUM'), 
-                  all.x = TRUE, 
-                  all.y = FALSE) %>%
-    mutate(prev_selection = ifelse(prev_selection == "No-Participation", NA, prev_selection))
+      dbp2 <- dbp2 %>% 
+        mutate(prop = prop * factor)
+      sum(dbp2$prop)
+      return(dbp2)
+    }
     
-  
-  #Sample hauls and calculate distances
-  #For each haul in the focus year, sample nhauls_sampled tows
-  
-  sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls),
-                                    .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
-                                      set.seed(seedz[ii])
-                                      
-                                      if (is.na(hauls[ii, "prev_selection"]) == TRUE) {
-                                        if (hauls[ii, "selection"] != "No-Participation") {
-                                          temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
-                                                                               set_month == as.character(hauls[ii, "set_month"])) 
-                                          samps <- temp %>% sample_n(size = (nhauls_sampled - 1), weight = prop, replace = F)
-                                          the_samples <- as.data.frame(samps[ , "selection"]) 
-                                          colnames(the_samples)[1] <- "selection"
-                                          the_samples <- the_samples %>%
-                                            add_row(selection = "No-Participation")
-                                        } else if (hauls[ii, "selection"] == "No-Participation") {
-                                          temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
-                                                                               set_month == as.character(hauls[ii, "set_month"])) 
-                                          samps <- temp %>% sample_n(size = (nhauls_sampled), weight = prop, replace = F)
-                                          the_samples <- as.data.frame(samps[ , "selection"]) 
-                                          colnames(the_samples)[1] <- "selection"
-                                        } 
-                                      } else {
-                                        if (hauls[ii, "selection"] != "No-Participation" & 
-                                            hauls[ii, "selection"] != hauls[ii, "prev_selection"]) {
-                                          temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
-                                                                               selection != as.character(hauls[ii, "prev_selection"]),
-                                                                               set_month == as.character(hauls[ii, "set_month"])) 
-                                          samps <- temp %>% sample_n(size = (nhauls_sampled - 2), weight = prop, replace = F)
-                                          the_samples <- as.data.frame(samps[ , "selection"]) 
-                                          colnames(the_samples)[1] <- "selection"
-                                          the_samples <- the_samples %>%
-                                            add_row(selection = "No-Participation") %>%
-                                            add_row(selection = as.character(hauls[ii, "prev_selection"]))
-                                        } else if (hauls[ii, "selection"] != "No-Participation" & 
-                                                   hauls[ii, "selection"] == hauls[ii, "prev_selection"]) {
-                                          temp <- dbp_month %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
-                                                                              set_month == as.character(hauls[ii, "set_month"]))
-                                          samps <- temp %>% sample_n(size = (nhauls_sampled - 1) , weight = prop, replace = F)
-                                          the_samples <- as.data.frame(samps[ , "selection"]) 
-                                          colnames(the_samples)[1] <- "selection"
-                                          the_samples <- the_samples %>%
-                                            add_row(selection = "No-Participation")
-                                        } else if (hauls[ii, "selection"] == "No-Participation" & 
-                                                   hauls[ii, "selection"] != hauls[ii, "prev_selection"]) {
-                                          temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
-                                                                               selection != as.character(hauls[ii, "prev_selection"]),
-                                                                               set_month == as.character(hauls[ii, "set_month"])) 
-                                          samps <- temp %>% sample_n(size = (nhauls_sampled - 1), weight = prop, replace = F)
-                                          the_samples <- as.data.frame(samps[ , "selection"]) 
-                                          colnames(the_samples)[1] <- "selection"
-                                          the_samples <- the_samples %>%
-                                            add_row(selection = as.character(hauls[ii, "prev_selection"]))
-                                        } else if (hauls[ii, "selection"] == "No-Participation" & 
-                                                   hauls[ii, "selection"] == hauls[ii, "prev_selection"]) {
-                                          temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
-                                                                               set_month == as.character(hauls[ii, "set_month"])) 
-                                          samps <- temp %>% sample_n(size = (nhauls_sampled), weight = prop, replace = F)
-                                          the_samples <- as.data.frame(samps[ , "selection"]) 
-                                          colnames(the_samples)[1] <- "selection"
+    dbp_month <- as.data.frame(do.call(rbind.data.frame, dbp3))
+    
+    ############################################################################
+    ## Create example plot with the proportion used to sample the choice set.
+    #
+    # dbp_test <- dbp_month %>% group_by(set_month) %>%
+    #   summarize(sum_prop = sum(prop)) 
+    # 
+    # 
+    # dbp_month_plot <- dbp_month %>%
+    #   filter(prop > 0.01) %>% 
+    #   filter(set_month <= 4) %>%
+    #   mutate(selection = as.factor(selection)) %>%
+    #   mutate(selection = fct_relevel(selection, "LAA-MSQD", "SBA-MSQD", "MRA-MSQD", "MNA-MSQD", 
+    #                                  "LAA-PSDN", "SBA-PSDN", "MNA-PSDN", 
+    #                                  "LAA-NANC", "MNA-NANC", 
+    #                                  "LAA-CMCK", "LAA-PBNT", "SFA-DCRB"))
+    # 
+    # months <- as_labeller(c("1" = "January",
+    #                         "2" = "February",
+    #                         "3" = "March",
+    #                         "4" = "Aprill",
+    #                         "5" = "May",
+    #                         "6" = "June",
+    #                         "7" = "July",
+    #                         "8" = "August",
+    #                         "9" = "September",
+    #                         "10" = "October",
+    #                         "11" = "November",
+    #                         "12" = "December"))
+    # 
+    # library(viridis)
+    # ggplot(dbp_month_plot, aes(x=selection, y=prop, fill = selection)) +
+    #   geom_bar(stat='identity')+
+    #   facet_grid(~set_month,scales="free", space="free_x", labeller = months) + ylab("Proportion") +
+    #   theme(
+    #         axis.title.x=element_blank(),
+    #         axis.text.x=element_blank(),
+    #         axis.ticks.x=element_blank(),
+    #         legend.position="bottom"
+    #   #    ,axis.text.x = element_text(size=7, angle=90)
+    #   ) +
+    #   scale_fill_manual(labels=c("LAA-CMCK" = "Chub mackerrel - Los Angeles",
+    #                              "LAA-MSQD" = "Market squid - Los Angeles",
+    #                              "LAA-NANC" = "Northern anchovy - Los Angeles",
+    #                              "LAA-PBNT" = "Pacific Bonito - Los Angeles",
+    #                              "LAA-PSDN" = "Pacific sardine - Los Angeles",
+    #                              "MNA-MSQD" = "Market squid - Monterey",
+    #                              "MNA-NANC" = "Northern anchovy - Monterey",
+    #                              "MNA-PSDN" = "Pacific sardine - Monterey",
+    #                              "MRA-MSQD" = "Market squid - Morro Bay",
+    #                              "SBA-MSQD" = "Market squid - Santa Barbara",
+    #                              "SBA-PSDN" = "Pacific sardine - Santa Barbara",
+    #                              "SFA-DCRB" = "Dungeness Crab - San Francisco"),
+    #                     values=c("#08519c", "#049cdb", "#6baed6","#2171b5", "#85db5b", "#4aa72f",
+    #                              "#248b37", "#e1dc0d", "#f0eb00", "#d94701", "#6a51a3", "#969696")) +
+    #   guides(fill=guide_legend(title="Species / Port areas: "))
+    ############################################################################
+    
+    #-----------------------------------------------------------------------
+    ## Sample Hauls
+    
+    # Set seed
+    set.seed(seed)
+    seedz <- sample(1:1e7, size = nrow(hauls))
+    
+    
+    # Include decision previous day!
+    hauls$set_date <- as.Date(
+      with(hauls, paste(set_year, set_month, set_day, sep="-")), "%Y-%m-%d")
+    hauls$prev_day_date <- hauls$set_date - days(1)
+    
+    selection_prev_days <- hauls %>% 
+      dplyr::select(c('selection', 'set_date', 'VESSEL_NUM')) %>%
+      unique() %>%
+      rename(prev_day_date = set_date) %>%
+      rename(prev_selection = selection)
+    
+    hauls <- merge(hauls, selection_prev_days,
+                   by = c('prev_day_date', 'VESSEL_NUM'), 
+                   all.x = TRUE, 
+                   all.y = FALSE) %>%
+      mutate(prev_selection = ifelse(prev_selection == "No-Participation", NA, prev_selection))
+    
+    
+    #Sample hauls and calculate distances
+    #For each haul in the focus year, sample nhauls_sampled tows
+    
+    sampled_hauls <- foreach::foreach(ii = 1:nrow(hauls),
+                                      .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
+                                        set.seed(seedz[ii])
+                                        
+                                        if (is.na(hauls[ii, "prev_selection"]) == TRUE) {
+                                          if (hauls[ii, "selection"] != "No-Participation") {
+                                            temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
+                                                                                 set_month == as.character(hauls[ii, "set_month"])) 
+                                            samps <- temp %>% sample_n(size = (nhauls_sampled - 1), weight = prop, replace = F)
+                                            the_samples <- as.data.frame(samps[ , "selection"]) 
+                                            colnames(the_samples)[1] <- "selection"
+                                            the_samples <- the_samples %>%
+                                              add_row(selection = "No-Participation")
+                                          } else if (hauls[ii, "selection"] == "No-Participation") {
+                                            temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
+                                                                                 set_month == as.character(hauls[ii, "set_month"])) 
+                                            samps <- temp %>% sample_n(size = (nhauls_sampled), weight = prop, replace = F)
+                                            the_samples <- as.data.frame(samps[ , "selection"]) 
+                                            colnames(the_samples)[1] <- "selection"
+                                          } 
+                                        } else {
+                                          if (hauls[ii, "selection"] != "No-Participation" & 
+                                              hauls[ii, "selection"] != hauls[ii, "prev_selection"]) {
+                                            temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
+                                                                                 selection != as.character(hauls[ii, "prev_selection"]),
+                                                                                 set_month == as.character(hauls[ii, "set_month"])) 
+                                            samps <- temp %>% sample_n(size = (nhauls_sampled - 2), weight = prop, replace = F)
+                                            the_samples <- as.data.frame(samps[ , "selection"]) 
+                                            colnames(the_samples)[1] <- "selection"
+                                            the_samples <- the_samples %>%
+                                              add_row(selection = "No-Participation") %>%
+                                              add_row(selection = as.character(hauls[ii, "prev_selection"]))
+                                          } else if (hauls[ii, "selection"] != "No-Participation" & 
+                                                     hauls[ii, "selection"] == hauls[ii, "prev_selection"]) {
+                                            temp <- dbp_month %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
+                                                                                set_month == as.character(hauls[ii, "set_month"]))
+                                            samps <- temp %>% sample_n(size = (nhauls_sampled - 1) , weight = prop, replace = F)
+                                            the_samples <- as.data.frame(samps[ , "selection"]) 
+                                            colnames(the_samples)[1] <- "selection"
+                                            the_samples <- the_samples %>%
+                                              add_row(selection = "No-Participation")
+                                          } else if (hauls[ii, "selection"] == "No-Participation" & 
+                                                     hauls[ii, "selection"] != hauls[ii, "prev_selection"]) {
+                                            temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
+                                                                                 selection != as.character(hauls[ii, "prev_selection"]),
+                                                                                 set_month == as.character(hauls[ii, "set_month"])) 
+                                            samps <- temp %>% sample_n(size = (nhauls_sampled - 1), weight = prop, replace = F)
+                                            the_samples <- as.data.frame(samps[ , "selection"]) 
+                                            colnames(the_samples)[1] <- "selection"
+                                            the_samples <- the_samples %>%
+                                              add_row(selection = as.character(hauls[ii, "prev_selection"]))
+                                          } else if (hauls[ii, "selection"] == "No-Participation" & 
+                                                     hauls[ii, "selection"] == hauls[ii, "prev_selection"]) {
+                                            temp <- dbp_month  %>% dplyr::filter(selection != as.character(hauls[ii, "selection"]),
+                                                                                 set_month == as.character(hauls[ii, "set_month"])) 
+                                            samps <- temp %>% sample_n(size = (nhauls_sampled), weight = prop, replace = F)
+                                            the_samples <- as.data.frame(samps[ , "selection"]) 
+                                            colnames(the_samples)[1] <- "selection"
+                                          }
                                         }
+                                        
+                                        actual_haul <- as.data.frame(hauls[ii, "selection"])
+                                        colnames(actual_haul)[1] <- "selection"
+                                        
+                                        #Combine the sampled values and the empirical haul
+                                        actual_haul$fished <- 1
+                                        actual_haul$fished_haul <- hauls[ii, "trip_id"]
+                                        actual_haul$fished_VESSEL_NUM <- hauls[ii, "VESSEL_NUM"]
+                                        the_samples$fished <- 0
+                                        the_samples$fished_haul <- hauls[ii, "trip_id"]
+                                        the_samples$fished_VESSEL_NUM <- hauls[ii, "VESSEL_NUM"]
+                                        the_samples <- rbind(actual_haul, the_samples)
+                                        
+                                        #Define the set_date
+                                        the_samples$set_date <- ymd(paste(hauls[ii, "set_year"], hauls[ii, "set_month"], hauls[ii, "set_day"], sep = "-"))
+                                        return(the_samples)
+                                        rm(actual_haul, the_samples, temp, samps)
                                       }
-                                      
-                                      actual_haul <- as.data.frame(hauls[ii, "selection"])
-                                      colnames(actual_haul)[1] <- "selection"
-                                      
-                                      #Combine the sampled values and the empirical haul
-                                      actual_haul$fished <- 1
-                                      actual_haul$fished_haul <- hauls[ii, "trip_id"]
-                                      actual_haul$fished_VESSEL_NUM <- hauls[ii, "VESSEL_NUM"]
-                                      the_samples$fished <- 0
-                                      the_samples$fished_haul <- hauls[ii, "trip_id"]
-                                      the_samples$fished_VESSEL_NUM <- hauls[ii, "VESSEL_NUM"]
-                                      the_samples <- rbind(actual_haul, the_samples)
-                                     
-                                      #Define the set_date
-                                      the_samples$set_date <- ymd(paste(hauls[ii, "set_year"], hauls[ii, "set_month"], hauls[ii, "set_day"], sep = "-"))
-                                      return(the_samples)
-                                      rm(actual_haul, the_samples, temp, samps)
-                                    }
-  print("Done sampling hauls")
-  sampled_hauls <- plyr::ldply(sampled_hauls)
+    print("Done sampling hauls")
+    sampled_hauls <- plyr::ldply(sampled_hauls)
+    
+    # add port and species 
+    sampled_hauls <- sampled_hauls %>% mutate(PACFIN_SPECIES_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, start= -4)))
+    sampled_hauls <- sampled_hauls %>% mutate(PORT_AREA_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, end= 3)))
+    sampled_hauls <- sampled_hauls %>% mutate(AGENCY_CODE = 
+                                                ifelse(PORT_AREA_CODE == "BDA" | PORT_AREA_CODE == "BGA" | PORT_AREA_CODE == "CA2" |                       
+                                                         PORT_AREA_CODE == "CCA" | PORT_AREA_CODE == "ERA" | PORT_AREA_CODE == "LAA" |                                              
+                                                         PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "MRA" | PORT_AREA_CODE == "SBA" |
+                                                         PORT_AREA_CODE == "SDA" | PORT_AREA_CODE == "SFA", "C", 
+                                                       ifelse(PORT_AREA_CODE == "BRA" | PORT_AREA_CODE == "CBA" | PORT_AREA_CODE == "CLO" |
+                                                                PORT_AREA_CODE == "NPA" | PORT_AREA_CODE == "OR1" | PORT_AREA_CODE == "TLA", "O",
+                                                              ifelse(PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS" |
+                                                                       PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5", "W", NA))))
+    
+    #add in the fleet name
+    sampled_hauls$fleet_name <- cluster
+  } else {
+    EXPAND HERE!!!
+  }
   
-  # add port and species 
-  sampled_hauls <- sampled_hauls %>% mutate(PACFIN_SPECIES_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, start= -4)))
-  sampled_hauls <- sampled_hauls %>% mutate(PORT_AREA_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, end= 3)))
-  sampled_hauls <- sampled_hauls %>% mutate(AGENCY_CODE = 
-                    ifelse(PORT_AREA_CODE == "BDA" | PORT_AREA_CODE == "BGA" | PORT_AREA_CODE == "CA2" |                       
-                           PORT_AREA_CODE == "CCA" | PORT_AREA_CODE == "ERA" | PORT_AREA_CODE == "LAA" |                                              
-                           PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "MRA" | PORT_AREA_CODE == "SBA" |
-                           PORT_AREA_CODE == "SDA" | PORT_AREA_CODE == "SFA", "C", 
-                    ifelse(PORT_AREA_CODE == "BRA" | PORT_AREA_CODE == "CBA" | PORT_AREA_CODE == "CLO" |
-                           PORT_AREA_CODE == "NPA" | PORT_AREA_CODE == "OR1" | PORT_AREA_CODE == "TLA", "O",
-                    ifelse(PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS" |
-                           PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5", "W", NA))))
-  
-  #add in the fleet name
-  sampled_hauls$fleet_name <- cluster
 
   #-----------------------------------------------
   ### Merge coordinates of port landed and center of gravity with participation data, and calculate distances from port to COG
