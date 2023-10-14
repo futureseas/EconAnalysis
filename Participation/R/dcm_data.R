@@ -13,17 +13,9 @@ library(tidyverse)
 library(lubridate)
 
 #-------------------------------------------------------------------------------
-## Read participation database ##
-participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-
-#-------------------------------------------------------------------------------
-## Day at sea:
-ticket_part <- participation_data %>% dplyr::filter(selection != "No-Participation")
-hist(ticket_part$max_days_sea)
-
-#-------------------------------------------------------------------------------
 ## Sampling choice data including expected revenue, expected cost and past behavior dummies ##
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
+participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
                          min_year = 2013, max_year = 2017,
                          min_year_prob = 2013, max_year_prob = 2017,

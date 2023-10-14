@@ -479,11 +479,20 @@ saveRDS(Tickets_final, "C:\\Data\\PacFIN data\\participation_data.rds")
 # 
 
 # ########################################
+# ## Repeated trip_id?
 # unique_tickets <- Tickets_final %>%
 #   dplyr::select(trip_id) %>%
 #   group_by(trip_id) %>%
 #   summarize(n_count = n()) %>% ungroup()
 # 
-# Tickets_check <- Tickets_final %>% group_by(trip_id) %>% summarize(n_obs = n()) %>%
+# Tickets_check <- Tickets_final %>% 
+# group_by(trip_id) %>% 
+# summarize(n_obs = n()) %>%
 #   ungroup() %>% filter(n_obs>1)
 # #######################################
+
+# ########################################
+# ## Day at sea:
+# ticket_part <- participation_data %>% dplyr::filter(selection != "No-Participation")
+# hist(ticket_part$max_days_sea)
+# ########################################
