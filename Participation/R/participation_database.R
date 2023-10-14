@@ -423,7 +423,7 @@ Tickets_dist <- Tickets_dist %>% rowwise() %>%
 # ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat_logbook)))/nrow(ticket_part_2))
 # ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat_ca)))/nrow(ticket_part_2))
 
-Tickets_dist <- Tickets_dist %>% mutate(dist = ifelse(dist > 220, NA, dist))
+Tickets_dist <- Tickets_dist %>% mutate(dist = ifelse(dist > 220*max_days_sea, NA, dist))
 hist(Tickets_dist$dist)
 
 #------------------------------------------------------
