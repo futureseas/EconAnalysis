@@ -130,12 +130,13 @@ samps <- samps1 %>%
 #--------------------------------------------------------------------------
 ### Incorporate multiday trip data
 multiday_data <- participation_data %>% 
-    dplyr::select(c(trip_id, multiday_trip, n_days_sea, n_obs_within_FTID)) %>% 
+    dplyr::select(c(trip_id, multiday_trip, n_obs_within_FTID)) %>% 
     unique() %>%
     rename(fished_haul = trip_id)
   
-samps <- merge(samps, multiday_data, by = "fished_haul", all.x = TRUE, all.y = FALSE)
-  
+samps <- merge(samps, multiday_data, by = "fished_haul", all.x = TRUE, all.y = FALSE) 
+
+### CHECK IF N_OBS_WITHIN_FTID IS = 1
   
 #--------------------------------------------------------------------------
 ### Incorporate wind data 
