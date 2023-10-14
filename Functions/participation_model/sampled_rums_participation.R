@@ -28,29 +28,29 @@ sampled_rums <- function(data_in, cluster = 4,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale, sample_choices = TRUE) {
 
-  ###############
-  # Delete
-  gc()
-  library(doParallel)
-  library(tidyr)
-  library(plm)
-  library(tidyverse)
-  library(lubridate)
-  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-  cluster <- 4
-  min_year_prob <- 2013
-  max_year_prob <- 2017
-  min_year_est <- 2012
-  max_year_est <- 2019
-  min_year <- 2013
-  max_year <- 2017
-  ndays <- 30
-  nhauls_sampled <- 5
-  seed <- 300
-  ncores <- 4
-  rev_scale <- 1000
-  sample_choices <- TRUE
-  ################
+  # ###############
+  # # Delete
+  # gc()
+  # library(doParallel)
+  # library(tidyr)
+  # library(plm)
+  # library(tidyverse)
+  # library(lubridate)
+  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+  # cluster <- 4
+  # min_year_prob <- 2013
+  # max_year_prob <- 2017
+  # min_year_est <- 2012
+  # max_year_est <- 2019
+  # min_year <- 2013
+  # max_year <- 2017
+  # ndays <- 30
+  # nhauls_sampled <- 5
+  # seed <- 300
+  # ncores <- 4
+  # rev_scale <- 1000
+  # sample_choices <- TRUE
+  # ################
 
   dat <- data_in 
   
@@ -59,7 +59,7 @@ sampled_rums <- function(data_in, cluster = 4,
   dat_est <- readRDS("C:/Data/PacFIN data/Tickets_filtered.rds")
   datPanel <- dat_est %>% 
       dplyr::filter(LANDING_YEAR >= min_year_est, LANDING_YEAR <= max_year_est) %>%
-      dplyr::filter(AFI_PRICE_PER_MTONS>0)%>%
+      dplyr::filter(AFI_PRICE_PER_MTONS>0) %>%
       dplyr::mutate(ln_Price_mtons = log(AFI_PRICE_PER_MTONS)) %>% 
       mutate(trend = LANDING_YEAR - min_year_est + 1) %>%
       mutate(set_month = LANDING_MONTH) %>% 
@@ -106,7 +106,7 @@ sampled_rums <- function(data_in, cluster = 4,
                   set_year <= max_year, 
                   group_all %in% cluster) %>% 
     distinct(trip_id, .keep_all = T)  %>% 
-    dplyr::select(trip_id, VESSEL_NUM, set_year, set_month, set_day, Revenue, selection) %>% 
+    dplyr::select(trip_id, VESSEL_NUM, set_year, set_month, set_day, Revenue, selection, n_obs_within_FTID) %>% 
       as.data.frame
 
     
@@ -122,6 +122,7 @@ sampled_rums <- function(data_in, cluster = 4,
     ## For this, we compute the average vessel catch and port composition by month
     ## (The choice set varies depending on the month of the year)
     dbp <- dist_hauls_catch_shares %>% 
+      dplyr::filter(n_obs_within_FTID==1) %>%
       group_by(selection, VESSEL_NUM, set_year, set_month) %>% 
       summarize(sum_rev = sum(Revenue, na.rm = TRUE)) %>%
       group_by(selection, VESSEL_NUM, set_month) %>%
@@ -252,6 +253,10 @@ sampled_rums <- function(data_in, cluster = 4,
       mutate(prev_selection = ifelse(prev_selection == "No-Participation", NA, prev_selection))
     
     
+    # Exclude other days of same trip (multiday trips)
+    hauls <- hauls %>% dplyr::filter(n_obs_within_FTID==1) 
+      
+    
     #Sample hauls and calculate distances
     #For each haul in the focus year, sample nhauls_sampled tows
     
@@ -353,6 +358,11 @@ sampled_rums <- function(data_in, cluster = 4,
     print("Done sampling choices")
   } else {
     print("Full choice set selected")
+    
+    # Exclude other days of same trip (multiday trips)
+    hauls <- hauls %>% dplyr::filter(n_obs_within_FTID==1) 
+    
+    # Expand hauls
     sampled_hauls <- hauls
     sampled_hauls$fished <- 1 
     sampled_hauls <- complete(sampled_hauls, trip_id, selection)
@@ -389,6 +399,7 @@ sampled_rums <- function(data_in, cluster = 4,
     
   ## Calculate landing's center of gravity each vessel and link to closest port
   datCOG <- dat %>% 
+      dplyr::filter(n_obs_within_FTID==1) %>% 
       dplyr::filter(selection != "No-Participation") %>% 
       dplyr::filter(set_year >= min_year, set_year <= max_year)
     
@@ -556,12 +567,14 @@ sampled_rums <- function(data_in, cluster = 4,
   # Create dummy for prev days fishing
   td2[which(td2$dummy_last_day != 0), 'dummy_last_day'] <- 1
   td2[which(td2$dummy_prev_days != 0), 'dummy_prev_days'] <- 1
+  td2[which(td2$dummy_prev_days_port != 0), 'dummy_prev_days_port'] <- 1
   td2[which(td2$dummy_prev_year_days != 0), 'dummy_prev_year_days'] <- 1
   td2[which(td2$dummy_clust_prev_days != 0), 'dummy_clust_prev_days'] <- 1
  
   # Change variables to zero for "No-Participation"
   td2[which(td2$selection == "No-Participation"), 'dummy_last_day'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_days'] <- 0
+  td2[which(td2$selection == "No-Participation"), 'dummy_prev_days_port'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_prev_year_days'] <- 0
   td2[which(td2$selection == "No-Participation"), 'dummy_clust_prev_days'] <- 0
   td2[which(td2$selection == "No-Participation"), 'mean_price'] <- 0
@@ -571,7 +584,7 @@ sampled_rums <- function(data_in, cluster = 4,
 
   
   sampled_hauls <- cbind(sampled_hauls,
-    td2[, c('dummy_last_day', 'dummy_prev_days', 'dummy_prev_year_days', "dummy_clust_prev_days", 
+    td2[, c('dummy_last_day', 'dummy_prev_days', 'dummy_prev_days_port', 'dummy_prev_year_days', "dummy_clust_prev_days", 
             'mean_price', 'mean_avail', 'diesel_price', 'dist_port_to_catch_area', 
             'dCPUE', 'dPrice30', 'dDieselState', 'dCPUE90', 'dPrice30_s', 'dPrice90_s')] )
 
