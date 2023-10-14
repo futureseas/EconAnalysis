@@ -180,7 +180,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
       # Average availability in the past n_days at port
       avail30y <- SDM.NANC %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
-      avail30y <- mean(avail30y$NANC_SDM_30, na.rm = TRUE)
+      avail30y <- mean(avail30y$NANC_SDM_20, na.rm = TRUE)
       dCPUE <- 0
       dCPUE_90 <- 0
       
@@ -188,7 +188,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
       # Average availability in the past n_days at port
       avail30y <- SDM.JMCK %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
-      avail30y <- mean(avail30y$JMCK_SDM_30, na.rm = TRUE)
+      avail30y <- mean(avail30y$JMCK_SDM_60, na.rm = TRUE)
       dCPUE <- 0
       dCPUE_90 <- 0
       
@@ -196,7 +196,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
       # Average availability in the past n_days at port
       avail30y <- SDM.CMCK %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
-      avail30y <- mean(avail30y$CMCK_SDM_30, na.rm = TRUE)
+      avail30y <- mean(avail30y$CMCK_SDM_60, na.rm = TRUE)
       dCPUE <- 0
       dCPUE_90 <- 0
       
@@ -204,7 +204,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       
       # Average availability in the past n_days at port
       avail30y <- SDM.PHRG %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
-      avail30y <- mean(avail30y$PHRG_SDM_30, na.rm = TRUE)
+      avail30y <- mean(avail30y$PHRG_SDM_20, na.rm = TRUE)
       dCPUE <- 0
       dCPUE_90 <- 0
       
