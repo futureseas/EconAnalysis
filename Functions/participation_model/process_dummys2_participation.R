@@ -115,6 +115,20 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   dum1_val <- nrow(dum1)
   
   
+  #-----------------------------------------------------------------------------------------------
+    #Did vessel fish in past n_days at port ? 
+  dum30port <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
+                                              set_date %within% temp_dat$days_inter,
+                                              VESSEL_NUM == temp_dat$fished_VESSEL_NUM,
+                                              PORT_AREA_CODE == port,
+                                              selection != "No-Participation",
+                                              group_all %in% fltz)
+  
+  dum30port <- dum30port %>% distinct(trip_id, .keep_all = T)
+  
+  #Add dummy coefficient
+  dum30port_val <- nrow(dum30port)
+  
   
   ########################
   ## Calculate revenues ##
@@ -276,6 +290,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$mean_avail <- mean_avail
   temp_dat$mean_price <- mean_price
   temp_dat$dummy_prev_days <- dum30_val
+  temp_dat$dummy_prev_days_port <- dum30port_val
   temp_dat$dummy_prev_year_days <- dum30y_val
   temp_dat$dummy_last_day <- dum1_val
   temp_dat$dummy_clust_prev_days <- dum30_c_val
