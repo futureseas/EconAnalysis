@@ -249,7 +249,7 @@ Tickets_exp_md <- Tickets_exp %>%
   mutate(FTID_unique = ifelse(is.na(FTID_unique), paste('Exp-',1:n()), FTID_unique)) %>% 
   # Create dummy multiday trip
   group_by(VESSEL_NUM, FTID_unique) %>% 
-  mutate(n_days_sea = sum(participating)) %>% ungroup() %>% 
+  mutate(n_days_sea = sum(participating)) %>% mutate(n_obs_within_FTID = 1:n()) %>% ungroup() %>% 
   mutate(multiday_trip = ifelse(n_days_sea>1, 1, 0))
 
 
@@ -292,7 +292,7 @@ Tickets_coord <- Tickets_coord %>%
     "selection", "PORT_AREA_CODE", "Species_Dominant", 
     "Landings_mtons", "Revenue", "Price_mtons", "max_days_sea",
     "group_all", "Vessel.length", "Vessel.weight", "Vessel.horsepower", 
-    "lat", "lon", "lon_logbook", "lon_ca", "lat_logbook", "lat_ca", "multiday_trip", "n_days_sea") 
+    "lat", "lon", "lon_logbook", "lon_ca", "lat_logbook", "lat_ca", "multiday_trip", "n_days_sea", "n_obs_within_FTID") 
 
 
 #---------------------------------------------------------------------------------------
