@@ -113,6 +113,7 @@ sampled_rums <- function(data_in, cluster = 4,
   #----------------------------------------------------------------------------
     
   if (sample_choices == TRUE) {
+    print("Start sampling choices")
     ## Select hauls used to calculate probability for the choice set
     dist_hauls_catch_shares <- hauls %>% dplyr::filter(set_year >= min_year_prob, set_year <= max_year_prob)
     dist_hauls_catch_shares <- dist_hauls_catch_shares[dist_hauls_catch_shares$selection != "No-Participation", ]
@@ -332,7 +333,6 @@ sampled_rums <- function(data_in, cluster = 4,
                                         return(the_samples)
                                         rm(actual_haul, the_samples, temp, samps)
                                       }
-    print("Done sampling hauls")
     sampled_hauls <- plyr::ldply(sampled_hauls)
     
     # add port and species 
@@ -340,23 +340,46 @@ sampled_rums <- function(data_in, cluster = 4,
     sampled_hauls <- sampled_hauls %>% mutate(PORT_AREA_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, end= 3)))
     sampled_hauls <- sampled_hauls %>% mutate(AGENCY_CODE = 
                                                 ifelse(PORT_AREA_CODE == "BDA" | PORT_AREA_CODE == "BGA" | PORT_AREA_CODE == "CA2" |                       
-                                                         PORT_AREA_CODE == "CCA" | PORT_AREA_CODE == "ERA" | PORT_AREA_CODE == "LAA" |                                              
-                                                         PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "MRA" | PORT_AREA_CODE == "SBA" |
-                                                         PORT_AREA_CODE == "SDA" | PORT_AREA_CODE == "SFA", "C", 
-                                                       ifelse(PORT_AREA_CODE == "BRA" | PORT_AREA_CODE == "CBA" | PORT_AREA_CODE == "CLO" |
-                                                                PORT_AREA_CODE == "NPA" | PORT_AREA_CODE == "OR1" | PORT_AREA_CODE == "TLA", "O",
-                                                              ifelse(PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS" |
-                                                                       PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5", "W", NA))))
+                                                       PORT_AREA_CODE == "CCA" | PORT_AREA_CODE == "ERA" | PORT_AREA_CODE == "LAA" |                                              
+                                                       PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "MRA" | PORT_AREA_CODE == "SBA" |
+                                                       PORT_AREA_CODE == "SDA" | PORT_AREA_CODE == "SFA", "C", 
+                                                ifelse(PORT_AREA_CODE == "BRA" | PORT_AREA_CODE == "CBA" | PORT_AREA_CODE == "CLO" |
+                                                       PORT_AREA_CODE == "NPA" | PORT_AREA_CODE == "OR1" | PORT_AREA_CODE == "TLA", "O",
+                                                ifelse(PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS" |
+                                                       PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5", "W", NA))))
     
     #add in the fleet name
     sampled_hauls$fleet_name <- cluster
+    print("Done sampling choices")
   } else {
-    EXPAND HERE!!!
+    print("Full choice set selected")
+    sampled_hauls <- hauls
+    sampled_hauls$fished <- 1 
+    sampled_hauls <- complete(sampled_hauls, trip_id, selection)
+    sampled_hauls <- sampled_hauls %>% 
+      arrange(trip_id, VESSEL_NUM) %>%
+      mutate(fished_VESSEL_NUM = zoo::na.locf(VESSEL_NUM, na.rm = F)) %>%
+      mutate(set_date = zoo::na.locf(set_date, na.rm = F)) %>%
+      mutate(fished = ifelse(is.na(fished), 0, fished)) %>%
+      rename(fished_haul = trip_id) %>% 
+      select(c(selection, fished, fished_haul, fished_VESSEL_NUM, set_date))
+      
+    sampled_hauls <- sampled_hauls %>% mutate(PACFIN_SPECIES_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, start= -4))) 
+    sampled_hauls <- sampled_hauls %>% mutate(PORT_AREA_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, end= 3)))  
+    sampled_hauls <- sampled_hauls %>% mutate(AGENCY_CODE = ifelse(PORT_AREA_CODE == "BDA" | PORT_AREA_CODE == "BGA" | PORT_AREA_CODE == "CA2" |                       
+                                  PORT_AREA_CODE == "CCA" | PORT_AREA_CODE == "ERA" | PORT_AREA_CODE == "LAA" |                                              
+                                  PORT_AREA_CODE == "MNA" | PORT_AREA_CODE == "MRA" | PORT_AREA_CODE == "SBA" |
+                                  PORT_AREA_CODE == "SDA" | PORT_AREA_CODE == "SFA", "C", 
+                           ifelse(PORT_AREA_CODE == "BRA" | PORT_AREA_CODE == "CBA" | PORT_AREA_CODE == "CLO" |
+                                  PORT_AREA_CODE == "NPA" | PORT_AREA_CODE == "OR1" | PORT_AREA_CODE == "TLA", "O",
+                           ifelse(PORT_AREA_CODE == "CLW" | PORT_AREA_CODE == "CWA" | PORT_AREA_CODE == "NPS" |
+                                  PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5", "W", NA))))
+    sampled_hauls$fleet_name <- cluster
   }
   
 
   #-----------------------------------------------
-  ### Merge coordinates of port landed and center of gravity with participation data, and calculate distances from port to COG
+  ### Merge coordinates of port landed and the computation of the center of gravity with participation data, and calculate distances from port to COG
   
   port_coord <- read.csv("C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv") %>% 
     rename(PORT_AREA_CODE = port_group_code) %>% 
