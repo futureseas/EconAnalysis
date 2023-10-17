@@ -16,18 +16,6 @@ rdo <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\rdo_R_c4.rds"
   ungroup() %>% 
   drop_na()
 
-# no_SDM <- rdo %>% 
-#   mutate(SDM = ifelse(grepl("PSDN", selection) == TRUE, 1, 0)) %>% 
-#   mutate(SDM = ifelse(grepl("MSQD", selection) == TRUE, 1, SDM)) %>% 
-#   mutate(SDM = ifelse(grepl("NANC", selection) == TRUE, 1, SDM)) %>% 
-#   mutate(SDM = ifelse(grepl("JMCK", selection) == TRUE, 1, SDM)) %>% 
-#   mutate(SDM = ifelse(grepl("CMCK", selection) == TRUE, 1, SDM)) %>% 
-#   mutate(SDM = ifelse(grepl("PHRG", selection) == TRUE, 1, SDM)) %>%
-#   filter(selection != "No-Participation")
-# 
-# epiDisplay::tab1(no_SDM$SDM, sort.group = "decreasing", cum.percent = TRUE)
-
-
 ## Create mlogit data
 the_tows <- mlogit.data(rdo, shape = 'long', choice = 'fished', alt.var = 'selection',
                         id.var = "fished_VESSEL_NUM", chid.var = "fished_haul")
