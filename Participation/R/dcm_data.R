@@ -23,7 +23,7 @@ samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
                          min_year_est = 2012, max_year_est = 2019,
                          ndays = 30, nhauls_sampled = 5,
                          seed = 300, ncores = 4, rev_scale = 1000, 
-                         sample_choices = TRUE)
+                         sample_choices = FALSE)
   
   samps <- samps1 %>% 
     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
