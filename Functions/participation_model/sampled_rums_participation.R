@@ -361,6 +361,10 @@ sampled_rums <- function(data_in, cluster = 4,
     
     # Exclude other days of same trip (multiday trips)
     hauls <- hauls %>% dplyr::filter(n_obs_within_FTID==1) 
+
+    # Include date
+    hauls$set_date <- as.Date(with(hauls, paste(set_year, set_month, set_day, sep="-")), "%Y-%m-%d")
+
     
     # Expand hauls
     sampled_hauls <- hauls

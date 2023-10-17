@@ -29,7 +29,7 @@ samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
     rm(participation_data, samps1)
     
-  saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4_sampled.rds")
+  saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4_full.rds")
   
   
 #----------------------------------
