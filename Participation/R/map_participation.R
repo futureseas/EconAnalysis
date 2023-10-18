@@ -2,15 +2,8 @@
 ##### Work to do: maybe show map picture [ like WK4 figure] of  Participation x Landing results ,
 ##### (a dummy example) –  and this allows you to cite your Landings paper. WORKING ON THIS!
 
-
-
 rm(list = ls(all.names = TRUE)) 
 gc()
-## Load datase (from Stata work on predicting shares)
-Simulated_shares <- read.csv("C:/GitHub/EconAnalysis/Participation/R/Simulated_shares.csv") %>%
-  mutate(port = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA)) %>%  
-  drop_na()
-
 
 # libraries
 library(packcircles)
@@ -27,6 +20,12 @@ library(ggspatial)
 library(tidygeocoder)
 library(ggrepel)
 library(scatterpie)
+
+
+## Load datase (from Stata work on predicting shares)
+Simulated_shares <- read.csv("C:/GitHub/EconAnalysis/Participation/R/Simulated_shares.csv") %>%
+  mutate(port = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA)) %>%  
+  drop_na()
 
 
 ## Get coordinates for port area
@@ -153,7 +152,7 @@ gg2 <- ggplot() +
   theme(legend.position = "right") + 
   geom_scatterpie_legend(Simulated_shares1$sum_part*coef, x=-131, y=44, 
                          labeller = scales::label_percent(scale = 100/coef)) +
-  geom_text_repel(aes(x=lon_port, y=lat_port, group = port, label = port), 
+  geom_text_repel(aes(x=lon_port, y=lat_port, group = port, label = port_group_name), 
                   data = Simulated_shares1, segment.color = "#333333") +
   ggtitle('(b) Squid SDM = 0') + 
   scale_fill_manual(values = group.colors, labels=species_label)
