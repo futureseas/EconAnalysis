@@ -96,6 +96,21 @@ species_label <- as_labeller(c("BTNA" = "Bluefin Tuna",
                                "UDAB" = "Sanddabs",
                                "YTNA" = "Yellowfin Tuna"))
 
+#---------------------------
+# ADD OFFSETS FOR PORT NAMES
+#---------------------------
+Simulated_shares <- Simulated_shares %>% 
+  mutate(x_nudge = case_when(port_group_name == 'Newport' ~ 1,
+                             port_group_name == 'Coos Bay' ~ 1,
+                             port_group_name == 'Monterey' ~ -2,
+                             port_group_name == 'Bodega Bay' ~ -2.5,
+                             port_group_name == 'Santa Barbara' ~ -3,
+                             port_group_name == 'Los Angeles' ~ -3,
+                             TRUE ~ -1),
+         y_nudge = case_when(port_group_name == 'San Diego' ~ -.5,
+                             port_group_name == 'Bodega Bay' ~ 0.5,
+                             port_group_name == 'Los Angeles' ~ -1,
+                             TRUE ~ 0)) 
 
 
 ##########################################################################
@@ -103,10 +118,11 @@ Simulated_shares1 <- Simulated_shares %>% mutate(perc = perc)  %>%
   mutate(Species = ifelse(selection != "No-Participation",  substr(selection, 5, 8), NA)) %>% 
   select(-c('perc1', 'perc2', 'perc3', 'selection')) %>%
   spread(Species, perc) %>%
-  replace(is.na(.), 0) %>%
-  mutate(sum_part = rowSums(across(where(is.numeric)))) %>% 
+  replace(is.na(.), 0) 
+max_obs = ncol(Simulated_shares1)
+Simulated_shares1 <- Simulated_shares1 %>%
+  mutate(sum_part = rowSums(.[5:max_obs])) %>% 
   merge(ports, by = c("port"), all.x = TRUE)
-
 max_obs = ncol(Simulated_shares1) - 3
 coef = 4.5
 
@@ -116,12 +132,14 @@ gg1 <- ggplot() +
   coord_sf(xlim = c(-133, -116), ylim = c(32,46)) + mytheme +
   geom_scatterpie(aes(x=lon_port, y=lat_port, group = port, r = sum_part*coef), 
                   data = Simulated_shares1, legend_name = "Species",
-                  cols = colnames(Simulated_shares1[,c(3:max_obs)])) +
+                  cols = colnames(Simulated_shares1[,c(5:max_obs)])) +
   theme(legend.position = "none") + 
   geom_scatterpie_legend(Simulated_shares1$sum_part*coef, x=-131, y=44, 
                          labeller = scales::label_percent(scale = 100/coef)) +
   geom_text_repel(aes(x=lon_port, y=lat_port, group = port, label = port_group_name), 
-                  data = Simulated_shares1, segment.color = "#333333") + 
+                  data = Simulated_shares1, segment.color = "#333333", size = 3,
+                  nudge_x = Simulated_shares1$x_nudge,
+                  nudge_y = Simulated_shares1$y_nudge) + 
   ggtitle('(a) Historical SDM') + 
   scale_fill_manual(values = group.colors, labels=species_label)
   
@@ -135,10 +153,11 @@ Simulated_shares1 <- Simulated_shares %>% mutate(perc = perc3) %>%
   mutate(Species = ifelse(selection != "No-Participation",  substr(selection, 5, 8), NA)) %>% 
   select(-c('perc1', 'perc2', 'perc3', 'selection')) %>%
   spread(Species, perc) %>%
-  replace(is.na(.), 0) %>%
-  mutate(sum_part = rowSums(across(where(is.numeric)))) %>% 
+  replace(is.na(.), 0)
+max_obs = ncol(Simulated_shares1)
+Simulated_shares1 <- Simulated_shares1 %>%
+  mutate(sum_part = rowSums(.[5:max_obs])) %>% 
   merge(ports, by = c("port"), all.x = TRUE)
-
 max_obs = ncol(Simulated_shares1) - 3
 coef = 4.5
 
@@ -148,12 +167,14 @@ gg2 <- ggplot() +
   coord_sf(xlim = c(-133, -116), ylim = c(32,46)) + mytheme +
   geom_scatterpie(aes(x=lon_port, y=lat_port, group = port, r = sum_part*coef), 
                   data = Simulated_shares1, legend_name = "Species",
-                  cols = colnames(Simulated_shares1[,c(3:max_obs)])) +
+                  cols = colnames(Simulated_shares1[,c(5:max_obs)])) +
   theme(legend.position = "right") + 
   geom_scatterpie_legend(Simulated_shares1$sum_part*coef, x=-131, y=44, 
                          labeller = scales::label_percent(scale = 100/coef)) +
   geom_text_repel(aes(x=lon_port, y=lat_port, group = port, label = port_group_name), 
-                  data = Simulated_shares1, segment.color = "#333333") +
+                  data = Simulated_shares1, segment.color = "#333333", size = 3,
+                  nudge_x = Simulated_shares1$x_nudge,
+                  nudge_y = Simulated_shares1$y_nudge) +
   ggtitle('(b) Squid SDM = 0') + 
   scale_fill_manual(values = group.colors, labels=species_label)
 
