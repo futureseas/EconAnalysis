@@ -435,13 +435,16 @@ saveRDS(rdo_R, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\rdo_R_c4.rds"
 ## Stata data
 
 # Organize data for Stata estimation (drop_na()???)
+rdo_R <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\rdo_R_c4.rds")
 rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_haul, -rdo_R$fished),]) %>%
   group_by(fished_VESSEL_NUM) %>%
   dplyr::mutate(fished_VESSEL_ID = cur_group_id()) %>%
-  ungroup() %>% dplyr::select(-c('fished_VESSEL_NUM')) %>%
+  ungroup() %>% 
+  #dplyr::select(-c('fished_VESSEL_NUM')) %>%
   group_by(set_date) %>%
   dplyr::mutate(time = cur_group_id()) %>%
-  ungroup() %>% dplyr::select(-c('set_date'))  
+  ungroup()
+  #%>% dplyr::select(-c('set_date'))  
 
 ## Save data to run with Stata
 write.csv(rdo_Stata,"C:\\GitHub\\EconAnalysis\\Participation\\Stata\\rdo_Stata_c4.csv", row.names = FALSE)
