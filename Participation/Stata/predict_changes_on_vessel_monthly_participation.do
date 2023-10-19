@@ -39,8 +39,6 @@ cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dis
 // marginsplot, xdimension(_outcome)
 
 * Total cases = 19,832
-
-preserve
 	program change_coeff, eclass
 		matrix betass = e(b)
 		matrix list betass
@@ -65,29 +63,20 @@ preserve
 	predict phat, pr
 	by fished_haul, sort: egen max_prob = max(phat) 
 	drop if max_prob != phat
-	tab selection
-	gen selection_hat = 1
-	egen freq = total(selection_hat), by(selection)
-	keep selection freq
-	sort selection
-	quietly by selection:  gen dup = cond(_N==1,0,_n)
-	drop if dup > 1
-	drop dup
-	egen tot = total(freq)
-	gen perc3 = freq/tot
-	drop tot freq
-	tempfile simulated3
-	save simulated3, replace
-restore
+	drop if selection == "No-Participation"
+	keep if species == "MSQD" | species == "PSDN" | species == "NANC"
+	gen PORT_AREA_CODE = substr(selection,1,3) 
+	keep fished_vessel_id species PORT_AREA_CODE set_year set_month  
+	sort fished_vessel_id species PORT_AREA_CODE set_year set_month
+    quietly by fished_vessel_id species PORT_AREA_CODE set_year set_month:  gen dup = cond(_N==1,0,_n)
+    keep if dup == 1
+    drop dup
+    rename species PACFIN_SPECIES_CODE
+    rename set_month LANDING_MONTH
+    rename set_year LANDING_YEAR
 
 
-merge 1:1 selection using "simulated1.dta", nogen keep(master match) 
-merge 1:1 selection using "simulated2.dta", nogen keep(master match) 
-merge 1:1 selection using "simulated3.dta", nogen keep(master match) 
-replace perc  = 0 if perc == .
-replace perc1 = 0 if perc1 == .
-replace perc2 = 0 if perc2 == .
-replace perc3 = 0 if perc3 == .
 
-export excel using "G:\My Drive\Tables\Participation\Simulated_shares.xlsx", replace
-export delimited using "C:\GitHub\EconAnalysis\Participation\R\Simulated_shares.csv", replace
+**** get real vessel_num!!!
+
+export delimited using "C:\GitHub\EconAnalysis\Participation\R\monthly_participation_pred.csv", replace
