@@ -41,46 +41,6 @@ cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dis
 * Total cases = 19,832
 
 preserve
-	replace mean_avail = 1 if species == "MSQD"
-	predict phat, pr
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	tab selection
-	gen selection_hat = 1
-	egen freq = total(selection_hat), by(selection)
-	keep selection freq
-	sort selection
-	quietly by selection:  gen dup = cond(_N==1,0,_n)
-	drop if dup > 1
-	drop dup
-	egen tot = total(freq)
-	gen perc1 = freq/tot
-	drop tot freq
-	tempfile simulated1
-	save simulated1, replace
-restore
-
-preserve
-	replace mean_avail = 0 if species == "MSQD"
-	predict phat, pr
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	tab selection
-	gen selection_hat = 1
-	egen freq = total(selection_hat), by(selection)
-	keep selection freq
-	sort selection
-	quietly by selection:  gen dup = cond(_N==1,0,_n)
-	drop if dup > 1
-	drop dup
-	egen tot = total(freq)
-	gen perc2 = freq/tot
-	drop tot freq
-	tempfile simulated2
-	save simulated2, replace
-restore
-
-preserve
 	program change_coeff, eclass
 		matrix betass = e(b)
 		matrix list betass
@@ -120,38 +80,6 @@ preserve
 	save simulated3, replace
 restore
 
-cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend, base("No-Participation")
-
-matrix betass = e(b)
-matrix list betass
-
-	predict phat, pr
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	tab selection
-	gen selection_hat = 1
-	egen freq = total(selection_hat), by(selection)
-	keep selection freq
-	sort selection
-	quietly by selection:  gen dup = cond(_N==1,0,_n)
-	drop if dup > 1
-	drop dup
-	egen tot = total(freq)
-	gen perc = freq/tot
-	drop tot freq
-
-/* keep if fished == 1
-gen selection_hat = 1
-egen freq = total(selection_hat), by(selection)
-keep selection freq
-sort selection
-quietly by selection:  gen dup = cond(_N==1,0,_n)
-drop if dup > 1
-drop dup
-egen tot = total(freq)
-gen perc = freq/tot
-drop tot freq */
 
 merge 1:1 selection using "simulated1.dta", nogen keep(master match) 
 merge 1:1 selection using "simulated2.dta", nogen keep(master match) 
