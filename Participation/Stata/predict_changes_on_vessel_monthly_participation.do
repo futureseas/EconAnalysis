@@ -65,18 +65,15 @@ cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dis
 	drop if max_prob != phat
 	drop if selection == "No-Participation"
 	keep if species == "MSQD" | species == "PSDN" | species == "NANC"
-	gen PORT_AREA_CODE = substr(selection,1,3) 
-	keep fished_vessel_id species PORT_AREA_CODE set_year set_month  
-	sort fished_vessel_id species PORT_AREA_CODE set_year set_month
-    quietly by fished_vessel_id species PORT_AREA_CODE set_year set_month:  gen dup = cond(_N==1,0,_n)
+	gen PORT_AREA_CODE = substr(selection,1,3)
+	keep fished_vessel_num species PORT_AREA_CODE set_year set_month  
+	sort fished_vessel_num species PORT_AREA_CODE set_year set_month
+    quietly by fished_vessel_num species PORT_AREA_CODE set_year set_month:  gen dup = cond(_N==1,0,_n)
     keep if dup == 1
     drop dup
     rename species PACFIN_SPECIES_CODE
     rename set_month LANDING_MONTH
     rename set_year LANDING_YEAR
-
-
-
-**** get real vessel_num!!!
+    rename fished_vessel_num VESSEL_NUM
 
 export delimited using "C:\GitHub\EconAnalysis\Participation\R\monthly_participation_pred.csv", replace
