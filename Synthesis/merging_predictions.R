@@ -4,6 +4,7 @@
 
 rm(list = ls(all.names = TRUE)) 
 gc()
+cluster = 4
 
 ## Read packages 
 library("dplyr") 
@@ -11,10 +12,19 @@ library("tidyr")
 library("zoo")
 library('ggplot2')
 library("reshape2")
-library(data.table)
+library("data.table")
 
 ## Load predicted participation
 part_pred <- read.csv(here::here("Participation", "R", "monthly_participation_pred.csv")) 
+
+ports_choices_PSDN <- part_pred %>%
+  dplyr::filter(PACFIN_SPECIES_CODE == "PSDN") %>% 
+  dplyr::select(c(PACFIN_SPECIES_CODE, PORT_AREA_CODE)) %>% unique()
+
+ports_choices_NANC <- part_pred %>%
+  dplyr::filter(PACFIN_SPECIES_CODE == "NANC") %>% 
+  dplyr::select(c(PACFIN_SPECIES_CODE, PORT_AREA_CODE)) %>% unique()
+
 max_year <- max(part_pred$LANDING_YEAR)
 min_year <- min(part_pred$LANDING_YEAR)
 
@@ -23,16 +33,16 @@ min_year <- min(part_pred$LANDING_YEAR)
 #########################
 historical_landings <- read.csv(file ="C:\\Data\\PacFIN data\\dataset_estimation.csv") %>%
   select(c("LANDING_YEAR", "LANDING_MONTH", "PORT_AREA_CODE", 
-           "PSDN_Landings", "MSQD_Landings", "NANC_Landings")) %>%
-  dplyr::filter(LANDING_YEAR >= min_year & LANDING_YEAR <= max_year) %>%
+           "PSDN_Landings", "MSQD_Landings", "NANC_Landings", "group_all")) %>%
+  dplyr::filter(LANDING_YEAR >= min_year & LANDING_YEAR <= max_year, group_all == cluster) %>%
   group_by(LANDING_YEAR, PORT_AREA_CODE) %>%
   summarize(PSDN_Landings = sum(PSDN_Landings, na.rm = TRUE),
             MSQD_Landings = sum(MSQD_Landings, na.rm = TRUE),
             NANC_Landings = sum(NANC_Landings, na.rm = TRUE)) %>%
   group_by(PORT_AREA_CODE) %>%
-  summarize(PSDN_Landings = sum(PSDN_Landings, na.rm = TRUE),
-            MSQD_Landings = sum(MSQD_Landings, na.rm = TRUE),
-            NANC_Landings = sum(NANC_Landings, na.rm = TRUE))
+  summarize(PSDN_Landings = mean(PSDN_Landings, na.rm = TRUE),
+            MSQD_Landings = mean(MSQD_Landings, na.rm = TRUE),
+            NANC_Landings = mean(NANC_Landings, na.rm = TRUE))
 
 ##########################
 ## Load historical data ##
@@ -48,7 +58,10 @@ historical_data <- historical_data %>%
 #######################
 ## Average by vessel ##
 #######################
-vessel_data <- historical_data %>%  select(c("VESSEL_NUM", "group_all", "Length_z")) %>% unique()
+vessel_data <-
+  historical_data %>%
+  select(c("VESSEL_NUM", "group_all", "Length_z")) %>% 
+  unique()
 
 
 ####################################
@@ -71,8 +84,6 @@ all_months <- expand.grid(LANDING_YEAR = unique(all_years$`c(2000:2020)`), LANDI
 data_ports <- merge(all_ports, all_months, by = "join", all = TRUE, allow.cartesian=TRUE)
 rm(all_months, all_ports, all_years)
 
-
-
 agency_codes <- read.csv(file = "C:\\Data\\PacFIN data\\PacFIN_month.csv") %>% 
   dplyr::select('AGENCY_CODE', 'PORT_AREA_CODE') %>% 
   unique() %>% drop_na()
@@ -89,17 +100,17 @@ ports_area_codes <- read.csv(file = "C:\\Data\\PacFIN data\\PacFIN_month.csv") %
 SDM_port_PSDN <- read.csv(file = here::here("Landings", "SDM", "PSDN_SDM_port_month.csv")) %>% 
   merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
   group_by(PORT_AREA_CODE, LANDING_MONTH, LANDING_YEAR) %>% 
-  summarize(PSDN_SDM_60 = mean(SDM_60))
+  summarize(PSDN_SDM_60 = mean(SDM_60, na.rm = TRUE))
 
 SDM_port_MSQD_Spawn <- read.csv(file = here::here("Landings", "SDM", "MSQD_Spawn_SDM_port_month.csv"))%>% 
   merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
   group_by(PORT_AREA_CODE, LANDING_YEAR, LANDING_MONTH) %>% 
-  summarize(MSQD_SPAWN_SDM_90 = mean(SDM_SPAWN_90))
+  summarize(MSQD_SPAWN_SDM_90 = mean(SDM_SPAWN_90, na.rm = TRUE))
 
 SDM_port_NANC <- read.csv(file = here::here("Landings", "SDM", "NANC_SDM_port_month.csv"))%>% 
   merge(ports_area_codes, by = c("PORT_NAME", "AGENCY_CODE"), all.x = TRUE) %>% 
   group_by(PORT_AREA_CODE, LANDING_MONTH, LANDING_YEAR) %>% 
-  summarize(NANC_SDM_20 = mean(SDM_20))
+  summarize(NANC_SDM_20 = mean(SDM_20, na.rm = TRUE))
 
 data_ports <- merge(data_ports, SDM_port_PSDN,
                     by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), all.x = TRUE)
@@ -115,12 +126,11 @@ rm(SDM_port_PSDN, SDM_port_NANC, SDM_port_MSQD_Spawn, ports_area_codes)
 
 Tickets_raw$AFI_PRICE_PER_MTON <- Tickets_raw$AFI_PRICE_PER_POUND * 2.20462 * 1000
 
-
 ## Sardine
 price.data <- Tickets_raw %>% 
   dplyr::filter(PACFIN_SPECIES_CODE == "PSDN") %>%
   group_by(PORT_AREA_CODE, LANDING_YEAR, LANDING_MONTH) %>%
-  summarise(PSDN_Price = mean(AFI_PRICE_PER_MTON))
+  summarise(PSDN_Price = mean(AFI_PRICE_PER_MTON, na.rm = TRUE))
 
 data_ports <- merge(data_ports, price.data, 
                     by = c('PORT_AREA_CODE', 'LANDING_YEAR', 'LANDING_MONTH'),
@@ -130,7 +140,7 @@ data_ports <- merge(data_ports, price.data,
 price.data <- Tickets_raw %>% 
   dplyr::filter(PACFIN_SPECIES_CODE == "PSDN") %>%
   group_by(AGENCY_CODE, LANDING_YEAR, LANDING_MONTH) %>%
-  summarise(PSDN_Price_State = mean(AFI_PRICE_PER_MTON))
+  summarise(PSDN_Price_State = mean(AFI_PRICE_PER_MTON, na.rm = TRUE))
 data_ports <- merge(data_ports, price.data, 
                     by = c('AGENCY_CODE', 'LANDING_YEAR', 'LANDING_MONTH'),
                     all.x = TRUE, all.y = FALSE)
@@ -139,7 +149,7 @@ data_ports <- merge(data_ports, price.data,
 price.data <- Tickets_raw %>% 
   dplyr::filter(PACFIN_SPECIES_CODE == "PSDN") %>%
   group_by(LANDING_YEAR, LANDING_MONTH) %>%
-  summarise(PSDN_Price_Date = mean(AFI_PRICE_PER_MTON))
+  summarise(PSDN_Price_Date = mean(AFI_PRICE_PER_MTON, na.rm = TRUE))
 data_ports <- merge(data_ports, price.data, 
                     by = c('LANDING_YEAR', 'LANDING_MONTH'),
                     all.x = TRUE, all.y = FALSE)
@@ -152,7 +162,7 @@ rm(price.data)
 price.data <- Tickets_raw %>% 
   dplyr::filter(PACFIN_SPECIES_CODE == "MSQD") %>%
   group_by(PORT_AREA_CODE, LANDING_YEAR, LANDING_MONTH) %>%
-  summarise(MSQD_Price = mean(AFI_PRICE_PER_MTON))
+  summarise(MSQD_Price = mean(AFI_PRICE_PER_MTON, na.rm = TRUE))
 
 data_ports <- merge(data_ports, price.data, 
                     by = c('PORT_AREA_CODE', 'LANDING_YEAR', 'LANDING_MONTH'),
@@ -162,7 +172,7 @@ data_ports <- merge(data_ports, price.data,
 price.data <- Tickets_raw %>% 
   dplyr::filter(PACFIN_SPECIES_CODE == "MSQD") %>%
   group_by(AGENCY_CODE, LANDING_YEAR, LANDING_MONTH) %>%
-  summarise(MSQD_Price_State = mean(AFI_PRICE_PER_MTON))
+  summarise(MSQD_Price_State = mean(AFI_PRICE_PER_MTON, na.rm = TRUE))
 data_ports <- merge(data_ports, price.data, 
                     by = c('AGENCY_CODE', 'LANDING_YEAR', 'LANDING_MONTH'),
                     all.x = TRUE, all.y = FALSE)
@@ -171,7 +181,7 @@ data_ports <- merge(data_ports, price.data,
 price.data <- Tickets_raw %>% 
   dplyr::filter(PACFIN_SPECIES_CODE == "MSQD") %>%
   group_by(LANDING_YEAR, LANDING_MONTH) %>%
-  summarise(MSQD_Price_Date = mean(AFI_PRICE_PER_MTON))
+  summarise(MSQD_Price_Date = mean(AFI_PRICE_PER_MTON, na.rm = TRUE))
 data_ports <- merge(data_ports, price.data, 
                     by = c('LANDING_YEAR', 'LANDING_MONTH'),
                     all.x = TRUE, all.y = FALSE)
@@ -184,7 +194,7 @@ rm(price.data)
 price.data <- Tickets_raw %>% 
   dplyr::filter(PACFIN_SPECIES_CODE == "NANC") %>%
   group_by(PORT_AREA_CODE, LANDING_YEAR, LANDING_MONTH) %>%
-  summarise(NANC_Price = mean(AFI_PRICE_PER_MTON))
+  summarise(NANC_Price = mean(AFI_PRICE_PER_MTON, na.rm = TRUE))
 
 data_ports <- merge(data_ports, price.data, 
                     by = c('PORT_AREA_CODE', 'LANDING_YEAR', 'LANDING_MONTH'),
@@ -194,7 +204,7 @@ data_ports <- merge(data_ports, price.data,
 price.data <- Tickets_raw %>% 
   dplyr::filter(PACFIN_SPECIES_CODE == "NANC") %>%
   group_by(AGENCY_CODE, LANDING_YEAR, LANDING_MONTH) %>%
-  summarise(NANC_Price_State = mean(AFI_PRICE_PER_MTON))
+  summarise(NANC_Price_State = mean(AFI_PRICE_PER_MTON, na.rm = TRUE))
 data_ports <- merge(data_ports, price.data, 
                     by = c('AGENCY_CODE', 'LANDING_YEAR', 'LANDING_MONTH'),
                     all.x = TRUE, all.y = FALSE)
@@ -203,7 +213,7 @@ data_ports <- merge(data_ports, price.data,
 price.data <- Tickets_raw %>% 
   dplyr::filter(PACFIN_SPECIES_CODE == "NANC") %>%
   group_by(LANDING_YEAR, LANDING_MONTH) %>%
-  summarise(NANC_Price_Date = mean(AFI_PRICE_PER_MTON))
+  summarise(NANC_Price_Date = mean(AFI_PRICE_PER_MTON, na.rm = TRUE))
 data_ports <- merge(data_ports, price.data, 
                     by = c('LANDING_YEAR', 'LANDING_MONTH'),
                     all.x = TRUE, all.y = FALSE)
@@ -247,7 +257,8 @@ area_data <- data_ports %>% select('LANDING_YEAR', 'LANDING_MONTH', 'PORT_AREA_C
               'PSDN.Open', 'MSQD.Open') %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse(LANDING_YEAR > 2015, 1, 0)) %>%
   dplyr::mutate(PSDN.Total.Closure = ifelse((LANDING_YEAR == 2015 & LANDING_MONTH >= 7), 1, PSDN.Total.Closure)) %>% 
-  dplyr::mutate(WA.Restriction = ifelse(LANDING_MONTH <= 3, 1, 0))  
+  dplyr::mutate(WA.Restriction = ifelse(LANDING_MONTH <= 3, 1, 0)) %>% 
+  dplyr::mutate(MSQD_SPAWN_SDM_90 = 0)
 
 area_data$port_ID <- factor(area_data$PORT_AREA_CODE) 
 
@@ -260,6 +271,8 @@ part_pred2 <- part_pred %>%
         by = c("PORT_AREA_CODE", "LANDING_YEAR", "LANDING_MONTH"), 
         all.x = TRUE, all.y = FALSE) %>%
   mutate(cluster_port = paste(group_all, PORT_AREA_CODE, sep = "-", collapse = NULL))
+
+part_pred2$port_cluster_ID <- factor(part_pred2$cluster_port)
 
 #################################################################################
 # Load landings estimations
@@ -278,13 +291,23 @@ set.seed(123)
 
 ## Sardine landings
 part_pred_PSDN <- part_pred2 %>% filter(PACFIN_SPECIES_CODE == "PSDN")
-prediction_PSDN <- cbind(predict(fit_qPSDN, newdata = part_pred_PSDN, allow_new_levels = TRUE), part_pred_PSDN) %>%
-  
+prediction_PSDN <- cbind(predict(fit_qPSDN, 
+                                 newdata = part_pred_PSDN, 
+                                 allow_new_levels = TRUE), 
+                         part_pred_PSDN) 
 
 ## Anchovy landings
 part_pred_NANC <- part_pred2 %>% filter(PACFIN_SPECIES_CODE == "NANC")
-prediction_NANC <- cbind(predict(fit_qNANC, newdata = part_pred_NANC, allow_new_levels = TRUE), part_pred_NANC)
+prediction_NANC <- cbind(predict(fit_qNANC, 
+                                  newdata = part_pred_NANC, 
+                                  allow_new_levels = TRUE), 
+                          part_pred_NANC)
 
 
-
+#################
+### Save data ###
+#################
+saveRDS(historical_landings, "historical_landings,rds")
+saveRDS(prediction_PSDN    , "prediction_PSDN.rds")
+saveRDS(prediction_NANC    , "prediction_NANC.rds")
 

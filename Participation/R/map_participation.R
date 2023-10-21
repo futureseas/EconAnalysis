@@ -23,8 +23,13 @@ library(scatterpie)
 
 
 ## Load datase (from Stata work on predicting shares)
-Simulated_shares <- read.csv("C:/GitHub/EconAnalysis/Participation/R/Simulated_shares.csv") %>%
+Simulated_shares <- read.csv("C:/GitHub/EconAnalysis/Participation/R/Simulated_shares_fig.csv") %>%
+  complete(selection, set_year) %>% mutate(perc = ifelse(is.na(perc), 0, perc),
+                                           perc3 = ifelse(is.na(perc3), 0, perc3)) %>%
   mutate(port = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA)) %>%  
+  group_by(selection, port) %>%
+  summarize(perc = mean(perc, na.rm = TRUE), perc3 = mean(perc3, na.rm = TRUE)) %>% 
+  ungroup() %>%
   drop_na()
 
 
@@ -69,18 +74,18 @@ Simulated_shares <- Simulated_shares %>%
   mutate(port_group_name = ifelse(port == "SDA", "San Diego", port_group_name))
 
 
-group.colors <- c("BTNA" = "#fde725",
+group.colors <- c("BTNA" = "#38588c",
                   "CHNK" = "#c2df23", 
                   "CMCK" = "#86d549",
                   "DCRB" = "#52c569", 
                   "JMCK" = "#2ab07f", 
-                  "MSQD" = "#1e9b8a",
                   "NANC" = "#25858e", 
                   "PBNT" = "#2d708e",
-                  "PSDN" = "#38588c",
+                  "PSDN" = "#fde725",
                   "STNA" = "#433e85",
                   "UDAB" = "#482173",
-                  "YTNA" = "#440154")  
+                  "YTNA" = "#1e9b8a",
+                  "MSQD" = "#440154")  
 
 
 species_label <- as_labeller(c("BTNA" = "Bluefin Tuna",
@@ -116,9 +121,10 @@ Simulated_shares <- Simulated_shares %>%
 ##########################################################################
 Simulated_shares1 <- Simulated_shares %>% mutate(perc = perc)  %>% 
   mutate(Species = ifelse(selection != "No-Participation",  substr(selection, 5, 8), NA)) %>% 
-  select(-c('perc1', 'perc2', 'perc3', 'selection')) %>%
+  select(-c('perc3', 'selection')) %>%
   spread(Species, perc) %>%
   replace(is.na(.), 0) 
+
 max_obs = ncol(Simulated_shares1)
 Simulated_shares1 <- Simulated_shares1 %>%
   mutate(sum_part = rowSums(.[5:max_obs])) %>% 
@@ -133,7 +139,7 @@ gg1 <- ggplot() +
   geom_scatterpie(aes(x=lon_port, y=lat_port, group = port, r = sum_part*coef), 
                   data = Simulated_shares1, legend_name = "Species",
                   cols = colnames(Simulated_shares1[,c(5:max_obs)])) +
-  theme(legend.position = "none") + 
+  theme(legend.position = "left") + 
   geom_scatterpie_legend(Simulated_shares1$sum_part*coef, x=-131, y=44, 
                          labeller = scales::label_percent(scale = 100/coef)) +
   geom_text_repel(aes(x=lon_port, y=lat_port, group = port, label = port_group_name), 
@@ -151,7 +157,7 @@ Simulated_shares1 <- Simulated_shares %>% mutate(perc = perc3) %>%
   mutate(port = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA)) %>%  
   drop_na() %>% 
   mutate(Species = ifelse(selection != "No-Participation",  substr(selection, 5, 8), NA)) %>% 
-  select(-c('perc1', 'perc2', 'perc3', 'selection')) %>%
+  select(-c('perc3', 'selection')) %>%
   spread(Species, perc) %>%
   replace(is.na(.), 0)
 max_obs = ncol(Simulated_shares1)
@@ -168,7 +174,7 @@ gg2 <- ggplot() +
   geom_scatterpie(aes(x=lon_port, y=lat_port, group = port, r = sum_part*coef), 
                   data = Simulated_shares1, legend_name = "Species",
                   cols = colnames(Simulated_shares1[,c(5:max_obs)])) +
-  theme(legend.position = "right") + 
+  theme(legend.position = "none") + 
   geom_scatterpie_legend(Simulated_shares1$sum_part*coef, x=-131, y=44, 
                          labeller = scales::label_percent(scale = 100/coef)) +
   geom_text_repel(aes(x=lon_port, y=lat_port, group = port, label = port_group_name), 

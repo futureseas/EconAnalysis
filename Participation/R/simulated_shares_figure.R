@@ -7,8 +7,13 @@ gc()
 
 
 ## Load datase (from Stata work on predicting shares)
-Simulated_shares <- read.csv("C:/GitHub/EconAnalysis/Participation/R/Simulated_shares.csv")
-
+Simulated_shares2 <- read.csv("C:/GitHub/EconAnalysis/Participation/R/Simulated_shares.csv") 
+Simulated_shares <- read.csv("C:/GitHub/EconAnalysis/Participation/R/Simulated_shares_fig.csv") %>%
+  complete(selection, set_year) %>% mutate(perc = ifelse(is.na(perc), 0, perc),
+                                           perc3 = ifelse(is.na(perc3), 0, perc3)) %>%
+  group_by(selection) %>%
+  summarize(perc = mean(perc, na.rm = TRUE), perc3 = mean(perc3, na.rm = TRUE)) %>% 
+  ungroup()
 
 # libraries
 library(packcircles)
@@ -29,7 +34,9 @@ data1 <- data %>% mutate(selection1 = ifelse(selection == "No-Participation", "N
                                       ifelse(selection == "SBA-MSQD", "Squid\n(Santa Barbara)", 
                                       ifelse(selection == "MNA-MSQD", "Squid\n(Monterey)", 
                                       ifelse(selection == "LAA-MSQD", "Squid\n(Los Angeles)",
-                                      ifelse(selection == "SFA-MSQD", "Squid\n(SF)", NA))))))
+                                      ifelse(selection == "MNA-NANC", "Anchovy\n(Monterey)", 
+                                      ifelse(selection == "LAA-CMCK", "Chub Mackerel\n(Los Angeles)",
+                                      ifelse(selection == "SFA-MSQD", "Squid\n(SF)", NA))))))))
 dat.gg <- circleLayoutVertices(packing, npoints=50)
 gg1 <- ggplot() + 
   geom_polygon(data = dat.gg, aes(x, y, group = id, fill=id), colour = "black", alpha = 0.6) +
@@ -47,14 +54,14 @@ packing <- circleProgressiveLayout(Simulated_shares$perc, sizetype='area')
 packing$radius <- packing$radius
 data <- cbind(Simulated_shares, packing)
 data2 <- data %>% mutate(selection2 = ifelse(selection == "No-Participation", "No\nParticipation",
-                                      ifelse(selection == "LAA-PSDN", "Sardine\n(Los Angeles)", 
-                                      ifelse(selection == "MNA-NANC", "Anchovy\n(Monterey)", 
+                                      ifelse(selection == "MNA-NANC", "Anchovy\n(Monterey)",
                                       ifelse(selection == "LAA-CMCK", "Chub Mackerel\n(Los Angeles)",
                                       ifelse(selection == "LAA-YTNA", "Yellowfin\n(Los Angeles)", 
+                                      ifelse(selection == "LAA-PSDN", "Sardine\n(Los Angeles)", 
                                       ifelse(selection == "LAA-BTNA", "Bluefin\n(Los Angeles)", 
-                                      ifelse(selection == "LAA-JMCK", "Jack Mackerel\n(Los Angeles)", 
-                                      ifelse(selection == "SFA-NANC", "Anchovy\n(SF)", 
-                                      ifelse(selection == "SFA-DCRB", "Crab\n(SF)", 
+                                      ifelse(selection == "LAA-NANC", "Anchovy\n(Los Angeles)", 
+                                      ifelse(selection == "SBA-CMCK", "Chub Mackerel\n(Santa Barbara)", 
+                                      ifelse(selection == "MNA-PSDN", "Sardine\n(Monterey)", 
                                       ifelse(selection == "LAA-PBNT", "Bonito\n(Los Angeles)",NA)))))))))))
 dat.gg <- circleLayoutVertices(packing, npoints=50)
 gg2 <- ggplot() + 
