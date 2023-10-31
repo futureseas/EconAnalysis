@@ -30,6 +30,9 @@ sampled_rums <- function(data_in, cluster = 4,
 
   # ###############
   # # Delete
+  #
+  # WORK TO DO: KEEP CORE VESSEL / CRITERIA FOR JUST PARTICIPATING IN A YEAR
+  #
   # gc()
   # library(doParallel)
   # library(tidyr)
