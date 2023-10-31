@@ -301,7 +301,7 @@ Tickets_coord <- Tickets_coord %>%
 library(fpp2)           # working with time series data
 library(zoo)            # working with time series data
 
-n_days_participation = 365
+n_days_participation = 30
 
 participation_data_all <- Tickets_coord %>% 
   mutate(CPS_revenue = 
@@ -311,53 +311,54 @@ participation_data_all <- Tickets_coord %>%
     ifelse(Species_Dominant == "PSDN", Revenue,
     ifelse(Species_Dominant == "CMCK", Revenue,
     ifelse(Species_Dominant == "JMCK", Revenue,
-    ifelse(Species_Dominant == "UMCK", Revenue, 0)))))))) %>%
+    ifelse(Species_Dominant == "UMCK", Revenue, 0)))))))) %>% 
   mutate(CPS_revenue = ifelse(selection == "No-Participation", 0, CPS_revenue)) %>% 
   mutate(partDummy = ifelse(selection == "No-Participation", 0, 1)) %>%
   dplyr::select(VESSEL_NUM, set_date, set_year, partDummy, CPS_revenue, Revenue, group_all) %>% unique() %>%
   dplyr::arrange(VESSEL_NUM, set_date) %>%
   group_by(VESSEL_NUM) %>%
-  mutate(participation_ndays = rollsum(partDummy, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
-  mutate(CPS_revenue_MA = rollsum(CPS_revenue, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
-  mutate(Revenue_MA = rollsum(Revenue, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
+  mutate(participation_ndays = RcppRoll::roll_sum(partDummy, n_days_participation, fill = NA, align = "center", na.rm = TRUE)) %>%
+  # mutate(CPS_revenue_MA = rollsum(CPS_revenue, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
+  # mutate(Revenue_MA = rollsum(Revenue, k = n_days_participation, na.rm = TRUE, fill = NA, align = "center")) %>%
   ungroup() %>% 
   filter(is.na(participation_ndays) == 0) %>%
-  mutate(perc_CPS = CPS_revenue_MA / Revenue_MA) %>%
+  # mutate(perc_CPS = CPS_revenue_MA / Revenue_MA) %>%
   mutate(partDummy = as.factor(partDummy))
 
 
 # ----------
-# # Plots with filtered data
-# 
-# cluster <- 5
-# ndays_filter <- 90
-# ndays_filter_t <- 30
-# 
-# participation_filtered <- participation_data_all %>%
-#   #filter(group_all == cluster) %>%
-#   mutate(Dfilter = ifelse(partDummy == 0 & participation_ndays < ndays_filter, 0, 1)) %>%
-#   mutate(Dfilter = ifelse(partDummy == 1 & participation_ndays < ndays_filter_t, 0, Dfilter)) %>%
-#   filter(Dfilter == 1) %>%
-#   dplyr::arrange(VESSEL_NUM, set_date)
-# 
-# perc <- participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
-# x1 <- trunc(perc$perc[1]*100*10^2)/10^2
-# x2 <- trunc(perc$perc[2]*100*10^2)/10^2
-# 
-# library(hrbrthemes)
-# ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
-#   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
-#   theme_ipsum()  +
-#   ylab("Number of observations") +
-#   xlab("Days participating within a year") +
-#   guides(fill=guide_legend(title="Participating?")) +
-#   scale_fill_discrete(labels = c(paste0("No (", paste0(x1,"%)")), paste0("Yes (", paste0(x2,"%)")))) +
-#   ggtitle(paste0("At least ",
-#     paste0(ndays_filter,
-#     paste0(" participating within a year (",
-#     paste0(formatC(nrow(participation_filtered), format="d", big.mark=","), " obs)")))),
-#     subtitle = paste0("...and ", paste0(ndays_filter_t, " days participating for rows with tickets")))
-#
+# Plots with filtered data
+
+cluster <- 4
+ndays_filter <- 7
+ndays_filter_t <- 7
+
+participation_filtered <- participation_data_all %>%
+  #filter(group_all == cluster) %>%
+  mutate(Dfilter = ifelse(partDummy == 0 & participation_ndays < ndays_filter, 0, 1)) %>%
+  mutate(Dfilter = ifelse(partDummy == 1 & participation_ndays < ndays_filter_t, 0, Dfilter)) %>%
+  filter(Dfilter == 1) %>%
+  dplyr::arrange(VESSEL_NUM, set_date)
+
+perc <- participation_filtered %>% group_by(partDummy) %>% summarize(n_obs = n(), perc = n()/nrow(participation_filtered))
+x1 <- trunc(perc$perc[1]*100*10^2)/10^2
+x2 <- trunc(perc$perc[2]*100*10^2)/10^2
+
+library(hrbrthemes)
+ggplot(data=participation_filtered, aes(x=participation_ndays, group=partDummy, fill=partDummy)) +
+  geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
+  theme_ipsum()  +
+  ylab("Number of observations") +
+  xlab("Days participating within a month") +
+  guides(fill=guide_legend(title="Participating?")) +
+  scale_fill_discrete(labels = c(paste0("No (", paste0(x1,"%)")), paste0("Yes (", paste0(x2,"%)")))) +
+  ggtitle(paste0("At least ",
+    paste0(ndays_filter,
+    paste0(" days participating within a month (",
+    paste0(formatC(nrow(participation_filtered), format="d", big.mark=","), " obs)")))),
+    #subtitle = paste0("...and ", paste0(ndays_filter_t, " days participating for rows with tickets"))
+    )
+
 # ggplot(data=participation_filtered, aes(x=Revenue_MA, group=partDummy, fill=partDummy)) +
 #   geom_density(adjust=1.5, alpha=.4, aes(y = ..count..)) +
 #   theme_ipsum()  +
@@ -378,8 +379,8 @@ participation_data_all <- Tickets_coord %>%
 #-----------------------------------------------
 ## filter non-participation
 
-ndays_filter <- 90 ## For rows with no-participation
-ndays_filter_t <- 30 ## For row with tickets
+ndays_filter <- 7 ## For rows with no-participation
+ndays_filter_t <- 7 ## For row with tickets
 
 participation_filtered <- participation_data_all %>%
   mutate(Dfilter = ifelse(partDummy == 0 & participation_ndays < ndays_filter, 0, 1)) %>%
@@ -476,7 +477,78 @@ Tickets_final$trip_id <- udpipe::unique_identifier(Tickets_final, fields = c('VE
 ### Save participation data
 
 saveRDS(Tickets_final, "C:\\Data\\PacFIN data\\participation_data.rds")
+Tickets_final <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+
+
+
+##############################
+### Some initial analysis ###
+##############################
+
+df.subs <- Tickets_final %>% 
+  dplyr::select(c(VESSEL_NUM, Species_Dominant, selection, set_month,
+                  set_date, set_year, group_all)) %>%
+  dplyr::filter(set_year == 2013, set_year <= 2017, set_month ==10, group_all == 4) 
+# %>%
+#   dplyr::filter(VESSEL_NUM == "648720" | VESSEL_NUM == "984694" |
+#                   VESSEL_NUM == "942575" | VESSEL_NUM == "602455") %>% drop_na() 
+
+ggplot(df.subs, aes(x=set_date, y=VESSEL_NUM, color=Species_Dominant)) + 
+  geom_point(size=1) 
+
+
+# ##################################
+# ## Distance to catch areas for CMCK, JMCK and
 # 
+# avg.dist <- Tickets_final %>%
+#   dplyr::filter(n_obs_within_FTID == 1) %>%
+#   dplyr::select(Species_Dominant, trip_id, dist) %>%
+#   dplyr::filter(Species_Dominant == "CMCK") %>%
+#   unique() %>% drop_na(dist)
+#   psych::describe(avg.dist$dist)
+# 
+# avg.dist <- Tickets_final %>%
+#   dplyr::filter(n_obs_within_FTID == 1) %>%
+#   dplyr::select(Species_Dominant, trip_id, dist) %>%
+#   dplyr::filter(Species_Dominant == "JMCK") %>%
+#   unique() %>% drop_na(dist)
+#   psych::describe(avg.dist$dist)
+# 
+# avg.dist <- Tickets_final %>%
+#   dplyr::filter(n_obs_within_FTID == 1) %>%
+#   dplyr::select(Species_Dominant, trip_id, dist) %>%
+#   dplyr::filter(Species_Dominant == "PHRG") %>%
+#   unique() %>% drop_na(dist)
+#   psych::describe(avg.dist$dist)
+
+
+# ##################################
+# ## Species with multiday trips
+# 
+# days_sea <- Tickets_final %>%
+#   dplyr::filter(n_obs_within_FTID == 1)   %>%
+#   dplyr::select(Species_Dominant, max_days_sea, trip_id) %>%
+#   dplyr::filter(max_days_sea > 1) %>%
+#   unique() %>% 
+#   mutate(Total_obs = n(), obs = 1)  %>% 
+#   group_by(Species_Dominant) %>%
+#   summarize(Total_obs = mean(Total_obs), obs = sum(obs),
+#    avg.days.sea = mean(max_days_sea)) %>%
+#   mutate(perc = scales::percent(obs/Total_obs)) 
+# 
+# library("googlesheets4")
+# gs4_auth(
+#   email = "fequezad@ucsc.edu",
+#   path = NULL,
+#   scopes = "https://www.googleapis.com/auth/spreadsheets",
+#   cache = gargle::gargle_oauth_cache(),
+#   use_oob = gargle::gargle_oob_default(),
+#   token = NULL)
+# 
+# gs4_create("days_sea", sheets = days_sea)
+
+
+
 
 # ########################################
 # ## Repeated trip_id?
