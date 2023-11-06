@@ -121,7 +121,7 @@ sampled_rums <- function(data_in, cluster = 4,
     
   #-----------------------------------------------------------------------------
   ## Add criteria for just participation in a year
-
+  part_criteria <- 
   
     
     
