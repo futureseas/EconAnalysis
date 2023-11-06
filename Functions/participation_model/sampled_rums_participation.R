@@ -28,32 +28,30 @@ sampled_rums <- function(data_in, cluster = 4,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale, sample_choices = TRUE) {
 
-  # ###############
-  # # Delete
-  #
-  # WORK TO DO: KEEP CORE VESSEL / CRITERIA FOR JUST PARTICIPATING IN A YEAR
-  #
-  # gc()
-  # library(doParallel)
-  # library(tidyr)
-  # library(plm)
-  # library(tidyverse)
-  # library(lubridate)
-  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-  # cluster <- 4
-  # min_year_prob <- 2013
-  # max_year_prob <- 2017
-  # min_year_est <- 2012
-  # max_year_est <- 2019
-  # min_year <- 2013
-  # max_year <- 2017
-  # ndays <- 30
-  # nhauls_sampled <- 5
-  # seed <- 300
-  # ncores <- 4
-  # rev_scale <- 1000
-  # sample_choices <- TRUE
-  # ################
+  ###############
+  # Delete
+
+  gc()
+  library(doParallel)
+  library(tidyr)
+  library(plm)
+  library(tidyverse)
+  library(lubridate)
+  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+  cluster <- 4
+  min_year_prob <- 2013
+  max_year_prob <- 2017
+  min_year_est <- 2012
+  max_year_est <- 2019
+  min_year <- 2013
+  max_year <- 2017
+  ndays <- 30
+  nhauls_sampled <- 5
+  seed <- 300
+  ncores <- 4
+  rev_scale <- 1000
+  sample_choices <- TRUE
+  ################
 
   dat <- data_in 
   
@@ -101,20 +99,45 @@ sampled_rums <- function(data_in, cluster = 4,
     #                            output = "Participation\\Results\\price_model.docx")
     #
     
+
+  # #-----------------------------------------------------------------------------
+  # ## Keep core vessel and 
+  # 
+  # core_vessels <- dat %>% 
+  #     dplyr::filter(set_year >= min_year_est, 
+  #                   set_year <= max_year_est, 
+  #                   group_all %in% cluster) %>% 
+  #     distinct(trip_id, .keep_all = T) %>% as.data.frame %>% 
+  #     dplyr::filter(Species_Dominant == "PSDN" | Species_Dominant == "MSQD" |
+  #                   Species_Dominant == "NANC" | Species_Dominant == "CMCK" |
+  #                   Species_Dominant == "JMCK" | Species_Dominant == "UMCK") %>% 
+  #     group_by(VESSEL_NUM) %>%
+  #     summarize(Landings = sum(Landings_mtons, na.rm = TRUE)) %>%
+  #     mutate(total_landings = sum(Landings)) %>%
+  #     arrange(desc(Landings)) %>% mutate(cumm = cumsum(Landings)) %>%
+  #     mutate(perc = cumm / total_landings * 100) %>% 
+  #     dplyr::filter(perc < 99) %>% dplyr::select(c('VESSEL_NUM')) %>%
+  #     unique()
+    
+  #-----------------------------------------------------------------------------
+  ## Add criteria for just participation in a year
+
+  
+    
+    
   #-----------------------------------------------------------------------------
   ## Define hauls data used for estimation (in this case, are the trips)
-  
+    
   hauls <- dat %>% 
-    dplyr::filter(set_year >= min_year, 
-                  set_year <= max_year, 
-                  group_all %in% cluster) %>% 
-    distinct(trip_id, .keep_all = T)  %>% 
-    dplyr::select(trip_id, VESSEL_NUM, set_year, set_month, set_day, Revenue, selection, n_obs_within_FTID) %>% 
-      as.data.frame
-
+      dplyr::filter(set_year >= min_year, 
+                    set_year <= max_year, 
+                    group_all %in% cluster) %>% 
+      distinct(trip_id, .keep_all = T) %>% 
+      dplyr::select(trip_id, VESSEL_NUM, set_year, set_month, 
+                    set_day, Revenue, selection, n_obs_within_FTID) %>% as.data.frame
     
-  #----------------------------------------------------------------------------
     
+  #-----------------------------------------------------------------------------
   if (sample_choices == TRUE) {
     print("Start sampling choices")
     ## Select hauls used to calculate probability for the choice set
