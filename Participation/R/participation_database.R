@@ -48,7 +48,7 @@ Tickets <- dplyr::select(Tickets_raw, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING
                                  FISHER_LICENSE_NUM, AFI_PRICE_PER_POUND, NUM_OF_DAYS_FISHED)) %>%
   mutate(AFI_PRICE_PER_MTONS = AFI_PRICE_PER_POUND/0.000453592)
   Tickets$FTID_unique <- udpipe::unique_identifier(Tickets, fields = c("FTID", "VESSEL_NUM", "LANDING_YEAR"))
-  # saveRDS(Tickets, "C:/Data/PacFIN data/Tickets_filtered.rds")
+  saveRDS(Tickets, "C:/Data/PacFIN data/Tickets_filtered.rds")
 
 
 #-----------------------------------------------------
@@ -400,7 +400,6 @@ Tickets_dist <- Tickets_dist %>% rowwise() %>%
 # ticket_part_2 %>% summarize(perc = (nrow(ticket_part_2)-sum(is.na(lat_ca)))/nrow(ticket_part_2))
 
 Tickets_dist <- Tickets_dist %>% mutate(dist = ifelse(dist > 220*max_days_sea, NA, dist))
-# hist(Tickets_dist$dist)
 
 #------------------------------------------------------
 ### Details before savings (e.g. create previous day, trip_id. Make vessel characteristics numeric)
