@@ -104,8 +104,8 @@ sampled_rums <- function(data_in, cluster = 4,
   # ## Keep core vessel and 
   # 
   # core_vessels <- dat %>% 
-  #     dplyr::filter(set_year >= min_year_est, 
-  #                   set_year <= max_year_est, 
+  #     dplyr::filter(set_year >= min_year, 
+  #                   set_year <= max_year, 
   #                   group_all %in% cluster) %>% 
   #     distinct(trip_id, .keep_all = T) %>% as.data.frame %>% 
   #     dplyr::filter(Species_Dominant == "PSDN" | Species_Dominant == "MSQD" |
@@ -121,13 +121,57 @@ sampled_rums <- function(data_in, cluster = 4,
     
   #-----------------------------------------------------------------------------
   ## Add criteria for just participation in a year
-  part_criteria <- 
+  vessel_part_year <- dat %>% 
+      group_by(VESSEL_NUM, set_year) %>%
+           summarize(landings = sum(Landings_mtons, na.rm = TRUE),
+                     n_trips = n()) %>%
+      arrange(set_year, desc(n_trips)) %>% 
+      mutate(perc = n_trips / 360 * 100)
   
+  # library(viridis)
+  # library(hrbrthemes)
+  # df <-  vessel_part_year %>% filter(set_year == 2017) 
+  # ggplot(data = df,aes(n_trips))+
+  #   geom_histogram(aes(y=cumsum(..count..)))+
+  #   stat_bin(aes(y=cumsum(..count..))) +
+  #   scale_fill_viridis() +
+  #   scale_color_viridis() +
+  #   theme_ipsum() +
+  #   theme(legend.position="none",
+  #     panel.spacing = unit(0.1, "lines"),
+  #     strip.text.x = element_text(size = 8)) +
+  #   xlab("") + scale_x_continuous(n.breaks = 20) +
+  #   ylab("Assigned Probability (%)") + ggtitle("Year = 2017")
     
-    
+  # ggplot(data = vessel_part_year, aes(x=n_trips, color=set_year, fill=set_year)) +
+  #   geom_histogram(alpha=0.6, binwidth = 5) +
+  #   scale_fill_viridis() +
+  #   scale_color_viridis() +
+  #   theme_ipsum() +
+  #   theme(legend.position="none",
+  #     panel.spacing = unit(0.1, "lines"),
+  #     strip.text.x = element_text(size = 8)) +
+  #   xlab("") + scale_x_continuous(n.breaks = 10) +
+  #   ylab("Assigned Probability (%)") +
+  #   facet_wrap(~set_year)
+
+  vessel_part_year <- vessel_part_year %>% 
+    dplyr::filter(n_trips >= 20) %>% 
+    dplyr::select(c('VESSEL_NUM', 'set_year')) %>%
+    unique() %>% ungroup() %>% mutate(active_year = 1)
+    saveRDS(vessel_part_year, file = "vessel_part_year.RDS")
+  
+  dat <- dat %>% 
+    merge(vessel_part_year, by = c('VESSEL_NUM', 'set_year'), 
+          all.x = TRUE, all.y = FALSE)  %>% 
+    dplyr::filter(active_year == 1) 
+  
+  
   #-----------------------------------------------------------------------------
   ## Define hauls data used for estimation (in this case, are the trips)
     
+  # 29,554 vs 29,519
+  
   hauls <- dat %>% 
       dplyr::filter(set_year >= min_year, 
                     set_year <= max_year, 
