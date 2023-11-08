@@ -17,37 +17,41 @@ library(lubridate)
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
-samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-                         min_year = 2013, max_year = 2017,
-                         min_year_prob = 2013, max_year_prob = 2017,
-                         min_year_est = 2012, max_year_est = 2019,
-                         ndays = 30, nhauls_sampled = 5,
-                         seed = 300, ncores = 4, rev_scale = 1000, 
-                         sample_choices = FALSE)
-  
-  samps <- samps1 %>% 
-    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-    rm(participation_data, samps1)
-    
-  saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4_full.rds")
-  
-  
-#----------------------------------
-test <- samps %>% ungroup() %>% group_by(fished_haul,selection) %>% summarize(n_count = n())
-max(test$n_count)
-rm(test)
+# samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+#                          min_year = 2013, max_year = 2017,
+#                          min_year_prob = 2013, max_year_prob = 2017,
+#                          min_year_est = 2012, max_year_est = 2019,
+#                          ndays = 30, nhauls_sampled = 5,
+#                          seed = 300, ncores = 4, rev_scale = 1000, 
+#                          sample_choices = TRUE)
+#   
+#   samps <- samps1 %>% 
+#     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+#     rm(participation_data, samps1)
+#     saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
+# 
+# 
+#
+
 
 #----------------------------------
 ## Run saved data
 samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
 
+#----------------------------------
+## Check if there is no similar alternatives within a treat
+test <- 
+    samps %>% ungroup() %>% 
+    group_by(fished_haul,selection) %>%
+    summarize(n_count = n())
+    max(test$n_count)
+    rm(test)
 
 #--------------------------------------------------------------------------
-# ### See how many times we have NA 
+## See how many times we have NA 
 
-# 285 NAs for price (0.003%)
-# 2,455 NAs for availability (0.025%)
-# 20,361 Nas for dist to catch areas (20.5%)
+# 4,168 NAs for availability (2.8%)
+# 29,330 Nas for dist to catch areas (19.9%)
 
 samps0 <- samps %>%
   filter(selection != "No-Participation")
@@ -62,19 +66,24 @@ sum(is.na(samps0$mean_avail))/nrow(samps0)
 sum(is.na(samps0$diesel_price))/nrow(samps0)
 sum(is.na(samps0$dist_port_to_catch_area))/nrow(samps0)
 
-## Diesel price not a problem
 ## NA in distance means that it was not recorded
 
-# ### All cases when we do not have price, we don't have availability either
-# psych::describe(samps0 %>% dplyr::filter(is.na(samps0$mean_price)))
+### All cases when we do not have availability, it was calculated using CPUE
+psych::describe(samps0 %>% dplyr::filter(is.na(samps0$mean_avail)))
+samps1 <- samps0 %>% dplyr::filter(is.na(samps0$mean_avail)) %>% 
+  group_by(PACFIN_SPECIES_CODE) %>% summarize(total_obs = n()) %>%
+  mutate(perc = total_obs*100/nrow(samps0 %>% 
+                                     dplyr::filter(
+                                       is.na(samps0$mean_avail))))
 
 
 #---------------------------------------------------------------------------
 ### Create dummies for missing availability and price and convert NA to zero
 
 samps1 <- samps %>% 
-  mutate(dDieselState = ifelse((is.na(samps$diesel_price)), 0, dDieselState)) %>%
-  mutate(dPrice30     = ifelse((is.na(samps$mean_price)), 0, dPrice30)) %>%
+  mutate(dDieselState   = ifelse((is.na(samps$diesel_price)), 0, dDieselState)) %>%
+  mutate(dPrice30       = ifelse((is.na(samps$mean_price)), 0, dPrice30)) %>%
+  mutate(d_missing_cpue = ifelse((is.na(samps$mean_avail)) & dCPUE90 == 1, 1, 0)) %>%
   mutate(dCPUE        = ifelse((is.na(samps$mean_avail)), 0, dCPUE)) %>%
   mutate(dCPUE90      = ifelse((is.na(samps$mean_avail)), 0, dCPUE90)) %>%
   mutate(d_missing    = ifelse((is.na(samps$mean_avail)), 1, 0)) %>%

@@ -28,30 +28,30 @@ sampled_rums <- function(data_in, cluster = 4,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale, sample_choices = TRUE) {
 
-  ###############
-  # Delete
-
-  gc()
-  library(doParallel)
-  library(tidyr)
-  library(plm)
-  library(tidyverse)
-  library(lubridate)
-  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-  cluster <- 4
-  min_year_prob <- 2013
-  max_year_prob <- 2017
-  min_year_est <- 2012
-  max_year_est <- 2019
-  min_year <- 2013
-  max_year <- 2017
-  ndays <- 30
-  nhauls_sampled <- 5
-  seed <- 300
-  ncores <- 4
-  rev_scale <- 1000
-  sample_choices <- TRUE
-  ################
+  # ###############
+  # # Delete
+  # 
+  # gc()
+  # library(doParallel)
+  # library(tidyr)
+  # library(plm)
+  # library(tidyverse)
+  # library(lubridate)
+  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+  # cluster <- 4
+  # min_year_prob <- 2013
+  # max_year_prob <- 2017
+  # min_year_est <- 2012
+  # max_year_est <- 2019
+  # min_year <- 2013
+  # max_year <- 2017
+  # ndays <- 30
+  # nhauls_sampled <- 5
+  # seed <- 300
+  # ncores <- 4
+  # rev_scale <- 1000
+  # sample_choices <- TRUE
+  # ################
 
   dat <- data_in 
   
@@ -179,7 +179,10 @@ sampled_rums <- function(data_in, cluster = 4,
       distinct(trip_id, .keep_all = T) %>% 
       dplyr::select(trip_id, VESSEL_NUM, set_year, set_month, 
                     set_day, Revenue, selection, n_obs_within_FTID) %>% as.data.frame
-    
+      hauls %>% group_by(selection) %>% 
+        summarize(n_obs = n(), perc = n()/nrow(hauls)) %>% 
+        filter(selection == "No-Participation")
+
     
   #-----------------------------------------------------------------------------
   if (sample_choices == TRUE) {
@@ -554,7 +557,8 @@ sampled_rums <- function(data_in, cluster = 4,
   psdn.sdm <- readRDS(file = 'Participation/SDMs/sdm_psdn.rds')
   psdn.sdm[is.na(psdn.sdm)] <- 0
   psdn.sdm$set_date <- ymd(paste(psdn.sdm$LANDING_YEAR, psdn.sdm$LANDING_MONTH, psdn.sdm$LANDING_DAY, sep = "-"))
-  msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd.rds')
+  msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd_spawn.rds') %>%
+    rename(MSQD_SDM_90 = MSQD_SPAWN_SDM_90)
   msqd.sdm[is.na(msqd.sdm)] <- 0
   msqd.sdm$set_date <- ymd(paste(msqd.sdm$LANDING_YEAR, msqd.sdm$LANDING_MONTH, msqd.sdm$LANDING_DAY, sep = "-"))
   nanc.sdm <- readRDS(file = 'Participation/SDMs/sdm_nanc.rds')
