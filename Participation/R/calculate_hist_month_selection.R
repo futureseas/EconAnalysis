@@ -16,7 +16,7 @@ library(lubridate)
 #-------------------------------------------------------------------------------
 ## Read participation database ##
 
-dat <- readRDS("C:\\Data\\PacFIN data\\participation_data_filtered.rds")
+dat <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
 #--------------------------------
 ## Calculate historical month selection (2005-2020)
