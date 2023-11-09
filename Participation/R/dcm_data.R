@@ -416,7 +416,9 @@ rm(rdo)
 #--------------------------------------------------------
 ## Exclude NA winds (previous problem with ports...) NONE!
 
-rdo_vessels_out <- rdo2 %>% filter(is.na(wind_max_220_mh)) %>% select(fished_haul) %>% unique()
+rdo_vessels_out <- rdo2 %>% 
+  dplyr::filter(is.na(wind_max_220_mh)) %>%
+  dplyr::select(fished_haul) %>% unique()
 `%ni%` <- Negate(`%in%`)
 rdo3 <- data.table::setDT(rdo2)[fished_haul %ni% rdo_vessels_out$fished_haul]
 rm(rdo2, rdo_vessels_out, `%ni%`)
@@ -429,7 +431,7 @@ fished_haul_select <- rdo3 %>%
   group_by(fished_VESSEL_NUM, set_date) %>%
   mutate(ncount = n()) %>%
   ungroup() %>% dplyr::filter(ncount == min(ncount)) %>%
-  select('fished_haul') %>%
+  dplyr::select('fished_haul') %>%
   unique()
 rdo_R <- data.table::setDT(rdo3)[fished_haul %chin% fished_haul_select$fished_haul]
 rm(fished_haul_select, rdo3)
