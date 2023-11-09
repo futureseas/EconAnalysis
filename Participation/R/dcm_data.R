@@ -17,18 +17,18 @@ library(lubridate)
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
-samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-                         min_year = 2013, max_year = 2017,
-                         min_year_prob = 2013, max_year_prob = 2017,
-                         min_year_est = 2012, max_year_est = 2019,
-                         ndays = 30, nhauls_sampled = 5,
-                         seed = 300, ncores = 4, rev_scale = 1000,
-                         sample_choices = TRUE)
-
-  samps <- samps1 %>%
-    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-    rm(participation_data, samps1)
-    saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
+# samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+#                          min_year = 2013, max_year = 2017,
+#                          min_year_prob = 2013, max_year_prob = 2017,
+#                          min_year_est = 2012, max_year_est = 2019,
+#                          ndays = 30, nhauls_sampled = 5,
+#                          seed = 300, ncores = 4, rev_scale = 1000,
+#                          sample_choices = TRUE)
+# 
+#   samps <- samps1 %>%
+#     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+#     rm(samps1)
+#     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
 
 #----------------------------------
 ## Run saved data
@@ -138,7 +138,7 @@ samps1 %>%
 samps <- samps1 %>% 
   mutate(dist_to_cog = ifelse(selection == "No-Participation", 0, dist_to_cog)) %>%
   mutate(lat_cg = ifelse(selection == "No-Participation", 0, lat_cg))
-  rm(samps1, samps0)
+  rm(samps1)
   # samps %>% filter(selection == "No-Participation") %>% psych::describe()
 
   
@@ -183,7 +183,7 @@ wind_2020_2020 <- wind_2020_2020 %>%
 wind <- wind_2020_2020 %>%
   mutate(set_date = as.Date(paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY,sep="-"),
     "%Y-%m-%d")) %>%
-  select(c("PORT_AREA_CODE", "set_date", "wind_max_220_mh")) %>% 
+  dplyr::select(c("PORT_AREA_CODE", "set_date", "wind_max_220_mh")) %>% 
   unique()
 
 samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE, all.y = FALSE) %>%
@@ -364,15 +364,15 @@ samps <- samps %>%
 
 unem_CA <- readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192133_ae51a3.xlsx", range = "A11:I263") %>%
   mutate(AGENCY_CODE = "C") %>%
-  select(c('Year', 'Period', 'unemployment rate', 'AGENCY_CODE'))
+  dplyr::select(c('Year', 'Period', 'unemployment rate', 'AGENCY_CODE'))
 
 unem_OR <- readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192159_36a94e.xlsx", range = "A11:I263") %>%
   mutate(AGENCY_CODE = "O")  %>%
-  select(c('Year', 'Period', 'unemployment rate', 'AGENCY_CODE'))
+  dplyr::select(c('Year', 'Period', 'unemployment rate', 'AGENCY_CODE'))
 
 unem_WA <- readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192208_d35a30.xlsx", range = "A11:I263") %>%
   mutate(AGENCY_CODE = "W")  %>%
-  select(c('Year', 'Period', 'unemployment rate', 'AGENCY_CODE'))
+  dplyr::select(c('Year', 'Period', 'unemployment rate', 'AGENCY_CODE'))
 
 unem <- rbind(unem_CA, unem_OR, unem_WA) %>%
   rename(set_year = Year) %>%
@@ -410,7 +410,7 @@ rdo2 <- rdo %>%
   group_by(fished_haul) %>%
   mutate(full = sum(fished)) %>%
   filter(full!=0) %>%
-  select(-c(full)) %>% ungroup()
+  dplyr::select(-c(full)) %>% ungroup()
 rm(rdo)
 
 #--------------------------------------------------------

@@ -290,7 +290,7 @@ label variable dummy_clust_prev_days "Alternative has been chosen during the las
 label variable hist_selection "Alternative has been historically chosen during the month (>20% revenue)"
 ********************************************************************
 
-esttab P1 B1 B2 B3 B4 B5 B6 B7 using "${tables}preliminary_regressions_participation_state_dep_2023_11_08.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
+esttab P1 B6 B7 using "${tables}preliminary_regressions_participation_state_dep_2023_11_09.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
 		stats(N r2 perc1 lr_p aic bic aicc caic, fmt(0 3) ///
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AIC" "BIC" "AICc" "CAIC" ))  ///
