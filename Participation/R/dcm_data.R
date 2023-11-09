@@ -442,7 +442,7 @@ rm(fished_haul_select, rdo3)
 #------------------------------------------------------
 ## Save data to use in R
 
-saveRDS(rdo_R, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\rdo_R_c4.rds")
+saveRDS(rdo_R, file = "C:\\Data\\PacFIN data\\rdo_R_c4.rds")
 
 
 #----------------------------------------------------
@@ -462,8 +462,8 @@ rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_hau
   #%>% dplyr::select(-c('set_date'))  
 
 ## Save data to run with Stata
-write.csv(rdo_Stata,"C:\\GitHub\\EconAnalysis\\Participation\\Stata\\rdo_Stata_c4.csv", row.names = FALSE)
-saveRDS(rdo_Stata, file = "C:\\GitHub\\EconAnalysis\\Participation\\Stata\\rdo_Stata_c4.rds")
+write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c4.csv", row.names = FALSE)
+saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c4.rds")
 
 
 

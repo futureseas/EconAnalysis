@@ -159,7 +159,7 @@ sampled_rums <- function(data_in, cluster = 4,
     dplyr::filter(n_trips >= 20) %>% 
     dplyr::select(c('VESSEL_NUM', 'set_year')) %>%
     unique() %>% ungroup() %>% mutate(active_year = 1)
-    saveRDS(vessel_part_year, file = "vessel_part_year.RDS")
+    saveRDS(vessel_part_year, file = "C:\\Data\\PacFIN data\\vessel_part_year.RDS")
   
   dat <- dat %>% 
     merge(vessel_part_year, by = c('VESSEL_NUM', 'set_year'), 
