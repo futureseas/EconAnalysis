@@ -212,7 +212,7 @@ preserve
 restore
 
 eststo B6: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend dummy_prev_days_port, base("No-Participation")
+		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_days_port, base("No-Participation")
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B6
 lrtest B6 P1, force
@@ -237,7 +237,7 @@ preserve
 restore
 
 eststo B7: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend dummy_prev_days dummy_prev_year_days, base("No-Participation")
+		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_days i.dummy_prev_year_days, base("No-Participation")
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B7
 lrtest B7 P1, force
@@ -290,7 +290,7 @@ label variable dummy_clust_prev_days "Alternative has been chosen during the las
 label variable hist_selection "Alternative has been historically chosen during the month (>20% revenue)"
 ********************************************************************
 
-esttab P1 B6 B7 using "${tables}preliminary_regressions_participation_state_dep_2023_11_09.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
+esttab P1 B1 B2 B3 B4 B5 B6 B7 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep_2023_11_09.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
 		stats(N r2 perc1 lr_p aic bic aicc caic, fmt(0 3) ///
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AIC" "BIC" "AICc" "CAIC" ))  ///
