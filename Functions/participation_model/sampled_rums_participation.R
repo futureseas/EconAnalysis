@@ -557,8 +557,9 @@ sampled_rums <- function(data_in, cluster = 4,
   psdn.sdm <- readRDS(file = 'Participation/SDMs/sdm_psdn.rds')
   psdn.sdm[is.na(psdn.sdm)] <- 0
   psdn.sdm$set_date <- ymd(paste(psdn.sdm$LANDING_YEAR, psdn.sdm$LANDING_MONTH, psdn.sdm$LANDING_DAY, sep = "-"))
-  msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd_spawn.rds') %>%
-    rename(MSQD_SDM_90 = MSQD_SPAWN_SDM_90)
+  # msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd_spawn.rds') %>%
+  #   rename(MSQD_SDM_90 = MSQD_SPAWN_SDM_90)
+  msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd.rds') 
   msqd.sdm[is.na(msqd.sdm)] <- 0
   msqd.sdm$set_date <- ymd(paste(msqd.sdm$LANDING_YEAR, msqd.sdm$LANDING_MONTH, msqd.sdm$LANDING_DAY, sep = "-"))
   nanc.sdm <- readRDS(file = 'Participation/SDMs/sdm_nanc.rds')

@@ -16,7 +16,7 @@ cap log close
 	log using ${logs}preliminary, text replace
 
 ** Import data
-import delimited "Stata\rdo_Stata_c4.csv"
+import delimited "C:\Data\PacFIN data\rdo_Stata_c4.csv"
 replace mean_price = mean_price / 1000
 gen id_obs = _n
 gen const_r2 = 1
@@ -211,6 +211,58 @@ preserve
 	estadd scalar perc1 = count1/_N*100: B5
 restore
 
+eststo B6: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+		ddieselstate psdnclosured msqdclosured msqdweekend dummy_prev_days_port, base("No-Participation")
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): B6
+lrtest B6 P1, force
+estadd scalar lr_p = r(p): B6
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: B6
+estadd scalar bic = S[1,6]: B6
+estadd scalar aicc = S[1,7]: B6
+estadd scalar caic = S[1,8]: B6
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: B6
+restore
+
+eststo B7: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
+		ddieselstate psdnclosured msqdclosured msqdweekend dummy_prev_days dummy_prev_year_days, base("No-Participation")
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): B7
+lrtest B7 P1, force
+estadd scalar lr_p = r(p): B7
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: B7
+estadd scalar bic = S[1,6]: B7
+estadd scalar aicc = S[1,7]: B7
+estadd scalar caic = S[1,8]: B7
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: B7
+restore
+
+
+
 ********************************************************************
 label variable mean_avail "Expected availability"
 label variable mean_price "Expected price"
@@ -232,12 +284,13 @@ label variable msqdweekend  "Binary: MSQD Weekend"
 ********************************************************************
 label variable dummy_last_day "Alternative has been chosen last day"
 label variable dummy_prev_days "Alternative has been chosen during the last 30 days"
+label variable dummy_prev_days_port "Port has been chosen during the last 30 days"
 label variable dummy_prev_year_days "Alternative has been chosen during the last 30 days (previous year)"
 label variable dummy_clust_prev_days "Alternative has been chosen during the last 30 days by any member of the fleet"
 label variable hist_selection "Alternative has been historically chosen during the month (>20% revenue)"
 ********************************************************************
 
-esttab P1 B1 B2 B3 B4 B5 using "${tables}preliminary_regressions_participation_state_dep_2023_09_14.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
+esttab P1 B1 B2 B3 B4 B5 B6 B7 using "${tables}preliminary_regressions_participation_state_dep_2023_11_08.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
 		stats(N r2 perc1 lr_p aic bic aicc caic, fmt(0 3) ///
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AIC" "BIC" "AICc" "CAIC" ))  ///

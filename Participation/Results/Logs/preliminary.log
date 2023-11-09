@@ -1,26 +1,62 @@
-------------------------------------------------------------------------
+-------------------------------------------------------------------------
       name:  <unnamed>
-       log:  C:\GitHub\EconAnalysis\Participation\Results\Logs\prelimina
-> ry.log
+       log:  C:\GitHub\EconAnalysis\Participation\Results\Logs\preliminar
+> y.log
   log type:  text
- opened on:  20 Oct 2023, 20:55:01
+ opened on:   8 Nov 2023, 21:28:47
 
 . 
 . ** Import data
-. import delimited "Stata\rdo_Stata_c4.csv"
+. import delimited "C:\Data\PacFIN data\rdo_Stata_c4.csv"
 (encoding automatically selected: ISO-8859-1)
-(38 vars, 118,992 obs)
+(40 vars, 176,730 obs)
 
 . replace mean_price = mean_price / 1000
-(98,875 real changes made)
+(147,275 real changes made)
 
 . gen id_obs = _n
+
+. gen const_r2 = 1
+
+. 
+. ** Merge historical selection
+. preserve
+
+.  import delimited "Stata\dbp_month_Stata_c4.csv", clear
+(encoding automatically selected: ISO-8859-2)
+(3 vars, 23 obs)
+
+.  tempfile dbp_month
+
+.  save dbp_month, replace
+file dbp_month.dta saved
+
+. restore
+
+. 
+. merge m:1 selection set_month using "dbp_month.dta"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       123,726
+        from master                   123,724  (_merge==1)
+        from using                          2  (_merge==2)
+
+    Matched                            53,006  (_merge==3)
+    -----------------------------------------
+
+. drop if _merge == 2
+(2 observations deleted)
+
+. replace hist_selection = 0 if _merge == 1
+(123,724 real changes made)
+
+. drop _merge
 
 . 
 . ** Set choice model database
 . cmset fished_vessel_id time selection
-note: case identifier _caseid generated from fished_vessel_id and
-      time.
+note: case identifier _caseid generated from fished_vessel_id and time.
 note: panel by alternatives identifier _panelaltid generated from
       fished_vessel_id and selection.
 note: alternatives are unbalanced across choice sets; at least one
@@ -30,597 +66,3026 @@ note: alternatives are unbalanced across choice sets; at least one
               Case ID variable: _caseid
          Alternatives variable: selection
 Panel by alternatives variable: _panelaltid (unbalanced)
-                 Time variable: time, 1 to 1823, but with gaps
+                 Time variable: time, 1 to 1701, but with gaps
                          Delta: 1 unit
 
 Note: Data have been xtset.
 
 . sort id_obs
 
+. // cmset fished_haul selection
+. 
 . gen species = substr(selection,-4,.) 
 
 . replace species = "No-Participation" if species == "tion" 
 variable species was str4 now str16
-(19,832 real changes made)
+(29,455 real changes made)
 
-. encode species, gen(nspecies)
+. // encode species, gen(nspecies)
+. 
+. 
+. ******************************
+. ** Estimate conditional logits (with alternative-specific constant)
+. 
+. *** Only-constant model
+. qui cmclogit fished, base("No-Participation") 
+
+. scalar ll0 = e(ll)
+
+. estimates store base
 
 . 
-. preserve
-
-.         cmclogit fished mean_avail mean_price diesel_price wind_max_22
-> 0_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog //
-> /
->                 ddieselstate psdnclosured msqdclosured msqdweekend, ba
-> se("No-Participation")
+. *** Preferred model
+. 
+. * Variables that do not converge: dcpue dparticipate
+. * No relevant variables: waclosure waclosured
+. 
+. eststo P1: cmclogit fished mean_avail mean_price diesel_price wind_max_
+> 220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog /
+> //
+>                 ddieselstate psdnclosured msqdclosured msqdweekend, bas
+> e("No-Participation")
 note: data were cmset as panel data, and the default vcetype for panel
       data is vce(cluster fished_vessel_id); see cmclogit.
-note: variable d_missing has 17454 cases that are not
+note: msqdclosured omitted because of collinearity.
+note: variable d_missing has 25437 cases that are not
       alternative-specific; there is no within-case variability.
-note: variable dist_port_to_catch_area_zero has 5 cases that are not
+note: variable dist_port_to_catch_area_zero has 37 cases that are not
       alternative-specific; there is no within-case variability.
-note: variable d_missing_d has 6947 cases that are not
+note: variable d_missing_d has 11192 cases that are not
       alternative-specific; there is no within-case variability.
-note: variable ddieselstate has 11708 cases that are not
+note: variable ddieselstate has 16201 cases that are not
       alternative-specific; there is no within-case variability.
-note: variable psdnclosured has 17419 cases that are not
+note: variable psdnclosured has 25620 cases that are not
       alternative-specific; there is no within-case variability.
-note: variable msqdclosured has 19102 cases that are not
-      alternative-specific; there is no within-case variability.
-note: variable msqdweekend has 16500 cases that are not
+note: variable msqdweekend has 21328 cases that are not
       alternative-specific; there is no within-case variability.
 
-Iteration 0:  Log pseudolikelihood = -21478.361  
-Iteration 1:  Log pseudolikelihood = -20579.958  
-Iteration 2:  Log pseudolikelihood = -20513.958  
-Iteration 3:  Log pseudolikelihood = -20501.647  
-Iteration 4:  Log pseudolikelihood = -20498.986  
-Iteration 5:  Log pseudolikelihood = -20498.404  
-Iteration 6:  Log pseudolikelihood = -20498.321  
-Iteration 7:  Log pseudolikelihood =  -20498.31  
-Iteration 8:  Log pseudolikelihood = -20498.308  
-Iteration 9:  Log pseudolikelihood = -20498.308  
-Iteration 10: Log pseudolikelihood = -20498.308  
-Iteration 11: Log pseudolikelihood = -20498.308  
+Iteration 0:  Log pseudolikelihood = -28508.214  
+Iteration 1:  Log pseudolikelihood = -26260.656  
+Iteration 2:  Log pseudolikelihood = -26130.506  
+Iteration 3:  Log pseudolikelihood = -26129.927  
+Iteration 4:  Log pseudolikelihood = -26129.927  
 
-Conditional logit choice model                 Number of obs      =    1
-> 18,992
-Case ID variable: _caseid                      Number of cases    =     
->  19832
+Conditional logit choice model                 Number of obs      =    17
+> 6,730
+Case ID variable: _caseid                      Number of cases    =      
+> 29455
 
-Alternatives variable: selection               Alts per case: min =     
->      6
-                                                              avg =     
->    6.0
-                                                              max =     
->      6
+Alternatives variable: selection               Alts per case: min =      
+>     6
+                                                              avg =      
+>   6.0
+                                                              max =      
+>     6
 
-                                                  Wald chi2(12)   =    6
-> 798.96
-Log pseudolikelihood = -20498.308                 Prob > chi2     =     
-> 0.0000
+                                                  Wald chi2(11)   =    19
+> 51.56
+Log pseudolikelihood = -26129.927                 Prob > chi2     =     0
+> .0000
 
-                      (Std. err. adjusted for 43 clusters in fished_vess
-> el_id)
-------------------------------------------------------------------------
-> ------
+                      (Std. err. adjusted for 46 clusters in fished_vesse
+> l_id)
+-------------------------------------------------------------------------
+> -----
              |               Robust
-      fished | Coefficient  std. err.      z    P>|z|     [95% conf. int
-> erval]
--------------+----------------------------------------------------------
-> ------
+      fished | Coefficient  std. err.      z    P>|z|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
 selection    |
-  mean_avail |   1.266931    .470993     2.69   0.007     .3438021    2.
-> 190061
-  mean_price |  -.8328412   .6792684    -1.23   0.220    -2.164183    .4
-> 985003
-diesel_price |    -.36118   .1536395    -2.35   0.019    -.6623078   -.0
-> 600522
-wind_max_2~h |  -.0224909   .0059877    -3.76   0.000    -.0342266   -.0
-> 107551
-   d_missing |   1.154952    .334847     3.45   0.001     .4986643    1.
-> 811241
-dist_port_~o |  -.0130906   .0027044    -4.84   0.000    -.0183912     -
-> .00779
- d_missing_d |  -4.152571   .2665526   -15.58   0.000    -4.675005   -3.
-> 630138
- dist_to_cog |  -.0096605    .000697   -13.86   0.000    -.0110265   -.0
-> 082944
-ddieselstate |    .223628   .1096246     2.04   0.041     .0087678    .4
-> 384883
-psdnclosured |   -.902468   .5359947    -1.68   0.092    -1.952998    .1
-> 480623
-msqdclosured |  -18.90299   .2793458   -67.67   0.000     -19.4505   -18
-> .35549
- msqdweekend |   -3.21246   .1562109   -20.56   0.000    -3.518627   -2.
-> 906292
--------------+----------------------------------------------------------
-> ------
+  mean_avail |    -1.5496      .4592    -3.37   0.001    -2.449615   -.64
+> 95847
+  mean_price |  -.0601244   .1645265    -0.37   0.715    -.3825904    .26
+> 23417
+diesel_price |   .2700451   .0396776     6.81   0.000     .1922785    .34
+> 78118
+wind_max_2~h |  -.0517618   .0041137   -12.58   0.000    -.0598246   -.04
+> 36991
+   d_missing |  -1.105154   .3673101    -3.01   0.003    -1.825068   -.38
+> 52395
+dist_port_~o |  -.0177426   .0026528    -6.69   0.000    -.0229419   -.01
+> 25432
+ d_missing_d |  -4.076078   .2266763   -17.98   0.000    -4.520356   -3.6
+> 31801
+ dist_to_cog |  -.0082209   .0005479   -15.00   0.000    -.0092948    -.0
+> 07147
+ddieselstate |  -.1182398   .0509263    -2.32   0.020    -.2180534   -.01
+> 84262
+psdnclosured |  -1.514746   .6844312    -2.21   0.027    -2.856207   -.17
+> 32857
+msqdclosured |          0  (omitted)
+ msqdweekend |  -3.605064   .1642706   -21.95   0.000    -3.927029     -3
+> .2831
+-------------+-----------------------------------------------------------
+> -----
 BDA_DCRB     |
-       _cons |    8.29591   5.467444     1.52   0.129    -2.420083     1
-> 9.0119
--------------+----------------------------------------------------------
-> ------
+       _cons |   .6277773   2.090847     0.30   0.764    -3.470209    4.7
+> 25763
+-------------+-----------------------------------------------------------
+> -----
 BDA_MSQD     |
-       _cons |   4.698966   1.032227     4.55   0.000     2.675838    6.
-> 722093
--------------+----------------------------------------------------------
-> ------
-CBA_MSQD     |
-       _cons |   11.85364    1.72054     6.89   0.000     8.481442    15
-> .22583
--------------+----------------------------------------------------------
-> ------
+       _cons |   1.512449   .8064559     1.88   0.061    -.0681756    3.0
+> 93073
+-------------+-----------------------------------------------------------
+> -----
+BGA_MSQD     |
+       _cons |   3.533768   .8495949     4.16   0.000     1.868593    5.1
+> 98944
+-------------+-----------------------------------------------------------
+> -----
+CWA_DCRB     |
+       _cons |   6.274511    3.89224     1.61   0.107     -1.35414    13.
+> 90316
+-------------+-----------------------------------------------------------
+> -----
 ERA_MSQD     |
-       _cons |   7.502677    1.19111     6.30   0.000     5.168145     9
-> .83721
--------------+----------------------------------------------------------
-> ------
+       _cons |   3.826415   .7237622     5.29   0.000     2.407868    5.2
+> 44963
+-------------+-----------------------------------------------------------
+> -----
 LAA_BTNA     |
-       _cons |   4.705973   2.344833     2.01   0.045     .1101857    9.
-> 301761
--------------+----------------------------------------------------------
-> ------
+       _cons |   1.761462   .7363527     2.39   0.017     .3182369    3.2
+> 04686
+-------------+-----------------------------------------------------------
+> -----
 LAA_CMCK     |
-       _cons |   1.715587   .8898395     1.93   0.054    -.0284666     3
-> .45964
--------------+----------------------------------------------------------
-> ------
+       _cons |  -.4052883    .243095    -1.67   0.095    -.8817459    .07
+> 11692
+-------------+-----------------------------------------------------------
+> -----
 LAA_JMCK     |
-       _cons |    2.55021   .7502889     3.40   0.001     1.079671    4.
-> 020749
--------------+----------------------------------------------------------
-> ------
+       _cons |   .2560946   .3176858     0.81   0.420    -.3665582    .87
+> 87473
+-------------+-----------------------------------------------------------
+> -----
 LAA_MSQD     |
-       _cons |   3.824742   .9353521     4.09   0.000     1.991486    5.
-> 657998
--------------+----------------------------------------------------------
-> ------
+       _cons |   .9008058   .3646324     2.47   0.013     .1861394    1.6
+> 15472
+-------------+-----------------------------------------------------------
+> -----
 LAA_NANC     |
-       _cons |   .1812961   .7102069     0.26   0.799    -1.210684    1.
-> 573276
--------------+----------------------------------------------------------
-> ------
+       _cons |   .5633907   .4037959     1.40   0.163    -.2280348    1.3
+> 54816
+-------------+-----------------------------------------------------------
+> -----
 LAA_PBNT     |
-       _cons |    3.55191   1.015846     3.50   0.000     1.560888    5.
-> 542933
--------------+----------------------------------------------------------
-> ------
+       _cons |   2.159529   .5426366     3.98   0.000     1.095981    3.2
+> 23077
+-------------+-----------------------------------------------------------
+> -----
 LAA_PSDN     |
-       _cons |   1.788843    .748941     2.39   0.017      .320946    3.
-> 256741
--------------+----------------------------------------------------------
-> ------
+       _cons |   .1440083   .3339938     0.43   0.666    -.5106075    .79
+> 86241
+-------------+-----------------------------------------------------------
+> -----
 LAA_RHRG     |
-       _cons |  -.9089746   .9763807    -0.93   0.352    -2.822646    1.
-> 004696
--------------+----------------------------------------------------------
-> ------
+       _cons |  -.9215866    .962941    -0.96   0.339    -2.808916    .96
+> 57431
+-------------+-----------------------------------------------------------
+> -----
 LAA_STNA     |
-       _cons |   4.046454   1.250171     3.24   0.001     1.596164    6.
-> 496743
--------------+----------------------------------------------------------
-> ------
+       _cons |   2.858382   .9224703     3.10   0.002     1.050373     4.
+> 66639
+-------------+-----------------------------------------------------------
+> -----
 LAA_YTNA     |
-       _cons |   2.974006   1.279449     2.32   0.020      .466333    5.
-> 481679
--------------+----------------------------------------------------------
-> ------
+       _cons |   .8972813   .5357743     1.67   0.094    -.1528169     1.
+> 94738
+-------------+-----------------------------------------------------------
+> -----
 MNA_ALBC     |
-       _cons |   1.729953   2.255287     0.77   0.443    -2.690327    6.
-> 150234
--------------+----------------------------------------------------------
-> ------
+       _cons |   .8889098   1.102601     0.81   0.420    -1.272148    3.0
+> 49968
+-------------+-----------------------------------------------------------
+> -----
 MNA_CMCK     |
-       _cons |   3.089622   1.199996     2.57   0.010     .7376732     5
-> .44157
--------------+----------------------------------------------------------
-> ------
+       _cons |   .2124701   .6136974     0.35   0.729    -.9903547    1.4
+> 15295
+-------------+-----------------------------------------------------------
+> -----
 MNA_JMCK     |
-       _cons |   2.706848   .6943102     3.90   0.000     1.346025    4.
-> 067671
--------------+----------------------------------------------------------
-> ------
+       _cons |   .7763231   .5565219     1.39   0.163    -.3144399    1.8
+> 67086
+-------------+-----------------------------------------------------------
+> -----
 MNA_LSKT     |
-       _cons |   6.139513   .9381593     6.54   0.000     4.300755    7.
-> 978272
--------------+----------------------------------------------------------
-> ------
+       _cons |   4.154372   1.244355     3.34   0.001     1.715482    6.5
+> 93262
+-------------+-----------------------------------------------------------
+> -----
 MNA_MSQD     |
-       _cons |   3.750628   1.031797     3.64   0.000     1.728343    5.
-> 772913
--------------+----------------------------------------------------------
-> ------
+       _cons |   .6753928   .3165859     2.13   0.033     .0548959     1.
+> 29589
+-------------+-----------------------------------------------------------
+> -----
 MNA_NANC     |
-       _cons |   1.135863   .6513788     1.74   0.081     -.140816    2.
-> 412542
--------------+----------------------------------------------------------
-> ------
+       _cons |   .2053405   .3874874     0.53   0.596    -.5541209    .96
+> 48019
+-------------+-----------------------------------------------------------
+> -----
 MNA_PSDN     |
-       _cons |   .7717243   .7105962     1.09   0.277    -.6210187    2.
-> 164467
--------------+----------------------------------------------------------
-> ------
+       _cons |  -.5719097   .3677779    -1.56   0.120    -1.292741    .14
+> 89219
+-------------+-----------------------------------------------------------
+> -----
 MNA_UDAB     |
-       _cons |   9.541219    3.47646     2.74   0.006     2.727482    16
-> .35496
--------------+----------------------------------------------------------
-> ------
+       _cons |   4.421233   1.190228     3.71   0.000      2.08843    6.7
+> 54037
+-------------+-----------------------------------------------------------
+> -----
 MRA_MSQD     |
-       _cons |   1.876496   1.165429     1.61   0.107    -.4077038    4.
-> 160695
--------------+----------------------------------------------------------
-> ------
+       _cons |  -1.404197   .5003929    -2.81   0.005    -2.384949   -.42
+> 34454
+-------------+-----------------------------------------------------------
+> -----
 NPA_MSQD     |
-       _cons |    12.9726   1.240016    10.46   0.000     10.54222    15
-> .40299
--------------+----------------------------------------------------------
-> ------
+       _cons |   8.148532   .8010827    10.17   0.000     6.578439    9.7
+> 18625
+-------------+-----------------------------------------------------------
+> -----
+NPS_CHUM     |
+       _cons |   9.559037   .8152947    11.72   0.000     7.961089    11.
+> 15699
+-------------+-----------------------------------------------------------
+> -----
+NPS_DCRB     |
+       _cons |   12.66186   2.108242     6.01   0.000     8.529781    16.
+> 79394
+-------------+-----------------------------------------------------------
+> -----
+NPS_SOCK     |
+       _cons |   8.328586   1.087157     7.66   0.000     6.197798    10.
+> 45937
+-------------+-----------------------------------------------------------
+> -----
 No_Partici~n |  (base alternative)
--------------+----------------------------------------------------------
-> ------
+-------------+-----------------------------------------------------------
+> -----
 SBA_CMCK     |
-       _cons |   1.981507   .8803307     2.25   0.024     .2560908    3.
-> 706924
--------------+----------------------------------------------------------
-> ------
+       _cons |  -.2363765   .3802566    -0.62   0.534    -.9816658    .50
+> 89128
+-------------+-----------------------------------------------------------
+> -----
 SBA_JMCK     |
-       _cons |   1.030883   1.329894     0.78   0.438    -1.575662    3.
-> 637427
--------------+----------------------------------------------------------
-> ------
+       _cons |  -1.102022   1.048919    -1.05   0.293    -3.157866     .9
+> 53822
+-------------+-----------------------------------------------------------
+> -----
 SBA_MSQD     |
-       _cons |   4.081203   .9147837     4.46   0.000      2.28826    5.
-> 874146
--------------+----------------------------------------------------------
-> ------
+       _cons |   1.176728   .4143777     2.84   0.005     .3645623    1.9
+> 88893
+-------------+-----------------------------------------------------------
+> -----
 SBA_PBNT     |
-       _cons |   3.641874   2.843087     1.28   0.200    -1.930474    9.
-> 214222
--------------+----------------------------------------------------------
-> ------
+       _cons |  -.6832403   1.243414    -0.55   0.583    -3.120287    1.7
+> 53807
+-------------+-----------------------------------------------------------
+> -----
 SBA_PSDN     |
-       _cons |   .3588901   .9457342     0.38   0.704    -1.494715    2.
-> 212495
--------------+----------------------------------------------------------
-> ------
+       _cons |   .5209602   .7926597     0.66   0.511    -1.032624    2.0
+> 74545
+-------------+-----------------------------------------------------------
+> -----
 SBA_UMCK     |
-       _cons |   5.864149   3.032482     1.93   0.053    -.0794067    11
-> .80771
--------------+----------------------------------------------------------
-> ------
+       _cons |   1.827274    1.10378     1.66   0.098    -.3360957    3.9
+> 90644
+-------------+-----------------------------------------------------------
+> -----
 SDA_BTNA     |
-       _cons |   12.29686   5.114516     2.40   0.016     2.272595    22
-> .32113
--------------+----------------------------------------------------------
-> ------
+       _cons |   5.389752   1.615054     3.34   0.001     2.224304      8
+> .5552
+-------------+-----------------------------------------------------------
+> -----
 SFA_CHNK     |
-       _cons |   17.91165    9.15804     1.96   0.050     -.037783    35
-> .86108
--------------+----------------------------------------------------------
-> ------
+       _cons |     4.4154   2.528323     1.75   0.081    -.5400219    9.3
+> 70822
+-------------+-----------------------------------------------------------
+> -----
 SFA_DCRB     |
-       _cons |   8.314179   5.807956     1.43   0.152    -3.069205    19
-> .69756
--------------+----------------------------------------------------------
-> ------
+       _cons |   .2927982   2.207833     0.13   0.894    -4.034475    4.6
+> 20071
+-------------+-----------------------------------------------------------
+> -----
 SFA_MSQD     |
-       _cons |    4.54532   1.128086     4.03   0.000     2.334312    6.
-> 756328
--------------+----------------------------------------------------------
-> ------
+       _cons |   1.010098   .4232788     2.39   0.017     .1804867    1.8
+> 39709
+-------------+-----------------------------------------------------------
+> -----
 SFA_NANC     |
-       _cons |   5.098876   1.306181     3.90   0.000     2.538809    7.
-> 658944
-------------------------------------------------------------------------
-> ------
+       _cons |   2.121208   .7989909     2.65   0.008     .5552144    3.6
+> 87201
+-------------+-----------------------------------------------------------
+> -----
+SPS_CHUM     |
+       _cons |   6.203231   .9769311     6.35   0.000     4.288481    8.1
+> 17981
+-------------------------------------------------------------------------
+> -----
 
-.         program change_coeff, eclass
-  1.                 matrix betass = e(b)
-  2.                 matrix list betass
-  3.                 scalar xx = (betass[1,14] + betass[1,15] + betass[1
-> ,16] + betass[1,20] + betass[1,31] + betass[1,35] + betass[1,36] + bet
-> ass[1,39] + betass[1,46])/(47-12-9)
-  4.                 forvalues i=13(1)47 {
-  5.                         matrix betass[1,`i'] = betass[1,`i'] + scal
-> ar(`=xx')
-  6.                 }
-  7.                 matrix betass[1,14] = 0
-  8.                 matrix betass[1,15] = 0
-  9.                 matrix betass[1,16] = 0
- 10.                 matrix betass[1,20] = 0
- 11.                 matrix betass[1,31] = 0
- 12.                 matrix betass[1,35] = 0
- 13.                 matrix betass[1,36] = 0
- 14.                 matrix betass[1,39] = 0
- 15.                 matrix betass[1,46] = 0
- 16.                 ereturn repost b = betass, rename
- 17.         end
+. estimates store P1
 
-.         change_coeff
+. di "R2-McFadden = " 1 - (e(ll)/ll0)
+R2-McFadden = .26418148
 
-betass[1,47]
-       selection:    selection:    selection:    selection:
-      mean_avail    mean_price  diesel_price  wind_max_2~h
-y1     1.2669314    -.83284121    -.36118002    -.02249086
+. estadd scalar r2 = 1 - (e(ll)/ll0): P1
 
-       selection:    selection:    selection:    selection:
-       d_missing  dist_port_~o   d_missing_d   dist_to_cog
-y1     1.1549524     -.0130906    -4.1525714    -.00966047
+. lrtest P1 base, force
 
-       selection:    selection:    selection:    selection:
-    ddieselstate  psdnclosured  msqdclosured   msqdweekend
-y1     .22362802    -.90246795    -18.902993    -3.2124597
+Likelihood-ratio test
+Assumption: base nested within P1
 
-        BDA_DCRB:     BDA_MSQD:     CBA_MSQD:     ERA_MSQD:
-           _cons         _cons         _cons         _cons
-y1       8.29591     4.6989655     11.853637     7.5026773
+LR chi2(11) = 18762.89
+Prob > chi2 =   0.0000
 
-        LAA_BTNA:     LAA_CMCK:     LAA_JMCK:     LAA_MSQD:
-           _cons         _cons         _cons         _cons
-y1     4.7059734     1.7155869     2.5502097     3.8247419
+. estadd scalar lr_p = r(p): P1
 
-        LAA_NANC:     LAA_PBNT:     LAA_PSDN:     LAA_RHRG:
-           _cons         _cons         _cons         _cons
-y1     .18129608     3.5519105     1.7888434    -.90897462
+. estat ic, all
 
-        LAA_STNA:     LAA_YTNA:     MNA_ALBC:     MNA_CMCK:
-           _cons         _cons         _cons         _cons
-y1     4.0464535     2.9740061     1.7299531     3.0896218
+Information criteria
 
-        MNA_JMCK:     MNA_LSKT:     MNA_MSQD:     MNA_NANC:
-           _cons         _cons         _cons         _cons
-y1      2.706848     6.1395131     3.7506282      1.135863
+---------------------------------------------------------
+       Model |          N   ll(null)  ll(model)        df
+-------------+-------------------------------------------
+          P1 |     29,455          .  -26129.93        51
+---------------------------------------------------------
+Note: BIC, AICc, and CAIC use N = number of cases. See 
+      [R] IC note.
 
-        MNA_PSDN:     MNA_UDAB:     MRA_MSQD:     NPA_MSQD:
-           _cons         _cons         _cons         _cons
-y1     .77172429     9.5412187     1.8764956     12.972604
+--------------------------------------------------------------------
+       Model |          AIC          BIC          AICc          CAIC
+-------------+------------------------------------------------------
+          P1 |     52361.85     52784.68      52362.03      52835.68
+--------------------------------------------------------------------
+Legend: AIC is Akaike's information criterion.
+        BIC is Bayesian information criterion.
+        AICc is corrected Akaike's information criterion.
+        CAIC is consistent Akaike's information criterion.
 
-        SBA_CMCK:     SBA_JMCK:     SBA_MSQD:     SBA_PBNT:
-           _cons         _cons         _cons         _cons
-y1     1.9815073     1.0308825     4.0812029     3.6418738
+. matrix S = r(S)
 
-        SBA_PSDN:     SBA_UMCK:     SDA_BTNA:     SFA_CHNK:
-           _cons         _cons         _cons         _cons
-y1     .35889009     5.8641494     12.296862     17.911646
+. estadd scalar aic = S[1,5]: P1
 
-        SFA_DCRB:     SFA_MSQD:     SFA_NANC:
-           _cons         _cons         _cons
-y1     8.3141791       4.54532     5.0988761
+. estadd scalar bic = S[1,6]: P1
 
-.         matrix list e(b)
+. estadd scalar aicc = S[1,7]: P1
 
-e(b)[1,47]
-       selection:    selection:    selection:    selection:
-      mean_avail    mean_price  diesel_price  wind_max_2~h
-y1     1.2669314    -.83284121    -.36118002    -.02249086
+. estadd scalar caic = S[1,8]: P1
 
-       selection:    selection:    selection:    selection:
-       d_missing  dist_port_~o   d_missing_d   dist_to_cog
-y1     1.1549524     -.0130906    -4.1525714    -.00966047
+. preserve
 
-       selection:    selection:    selection:    selection:
-    ddieselstate  psdnclosured  msqdclosured   msqdweekend
-y1     .22362802    -.90246795    -18.902993    -3.2124597
-
-        BDA_DCRB:     BDA_MSQD:     CBA_MSQD:     ERA_MSQD:
-           _cons         _cons         _cons         _cons
-y1     10.415382             0             0             0
-
-        LAA_BTNA:     LAA_CMCK:     LAA_JMCK:     LAA_MSQD:
-           _cons         _cons         _cons         _cons
-y1     6.8254455     3.8350589     4.6696818             0
-
-        LAA_NANC:     LAA_PBNT:     LAA_PSDN:     LAA_RHRG:
-           _cons         _cons         _cons         _cons
-y1     2.3007681     5.6713825     3.9083154     1.2104974
-
-        LAA_STNA:     LAA_YTNA:     MNA_ALBC:     MNA_CMCK:
-           _cons         _cons         _cons         _cons
-y1     6.1659255     5.0934781     3.8494251     5.2090938
-
-        MNA_JMCK:     MNA_LSKT:     MNA_MSQD:     MNA_NANC:
-           _cons         _cons         _cons         _cons
-y1       4.82632     8.2589851             0      3.255335
-
-        MNA_PSDN:     MNA_UDAB:     MRA_MSQD:     NPA_MSQD:
-           _cons         _cons         _cons         _cons
-y1     2.8911963     11.660691             0             0
-
-        SBA_CMCK:     SBA_JMCK:     SBA_MSQD:     SBA_PBNT:
-           _cons         _cons         _cons         _cons
-y1     4.1009793     3.1503546             0     5.7613458
-
-        SBA_PSDN:     SBA_UMCK:     SDA_BTNA:     SFA_CHNK:
-           _cons         _cons         _cons         _cons
-y1     2.4783621     7.9836214     14.416334     20.031118
-
-        SFA_DCRB:     SFA_MSQD:     SFA_NANC:
-           _cons         _cons         _cons
-y1     10.433651             0     7.2183482
-
-.         replace mean_avail = 0 if species == "MSQD"
-(61,369 real changes made)
-
-.         predict phat, pr
+.         qui predict phat
 
 .         by fished_haul, sort: egen max_prob = max(phat) 
 
 .         drop if max_prob != phat
-(99,160 observations deleted)
+(147,275 observations deleted)
 
-.         tab selection
+.         by fished_haul, sort: gen nvals = _n == 1 
 
-       selection |      Freq.     Percent        Cum.
------------------+-----------------------------------
-        BDA-DCRB |          8        0.04        0.04
-        LAA-BTNA |        235        1.18        1.23
-        LAA-CMCK |      2,279       11.49       12.72
-        LAA-JMCK |        178        0.90       13.61
-        LAA-NANC |        254        1.28       14.90
-        LAA-PBNT |        105        0.53       15.42
-        LAA-PSDN |        670        3.38       18.80
-        LAA-STNA |         12        0.06       18.86
-        LAA-YTNA |        563        2.84       21.70
-        MNA-ALBC |          2        0.01       21.71
-        MNA-CMCK |         48        0.24       21.95
-        MNA-JMCK |         88        0.44       22.40
-        MNA-LSKT |          4        0.02       22.42
-        MNA-NANC |      3,804       19.18       41.60
-        MNA-PSDN |        322        1.62       43.22
-        MNA-UDAB |          3        0.02       43.24
-No-Participation |     10,568       53.29       96.53
-        SBA-CMCK |        360        1.82       98.34
-        SBA-JMCK |         17        0.09       98.43
-        SBA-PBNT |         24        0.12       98.55
-        SBA-PSDN |          9        0.05       98.59
-        SBA-UMCK |          6        0.03       98.62
-        SDA-BTNA |         23        0.12       98.74
-        SFA-CHNK |          2        0.01       98.75
-        SFA-DCRB |        109        0.55       99.30
-        SFA-NANC |        139        0.70      100.00
------------------+-----------------------------------
-           Total |     19,832      100.00
+.         count if nvals
+  29,455
+
+.         dis _N
+29455
 
 .         gen selection_hat = 1
 
-.         egen freq = total(selection_hat), by(selection set_year)
+.         egen count1 = total(fished)
 
-.         keep selection set_year freq
+.         dis count1/_N*100 "%"
+62.536072%
 
-.         sort selection set_year
-
-.         quietly by selection set_year:  gen dup = cond(_N==1,0,_n)
-
-.         drop if dup > 1
-(19,742 observations deleted)
-
-.         drop dup
-
-.         egen tot = total(freq), by(set_year)
-
-.         gen perc3 = freq/tot
-
-.         drop tot freq
-
-.         tempfile simulated3
-
-.         save simulated3, replace
-(file simulated3.dta not found)
-file simulated3.dta saved
+.         estadd scalar perc1 = count1/_N*100: P1
 
 . restore
 
 . 
-. keep if fished == 1
-(99,160 observations deleted)
+. ***********************************************************
+. *** Include state dependency (models to present on paper)
+. 
+. eststo B1: cmclogit fished mean_avail mean_price diesel_price wind_max_
+> 220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog /
+> //
+>                 ddieselstate psdnclosured msqdclosured msqdweekend i.du
+> mmy_last_day, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel
+      data is vce(cluster fished_vessel_id); see cmclogit.
+note: msqdclosured omitted because of collinearity.
+note: variable d_missing has 25437 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 37 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 11192 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 16201 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 25620 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 21328 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable 1.dummy_last_day has 18400 cases that are not
+      alternative-specific; there is no within-case variability.
 
-. tab selection
+Iteration 0:  Log pseudolikelihood = -25230.753  
+Iteration 1:  Log pseudolikelihood = -23419.752  
+Iteration 2:  Log pseudolikelihood = -23248.298  
+Iteration 3:  Log pseudolikelihood = -23247.658  
+Iteration 4:  Log pseudolikelihood = -23247.658  
 
-       selection |      Freq.     Percent        Cum.
------------------+-----------------------------------
-        BDA-DCRB |          7        0.04        0.04
-        BDA-MSQD |         12        0.06        0.10
-        CBA-MSQD |          4        0.02        0.12
-        ERA-MSQD |         48        0.24        0.36
-        LAA-BTNA |         54        0.27        0.63
-        LAA-CMCK |        417        2.10        2.73
-        LAA-JMCK |         41        0.21        2.94
-        LAA-MSQD |      2,058       10.38       13.32
-        LAA-NANC |        105        0.53       13.85
-        LAA-PBNT |         28        0.14       13.99
-        LAA-PSDN |        139        0.70       14.69
-        LAA-RHRG |          1        0.01       14.69
-        LAA-STNA |          3        0.02       14.71
-        LAA-YTNA |        117        0.59       15.30
-        MNA-ALBC |          1        0.01       15.30
-        MNA-CMCK |         14        0.07       15.37
-        MNA-JMCK |         33        0.17       15.54
-        MNA-LSKT |          1        0.01       15.55
-        MNA-MSQD |      2,383       12.02       27.56
-        MNA-NANC |        829        4.18       31.74
-        MNA-PSDN |        171        0.86       32.60
-        MNA-UDAB |          1        0.01       32.61
-        MRA-MSQD |        120        0.61       33.21
-        NPA-MSQD |         17        0.09       33.30
-No-Participation |      8,611       43.42       76.72
-        SBA-CMCK |         55        0.28       77.00
-        SBA-JMCK |          2        0.01       77.01
-        SBA-MSQD |      3,779       19.06       96.06
-        SBA-PBNT |          4        0.02       96.08
-        SBA-PSDN |          9        0.05       96.13
-        SBA-UMCK |          1        0.01       96.13
-        SDA-BTNA |          6        0.03       96.16
-        SFA-CHNK |          1        0.01       96.17
-        SFA-DCRB |         47        0.24       96.40
-        SFA-MSQD |        661        3.33       99.74
-        SFA-NANC |         52        0.26      100.00
------------------+-----------------------------------
-           Total |     19,832      100.00
+Conditional logit choice model                 Number of obs      =    17
+> 6,730
+Case ID variable: _caseid                      Number of cases    =      
+> 29455
 
-. gen selection_hat = 1
+Alternatives variable: selection               Alts per case: min =      
+>     6
+                                                              avg =      
+>   6.0
+                                                              max =      
+>     6
 
-. egen freq = total(selection_hat), by(selection set_year)
+                                                  Wald chi2(12)   =    37
+> 28.09
+Log pseudolikelihood = -23247.658                 Prob > chi2     =     0
+> .0000
 
-. keep selection set_year freq
+                      (Std. err. adjusted for 46 clusters in fished_vesse
+> l_id)
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+      fished | Coefficient  std. err.      z    P>|z|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+selection    |
+  mean_avail |  -1.444893   .3649749    -3.96   0.000    -2.160231   -.72
+> 95555
+  mean_price |  -.0620374    .120142    -0.52   0.606    -.2975114    .17
+> 34366
+diesel_price |   .2308136   .0324852     7.11   0.000     .1671439    .29
+> 44834
+wind_max_2~h |   -.049008   .0034768   -14.10   0.000    -.0558223   -.04
+> 21937
+   d_missing |  -.9282192   .3460777    -2.68   0.007    -1.606519   -.24
+> 99193
+dist_port_~o |  -.0139919   .0019505    -7.17   0.000    -.0178149    -.0
+> 10169
+ d_missing_d |  -3.314882   .1895248   -17.49   0.000    -3.686344    -2.
+> 94342
+ dist_to_cog |  -.0066086    .000495   -13.35   0.000    -.0075788   -.00
+> 56384
+ddieselstate |  -.0582114   .0395355    -1.47   0.141    -.1356994    .01
+> 92767
+psdnclosured |   -1.47211   .6152482    -2.39   0.017    -2.677974   -.26
+> 62458
+msqdclosured |          0  (omitted)
+ msqdweekend |  -3.469767   .1738536   -19.96   0.000    -3.810514    -3.
+> 12902
+1.dummy_la~y |   1.904298   .0721869    26.38   0.000     1.762814    2.0
+> 45782
+-------------+-----------------------------------------------------------
+> -----
+BDA_DCRB     |
+       _cons |  -.2749539   1.573064    -0.17   0.861    -3.358104    2.8
+> 08196
+-------------+-----------------------------------------------------------
+> -----
+BDA_MSQD     |
+       _cons |   .2537065   .6428082     0.39   0.693    -1.006174    1.5
+> 13587
+-------------+-----------------------------------------------------------
+> -----
+BGA_MSQD     |
+       _cons |   1.787759   .6913936     2.59   0.010     .4326529    3.1
+> 42866
+-------------+-----------------------------------------------------------
+> -----
+CWA_DCRB     |
+       _cons |   5.206253   3.232015     1.61   0.107     -1.12838    11.
+> 54089
+-------------+-----------------------------------------------------------
+> -----
+ERA_MSQD     |
+       _cons |    2.26099   .5848794     3.87   0.000     1.114648    3.4
+> 07333
+-------------+-----------------------------------------------------------
+> -----
+LAA_BTNA     |
+       _cons |   .7880802   .5734056     1.37   0.169    -.3357742    1.9
+> 11935
+-------------+-----------------------------------------------------------
+> -----
+LAA_CMCK     |
+       _cons |  -1.040433   .1976504    -5.26   0.000    -1.427821   -.65
+> 30454
+-------------+-----------------------------------------------------------
+> -----
+LAA_JMCK     |
+       _cons |  -.5054764   .2446522    -2.07   0.039    -.9849859   -.02
+> 59669
+-------------+-----------------------------------------------------------
+> -----
+LAA_MSQD     |
+       _cons |   .0104117   .2795157     0.04   0.970     -.537429    .55
+> 82525
+-------------+-----------------------------------------------------------
+> -----
+LAA_NANC     |
+       _cons |  -.1844125   .3089045    -0.60   0.551    -.7898542    .42
+> 10291
+-------------+-----------------------------------------------------------
+> -----
+LAA_PBNT     |
+       _cons |   1.010383   .4244707     2.38   0.017     .1784359     1.
+> 84233
+-------------+-----------------------------------------------------------
+> -----
+LAA_PSDN     |
+       _cons |  -.5956306   .2607298    -2.28   0.022    -1.106652   -.08
+> 46096
+-------------+-----------------------------------------------------------
+> -----
+LAA_RHRG     |
+       _cons |  -1.449306    .798776    -1.81   0.070    -3.014878     .1
+> 16266
+-------------+-----------------------------------------------------------
+> -----
+LAA_STNA     |
+       _cons |   1.499298   .7292777     2.06   0.040     .0699396    2.9
+> 28656
+-------------+-----------------------------------------------------------
+> -----
+LAA_YTNA     |
+       _cons |   .0488145   .4110899     0.12   0.905    -.7569069    .85
+> 45359
+-------------+-----------------------------------------------------------
+> -----
+MNA_ALBC     |
+       _cons |  -.0861008   .8755454    -0.10   0.922    -1.802138    1.6
+> 29937
+-------------+-----------------------------------------------------------
+> -----
+MNA_CMCK     |
+       _cons |  -.5417705   .4796309    -1.13   0.259     -1.48183    .39
+> 82887
+-------------+-----------------------------------------------------------
+> -----
+MNA_JMCK     |
+       _cons |    -.10283   .4217705    -0.24   0.807    -.9294851    .72
+> 38251
+-------------+-----------------------------------------------------------
+> -----
+MNA_LSKT     |
+       _cons |   2.746102   .8997881     3.05   0.002     .9825497    4.5
+> 09654
+-------------+-----------------------------------------------------------
+> -----
+MNA_MSQD     |
+       _cons |  -.1247017   .2547659    -0.49   0.625    -.6240337    .37
+> 46302
+-------------+-----------------------------------------------------------
+> -----
+MNA_NANC     |
+       _cons |  -.5337769   .3088129    -1.73   0.084    -1.139039    .07
+> 14852
+-------------+-----------------------------------------------------------
+> -----
+MNA_PSDN     |
+       _cons |  -1.070184   .2973939    -3.60   0.000    -1.653065   -.48
+> 73024
+-------------+-----------------------------------------------------------
+> -----
+MNA_UDAB     |
+       _cons |   2.904933   .7886509     3.68   0.000     1.359205     4.
+> 45066
+-------------+-----------------------------------------------------------
+> -----
+MRA_MSQD     |
+       _cons |  -1.762367   .4105755    -4.29   0.000    -2.567081   -.95
+> 76543
+-------------+-----------------------------------------------------------
+> -----
+NPA_MSQD     |
+       _cons |   5.725734   .7100922     8.06   0.000     4.333979    7.1
+> 17489
+-------------+-----------------------------------------------------------
+> -----
+NPS_CHUM     |
+       _cons |   6.847411   .6959304     9.84   0.000     5.483412     8.
+> 21141
+-------------+-----------------------------------------------------------
+> -----
+NPS_DCRB     |
+       _cons |   9.550116   1.510962     6.32   0.000     6.588684    12.
+> 51155
+-------------+-----------------------------------------------------------
+> -----
+NPS_SOCK     |
+       _cons |   5.757836   .9207427     6.25   0.000     3.953214    7.5
+> 62459
+-------------+-----------------------------------------------------------
+> -----
+No_Partici~n |  (base alternative)
+-------------+-----------------------------------------------------------
+> -----
+SBA_CMCK     |
+       _cons |  -.8712042   .3017094    -2.89   0.004    -1.462544   -.27
+> 98646
+-------------+-----------------------------------------------------------
+> -----
+SBA_JMCK     |
+       _cons |  -1.692654   .8953144    -1.89   0.059    -3.447438    .06
+> 21296
+-------------+-----------------------------------------------------------
+> -----
+SBA_MSQD     |
+       _cons |   .3190857   .3129884     1.02   0.308    -.2943603    .93
+> 25316
+-------------+-----------------------------------------------------------
+> -----
+SBA_PBNT     |
+       _cons |   -.986343    1.00377    -0.98   0.326    -2.953696    .98
+> 10104
+-------------+-----------------------------------------------------------
+> -----
+SBA_PSDN     |
+       _cons |  -.1940304      .5816    -0.33   0.739    -1.333946    .94
+> 58847
+-------------+-----------------------------------------------------------
+> -----
+SBA_UMCK     |
+       _cons |   .7524813   .9086323     0.83   0.408    -1.028405    2.5
+> 33368
+-------------+-----------------------------------------------------------
+> -----
+SDA_BTNA     |
+       _cons |   3.553066   1.204573     2.95   0.003     1.192147    5.9
+> 13985
+-------------+-----------------------------------------------------------
+> -----
+SFA_CHNK     |
+       _cons |   3.041133   1.809037     1.68   0.093    -.5045144    6.5
+> 86781
+-------------+-----------------------------------------------------------
+> -----
+SFA_DCRB     |
+       _cons |   -.372819   1.615305    -0.23   0.817    -3.538759    2.7
+> 93121
+-------------+-----------------------------------------------------------
+> -----
+SFA_MSQD     |
+       _cons |   .1115202   .3363883     0.33   0.740    -.5477888    .77
+> 08291
+-------------+-----------------------------------------------------------
+> -----
+SFA_NANC     |
+       _cons |   1.003004   .6261515     1.60   0.109    -.2242305    2.2
+> 30238
+-------------+-----------------------------------------------------------
+> -----
+SPS_CHUM     |
+       _cons |   4.116763   .8971023     4.59   0.000     2.358475    5.8
+> 75051
+-------------------------------------------------------------------------
+> -----
 
-. sort selection set_year
+. di "R2-McFadden = " 1 - (e(ll)/ll0)
+R2-McFadden = .34534615
 
-. quietly by selection set_year:  gen dup = cond(_N==1,0,_n)
+. estadd scalar r2 = 1 - (e(ll)/ll0): B1
 
-. drop if dup > 1
-(19,727 observations deleted)
+. lrtest B1 P1, force
 
-. drop dup
+Likelihood-ratio test
+Assumption: P1 nested within B1
 
-. egen tot = total(freq), by(set_year)
+ LR chi2(1) = 5764.54
+Prob > chi2 =  0.0000
 
-. gen perc = freq/tot
+. estadd scalar lr_p = r(p): B1
 
-. drop tot freq
+. estat ic, all
+
+Information criteria
+
+---------------------------------------------------------
+       Model |          N   ll(null)  ll(model)        df
+-------------+-------------------------------------------
+          B1 |     29,455          .  -23247.66        52
+---------------------------------------------------------
+Note: BIC, AICc, and CAIC use N = number of cases. See 
+      [R] IC note.
+
+--------------------------------------------------------------------
+       Model |          AIC          BIC          AICc          CAIC
+-------------+------------------------------------------------------
+          B1 |     46599.32     47030.43       46599.5      47082.43
+--------------------------------------------------------------------
+Legend: AIC is Akaike's information criterion.
+        BIC is Bayesian information criterion.
+        AICc is corrected Akaike's information criterion.
+        CAIC is consistent Akaike's information criterion.
+
+. matrix S = r(S)
+
+. estadd scalar aic = S[1,5]: B1
+
+. estadd scalar bic = S[1,6]: B1
+
+. estadd scalar aicc = S[1,7]: B1
+
+. estadd scalar caic = S[1,8]: B1
+
+. preserve
+
+.         qui predict phat
+
+.         by fished_haul, sort: egen max_prob = max(phat) 
+
+.         drop if max_prob != phat
+(147,275 observations deleted)
+
+.         by fished_haul, sort: gen nvals = _n == 1 
+
+.         count if nvals
+  29,455
+
+.         dis _N
+29455
+
+.         gen selection_hat = 1
+
+.         egen count1 = total(fished)
+
+.         dis count1/_N*100 "%"
+67.716856%
+
+.         estadd scalar perc1 = count1/_N*100: B1
+
+. restore
 
 . 
-. merge m:m selection using "simulated3.dta", nogen keep(master match) 
+. eststo B2: cmclogit fished mean_avail mean_price diesel_price wind_max_
+> 220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog /
+> //
+>                 ddieselstate psdnclosured msqdclosured msqdweekend i.du
+> mmy_prev_days, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel
+      data is vce(cluster fished_vessel_id); see cmclogit.
+note: msqdclosured omitted because of collinearity.
+note: variable d_missing has 25437 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 37 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 11192 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 16201 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 25620 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 21328 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable 1.dummy_prev_days has 2263 cases that are not
+      alternative-specific; there is no within-case variability.
 
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                            30
-        from master                        30  
-        from using                          0  
+Iteration 0:  Log pseudolikelihood = -24244.721  
+Iteration 1:  Log pseudolikelihood = -22393.723  
+Iteration 2:  Log pseudolikelihood = -22287.758  
+Iteration 3:  Log pseudolikelihood = -22287.343  
+Iteration 4:  Log pseudolikelihood = -22287.343  
 
-    Matched                                92  
-    -----------------------------------------
+Conditional logit choice model                 Number of obs      =    17
+> 6,730
+Case ID variable: _caseid                      Number of cases    =      
+> 29455
 
-. replace perc  = 0 if perc == .
-(0 real changes made)
+Alternatives variable: selection               Alts per case: min =      
+>     6
+                                                              avg =      
+>   6.0
+                                                              max =      
+>     6
 
-. replace perc3 = 0 if perc3 == .
-(30 real changes made)
+                                                  Wald chi2(12)   =    61
+> 32.55
+Log pseudolikelihood = -22287.343                 Prob > chi2     =     0
+> .0000
+
+                      (Std. err. adjusted for 46 clusters in fished_vesse
+> l_id)
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+      fished | Coefficient  std. err.      z    P>|z|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+selection    |
+  mean_avail |  -1.137903   .4270255    -2.66   0.008    -1.974858   -.30
+> 09483
+  mean_price |  -.0939437   .1164289    -0.81   0.420    -.3221402    .13
+> 42527
+diesel_price |   .3302115   .0414896     7.96   0.000     .2488933    .41
+> 15297
+wind_max_2~h |   -.050632    .003955   -12.80   0.000    -.0583836   -.04
+> 28803
+   d_missing |  -.8047656   .3746593    -2.15   0.032    -1.539084   -.07
+> 04468
+dist_port_~o |  -.0105656   .0018335    -5.76   0.000    -.0141592    -.0
+> 06972
+ d_missing_d |  -2.039869   .1739277   -11.73   0.000    -2.380761   -1.6
+> 98977
+ dist_to_cog |  -.0034056   .0004374    -7.79   0.000    -.0042628   -.00
+> 25484
+ddieselstate |  -.0591003   .0412686    -1.43   0.152    -.1399852    .02
+> 17847
+psdnclosured |  -.9993432   .6623228    -1.51   0.131    -2.297472    .29
+> 87856
+msqdclosured |          0  (omitted)
+ msqdweekend |  -3.669857   .1646075   -22.29   0.000    -3.992482   -3.3
+> 47232
+1.dummy_pr.. |   2.701067   .0920818    29.33   0.000      2.52059    2.8
+> 81544
+-------------+-----------------------------------------------------------
+> -----
+BDA_DCRB     |
+       _cons |  -2.209102   1.055057    -2.09   0.036    -4.276976   -.14
+> 12282
+-------------+-----------------------------------------------------------
+> -----
+BDA_MSQD     |
+       _cons |  -1.446353    .489626    -2.95   0.003    -2.406002   -.48
+> 67038
+-------------+-----------------------------------------------------------
+> -----
+BGA_MSQD     |
+       _cons |  -.7564522   .6749187    -1.12   0.262    -2.079269    .56
+> 63642
+-------------+-----------------------------------------------------------
+> -----
+CWA_DCRB     |
+       _cons |    .830876   1.741659     0.48   0.633    -2.582713    4.2
+> 44465
+-------------+-----------------------------------------------------------
+> -----
+ERA_MSQD     |
+       _cons |  -.9374912   .4610304    -2.03   0.042    -1.841094   -.03
+> 38882
+-------------+-----------------------------------------------------------
+> -----
+LAA_BTNA     |
+       _cons |  -1.205334   .6316154    -1.91   0.056    -2.443277    .03
+> 26096
+-------------+-----------------------------------------------------------
+> -----
+LAA_CMCK     |
+       _cons |  -3.029843   .2350053   -12.89   0.000    -3.490445   -2.5
+> 69241
+-------------+-----------------------------------------------------------
+> -----
+LAA_JMCK     |
+       _cons |  -2.343956   .2313395   -10.13   0.000    -2.797373   -1.8
+> 90539
+-------------+-----------------------------------------------------------
+> -----
+LAA_MSQD     |
+       _cons |  -2.326985   .3084095    -7.55   0.000    -2.931457   -1.7
+> 22514
+-------------+-----------------------------------------------------------
+> -----
+LAA_NANC     |
+       _cons |  -2.493437   .3420075    -7.29   0.000    -3.163759   -1.8
+> 23115
+-------------+-----------------------------------------------------------
+> -----
+LAA_PBNT     |
+       _cons |  -1.209694   .4778835    -2.53   0.011    -2.146328   -.27
+> 30592
+-------------+-----------------------------------------------------------
+> -----
+LAA_PSDN     |
+       _cons |  -2.662939   .2986078    -8.92   0.000      -3.2482   -2.0
+> 77679
+-------------+-----------------------------------------------------------
+> -----
+LAA_RHRG     |
+       _cons |  -3.010761   .4498278    -6.69   0.000    -3.892407   -2.1
+> 29115
+-------------+-----------------------------------------------------------
+> -----
+LAA_STNA     |
+       _cons |  -.4834554   .7867602    -0.61   0.539    -2.025477    1.0
+> 58566
+-------------+-----------------------------------------------------------
+> -----
+LAA_YTNA     |
+       _cons |    -2.2341   .4661821    -4.79   0.000      -3.1478     -1
+> .3204
+-------------+-----------------------------------------------------------
+> -----
+MNA_ALBC     |
+       _cons |   -1.72301   .9748087    -1.77   0.077      -3.6336    .18
+> 75796
+-------------+-----------------------------------------------------------
+> -----
+MNA_CMCK     |
+       _cons |  -2.261203   .4304078    -5.25   0.000    -3.104787   -1.4
+> 17619
+-------------+-----------------------------------------------------------
+> -----
+MNA_JMCK     |
+       _cons |  -2.163569   .3826525    -5.65   0.000    -2.913554   -1.4
+> 13584
+-------------+-----------------------------------------------------------
+> -----
+MNA_LSKT     |
+       _cons |   .4628727   .8406737     0.55   0.582    -1.184817    2.1
+> 10563
+-------------+-----------------------------------------------------------
+> -----
+MNA_MSQD     |
+       _cons |  -2.467464   .2786474    -8.86   0.000    -3.013603   -1.9
+> 21325
+-------------+-----------------------------------------------------------
+> -----
+MNA_NANC     |
+       _cons |   -2.68514    .273677    -9.81   0.000    -3.221537   -2.1
+> 48743
+-------------+-----------------------------------------------------------
+> -----
+MNA_PSDN     |
+       _cons |  -3.441772   .2671263   -12.88   0.000     -3.96533   -2.9
+> 18215
+-------------+-----------------------------------------------------------
+> -----
+MNA_UDAB     |
+       _cons |   .8142728   .8127399     1.00   0.316    -.7786682    2.4
+> 07214
+-------------+-----------------------------------------------------------
+> -----
+MRA_MSQD     |
+       _cons |   -3.20812   .4172057    -7.69   0.000    -4.025828   -2.3
+> 90412
+-------------+-----------------------------------------------------------
+> -----
+NPA_MSQD     |
+       _cons |   1.139495   .6166343     1.85   0.065    -.0690862    2.3
+> 48076
+-------------+-----------------------------------------------------------
+> -----
+NPS_CHUM     |
+       _cons |   1.388048   .6095171     2.28   0.023     .1934161    2.5
+> 82679
+-------------+-----------------------------------------------------------
+> -----
+NPS_DCRB     |
+       _cons |   3.607626   1.583794     2.28   0.023     .5034467    6.7
+> 11805
+-------------+-----------------------------------------------------------
+> -----
+NPS_SOCK     |
+       _cons |   .3656491   .8096348     0.45   0.652    -1.221206    1.9
+> 52504
+-------------+-----------------------------------------------------------
+> -----
+No_Partici~n |  (base alternative)
+-------------+-----------------------------------------------------------
+> -----
+SBA_CMCK     |
+       _cons |  -2.440338   .2563768    -9.52   0.000    -2.942827   -1.9
+> 37848
+-------------+-----------------------------------------------------------
+> -----
+SBA_JMCK     |
+       _cons |   -2.96899   .8252168    -3.60   0.000    -4.586385   -1.3
+> 51595
+-------------+-----------------------------------------------------------
+> -----
+SBA_MSQD     |
+       _cons |   -2.14044   .3034836    -7.05   0.000    -2.735257   -1.5
+> 45624
+-------------+-----------------------------------------------------------
+> -----
+SBA_PBNT     |
+       _cons |  -2.229124   .8592875    -2.59   0.009    -3.913297   -.54
+> 49517
+-------------+-----------------------------------------------------------
+> -----
+SBA_PSDN     |
+       _cons |  -2.174969   .4405477    -4.94   0.000    -3.038426   -1.3
+> 11511
+-------------+-----------------------------------------------------------
+> -----
+SBA_UMCK     |
+       _cons |  -1.083957   .9870288    -1.10   0.272    -3.018498    .85
+> 05837
+-------------+-----------------------------------------------------------
+> -----
+SDA_BTNA     |
+       _cons |   .7608918   1.214047     0.63   0.531    -1.618596     3.
+> 14038
+-------------+-----------------------------------------------------------
+> -----
+SFA_CHNK     |
+       _cons |   1.232813   1.480915     0.83   0.405    -1.669727    4.1
+> 35353
+-------------+-----------------------------------------------------------
+> -----
+SFA_DCRB     |
+       _cons |  -2.222458   1.150774    -1.93   0.053    -4.477934    .03
+> 30169
+-------------+-----------------------------------------------------------
+> -----
+SFA_MSQD     |
+       _cons |  -2.376276   .3282434    -7.24   0.000    -3.019621   -1.7
+> 32931
+-------------+-----------------------------------------------------------
+> -----
+SFA_NANC     |
+       _cons |   -1.02895   .4873655    -2.11   0.035    -1.984169   -.07
+> 37311
+-------------+-----------------------------------------------------------
+> -----
+SPS_CHUM     |
+       _cons |  -.6718906   .8326965    -0.81   0.420    -2.303946    .96
+> 01645
+-------------------------------------------------------------------------
+> -----
+
+. di "R2-McFadden = " 1 - (e(ll)/ll0)
+R2-McFadden = .37238862
+
+. estadd scalar r2 = 1 - (e(ll)/ll0): B2
+
+. lrtest B2 P1, force
+
+Likelihood-ratio test
+Assumption: P1 nested within B2
+
+ LR chi2(1) = 7685.17
+Prob > chi2 =  0.0000
+
+. estadd scalar lr_p = r(p): B2
+
+. estat ic, all
+
+Information criteria
+
+---------------------------------------------------------
+       Model |          N   ll(null)  ll(model)        df
+-------------+-------------------------------------------
+          B2 |     29,455          .  -22287.34        52
+---------------------------------------------------------
+Note: BIC, AICc, and CAIC use N = number of cases. See 
+      [R] IC note.
+
+--------------------------------------------------------------------
+       Model |          AIC          BIC          AICc          CAIC
+-------------+------------------------------------------------------
+          B2 |     44678.69      45109.8      44678.87       45161.8
+--------------------------------------------------------------------
+Legend: AIC is Akaike's information criterion.
+        BIC is Bayesian information criterion.
+        AICc is corrected Akaike's information criterion.
+        CAIC is consistent Akaike's information criterion.
+
+. matrix S = r(S)
+
+. estadd scalar aic = S[1,5]: B2
+
+. estadd scalar bic = S[1,6]: B2
+
+. estadd scalar aicc = S[1,7]: B2
+
+. estadd scalar caic = S[1,8]: B2
+
+. preserve
+
+.         qui predict phat
+
+.         by fished_haul, sort: egen max_prob = max(phat) 
+
+.         drop if max_prob != phat
+(147,275 observations deleted)
+
+.         by fished_haul, sort: gen nvals = _n == 1 
+
+.         count if nvals
+  29,455
+
+.         dis _N
+29455
+
+.         gen selection_hat = 1
+
+.         egen count1 = total(fished)
+
+.         dis count1/_N*100 "%"
+63.568155%
+
+.         estadd scalar perc1 = count1/_N*100: B2
+
+. restore
 
 . 
-end of do-file
+. eststo B3: cmclogit fished mean_avail mean_price diesel_price wind_max_
+> 220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog /
+> //
+>                 ddieselstate psdnclosured msqdclosured msqdweekend i.du
+> mmy_prev_year_days, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel
+      data is vce(cluster fished_vessel_id); see cmclogit.
+note: msqdclosured omitted because of collinearity.
+note: variable d_missing has 25437 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 37 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 11192 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 16201 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 25620 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 21328 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable 1.dummy_prev_year_days has 10467 cases that are not
+      alternative-specific; there is no within-case variability.
 
-. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
+Iteration 0:  Log pseudolikelihood = -28250.833  
+Iteration 1:  Log pseudolikelihood = -26022.185  
+Iteration 2:  Log pseudolikelihood = -25885.947  
+Iteration 3:  Log pseudolikelihood = -25885.393  
+Iteration 4:  Log pseudolikelihood = -25885.393  
 
-. export excel using "G:\My Drive\Tables\Participation\Simulated_shares_
-> fig.xlsx", replace
-file G:\My Drive\Tables\Participation\Simulated_shares_fig.xlsx saved
+Conditional logit choice model                 Number of obs      =    17
+> 6,730
+Case ID variable: _caseid                      Number of cases    =      
+> 29455
 
-. export delimited using "C:\GitHub\EconAnalysis\Participation\R\Simulat
-> ed_shares_fig.csv", replace
-(file C:\GitHub\EconAnalysis\Participation\R\Simulated_shares_fig.csv
-    not found)
-file C:\GitHub\EconAnalysis\Participation\R\Simulated_shares_fig.csv sav
-> ed
+Alternatives variable: selection               Alts per case: min =      
+>     6
+                                                              avg =      
+>   6.0
+                                                              max =      
+>     6
+
+                                                  Wald chi2(12)   =    26
+> 66.69
+Log pseudolikelihood = -25885.393                 Prob > chi2     =     0
+> .0000
+
+                      (Std. err. adjusted for 46 clusters in fished_vesse
+> l_id)
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+      fished | Coefficient  std. err.      z    P>|z|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+selection    |
+  mean_avail |  -1.786619   .4614551    -3.87   0.000    -2.691054   -.88
+> 21834
+  mean_price |   .0063179   .0076303     0.83   0.408    -.0086372    .02
+> 12731
+diesel_price |   .3104722   .0366915     8.46   0.000     .2385583    .38
+> 23861
+wind_max_2~h |   -.048845   .0042203   -11.57   0.000    -.0571166   -.04
+> 05735
+   d_missing |   -1.17967   .3542462    -3.33   0.001    -1.873979     -.
+> 48536
+dist_port_~o |  -.0174436   .0028673    -6.08   0.000    -.0230635   -.01
+> 18237
+ d_missing_d |  -4.022815   .2392764   -16.81   0.000    -4.491788   -3.5
+> 53842
+ dist_to_cog |  -.0074576   .0005681   -13.13   0.000    -.0085712   -.00
+> 63441
+ddieselstate |  -.0378407   .0456465    -0.83   0.407    -.1273062    .05
+> 16248
+psdnclosured |   -1.43157   .7065713    -2.03   0.043    -2.816424   -.04
+> 67154
+msqdclosured |          0  (omitted)
+ msqdweekend |  -3.635157   .1631752   -22.28   0.000    -3.954975    -3.
+> 31534
+1.dum~r_days |   .5468626   .0787148     6.95   0.000     .3925846    .70
+> 11407
+-------------+-----------------------------------------------------------
+> -----
+BDA_DCRB     |
+       _cons |  -.2805536   .8982801    -0.31   0.755     -2.04115    1.4
+> 80043
+-------------+-----------------------------------------------------------
+> -----
+BDA_MSQD     |
+       _cons |   1.080052   .7265182     1.49   0.137    -.3438971    2.5
+> 04002
+-------------+-----------------------------------------------------------
+> -----
+BGA_MSQD     |
+       _cons |   2.906696   .8216899     3.54   0.000     1.296214    4.5
+> 17179
+-------------+-----------------------------------------------------------
+> -----
+CWA_DCRB     |
+       _cons |   5.291003   4.059754     1.30   0.192     -2.66597    13.
+> 24797
+-------------+-----------------------------------------------------------
+> -----
+ERA_MSQD     |
+       _cons |   3.155532   .6702296     4.71   0.000     1.841906    4.4
+> 69158
+-------------+-----------------------------------------------------------
+> -----
+LAA_BTNA     |
+       _cons |   1.300076   .4843396     2.68   0.007     .3507875    2.2
+> 49364
+-------------+-----------------------------------------------------------
+> -----
+LAA_CMCK     |
+       _cons |  -.8313401   .2227268    -3.73   0.000    -1.267877   -.39
+> 48037
+-------------+-----------------------------------------------------------
+> -----
+LAA_JMCK     |
+       _cons |  -.1127007   .3002712    -0.38   0.707    -.7012215    .47
+> 58201
+-------------+-----------------------------------------------------------
+> -----
+LAA_MSQD     |
+       _cons |   .2574192   .2997099     0.86   0.390    -.3300015    .84
+> 48398
+-------------+-----------------------------------------------------------
+> -----
+LAA_NANC     |
+       _cons |   .3306337   .3752371     0.88   0.378    -.4048176    1.0
+> 66085
+-------------+-----------------------------------------------------------
+> -----
+LAA_PBNT     |
+       _cons |   1.841254   .4945708     3.72   0.000     .8719134    2.8
+> 10595
+-------------+-----------------------------------------------------------
+> -----
+LAA_PSDN     |
+       _cons |  -.3210066   .3469378    -0.93   0.355    -1.000992     .3
+> 58979
+-------------+-----------------------------------------------------------
+> -----
+LAA_RHRG     |
+       _cons |  -1.152596   .9766299    -1.18   0.238    -3.066756    .76
+> 15632
+-------------+-----------------------------------------------------------
+> -----
+LAA_STNA     |
+       _cons |   2.594323   .9213402     2.82   0.005     .7885296    4.4
+> 00117
+-------------+-----------------------------------------------------------
+> -----
+LAA_YTNA     |
+       _cons |   .5345166   .4203266     1.27   0.203    -.2893083    1.3
+> 58342
+-------------+-----------------------------------------------------------
+> -----
+MNA_ALBC     |
+       _cons |    .571987   1.057345     0.54   0.589    -1.500371    2.6
+> 44345
+-------------+-----------------------------------------------------------
+> -----
+MNA_CMCK     |
+       _cons |  -.0747934    .543571    -0.14   0.891    -1.140173    .99
+> 05863
+-------------+-----------------------------------------------------------
+> -----
+MNA_JMCK     |
+       _cons |   .5193322   .4604506     1.13   0.259    -.3831344    1.4
+> 21799
+-------------+-----------------------------------------------------------
+> -----
+MNA_LSKT     |
+       _cons |   3.908129   1.216563     3.21   0.001     1.523709    6.2
+> 92549
+-------------+-----------------------------------------------------------
+> -----
+MNA_MSQD     |
+       _cons |   .1310534   .2455653     0.53   0.594    -.3502457    .61
+> 23526
+-------------+-----------------------------------------------------------
+> -----
+MNA_NANC     |
+       _cons |  -.0950279   .3668883    -0.26   0.796    -.8141158      .
+> 62406
+-------------+-----------------------------------------------------------
+> -----
+MNA_PSDN     |
+       _cons |  -.9152848   .3209278    -2.85   0.004    -1.544292    -.2
+> 86278
+-------------+-----------------------------------------------------------
+> -----
+MNA_UDAB     |
+       _cons |   3.958335    1.08044     3.66   0.000     1.840712    6.0
+> 75957
+-------------+-----------------------------------------------------------
+> -----
+MRA_MSQD     |
+       _cons |  -1.751594   .4552145    -3.85   0.000    -2.643798   -.85
+> 93905
+-------------+-----------------------------------------------------------
+> -----
+NPA_MSQD     |
+       _cons |   7.188647   .7999582     8.99   0.000     5.620758    8.7
+> 56536
+-------------+-----------------------------------------------------------
+> -----
+NPS_CHUM     |
+       _cons |   8.350096   .7112133    11.74   0.000     6.956143    9.7
+> 44048
+-------------+-----------------------------------------------------------
+> -----
+NPS_DCRB     |
+       _cons |   10.67127   .7090613    15.05   0.000     9.281533      1
+> 2.061
+-------------+-----------------------------------------------------------
+> -----
+NPS_SOCK     |
+       _cons |   7.098475   .7354152     9.65   0.000     5.657088    8.5
+> 39863
+-------------+-----------------------------------------------------------
+> -----
+No_Partici~n |  (base alternative)
+-------------+-----------------------------------------------------------
+> -----
+SBA_CMCK     |
+       _cons |  -.5068581   .3629309    -1.40   0.163     -1.21819    .20
+> 44734
+-------------+-----------------------------------------------------------
+> -----
+SBA_JMCK     |
+       _cons |  -1.358161   1.004671    -1.35   0.176    -3.327279    .61
+> 09577
+-------------+-----------------------------------------------------------
+> -----
+SBA_MSQD     |
+       _cons |   .5904683   .3516915     1.68   0.093    -.0988343    1.2
+> 79771
+-------------+-----------------------------------------------------------
+> -----
+SBA_PBNT     |
+       _cons |  -1.011522   .9762691    -1.04   0.300    -2.924974    .90
+> 19304
+-------------+-----------------------------------------------------------
+> -----
+SBA_PSDN     |
+       _cons |   .2806551   .7553923     0.37   0.710    -1.199887    1.7
+> 61197
+-------------+-----------------------------------------------------------
+> -----
+SBA_UMCK     |
+       _cons |   1.441164   .9670398     1.49   0.136    -.4541991    3.3
+> 36527
+-------------+-----------------------------------------------------------
+> -----
+SDA_BTNA     |
+       _cons |   4.380012   .5378162     8.14   0.000     3.325911    5.4
+> 34112
+-------------+-----------------------------------------------------------
+> -----
+SFA_CHNK     |
+       _cons |   3.332093   .6779232     4.92   0.000     2.003388    4.6
+> 60798
+-------------+-----------------------------------------------------------
+> -----
+SFA_DCRB     |
+       _cons |  -.6404848   .8147788    -0.79   0.432    -2.237422    .95
+> 64523
+-------------+-----------------------------------------------------------
+> -----
+SFA_MSQD     |
+       _cons |   .4002073     .34805     1.15   0.250    -.2819581    1.0
+> 82373
+-------------+-----------------------------------------------------------
+> -----
+SFA_NANC     |
+       _cons |   1.760519   .6216108     2.83   0.005     .5421842    2.9
+> 78854
+-------------+-----------------------------------------------------------
+> -----
+SPS_CHUM     |
+       _cons |   5.139328   .8784779     5.85   0.000     3.417543    6.8
+> 61113
+-------------------------------------------------------------------------
+> -----
+
+. di "R2-McFadden = " 1 - (e(ll)/ll0)
+R2-McFadden = .27106757
+
+. estadd scalar r2 = 1 - (e(ll)/ll0): B3
+
+. lrtest B3 P1, force
+
+Likelihood-ratio test
+Assumption: P1 nested within B3
+
+ LR chi2(1) = 489.07
+Prob > chi2 = 0.0000
+
+. estadd scalar lr_p = r(p): B3
+
+. estat ic, all
+
+Information criteria
+
+---------------------------------------------------------
+       Model |          N   ll(null)  ll(model)        df
+-------------+-------------------------------------------
+          B3 |     29,455          .  -25885.39        52
+---------------------------------------------------------
+Note: BIC, AICc, and CAIC use N = number of cases. See 
+      [R] IC note.
+
+--------------------------------------------------------------------
+       Model |          AIC          BIC          AICc          CAIC
+-------------+------------------------------------------------------
+          B3 |     51874.79      52305.9      51874.97       52357.9
+--------------------------------------------------------------------
+Legend: AIC is Akaike's information criterion.
+        BIC is Bayesian information criterion.
+        AICc is corrected Akaike's information criterion.
+        CAIC is consistent Akaike's information criterion.
+
+. matrix S = r(S)
+
+. estadd scalar aic = S[1,5]: B3
+
+. estadd scalar bic = S[1,6]: B3
+
+. estadd scalar aicc = S[1,7]: B3
+
+. estadd scalar caic = S[1,8]: B3
+
+. preserve
+
+.         qui predict phat
+
+.         by fished_haul, sort: egen max_prob = max(phat) 
+
+.         drop if max_prob != phat
+(147,275 observations deleted)
+
+.         by fished_haul, sort: gen nvals = _n == 1 
+
+.         count if nvals
+  29,455
+
+.         dis _N
+29455
+
+.         gen selection_hat = 1
+
+.         egen count1 = total(fished)
+
+.         dis count1/_N*100 "%"
+62.512307%
+
+.         estadd scalar perc1 = count1/_N*100: B3
+
+. restore
+
+. 
+. eststo B4: cmclogit fished mean_avail mean_price diesel_price wind_max_
+> 220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog /
+> //
+>                 ddieselstate psdnclosured msqdclosured msqdweekend i.du
+> mmy_clust_prev_days, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel
+      data is vce(cluster fished_vessel_id); see cmclogit.
+note: msqdclosured omitted because of collinearity.
+note: variable d_missing has 25437 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 37 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 11192 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 16201 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 25620 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 21328 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable 1.dummy_clust_prev_days has 94 cases that are not
+      alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log pseudolikelihood = -28015.099  
+Iteration 1:  Log pseudolikelihood = -25770.943  
+Iteration 2:  Log pseudolikelihood = -25643.598  
+Iteration 3:  Log pseudolikelihood = -25643.057  
+Iteration 4:  Log pseudolikelihood = -25643.057  
+
+Conditional logit choice model                 Number of obs      =    17
+> 6,730
+Case ID variable: _caseid                      Number of cases    =      
+> 29455
+
+Alternatives variable: selection               Alts per case: min =      
+>     6
+                                                              avg =      
+>   6.0
+                                                              max =      
+>     6
+
+                                                  Wald chi2(12)   =    25
+> 25.80
+Log pseudolikelihood = -25643.057                 Prob > chi2     =     0
+> .0000
+
+                      (Std. err. adjusted for 46 clusters in fished_vesse
+> l_id)
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+      fished | Coefficient  std. err.      z    P>|z|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+selection    |
+  mean_avail |   -1.43789   .5040458    -2.85   0.004    -2.425801   -.44
+> 99782
+  mean_price |   .0099677   .0025815     3.86   0.000      .004908    .01
+> 50275
+diesel_price |   .2798784    .034768     8.05   0.000     .2117345    .34
+> 80224
+wind_max_2~h |  -.0541033   .0041243   -13.12   0.000    -.0621868   -.04
+> 60199
+   d_missing |  -1.038647   .3776908    -2.75   0.006    -1.778908   -.29
+> 83866
+dist_port_~o |  -.0171905   .0025787    -6.67   0.000    -.0222446   -.01
+> 21363
+ d_missing_d |  -1.834025   .2699473    -6.79   0.000    -2.363111   -1.3
+> 04938
+ dist_to_cog |  -.0080587   .0005507   -14.63   0.000     -.009138   -.00
+> 69793
+ddieselstate |   -.097421    .053086    -1.84   0.066    -.2014676    .00
+> 66257
+psdnclosured |  -1.350148   .6830479    -1.98   0.048    -2.688898   -.01
+> 13991
+msqdclosured |          0  (omitted)
+ msqdweekend |  -3.627278   .1632439   -22.22   0.000     -3.94723   -3.3
+> 07325
+1.dummy_cl~s |   2.337783   .1514306    15.44   0.000     2.040985    2.6
+> 34582
+-------------+-----------------------------------------------------------
+> -----
+BDA_DCRB     |
+       _cons |  -2.438098   .9505333    -2.56   0.010    -4.301109   -.57
+> 50871
+-------------+-----------------------------------------------------------
+> -----
+BDA_MSQD     |
+       _cons |  -.9312958   .7477515    -1.25   0.213    -2.396862    .53
+> 42703
+-------------+-----------------------------------------------------------
+> -----
+BGA_MSQD     |
+       _cons |   1.096703   .7671263     1.43   0.153    -.4068369    2.6
+> 00243
+-------------+-----------------------------------------------------------
+> -----
+CWA_DCRB     |
+       _cons |   1.269589   4.636246     0.27   0.784    -7.817287    10.
+> 35647
+-------------+-----------------------------------------------------------
+> -----
+ERA_MSQD     |
+       _cons |   1.343854    .636996     2.11   0.035      .095365    2.5
+> 92343
+-------------+-----------------------------------------------------------
+> -----
+LAA_BTNA     |
+       _cons |   -.652823   .5048474    -1.29   0.196    -1.642306    .33
+> 66597
+-------------+-----------------------------------------------------------
+> -----
+LAA_CMCK     |
+       _cons |  -2.664227    .247119   -10.78   0.000    -3.148571   -2.1
+> 79883
+-------------+-----------------------------------------------------------
+> -----
+LAA_JMCK     |
+       _cons |  -2.034689   .3214296    -6.33   0.000     -2.66468   -1.4
+> 04699
+-------------+-----------------------------------------------------------
+> -----
+LAA_MSQD     |
+       _cons |  -1.506791   .2464338    -6.11   0.000    -1.989792    -1.
+> 02379
+-------------+-----------------------------------------------------------
+> -----
+LAA_NANC     |
+       _cons |  -1.756088   .4409288    -3.98   0.000    -2.620293   -.89
+> 18833
+-------------+-----------------------------------------------------------
+> -----
+LAA_PBNT     |
+       _cons |  -.3104374   .4900224    -0.63   0.526    -1.270864     .6
+> 49989
+-------------+-----------------------------------------------------------
+> -----
+LAA_PSDN     |
+       _cons |  -2.147074   .3152194    -6.81   0.000    -2.764893   -1.5
+> 29255
+-------------+-----------------------------------------------------------
+> -----
+LAA_RHRG     |
+       _cons |  -3.408695   1.019515    -3.34   0.001    -5.406908   -1.4
+> 10482
+-------------+-----------------------------------------------------------
+> -----
+LAA_STNA     |
+       _cons |   .4647564   .9140464     0.51   0.611    -1.326742    2.2
+> 56254
+-------------+-----------------------------------------------------------
+> -----
+LAA_YTNA     |
+       _cons |  -1.543654   .4189956    -3.68   0.000     -2.36487   -.72
+> 24376
+-------------+-----------------------------------------------------------
+> -----
+MNA_ALBC     |
+       _cons |  -1.592716   .9547044    -1.67   0.095    -3.463902    .27
+> 84705
+-------------+-----------------------------------------------------------
+> -----
+MNA_CMCK     |
+       _cons |  -1.900756   .5111784    -3.72   0.000    -2.902647   -.89
+> 88652
+-------------+-----------------------------------------------------------
+> -----
+MNA_JMCK     |
+       _cons |  -1.483922   .4647277    -3.19   0.001    -2.394772    -.5
+> 73073
+-------------+-----------------------------------------------------------
+> -----
+MNA_LSKT     |
+       _cons |   1.206294   .9702603     1.24   0.214    -.6953816    3.1
+> 07969
+-------------+-----------------------------------------------------------
+> -----
+MNA_MSQD     |
+       _cons |  -1.710845    .215061    -7.96   0.000    -2.132357   -1.2
+> 89333
+-------------+-----------------------------------------------------------
+> -----
+MNA_NANC     |
+       _cons |  -2.017948   .2941872    -6.86   0.000    -2.594544   -1.4
+> 41351
+-------------+-----------------------------------------------------------
+> -----
+MNA_PSDN     |
+       _cons |   -2.78406    .323856    -8.60   0.000    -3.418806   -2.1
+> 49314
+-------------+-----------------------------------------------------------
+> -----
+MNA_UDAB     |
+       _cons |    .997228   .6998329     1.42   0.154    -.3744193    2.3
+> 68875
+-------------+-----------------------------------------------------------
+> -----
+MRA_MSQD     |
+       _cons |  -3.696806   .4300128    -8.60   0.000    -4.539616   -2.8
+> 53997
+-------------+-----------------------------------------------------------
+> -----
+NPA_MSQD     |
+       _cons |     5.7079   .7076883     8.07   0.000     4.320857    7.0
+> 94944
+-------------+-----------------------------------------------------------
+> -----
+NPS_CHUM     |
+       _cons |   6.848988    .689537     9.93   0.000     5.497521    8.2
+> 00456
+-------------+-----------------------------------------------------------
+> -----
+NPS_DCRB     |
+       _cons |   7.926275   .7048554    11.25   0.000     6.544783    9.3
+> 07766
+-------------+-----------------------------------------------------------
+> -----
+NPS_SOCK     |
+       _cons |   5.547132   .7227486     7.68   0.000      4.13057    6.9
+> 63693
+-------------+-----------------------------------------------------------
+> -----
+No_Partici~n |  (base alternative)
+-------------+-----------------------------------------------------------
+> -----
+SBA_CMCK     |
+       _cons |  -2.248282    .363734    -6.18   0.000    -2.961188   -1.5
+> 35377
+-------------+-----------------------------------------------------------
+> -----
+SBA_JMCK     |
+       _cons |  -2.175762   .9197763    -2.37   0.018     -3.97849   -.37
+> 30331
+-------------+-----------------------------------------------------------
+> -----
+SBA_MSQD     |
+       _cons |  -1.252186   .2935118    -4.27   0.000    -1.827459   -.67
+> 69135
+-------------+-----------------------------------------------------------
+> -----
+SBA_PBNT     |
+       _cons |  -2.039099   .9512259    -2.14   0.032    -3.903468   -.17
+> 47305
+-------------+-----------------------------------------------------------
+> -----
+SBA_PSDN     |
+       _cons |  -1.907648   .7389754    -2.58   0.010    -3.356013   -.45
+> 92823
+-------------+-----------------------------------------------------------
+> -----
+SBA_UMCK     |
+       _cons |  -.7652115    1.03627    -0.74   0.460    -2.796263     1.
+> 26584
+-------------+-----------------------------------------------------------
+> -----
+SDA_BTNA     |
+       _cons |   2.302209   .4978139     4.62   0.000     1.326512    3.2
+> 77906
+-------------+-----------------------------------------------------------
+> -----
+SFA_CHNK     |
+       _cons |   .7493072   .6155879     1.22   0.224     -.457223    1.9
+> 55837
+-------------+-----------------------------------------------------------
+> -----
+SFA_DCRB     |
+       _cons |  -2.393505   .7518143    -3.18   0.001    -3.867034   -.91
+> 99758
+-------------+-----------------------------------------------------------
+> -----
+SFA_MSQD     |
+       _cons |  -1.433514   .3366189    -4.26   0.000    -2.093275   -.77
+> 37529
+-------------+-----------------------------------------------------------
+> -----
+SFA_NANC     |
+       _cons |  -.1073276   .6360978    -0.17   0.866    -1.354056    1.1
+> 39401
+-------------+-----------------------------------------------------------
+> -----
+SPS_CHUM     |
+       _cons |   4.057923   .8986252     4.52   0.000      2.29665    5.8
+> 19196
+-------------------------------------------------------------------------
+> -----
+
+. di "R2-McFadden = " 1 - (e(ll)/ll0)
+R2-McFadden = .27789174
+
+. estadd scalar r2 = 1 - (e(ll)/ll0): B4
+
+. lrtest B4 P1, force
+
+Likelihood-ratio test
+Assumption: P1 nested within B4
+
+ LR chi2(1) = 973.74
+Prob > chi2 = 0.0000
+
+. estadd scalar lr_p = r(p): B4
+
+. estat ic, all
+
+Information criteria
+
+---------------------------------------------------------
+       Model |          N   ll(null)  ll(model)        df
+-------------+-------------------------------------------
+          B4 |     29,455          .  -25643.06        52
+---------------------------------------------------------
+Note: BIC, AICc, and CAIC use N = number of cases. See 
+      [R] IC note.
+
+--------------------------------------------------------------------
+       Model |          AIC          BIC          AICc          CAIC
+-------------+------------------------------------------------------
+          B4 |     51390.11     51821.23       51390.3      51873.23
+--------------------------------------------------------------------
+Legend: AIC is Akaike's information criterion.
+        BIC is Bayesian information criterion.
+        AICc is corrected Akaike's information criterion.
+        CAIC is consistent Akaike's information criterion.
+
+. matrix S = r(S)
+
+. estadd scalar aic = S[1,5]: B4
+
+. estadd scalar bic = S[1,6]: B4
+
+. estadd scalar aicc = S[1,7]: B4
+
+. estadd scalar caic = S[1,8]: B4
+
+. preserve
+
+.         qui predict phat
+
+.         by fished_haul, sort: egen max_prob = max(phat) 
+
+.         drop if max_prob != phat
+(147,275 observations deleted)
+
+.         by fished_haul, sort: gen nvals = _n == 1 
+
+.         count if nvals
+  29,455
+
+.         dis _N
+29455
+
+.         gen selection_hat = 1
+
+.         egen count1 = total(fished)
+
+.         dis count1/_N*100 "%"
+62.712612%
+
+.         estadd scalar perc1 = count1/_N*100: B4
+
+. restore
 
 . 
 . 
-end of do-file
+. eststo B5: cmclogit fished mean_avail mean_price diesel_price wind_max_
+> 220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog /
+> //
+>                 ddieselstate psdnclosured msqdclosured msqdweekend i.hi
+> st_selection, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel
+      data is vce(cluster fished_vessel_id); see cmclogit.
+note: msqdclosured omitted because of collinearity.
+note: variable d_missing has 25437 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 37 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 11192 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 16201 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 25620 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 21328 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable 1.hist_selection has 637 cases that are not
+      alternative-specific; there is no within-case variability.
 
-. save c:\users\fequezad\appdata\local\temp\emergency_close_stata_st.dta
-> , replace
+Iteration 0:  Log pseudolikelihood = -28287.117  
+Iteration 1:  Log pseudolikelihood = -26054.357  
+Iteration 2:  Log pseudolikelihood = -25923.524  
+Iteration 3:  Log pseudolikelihood = -25922.959  
+Iteration 4:  Log pseudolikelihood = -25922.959  
+
+Conditional logit choice model                 Number of obs      =    17
+> 6,730
+Case ID variable: _caseid                      Number of cases    =      
+> 29455
+
+Alternatives variable: selection               Alts per case: min =      
+>     6
+                                                              avg =      
+>   6.0
+                                                              max =      
+>     6
+
+                                                  Wald chi2(12)   =    22
+> 97.51
+Log pseudolikelihood = -25922.959                 Prob > chi2     =     0
+> .0000
+
+                      (Std. err. adjusted for 46 clusters in fished_vesse
+> l_id)
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+      fished | Coefficient  std. err.      z    P>|z|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+selection    |
+  mean_avail |  -1.734853   .4700245    -3.69   0.000    -2.656084   -.81
+> 36215
+  mean_price |  -.1227969   .1596589    -0.77   0.442    -.4357226    .19
+> 01289
+diesel_price |   .2722842   .0398711     6.83   0.000     .1941383      .
+> 35043
+wind_max_2~h |  -.0517534   .0045203   -11.45   0.000    -.0606131   -.04
+> 28938
+   d_missing |   -1.01669   .3607396    -2.82   0.005    -1.723726   -.30
+> 96531
+dist_port_~o |  -.0132755   .0020716    -6.41   0.000    -.0173357   -.00
+> 92153
+ d_missing_d |  -3.874879    .208526   -18.58   0.000    -4.283582   -3.4
+> 66175
+ dist_to_cog |  -.0082965     .00056   -14.82   0.000    -.0093941    -.0
+> 07199
+ddieselstate |  -.1033587   .0536873    -1.93   0.054    -.2085839    .00
+> 18664
+psdnclosured |  -1.479128   .6855374    -2.16   0.031    -2.822756   -.13
+> 54991
+msqdclosured |          0  (omitted)
+ msqdweekend |  -3.623175    .163805   -22.12   0.000    -3.944227   -3.3
+> 02123
+1.hist_sel~n |   .7424171   .0859609     8.64   0.000     .5739368    .91
+> 08973
+-------------+-----------------------------------------------------------
+> -----
+BDA_DCRB     |
+       _cons |   1.172606   1.969848     0.60   0.552    -2.688224    5.0
+> 33437
+-------------+-----------------------------------------------------------
+> -----
+BDA_MSQD     |
+       _cons |   1.387841   .7901981     1.76   0.079    -.1609191      2
+> .9366
+-------------+-----------------------------------------------------------
+> -----
+BGA_MSQD     |
+       _cons |   3.432615    .854243     4.02   0.000      1.75833    5.1
+> 06901
+-------------+-----------------------------------------------------------
+> -----
+CWA_DCRB     |
+       _cons |   6.699682    3.87575     1.73   0.084    -.8966482    14.
+> 29601
+-------------+-----------------------------------------------------------
+> -----
+ERA_MSQD     |
+       _cons |    3.75778   .7253966     5.18   0.000     2.336029    5.1
+> 79532
+-------------+-----------------------------------------------------------
+> -----
+LAA_BTNA     |
+       _cons |   1.613956   .7205023     2.24   0.025     .2017974    3.0
+> 26114
+-------------+-----------------------------------------------------------
+> -----
+LAA_CMCK     |
+       _cons |  -.5110535    .240744    -2.12   0.034     -.982903    -.0
+> 39204
+-------------+-----------------------------------------------------------
+> -----
+LAA_JMCK     |
+       _cons |   .0100632   .3064503     0.03   0.974    -.5905683    .61
+> 06946
+-------------+-----------------------------------------------------------
+> -----
+LAA_MSQD     |
+       _cons |   .1802388   .3703229     0.49   0.626    -.5455808    .90
+> 60584
+-------------+-----------------------------------------------------------
+> -----
+LAA_NANC     |
+       _cons |   .5831071    .408755     1.43   0.154     -.218038    1.3
+> 84252
+-------------+-----------------------------------------------------------
+> -----
+LAA_PBNT     |
+       _cons |    1.82533   .5215438     3.50   0.000      .803123    2.8
+> 47537
+-------------+-----------------------------------------------------------
+> -----
+LAA_PSDN     |
+       _cons |  -.0112625   .3333536    -0.03   0.973    -.6646236    .64
+> 20986
+-------------+-----------------------------------------------------------
+> -----
+LAA_RHRG     |
+       _cons |  -1.011988   .9662894    -1.05   0.295     -2.90588    .88
+> 19047
+-------------+-----------------------------------------------------------
+> -----
+LAA_STNA     |
+       _cons |   2.677838   .8716732     3.07   0.002       .96939    4.3
+> 86286
+-------------+-----------------------------------------------------------
+> -----
+LAA_YTNA     |
+       _cons |   .7040971   .5181861     1.36   0.174    -.3115289    1.7
+> 19723
+-------------+-----------------------------------------------------------
+> -----
+MNA_ALBC     |
+       _cons |   1.014875   1.122857     0.90   0.366    -1.185885    3.2
+> 15635
+-------------+-----------------------------------------------------------
+> -----
+MNA_CMCK     |
+       _cons |   .1720941   .6206836     0.28   0.782    -1.044423    1.3
+> 88612
+-------------+-----------------------------------------------------------
+> -----
+MNA_JMCK     |
+       _cons |   .7271818   .5614123     1.30   0.195    -.3731661     1.
+> 82753
+-------------+-----------------------------------------------------------
+> -----
+MNA_LSKT     |
+       _cons |   3.899553   1.246533     3.13   0.002     1.456394    6.3
+> 42712
+-------------+-----------------------------------------------------------
+> -----
+MNA_MSQD     |
+       _cons |   .2098543   .3210842     0.65   0.513    -.4194591    .83
+> 91678
+-------------+-----------------------------------------------------------
+> -----
+MNA_NANC     |
+       _cons |   .2108471    .392921     0.54   0.592    -.5592639    .98
+> 09581
+-------------+-----------------------------------------------------------
+> -----
+MNA_PSDN     |
+       _cons |  -.6178678    .373319    -1.66   0.098     -1.34956    .11
+> 38239
+-------------+-----------------------------------------------------------
+> -----
+MNA_UDAB     |
+       _cons |   4.430854   1.147893     3.86   0.000     2.181025    6.6
+> 80684
+-------------+-----------------------------------------------------------
+> -----
+MRA_MSQD     |
+       _cons |  -1.543295   .4987434    -3.09   0.002    -2.520814   -.56
+> 57758
+-------------+-----------------------------------------------------------
+> -----
+NPA_MSQD     |
+       _cons |   8.058959   .8142637     9.90   0.000     6.463032    9.6
+> 54887
+-------------+-----------------------------------------------------------
+> -----
+NPS_CHUM     |
+       _cons |   9.558757   .8221597    11.63   0.000     7.947353    11.
+> 17016
+-------------+-----------------------------------------------------------
+> -----
+NPS_DCRB     |
+       _cons |   13.47179   2.047608     6.58   0.000      9.45855    17.
+> 48503
+-------------+-----------------------------------------------------------
+> -----
+NPS_SOCK     |
+       _cons |   8.619707   1.087549     7.93   0.000     6.488151    10.
+> 75126
+-------------+-----------------------------------------------------------
+> -----
+No_Partici~n |  (base alternative)
+-------------+-----------------------------------------------------------
+> -----
+SBA_CMCK     |
+       _cons |  -.4481743   .3853042    -1.16   0.245    -1.203357    .30
+> 70081
+-------------+-----------------------------------------------------------
+> -----
+SBA_JMCK     |
+       _cons |  -1.271567    1.05417    -1.21   0.228    -3.337703    .79
+> 45682
+-------------+-----------------------------------------------------------
+> -----
+SBA_MSQD     |
+       _cons |   .2618766   .4004042     0.65   0.513    -.5229012    1.0
+> 46654
+-------------+-----------------------------------------------------------
+> -----
+SBA_PBNT     |
+       _cons |  -.4502575   1.226044    -0.37   0.713     -2.85326    1.9
+> 52745
+-------------+-----------------------------------------------------------
+> -----
+SBA_PSDN     |
+       _cons |   .4416632   .7874168     0.56   0.575    -1.101645    1.9
+> 84972
+-------------+-----------------------------------------------------------
+> -----
+SBA_UMCK     |
+       _cons |    1.81662   1.099751     1.65   0.099    -.3388519    3.9
+> 72091
+-------------+-----------------------------------------------------------
+> -----
+SDA_BTNA     |
+       _cons |   5.812994   1.584268     3.67   0.000     2.707885    8.9
+> 18103
+-------------+-----------------------------------------------------------
+> -----
+SFA_CHNK     |
+       _cons |   5.104472   2.418276     2.11   0.035     .3647374    9.8
+> 44207
+-------------+-----------------------------------------------------------
+> -----
+SFA_DCRB     |
+       _cons |   .8580897   2.068542     0.41   0.678    -3.196179    4.9
+> 12358
+-------------+-----------------------------------------------------------
+> -----
+SFA_MSQD     |
+       _cons |   .8252614   .4127665     2.00   0.046     .0162539    1.6
+> 34269
+-------------+-----------------------------------------------------------
+> -----
+SFA_NANC     |
+       _cons |   2.108148   .7862957     2.68   0.007     .5670363    3.6
+> 49259
+-------------+-----------------------------------------------------------
+> -----
+SPS_CHUM     |
+       _cons |   6.332565   .9862918     6.42   0.000     4.399469    8.2
+> 65662
+-------------------------------------------------------------------------
+> -----
+
+. di "R2-McFadden = " 1 - (e(ll)/ll0)
+R2-McFadden = .27000968
+
+. estadd scalar r2 = 1 - (e(ll)/ll0): B5
+
+. lrtest B5 P1, force
+
+Likelihood-ratio test
+Assumption: P1 nested within B5
+
+ LR chi2(1) = 413.94
+Prob > chi2 = 0.0000
+
+. estadd scalar lr_p = r(p): B5
+
+. estat ic, all
+
+Information criteria
+
+---------------------------------------------------------
+       Model |          N   ll(null)  ll(model)        df
+-------------+-------------------------------------------
+          B5 |     29,455          .  -25922.96        52
+---------------------------------------------------------
+Note: BIC, AICc, and CAIC use N = number of cases. See 
+      [R] IC note.
+
+--------------------------------------------------------------------
+       Model |          AIC          BIC          AICc          CAIC
+-------------+------------------------------------------------------
+          B5 |     51949.92     52381.03      51950.11      52433.03
+--------------------------------------------------------------------
+Legend: AIC is Akaike's information criterion.
+        BIC is Bayesian information criterion.
+        AICc is corrected Akaike's information criterion.
+        CAIC is consistent Akaike's information criterion.
+
+. matrix S = r(S)
+
+. estadd scalar aic = S[1,5]: B5
+
+. estadd scalar bic = S[1,6]: B5
+
+. estadd scalar aicc = S[1,7]: B5
+
+. estadd scalar caic = S[1,8]: B5
+
+. preserve
+
+.         qui predict phat
+
+.         by fished_haul, sort: egen max_prob = max(phat) 
+
+.         drop if max_prob != phat
+(147,275 observations deleted)
+
+.         by fished_haul, sort: gen nvals = _n == 1 
+
+.         count if nvals
+  29,455
+
+.         dis _N
+29455
+
+.         gen selection_hat = 1
+
+.         egen count1 = total(fished)
+
+.         dis count1/_N*100 "%"
+62.627737%
+
+.         estadd scalar perc1 = count1/_N*100: B5
+
+. restore
+
+. 
+. eststo B6: cmclogit fished mean_avail mean_price diesel_price wind_max_
+> 220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog /
+> //
+>                 ddieselstate psdnclosured msqdclosured msqdweekend dumm
+> y_prev_days_port, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel
+      data is vce(cluster fished_vessel_id); see cmclogit.
+note: msqdclosured omitted because of collinearity.
+note: variable d_missing has 25437 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 37 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 11192 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 16201 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 25620 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 21328 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable dummy_prev_days_port has 1357 cases that are not
+      alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log pseudolikelihood = -24793.571  
+Iteration 1:  Log pseudolikelihood = -22865.888  
+Iteration 2:  Log pseudolikelihood = -22758.905  
+Iteration 3:  Log pseudolikelihood =  -22758.41  
+Iteration 4:  Log pseudolikelihood =  -22758.41  
+
+Conditional logit choice model                 Number of obs      =    17
+> 6,730
+Case ID variable: _caseid                      Number of cases    =      
+> 29455
+
+Alternatives variable: selection               Alts per case: min =      
+>     6
+                                                              avg =      
+>   6.0
+                                                              max =      
+>     6
+
+                                                  Wald chi2(12)   =    51
+> 67.68
+Log pseudolikelihood =  -22758.41                 Prob > chi2     =     0
+> .0000
+
+                      (Std. err. adjusted for 46 clusters in fished_vesse
+> l_id)
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+      fished | Coefficient  std. err.      z    P>|z|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+selection    |
+  mean_avail |  -.2553653   .4946502    -0.52   0.606    -1.224862    .71
+> 41314
+  mean_price |  -.0451193    .117773    -0.38   0.702    -.2759501    .18
+> 57115
+diesel_price |   .3371514   .0422217     7.99   0.000     .2543984    .41
+> 99044
+wind_max_2~h |  -.0508664   .0039204   -12.97   0.000    -.0585503   -.04
+> 31825
+   d_missing |  -.7963925   .3610994    -2.21   0.027    -1.504134   -.08
+> 86506
+dist_port_~o |  -.0116521   .0020569    -5.66   0.000    -.0156834   -.00
+> 76207
+ d_missing_d |  -3.134693   .1760399   -17.81   0.000    -3.479725   -2.7
+> 89661
+ dist_to_cog |  -.0030338   .0004181    -7.26   0.000    -.0038533   -.00
+> 22144
+ddieselstate |   -.095785   .0424076    -2.26   0.024    -.1789024   -.01
+> 26675
+psdnclosured |  -1.237043   .6789143    -1.82   0.068    -2.567691    .09
+> 36044
+msqdclosured |          0  (omitted)
+ msqdweekend |  -3.640065   .1632575   -22.30   0.000    -3.960043   -3.3
+> 20086
+dummy_prev~t |   2.833771   .0794358    35.67   0.000      2.67808    2.9
+> 89462
+-------------+-----------------------------------------------------------
+> -----
+BDA_DCRB     |
+       _cons |  -3.133276   1.110142    -2.82   0.005    -5.309114   -.95
+> 74374
+-------------+-----------------------------------------------------------
+> -----
+BDA_MSQD     |
+       _cons |  -1.500392   .4887295    -3.07   0.002    -2.458284   -.54
+> 24998
+-------------+-----------------------------------------------------------
+> -----
+BGA_MSQD     |
+       _cons |  -.5103772   .6240127    -0.82   0.413     -1.73342    .71
+> 26653
+-------------+-----------------------------------------------------------
+> -----
+CWA_DCRB     |
+       _cons |   .7500865   1.597787     0.47   0.639    -2.381518    3.8
+> 81691
+-------------+-----------------------------------------------------------
+> -----
+ERA_MSQD     |
+       _cons |  -1.113627   .4354981    -2.56   0.011    -1.967188   -.26
+> 00664
+-------------+-----------------------------------------------------------
+> -----
+LAA_BTNA     |
+       _cons |  -2.698127   .6996053    -3.86   0.000    -4.069328   -1.3
+> 26926
+-------------+-----------------------------------------------------------
+> -----
+LAA_CMCK     |
+       _cons |  -3.946587   .2440754   -16.17   0.000    -4.424966   -3.4
+> 68208
+-------------+-----------------------------------------------------------
+> -----
+LAA_JMCK     |
+       _cons |  -3.633021   .3098474   -11.73   0.000    -4.240311   -3.0
+> 25732
+-------------+-----------------------------------------------------------
+> -----
+LAA_MSQD     |
+       _cons |  -2.660892   .3554803    -7.49   0.000    -3.357621   -1.9
+> 64164
+-------------+-----------------------------------------------------------
+> -----
+LAA_NANC     |
+       _cons |  -3.587762   .3926043    -9.14   0.000    -4.357252   -2.8
+> 18272
+-------------+-----------------------------------------------------------
+> -----
+LAA_PBNT     |
+       _cons |  -2.402104   .5294944    -4.54   0.000    -3.439894   -1.3
+> 64315
+-------------+-----------------------------------------------------------
+> -----
+LAA_PSDN     |
+       _cons |  -3.521067   .3440092   -10.24   0.000    -4.195312   -2.8
+> 46821
+-------------+-----------------------------------------------------------
+> -----
+LAA_RHRG     |
+       _cons |   -4.90907   1.025072    -4.79   0.000    -6.918174   -2.8
+> 99965
+-------------+-----------------------------------------------------------
+> -----
+LAA_STNA     |
+       _cons |  -1.487481   .9798394    -1.52   0.129    -3.407931    .43
+> 29693
+-------------+-----------------------------------------------------------
+> -----
+LAA_YTNA     |
+       _cons |  -3.404612   .5190676    -6.56   0.000    -4.421966   -2.3
+> 87259
+-------------+-----------------------------------------------------------
+> -----
+MNA_ALBC     |
+       _cons |  -2.916242   .9654974    -3.02   0.003    -4.808582   -1.0
+> 23902
+-------------+-----------------------------------------------------------
+> -----
+MNA_CMCK     |
+       _cons |  -3.592418   .5304325    -6.77   0.000    -4.632046   -2.5
+> 52789
+-------------+-----------------------------------------------------------
+> -----
+MNA_JMCK     |
+       _cons |  -3.123723   .4202979    -7.43   0.000    -3.947492   -2.2
+> 99954
+-------------+-----------------------------------------------------------
+> -----
+MNA_LSKT     |
+       _cons |  -.1149455   1.280229    -0.09   0.928    -2.624148    2.3
+> 94257
+-------------+-----------------------------------------------------------
+> -----
+MNA_MSQD     |
+       _cons |  -2.711556   .2860547    -9.48   0.000    -3.272213   -2.1
+> 50899
+-------------+-----------------------------------------------------------
+> -----
+MNA_NANC     |
+       _cons |  -3.590691   .3028549   -11.86   0.000    -4.184276   -2.9
+> 97106
+-------------+-----------------------------------------------------------
+> -----
+MNA_PSDN     |
+       _cons |  -4.257497   .2990609   -14.24   0.000    -4.843645   -3.6
+> 71348
+-------------+-----------------------------------------------------------
+> -----
+MNA_UDAB     |
+       _cons |   .2552962    1.00885     0.25   0.800    -1.722013    2.2
+> 32606
+-------------+-----------------------------------------------------------
+> -----
+MRA_MSQD     |
+       _cons |  -3.321935   .4304025    -7.72   0.000    -4.165508   -2.4
+> 78361
+-------------+-----------------------------------------------------------
+> -----
+NPA_MSQD     |
+       _cons |   .9436636   .5577727     1.69   0.091    -.1495508    2.0
+> 36878
+-------------+-----------------------------------------------------------
+> -----
+NPS_CHUM     |
+       _cons |   .4182265   .6202411     0.67   0.500    -.7974237    1.6
+> 33877
+-------------+-----------------------------------------------------------
+> -----
+NPS_DCRB     |
+       _cons |   3.126258   1.597683     1.96   0.050    -.0051429    6.2
+> 57658
+-------------+-----------------------------------------------------------
+> -----
+NPS_SOCK     |
+       _cons |  -.6575165   .7794209    -0.84   0.399    -2.185153    .87
+> 01204
+-------------+-----------------------------------------------------------
+> -----
+No_Partici~n |  (base alternative)
+-------------+-----------------------------------------------------------
+> -----
+SBA_CMCK     |
+       _cons |   -4.10657   .3821467   -10.75   0.000    -4.855563   -3.3
+> 57576
+-------------+-----------------------------------------------------------
+> -----
+SBA_JMCK     |
+       _cons |  -4.964693    1.06296    -4.67   0.000    -7.048056    -2.
+> 88133
+-------------+-----------------------------------------------------------
+> -----
+SBA_MSQD     |
+       _cons |  -2.361283    .328967    -7.18   0.000    -3.006047    -1.
+> 71652
+-------------+-----------------------------------------------------------
+> -----
+SBA_PBNT     |
+       _cons |  -4.703084   1.202741    -3.91   0.000    -7.060413   -2.3
+> 45754
+-------------+-----------------------------------------------------------
+> -----
+SBA_PSDN     |
+       _cons |  -3.580175   .6230749    -5.75   0.000    -4.801379    -2.
+> 35897
+-------------+-----------------------------------------------------------
+> -----
+SBA_UMCK     |
+       _cons |  -2.612899   1.109353    -2.36   0.019    -4.787191   -.43
+> 86074
+-------------+-----------------------------------------------------------
+> -----
+SDA_BTNA     |
+       _cons |  -.0976964   1.218119    -0.08   0.936    -2.485165    2.2
+> 89773
+-------------+-----------------------------------------------------------
+> -----
+SFA_CHNK     |
+       _cons |  -.4704003   1.589663    -0.30   0.767    -3.586083    2.6
+> 45282
+-------------+-----------------------------------------------------------
+> -----
+SFA_DCRB     |
+       _cons |  -3.392283   1.214957    -2.79   0.005    -5.773555   -1.0
+> 11011
+-------------+-----------------------------------------------------------
+> -----
+SFA_MSQD     |
+       _cons |  -2.591295   .3388662    -7.65   0.000    -3.255461    -1.
+> 92713
+-------------+-----------------------------------------------------------
+> -----
+SFA_NANC     |
+       _cons |  -2.246672   .5689096    -3.95   0.000    -3.361714   -1.1
+> 31629
+-------------+-----------------------------------------------------------
+> -----
+SPS_CHUM     |
+       _cons |  -1.656124   .8461738    -1.96   0.050    -3.314594    .00
+> 23466
+-------------------------------------------------------------------------
+> -----
+
+. di "R2-McFadden = " 1 - (e(ll)/ll0)
+R2-McFadden = .35912338
+
+. estadd scalar r2 = 1 - (e(ll)/ll0): B6
+
+. lrtest B6 P1, force
+
+Likelihood-ratio test
+Assumption: P1 nested within B6
+
+ LR chi2(1) = 6743.03
+Prob > chi2 =  0.0000
+
+. estadd scalar lr_p = r(p): B6
+
+. estat ic, all
+
+Information criteria
+
+---------------------------------------------------------
+       Model |          N   ll(null)  ll(model)        df
+-------------+-------------------------------------------
+          B6 |     29,455          .  -22758.41        52
+---------------------------------------------------------
+Note: BIC, AICc, and CAIC use N = number of cases. See 
+      [R] IC note.
+
+--------------------------------------------------------------------
+       Model |          AIC          BIC          AICc          CAIC
+-------------+------------------------------------------------------
+          B6 |     45620.82     46051.93      45621.01      46103.93
+--------------------------------------------------------------------
+Legend: AIC is Akaike's information criterion.
+        BIC is Bayesian information criterion.
+        AICc is corrected Akaike's information criterion.
+        CAIC is consistent Akaike's information criterion.
+
+. matrix S = r(S)
+
+. estadd scalar aic = S[1,5]: B6
+
+. estadd scalar bic = S[1,6]: B6
+
+. estadd scalar aicc = S[1,7]: B6
+
+. estadd scalar caic = S[1,8]: B6
+
+. preserve
+
+.         qui predict phat
+
+.         by fished_haul, sort: egen max_prob = max(phat) 
+
+.         drop if max_prob != phat
+(147,275 observations deleted)
+
+.         by fished_haul, sort: gen nvals = _n == 1 
+
+.         count if nvals
+  29,455
+
+.         dis _N
+29455
+
+.         gen selection_hat = 1
+
+.         egen count1 = total(fished)
+
+.         dis count1/_N*100 "%"
+63.130199%
+
+.         estadd scalar perc1 = count1/_N*100: B6
+
+. restore
+
+. 
+. eststo B7: cmclogit fished mean_avail mean_price diesel_price wind_max_
+> 220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog /
+> //
+>                 ddieselstate psdnclosured msqdclosured msqdweekend dumm
+> y_prev_days dummy_prev_year_days, base("No-Participation")
+note: data were cmset as panel data, and the default vcetype for panel
+      data is vce(cluster fished_vessel_id); see cmclogit.
+note: msqdclosured omitted because of collinearity.
+note: variable d_missing has 25437 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable dist_port_to_catch_area_zero has 37 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable d_missing_d has 11192 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable ddieselstate has 16201 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable psdnclosured has 25620 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable msqdweekend has 21328 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable dummy_prev_days has 2263 cases that are not
+      alternative-specific; there is no within-case variability.
+note: variable dummy_prev_year_days has 10467 cases that are not
+      alternative-specific; there is no within-case variability.
+
+Iteration 0:  Log pseudolikelihood =  -24223.43  
+Iteration 1:  Log pseudolikelihood = -22372.798  
+Iteration 2:  Log pseudolikelihood = -22265.648  
+Iteration 3:  Log pseudolikelihood = -22265.226  
+Iteration 4:  Log pseudolikelihood = -22265.226  
+
+Conditional logit choice model                 Number of obs      =    17
+> 6,730
+Case ID variable: _caseid                      Number of cases    =      
+> 29455
+
+Alternatives variable: selection               Alts per case: min =      
+>     6
+                                                              avg =      
+>   6.0
+                                                              max =      
+>     6
+
+                                                  Wald chi2(13)   =    67
+> 41.48
+Log pseudolikelihood = -22265.226                 Prob > chi2     =     0
+> .0000
+
+                      (Std. err. adjusted for 46 clusters in fished_vesse
+> l_id)
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+      fished | Coefficient  std. err.      z    P>|z|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+selection    |
+  mean_avail |  -1.225107   .4285974    -2.86   0.004    -2.065143   -.38
+> 50718
+  mean_price |  -.0459151   .0996358    -0.46   0.645    -.2411976    .14
+> 93674
+diesel_price |   .3490412   .0416647     8.38   0.000     .2673799    .43
+> 07024
+wind_max_2~h |  -.0496536   .0040394   -12.29   0.000    -.0575706   -.04
+> 17365
+   d_missing |  -.8388957   .3712139    -2.26   0.024    -1.566462   -.11
+> 13299
+dist_port_~o |  -.0105092   .0019241    -5.46   0.000    -.0142804    -.0
+> 06738
+ d_missing_d |  -2.055854   .1797014   -11.44   0.000    -2.408062   -1.7
+> 03645
+ dist_to_cog |  -.0032331   .0004408    -7.33   0.000    -.0040971    -.0
+> 02369
+ddieselstate |  -.0379199   .0408856    -0.93   0.354    -.1180542    .04
+> 22144
+psdnclosured |  -.9776276   .6761451    -1.45   0.148    -2.302848    .34
+> 75923
+msqdclosured |          0  (omitted)
+ msqdweekend |  -3.676708   .1641304   -22.40   0.000    -3.998397   -3.3
+> 55018
+~y_prev_days |   2.672512   .0897022    29.79   0.000     2.496698    2.8
+> 48325
+dummy~r_days |   .1741472   .0555691     3.13   0.002     .0652338    .28
+> 30606
+-------------+-----------------------------------------------------------
+> -----
+BDA_DCRB     |
+       _cons |  -2.702062    1.04439    -2.59   0.010    -4.749029   -.65
+> 50947
+-------------+-----------------------------------------------------------
+> -----
+BDA_MSQD     |
+       _cons |  -1.590631   .5173196    -3.07   0.002    -2.604559   -.57
+> 67032
+-------------+-----------------------------------------------------------
+> -----
+BGA_MSQD     |
+       _cons |  -.9438994   .6886208    -1.37   0.170    -2.293571    .40
+> 57726
+-------------+-----------------------------------------------------------
+> -----
+CWA_DCRB     |
+       _cons |   .2528853   1.607885     0.16   0.875    -2.898511    3.4
+> 04282
+-------------+-----------------------------------------------------------
+> -----
+ERA_MSQD     |
+       _cons |  -1.132137   .4633309    -2.44   0.015    -2.040249   -.22
+> 40253
+-------------+-----------------------------------------------------------
+> -----
+LAA_BTNA     |
+       _cons |   -1.41005   .5938057    -2.37   0.018    -2.573888   -.24
+> 62124
+-------------+-----------------------------------------------------------
+> -----
+LAA_CMCK     |
+       _cons |  -3.172292   .2426862   -13.07   0.000    -3.647948   -2.6
+> 96635
+-------------+-----------------------------------------------------------
+> -----
+LAA_JMCK     |
+       _cons |  -2.453161   .2335739   -10.50   0.000    -2.910957   -1.9
+> 95364
+-------------+-----------------------------------------------------------
+> -----
+LAA_MSQD     |
+       _cons |  -2.544744   .3043325    -8.36   0.000    -3.141225   -1.9
+> 48263
+-------------+-----------------------------------------------------------
+> -----
+LAA_NANC     |
+       _cons |  -2.536618   .3413909    -7.43   0.000    -3.205732   -1.8
+> 67505
+-------------+-----------------------------------------------------------
+> -----
+LAA_PBNT     |
+       _cons |  -1.323269   .4635492    -2.85   0.004    -2.231809   -.41
+> 47292
+-------------+-----------------------------------------------------------
+> -----
+LAA_PSDN     |
+       _cons |  -2.816687   .3084837    -9.13   0.000    -3.421304   -2.2
+> 12071
+-------------+-----------------------------------------------------------
+> -----
+LAA_RHRG     |
+       _cons |  -3.078544    .461237    -6.67   0.000    -3.982552   -2.1
+> 74536
+-------------+-----------------------------------------------------------
+> -----
+LAA_STNA     |
+       _cons |  -.5685953   .7851313    -0.72   0.469    -2.107424    .97
+> 02337
+-------------+-----------------------------------------------------------
+> -----
+LAA_YTNA     |
+       _cons |   -2.37389   .4453439    -5.33   0.000    -3.246748   -1.5
+> 01032
+-------------+-----------------------------------------------------------
+> -----
+MNA_ALBC     |
+       _cons |  -1.914999   .9367932    -2.04   0.041     -3.75108    -.0
+> 78918
+-------------+-----------------------------------------------------------
+> -----
+MNA_CMCK     |
+       _cons |  -2.374769   .4062401    -5.85   0.000    -3.170985   -1.5
+> 78553
+-------------+-----------------------------------------------------------
+> -----
+MNA_JMCK     |
+       _cons |  -2.264144   .3609052    -6.27   0.000    -2.971505   -1.5
+> 56782
+-------------+-----------------------------------------------------------
+> -----
+MNA_LSKT     |
+       _cons |   .4177275   .8458071     0.49   0.621    -1.240024    2.0
+> 75479
+-------------+-----------------------------------------------------------
+> -----
+MNA_MSQD     |
+       _cons |  -2.658262   .2644531   -10.05   0.000     -3.17658   -2.1
+> 39943
+-------------+-----------------------------------------------------------
+> -----
+MNA_NANC     |
+       _cons |   -2.77704   .2751787   -10.09   0.000     -3.31638     -2
+> .2377
+-------------+-----------------------------------------------------------
+> -----
+MNA_PSDN     |
+       _cons |   -3.54644   .2621578   -13.53   0.000    -4.060259    -3.
+> 03262
+-------------+-----------------------------------------------------------
+> -----
+MNA_UDAB     |
+       _cons |   .6103983   .7649798     0.80   0.425    -.8889345    2.1
+> 09731
+-------------+-----------------------------------------------------------
+> -----
+MRA_MSQD     |
+       _cons |  -3.351954   .4145082    -8.09   0.000    -4.164375   -2.5
+> 39533
+-------------+-----------------------------------------------------------
+> -----
+NPA_MSQD     |
+       _cons |   .8840192   .6363005     1.39   0.165    -.3631069    2.1
+> 31145
+-------------+-----------------------------------------------------------
+> -----
+NPS_CHUM     |
+       _cons |   1.048992   .6049716     1.73   0.083    -.1367307    2.2
+> 34714
+-------------+-----------------------------------------------------------
+> -----
+NPS_DCRB     |
+       _cons |   2.738236   1.397232     1.96   0.050    -.0002889     5.
+> 47676
+-------------+-----------------------------------------------------------
+> -----
+NPS_SOCK     |
+       _cons |  -.0387792   .7705558    -0.05   0.960    -1.549041    1.4
+> 71482
+-------------+-----------------------------------------------------------
+> -----
+No_Partici~n |  (base alternative)
+-------------+-----------------------------------------------------------
+> -----
+SBA_CMCK     |
+       _cons |  -2.519581   .2529392    -9.96   0.000    -3.015332   -2.0
+> 23829
+-------------+-----------------------------------------------------------
+> -----
+SBA_JMCK     |
+       _cons |  -3.045742   .8255472    -3.69   0.000    -4.663784   -1.4
+> 27699
+-------------+-----------------------------------------------------------
+> -----
+SBA_MSQD     |
+       _cons |  -2.339208    .295449    -7.92   0.000    -2.918278   -1.7
+> 60139
+-------------+-----------------------------------------------------------
+> -----
+SBA_PBNT     |
+       _cons |  -2.423325   .8274454    -2.93   0.003    -4.045088   -.80
+> 15617
+-------------+-----------------------------------------------------------
+> -----
+SBA_PSDN     |
+       _cons |  -2.260554    .440982    -5.13   0.000    -3.124862   -1.3
+> 96245
+-------------+-----------------------------------------------------------
+> -----
+SBA_UMCK     |
+       _cons |  -1.277599   .9495637    -1.35   0.178    -3.138709     .5
+> 83512
+-------------+-----------------------------------------------------------
+> -----
+SDA_BTNA     |
+       _cons |   .2284747   1.065797     0.21   0.830    -1.860449    2.3
+> 17399
+-------------+-----------------------------------------------------------
+> -----
+SFA_CHNK     |
+       _cons |   .5652204   1.368544     0.41   0.680    -2.117076    3.2
+> 47516
+-------------+-----------------------------------------------------------
+> -----
+SFA_DCRB     |
+       _cons |  -2.752279   1.064616    -2.59   0.010    -4.838888   -.66
+> 56697
+-------------+-----------------------------------------------------------
+> -----
+SFA_MSQD     |
+       _cons |  -2.592542   .3306549    -7.84   0.000    -3.240613    -1.
+> 94447
+-------------+-----------------------------------------------------------
+> -----
+SFA_NANC     |
+       _cons |  -1.170471   .4862092    -2.41   0.016    -2.123424   -.21
+> 75189
+-------------+-----------------------------------------------------------
+> -----
+SPS_CHUM     |
+       _cons |  -.9934171   .8249792    -1.20   0.229    -2.610347    .62
+> 35123
+-------------------------------------------------------------------------
+> -----
+
+. di "R2-McFadden = " 1 - (e(ll)/ll0)
+R2-McFadden = .37301143
+
+. estadd scalar r2 = 1 - (e(ll)/ll0): B7
+
+. lrtest B7 P1, force
+
+Likelihood-ratio test
+Assumption: P1 nested within B7
+
+ LR chi2(2) = 7729.40
+Prob > chi2 =  0.0000
+
+. estadd scalar lr_p = r(p): B7
+
+. estat ic, all
+
+Information criteria
+
+---------------------------------------------------------
+       Model |          N   ll(null)  ll(model)        df
+-------------+-------------------------------------------
+          B7 |     29,455          .  -22265.23        53
+---------------------------------------------------------
+Note: BIC, AICc, and CAIC use N = number of cases. See 
+      [R] IC note.
+
+--------------------------------------------------------------------
+       Model |          AIC          BIC          AICc          CAIC
+-------------+------------------------------------------------------
+          B7 |     44636.45     45075.85      44636.65      45128.85
+--------------------------------------------------------------------
+Legend: AIC is Akaike's information criterion.
+        BIC is Bayesian information criterion.
+        AICc is corrected Akaike's information criterion.
+        CAIC is consistent Akaike's information criterion.
+
+. matrix S = r(S)
+
+. estadd scalar aic = S[1,5]: B7
+
+. estadd scalar bic = S[1,6]: B7
+
+. estadd scalar aicc = S[1,7]: B7
+
+. estadd scalar caic = S[1,8]: B7
+
+. preserve
+
+.         qui predict phat
+
+.         by fished_haul, sort: egen max_prob = max(phat) 
+
+.         drop if max_prob != phat
+(147,275 observations deleted)
+
+.         by fished_haul, sort: gen nvals = _n == 1 
+
+.         count if nvals
+  29,455
+
+.         dis _N
+29455
+
+.         gen selection_hat = 1
+
+.         egen count1 = total(fished)
+
+.         dis count1/_N*100 "%"
+63.656425%
+
+.         estadd scalar perc1 = count1/_N*100: B7
+
+. restore
+
+. 
+. 
+. 
+. ********************************************************************
+. label variable mean_avail "Expected availability"
+
+. label variable mean_price "Expected price"
+
+. label variable diesel_price "Expected diesel price"
+
+. label variable wind_max_220_mh "Maximum wind (< 220km)"
+
+. label variable d_missing "Binary: Missing availability"
+
+. label variable d_missing_p "Binary: Missing price"
+
+. label variable dist_port_to_catch_area "Distance to catch area"
+
+. label variable dist_port_to_catch_area_zero "Distance to catch area"
+
+. label variable d_missing_d "Binary: Missing distance"
+
+. label variable lat_cg "Latitudinal Center of Gravity"
+
+. label variable unem_rate "State unemployment rate"
+
+. label variable dist_to_cog "Distance to Center of Gravity" 
+
+. ********************************************************************
+. label variable ddieselstate "Binary: Diesel price by state" 
+
+. label variable psdnclosured "Binary: PSDN Closure" 
+
+. label variable msqdclosured "Binary: MSQD Closure"
+
+. label variable msqdweekend  "Binary: MSQD Weekend"
+
+. ********************************************************************
+. label variable dummy_last_day "Alternative has been chosen last day"
+
+. label variable dummy_prev_days "Alternative has been chosen during the 
+> last 30 days"
+
+. label variable dummy_prev_days_port "Port has been chosen during the la
+> st 30 days"
+
+. label variable dummy_prev_year_days "Alternative has been chosen during
+>  the last 30 days (previous year)"
+
+. label variable dummy_clust_prev_days "Alternative has been chosen durin
+> g the last 30 days by any member of the fleet"
+
+. label variable hist_selection "Alternative has been historically chosen
+>  during the month (>20% revenue)"
+
+. ********************************************************************
+. 
+. esttab P1 B1 B2 B3 B4 B5 B6 B7 using "${tables}preliminary_regressions_
+> participation_state_dep_2023_11_08.rtf", starlevels(* 0.10 ** 0.05 *** 
+> 0.01) ///
+>                 label title("Table. Preliminary estimations.") /// 
+>                 stats(N r2 perc1 lr_p aic bic aicc caic, fmt(0 3) ///
+>                         labels("Observations" "McFadden R2" "Predicted 
+> choices (%)" "LR-test" "AIC" "BIC" "AICc" "CAIC" ))  ///
+>                 replace nodepvars b(%9.3f) not nomtitle nobaselevels se
+>   noconstant
 (file
-    c:\users\fequezad\appdata\local\temp\emergency_close_stata_st.dta
-    not found)
-file c:\users\fequezad\appdata\local\temp\emergency_close_stata_st.dta
-    saved
+    C:\GitHub\EconAnalysis\Participation\Results\Tables\preliminary_reg
+    > ressions_participation_state_dep_2023_11_08.rtf not found)
+(output written to C:\GitHub\EconAnalysis\Participation\Results\Tables\pr
+> eliminary_regressions_participation_state_dep_2023_11_08.rtf)
+
+. 
+. 
+. 
+. 
+. 
+end of do-file
+
+. exit, clear
