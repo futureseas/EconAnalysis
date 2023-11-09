@@ -28,7 +28,7 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 #   samps <- samps1 %>% 
 #     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
 #     rm(participation_data, samps1)
-#     saveRDS(samps, file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
+#     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
 # 
 # 
 #
@@ -36,7 +36,7 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
 #----------------------------------
 ## Run saved data
-samps <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\sample_choice_set_c4.rds")
+samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
 
 #----------------------------------
 ## Check if there is no similar alternatives within a treat
