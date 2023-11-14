@@ -54,29 +54,98 @@ qui cmclogit fished, base("No-Participation")
 scalar ll0 = e(ll)
 estimates store base
 
-cmclogit fished mean_avail mean_price d_missing wind_max_220_mh, base("No-Participation")
-estimates store P4
-lrtest P3 P4, force
+eststo P1: cmclogit fished mean_avail d_missing mean_price wind_max_220_mh dist_to_cog ///
+	dist_port_to_catch_area_zero d_missing_d diesel_price, base("No-Participation") 
+estimates store P1
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): P1
+lrtest P1 base, force
+estadd scalar lr_p = r(p): P1
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: P1
+estadd scalar bic = S[1,6]: P1
+estadd scalar aicc = S[1,7]: P1
+estadd scalar caic = S[1,8]: P1
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: P1
+restore
 
-cmclogit fished mean_avail mean_price d_missing wind_max_220_mh dist_to_cog, base("No-Participation")
-estimates store P5
-lrtest P4 P5, force
- 
-cmclogit fished mean_avail d_missing mean_price wind_max_220_mh dist_to_cog ///
-	dist_port_to_catch_area_zero d_missing_d, base("No-Participation")
-estimates store P6
-lrtest P5 P6, force
+eststo P2: cmclogit fished exp_revenue d_missing wind_max_220_mh dist_to_cog ///
+	dist_port_to_catch_area_zero d_missing_d diesel_price, base("No-Participation") 
+estimates store P2
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): P2
+lrtest P2 base, force
+estadd scalar lr_p = r(p): P2
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: P2
+estadd scalar bic = S[1,6]: P2
+estadd scalar aicc = S[1,7]: P2
+estadd scalar caic = S[1,8]: P2
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: P2
+restore
 
- 
+gen d_missing_all = d_missing_d
+replace d_missing_all = 1 if d_missing == 1
 
-/* 
 
-c.mean_avail#c.dcpue 
+eststo P3: cmclogit fished  mean_avail mean_price wind_max_220_mh dist_to_cog ///
+	dist_port_to_catch_area_zero d_missing_all diesel_price, base("No-Participation") 
+estimates store P3
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): P3
+lrtest P3 base, force
+estadd scalar lr_p = r(p): P3
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: P3
+estadd scalar bic = S[1,6]: P3
+estadd scalar aicc = S[1,7]: P3
+estadd scalar caic = S[1,8]: P3
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: P3
+restore
+
+esttab P1 P2 P3 using "G:\My Drive\Tables\Participation\preliminary_reg_base_2023_11_13.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Preliminary estimations.") /// 
+		stats(N r2 perc1 lr_p aic bic aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AIC" "BIC" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels se  noconstant
+
+
+/* ddieselstate psdnclosured msqdclosured msqdweekend
+exclude diesel
  */
- 
-
-
-
 
 
 *** Preferred model
