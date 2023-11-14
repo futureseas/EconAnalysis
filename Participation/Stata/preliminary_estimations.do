@@ -42,6 +42,9 @@ gen species = substr(selection,-4,.)
 replace species = "No-Participation" if species == "tion" 
 // encode species, gen(nspecies)
 
+** Create revenue variable
+gen exp_revenue = mean_price * mean_avail
+
 
 ******************************
 ** Estimate conditional logits (with alternative-specific constant)
@@ -51,7 +54,33 @@ qui cmclogit fished, base("No-Participation")
 scalar ll0 = e(ll)
 estimates store base
 
+cmclogit fished mean_avail mean_price d_missing wind_max_220_mh, base("No-Participation")
+estimates store P4
+lrtest P3 P4, force
+
+cmclogit fished mean_avail mean_price d_missing wind_max_220_mh dist_to_cog, base("No-Participation")
+estimates store P5
+lrtest P4 P5, force
+ 
+cmclogit fished mean_avail d_missing mean_price wind_max_220_mh dist_to_cog ///
+	dist_port_to_catch_area_zero d_missing_d, base("No-Participation")
+estimates store P6
+lrtest P5 P6, force
+
+ 
+
+/* 
+
+c.mean_avail#c.dcpue 
+ */
+ 
+
+
+
+
+
 *** Preferred model
+
 
 * Variables that do not converge: dcpue dparticipate
 * No relevant variables: waclosure waclosured
