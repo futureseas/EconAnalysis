@@ -326,6 +326,12 @@ samps <- samps %>%
     ifelse(set_date >= "2015-04-28", 1, 0)))))))))))))))) %>% 
     dplyr::mutate(PSDN.Closure.d = PSDN.Closure * dPSDN)
 
+samps <- samps %>%
+  dplyr::mutate(PSDN.Total.Closure = 
+    ifelse(set_date >= "2015-04-28", 1, 0)) %>% 
+  dplyr::mutate(PSDN.Total.Closure.d = PSDN.Total.Closure * dPSDN)
+
+
 
 #------------------------------------------------------------------
 ## Incorporate closure dummy for market squid and weekend indicator
@@ -389,19 +395,31 @@ samps <- samps %>%
   mutate(unem_rate = ifelse(selection == "No-Participation", 0, unem_rate))
   rm(unem)
 
+  
+#-----------------------------#
+# Include vessel lenght
+  
+lenght.vessel <- participation_data %>% 
+  dplyr::select(c(Vessel.length, VESSEL_NUM)) %>% 
+  rename(fished_VESSEL_NUM = VESSEL_NUM) %>%
+  unique() %>% drop_na()
+
+samps2 <- merge(samps, lenght.vessel, by = "fished_VESSEL_NUM", all.x = TRUE, all.y = FALSE)
+  
 
 #-------------------------#
 ## Format as mlogit.data ##
 #-------------------------#
 
 ## Subset database
-rdo <- samps %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NUM, set_date, set_month, set_year,
+rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NUM, set_date, set_month, set_year,
                                mean_price, mean_avail, diesel_price, dCPUE, dPrice30, dDieselState, dCPUE90,     
                                wind_max_220_mh, dummy_last_day, dummy_prev_days_port, dummy_prev_days, dummy_prev_year_days, dummy_clust_prev_days,
                                lat_cg, dist_to_cog, dist_port_to_catch_area, dist_port_to_catch_area_zero, 
-                               PSDN.Closure, WA.Closure, MSQD.Closure, Weekend, PSDN.Closure.d, WA.Closure.d, MSQD.Closure.d, MSQD.Weekend, 
-                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_cpue, d_missing_d)
-rm(samps)
+                               PSDN.Closure, PSDN.Total.Closure, WA.Closure, MSQD.Closure, Weekend,
+                               PSDN.Closure.d, PSDN.Total.Closure.d, WA.Closure.d, MSQD.Closure.d, MSQD.Weekend, 
+                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_cpue, d_missing_d, Vessel.length)
+                              rm(samps, samps2)
 
 #-----------------------------------------------------------------
 ## Drop choice occasions that received no choice (none of them...)

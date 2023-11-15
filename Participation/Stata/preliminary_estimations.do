@@ -7,6 +7,29 @@ global logs "${results}Logs\"
 global mwtp "${path}WTP estimation\"
 cd $path
 
+* Model set-up
+
+global dclosure = "all"
+
+if "$dclosure" == "1"  {
+	global closure = "if psdntotalclosure == 1"
+	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all msqdweekend"
+	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all msqdweekend" 
+	global case = " "
+} 
+else if "$dclosure" == "0" {
+	global closure = "if psdntotalclosure == 0"
+	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured msqdweekend"
+	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured msqdweekend" 
+	global case = " "
+}
+else if "$dclosure" == "all" {
+	global closure = " "
+	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured msqdweekend" 
+	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured msqdweekend" 
+	global case = " "
+}
+
 
 *    Preilimnary estimations (before contraction mapping)    *
 **************************************************************
@@ -45,6 +68,11 @@ replace species = "No-Participation" if species == "tion"
 ** Create revenue variable
 gen exp_revenue = mean_price * mean_avail
 
+** Create missing variable (dist and revenue together)
+gen d_missing_all = d_missing_d
+replace d_missing_all = 1 if d_missing == 1
+
+
 
 ******************************
 ** Estimate conditional logits (with alternative-specific constant)
@@ -54,119 +82,34 @@ qui cmclogit fished, base("No-Participation")
 scalar ll0 = e(ll)
 estimates store base
 
-eststo P1: cmclogit fished mean_avail d_missing mean_price wind_max_220_mh dist_to_cog ///
-	dist_port_to_catch_area_zero d_missing_d diesel_price, base("No-Participation") 
-estimates store P1
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): P1
-lrtest P1 base, force
-estadd scalar lr_p = r(p): P1
-estat ic, all
-matrix S = r(S)
-estadd scalar aic = S[1,5]: P1
-estadd scalar bic = S[1,6]: P1
-estadd scalar aicc = S[1,7]: P1
-estadd scalar caic = S[1,8]: P1
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: P1
-restore
+// matrix s2=e(b)
+// mat s = start[1, 1..5]
+// forvalues i = 6(1)45 {
+// 	display `i'
+// 	mat s = s, s2[1,`i']
+// 	mat s = s, start[1,`i']
+// }
 
-eststo P2: cmclogit fished exp_revenue d_missing wind_max_220_mh dist_to_cog ///
-	dist_port_to_catch_area_zero d_missing_d diesel_price, base("No-Participation") 
-estimates store P2
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): P2
-lrtest P2 base, force
-estadd scalar lr_p = r(p): P2
-estat ic, all
-matrix S = r(S)
-estadd scalar aic = S[1,5]: P2
-estadd scalar bic = S[1,6]: P2
-estadd scalar aicc = S[1,7]: P2
-estadd scalar caic = S[1,8]: P2
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: P2
-restore
-
-gen d_missing_all = d_missing_d
-replace d_missing_all = 1 if d_missing == 1
-
-
-eststo P3: cmclogit fished  mean_avail mean_price wind_max_220_mh dist_to_cog ///
-	dist_port_to_catch_area_zero d_missing_all diesel_price, base("No-Participation") 
-estimates store P3
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): P3
-lrtest P3 base, force
-estadd scalar lr_p = r(p): P3
-estat ic, all
-matrix S = r(S)
-estadd scalar aic = S[1,5]: P3
-estadd scalar bic = S[1,6]: P3
-estadd scalar aicc = S[1,7]: P3
-estadd scalar caic = S[1,8]: P3
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: P3
-restore
-
-esttab P1 P2 P3 using "G:\My Drive\Tables\Participation\preliminary_reg_base_2023_11_13.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
-		label title("Table. Preliminary estimations.") /// 
-		stats(N r2 perc1 lr_p aic bic aicc caic, fmt(0 3) ///
-			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AIC" "BIC" "AICc" "CAIC" ))  ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels se  noconstant
-
-
-/* ddieselstate psdnclosured msqdclosured msqdweekend
-exclude diesel
- */
 
 
 *** Preferred model
+qui cmclogit fished $vars $closure, base("No-Participation") noconstant
+matrix sA=e(b)
 
-
-* Variables that do not converge: dcpue dparticipate
-* No relevant variables: waclosure waclosured
-
-eststo P1: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend, base("No-Participation")
-estimates store P1
+* No relevant variables: waclosure waclosured ddieselstate msqdclosured
+eststo A0: cmclogit fished $vars $closure, ///
+	casevar($case) base("No-Participation") from(sA, skip)
+matrix sA=e(b)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): P1
-lrtest P1 base, force
-estadd scalar lr_p = r(p): P1
+estadd scalar r2 = 1 - (e(ll)/ll0): A0
+lrtest base A0, force
+estadd scalar lr_p = r(p): A0
 estat ic, all
 matrix S = r(S)
-estadd scalar aic = S[1,5]: P1
-estadd scalar bic = S[1,6]: P1
-estadd scalar aicc = S[1,7]: P1
-estadd scalar caic = S[1,8]: P1
+estadd scalar aic = S[1,5]: A0
+estadd scalar bic = S[1,6]: A0
+estadd scalar aicc = S[1,7]: A0
+estadd scalar caic = S[1,8]: A0
 preserve
 	qui predict phat
 	by fished_haul, sort: egen max_prob = max(phat) 
@@ -177,17 +120,129 @@ preserve
 	gen selection_hat = 1
 	egen count1 = total(fished)
 	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: P1
+	estadd scalar perc1 = count1/_N*100: A0
 restore
+
+
+	
 
 ***********************************************************
 *** Include state dependency (models to present on paper)
 
-eststo B1: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_last_day, base("No-Participation")
+eststo A1: cmclogit fished  $vars i.hist_selection $closure, ///
+	casevar($case) base("No-Participation") from(sA, skip)
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A1
+lrtest A0 A1, force
+estadd scalar lr_p = r(p): A1
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A1
+estadd scalar bic = S[1,6]: A1
+estadd scalar aicc = S[1,7]: A1
+estadd scalar caic = S[1,8]: A1
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A1
+restore
+
+eststo A2: cmclogit fished  $vars i.dummy_prev_days i.dummy_prev_year_days $closure, ///
+	casevar($case) base("No-Participation") from(sA, skip)
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A2
+lrtest A0 A1, force
+estadd scalar lr_p = r(p): A2
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A2
+estadd scalar bic = S[1,6]: A2
+estadd scalar aicc = S[1,7]: A2
+estadd scalar caic = S[1,8]: A2
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A2
+restore
+
+eststo A3: cmclogit fished  $vars i.dummy_last_day $closure, ///
+	casevar($case) base("No-Participation") from(sA, skip)
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A3
+lrtest A0 A1, force
+estadd scalar lr_p = r(p): A3
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A3
+estadd scalar bic = S[1,6]: A3
+estadd scalar aicc = S[1,7]: A3
+estadd scalar caic = S[1,8]: A3
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A3
+restore
+
+* Out: i.dummy_clust_prev_days i.dummy_prev_days_port
+
+
+*** Using SDM and price separately
+qui cmclogit fished $vars_sdm $closure, base("No-Participation") noconstant
+matrix sB=e(b)
+
+eststo B0: cmclogit fished  $vars_sdm $closure, ///
+	casevar($case) base("No-Participation") from(sB, skip) iter(19)
+matrix sB=e(b)
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): B0
+lrtest base B0, force
+estadd scalar lr_p = r(p): B0
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: B0
+estadd scalar bic = S[1,6]: B0
+estadd scalar aicc = S[1,7]: B0
+estadd scalar caic = S[1,8]: B0
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: B0
+restore
+
+
+eststo B1: cmclogit fished  $vars_sdm i.hist_selection $closure, ///
+	casevar($case) base("No-Participation") from(sB, skip)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B1
-lrtest B1 P1, force
+lrtest B0 B1, force
 estadd scalar lr_p = r(p): B1
 estat ic, all
 matrix S = r(S)
@@ -208,11 +263,11 @@ preserve
 	estadd scalar perc1 = count1/_N*100: B1
 restore
 
-eststo B2: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_days, base("No-Participation")
+eststo B2: cmclogit fished  $vars_sdm i.dummy_prev_days i.dummy_prev_year_days $closure, ///
+	casevar($case) base("No-Participation") from(sB, skip)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B2
-lrtest B2 P1, force
+lrtest B0 B2, force
 estadd scalar lr_p = r(p): B2
 estat ic, all
 matrix S = r(S)
@@ -233,11 +288,11 @@ preserve
 	estadd scalar perc1 = count1/_N*100: B2
 restore
 
-eststo B3: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_year_days, base("No-Participation")
+eststo B3: cmclogit fished  $vars_sdm i.dummy_last_day $closure, ///
+	casevar($case) base("No-Participation") from(sB, skip)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B3
-lrtest B3 P1, force
+lrtest B0 B3, force
 estadd scalar lr_p = r(p): B3
 estat ic, all
 matrix S = r(S)
@@ -258,114 +313,14 @@ preserve
 	estadd scalar perc1 = count1/_N*100: B3
 restore
 
-eststo B4: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_clust_prev_days, base("No-Participation")
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): B4
-lrtest B4 P1, force
-estadd scalar lr_p = r(p): B4
-estat ic, all
-matrix S = r(S)
-estadd scalar aic = S[1,5]: B4
-estadd scalar bic = S[1,6]: B4
-estadd scalar aicc = S[1,7]: B4
-estadd scalar caic = S[1,8]: B4
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: B4
-restore
-
-
-eststo B5: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend i.hist_selection, base("No-Participation")
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): B5
-lrtest B5 P1, force
-estadd scalar lr_p = r(p): B5
-estat ic, all
-matrix S = r(S)
-estadd scalar aic = S[1,5]: B5
-estadd scalar bic = S[1,6]: B5
-estadd scalar aicc = S[1,7]: B5
-estadd scalar caic = S[1,8]: B5
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: B5
-restore
-
-eststo B6: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_days_port, base("No-Participation")
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): B6
-lrtest B6 P1, force
-estadd scalar lr_p = r(p): B6
-estat ic, all
-matrix S = r(S)
-estadd scalar aic = S[1,5]: B6
-estadd scalar bic = S[1,6]: B6
-estadd scalar aicc = S[1,7]: B6
-estadd scalar caic = S[1,8]: B6
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: B6
-restore
-
-eststo B7: cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d dist_to_cog ///
-		ddieselstate psdnclosured msqdclosured msqdweekend i.dummy_prev_days i.dummy_prev_year_days, base("No-Participation")
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): B7
-lrtest B7 P1, force
-estadd scalar lr_p = r(p): B7
-estat ic, all
-matrix S = r(S)
-estadd scalar aic = S[1,5]: B7
-estadd scalar bic = S[1,6]: B7
-estadd scalar aicc = S[1,7]: B7
-estadd scalar caic = S[1,8]: B7
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: B7
-restore
-
-
 
 ********************************************************************
 label variable mean_avail "Expected availability"
+label variable exp_revenue "Expected revenue"
 label variable mean_price "Expected price"
 label variable diesel_price "Expected diesel price"
 label variable wind_max_220_mh "Maximum wind (< 220km)"
+label variable d_missing_all "Binary: Missing information"
 label variable d_missing "Binary: Missing availability"
 label variable d_missing_p "Binary: Missing price"
 label variable dist_port_to_catch_area "Distance to catch area"
@@ -388,11 +343,10 @@ label variable dummy_clust_prev_days "Alternative has been chosen during the las
 label variable hist_selection "Alternative has been historically chosen during the month (>20% revenue)"
 ********************************************************************
 
-esttab P1 B1 B2 B3 B4 B5 B6 B7 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep_2023_11_09.rtf", starlevels(* 0.10 ** 0.05 *** 0.01) ///
+
+esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-case.rtf", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
-		stats(N r2 perc1 lr_p aic bic aicc caic, fmt(0 3) ///
-			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AIC" "BIC" "AICc" "CAIC" ))  ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels se  noconstant
-
-
-
+		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels drop($case) se noconstant
