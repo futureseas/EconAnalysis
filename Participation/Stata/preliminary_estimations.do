@@ -19,14 +19,14 @@ if "$dclosure" == "1"  {
 } 
 else if "$dclosure" == "0" {
 	global closure = "if psdntotalclosure == 0"
-	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured msqdweekend"
-	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured msqdweekend" 
+	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend"
+	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend" 
 	global case = " "
 }
 else if "$dclosure" == "all" {
 	global closure = " "
-	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured msqdweekend" 
-	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured msqdweekend" 
+	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend" 
+	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend" 
 	global case = " "
 }
 
@@ -73,6 +73,9 @@ gen d_missing_all = d_missing_d
 replace d_missing_all = 1 if d_missing == 1
 
 
+gen psdnclosured2 = psdnclosured - psdntotalclosured
+
+
 
 ******************************
 ** Estimate conditional logits (with alternative-specific constant)
@@ -89,8 +92,6 @@ estimates store base
 // 	mat s = s, s2[1,`i']
 // 	mat s = s, start[1,`i']
 // }
-
-
 
 *** Preferred model
 qui cmclogit fished $vars $closure, base("No-Participation") noconstant
@@ -331,9 +332,11 @@ label variable unem_rate "State unemployment rate"
 label variable dist_to_cog "Distance to Center of Gravity" 
 ********************************************************************
 label variable ddieselstate "Binary: Diesel price by state" 
-label variable psdnclosured "Binary: PSDN Closure" 
+label variable psdnclosured "Binary: PSDN Closure x PSDN" 
+label variable psdnclosured2 "Binary: PSDN Seasonal Closure x PSDN chosen" 
+label variable psdntotalclosured "Binary: PSDN Total Closure x PSDN chosen" 
 label variable msqdclosured "Binary: MSQD Closure"
-label variable msqdweekend  "Binary: MSQD Weekend"
+label variable msqdweekend  "Binary: Weekend x MSQD chosen"
 ********************************************************************
 label variable dummy_last_day "Alternative has been chosen last day"
 label variable dummy_prev_days "Alternative has been chosen during the last 30 days"
@@ -344,7 +347,7 @@ label variable hist_selection "Alternative has been historically chosen during t
 ********************************************************************
 
 
-esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-case.rtf", ///
+esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-psdn_closure.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
 		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///
