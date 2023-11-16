@@ -12,8 +12,8 @@ cd $path
 ****************************
 **** Paticipation model ****
 ****************************
-global exp_vars "mean_avail mean_price diesel_price wind_max_220_mh d_missing dist_port_to_catch_area_zero d_missing_d ddieselstate psdnclosured msqdclosured msqdweekend"
-
+global exp_vars "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all"
+global case_vars "psdnclosure weekend"
 
 clear all
 cap log close
@@ -23,6 +23,8 @@ cap log close
 import delimited "Stata\rdo_Stata_c4.csv"
 gen id_obs = _n
 replace mean_price = mean_price / 1000
+gen const_r2 = 1
+
 /* gen delta1 = rnormal(0,0.1)
 by fished_vessel_id selection, sort: egen delta = mean(delta1)
 drop delta1
