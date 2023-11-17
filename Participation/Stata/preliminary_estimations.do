@@ -212,7 +212,7 @@ qui cmclogit fished $vars_sdm $closure, base("No-Participation") noconstant
 matrix sB=e(b)
 
 eststo B0: cmclogit fished  $vars_sdm $closure, ///
-	casevar($case) base("No-Participation") from(sB, skip) 
+	casevar($case) base("No-Participation") from(sB, skip) vce(bootstrap)
 matrix sB=e(b)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B0
@@ -236,6 +236,70 @@ preserve
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: B0
 restore
+
+eststo B2: cmclogit fished  $vars_sdm i.dummy_prev_days i.dummy_prev_year_days $closure, ///
+	casevar($case) base("No-Participation") from(sB, skip) vce(bootstrap)
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): B2
+lrtest B0 B2, force
+estadd scalar lr_p = r(p): B2
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: B2
+estadd scalar bic = S[1,6]: B2
+estadd scalar aicc = S[1,7]: B2
+estadd scalar caic = S[1,8]: B2
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: B2
+restore
+
+********************************************************************
+label variable mean_avail "Expected availability"
+label variable exp_revenue "Expected revenue"
+label variable mean_price "Expected price"
+label variable diesel_price "Expected diesel price"
+label variable wind_max_220_mh "Maximum wind (< 220km)"
+label variable d_missing_all "Binary: Missing information"
+label variable d_missing "Binary: Missing availability"
+label variable d_missing_p "Binary: Missing price"
+label variable dist_port_to_catch_area "Distance to catch area"
+label variable dist_port_to_catch_area_zero "Distance to catch area"
+label variable d_missing_d "Binary: Missing distance"
+label variable lat_cg "Latitudinal Center of Gravity"
+label variable unem_rate "State unemployment rate"
+label variable dist_to_cog "Distance to Center of Gravity" 
+********************************************************************
+label variable ddieselstate "Binary: Diesel price by state" 
+label variable psdnclosured "Binary: PSDN Closure x PSDN" 
+label variable psdnclosured2 "Binary: PSDN Seasonal Closure x PSDN chosen" 
+label variable psdntotalclosured "Binary: PSDN Total Closure x PSDN chosen" 
+label variable msqdclosured "Binary: MSQD Closure"
+label variable msqdweekend  "Binary: Weekend x MSQD chosen"
+********************************************************************
+label variable dummy_last_day "Alternative has been chosen last day"
+label variable dummy_prev_days "Alternative has been chosen during the last 30 days"
+label variable dummy_prev_days_port "Port has been chosen during the last 30 days"
+label variable dummy_prev_year_days "Alternative has been chosen during the last 30 days (previous year)"
+label variable dummy_clust_prev_days "Alternative has been chosen during the last 30 days by any member of the fleet"
+label variable hist_selection "Alternative has been historically chosen during the month (>20% revenue)"
+********************************************************************
+
+
+esttab B0 B2 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-IV_BS.rtf", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Preliminary estimations.") /// 
+		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels drop($case _cons) se noconstant
 
 
 eststo B1: cmclogit fished  $vars_sdm i.hist_selection $closure, ///
@@ -261,31 +325,6 @@ preserve
 	egen count1 = total(fished)
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: B1
-restore
-
-eststo B2: cmclogit fished  $vars_sdm i.dummy_prev_days i.dummy_prev_year_days $closure, ///
-	casevar($case) base("No-Participation") from(sB, skip)
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): B2
-lrtest B0 B2, force
-estadd scalar lr_p = r(p): B2
-estat ic, all
-matrix S = r(S)
-estadd scalar aic = S[1,5]: B2
-estadd scalar bic = S[1,6]: B2
-estadd scalar aicc = S[1,7]: B2
-estadd scalar caic = S[1,8]: B2
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: B2
 restore
 
 eststo B3: cmclogit fished  $vars_sdm i.dummy_last_day i.dummy_prev_year_days $closure, ///
