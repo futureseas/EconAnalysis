@@ -64,7 +64,9 @@ replace species = "No-Participation" if species == "tion"
 
 
 ** Instrument price
-reg mean_price mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend pricefishmealafi
+egen selectionf = group(selection), label
+reg mean_price i.selectionf mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend ///
+	diesel_price pricefishmealafi, noconstant
 predict res, residuals
 
 
