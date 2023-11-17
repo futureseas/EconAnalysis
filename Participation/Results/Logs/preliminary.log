@@ -955,3 +955,4 @@ Legend: AIC is Akaike's information criterion.
 . 
 end of do-file
 
+. exit, clear

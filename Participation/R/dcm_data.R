@@ -30,8 +30,7 @@ samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
     rm(samps1)
     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
 
-
-
+    
 #----------------------------------
 
 ## Run saved data

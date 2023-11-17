@@ -24,19 +24,19 @@ global dclosure = "all"
 if "$dclosure" == "1"  {
 	global closure = "if psdntotalclosure == 1"
 	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all msqdweekend"
-	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all msqdweekend res" 
+	global vars_sdm = "mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all msqdweekend res" 
 	global case = " "
 } 
 else if "$dclosure" == "0" {
 	global closure = "if psdntotalclosure == 0"
 	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend"
-	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend res" 
+	global vars_sdm = "mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend res" 
 	global case = " "
 }
 else if "$dclosure" == "all" {
 	global closure = " "
 	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend" 
-	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend res" 
+	global vars_sdm = "mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend res" 
 	global case = " " // at the end add: lunarill
 }
 
@@ -65,8 +65,8 @@ replace species = "No-Participation" if species == "tion"
 
 ** Instrument price
 egen selectionf = group(selection), label
-reg mean_price i.selectionf mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend ///
-	diesel_price pricefishmealafi, noconstant
+reg mean_price2 i.selectionf mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend ///
+	pricefishmealafi, noconstant
 predict res, residuals
 
 
