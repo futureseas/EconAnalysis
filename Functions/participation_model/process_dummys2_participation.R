@@ -276,19 +276,45 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       dPrice90_species <- 0
     }
     
+    price30v2 <- dat1 %>% ungroup %>%
+      dplyr::filter(set_date %within% temp_dat$days30_inter, selection == sel) 
+      mean_price2 <- mean(price30v2$Price_mtons, na.rm = TRUE)
+      dPrice30_species2 <- 0
+      dPrice90_species2 <- 0
+
+    ### If to restrictive, then use species
+    if (is.na(mean_price2)) {
+      price30v2 <- dat1 %>% ungroup %>%
+        dplyr::filter(set_date %within% temp_dat$days30_inter, Species_Dominant == species)
+        mean_price2 <- mean(price30v2$Price_mtons, na.rm = TRUE)
+        dPrice30_species2 <- 1
+        dPrice90_species2 <- 0
+    }
+    if (is.na(mean_price2)) {
+      price30v2 <- dat1 %>% ungroup %>%
+        dplyr::filter(set_date %within% temp_dat$days90_inter, Species_Dominant == species)
+        mean_price2 <- mean(price30v2$Price_mtons, na.rm = TRUE)
+        dPrice30_species2 <- 0
+        dPrice90_species2 <- 1
+    }
+
   } else {
     mean_avail <- 0
     mean_price <- 0
+    mean_price2 <- 0
     dCPUE <- 0
     dCPUE_90 <- 0
     dPrice30 <- 0
     dPrice30_species <- 0
     dPrice90_species <- 0
+    dPrice30_species2 <- 0
+    dPrice90_species2 <- 0
 }
   
   # Include new information in temp_dat
   temp_dat$mean_avail <- mean_avail
   temp_dat$mean_price <- mean_price
+  temp_dat$mean_price2 <- mean_price2
   temp_dat$dummy_prev_days <- dum30_val
   temp_dat$dummy_prev_days_port <- dum30port_val
   temp_dat$dummy_prev_year_days <- dum30y_val
@@ -299,7 +325,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$dPrice30 <- dPrice30
   temp_dat$dPrice30_s <- dPrice30_species
   temp_dat$dPrice90_s <- dPrice90_species
-  
+  temp_dat$dPrice30_s2 <- dPrice30_species2
+  temp_dat$dPrice90_s2 <- dPrice90_species2
   
   
   ###################
