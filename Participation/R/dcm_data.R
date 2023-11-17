@@ -30,7 +30,10 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 #     rm(samps1)
 #     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
 
+
+
 #----------------------------------
+
 ## Run saved data
 samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
 
@@ -153,6 +156,15 @@ samps <- merge(samps, multiday_data, by = "fished_haul", all.x = TRUE, all.y = F
 
 ### Check if n_obs_within_FTID == 1
 psych::describe(samps %>% dplyr::select(n_obs_within_FTID))
+
+
+
+#-------------------------------------------
+### Include lunar data
+
+samps <- samps %>% mutate(lunar.ill = lunar::lunar.illumination(as.Date(set_date), shift = 0))
+
+
 
 #--------------------------------------------------------------------------
 ### Incorporate wind data 
@@ -418,7 +430,7 @@ rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NU
                                lat_cg, dist_to_cog, dist_port_to_catch_area, dist_port_to_catch_area_zero, 
                                PSDN.Closure, PSDN.Total.Closure, WA.Closure, MSQD.Closure, Weekend,
                                PSDN.Closure.d, PSDN.Total.Closure.d, WA.Closure.d, MSQD.Closure.d, MSQD.Weekend, 
-                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_cpue, d_missing_d, Vessel.length)
+                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_cpue, d_missing_d, Vessel.length, lunar.ill)
                               rm(samps, samps2)
 
 #-----------------------------------------------------------------
@@ -426,9 +438,10 @@ rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NU
 
 rdo2 <- rdo %>%
   group_by(fished_haul) %>%
-  mutate(full = sum(fished)) %>%
+  mutate(full = sum(fished)) %>% 
+  ungroup() %>%
   filter(full!=0) %>%
-  dplyr::select(-c(full)) %>% ungroup()
+  dplyr::select(-c(full)) 
 rm(rdo)
 
 #--------------------------------------------------------
@@ -455,18 +468,9 @@ rdo_R <- data.table::setDT(rdo3)[fished_haul %chin% fished_haul_select$fished_ha
 rm(fished_haul_select, rdo3)
 
 
-#------------------------------------------------------
-## Save data to use in R
-
-saveRDS(rdo_R, file = "C:\\Data\\PacFIN data\\rdo_R_c4.rds")
-
-
 #----------------------------------------------------
 ## Stata data
 
-# Organize data for Stata estimation (drop_na()???)
-
-#rdo_R <- readRDS(file = "C:\\GitHub\\EconAnalysis\\Participation\\R\\rdo_R_c4.rds")
 rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_haul, -rdo_R$fished),]) %>%
   group_by(fished_VESSEL_NUM) %>%
   dplyr::mutate(fished_VESSEL_ID = cur_group_id()) %>%

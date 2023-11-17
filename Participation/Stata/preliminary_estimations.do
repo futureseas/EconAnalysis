@@ -7,8 +7,18 @@ global logs "${results}Logs\"
 global mwtp "${path}WTP estimation\"
 cd $path
 
-* Model set-up
+clear all
+cap log close
+	log using ${logs}preliminary, text replace
 
+** Import data
+import delimited "C:\Data\PacFIN data\rdo_Stata_c4.csv"
+replace mean_price = mean_price / 1000
+gen id_obs = _n
+gen const_r2 = 1
+
+
+* Model set-up
 global dclosure = "all"
 
 if "$dclosure" == "1"  {
@@ -27,58 +37,40 @@ else if "$dclosure" == "all" {
 	global closure = " "
 	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend" 
 	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend" 
-	global case = " "
+	global case = " " // at the end add: lunarill
 }
 
 
-*    Preilimnary estimations (before contraction mapping)    *
-**************************************************************
-
-clear all
-cap log close
-	log using ${logs}preliminary, text replace
-
-** Import data
-import delimited "C:\Data\PacFIN data\rdo_Stata_c4.csv"
-replace mean_price = mean_price / 1000
-gen id_obs = _n
-gen const_r2 = 1
-
-** Merge historical selection
+** Add addtional variables
 preserve
  import delimited "Stata\dbp_month_Stata_c4.csv", clear
  tempfile dbp_month
  save dbp_month, replace
 restore
-
 merge m:1 selection set_month using "dbp_month.dta"
 drop if _merge == 2
 replace hist_selection = 0 if _merge == 1
 drop _merge
-
-** Set choice model database
-cmset fished_vessel_id time selection
-sort id_obs
-// cmset fished_haul selection
-
+gen exp_revenue = mean_price * mean_avail
+gen exp_cost_cog = diesel_price * dist_to_cog 
+gen exp_cost_catch_area = diesel_price * dist_port_to_catch_area_zero
+gen d_missing_all = d_missing_d
+replace d_missing_all = 1 if d_missing == 1
+gen psdnclosured2 = psdnclosured - psdntotalclosured
+gen psdnclosure2 = psdnclosure - psdntotalclosure
 gen species = substr(selection,-4,.) 
 replace species = "No-Participation" if species == "tion" 
 // encode species, gen(nspecies)
-
-** Create revenue variable
-gen exp_revenue = mean_price * mean_avail
-
-** Create missing variable (dist and revenue together)
-gen d_missing_all = d_missing_d
-replace d_missing_all = 1 if d_missing == 1
-
-
-gen psdnclosured2 = psdnclosured - psdntotalclosured
 
 
 
 ******************************
 ** Estimate conditional logits (with alternative-specific constant)
+
+** Set choice model database
+// cmset fished_haul selection
+cmset fished_vessel_id time selection
+sort id_obs
 
 *** Only-constant model
 qui cmclogit fished, base("No-Participation") 
@@ -180,7 +172,7 @@ preserve
 	estadd scalar perc1 = count1/_N*100: A2
 restore
 
-eststo A3: cmclogit fished  $vars i.dummy_last_day $closure, ///
+eststo A3: cmclogit fished  $vars i.dummy_last_day i.dummy_prev_year_days $closure, ///
 	casevar($case) base("No-Participation") from(sA, skip)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): A3
@@ -205,6 +197,7 @@ preserve
 	estadd scalar perc1 = count1/_N*100: A3
 restore
 
+
 * Out: i.dummy_clust_prev_days i.dummy_prev_days_port
 
 
@@ -213,7 +206,7 @@ qui cmclogit fished $vars_sdm $closure, base("No-Participation") noconstant
 matrix sB=e(b)
 
 eststo B0: cmclogit fished  $vars_sdm $closure, ///
-	casevar($case) base("No-Participation") from(sB, skip) iter(19)
+	casevar($case) base("No-Participation") from(sB, skip) 
 matrix sB=e(b)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B0
@@ -289,7 +282,7 @@ preserve
 	estadd scalar perc1 = count1/_N*100: B2
 restore
 
-eststo B3: cmclogit fished  $vars_sdm i.dummy_last_day $closure, ///
+eststo B3: cmclogit fished  $vars_sdm i.dummy_last_day i.dummy_prev_year_days $closure, ///
 	casevar($case) base("No-Participation") from(sB, skip)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B3
@@ -313,6 +306,7 @@ preserve
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: B3
 restore
+
 
 
 ********************************************************************
@@ -347,9 +341,9 @@ label variable hist_selection "Alternative has been historically chosen during t
 ********************************************************************
 
 
-esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-psdn_closure.rtf", ///
+esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-expcost_lenght.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
 		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AICc" "CAIC" ))  ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels drop($case) se noconstant
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels drop($case _cons) se noconstant
