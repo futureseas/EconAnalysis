@@ -24,19 +24,19 @@ global dclosure = "all"
 if "$dclosure" == "1"  {
 	global closure = "if psdntotalclosure == 1"
 	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all msqdweekend"
-	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all msqdweekend" 
+	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all msqdweekend res" 
 	global case = " "
 } 
 else if "$dclosure" == "0" {
 	global closure = "if psdntotalclosure == 0"
 	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend"
-	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend" 
+	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend res" 
 	global case = " "
 }
 else if "$dclosure" == "all" {
 	global closure = " "
 	global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend" 
-	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend" 
+	global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend res" 
 	global case = " " // at the end add: lunarill
 }
 
@@ -63,6 +63,10 @@ replace species = "No-Participation" if species == "tion"
 // encode species, gen(nspecies)
 
 
+** Instrument price
+reg mean_price mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_all psdnclosured2 psdntotalclosured msqdweekend pricefishmealafi
+predict res, residuals
+
 
 ******************************
 ** Estimate conditional logits (with alternative-specific constant)
@@ -85,7 +89,7 @@ estimates store base
 // 	mat s = s, start[1,`i']
 // }
 
-*** Preferred model
+/* *** Preferred model
 qui cmclogit fished $vars $closure, base("No-Participation") noconstant
 matrix sA=e(b)
 
@@ -196,7 +200,7 @@ preserve
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: A3
 restore
-
+ */
 
 * Out: i.dummy_clust_prev_days i.dummy_prev_days_port
 
@@ -341,7 +345,7 @@ label variable hist_selection "Alternative has been historically chosen during t
 ********************************************************************
 
 
-esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-expcost_lenght.rtf", ///
+esttab B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-IV.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
 		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///

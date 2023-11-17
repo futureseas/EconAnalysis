@@ -165,6 +165,21 @@ psych::describe(samps %>% dplyr::select(n_obs_within_FTID))
 samps <- samps %>% mutate(lunar.ill = lunar::lunar.illumination(as.Date(set_date), shift = 0))
 
 
+#---------------------------------------------------------------------------------------
+### Include world's fish meal price as instrument
+Deflactor <- read.csv(file = "C:\\Data\\PacFIN data\\deflactor.csv")
+fish.meal <- read.csv(here::here("Data", "Instruments", "PFISHUSDM.csv"), header = TRUE, stringsAsFactors = FALSE)
+fish.meal$DATE <- as.Date(fish.meal$DATE, format = "%m/%d/%Y") 
+fish.meal$LANDING_YEAR  <- lubridate::year(fish.meal$DATE)
+fish.meal$LANDING_MONTH <- lubridate::month(fish.meal$DATE)
+fish.meal <- fish.meal %>% dplyr::select(-c('DATE')) %>% dplyr::rename(Price.Fishmeal = PFISHUSDM)
+samps <- samps %>% mutate(LANDING_MONTH = month(set_date), LANDING_YEAR = year(set_date)) %>%
+  merge(fish.meal, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE) %>%
+  merge(Deflactor, by = c('LANDING_YEAR', 'LANDING_MONTH'), all.x = TRUE, all.y = FALSE)
+samps$Price.Fishmeal.AFI <- samps$Price.Fishmeal*samps$defl
+rm(fish.meal)
+
+
 
 #--------------------------------------------------------------------------
 ### Incorporate wind data 
@@ -430,7 +445,7 @@ rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NU
                                lat_cg, dist_to_cog, dist_port_to_catch_area, dist_port_to_catch_area_zero, 
                                PSDN.Closure, PSDN.Total.Closure, WA.Closure, MSQD.Closure, Weekend,
                                PSDN.Closure.d, PSDN.Total.Closure.d, WA.Closure.d, MSQD.Closure.d, MSQD.Weekend, 
-                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_cpue, d_missing_d, Vessel.length, lunar.ill)
+                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_cpue, d_missing_d, Vessel.length, lunar.ill, Price.Fishmeal.AFI )
                               rm(samps, samps2)
 
 #-----------------------------------------------------------------
