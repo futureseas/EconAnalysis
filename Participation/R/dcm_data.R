@@ -17,18 +17,18 @@ library(lubridate)
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
-samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-                         min_year = 2013, max_year = 2017,
-                         min_year_prob = 2013, max_year_prob = 2017,
-                         min_year_est = 2012, max_year_est = 2019,
-                         ndays = 30, nhauls_sampled = 5,
-                         seed = 300, ncores = 4, rev_scale = 1000,
-                         sample_choices = TRUE)
-
-  samps <- samps1 %>%
-    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-    rm(samps1)
-    saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
+# samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+#                          min_year = 2013, max_year = 2017,
+#                          min_year_prob = 2013, max_year_prob = 2017,
+#                          min_year_est = 2012, max_year_est = 2019,
+#                          ndays = 30, nhauls_sampled = 5,
+#                          seed = 300, ncores = 4, rev_scale = 1000,
+#                          sample_choices = TRUE)
+# 
+#   samps <- samps1 %>%
+#     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+#     rm(samps1)
+#     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
 
     
 #----------------------------------
@@ -37,7 +37,7 @@ samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
 samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
 
 #----------------------------------
-## Check if there is no similar alternatives within a treat
+## Check if there is no similar alternatives within a trip
 test <- 
     samps %>% ungroup() %>% 
     group_by(fished_haul,selection) %>%
@@ -46,20 +46,23 @@ test <-
     rm(test)
 
 # #--------------------------------------------------------------------------
-# ## See how many times we have NA 
-# 
-# # 4,168 NAs for availability (2.8%)
-# # 29,330 Nas for dist to catch areas (19.9%)
-# 
+## See how many times we have NA
+
+# 4,168 NAs for availability (2.8%)
+# 29,330 Nas for dist to catch areas (19.9%)
+# 10,320 NAs for mean_price2 (7%)
+
 # samps0 <- samps %>%
 #   filter(selection != "No-Participation")
 # 
 # sum(is.na(samps0$mean_price))
+# sum(is.na(samps0$mean_price2))
 # sum(is.na(samps0$mean_avail))
 # sum(is.na(samps0$diesel_price))
 # sum(is.na(samps0$dist_port_to_catch_area))
 # 
 # sum(is.na(samps0$mean_price))/nrow(samps0)
+# sum(is.na(samps0$mean_price2))/nrow(samps0)
 # sum(is.na(samps0$mean_avail))/nrow(samps0)
 # sum(is.na(samps0$diesel_price))/nrow(samps0)
 # sum(is.na(samps0$dist_port_to_catch_area))/nrow(samps0)
@@ -68,9 +71,9 @@ test <-
 # 
 # ### All cases when we do not have availability, it was calculated using CPUE
 # psych::describe(samps0 %>% dplyr::filter(is.na(samps0$mean_avail)))
-# samps0 %>% dplyr::filter(is.na(samps0$mean_avail)) %>% 
+# samps0 %>% dplyr::filter(is.na(samps0$mean_avail)) %>%
 #   group_by(PACFIN_SPECIES_CODE) %>% summarize(total_obs = n()) %>%
-#   mutate(perc = total_obs*100/nrow(samps0 %>% 
+#   mutate(perc = total_obs*100/nrow(samps0 %>%
 #                                      dplyr::filter(
 #                                        is.na(samps0$mean_avail))))
 
@@ -81,17 +84,21 @@ test <-
 samps1 <- samps %>% 
   mutate(dDieselState   = ifelse((is.na(samps$diesel_price)), 0, dDieselState)) %>%
   mutate(dPrice30       = ifelse((is.na(samps$mean_price)), 0, dPrice30)) %>%
+  mutate(dPrice30_s     = ifelse((is.na(samps$dPrice30_s)), 0, dPrice30_s)) %>%
+  mutate(dPrice90_s     = ifelse((is.na(samps$dPrice90_s)), 0, dPrice90_s)) %>%
+  mutate(dPrice30_s2     = ifelse((is.na(samps$dPrice30_s2)), 0, dPrice30_s2)) %>%
+  mutate(dPrice90_s2     = ifelse((is.na(samps$dPrice90_s2)), 0, dPrice90_s2)) %>%
   mutate(d_missing_cpue = ifelse((is.na(samps$mean_avail)) & dCPUE90 == 1, 1, 0)) %>%
   mutate(dCPUE        = ifelse((is.na(samps$mean_avail)), 0, dCPUE)) %>%
   mutate(dCPUE90      = ifelse((is.na(samps$mean_avail)), 0, dCPUE90)) %>%
   mutate(d_missing    = ifelse((is.na(samps$mean_avail)), 1, 0)) %>%
   mutate(d_missing_p  = ifelse((is.na(samps$mean_price)), 1, 0)) %>%
+  mutate(d_missing_p2 = ifelse((is.na(samps$mean_price2)), 1, 0)) %>%
   mutate(d_missing_d  = ifelse((is.na(samps$dist_port_to_catch_area)), 1, 0)) %>%
   mutate(mean_avail   = ifelse((is.na(samps$mean_avail)), 0, mean_avail)) %>% 
   mutate(mean_price   = ifelse((is.na(samps$mean_price)), 0, mean_price)) %>%
-  mutate(dist_port_to_catch_area_zero  = ifelse((is.na(samps$dist_port_to_catch_area)), 0, dist_port_to_catch_area)) %>%
-    dplyr::select(-c('dPrice30_s', 'dPrice90_s')) 
-
+  mutate(mean_price2  = ifelse((is.na(samps$mean_price2)), 0, mean_price2)) %>%
+  mutate(dist_port_to_catch_area_zero  = ifelse((is.na(samps$dist_port_to_catch_area)), 0, dist_port_to_catch_area)) 
 
 # samps1 %>% dplyr::filter(samps1$d_missing_cpue == 1) %>% 
 #   group_by(PACFIN_SPECIES_CODE) %>% summarize(total_obs = n()) %>%
@@ -103,6 +110,8 @@ samps1 <- samps %>%
 # ### See how many times we need to use CPUE (30 and 90 days), average 30 days prices and State diesel prices
 # # 21.2% State diesel prices
 # # 0% Prices (30 days)
+# # 14% Prices 2 (30 days using species)
+# # 10.8% Prices 2 (90 days using species)
 # # 8.6% CPUE index (30 days)
 # # 0.4% CPUE index (90 days)
 
@@ -112,12 +121,26 @@ samps1 %>%
   mutate(total = sum(n())) %>%
   group_by(dDieselState) %>%
   summarize(n_obs = n(), perc = n()/mean(total))
-
+    
 samps1 %>%
   filter(selection != "No-Participation")  %>%
   filter(is.na(mean_price) == FALSE) %>%
   mutate(total = sum(n())) %>%
   group_by(dPrice30) %>%
+  summarize(n_obs = n(), perc = n()/mean(total))
+    
+samps1 %>%
+  filter(selection != "No-Participation")  %>%
+  filter(is.na(mean_price2) == FALSE) %>%
+  mutate(total = sum(n())) %>%
+  group_by(dPrice30_s2) %>%
+  summarize(n_obs = n(), perc = n()/mean(total))
+
+samps1 %>%
+  filter(selection != "No-Participation")  %>%
+  filter(is.na(mean_price2) == FALSE) %>%
+  mutate(total = sum(n())) %>%
+  group_by(dPrice90_s2) %>%
   summarize(n_obs = n(), perc = n()/mean(total))
 
 samps1 %>%
