@@ -17,18 +17,18 @@ library(lubridate)
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
-# samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-#                          min_year = 2013, max_year = 2017,
-#                          min_year_prob = 2013, max_year_prob = 2017,
-#                          min_year_est = 2012, max_year_est = 2019,
-#                          ndays = 30, nhauls_sampled = 5,
-#                          seed = 300, ncores = 4, rev_scale = 1000,
-#                          sample_choices = TRUE)
-# 
-#   samps <- samps1 %>%
-#     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-#     rm(samps1)
-#     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
+samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+                         min_year = 2013, max_year = 2017,
+                         min_year_prob = 2013, max_year_prob = 2017,
+                         min_year_est = 2012, max_year_est = 2019,
+                         ndays = 30, nhauls_sampled = 5,
+                         seed = 300, ncores = 4, rev_scale = 1000,
+                         sample_choices = TRUE)
+
+  samps <- samps1 %>%
+    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+    rm(samps1)
+    saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
 
 
 
@@ -440,12 +440,13 @@ samps2 <- merge(samps, lenght.vessel, by = "fished_VESSEL_NUM", all.x = TRUE, al
 
 ## Subset database
 rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NUM, set_date, set_month, set_year,
-                               mean_price, mean_avail, diesel_price, dCPUE, dPrice30, dDieselState, dCPUE90,     
+                               mean_price, mean_price2, mean_avail, diesel_price, dCPUE, dPrice30, dDieselState, dCPUE90,     
                                wind_max_220_mh, dummy_last_day, dummy_prev_days_port, dummy_prev_days, dummy_prev_year_days, dummy_clust_prev_days,
                                lat_cg, dist_to_cog, dist_port_to_catch_area, dist_port_to_catch_area_zero, 
                                PSDN.Closure, PSDN.Total.Closure, WA.Closure, MSQD.Closure, Weekend,
                                PSDN.Closure.d, PSDN.Total.Closure.d, WA.Closure.d, MSQD.Closure.d, MSQD.Weekend, 
-                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_cpue, d_missing_d, Vessel.length, lunar.ill, Price.Fishmeal.AFI )
+                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_cpue, d_missing_d, Vessel.length, 
+                               lunar.ill, Price.Fishmeal.AFI, dPrice30_s, dPrice90_s,dPrice30_s2, dPrice90_s2)
                               rm(samps, samps2)
 
 #-----------------------------------------------------------------
