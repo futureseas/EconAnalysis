@@ -95,7 +95,7 @@ cmset fished_vessel_id time selection
 sort id_obs
 
 *** Only-constant model
-nlogit fished $vars_sdm || part:  || port: || selection: , base("No-Participation") case(fished_haul) 
+nlogit fished $vars || part: unem_rate , || port: , || selection: , case(fished_haul) vce(cluster fished_vessel_num)
 
 
 <<< WORK FROM HERE >>>
