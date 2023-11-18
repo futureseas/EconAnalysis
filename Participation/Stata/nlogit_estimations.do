@@ -3,23 +3,15 @@ global results "${path}Results\"
 global figures "${results}Figures\"
 global tables "${results}Tables\"
 global contrmap "${path}Contraction mapping\"
-global logs "${results}Logs\"
 global mwtp "${path}WTP estimation\"
 cd $path
 
 clear all
-cap log close
-	log using ${logs}preliminary, text replace
 
 ** Import data
 import delimited "C:\Data\PacFIN data\rdo_Stata_c4.csv"
 replace mean_price = mean_price / 1000
-replace mean_price2 = mean_price2 / 1000
-replace pricefishmealafi = pricefishmealafi / 1000
-gen exp_cost_cog        = diesel_price * dist_to_cog 
-gen exp_cost_catch_area = diesel_price * dist_port_to_catch_area_zero
 gen id_obs = _n
-gen const_r2 = 1
 
 ** Add addtional variables
 preserve
@@ -32,31 +24,34 @@ drop if _merge == 2
 replace hist_selection = 0 if _merge == 1
 drop _merge
 gen psdnclosured2 = psdnclosured - psdntotalclosured
-gen psdnclosure2 = psdnclosure - psdntotalclosure
-gen species = substr(selection,-4,.) 
-replace species = "No-Participation" if species == "tion" 
 replace d_missing_p = d_missing_p2 if mean_price > 50
 replace mean_price = mean_price2 if mean_price > 50
 gen exp_revenue = mean_price * mean_avail
-gen exp_revenue2 = mean_price2 * mean_avail
-egen species_int = group(species), label
-// encode species, gen(nspecies)
 
-// ** Instrument price
-// egen selectionf = group(selection), label
-// reg  mean_price i.selectionf mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 				d_missing_cpue d_missing_p2 d_missing_d psdnclosured2 psdntotalclosured msqdweekend ///
-// 				pricefishmealafi diesel_price, noconstant
-// predict res, residual
+*** Create species, port and participation.
+gen spec = substr(selection,-4,.) 
+replace spec = " " if spec == "tion" 
+gen port_l = substr(selection,1,3) 
+replace port_l = " " if port_l == "No-" 
+gen part = (selection == "No-Participation")
+egen port = group(port_l), label
+
 
 ********************************************************************
 * Model set-up
+
 global closure = " "
 global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_cpue d_missing_p d_missing_d psdnclosured2 psdntotalclosured msqdweekend" 
 global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_cpue d_missing_p d_missing_d psdnclosured2 psdntotalclosured msqdweekend" 
 global case = "" // at the end add: lunarill
 global case_sdm = " "
 
+
+********************************************************************
+* Create nested logit structure
+
+nlogittree selection port part, choice(fished) case(fished_haul) generate(prob)
+nlogit fished mean_avail || part: , || port:,  || selection: , case(fished_haul) 
 
 
 ********************************************************************
@@ -93,6 +88,8 @@ label variable dummy_clust_prev_days "Alternative has been chosen during the las
 label variable hist_selection "Alternative has been historically chosen during the month (>20% revenue)"
 
 
+
+
 ******************************
 ** Estimate conditional logits (with alternative-specific constant)
 
@@ -114,7 +111,14 @@ estimates store base
 // 	mat s = s, start[1,`i']
 // }
 
+
+
+
 *** Using SDM and price separately
+
+
+
+
 cmclogit fished $vars_sdm $closure, base("No-Participation") noconstant
 matrix sB=e(b)
 

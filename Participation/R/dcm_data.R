@@ -467,7 +467,7 @@ rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NU
                                lat_cg, dist_to_cog, dist_port_to_catch_area, dist_port_to_catch_area_zero, 
                                PSDN.Closure, PSDN.Total.Closure, WA.Closure, MSQD.Closure, Weekend,
                                PSDN.Closure.d, PSDN.Total.Closure.d, WA.Closure.d, MSQD.Closure.d, MSQD.Weekend, 
-                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_cpue, d_missing_d, Vessel.length, 
+                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_p2, d_missing_cpue, d_missing_d, Vessel.length, 
                                lunar.ill, Price.Fishmeal.AFI, dPrice30_s, dPrice90_s,dPrice30_s2, dPrice90_s2)
                               rm(samps, samps2)
 
