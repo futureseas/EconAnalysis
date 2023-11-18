@@ -51,7 +51,6 @@ global case_sdm = " "
 * Create nested logit structure
 
 nlogittree selection port part, choice(fished) case(fished_haul) generate(prob)
-nlogit fished mean_avail || part: , || port:,  || selection: , case(fished_haul) 
 
 
 ********************************************************************
@@ -99,6 +98,10 @@ cmset fished_vessel_id time selection
 sort id_obs
 
 *** Only-constant model
+nlogit fished mean_avail || part: , || port:,  || selection: , case(fished_haul) 
+
+<<< WORK FROM HERE >>>
+
 qui cmclogit fished, base("No-Participation") 
 scalar ll0 = e(ll)
 estimates store base
@@ -115,9 +118,6 @@ estimates store base
 
 
 *** Using SDM and price separately
-
-
-
 
 cmclogit fished $vars_sdm $closure, base("No-Participation") noconstant
 matrix sB=e(b)
