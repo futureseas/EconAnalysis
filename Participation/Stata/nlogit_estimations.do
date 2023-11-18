@@ -58,15 +58,12 @@ nlogittree selection port part, choice(fished) case(fished_haul) generate(prob)
 
 label variable mean_avail "Expected availability"
 label variable exp_revenue "Expected revenue"
-label variable exp_revenue2 "Expected revenue (just MA)"
 label variable mean_price "Expected price"
-label variable mean_price2 "Expected price (just MA)"
 label variable diesel_price "Expected diesel price"
 label variable wind_max_220_mh "Maximum wind (< 220km)"
 label variable d_missing "Binary: Missing availability"
 label variable d_missing_cpue "Binary: Missing availability (CPUE)"
 label variable d_missing_p "Binary: Missing price"
-label variable d_missing_p2 "Binary: Missing price"
 label variable dist_port_to_catch_area "Distance to catch area"
 label variable dist_port_to_catch_area_zero "Distance to catch area"
 label variable d_missing_d "Binary: Missing distance"
@@ -98,7 +95,8 @@ cmset fished_vessel_id time selection
 sort id_obs
 
 *** Only-constant model
-nlogit fished mean_avail || part: , || port:,  || selection: , case(fished_haul) 
+nlogit fished $vars_sdm || part:  || port: || selection: , base("No-Participation") case(fished_haul) 
+
 
 <<< WORK FROM HERE >>>
 
