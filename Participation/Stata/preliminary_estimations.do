@@ -1,3 +1,13 @@
+
+***************************************
+**** Should I stay or should I go? ****
+***************************************
+
+** Work to do: 
+* - Compute mean_catch for sardine, anchovy, squid, mackerrrel and herring. Constant and sdm explain catch.
+* - Add predicted choices without "No-participation"
+
+
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -16,7 +26,7 @@ import delimited "C:\Data\PacFIN data\rdo_Stata_c4.csv"
 replace mean_price = mean_price / 1000
 replace mean_price2 = mean_price2 / 1000
 replace pricefishmealafi = pricefishmealafi / 1000
-gen exp_cost_cog        = diesel_price * dist_to_cog 
+gen exp_cost_cog = diesel_price * dist_to_cog 
 gen exp_cost_catch_area = diesel_price * dist_port_to_catch_area_zero
 gen id_obs = _n
 gen const_r2 = 1
@@ -42,19 +52,32 @@ gen exp_revenue2 = mean_price2 * mean_avail
 egen species_int = group(species), label
 // encode species, gen(nspecies)
 
+/* 
+** Add dummy if forage species (maybe interaction with price)
+tab species, sum(mean_price2)
+// "STNA" "LSKT" "RHRG" "UDAB" "JMCK" "PBNT" "PSDN" "NANC" "CMCK" "SOCK" "MSQD" "BTNA" "UMCK" "YTNA" "CHUM" "ALBC" "CHNK" "DCRB"
+gen high_value_species = (species == "ALBC" | species == "DCRB" | species == "CHNK")
+gen forage_species = (species == "RHRG" | species == "JMCK" | species == "PSDN" | ///
+		species == "NANC" | species == "CMCK" | species == "MSQD" | species == "UMCK")
+gen no_net_species = (species == "ALBC" | species == "DCRB")
+ */
+
+
 // ** Instrument price
 // egen selectionf = group(selection), label
+// cmset fished_vessel_id time selection
+
 // reg  mean_price i.selectionf mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 				d_missing_cpue d_missing_p2 d_missing_d psdnclosured2 psdntotalclosured msqdweekend ///
-// 				pricefishmealafi diesel_price, noconstant
+// 				d_missing_cpue d_missing_p d_missing_d psdnclosured2 psdntotalclosured msqdweekend ///
+// 				diesel_price, noconstant
 // predict res, residual
 
 ********************************************************************
 * Model set-up
 global closure = " "
-global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_cpue d_missing_p d_missing_d psdnclosured2 psdntotalclosured msqdweekend" 
 global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_cpue d_missing_p d_missing_d psdnclosured2 psdntotalclosured msqdweekend" 
-global case = "" // at the end add: lunarill
+global vars =               "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_cpue d_missing_p d_missing_d psdnclosured2 psdntotalclosured msqdweekend" 
+global case = " " // at the end add: lunarill
 global case_sdm = " "
 
 
@@ -169,7 +192,7 @@ preserve
 	estadd scalar perc1 = count1/_N*100: B2
 restore
 
-// esttab B0 B2 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-IV_dist.rtf", ///
+// esttab B0 B2 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-IV_diesel.rtf", ///
 // 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 // 		label title("Table. Preliminary estimations.") /// 
 // 		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///
@@ -338,7 +361,7 @@ restore
 
 * Out: i.dummy_clust_prev_days i.dummy_prev_days_port
 
-esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}.rtf", ///
+esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-int_avail.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
 		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///
