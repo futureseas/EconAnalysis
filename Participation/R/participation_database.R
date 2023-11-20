@@ -157,6 +157,12 @@ Tickets_chr <- merge(Tickets, Vessel.chr.lenght, by = c("VESSEL_NUM"), all.x = T
 Tickets_chr <- merge(Tickets_chr, Vessel.chr.weight, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 Tickets_chr <- merge(Tickets_chr, Vessel.chr.horsepower, by = c("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 
+
+Tickets_catch <- Tickets_chr %>% 
+  mutate(max_days_sea = ifelse(is.na(max_days_sea), 1, max_days_sea))
+saveRDS(Tickets_catch, "C:/Data/PacFIN data/Tickets_filtered_catch.rds")
+
+
 #---------------------------------------------------------------------
 ## Calculate CPUE, standardize within species and transform to tanh()
 sigmoid = function(x) {
