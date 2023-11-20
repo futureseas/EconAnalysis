@@ -8,6 +8,14 @@ cd $path
 
 clear all
 
+*************************************************************************************************************
+*** Work to do: 
+*
+* - Delete trips with low k
+*
+*************************************************************************************************************
+
+
 ** Import data
 import delimited "C:\Data\PacFIN data\rdo_Stata_c4.csv"
 replace mean_price = mean_price / 1000
@@ -95,7 +103,7 @@ cmset fished_vessel_id time selection
 sort id_obs
 
 *** Only-constant model
-nlogit fished $vars || part: unem_rate , || port: , || selection: , case(fished_haul) vce(cluster fished_vessel_num)
+nlogit fished exp_revenue wind_max_220_mh dist_to_cog || part: unem_rate , || port: , || selection: , case(fished_haul) vce(cluster fished_vessel_num)
 
 
 <<< WORK FROM HERE >>>
