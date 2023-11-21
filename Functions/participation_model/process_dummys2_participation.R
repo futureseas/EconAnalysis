@@ -12,10 +12,12 @@
 #' @param SDM.CMCK 
 #' @param CPUE.index
 #' @param model_price1 estimated model for prices
+#' @param model_catch1 estimated model for catches
 #' @param fuel.prices1 fuel data by port
 #' @param fuel.prices.state1 fuel data by port
 #' @param min_year_est1 minimum year used in estimation
 #' @param species.list.number1
+#' @param species.list.number.sdm1
 #' @export
 
 process_dummys2 <- function(xx, td1 = td, dat1 = dat, 
@@ -27,10 +29,12 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
                             SDM.CMCK = cmck.sdm,
                             CPUE.index = CPUE_index,
                             model_price1 = mod_estimate,
+                            model_catch1 = mod_estimate_sdm,
                             fuel.prices1 = fuel.prices,
                             fuel.prices.state1 = fuel.prices.state,
                             min_year_est1 = min_year_est,
-                            species.list.number1 = species.list.number){
+                            species.list.number1 = species.list.number,
+                            species.list.number.sdm1 = species.list.number.sdm){
 
   # ### Delete
   # xx <- 150  # 6
@@ -44,10 +48,12 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   # SDM.CMCK <- cmck.sdm
   # CPUE.index <- CPUE_index
   # model_price1 <- mod_estimate
+  # model_catch1 = mod_estimate_sdm
   # fuel.prices1 <- fuel.prices
   # fuel.prices.state1 <- fuel.prices.state
   # min_year_est1 = min_year_est
   # species.list.number1 = species.list.number
+  # species.list.number.sdm1 = species.list.number.sdm
   # ###
 
   temp_dat <- td1[xx, ]
