@@ -28,33 +28,101 @@ sampled_rums <- function(data_in, cluster = 4,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale, sample_choices = TRUE) {
 
-  # ###############
-  # # Delete
-  # 
-  # gc()
-  # library(doParallel)
-  # library(tidyr)
-  # library(plm)
-  # library(tidyverse)
-  # library(lubridate)
-  # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-  # cluster <- 4
-  # min_year_prob <- 2013
-  # max_year_prob <- 2017
-  # min_year_est <- 2012
-  # max_year_est <- 2019
-  # min_year <- 2013
-  # max_year <- 2017
-  # ndays <- 30
-  # nhauls_sampled <- 5
-  # seed <- 300
-  # ncores <- 4
-  # rev_scale <- 1000
-  # sample_choices <- TRUE
-  # ################
+  ###############
+  # Delete
+
+  gc()
+  library(doParallel)
+  library(tidyr)
+  library(plm)
+  library(tidyverse)
+  library(lubridate)
+  data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+  cluster <- 4
+  min_year_prob <- 2013
+  max_year_prob <- 2017
+  min_year_est <- 2012
+  max_year_est <- 2019
+  min_year <- 2013
+  max_year <- 2017
+  ndays <- 30
+  nhauls_sampled <- 5
+  seed <- 300
+  ncores <- 4
+  rev_scale <- 1000
+  sample_choices <- TRUE
+  ################
 
   dat <- data_in 
   
+  
+  
+  #-------------
+  ## Catch models
+  
+  ## Load SDMs 
+  psdn.sdm <- readRDS(file = 'Participation/SDMs/sdm_psdn.rds')
+  msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd.rds')
+  nanc.sdm <- readRDS(file = 'Participation/SDMs/sdm_nanc.rds')
+  phrg.sdm <- readRDS(file = 'Participation/SDMs/sdm_phrg.rds')
+  jmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_jmck.rds')
+  cmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_cmck.rds')
+  psdn.sdm[is.na(psdn.sdm)] <- 0
+  msqd.sdm[is.na(msqd.sdm)] <- 0
+  nanc.sdm[is.na(nanc.sdm)] <- 0
+  phrg.sdm[is.na(phrg.sdm)] <- 0
+  jmck.sdm[is.na(jmck.sdm)] <- 0
+  cmck.sdm[is.na(cmck.sdm)] <- 0
+
+  dat_est_sdm <- readRDS("C:/Data/PacFIN data/Tickets_filtered_catch.rds")
+  PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
+
+  datPanel_sdm <- dat_est_sdm %>% 
+    dplyr::filter(LANDING_YEAR >= min_year_est, LANDING_YEAR <= 2014) %>%
+    dplyr::filter(Landings_mtons > 0) %>%
+    dplyr::mutate(ln_Catch_mtons = log(Landings_mtons)) %>% 
+    filter(PACFIN_SPECIES_CODE == "MSQD" | PACFIN_SPECIES_CODE == "PSDN" | PACFIN_SPECIES_CODE == "NANC")
+  
+  datPanelSDM <- datPanel_sdm %>% 
+    merge(psdn.sdm, by = c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "PORT_AREA_CODE"), all.x = TRUE, all.y = FALSE, allow.cartesian = TRUE) %>%
+    merge(msqd.sdm, by = c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "PORT_AREA_CODE"), all.x = TRUE, all.y = FALSE, allow.cartesian = TRUE) %>%
+    merge(nanc.sdm, by = c("LANDING_YEAR", "LANDING_MONTH", "LANDING_DAY", "PORT_AREA_CODE"), all.x = TRUE, all.y = FALSE, allow.cartesian = TRUE) %>%
+    merge(PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE) 
+
+  species_sdm <- as.data.frame(datPanelSDM %>% dplyr::select(PACFIN_SPECIES_CODE) %>% unique())
+  species.list_sdm <- c(species_sdm$PACFIN_SPECIES_CODE)
+  species.list.number.sdm <- as.data.frame(species.list_sdm)
+  
+  mod_estimate_sdm <- list()
+  xx <- 1
+  for(ii in species.list_sdm) {
+    datPanel_X_SDM <- datPanelSDM %>% filter(PACFIN_SPECIES_CODE == ii) 
+    if (ii == "MSQD") {
+    mod_estimate_sdm[[xx]] <- 
+      lm(ln_Catch_mtons ~ MSQD_SDM_90 + max_days_sea + as.numeric(Vessel.length):factor(group_all), data = datPanel_X_SDM)
+    }
+    if (ii == "NANC") {
+      mod_estimate_sdm[[xx]] <- 
+      lm(ln_Catch_mtons ~ NANC_SDM_60 + max_days_sea + as.numeric(Vessel.length):factor(group_all), data = datPanel_X_SDM)
+    }
+    if (ii == "PSDN") {
+      mod_estimate_sdm[[xx]] <- 
+      lm(ln_Catch_mtons ~ PSDN_SDM_60 + max_days_sea + as.numeric(Vessel.length):factor(group_all), data = datPanel_X_SDM)
+    }
+    xx <- min(xx + 1, nrow(species_sdm))
+  }
+  rm(xx, species.list_sdm, species_sdm, datPanelSDM, dat_est_sdm, datPanel_sdm, datPanel_X_SDM)
+  species.list.number.sdm$id_number <- seq(1, nrow(species.list.number.sdm))
+  
+  # summary(mod_estimate_sdm[[1]])
+  # summary(mod_estimate_sdm[[3]])
+  # summary(mod_estimate_sdm[[2]])
+  # modelsummary::modelsummary(mod_estimate_sdm, fmt = 2,
+  #                            gof_map = c("nobs", "adj.r.squared"),
+  #                            statistic = "({std.error}){stars}",
+  #                            output = "Participation\\Results\\catch_model.docx")
+
+
   #-------------
   ## Price models
   dat_est <- readRDS("C:/Data/PacFIN data/Tickets_filtered.rds")
@@ -92,13 +160,7 @@ sampled_rums <- function(data_in, cluster = 4,
     rm(xx, species.list, species, datPanel, datPanel2, dat_est, datPanel_X)
     species.list.number$id_number <- seq(1, nrow(species.list.number))
 
-    # summary(mod_estimate[[1]])
-    # modelsummary::modelsummary(model_price, fmt = 2,
-    #                            gof_map = c("nobs", "adj.r.squared"),
-    #                            statistic = "({std.error}){stars}",
-    #                            output = "Participation\\Results\\price_model.docx")
-    #
-    
+
 
   # #-----------------------------------------------------------------------------
   # ## Keep core vessel and 
@@ -553,27 +615,16 @@ sampled_rums <- function(data_in, cluster = 4,
   #-----------------------------------------------------------------------------
   ### Calculate revenues from each period and process dummy variables for past behavior
   
-  ## Load SDMs to be used in function to calculate expected revenue and cost below
-  psdn.sdm <- readRDS(file = 'Participation/SDMs/sdm_psdn.rds')
-  psdn.sdm[is.na(psdn.sdm)] <- 0
+  ## Modify SDMs to be used in function to calculate expected revenue and cost below
   psdn.sdm$set_date <- ymd(paste(psdn.sdm$LANDING_YEAR, psdn.sdm$LANDING_MONTH, psdn.sdm$LANDING_DAY, sep = "-"))
+  msqd.sdm$set_date <- ymd(paste(msqd.sdm$LANDING_YEAR, msqd.sdm$LANDING_MONTH, msqd.sdm$LANDING_DAY, sep = "-"))
+  nanc.sdm$set_date <- ymd(paste(nanc.sdm$LANDING_YEAR, nanc.sdm$LANDING_MONTH, nanc.sdm$LANDING_DAY, sep = "-"))
+  phrg.sdm$set_date <- ymd(paste(phrg.sdm$LANDING_YEAR, phrg.sdm$LANDING_MONTH, phrg.sdm$LANDING_DAY, sep = "-"))
+  jmck.sdm$set_date <- ymd(paste(jmck.sdm$LANDING_YEAR, jmck.sdm$LANDING_MONTH, jmck.sdm$LANDING_DAY, sep = "-"))
+  cmck.sdm$set_date <- ymd(paste(cmck.sdm$LANDING_YEAR, cmck.sdm$LANDING_MONTH, cmck.sdm$LANDING_DAY, sep = "-"))
   # msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd_spawn.rds') %>%
   #   rename(MSQD_SDM_90 = MSQD_SPAWN_SDM_90)
-  msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd.rds') 
-  msqd.sdm[is.na(msqd.sdm)] <- 0
-  msqd.sdm$set_date <- ymd(paste(msqd.sdm$LANDING_YEAR, msqd.sdm$LANDING_MONTH, msqd.sdm$LANDING_DAY, sep = "-"))
-  nanc.sdm <- readRDS(file = 'Participation/SDMs/sdm_nanc.rds')
-  nanc.sdm[is.na(nanc.sdm)] <- 0
-  nanc.sdm$set_date <- ymd(paste(nanc.sdm$LANDING_YEAR, nanc.sdm$LANDING_MONTH, nanc.sdm$LANDING_DAY, sep = "-"))
-  phrg.sdm <- readRDS(file = 'Participation/SDMs/sdm_phrg.rds')
-  phrg.sdm[is.na(phrg.sdm)] <- 0
-  phrg.sdm$set_date <- ymd(paste(phrg.sdm$LANDING_YEAR, phrg.sdm$LANDING_MONTH, phrg.sdm$LANDING_DAY, sep = "-"))
-  jmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_jmck.rds')
-  jmck.sdm[is.na(jmck.sdm)] <- 0
-  jmck.sdm$set_date <- ymd(paste(jmck.sdm$LANDING_YEAR, jmck.sdm$LANDING_MONTH, jmck.sdm$LANDING_DAY, sep = "-"))
-  cmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_cmck.rds')
-  cmck.sdm[is.na(cmck.sdm)] <- 0
-  cmck.sdm$set_date <- ymd(paste(cmck.sdm$LANDING_YEAR, cmck.sdm$LANDING_MONTH, cmck.sdm$LANDING_DAY, sep = "-"))
+  
   
   ## Load abundance index in cases without SDM
 
@@ -634,10 +685,12 @@ sampled_rums <- function(data_in, cluster = 4,
                       SDM.CMCK = cmck.sdm,
                       CPUE.index = CPUE_index,
                       model_price1 = mod_estimate,
+                      model_catch1 = mod_estimate_sdm,
                       fuel.prices1 = fuel.prices,
                       fuel.prices.state1 = fuel.prices.state,
                       min_year_est1 = min_year_est,
-                      species.list.number1 = species.list.number)
+                      species.list.number1 = species.list.number,
+                      species.list.number.sdm1 = species.list.number.sdm)
     }
   print("Done calculating dummys and revenues")
   td2 <- plyr::ldply(dummys2)
