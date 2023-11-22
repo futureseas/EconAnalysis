@@ -55,12 +55,10 @@ sampled_rums <- function(data_in, cluster = 4,
 
   dat <- data_in 
   
-  
-  
   #-------------
   ## Catch models
   
-  ## Load SDMs 
+  ## Load SDM 
   psdn.sdm <- readRDS(file = 'Participation/SDMs/sdm_psdn.rds')
   msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd.rds')
   nanc.sdm <- readRDS(file = 'Participation/SDMs/sdm_nanc.rds')
