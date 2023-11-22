@@ -56,8 +56,9 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   # species.list.number.sdm1 = species.list.number.sdm
   # ###
 
+  # start.time <- Sys.time()
+  
   temp_dat <- td1[xx, ]
-
   dat1$set_date <- as_date(dat1$set_date)
   fltz <- temp_dat$fleet_name
   sel  <- temp_dat$selection
@@ -69,161 +70,221 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   ########################################################################################################
   ### DO VESSEL HAVE FISH THE SPECIES AT THE PORT IN CONSIDERATION IN THE LAST N_DAYS (AND LAST YEAR)? ###
   ########################################################################################################
-  
+
   #Did vessel fish in past n_days at port for species X? 
-  dum30 <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
-                                              set_date %within% temp_dat$days_inter,
+  dum30 <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days_inter,
                                               VESSEL_NUM == temp_dat$fished_VESSEL_NUM,
                                               selection == sel,
-                                              selection != "No-Participation",
-                                              group_all %in% fltz)
+                                              selection != "No-Participation")
   dum30 <- dum30 %>% distinct(trip_id, .keep_all = T)
-  
-  #Add dummy coefficient
   dum30_val <- nrow(dum30)
   
   #-----------------------------------------------------------------------------------------------
   #Did cluster fish in past n_days at port for species X? 
-  dum30_c <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
-                                              set_date %within% temp_dat$days_inter,
-                                              selection == sel,
-                                              selection != "No-Participation",
-                                              group_all %in% fltz)
+  dum30_c <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days_inter,
+                                                selection == sel,
+                                                selection != "No-Participation",
+                                                group_all %in% fltz)
   dum30_c <- dum30_c %>% distinct(trip_id, .keep_all = T)
-  
-  #Add dummy coefficient
   dum30_c_val <- nrow(dum30_c)
-  
+
   #-----------------------------------------------------------------------------------------------
   # Vessel fish in the past n_days of last year at port for species X?
-  dum30y <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul, 
-                                               set_date %within% temp_dat$prev_year_days_inter,
+  dum30y <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$prev_year_days_inter,
                                                VESSEL_NUM == temp_dat$fished_VESSEL_NUM,
                                                selection == sel,
-                                               selection != "No-Participation",
-                                               group_all %in% fltz)
-
+                                               selection != "No-Participation")
   dum30y <- dum30y %>% distinct(trip_id, .keep_all = T)
-  
-  #Add dummy coefficient
   dum30y_val <- nrow(dum30y)
   
-  
+
   #-----------------------------------------------------------------------------------------------
   # Same decision that day before? 
   dum1 <- dat1 %>% ungroup %>% dplyr::filter(set_date %in% temp_dat$prev_day_date,
-                                               VESSEL_NUM == temp_dat$fished_VESSEL_NUM,
-                                               selection == sel)
-  
+                                             VESSEL_NUM == temp_dat$fished_VESSEL_NUM,
+                                             selection == sel)
   dum1 <- dum1 %>% distinct(trip_id, .keep_all = T)
-  
-  #Add dummy coefficient
   dum1_val <- nrow(dum1)
-  
-  
+
   #-----------------------------------------------------------------------------------------------
-    #Did vessel fish in past n_days at port ? 
-  dum30port <- dat1 %>% ungroup %>% dplyr::filter(trip_id != temp_dat$fished_haul,
-                                              set_date %within% temp_dat$days_inter,
-                                              VESSEL_NUM == temp_dat$fished_VESSEL_NUM,
-                                              PORT_AREA_CODE == port,
-                                              selection != "No-Participation",
-                                              group_all %in% fltz)
+  #Did vessel fish in past n_days at port ? 
+  dum30port <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days_inter,
+                                                  VESSEL_NUM == temp_dat$fished_VESSEL_NUM,
+                                                  PORT_AREA_CODE == port,
+                                                  selection != "No-Participation")
   
   dum30port <- dum30port %>% distinct(trip_id, .keep_all = T)
-  
-  #Add dummy coefficient
   dum30port_val <- nrow(dum30port)
   
-  
+
   ########################
   ## Calculate revenues ##
   ########################
   
-  # ## Obtain vessel length and horsepower
-  # vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>% 
-  #   dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
-  # vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower)) %>% 
-  #   dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
-  # if (is.na(vessel.hp$Vessel.horsepower)) {
-  #   vessel.hp <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.horsepower, Vessel.length)) %>% 
-  #     unique() %>% dplyr::filter(Vessel.length == mean(vessel.length$Vessel.length))
-  # }
-  
-  
-  # << SDM LAST 30 DAYS >>
-  
   if (sel != "No-Participation") {
     if (species == "PSDN") {
-      # ## Obtain SDM previous day for the species/port combination
-      # if (temp_dat$set_date >= as.Date("2017-04-20") & temp_dat$set_date <= as.Date("2017-04-30")) {
-      #   sdm1 <- SDM.PSDN %>% dplyr::filter(set_date == "2017-04-19", PORT_AREA_CODE %in% port)
-      #   sdm2 <- SDM.PSDN %>% dplyr::filter(set_date == "2017-05-01", PORT_AREA_CODE %in% port)
-      #   sdm <- rbind(sdm1, sdm2)
-      # } else if (temp_dat$set_date >= as.Date("2010-12-27") & temp_dat$set_date <= as.Date("2010-12-31")) {
-      #   sdm1 <- SDM.PSDN %>% dplyr::filter(set_date == "2010-12-26", PORT_AREA_CODE %in% port)
-      #   sdm2 <- SDM.PSDN %>% dplyr::filter(set_date == "2011-01-01", PORT_AREA_CODE %in% port)
-      #   sdm <- rbind(sdm1, sdm2)
-      # } else {
-      #   sdm <- SDM.PSDN %>% dplyr::filter(set_date %in% temp_dat$set_date, PORT_AREA_CODE %in% port)
-      # }
+      # Predict catch using SDM
+      vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>%
+        dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+        day.SDM <- SDM.PSDN %>% dplyr::select(c(set_date, PSDN_SDM_60, PORT_AREA_CODE)) %>%
+        dplyr::filter(set_date %in% temp_dat$set_date, 
+                      PORT_AREA_CODE %in% port) %>% unique()
+      est_catch <- temp_dat
+      est_catch$max_days_sea <- 1 
+      est_catch$Vessel.length <- mean(vessel.length$Vessel.length, na.rm = TRUE)
+      est_catch$PSDN_SDM_60 <- day.SDM$PSDN_SDM_60
+      est_catch$group_all <- fltz
+      id_catch <- species.list.number.sdm1 %>% dplyr::filter(species.list_sdm == species)
+      id_catch1 <- id_catch$id_number
+      catch <- as.data.frame(predict(model_catch1[[id_catch1]], est_catch, interval = "prediction"))
+      catch$fit <- exp(catch$fit)
+      catch30y <- catch$fit
+      
+      # Average availability in the past n_days at port
+      catch30y2 <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, 
+                                                     PORT_AREA_CODE %in% port,
+                                                     Species_Dominant %in% species)
+      catch30y2 <- mean(catch30y2$Landings_mtons, na.rm = TRUE)
      
       # Average availability in the past n_days at port
-      avail30y <- SDM.PSDN %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
+      avail30y <- SDM.PSDN %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, 
+                                                         PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$PSDN_SDM_60, na.rm = TRUE)
       dCPUE <- 0
       dCPUE_90 <- 0
       
     } else if (species == "MSQD") {
       
+      # Predict catch using SDM
+      vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>%
+        dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+        day.SDM <- SDM.MSQD %>% dplyr::select(c(set_date, MSQD_SDM_90, PORT_AREA_CODE)) %>%
+        dplyr::filter(set_date %in% temp_dat$set_date, PORT_AREA_CODE %in% port) %>% unique()
+      est_catch <- temp_dat
+      est_catch$max_days_sea <- 1 
+      est_catch$Vessel.length <- mean(vessel.length$Vessel.length, na.rm = TRUE)
+      est_catch$MSQD_SDM_90 <- day.SDM$MSQD_SDM_90
+      est_catch$group_all <- fltz
+      id_catch <- species.list.number.sdm1 %>% dplyr::filter(species.list_sdm == species)
+      id_catch1 <- id_catch$id_number
+      catch <- as.data.frame(predict(model_catch1[[id_catch1]], est_catch, interval = "prediction"))
+      catch$fit <- exp(catch$fit)
+      catch30y <- catch$fit
+      
       # Average availability in the past n_days at port
-      avail30y <- SDM.MSQD %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
+      catch30y2 <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, 
+                                                     PORT_AREA_CODE %in% port,
+                                                     Species_Dominant %in% species)
+      catch30y2 <- mean(catch30y2$Landings_mtons, na.rm = TRUE)
+
+      # Average availability in the past n_days at port
+      avail30y <- SDM.MSQD %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, 
+                                                         PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$MSQD_SDM_90, na.rm = TRUE)
       dCPUE <- 0
       dCPUE_90 <- 0
       
     } else if (species == "NANC") {
       
+      # Predict catch using SDM
+      vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>%
+        dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
+      day.SDM <- SDM.NANC %>% dplyr::select(c(set_date, NANC_SDM_60, PORT_AREA_CODE)) %>%
+        dplyr::filter(set_date %in% temp_dat$set_date, 
+                      PORT_AREA_CODE %in% port) %>% unique()
+      est_catch <- temp_dat
+      est_catch$max_days_sea <- 1 
+      est_catch$Vessel.length <- mean(vessel.length$Vessel.length, na.rm = TRUE)
+      est_catch$NANC_SDM_60 <- day.SDM$NANC_SDM_60
+      est_catch$group_all <- fltz
+      id_catch <- species.list.number.sdm1 %>% dplyr::filter(species.list_sdm == species)
+      id_catch1 <- id_catch$id_number
+      catch <- as.data.frame(predict(model_catch1[[id_catch1]], est_catch, interval = "prediction"))
+      catch$fit <- exp(catch$fit)
+      catch30y <- catch$fit
+      
       # Average availability in the past n_days at port
-      avail30y <- SDM.NANC %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
-      avail30y <- mean(avail30y$NANC_SDM_20, na.rm = TRUE)
+      catch30y2 <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, 
+                                                     PORT_AREA_CODE %in% port,
+                                                     Species_Dominant %in% species)
+      catch30y2 <- mean(catch30y2$Landings_mtons, na.rm = TRUE)
+      
+      
+      # Average availability in the past n_days at port
+      avail30y <- SDM.NANC %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, 
+                                                         PORT_AREA_CODE %in% port)
+      avail30y <- mean(avail30y$NANC_SDM_60, na.rm = TRUE)
       dCPUE <- 0
       dCPUE_90 <- 0
       
     } else if (species == "JMCK") {
-      
+
+      # Average availability in the past n_days at port
+      catch30y <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter,
+                                                     PORT_AREA_CODE %in% port,
+                                                     Species_Dominant %in% species)
+      catch30y <- mean(catch30y$Landings_mtons, na.rm = TRUE)
+      catch30y2 <- catch30y
+
       # Average availability in the past n_days at port
       avail30y <- SDM.JMCK %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$JMCK_SDM_60, na.rm = TRUE)
       dCPUE <- 0
       dCPUE_90 <- 0
-      
+
     } else if (species == "CMCK") {
-      
+
       # Average availability in the past n_days at port
-      avail30y <- SDM.CMCK %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
+      catch30y <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter,
+                                                     PORT_AREA_CODE %in% port,
+                                                     Species_Dominant %in% species)
+      catch30y <- mean(catch30y$Landings_mtons, na.rm = TRUE)
+      catch30y2 <- catch30y
+
+      # Average availability in the past n_days at port
+      avail30y <- SDM.CMCK %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, 
+                                                         PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$CMCK_SDM_60, na.rm = TRUE)
       dCPUE <- 0
       dCPUE_90 <- 0
-      
+
     } else if (species == "PHRG") {
-      
+
       # Average availability in the past n_days at port
-      avail30y <- SDM.PHRG %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
+      catch30y <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter,
+                                                     PORT_AREA_CODE %in% port,
+                                                     Species_Dominant %in% species)
+      catch30y <- mean(catch30y$Landings_mtons, na.rm = TRUE)
+      catch30y2 <- catch30y
+
+      # Average availability in the past n_days at port
+      avail30y <- SDM.PHRG %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, 
+                                                         PORT_AREA_CODE %in% port)
       avail30y <- mean(avail30y$PHRG_SDM_20, na.rm = TRUE)
       dCPUE <- 0
       dCPUE_90 <- 0
-      
+
     } else {
       # Average availability in the past n_days at port
+      catch30y <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, 
+                                                     PORT_AREA_CODE %in% port,
+                                                     Species_Dominant %in% species)
+      catch30y <- mean(catch30y$Landings_mtons, na.rm = TRUE)
+      catch30y2 <- catch30y
+      
+      # Average availability in the past n_days at port
       avail30y <- CPUE.index %>% ungroup %>%
-        dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port, Species_Dominant %in% species)
+        dplyr::filter(set_date %within% temp_dat$days30_inter, 
+                      PORT_AREA_CODE %in% port, 
+                      Species_Dominant %in% species)
       avail30y <- mean(avail30y$CPUE_index, na.rm = TRUE)
       dCPUE <- 1
       dCPUE_90 <- 0
       if (is.na(avail30y)) {
         avail30y <- CPUE.index %>% ungroup %>%
-          dplyr::filter(set_date %within% temp_dat$days90_inter, PORT_AREA_CODE %in% port, Species_Dominant %in% species)
+          dplyr::filter(set_date %within% temp_dat$days90_inter, 
+                        PORT_AREA_CODE %in% port, 
+                        Species_Dominant %in% species)
         avail30y <- mean(avail30y$CPUE_index, na.rm = TRUE)
         dCPUE_90 <- 1
       }
@@ -231,7 +292,9 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     
     #Calculate availability
     mean_avail <- avail30y
-
+    mean_catch2 <- catch30y2 
+    mean_catch  <- catch30y
+    
     # Create database to predict prices
     est_price <- temp_dat
     est_price$trend <- (year(est_price$set_date) - min_year_est1) + 1 
@@ -308,6 +371,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
     mean_avail <- 0
     mean_price <- 0
     mean_price2 <- 0
+    mean_catch2 <- 0
+    mean_catch <- 0
     dCPUE <- 0
     dCPUE_90 <- 0
     dPrice30 <- 0
@@ -321,6 +386,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$mean_avail <- mean_avail
   temp_dat$mean_price <- mean_price
   temp_dat$mean_price2 <- mean_price2
+  temp_dat$mean_catch2 <- mean_catch2
+  temp_dat$mean_catch  <- mean_catch
   temp_dat$dummy_prev_days <- dum30_val
   temp_dat$dummy_prev_days_port <- dum30port_val
   temp_dat$dummy_prev_year_days <- dum30y_val
@@ -334,11 +401,10 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$dPrice30_s2 <- dPrice30_species2
   temp_dat$dPrice90_s2 <- dPrice90_species2
   
-  
   ###################
   ## Calculate Cost #
   ###################
-  
+
   if (sel != "No-Participation") {
     diesel.price <- fuel.prices1 %>% ungroup %>% 
       dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE == port)
@@ -365,7 +431,11 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   temp_dat$dist_port_to_catch_area <- exp_dist
   temp_dat$dDieselState <- dDieselState_price
   
-  ## Return data for row choice
+  # end.time <- Sys.time()
+  # time.taken <- round(end.time - start.time,2)
+  # time.taken
+  
+  # return data 
   return(temp_dat)
 }
   
