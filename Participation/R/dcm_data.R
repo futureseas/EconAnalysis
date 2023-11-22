@@ -17,18 +17,18 @@ library(lubridate)
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
-# samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-#                          min_year = 2013, max_year = 2017,
-#                          min_year_prob = 2013, max_year_prob = 2017,
-#                          min_year_est = 2012, max_year_est = 2019,
-#                          ndays = 30, nhauls_sampled = 5,
-#                          seed = 300, ncores = 4, rev_scale = 1000,
-#                          sample_choices = TRUE)
-# 
-#   samps <- samps1 %>%
-#     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-#     rm(samps1)
-#     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
+samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+                         min_year = 2013, max_year = 2017,
+                         min_year_prob = 2013, max_year_prob = 2017,
+                         min_year_est = 2012, max_year_est = 2019,
+                         ndays = 30, nhauls_sampled = 5,
+                         seed = 300, ncores = 4, rev_scale = 1000,
+                         sample_choices = TRUE)
+
+  samps <- samps1 %>%
+    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+    rm(samps1)
+    saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
 
     
 #----------------------------------
@@ -58,12 +58,15 @@ test <-
 # sum(is.na(samps0$mean_price))
 # sum(is.na(samps0$mean_price2))
 # sum(is.na(samps0$mean_avail))
+# sum(is.na(samps0$mean_catch))
+# sum(is.na(samps0$mean_catch2))
 # sum(is.na(samps0$diesel_price))
 # sum(is.na(samps0$dist_port_to_catch_area))
-# 
 # sum(is.na(samps0$mean_price))/nrow(samps0)
 # sum(is.na(samps0$mean_price2))/nrow(samps0)
 # sum(is.na(samps0$mean_avail))/nrow(samps0)
+# sum(is.na(samps0$mean_catch))/nrow(samps0) 
+# sum(is.na(samps0$mean_catch2))/nrow(samps0)    
 # sum(is.na(samps0$diesel_price))/nrow(samps0)
 # sum(is.na(samps0$dist_port_to_catch_area))/nrow(samps0)
 # 
@@ -86,19 +89,24 @@ samps1 <- samps %>%
   mutate(dPrice30       = ifelse((is.na(samps$mean_price)), 0, dPrice30)) %>%
   mutate(dPrice30_s     = ifelse((is.na(samps$dPrice30_s)), 0, dPrice30_s)) %>%
   mutate(dPrice90_s     = ifelse((is.na(samps$dPrice90_s)), 0, dPrice90_s)) %>%
-  mutate(dPrice30_s2     = ifelse((is.na(samps$dPrice30_s2)), 0, dPrice30_s2)) %>%
-  mutate(dPrice90_s2     = ifelse((is.na(samps$dPrice90_s2)), 0, dPrice90_s2)) %>%
+  mutate(dPrice30_s2    = ifelse((is.na(samps$dPrice30_s2)), 0, dPrice30_s2)) %>%
+  mutate(dPrice90_s2    = ifelse((is.na(samps$dPrice90_s2)), 0, dPrice90_s2)) %>%
   mutate(d_missing_cpue = ifelse((is.na(samps$mean_avail)) & dCPUE90 == 1, 1, 0)) %>%
   mutate(dCPUE        = ifelse((is.na(samps$mean_avail)), 0, dCPUE)) %>%
   mutate(dCPUE90      = ifelse((is.na(samps$mean_avail)), 0, dCPUE90)) %>%
+  mutate(d_missing_catch    = ifelse((is.na(samps$mean_catch)), 1, 0)) %>%
+  mutate(d_missing_catch2   = ifelse((is.na(samps$mean_catch2)), 1, 0)) %>%
   mutate(d_missing    = ifelse((is.na(samps$mean_avail)), 1, 0)) %>%
   mutate(d_missing_p  = ifelse((is.na(samps$mean_price)), 1, 0)) %>%
   mutate(d_missing_p2 = ifelse((is.na(samps$mean_price2)), 1, 0)) %>%
   mutate(d_missing_d  = ifelse((is.na(samps$dist_port_to_catch_area)), 1, 0)) %>%
   mutate(mean_avail   = ifelse((is.na(samps$mean_avail)), 0, mean_avail)) %>% 
+  mutate(mean_catch   = ifelse((is.na(samps$mean_catch)), 0, mean_catch)) %>% 
+  mutate(mean_catch2  = ifelse((is.na(samps$mean_catch2)), 0, mean_catch2)) %>% 
   mutate(mean_price   = ifelse((is.na(samps$mean_price)), 0, mean_price)) %>%
   mutate(mean_price2  = ifelse((is.na(samps$mean_price2)), 0, mean_price2)) %>%
-  mutate(dist_port_to_catch_area_zero  = ifelse((is.na(samps$dist_port_to_catch_area)), 0, dist_port_to_catch_area)) 
+  mutate(dist_port_to_catch_area_zero  = 
+           ifelse((is.na(samps$dist_port_to_catch_area)), 0, dist_port_to_catch_area)) 
 
 # samps1 %>% dplyr::filter(samps1$d_missing_cpue == 1) %>% 
 #   group_by(PACFIN_SPECIES_CODE) %>% summarize(total_obs = n()) %>%
@@ -462,7 +470,7 @@ samps2 <- merge(samps, lenght.vessel, by = "fished_VESSEL_NUM", all.x = TRUE, al
 
 ## Subset database
 rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NUM, set_date, set_month, set_year,
-                               mean_price, mean_price2, mean_avail, diesel_price, dCPUE, dPrice30, dDieselState, dCPUE90,     
+                               mean_price, mean_price2, mean_catch, mean_catch2, mean_avail, diesel_price, dCPUE, dPrice30, dDieselState, dCPUE90,     
                                wind_max_220_mh, dummy_last_day, dummy_prev_days_port, dummy_prev_days, dummy_prev_year_days, dummy_clust_prev_days,
                                lat_cg, dist_to_cog, dist_port_to_catch_area, dist_port_to_catch_area_zero, 
                                PSDN.Closure, PSDN.Total.Closure, WA.Closure, MSQD.Closure, Weekend,
