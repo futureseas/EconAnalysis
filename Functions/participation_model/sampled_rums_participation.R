@@ -109,7 +109,7 @@ sampled_rums <- function(data_in, cluster = 4,
     }
     xx <- min(xx + 1, nrow(species_sdm))
   }
-  rm(xx, species.list_sdm, species_sdm, datPanelSDM, dat_est_sdm, datPanel_sdm, datPanel_X_SDM)
+  rm(xx, species.list_sdm, species_sdm, datPanelSDM, dat_est_sdm, datPanel_sdm, datPanel_X_SDM, PAM_Vessel_Groups)
   species.list.number.sdm$id_number <- seq(1, nrow(species.list.number.sdm))
   
   # summary(mod_estimate_sdm[[1]])
@@ -161,7 +161,7 @@ sampled_rums <- function(data_in, cluster = 4,
 
 
   # #-----------------------------------------------------------------------------
-  # ## Keep core vessel and 
+  # ## Keep core vessel
   # 
   # core_vessels <- dat %>% 
   #     dplyr::filter(set_year >= min_year, 
@@ -242,7 +242,7 @@ sampled_rums <- function(data_in, cluster = 4,
       hauls %>% group_by(selection) %>% 
         summarize(n_obs = n(), perc = n()/nrow(hauls)) %>% 
         filter(selection == "No-Participation")
-
+  
     
   #-----------------------------------------------------------------------------
   if (sample_choices == TRUE) {
