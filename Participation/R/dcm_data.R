@@ -28,13 +28,13 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 #   samps <- samps1 %>%
 #     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
 #     rm(samps1)
-#     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
+#     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4_nhauls5.rds")
 
     
 #----------------------------------
 
 ## Run saved data
-samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c4.rds")
+samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c4_nhauls5.rds")
 
 #----------------------------------
 ## Check if there is no similar alternatives within a trip

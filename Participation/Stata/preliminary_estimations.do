@@ -18,8 +18,8 @@ global mwtp "${path}WTP estimation\"
 cd $path
 
 clear all
-cap log close
-	log using ${logs}preliminary, text replace
+// cap log close
+// 	log using ${logs}preliminary, text replace
 
 ** Import data
 import delimited "C:\Data\PacFIN data\rdo_Stata_c4.csv"
