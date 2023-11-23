@@ -132,7 +132,11 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       est_catch <- temp_dat
       est_catch$max_days_sea <- 1 
       est_catch$Vessel.length <- mean(vessel.length$Vessel.length, na.rm = TRUE)
-      est_catch$PSDN_SDM_60 <- day.SDM$PSDN_SDM_60
+      if (length(day.SDM) != 0) {
+        est_catch$PSDN_SDM_60 <- mean(day.SDM$PSDN_SDM_60, na.rm = TRUE)
+      } else {
+        est_catch$PSDN_SDM_60 <- 0
+      }
       est_catch$group_all <- fltz
       id_catch <- species.list.number.sdm1 %>% dplyr::filter(species.list_sdm == species)
       id_catch1 <- id_catch$id_number
@@ -163,7 +167,11 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       est_catch <- temp_dat
       est_catch$max_days_sea <- 1 
       est_catch$Vessel.length <- mean(vessel.length$Vessel.length, na.rm = TRUE)
-      est_catch$MSQD_SDM_90 <- day.SDM$MSQD_SDM_90
+      if (length(day.SDM) != 0) {
+        est_catch$MSQD_SDM_90 <- mean(day.SDM$MSQD_SDM_90, na.rm = TRUE)
+      } else {
+        est_catch$MSQD_SDM_90 <- 0
+      }
       est_catch$group_all <- fltz
       id_catch <- species.list.number.sdm1 %>% dplyr::filter(species.list_sdm == species)
       id_catch1 <- id_catch$id_number
@@ -195,7 +203,11 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       est_catch <- temp_dat
       est_catch$max_days_sea <- 1 
       est_catch$Vessel.length <- mean(vessel.length$Vessel.length, na.rm = TRUE)
-      est_catch$NANC_SDM_60 <- day.SDM$NANC_SDM_60
+      if (length(day.SDM) != 0) {
+        est_catch$NANC_SDM_60 <- mean(day.SDM$NANC_SDM_60, na.rm = TRUE)
+      } else {
+        est_catch$NANC_SDM_60 <- 0
+      }
       est_catch$group_all <- fltz
       id_catch <- species.list.number.sdm1 %>% dplyr::filter(species.list_sdm == species)
       id_catch1 <- id_catch$id_number
