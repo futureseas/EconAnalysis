@@ -84,7 +84,6 @@ test <-
 
 #---------------------------------------------------------------------------
 ### Create dummies for missing availability and price and convert NA to zero
-
 samps1 <- samps %>% 
   mutate(dDieselState   = ifelse((is.na(samps$diesel_price)), 0, dDieselState)) %>%
   mutate(dPrice30       = ifelse((is.na(samps$mean_price)), 0, dPrice30)) %>%
@@ -106,9 +105,10 @@ samps1 <- samps %>%
   mutate(mean_catch2  = ifelse((is.na(samps$mean_catch2)), 0, mean_catch2)) %>% 
   mutate(mean_price   = ifelse((is.na(samps$mean_price)), 0, mean_price)) %>%
   mutate(mean_price2  = ifelse((is.na(samps$mean_price2)), 0, mean_price2)) %>%
-  mutate(dist_port_to_catch_area_zero  = 
-           ifelse((is.na(samps$dist_port_to_catch_area)), 0, dist_port_to_catch_area)) 
-
+  mutate(dist_port_to_catch_area_zero  = ifelse((is.na(samps$dist_port_to_catch_area)), 0, 
+                                                dist_port_to_catch_area)) 
+  nrow(samps1 %>% dplyr::filter(samps1$d_missing_catch == 1)) 
+    
 # samps1 %>% dplyr::filter(samps1$d_missing_cpue == 1) %>% 
 #   group_by(PACFIN_SPECIES_CODE) %>% summarize(total_obs = n()) %>%
 #   mutate(perc = total_obs*100/nrow(samps1 %>% 
@@ -173,21 +173,18 @@ samps <- samps1 %>%
   mutate(dist_to_cog = ifelse(selection == "No-Participation", 0, dist_to_cog)) %>%
   mutate(lat_cg = ifelse(selection == "No-Participation", 0, lat_cg))
   rm(samps1)
-  # samps %>% filter(selection == "No-Participation") %>% psych::describe()
+  samps %>% filter(selection == "No-Participation") %>% psych::describe()
 
   
 #--------------------------------------------------------------------------
 ### Incorporate multiday trip data
 multiday_data <- participation_data %>% 
-    dplyr::select(c(trip_id, multiday_trip, n_obs_within_FTID)) %>% 
-    unique() %>%
+    dplyr::select(c(trip_id, multiday_trip, n_obs_within_FTID)) %>% unique() %>%
     rename(fished_haul = trip_id)
-  
-samps <- merge(samps, multiday_data, by = "fished_haul", all.x = TRUE, all.y = FALSE) 
+  samps <- merge(samps, multiday_data, by = "fished_haul", all.x = TRUE, all.y = FALSE) 
 
 ### Check if n_obs_within_FTID == 1
-psych::describe(samps %>% dplyr::select(n_obs_within_FTID))
-
+psych::describe(samps %>% group_by(fished_haul) %>% summarise(obs = sum(n_obs_within_FTID)/6))
 
 
 #-------------------------------------------
@@ -471,12 +468,13 @@ samps2 <- merge(samps, lenght.vessel, by = "fished_VESSEL_NUM", all.x = TRUE, al
 
 ## Subset database
 rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NUM, set_date, set_month, set_year,
-                               mean_price, mean_price2, mean_catch, mean_catch2, mean_avail, diesel_price, dCPUE, dPrice30, dDieselState, dCPUE90,     
-                               wind_max_220_mh, dummy_last_day, dummy_prev_days_port, dummy_prev_days, dummy_prev_year_days, dummy_clust_prev_days,
-                               lat_cg, dist_to_cog, dist_port_to_catch_area, dist_port_to_catch_area_zero, 
-                               PSDN.Closure, PSDN.Total.Closure, WA.Closure, MSQD.Closure, Weekend,
-                               PSDN.Closure.d, PSDN.Total.Closure.d, WA.Closure.d, MSQD.Closure.d, MSQD.Weekend, 
-                               dParticipate, unem_rate, d_missing, d_missing_p, d_missing_p2, d_missing_cpue, d_missing_d, Vessel.length, 
+                               mean_price, mean_price2, mean_catch, mean_catch2, mean_avail, diesel_price, dCPUE, dPrice30, 
+                               dDieselState, dCPUE90, wind_max_220_mh, dummy_last_day, dummy_prev_days_port,
+                               dummy_prev_days, dummy_prev_year_days, dummy_clust_prev_days, lat_cg, dist_to_cog, 
+                               dist_port_to_catch_area, dist_port_to_catch_area_zero, PSDN.Closure, PSDN.Total.Closure, 
+                               WA.Closure, MSQD.Closure, Weekend, PSDN.Closure.d, PSDN.Total.Closure.d, WA.Closure.d, 
+                               MSQD.Closure.d, MSQD.Weekend, dParticipate, unem_rate, d_missing_catch, d_missing_catch2, 
+                               d_missing, d_missing_p, d_missing_p2, d_missing_cpue, d_missing_d, Vessel.length, 
                                lunar.ill, Price.Fishmeal.AFI, dPrice30_s, dPrice90_s,dPrice30_s2, dPrice90_s2)
                               rm(samps, samps2)
 
@@ -529,8 +527,8 @@ rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_hau
   #%>% dplyr::select(-c('set_date'))  
 
 ## Save data to run with Stata
-write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c4.csv", row.names = FALSE)
-saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c4.rds")
+write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c4_nhauls5.csv", row.names = FALSE)
+saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c4_nhauls5.rds")
 
 
 
