@@ -30,3 +30,65 @@
 . 
 end of do-file
 
+. do "c:\users\fequezad\appdata\local\temp\st_stata_temp.tmp"
+
+. 
+. ***************************************
+. **** Should I stay or should I go? ****
+. ***************************************
+. 
+. ** Work to do: 
+. * - Compute mean_catch for sardine, anchovy, squid, mackerrrel and herring. Constant and sdm explain catch.
+. * - Add predicted choices without "No-participation"
+. 
+. 
+. global path "C:\GitHub\EconAnalysis\Participation\" 
+
+. global results "${path}Results\"
+
+. global figures "${results}Figures\"
+
+. global tables "${results}Tables\"
+
+. global contrmap "${path}Contraction mapping\"
+
+. global logs "${results}Logs\"
+
+. global mwtp "${path}WTP estimation\"
+
+. cd $path
+C:\GitHub\EconAnalysis\Participation
+
+. 
+. clear all
+
+. // cap log close
+. //      log using ${logs}preliminary, text replace
+. 
+. ** Import data
+. import delimited "C:\Data\PacFIN data\rdo_Stata_c4.csv"
+(encoding automatically selected: ISO-8859-1)
+(51 vars, 176,730 obs)
+
+. replace mean_price = mean_price / 1000
+(147,275 real changes made)
+
+. replace mean_price2 = mean_price2 / 1000
+(136,955 real changes made)
+
+. replace pricefishmealafi = pricefishmealafi / 1000
+(176,730 real changes made)
+
+. gen exp_cost_cog = diesel_price * dist_to_cog 
+
+. gen exp_cost_catch_area = diesel_price * dist_port_to_catch_area_zero
+
+. gen id_obs = _n
+
+. gen const_r2 = 1
+
+. 
+. 
+end of do-file
+
+. exit, clear

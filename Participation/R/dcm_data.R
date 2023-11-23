@@ -49,12 +49,13 @@ test <-
 ## See how many times we have NA
 
 # 4,168 NAs for availability (2.8%)
+# 10,909 NAs using catches (with SDM) (7.4%)
+# 36,588 NAs using catches (no SDM) (24.8%)
 # 29,330 Nas for dist to catch areas (19.9%)
 # 10,320 NAs for mean_price2 (7%)
 
 # samps0 <- samps %>%
 #   filter(selection != "No-Participation")
-# 
 # sum(is.na(samps0$mean_price))
 # sum(is.na(samps0$mean_price2))
 # sum(is.na(samps0$mean_avail))
@@ -65,8 +66,8 @@ test <-
 # sum(is.na(samps0$mean_price))/nrow(samps0)
 # sum(is.na(samps0$mean_price2))/nrow(samps0)
 # sum(is.na(samps0$mean_avail))/nrow(samps0)
-# sum(is.na(samps0$mean_catch))/nrow(samps0) 
-# sum(is.na(samps0$mean_catch2))/nrow(samps0)    
+# sum(is.na(samps0$mean_catch))/nrow(samps0)
+# sum(is.na(samps0$mean_catch2))/nrow(samps0)
 # sum(is.na(samps0$diesel_price))/nrow(samps0)
 # sum(is.na(samps0$dist_port_to_catch_area))/nrow(samps0)
 # 
