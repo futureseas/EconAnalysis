@@ -127,8 +127,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>%
         dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
         day.SDM <- SDM.PSDN %>% dplyr::select(c(set_date, PSDN_SDM_60, PORT_AREA_CODE)) %>%
-        dplyr::filter(set_date %in% temp_dat$set_date, 
-                      PORT_AREA_CODE %in% port) %>% unique()
+          dplyr::filter(set_date %in% temp_dat$prev_day_date, PORT_AREA_CODE %in% port) %>% unique()
       est_catch <- temp_dat
       est_catch$max_days_sea <- 1 
       est_catch$Vessel.length <- mean(vessel.length$Vessel.length, na.rm = TRUE)
@@ -163,7 +162,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>%
         dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
         day.SDM <- SDM.MSQD %>% dplyr::select(c(set_date, MSQD_SDM_90, PORT_AREA_CODE)) %>%
-        dplyr::filter(set_date %in% temp_dat$set_date, PORT_AREA_CODE %in% port) %>% unique()
+          dplyr::filter(set_date %in% temp_dat$prev_day_date, PORT_AREA_CODE %in% port) %>% unique()
       est_catch <- temp_dat
       est_catch$max_days_sea <- 1 
       est_catch$Vessel.length <- mean(vessel.length$Vessel.length, na.rm = TRUE)
@@ -198,8 +197,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>%
         dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
       day.SDM <- SDM.NANC %>% dplyr::select(c(set_date, NANC_SDM_60, PORT_AREA_CODE)) %>%
-        dplyr::filter(set_date %in% temp_dat$set_date, 
-                      PORT_AREA_CODE %in% port) %>% unique()
+        dplyr::filter(set_date %in% temp_dat$prev_day_date, PORT_AREA_CODE %in% port) %>% unique()
       est_catch <- temp_dat
       est_catch$max_days_sea <- 1 
       est_catch$Vessel.length <- mean(vessel.length$Vessel.length, na.rm = TRUE)
