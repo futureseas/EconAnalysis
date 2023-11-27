@@ -7,7 +7,6 @@
 * - Compute mean_catch for sardine, anchovy, squid, mackerrrel and herring. Constant and sdm explain catch.
 * - Add predicted choices without "No-participation"
 
-
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -22,9 +21,11 @@ clear all
 // 	log using ${logs}preliminary, text replace
 
 ** Import data
-import delimited "C:\Data\PacFIN data\rdo_Stata_c4.csv"
+import delimited "C:\Data\PacFIN data\rdo_Stata_c4_nhauls5.csv"
 replace mean_price = mean_price / 1000
 replace mean_price2 = mean_price2 / 1000
+replace mean_catch = mean_catch / 1000
+replace mean_catch2 = mean_catch2 / 1000
 replace pricefishmealafi = pricefishmealafi / 1000
 gen exp_cost_cog = diesel_price * dist_to_cog 
 gen exp_cost_catch_area = diesel_price * dist_port_to_catch_area_zero
@@ -47,9 +48,17 @@ gen species = substr(selection,-4,.)
 replace species = "No-Participation" if species == "tion" 
 replace d_missing_p = d_missing_p2 if mean_price > 50
 replace mean_price = mean_price2 if mean_price > 50
-gen exp_revenue = mean_price * mean_avail
+gen exp_revenue  = mean_price  * mean_avail
 gen exp_revenue2 = mean_price2 * mean_avail
 egen species_int = group(species), label
+gen d_p = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
+gen d_c = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
+gen d_d = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
+gen d_pc = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
+gen d_pd = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
+gen d_cd = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
+gen d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
+sum d_p d_c d_d d_pc d_pd d_cd d_pcd
 // encode species, gen(nspecies)
 
 /* 
@@ -63,29 +72,41 @@ gen no_net_species = (species == "ALBC" | species == "DCRB")
  */
 
 
-// ** Instrument price
-// egen selectionf = group(selection), label
-// cmset fished_vessel_id time selection
+** Instrument price
+egen selectionf = group(selection), label
+cmset fished_vessel_id time selection
 
-// reg  mean_price i.selectionf mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 				d_missing_cpue d_missing_p d_missing_d psdnclosured2 psdntotalclosured msqdweekend ///
-// 				diesel_price, noconstant
-// predict res, residual
+/* reg  mean_price i.selectionf mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+				d_c d_d d_cd d_pd d_pcd psdnclosured2 psdntotalclosured msqdweekend /// 
+				pricefishmealafi diesel_price, noconstant
+predict res, residual
+reg  exp_revenue i.selectionf mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+				d_c d_d d_cd d_pd d_pcd psdnclosured2 psdntotalclosured msqdweekend /// 
+				pricefishmealafi, noconstant
+predict res_rev, residual */
+
+
+*** Test model 
+
+cmclogit fished exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			d_c d_d d_pd d_cd d_pcd psdnclosured2 psdntotalclosured msqdweekend ///
+			i.dummy_last_day i.dummy_prev_year_days, ///
+			base("No-Participation")
+
 
 ********************************************************************
 * Model set-up
 global closure = " "
-global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_cpue d_missing_p d_missing_d psdnclosured2 psdntotalclosured msqdweekend" 
-global vars =               "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_cpue d_missing_p d_missing_d psdnclosured2 psdntotalclosured msqdweekend" 
+global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_c d_d d_pd d_cd d_pcd psdnclosured2 psdntotalclosured msqdweekend" 
+global vars =               "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_c d_d d_pd d_cd d_pcd psdnclosured2 psdntotalclosured msqdweekend" 
 global case = " " // at the end add: lunarill
 global case_sdm = " "
-
 
 
 ********************************************************************
 ** Create labels
 
-label variable mean_avail "Expected availability"
+label variable mean_catch "Expected catch"
 label variable exp_revenue "Expected revenue"
 label variable exp_revenue2 "Expected revenue (just MA)"
 label variable mean_price "Expected price"
@@ -94,7 +115,7 @@ label variable diesel_price "Expected diesel price"
 label variable wind_max_220_mh "Maximum wind (< 220km)"
 label variable d_missing "Binary: Missing availability"
 label variable d_missing_cpue "Binary: Missing availability (CPUE)"
-label variable d_missing_p "Binary: Missing price"
+label variable d_missing_p  "Binary: Missing price"
 label variable d_missing_p2 "Binary: Missing price"
 label variable dist_port_to_catch_area "Distance to catch area"
 label variable dist_port_to_catch_area_zero "Distance to catch area"
@@ -192,13 +213,13 @@ preserve
 	estadd scalar perc1 = count1/_N*100: B2
 restore
 
-// esttab B0 B2 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-IV_diesel.rtf", ///
-// 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
-// 		label title("Table. Preliminary estimations.") /// 
-// 		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///
-// 			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AICc" "CAIC" ))  ///
-// 		replace nodepvars b(%9.3f) not nomtitle nobaselevels drop($case_sdm _cons) se noconstant
-// exit, clear
+/* esttab B0 B2 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-IV_catch_oldprices.rtf", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Preliminary estimations.") /// 
+		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels drop($case_sdm _cons) se noconstant
+exit, clear */
 
 eststo B1: cmclogit fished  $vars_sdm i.hist_selection $closure, ///
 	casevar($case_sdm) base("No-Participation") from(sB, skip)
@@ -284,7 +305,7 @@ preserve
 restore
 
 eststo A1: cmclogit fished  $vars i.hist_selection $closure, ///
-	casevar($case) base("No-Participation") from(sA, skip)
+	casevar($case) base("No-Participation")  from(sA, skip)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): A1
 lrtest A0 A1, force
@@ -357,13 +378,16 @@ preserve
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: A3
 restore
- */
+
 
 * Out: i.dummy_clust_prev_days i.dummy_prev_days_port
 
-esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-int_avail.rtf", ///
+esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
 		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
+
+
+

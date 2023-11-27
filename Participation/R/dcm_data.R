@@ -531,4 +531,27 @@ write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c4_nhauls5.csv", row.names
 saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c4_nhauls5.rds")
 
 
+# ########################################
+# ## Compare mean_catch v/s mean_catch2 ##
+# ########################################
+# rdo_Stata <- readRDS(file = "C:\\Data\\PacFIN data\\rdo_Stata_c4_nhauls5.rds")
+# compare_catch_data <- rdo_Stata %>% 
+#   mutate(Port = substr(selection, 1, 3)) %>%
+#   mutate(Species = substr(selection, 5, 8)) %>% 
+#   filter(mean_catch2 > 0) %>%
+#   group_by(set_date, Species, Port) %>%
+#   summarize(avg_catch = mean(mean_catch),
+#             avg_catch2 = mean(mean_catch2)) %>%
+#   filter(Species == "MSQD" | Species == "NANC" | Species == "PSDN") %>%
+#   dplyr::select(c('avg_catch', 'avg_catch2', 'Species', 'Port')) 
+# 
+# Model <- lm(avg_catch ~ avg_catch2 + factor(Port) + factor(Species), data = compare_catch_data)
+# summary(Model)
+
+
+
+
+
+
+
 
