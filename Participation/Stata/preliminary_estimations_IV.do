@@ -163,7 +163,7 @@ preserve
 	estadd scalar perc1 = count1/_N*100: B0
 restore
 
-eststo B1: cmclogit fished  $vars_sdm i.dummy_last_day i.dummy_prev_year_days $closure, ///
+eststo B1: cmclogit fished  $vars_sdm i.dummy_prev_days i.dummy_prev_year_days $closure, ///
 	casevar($case_sdm) base("No-Participation") from(sB, skip) vce(bootstrap)
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B1
