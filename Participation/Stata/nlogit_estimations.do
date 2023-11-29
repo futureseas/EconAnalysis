@@ -17,9 +17,16 @@ clear all
 
 
 ** Import data
-import delimited "C:\Data\PacFIN data\rdo_Stata_c4.csv"
+import delimited "C:\Data\PacFIN data\rdo_Stata_c4_nhauls5.csv"
 replace mean_price = mean_price / 1000
+replace mean_price2 = mean_price2 / 1000
+replace mean_catch = mean_catch / 1000
+replace mean_catch2 = mean_catch2 / 1000
+replace pricefishmealafi = pricefishmealafi / 1000
+gen exp_cost_cog = diesel_price * dist_to_cog 
+gen exp_cost_catch_area = diesel_price * dist_port_to_catch_area_zero
 gen id_obs = _n
+gen const_r2 = 1
 
 ** Add addtional variables
 preserve
@@ -32,9 +39,22 @@ drop if _merge == 2
 replace hist_selection = 0 if _merge == 1
 drop _merge
 gen psdnclosured2 = psdnclosured - psdntotalclosured
+gen psdnclosure2 = psdnclosure - psdntotalclosure
+gen species = substr(selection,-4,.) 
+replace species = "No-Participation" if species == "tion" 
 replace d_missing_p = d_missing_p2 if mean_price > 50
 replace mean_price = mean_price2 if mean_price > 50
-gen exp_revenue = mean_price * mean_avail
+gen exp_revenue  = mean_price  * mean_avail
+gen exp_revenue2 = mean_price2 * mean_avail
+egen species_int = group(species), label
+gen d_p = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
+gen d_c = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
+gen d_d = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
+gen d_pc = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
+gen d_pd = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
+gen d_cd = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
+gen d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
+sum d_p d_c d_d d_pc d_pd d_cd d_pcd
 
 *** Create species, port and participation.
 gen spec = substr(selection,-4,.) 
@@ -49,9 +69,9 @@ egen port = group(port_l), label
 * Model set-up
 
 global closure = " "
-global vars = "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_cpue d_missing_p d_missing_d psdnclosured2 psdntotalclosured msqdweekend" 
-global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_missing_cpue d_missing_p d_missing_d psdnclosured2 psdntotalclosured msqdweekend" 
-global case = "" // at the end add: lunarill
+global vars_sdm = "mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_c d_d d_pd d_cd d_pcd psdnclosured2 psdntotalclosured msqdweekend" 
+global vars =               "exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_c d_d d_pd d_cd d_pcd psdnclosured2 psdntotalclosured msqdweekend" 
+global case = " " // at the end add: lunarill
 global case_sdm = " "
 
 
@@ -90,23 +110,34 @@ label variable dummy_prev_days_port "Port has been chosen during the last 30 day
 label variable dummy_prev_year_days "Alternative has been chosen during the last 30 days (previous year)"
 label variable dummy_clust_prev_days "Alternative has been chosen during the last 30 days by any member of the fleet"
 label variable hist_selection "Alternative has been historically chosen during the month (>20% revenue)"
-
+label variable d_c "Binary: Availability missing "
+label variable d_d "Binary: Distance missing "
+label variable d_pd "Binary: Distance and price missing"
+label variable d_cd "Binary: Availability and distance missing"
+label variable d_pcd "Binary: Availability, distance and price missing"
 
 
 
 ******************************
-** Estimate conditional logits (with alternative-specific constant)
+** Estimate nested logit
 
 ** Set choice model database
 // cmset fished_haul selection
 cmset fished_vessel_id time selection
 sort id_obs
 
-*** Only-constant model
+*** Create nested logit variable
+
+<<< WORK FROM HERE >>>
+
 nlogit fished exp_revenue wind_max_220_mh dist_to_cog || part: unem_rate , || port: , || selection: , case(fished_haul) vce(cluster fished_vessel_num)
 
 
-<<< WORK FROM HERE >>>
+*** Estimate model ***
+
+// exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero d_c d_d d_pd d_cd d_pcd psdnclosured2 psdntotalclosured msqdweekend
+
+
 
 qui cmclogit fished, base("No-Participation") 
 scalar ll0 = e(ll)
@@ -351,6 +382,6 @@ restore
 esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
-		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///
-			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AICc" "CAIC" ))  ///
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "Predicted choices - Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant

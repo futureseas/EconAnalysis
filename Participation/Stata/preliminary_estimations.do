@@ -4,7 +4,7 @@
 ***************************************
 
 ** Work to do: 
-* - Compute mean_catch for sardine, anchovy, squid, mackerrrel and herring. Constant and sdm explain catch.
+
 * - Add predicted choices without "No-participation"
 
 global path "C:\GitHub\EconAnalysis\Participation\" 
@@ -73,10 +73,10 @@ gen no_net_species = (species == "ALBC" | species == "DCRB")
 
 
 ** Instrument price
-egen selectionf = group(selection), label
-cmset fished_vessel_id time selection
+/* egen selectionf = group(selection), label
+cmset fished_vessel_id time selection 
 
-/* reg  mean_price i.selectionf mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+reg  mean_price i.selectionf mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 				d_c d_d d_cd d_pd d_pcd psdnclosured2 psdntotalclosured msqdweekend /// 
 				pricefishmealafi diesel_price, noconstant
 predict res, residual
@@ -85,13 +85,6 @@ reg  exp_revenue i.selectionf mean_avail wind_max_220_mh dist_to_cog dist_port_t
 				pricefishmealafi, noconstant
 predict res_rev, residual */
 
-
-*** Test model 
-
-cmclogit fished exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			d_c d_d d_pd d_cd d_pcd psdnclosured2 psdntotalclosured msqdweekend ///
-			i.dummy_last_day i.dummy_prev_year_days, ///
-			base("No-Participation")
 
 
 ********************************************************************
@@ -135,6 +128,11 @@ label variable dummy_prev_days_port "Port has been chosen during the last 30 day
 label variable dummy_prev_year_days "Alternative has been chosen during the last 30 days (previous year)"
 label variable dummy_clust_prev_days "Alternative has been chosen during the last 30 days by any member of the fleet"
 label variable hist_selection "Alternative has been historically chosen during the month (>20% revenue)"
+label variable d_c "Binary: Availability missing "
+label variable d_d "Binary: Distance missing "
+label variable d_pd "Binary: Distance and price missing"
+label variable d_cd "Binary: Availability and distance missing"
+label variable d_pcd "Binary: Availability, distance and price missing"
 
 
 ******************************
@@ -186,6 +184,10 @@ preserve
 	egen count1 = total(fished)
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: B0
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: B0
 restore
 
 eststo B2: cmclogit fished  $vars_sdm i.dummy_prev_days i.dummy_prev_year_days $closure, ///
@@ -211,6 +213,10 @@ preserve
 	egen count1 = total(fished)
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: B2
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: B2
 restore
 
 /* esttab B0 B2 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-${dclosure}-IV_catch_oldprices.rtf", ///
@@ -244,7 +250,12 @@ preserve
 	egen count1 = total(fished)
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: B1
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: B1
 restore
+
 
 eststo B3: cmclogit fished  $vars_sdm i.dummy_last_day i.dummy_prev_year_days $closure, ///
 	casevar($case_sdm) base("No-Participation") from(sB, skip)
@@ -269,6 +280,10 @@ preserve
 	egen count1 = total(fished)
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: B3
+		drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: B3
 restore
 
 
@@ -302,6 +317,10 @@ preserve
 	egen count1 = total(fished)
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: A0
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A0
 restore
 
 eststo A1: cmclogit fished  $vars i.hist_selection $closure, ///
@@ -327,6 +346,10 @@ preserve
 	egen count1 = total(fished)
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: A1
+			drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A1
 restore
 
 eststo A2: cmclogit fished  $vars i.dummy_prev_days i.dummy_prev_year_days $closure, ///
@@ -352,6 +375,10 @@ preserve
 	egen count1 = total(fished)
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: A2
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A2
 restore
 
 eststo A3: cmclogit fished  $vars i.dummy_last_day i.dummy_prev_year_days $closure, ///
@@ -377,17 +404,19 @@ preserve
 	egen count1 = total(fished)
 	dis count1/_N*100 "%"
 	estadd scalar perc1 = count1/_N*100: A3
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A3
 restore
 
 
 * Out: i.dummy_clust_prev_days i.dummy_prev_days_port
 
-esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}.rtf", ///
+esttab A0 A1 A2 A3 B0 B1 B2 B3 using "G:\My Drive\Tables\Participation\preliminary_regressions_participation_state_dep-${S_DATE}-perc2.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
-		stats(N r2 perc1 lr_p aicc caic, fmt(0 3) ///
-			labels("Observations" "McFadden R2" "Predicted choices (%)" "LR-test" "AICc" "CAIC" ))  ///
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
-
-
-
