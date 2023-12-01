@@ -7,13 +7,6 @@ global mwtp "${path}WTP estimation\"
 cd $path
 clear all
 
-*************************************************************************************************************
-*** Work to do: 
-*
-* - Delete trips with low k
-*
-*************************************************************************************************************
-
 
 ** Import data
 import delimited "C:\Data\PacFIN data\rdo_Stata_c4_nhauls5.csv"
@@ -158,7 +151,8 @@ tab check_if_choice
 ** New Logit tree
 nlogittree selection port part, choice(fished) case(fished_haul) 
 constraint 1 [/port]MRA_tau = 1
-
+constraint 2 [/part]NoPart_tau = 1 
+constraint 3 [/port]NoPort_tau = 1 
 
 ** Create dummies to include in the model
 
@@ -178,7 +172,7 @@ gen d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1)
 
 *** Base model to compute R2 ***
 nlogit fished  || part: , base(NoPart) || port: , base(NoPort) || selection: , ///
-		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_num)
+		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num)
 matrix start=e(b)
 estimates store base
 estimates save ${results}basemodel_TUNA.ster
@@ -186,10 +180,8 @@ estimates save ${results}basemodel_TUNA.ster
 estimates store base
 scalar ll0 = e(ll)
 
-
-
 eststo A1: nlogit fished mean_price mean_avail wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured d_d d_c d_p d_cd d_pd d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
-		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_num) from(start, skip)
+		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 		matrix start=e(b)
 estimates save ${results}nlogit_1_TUNA.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
@@ -220,9 +212,8 @@ preserve
 	estadd scalar perc2 = count2/_N*100: A1
 restore
 
-
 eststo A2: nlogit fished mean_price mean_avail wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured diesel_price d_d d_c d_p d_cd d_pd d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
-		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_num) from(start, skip)
+		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 		matrix start=e(b)
 estimates save ${results}nlogit_2_TUNA.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
@@ -263,7 +254,7 @@ replace d_pd = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 1)
 replace d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1) 
 
 eststo A3: nlogit fished mean_price2 mean_avail wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured diesel_price d_d d_c d_p d_cd d_pd d_pc d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
-		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_num) from(start, skip)
+		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 		matrix start=e(b)
 estimates save ${results}nlogit_3_TUNA.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
@@ -303,7 +294,7 @@ replace d_pd =  (d_missing_p == 1 & d_missing_catch == 0 & d_missing_d == 1)
 replace d_pcd = (d_missing_p == 1 & d_missing_catch == 1 & d_missing_d == 1) 
 
 eststo A4: nlogit fished mean_price mean_catch wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured diesel_price d_d d_c d_p d_cd d_pd d_pc d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
-		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_num) from(start, skip)
+		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 		matrix start=e(b)
 estimates save ${results}nlogit_3_TUNA.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
@@ -344,7 +335,7 @@ replace d_pd =  (d_missing_p2 == 1 & d_missing_catch == 0 & d_missing_d == 1)
 replace d_pcd = (d_missing_p2 == 1 & d_missing_catch == 1 & d_missing_d == 1) 
 
 eststo A5: nlogit fished mean_price2 mean_catch wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured diesel_price d_d d_c d_p d_cd d_pd d_pc d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
-		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_num) from(start, skip)
+		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 		matrix start=e(b)
 estimates save ${results}nlogit_3_TUNA.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
