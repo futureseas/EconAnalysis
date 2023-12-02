@@ -278,6 +278,39 @@ esttab A1 A2 using "G:\My Drive\Tables\Participation\nested_logit-${S_DATE}_FULL
 
 exit
 
+nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured i.dummy_last_day i.dummy_prev_year_days ///
+	  	d_d d_c d_p d_cd d_pd d_pc d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
+	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num)
+estimates store statedep
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): statedep
+lrtest A1 statedep, force
+estadd scalar lr_p = r(p): statedep
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: statedep
+estadd scalar bic = S[1,6]: statedep
+estadd scalar aicc = S[1,7]: statedep
+estadd scalar caic = S[1,8]: statedep
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: statedep
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: statedep
+restore
+
+
 nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
 	  	d_d d_c d_p d_cd d_pd d_pc d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: lunarill weekend, ///
 	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num)
