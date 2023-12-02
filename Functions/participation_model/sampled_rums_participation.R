@@ -598,6 +598,22 @@ sampled_rums <- function(data_in, cluster = 4,
   sampled_hauls$prev_year_set_date <- sampled_hauls$set_date - days(365)
   sampled_hauls$prev_year_days_date <- sampled_hauls$prev_days_date - days(365)
   
+  if (sample_choices == FALSE) {
+    sampled_hauls <- sampled_hauls %>%
+      group_by(selection) %>% 
+      dplyr::mutate(time_chosen = sum(fished)) %>% 
+      ungroup() %>% 
+      dplyr::mutate(NP_n_choice_occ = ifelse(selection == "No-Participation", time_chosen, 0)) %>%
+      dplyr::mutate(n_choice_occ = sum(fished) - max(NP_n_choice_occ))  %>%
+      dplyr::mutate(perc_chosen = round(time_chosen*100/n_choice_occ, digits = 1)) %>%
+      dplyr::filter(perc_chosen >= k_chosen) %>% 
+      group_by(fished_haul) %>%
+      dplyr::mutate(choice_or_not = sum(fished)) %>%
+      ungroup() %>%
+      dplyr::filter(choice_or_not == 1) %>%
+      dplyr::select(-c('NP_n_choice_occ', 'time_chosen', 'n_choice_occ', 'choice_or_not'))
+  }
+  
   # Database to use in iterations
   td <- sampled_hauls %>%
     dplyr::select(fished_haul, set_date, prev_days_date, prev_30days_date, prev_90days_date,
