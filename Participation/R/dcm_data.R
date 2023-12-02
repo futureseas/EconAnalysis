@@ -17,24 +17,25 @@ library(lubridate)
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
-# samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
-#                          min_year = 2013, max_year = 2017,
-#                          min_year_prob = 2013, max_year_prob = 2017,
-#                          min_year_est = 2012, max_year_est = 2019,
-#                          ndays = 30, nhauls_sampled = 5,
-#                          seed = 300, ncores = 4, rev_scale = 1000,
-#                          sample_choices = FALSE, k_chosen = 0.5) ## max_est_year for catch is 2014 (pre-closure)
-# 
-#   samps <- samps1 %>%
-#     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-#     rm(samps1)
-#     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4_full.rds")
+samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
+                         min_year = 2013, max_year = 2017,
+                         min_year_prob = 2013, max_year_prob = 2017,
+                         min_year_est = 2012, max_year_est = 2019,
+                         ndays = 30, nhauls_sampled = 5,
+                         seed = 300, ncores = 4, rev_scale = 1000,
+                         sample_choices = FALSE, k_chosen = 0.5) 
+                         ## max_est_year for catch is 2014 (pre-closure)
+
+  samps <- samps1 %>%
+    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+    rm(samps1)
+    saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4_full.rds")
 
     
 #----------------------------------
 
 ## Run saved data
-samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c4_nhauls5.rds")
+samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c4_full.rds")
 
 #----------------------------------
 ## Check if there is no similar alternatives within a trip
@@ -527,14 +528,14 @@ rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_hau
   #%>% dplyr::select(-c('set_date'))  
 
 ## Save data to run with Stata
-write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c4_nhauls5.csv", row.names = FALSE)
-saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c4_nhauls5.rds")
+write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c4_full.csv", row.names = FALSE)
+saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c4_full.rds")
 
 
 # ########################################
 # ## Compare mean_catch v/s mean_catch2 ##
 # ########################################
-# rdo_Stata <- readRDS(file = "C:\\Data\\PacFIN data\\rdo_Stata_c4_nhauls5.rds")
+# rdo_Stata <- readRDS(file = "C:\\Data\\PacFIN data\\rdo_Stata_c4_full.rds")
 # compare_catch_data <- rdo_Stata %>% 
 #   mutate(Port = substr(selection, 1, 3)) %>%
 #   mutate(Species = substr(selection, 5, 8)) %>% 
