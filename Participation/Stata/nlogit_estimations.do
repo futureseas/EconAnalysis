@@ -276,6 +276,7 @@ esttab A1 A2 using "G:\My Drive\Tables\Participation\nested_logit-${S_DATE}_FULL
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant drop(weekend _cons)
 
+exit
 
 nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
 	  	d_d d_c d_p d_cd d_pd d_pc d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: lunarill weekend, ///
@@ -283,7 +284,7 @@ nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero
 estimates store lun
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): lun
-lrtest base lun, force
+lrtest A1 lun, force
 estadd scalar lr_p = r(p): lun
 estat ic, all
 matrix S = r(S)
@@ -309,4 +310,3 @@ preserve
 	estadd scalar perc2 = count2/_N*100: lun
 restore
 
-* Note: Add lunar at the end.
