@@ -17,6 +17,7 @@
 #' @param ncores Number of cores to use
 #' @param rev_scale Scale the revenue by this factor
 #' @param sample_choices whether we want to sample choices or not
+#' @param k_chosen threshold for selection alternative in choice set
 
 #' @export
 
@@ -26,7 +27,7 @@ sampled_rums <- function(data_in, cluster = 4,
                          min_year_est = 2012, max_year_est = 2019,
                          ndays = 30, 
                          nhauls_sampled = 5, seed = 300, 
-                         ncores, rev_scale, sample_choices = TRUE) {
+                         ncores, rev_scale, sample_choices = FALSE, k_chosen = 0.5) {
 
   # ###############
   # # Delete
@@ -45,12 +46,13 @@ sampled_rums <- function(data_in, cluster = 4,
   # max_year_est <- 2019
   # min_year <- 2013
   # max_year <- 2017
+  # k_chosen <- 0.5
   # ndays <- 30
   # nhauls_sampled <- 5
   # seed <- 300
   # ncores <- 4
   # rev_scale <- 1000
-  # sample_choices <- TRUE
+  # sample_choices <- FALSE
   # ################
 
   dat <- data_in 
@@ -158,7 +160,10 @@ sampled_rums <- function(data_in, cluster = 4,
     rm(xx, species.list, species, datPanel, datPanel2, dat_est, datPanel_X)
     species.list.number$id_number <- seq(1, nrow(species.list.number))
 
-
+    summary(mod_estimate[[234]]) # psdn 17%
+    summary(mod_estimate[[261]]) # squid 36%
+    summary(mod_estimate[[209]]) # nanc 52%
+    summary(mod_estimate[[233]]) # cmck 30%
 
   # #-----------------------------------------------------------------------------
   # ## Keep core vessel
@@ -685,7 +690,7 @@ sampled_rums <- function(data_in, cluster = 4,
     fuel.prices.state[fuel.prices.state == 0] <- NA
     fuel.prices.state <- fuel.prices.state %>% drop_na()
 
-    
+  
   ### Calculate revenues
   dummys2 <- foreach::foreach(ii = 1:nrow(td),
     .packages = c("dplyr", 'lubridate')) %dopar% {
