@@ -498,7 +498,7 @@ sampled_rums <- function(data_in, cluster = 4,
     # Finish work
     registerDoSEQ()
     print("Done sampling choices")
-} else {
+  } else {
     print("Full choice set selected")
     
     # Exclude other days of same trip (multiday trips)
