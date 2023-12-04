@@ -52,7 +52,7 @@ sampled_rums <- function(data_in, cluster = 4,
   # seed <- 300
   # ncores <- 4
   # rev_scale <- 1000
-  # sample_choices <- FALSE
+  # sample_choices <- TRUE
   # ################
 
   dat <- data_in 
@@ -293,8 +293,8 @@ sampled_rums <- function(data_in, cluster = 4,
     
     
     ### Create factor by month and graph composition
-    cl <- makeCluster(ncores)
-    registerDoParallel(cl)
+    registerDoParallel(cl = ncores)
+    getDoParWorkers()
     
     dbp3 <- foreach::foreach(ll = 1:12, .packages = c("dplyr", 'plyr', 'lubridate')) %dopar% {
       dbp2 <- dbp %>% dplyr::filter(set_month == ll)  %>%  
@@ -493,8 +493,12 @@ sampled_rums <- function(data_in, cluster = 4,
     
     #add in the fleet name
     sampled_hauls$fleet_name <- cluster
+    
+    
+    # Finish work
+    registerDoSEQ()
     print("Done sampling choices")
-  } else {
+} else {
     print("Full choice set selected")
     
     # Exclude other days of same trip (multiday trips)
@@ -692,6 +696,10 @@ sampled_rums <- function(data_in, cluster = 4,
 
   
   ### Calculate revenues
+  
+  registerDoParallel(cl = ncores)
+  getDoParWorkers()  
+  
   dummys2 <- foreach::foreach(ii = 1:nrow(td),
     .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
@@ -713,7 +721,8 @@ sampled_rums <- function(data_in, cluster = 4,
     }
   print("Done calculating dummys and revenues")
   td2 <- plyr::ldply(dummys2)
-  stopCluster(cl)
+  
+  registerDoSEQ()
   
   # Create dummy for prev days fishing
   td2[which(td2$dummy_last_day != 0), 'dummy_last_day'] <- 1
