@@ -287,7 +287,7 @@ replace d_pc =  (d_missing_p == 1 & d_missing_catch == 1 & d_missing_d == 0)
 replace d_pd =  (d_missing_p == 1 & d_missing_catch == 0 & d_missing_d == 1) 
 replace d_pcd = (d_missing_p == 1 & d_missing_catch == 1 & d_missing_d == 1) 
 
-nlogit fished mean_catch mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured dummy_last_day dummy_prev_year_days ///
+nlogit fished mean_price mean_catch wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured dummy_last_day dummy_prev_year_days ///
 	  	d_d d_c d_p d_cd d_pd d_pc d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
 	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num)
 estimates store statedep2
