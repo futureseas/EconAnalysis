@@ -518,7 +518,7 @@ sampled_rums <- function(data_in, cluster = 4,
       mutate(set_date = zoo::na.locf(set_date, na.rm = F)) %>%
       mutate(fished = ifelse(is.na(fished), 0, fished)) %>%
       rename(fished_haul = trip_id) %>% 
-      select(c(selection, fished, fished_haul, fished_VESSEL_NUM, set_date))
+      dplyr::select(c(selection, fished, fished_haul, fished_VESSEL_NUM, set_date))
       
     sampled_hauls <- sampled_hauls %>% mutate(PACFIN_SPECIES_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, start= -4))) 
     sampled_hauls <- sampled_hauls %>% mutate(PORT_AREA_CODE = ifelse(selection == "No-Participation", NA, str_sub(sampled_hauls$selection, end= 3)))  
@@ -721,6 +721,7 @@ sampled_rums <- function(data_in, cluster = 4,
     }
   print("Done calculating dummys and revenues")
   td2 <- plyr::ldply(dummys2)
+  saveRDS(td2, file = "C:\\Data\\PacFIN data\\td2.rds")
   
   registerDoSEQ()
   
