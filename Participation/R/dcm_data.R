@@ -30,7 +30,8 @@ samps1 <- sampled_rums(data_in = participation_data, cluster = 4,
     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
     rm(samps1)
     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c4_full.rds")
-
+    write.csv(samps,"C:\\Users\\fequezad\\OneDrive\\PostDoc\\sample_choice_set_c4_full.csv", row.names = FALSE)
+    
     
 #----------------------------------
 
