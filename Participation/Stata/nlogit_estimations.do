@@ -124,7 +124,7 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 ** Create nested logit variables
 nlogitgen port = selection( ///
 	LAA: LAA-BTNA | LAA-CMCK | LAA-MSQD | LAA-NANC | LAA-PSDN | LAA-YTNA, ///
-    MNA: MNA-MSQD | MNA-NANC, /// 
+    MNA: MNA-MSQD | MNA-NANC | MNA-PSDN, /// 
     MRA: MRA-MSQD, ///
     SBA: SBA-CMCK | SBA-MSQD, /// 
     SFA: SFA-MSQD | SFA-NANC, /// 
@@ -148,11 +148,9 @@ keep if selection == "LAA-CMCK" | ///
 		selection == "MNA-PSDN" | ///
 		selection == "LAA-PSDN" | ///
 		selection == "LAA-NANC" | ///
-		selection == "MRA-MSQD" 
-
-/* 		| ///
+		selection == "MRA-MSQD" | ///
 		selection == "LAA-BTNA" | ///
-		selection == "LAA-YTNA" */ 
+		selection == "LAA-YTNA" 
 
 ** Drop cases with no choice selected
 cap drop check_if_choice
@@ -171,11 +169,11 @@ constraint 3 [/port]NoPort_tau = 1
 
 *** Base model to compute R2
 
-//nlogit fished  || part: , base(NoPart) || port: , base(NoPort) || selection: , ///
+nlogit fished  || part: , base(NoPart) || port: , base(NoPort) || selection: , ///
 		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num)
-//matrix start=e(b) 
-//estimates save ${results}basemodel_FULL.ster 
-estimates use ${results}basemodel_MRA.ster
+matrix start=e(b) 
+estimates save ${results}basemodel_FULL.ster 
+estimates use ${results}basemodel_FULL.ster
 estimates store base
 scalar ll0 = e(ll)
 
@@ -190,10 +188,10 @@ replace d_pc =  (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0)
 replace d_pd =  (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
 replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
 
-eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured d_d d_c d_p d_cd d_pd d_pc d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
+eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured d_d d_c d_p d_cd d_pd d_pc d_pcd dummy_last_day dummy_prev_year_days || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
 		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 		matrix start=e(b)
-//estimates save ${results}nlogit_1_FULL.ster
+estimates save ${results}nlogit_1_FULL.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): A1
 lrtest base A1, force
@@ -232,10 +230,10 @@ replace d_pc =  (d_missing_p == 1 & d_missing_catch == 1 & d_missing_d == 0)
 replace d_pd =  (d_missing_p == 1 & d_missing_catch == 0 & d_missing_d == 1) 
 replace d_pcd = (d_missing_p == 1 & d_missing_catch == 1 & d_missing_d == 1) 
 
-eststo A2: nlogit fished mean_price mean_catch wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured d_d d_c d_p d_cd d_pd d_pc d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
+eststo A2: nlogit fished mean_price mean_catch wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured d_d d_c d_p d_cd d_pd d_pc d_pcd dummy_last_day dummy_prev_year_days || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
 		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 		matrix start=e(b)
-//estimates save ${results}nlogit_2_FULL.ster
+estimates save ${results}nlogit_2_FULL.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): A2
 lrtest base A2, force
@@ -271,59 +269,6 @@ esttab A1 A2 using "G:\My Drive\Tables\Participation\nested_logit-${S_DATE}_FULL
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant drop(weekend _cons)
 
-exit
-
-*** Models using catch
-replace d_c =   (d_missing_p == 0 & d_missing_catch == 1 & d_missing_d == 0) 
-replace d_d =   (d_missing_p == 0 & d_missing_catch == 0 & d_missing_d == 1) 
-replace d_p =   (d_missing_p == 1 & d_missing_catch == 0 & d_missing_d == 0) 
-replace d_cd =  (d_missing_p == 0 & d_missing_catch == 1 & d_missing_d == 1) 
-replace d_pc =  (d_missing_p == 1 & d_missing_catch == 1 & d_missing_d == 0) 
-replace d_pd =  (d_missing_p == 1 & d_missing_catch == 0 & d_missing_d == 1) 
-replace d_pcd = (d_missing_p == 1 & d_missing_catch == 1 & d_missing_d == 1) 
-
-nlogit fished mean_price mean_catch wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured dummy_last_day dummy_prev_year_days ///
-	  	d_d d_c d_p d_cd d_pd d_pc d_pcd || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
-	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num)
-estimates store statedep2
-estimates use ${results}nlogit_1_MRA.ster
-estimate store A1
-estimates use ${results}basemodel_MRA.ster
-scalar ll0 = e(ll)
-estimates restore statedep
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): statedep2
-lrtest statedep statedep2, force
-estadd scalar lr_p = r(p): statedep2
-estat ic, all
-matrix S = r(S)
-estadd scalar aic = S[1,5]: statedep2
-estadd scalar bic = S[1,6]: statedep2
-estadd scalar aicc = S[1,7]: statedep2
-estadd scalar caic = S[1,8]: statedep2
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: statedep2
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc2 = count2/_N*100: statedep2
-restore
-esttab statedep using "G:\My Drive\Tables\Participation\nested_logit-${S_DATE}_statedep.rtf", ///
-		starlevels(* 0.10 ** 0.05 *** 0.01) ///
-		label title("Table. Preliminary estimations.") /// 
-		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
-			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant drop(weekend _cons)
 exit
 
 
