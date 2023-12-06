@@ -46,7 +46,6 @@ test <-
     summarize(n_count = n())
     max(test$n_count)
     rm(test)
-
     
     # #--------------------------------------------------------------------------
 ## See how many times we have NA
