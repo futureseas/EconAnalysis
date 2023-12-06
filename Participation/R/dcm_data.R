@@ -538,7 +538,7 @@ rdo_Stata_noid <- rdo_Stata %>%
   dplyr::select(-c('fished_VESSEL_NUM'))
 
 ## Save data to run with Stata
-write.csv(rdo_Stata_noid,"C:\\Users\\felip\\OneDrive\\PostDoc\\rdo_Stata_c4_full_noid.csv", row.names = FALSE)
+write.csv(rdo_Stata_noid,"C:\\Users\\fequezad\\OneDrive\\PostDoc\\rdo_Stata_c4_full_noid.csv", row.names = FALSE)
 
 
 # ########################################
