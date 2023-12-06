@@ -34,7 +34,6 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 #----------------------------------
 
 ## Run saved data
-
 samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c4_full.rds")
 
 
