@@ -9,7 +9,10 @@ clear all
 
 
 ** Import data
-import delimited "C:\Data\PacFIN data\rdo_Stata_c4_full.csv"
+// import delimited "C:\Data\PacFIN data\rdo_Stata_c4_full.csv"
+// save rdo_Stata_c4_full.dta, replace
+use rdo_Stata_c4_full.dta, clear
+
 replace mean_price = mean_price / 1000
 replace mean_price2 = mean_price2 / 1000
 replace mean_catch = mean_catch / 1000
@@ -120,21 +123,13 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 
 ** Create nested logit variables
 nlogitgen port = selection( ///
-	BDA: BDA-DCRB | BDA-MSQD, ///
-	BGA: BGA-MSQD , ///
- 	CWA: CWA-DCRB , ///
-    ERA: ERA-MSQD , ///
-    LAA: LAA-BTNA | LAA-CMCK | LAA-JMCK | LAA-MSQD | LAA-NANC | LAA-PBNT | LAA-PSDN | LAA-RHRG | LAA-STNA | LAA-YTNA, ///
-    MNA: MNA-ALBC | MNA-CMCK | MNA-JMCK | MNA-LSKT | MNA-MSQD | MNA-NANC | MNA-PSDN | MNA-UDAB, /// 
+	LAA: LAA-BTNA | LAA-CMCK | LAA-MSQD | LAA-NANC | LAA-PSDN | LAA-YTNA, ///
+    MNA: MNA-MSQD | MNA-NANC, /// 
     MRA: MRA-MSQD, ///
-    NPA: NPA-MSQD, /// 
-    NPS: NPS-CHUM | NPS-DCRB | NPS-SOCK, /// 
-    SBA: SBA-CMCK | SBA-JMCK | SBA-MSQD | SBA-PBNT | SBA-PSDN | SBA-UMCK, /// 
-    SDA: SDA-BTNA, ///
-    SFA: SFA-CHNK | SFA-DCRB | SFA-MSQD | SFA-NANC, /// 
-    SPS: SPS-CHUM, ///
+    SBA: SBA-CMCK | SBA-MSQD, /// 
+    SFA: SFA-MSQD | SFA-NANC, /// 
     NoPort: No-Participation)
-nlogitgen part = port(Part: BDA | BGA | CWA | ERA | LAA | MNA | MRA | NPA | NPS | SBA | SDA | SFA | SPS, ///
+nlogitgen part = port(Part: LAA | MNA | MRA | SBA | SFA, ///
 					  NoPart: NoPort)
 
 ** Logit tree
