@@ -9,7 +9,7 @@ clear all
 
 
 ** Import data
-import delimited "C:\Data\PacFIN data\rdo_Stata_c4_nhauls5.csv"
+import delimited "C:\Data\PacFIN data\rdo_Stata_c4_full.csv"
 replace mean_price = mean_price / 1000
 replace mean_price2 = mean_price2 / 1000
 replace mean_catch = mean_catch / 1000
@@ -174,7 +174,7 @@ constraint 2 [/part]NoPart_tau = 1
 constraint 3 [/port]NoPort_tau = 1 
 
 
-/* *** Base model to compute R2
+*** Base model to compute R2
 
 //nlogit fished  || part: , base(NoPart) || port: , base(NoPort) || selection: , ///
 		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num)
@@ -276,7 +276,7 @@ esttab A1 A2 using "G:\My Drive\Tables\Participation\nested_logit-${S_DATE}_FULL
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant drop(weekend _cons)
 
-exit */
+exit
 
 *** Models using catch
 replace d_c =   (d_missing_p == 0 & d_missing_catch == 1 & d_missing_d == 0) 
