@@ -35,8 +35,7 @@ participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
 ## Run saved data
 
-samps <- readRDS(file = "C:\\Users\\felip\\OneDrive\\PostDoc\\sample_choice_set_c4_full.rds")
-#samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c4_full.rds")
+samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c4_full.rds")
 
 
 #----------------------------------
@@ -532,6 +531,15 @@ rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_hau
 ## Save data to run with Stata
 write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c4_full.csv", row.names = FALSE)
 saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c4_full.rds")
+
+#----------------------------------------------------
+## Stata data
+
+rdo_Stata_noid <- rdo_Stata %>% 
+  dplyr::select(-c('fished_VESSEL_NUM'))
+
+## Save data to run with Stata
+write.csv(rdo_Stata_noid,"C:\\Users\\felip\\OneDrive\\PostDoc\\rdo_Stata_c4_full_noid.csv", row.names = FALSE)
 
 
 # ########################################
