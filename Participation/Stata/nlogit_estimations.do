@@ -121,6 +121,9 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 ** Estimate nested logit **
 ***************************
 
+<<< CHANGE TREE STRUCTURE >>>
+
+
 ** Create nested logit variables
 nlogitgen port = selection( ///
 	LAA: LAA-BTNA | LAA-CMCK | LAA-MSQD | LAA-NANC | LAA-PSDN | LAA-YTNA, ///
@@ -180,16 +183,16 @@ scalar ll0 = e(ll)
 
 *** Models with availability 
 
-replace d_c =   (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
-replace d_d =   (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
-replace d_p =   (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
-replace d_cd =  (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
-replace d_pc =  (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
-replace d_pd =  (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
+replace d_c   =   (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
+replace d_d   =   (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
+replace d_p   =   (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
+replace d_cd  =  (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
+replace d_pc  =  (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
+replace d_pd  =  (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
 replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
 
-eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured d_d d_c d_p d_cd d_pd d_pc d_pcd dummy_last_day dummy_prev_year_days || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
-		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
+eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured d_d d_cd dcpue dummy_last_day dummy_prev_year_days || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
+		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) // from(start, skip)
 		matrix start=e(b)
 estimates save ${results}nlogit_1_FULL.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
@@ -230,7 +233,9 @@ replace d_pc =  (d_missing_p == 1 & d_missing_catch == 1 & d_missing_d == 0)
 replace d_pd =  (d_missing_p == 1 & d_missing_catch == 0 & d_missing_d == 1) 
 replace d_pcd = (d_missing_p == 1 & d_missing_catch == 1 & d_missing_d == 1) 
 
-eststo A2: nlogit fished mean_price mean_catch wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured d_d d_c d_p d_cd d_pd d_pc d_pcd dummy_last_day dummy_prev_year_days || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
+
+
+eststo A2: nlogit fished mean_price mean_catch wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured d_d d_cd dcpue dummy_last_day dummy_prev_year_days || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
 		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 		matrix start=e(b)
 estimates save ${results}nlogit_2_FULL.ster
@@ -271,6 +276,12 @@ esttab A1 A2 using "G:\My Drive\Tables\Participation\nested_logit-${S_DATE}_FULL
 
 exit
 
+esttab A1 using "G:\My Drive\Tables\Participation\nested_logit-${S_DATE}_FULL.rtf", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Preliminary estimations.") /// 
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant drop(weekend _cons)
 
 /* 
 nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
