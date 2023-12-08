@@ -121,19 +121,19 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 ** Estimate nested logit **
 ***************************
 
-<<< CHANGE TREE STRUCTURE >>>
-
-
 ** Create nested logit variables
+
 nlogitgen port = selection( ///
-	LAA: LAA-BTNA | LAA-CMCK | LAA-MSQD | LAA-NANC | LAA-PSDN | LAA-YTNA, ///
+	LAA_TUNA: LAA-YTNA | LAA-BTNA, ///
+	LAA: LAA-CMCK | LAA-MSQD | LAA-NANC | LAA-PSDN, ///
     MNA: MNA-MSQD | MNA-NANC | MNA-PSDN, /// 
     MRA: MRA-MSQD, ///
     SBA: SBA-CMCK | SBA-MSQD, /// 
     SFA: SFA-MSQD | SFA-NANC, /// 
-    NoPort: No-Participation)
-nlogitgen part = port(Part: LAA | MNA | MRA | SBA | SFA, ///
-					  NoPart: NoPort)
+    NOPORT: No-Participation)
+
+nlogitgen part = port(PART: LAA | MNA | MRA | SBA | SFA | LAA_TUNA, ///
+					  NOPART: NOPORT)
 
 ** Logit tree
 nlogittree selection port part, choice(fished) case(fished_haul) 
@@ -166,23 +166,22 @@ tab check_if_choice
 ** New Logit tree
 nlogittree selection port part, choice(fished) case(fished_haul) 
 constraint 1 [/port]MRA_tau = 1
-constraint 2 [/part]NoPart_tau = 1 
-constraint 3 [/port]NoPort_tau = 1 
+constraint 2 [/part]NOPART_tau = 1 
+constraint 3 [/port]NOPORT_tau = 1 
+// constraint 4 [/part]TUNA_tau = 1 
 
-
-*** Base model to compute R2
+/* *** Base model to compute R2
 
 nlogit fished  || part: , base(NoPart) || port: , base(NoPort) || selection: , ///
-		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num)
+		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_num)
 matrix start=e(b) 
 estimates save ${results}basemodel_FULL.ster 
 estimates use ${results}basemodel_FULL.ster
 estimates store base
-scalar ll0 = e(ll)
+scalar ll0 = e(ll) */
 
 
 *** Models with availability 
-
 replace d_c   =   (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
 replace d_d   =   (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
 replace d_p   =   (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
@@ -191,9 +190,13 @@ replace d_pc  =  (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0)
 replace d_pd  =  (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
 replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
 
-eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured d_d d_cd dcpue dummy_last_day dummy_prev_year_days || part: unem_rate, base(NoPart) || port: , base(NoPort) || selection: weekend, ///
+tabulate set_month, generate(month)
+
+eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
+	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || part: unem_rate || port: || selection: weekend, ///
 		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) // from(start, skip)
-		matrix start=e(b)
+
+matrix start=e(b)
 estimates save ${results}nlogit_1_FULL.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): A1
