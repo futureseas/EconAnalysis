@@ -123,20 +123,32 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 
 ** Create nested logit variables
 
-nlogitgen port = selection( ///
-	LAA_TUNA: LAA-YTNA | LAA-BTNA, ///
-	LAA: LAA-CMCK | LAA-MSQD | LAA-NANC | LAA-PSDN, ///
-    MNA: MNA-MSQD | MNA-NANC | MNA-PSDN, /// 
-    MRA: MRA-MSQD, ///
-    SBA: SBA-CMCK | SBA-MSQD, /// 
-    SFA: SFA-MSQD | SFA-NANC, /// 
+nlogitgen species = selection( ///
+	MSQD: LAA-MSQD | MNA-MSQD | MRA-MSQD | SBA-MSQD | SFA-MSQD, ///
+	TUNA: LAA-YTNA | LAA-BTNA, ///
+	PSDN: LAA-PSDN | MNA-PSDN, ///
+	NANC: LAA-NANC | MNA-NANC | SFA-NANC, ///
+	CMCK: LAA-CMCK | SBA-CMCK, /// 
     NOPORT: No-Participation)
 
-nlogitgen part = port(PART: LAA | MNA | MRA | SBA | SFA | LAA_TUNA, ///
+nlogitgen part = species(PART: MSQD | PSDN | NANC | CMCK | TUNA, ///
 					  NOPART: NOPORT)
 
+// nlogitgen port = selection( ///
+// 	LAA_TUNA: LAA-YTNA | LAA-BTNA, ///
+// 	LAA: LAA-CMCK | LAA-MSQD | LAA-NANC | LAA-PSDN, ///
+//     MNA: MNA-MSQD | MNA-NANC | MNA-PSDN, /// 
+//     MRA: MRA-MSQD, ///
+//     SBA: SBA-CMCK | SBA-MSQD, /// 
+//     SFA: SFA-MSQD | SFA-NANC, /// 
+//     NOPORT: No-Participation)
+
+// nlogitgen part = port(PART: LAA | MNA | MRA | SBA | SFA | LAA_TUNA, ///
+// 					  NOPART: NOPORT)
+
+
 ** Logit tree
-nlogittree selection port part, choice(fished) case(fished_haul) 
+nlogittree selection species part, choice(fished) case(fished_haul) generate(prob)
 
 ** Keep few choices
 keep if selection == "LAA-CMCK" | ///
@@ -152,7 +164,6 @@ keep if selection == "LAA-CMCK" | ///
 		selection == "LAA-PSDN" | ///
 		selection == "LAA-NANC" | ///
 		selection == "MRA-MSQD" | ///
-		selection == "LAA-BTNA" | ///
 		selection == "LAA-YTNA" 
 
 ** Drop cases with no choice selected
@@ -164,10 +175,10 @@ keep if check_if_choice
 tab check_if_choice
 
 ** New Logit tree
-nlogittree selection port part, choice(fished) case(fished_haul) 
-constraint 1 [/port]MRA_tau = 1
+nlogittree selection species part, choice(fished) case(fished_haul) 
+// constraint 1 [/port]MRA_tau = 1
 constraint 2 [/part]NOPART_tau = 1 
-constraint 3 [/port]NOPORT_tau = 1 
+constraint 3 [/species]NOPORT_tau = 1 
 // constraint 4 [/part]TUNA_tau = 1 
 
 /* *** Base model to compute R2
@@ -193,11 +204,14 @@ replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1)
 tabulate set_month, generate(month)
 
 eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
-	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || part: unem_rate || port: || selection: weekend, ///
-		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) // from(start, skip)
+	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || part: unem_rate || species: || selection: weekend, ///
+		base("No-Participation") case(fished_haul) constraints(2 3) vce(cluster fished_vessel_num) iterate(73) trace gradient showstep 
 
-matrix start=e(b)
+		// from(start, skip)
+
 estimates save ${results}nlogit_1_FULL.ster
+matrix start=e(b)
+
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): A1
 lrtest base A1, force
