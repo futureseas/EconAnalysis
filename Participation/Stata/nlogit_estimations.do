@@ -134,19 +134,6 @@ nlogitgen species = selection( ///
 nlogitgen part = species(PART: MSQD | PSDN | NANC | CMCK | TUNA, ///
 					  NOPART: NOPORT)
 
-// nlogitgen port = selection( ///
-// 	LAA_TUNA: LAA-YTNA | LAA-BTNA, ///
-// 	LAA: LAA-CMCK | LAA-MSQD | LAA-NANC | LAA-PSDN, ///
-//     MNA: MNA-MSQD | MNA-NANC | MNA-PSDN, /// 
-//     MRA: MRA-MSQD, ///
-//     SBA: SBA-CMCK | SBA-MSQD, /// 
-//     SFA: SFA-MSQD | SFA-NANC, /// 
-//     NOPORT: No-Participation)
-
-// nlogitgen part = port(PART: LAA | MNA | MRA | SBA | SFA | LAA_TUNA, ///
-// 					  NOPART: NOPORT)
-
-
 ** Logit tree
 nlogittree selection species part, choice(fished) case(fished_haul) generate(prob)
 
@@ -174,12 +161,18 @@ tab check_if_choice
 keep if check_if_choice
 tab check_if_choice
 
+
 ** New Logit tree
-nlogittree selection species part, choice(fished) case(fished_haul) 
-// constraint 1 [/port]MRA_tau = 1
+constraint 1 [/port]MRA_tau = 1
 constraint 2 [/part]NOPART_tau = 1 
 constraint 3 [/species]NOPORT_tau = 1 
-// constraint 4 [/part]TUNA_tau = 1 
+constraint 4 [/species]TUNA_tau = 1 
+constraint 5 [/port]LAATUNA_tau = 1
+constraint 6 [/port]NOPORT_tau = 1 
+
+
+*** Model nested with prices
+nlogittree selection species part, choice(fished) case(fished_haul) 
 
 /* *** Base model to compute R2
 
@@ -205,13 +198,37 @@ tabulate set_month, generate(month)
 
 eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
 	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || part: unem_rate || species: || selection: weekend, ///
-		base("No-Participation") case(fished_haul) constraints(2 3) vce(cluster fished_vessel_num) iterate(73) trace gradient showstep 
+	base("No-Participation") case(fished_haul) constraints(2 3 4) vce(cluster fished_vessel_num) // from(start, skip)
+	estimates save ${results}nlogit_1_FULL.ster
 
-		// from(start, skip)
 
-estimates save ${results}nlogit_1_FULL.ster
+
+*** Model nested with ports
+
+nlogitgen port = selection( ///
+	LAATUNA: LAA-YTNA, ///
+	LAA: LAA-CMCK | LAA-MSQD | LAA-NANC | LAA-PSDN, ///
+    MNA: MNA-MSQD | MNA-NANC | MNA-PSDN, /// 
+    MRA: MRA-MSQD, ///
+    SBA: SBA-CMCK | SBA-MSQD, /// 
+    SFA: SFA-MSQD | SFA-NANC, /// 
+    NOPORT: No-Participation)
+
+nlogitgen partp = port(PART: LAA | MNA | MRA | SBA | SFA | LAATUNA, NOPART: NOPORT)
+
+nlogittree selection port partp, choice(fished) case(fished_haul) 
+
+eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
+	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || partp: unem_rate || port: || selection: weekend, ///
+	base("No-Participation") case(fished_haul) constraints(1 2 5 6) vce(cluster fished_vessel_num) // from(start, skip)
+	estimates save ${results}nlogit_1_FULLp.ster
+
+
+**********************
+**********************
+
+
 matrix start=e(b)
-
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): A1
 lrtest base A1, force
