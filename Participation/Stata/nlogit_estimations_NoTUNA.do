@@ -15,7 +15,7 @@ use rdo_Stata_c4_full.dta, clear
 preserve
  import delimited "Stata\dbp_month_Stata_c4.csv", clear
  tempfile dbp_month
- save dbp_month, replace
+ save dbp_month
 restore
 merge m:1 selection set_month using "dbp_month.dta"
 drop if _merge == 2
