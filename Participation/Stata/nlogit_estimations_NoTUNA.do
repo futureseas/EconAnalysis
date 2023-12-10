@@ -12,11 +12,6 @@ clear all
 use rdo_Stata_c4_full.dta, clear
 
 ** Add addtional variables
-preserve
- import delimited "Stata\dbp_month_Stata_c4.csv", clear
- tempfile dbp_month
- save dbp_month
-restore
 merge m:1 selection set_month using "dbp_month.dta"
 drop if _merge == 2
 replace hist_selection = 0 if _merge == 1
@@ -119,11 +114,8 @@ constraint 3 [/partp]NOPART_tau = 1
 
 
 *** Base model to compute R2
-nlogit fished  || partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_num)
+asclogit fished, base("No-Participation") case(fished_haul) alternatives(selection) vce(cluster fished_vessel_num)
 matrix start=e(b) 
-estimates save ${results}basemodel_FULL.ster 
-// estimates use ${results}basemodel_FULL.ster
 estimates store base
 scalar ll0 = e(ll)
 
