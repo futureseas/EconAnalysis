@@ -131,7 +131,7 @@ scalar ll0 = e(ll)
 
 *** Estimate model
 eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
-	d_d d_cd dcpue || partp: unem_rate || port: || selection: weekend, ///
+	d_d d_cd || partp: unem_rate || port: || selection: weekend, ///
 	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 	matrix start=e(b) 
 	estimates save ${results}nlogit_1_FULL.ster
@@ -164,7 +164,7 @@ preserve
 restore
 
 eststo A2: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
-	d_d d_cd dcpue hist_selection || partp: unem_rate || port: || selection: weekend, ///
+	d_d d_cd hist_selection || partp: unem_rate || port: || selection: weekend, ///
 	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 	estimates save ${results}nlogit_2_FULL.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
@@ -196,7 +196,7 @@ preserve
 restore
 
 eststo A3: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
-	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || partp: unem_rate || port: || selection: weekend, ///
+	d_d d_cd dummy_last_day dummy_prev_year_days || partp: unem_rate || port: || selection: weekend, ///
 	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 	estimates save ${results}nlogit_3_FULLp.ster
 	matrix start=e(b) 
@@ -229,9 +229,10 @@ preserve
 restore
 
 eststo A4: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
-	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || partp: unem_rate || port: || selection: weekend lunarill, ///
+	d_d d_cd dummy_last_day dummy_prev_year_days || partp: unem_rate || port: || selection: weekend lunarill, ///
 	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 	estimates save ${results}nlogit_4_FULL.ster
+	matrix start=e(b) 
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): A4
 lrtest A3 A4, force
@@ -274,7 +275,7 @@ replace d_pd  = (d_missing_p == 1 & d_missing_catch == 0 & d_missing_d == 1)
 replace d_pcd = (d_missing_p == 1 & d_missing_catch == 1 & d_missing_d == 1) 
 
 eststo A5: nlogit fished mean_catch mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
-	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || partp: unem_rate || port: || selection: weekend lunarill, ///
+	d_c d_d d_cd d_pc d_pcd dummy_last_day dummy_prev_year_days || partp: unem_rate || port: || selection: weekend lunarill, ///
 	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
 	estimates save ${results}nlogit_5_FULL.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
