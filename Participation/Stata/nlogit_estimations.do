@@ -169,6 +169,8 @@ constraint 3 [/species]NOPORT_tau = 1
 constraint 4 [/species]TUNA_tau = 1 
 constraint 5 [/port]LAATUNA_tau = 1
 constraint 6 [/port]NOPORT_tau = 1 
+constraint 7 [/partp]NOPART_tau = 1 
+
 
 
 *** Model nested with prices
@@ -202,7 +204,6 @@ eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catc
 	estimates save ${results}nlogit_1_FULL.ster
 
 
-
 *** Model nested with ports
 
 nlogitgen port = selection( ///
@@ -220,7 +221,7 @@ nlogittree selection port partp, choice(fished) case(fished_haul)
 
 eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
 	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || partp: unem_rate || port: || selection: weekend, ///
-	base("No-Participation") case(fished_haul) constraints(1 2 5 6) vce(cluster fished_vessel_num) // from(start, skip)
+	base("No-Participation") case(fished_haul) constraints(1 5 6 7) vce(cluster fished_vessel_num) // from(start, skip)
 	estimates save ${results}nlogit_1_FULLp.ster
 
 
