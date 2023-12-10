@@ -115,7 +115,6 @@ constraint 3 [/partp]NOPART_tau = 1
 
 *** Base model to compute R2
 asclogit fished, base("No-Participation") case(fished_haul) alternatives(selection) vce(cluster fished_vessel_num)
-matrix start=e(b) 
 estimates store base
 scalar ll0 = e(ll)
 
@@ -123,7 +122,7 @@ scalar ll0 = e(ll)
 *** Estimate model
 eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
 	d_d d_cd || partp: unem_rate, base(NOPART) || port: , base(NOPORT) || selection: weekend, ///
-	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
+	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) // from(start, skip)
 	matrix start=e(b) 
 	estimates save ${results}nlogit_1_FULL.ster
 di "R2-McFadden = " 1 - (e(ll)/ll0)
