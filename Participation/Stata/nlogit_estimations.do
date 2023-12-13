@@ -170,7 +170,7 @@ constraint 4 [/species]TUNA_tau = 1
 constraint 5 [/port]LAATUNA_tau = 1
 constraint 6 [/port]NOPORT_tau = 1 
 constraint 7 [/partp]NOPART_tau = 1 
-
+constraint 8 [/port]SBA_tau = 1
 
 
 *** Model nested with prices
@@ -198,10 +198,10 @@ replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1)
 
 tabulate set_month, generate(month)
 
-eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
-	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || part: unem_rate || species: || selection: weekend, ///
-	base("No-Participation") case(fished_haul) constraints(2 3 4) vce(cluster fished_vessel_num) // from(start, skip)
-	estimates save ${results}nlogit_1_FULL.ster
+// eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
+// 	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || part: unem_rate || species: || selection: weekend, ///
+// 	base("No-Participation") case(fished_haul) constraints(2 3 4) vce(cluster fished_vessel_num) // from(start, skip)
+// 	estimates save ${results}nlogit_1_FULL.ster
 
 
 *** Model nested with ports
@@ -221,13 +221,8 @@ nlogittree selection port partp, choice(fished) case(fished_haul)
 
 eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
 	d_d d_cd dcpue dummy_last_day dummy_prev_year_days || partp: unem_rate || port: || selection: weekend, ///
-	base("No-Participation") case(fished_haul) constraints(1 5 6 7) vce(cluster fished_vessel_num) // from(start, skip)
+	base("No-Participation") case(fished_haul) constraints(1 5 6 7 8) vce(cluster fished_vessel_num) // from(start, skip)
 	estimates save ${results}nlogit_1_FULLp.ster
-
-
-**********************
-**********************
-
 
 matrix start=e(b)
 di "R2-McFadden = " 1 - (e(ll)/ll0)

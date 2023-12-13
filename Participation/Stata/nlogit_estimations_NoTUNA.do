@@ -111,6 +111,7 @@ nlogittree selection port partp, choice(fished) case(fished_haul)
 constraint 1 [/port]MRA_tau = 1
 constraint 2 [/port]NOPORT_tau = 1 
 constraint 3 [/partp]NOPART_tau = 1 
+constraint 4 [/port]SBA_tau = 1
 
 
 *** Base model to compute R2
@@ -118,13 +119,15 @@ asclogit fished, base("No-Participation") case(fished_haul) alternatives(selecti
 estimates store base
 scalar ll0 = e(ll)
 
-
 *** Estimate model
-eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
-	d_d d_cd || partp: unem_rate, base(NOPART) || port: , base(NOPORT) || selection: weekend, ///
-	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) // from(start, skip)
+eststo A1: nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog psdnclosured ///
+	d_cd || partp: unem_rate, base(NOPART) || port: , base(NOPORT) || selection: weekend, ///
+	base("No-Participation") case(fished_haul) constraints(1 2 3 4) vce(cluster fished_vessel_num) // from(start, skip)
+	estimates save ${results}nlogit_1_3_FULL.ster, replace
+	
+	estimates use ${results}nlogit_1_2_FULL.ster
+	estimate store A1
 	matrix start=e(b) 
-	estimates save ${results}nlogit_1_FULL.ster, replace
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): A1
 lrtest base A1, force
@@ -153,37 +156,40 @@ preserve
 	estadd scalar perc2 = count2/_N*100: A1
 restore
 
-// eststo A2: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
-// 	d_d d_cd hist_selection || partp: unem_rate, base(NOPART) || port: , base(NOPORT) || selection: weekend, ///
-// 	base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_num) from(start, skip)
-// 	estimates save ${results}nlogit_2_FULL.ster, replace
-// di "R2-McFadden = " 1 - (e(ll)/ll0)
-// estadd scalar r2 = 1 - (e(ll)/ll0): A2
-// lrtest A1 A2, force
-// estadd scalar lr_p = r(p): A2
-// estat ic, all
-// matrix S = r(S)
-// estadd scalar aic = S[1,5]: A2
-// estadd scalar bic = S[1,6]: A2
-// estadd scalar aicc = S[1,7]: A2
-// estadd scalar caic = S[1,8]: A2
-// preserve
-// 	qui predict phat
-// 	by fished_haul, sort: egen max_prob = max(phat) 
-// 	drop if max_prob != phat
-// 	by fished_haul, sort: gen nvals = _n == 1 
-// 	count if nvals
-// 	dis _N
-// 	gen selection_hat = 1
-// 	egen count1 = total(fished)
-// 	dis count1/_N*100 "%"
-// 	estadd scalar perc1 = count1/_N*100: A2
-// 	drop if selection == "No-Participation"
-// 	egen count2 = total(fished)
-// 	dis _N
-// 	dis count2/_N*100 "%"
-// 	estadd scalar perc2 = count2/_N*100: A2
-// restore
+eststo A2_2: nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog psdnclosured d_cd hist_selection ///
+	|| partp: unem_rate, base(NOPART) || port: , base(NOPORT) || selection: weekend, ///
+	base("No-Participation") case(fished_haul) constraints(1 2 3 4) vce(cluster fished_vessel_num) from(start, skip)
+/* estimates save ${results}nlogit_2_FULL.ster, replace
+estimates use ${results}nlogit_2_FULL.ster
+estimates store A2 */
+estimates restore A2
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A2
+lrtest A1 A2, force
+estadd scalar lr_p = r(p): A2
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A2
+estadd scalar bic = S[1,6]: A2
+estadd scalar aicc = S[1,7]: A2
+estadd scalar caic = S[1,8]: A2
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A2
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A2
+restore
 
 // // eststo A3: nlogit fished mean_avail mean_price wind_max_220_mh dist_port_to_catch_area_zero dist_to_cog psdnclosured ///
 // // 	d_d d_cd dummy_last_day dummy_prev_year_days || partp: unem_rate, base(NOPART) || port: , base(NOPORT) || selection: weekend, ///
@@ -299,7 +305,6 @@ restore
 
 **************************************
 *** Save results
-, replace
 esttab A1 using "G:\My Drive\Tables\Participation\nested_logit-${S_DATE}_FULL.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Preliminary estimations.") /// 
