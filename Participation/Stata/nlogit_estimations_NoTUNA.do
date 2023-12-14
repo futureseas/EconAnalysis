@@ -96,60 +96,14 @@ tab check_if_choice
 keep if check_if_choice
 tab check_if_choice
 
-cmset fished_haul selection
-cmclogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			d_missing_d d_missing_p psdnclosured unem_rate msqdweekend i.dummy_last_day, ///
-	base("No-Participation")   // from(start, skip)
 
-cmset fished_vessel_id time selection
-cmclogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			d_missing_d d_missing_p psdnclosured unem_rate msqdweekend i.dummy_last_day, ///
-	base("No-Participation")   // from(start, skip)
-
-** Create nested logit variables
-cap drop port
-cap label drop lb_port
-cap drop partp
-cap label drop lb_partp
-nlogitgen port = selection( ///
-	LAA: LAA-CMCK | LAA-MSQD | LAA-PSDN | LAA-NANC, ///
-	LAATUNA: LAA-YTNA, ///
-    MNA: MNA-MSQD | MNA-NANC | MNA-PSDN, /// 
-    MRA: MRA-MSQD, ///
-    SBA: SBA-MSQD | SBA-CMCK, /// 
-    SFA: SFA-MSQD | SFA-NANC, /// 
-    NOPORT: No-Participation)
-nlogitgen partp = port(PART: LAA | LAATUNA | MNA | MRA | SBA | SFA, NOPART: NOPORT)
-nlogittree selection port partp, choice(fished) case(fished_haul) 
-
-** New Logit tree
-constraint 1 [/partp]NOPART_tau = 1 
-constraint 2 [/port]NOPORT_tau = 1 
-constraint 3 [/port]MRA_tau = 1
-constraint 4 [/port]SBA_tau = 1
-constraint 5 [/port]SFA_tau = 1
-constraint 6 [/port]LAA_tau = 1
-constraint 7 [/port]MNA_tau = 1
-constraint 8 [/port]SBA_tau = 1
-constraint 9 [/partp]PART_tau = 1 
-constraint 10 [/port]LAATUNA_tau = 1
-
+*** Base model to compute R2
 set processors 4
+asclogit fished, base("No-Participation")  alternatives(selection) case(fished_haul) 
+estimates store base
+scalar ll0 = e(ll)
 
-
-*** Estimate model (with Species instead of ports)
-estimates use ${results}nlogit_FULL_v2.ster
-estimates store A2
-
-*** Estimate model (with weekend by species)
-estimates use ${results}nlogit_FULL_v4.ster
-estimates store A4
-
-*** Estimate model (with price * TUNA)
-estimates use ${results}nlogit_FULL_v5.ster
-estimates store A5
-
-
+*** Set nested logit
 cap drop port
 cap label drop lb_port
 cap drop partp
@@ -163,26 +117,208 @@ nlogitgen port = selection( ///
     NOPORT: No-Participation)
 nlogitgen partp = port(PART: CMCK | MSQD | PSDN | NANC | TUNA, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		d_missing_d d_missing_p psdnclosured  unem_rate dummy_last_day msqdweekend /// 
-		|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
-estimates save ${results}nlogit_FULL_v6.ster, replace
 
 
+*** Estimate model (base)
+estimates use ${results}nlogit_FULL_v2.ster
+estimates store A2
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A2
+lrtest base A2, force
+estadd scalar lr_p = r(p): A2
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A2
+estadd scalar bic = S[1,6]: A2
+estadd scalar aicc = S[1,7]: A2
+estadd scalar caic = S[1,8]: A2
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A2
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A2
+restore
 
+*** Estimate model (with weekend by species)
+estimates use ${results}nlogit_FULL_v4.ster
+estimates store A4
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A4
+lrtest A2 A4, force
+estadd scalar lr_p = r(p): A4
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A4
+estadd scalar bic = S[1,6]: A4
+estadd scalar aicc = S[1,7]: A4
+estadd scalar caic = S[1,8]: A4
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A4
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A4
+restore
 
+*** Estimate model (with price * TUNA)
+estimates use ${results}nlogit_FULL_v5.ster
+estimates store A5
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A5
+lrtest A2 A5, force
+estadd scalar lr_p = r(p): A5
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A5
+estadd scalar bic = S[1,6]: A5
+estadd scalar aicc = S[1,7]: A5
+estadd scalar caic = S[1,8]: A5
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A5
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A5
+restore
 
+*** Estimate model (with clustered SE)
+estimates use ${results}nlogit_FULL_v6.ster
+estimates store A6
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A6
+lrtest A2 A6, force
+estadd scalar lr_p = r(p): A6
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A6
+estadd scalar bic = S[1,6]: A6
+estadd scalar aicc = S[1,7]: A6
+estadd scalar caic = S[1,8]: A6
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A6
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A6
+restore
 
-esttab A1 A2 A4 A5 A6 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL.rtf", ///
+esttab A6 using "G:\My Drive\Tables\Participation\nested_logit_FULL_v2_${S_DATE}", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
-		stats(N, fmt(0) ///
-			labels("Observations"))  ///
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
+
+
+
+
+*** Estimate model (with weekend by species + clustered SE)
+/* nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		d_missing_d d_missing_p psdnclosured unem_rate dummy_last_day /// 
+		|| partp: , base(NOPART) || port: , base(NOPORT) || selection: weekend, ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
+estimates save ${results}nlogit_FULL_v7.ster, replace */
+
+estimates use ${results}nlogit_FULL_v7.ster
+estimates store A7
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A7
+lrtest A4 A7, force
+estadd scalar lr_p = r(p): A7
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A7
+estadd scalar bic = S[1,6]: A7
+estadd scalar aicc = S[1,7]: A7
+estadd scalar caic = S[1,8]: A7
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A7
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A7
+restore
+
+
+esttab A2 A4 A5 A6 A7 using "G:\My Drive\Tables\Participation\nested_logit_FULL_v2_${S_DATE}", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Nested Logit.") /// 
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
 
 
 
 
 
-** Note: Model with ports nest and participation in CPS or Tuna do not converge. Model with YTNA within LAA not consistent with RUM.
+/* * Then try adding mean_catch, exp_revenue, exp_value, 
+esttab A7 A8 A9 A10 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL_v2_${S_DATE}.rtf", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Nested Logit.") /// 
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
+
+* add lunarill
+esttab A7 A11 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL_v2_${S_DATE}.rtf", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Nested Logit.") /// 
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
+ */
+
+
+ ** Note: Model with ports nest and participation in CPS or Tuna do not converge. Model with YTNA within LAA not consistent with RUM.
+
