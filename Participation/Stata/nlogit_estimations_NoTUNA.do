@@ -243,23 +243,14 @@ preserve
 	estadd scalar perc2 = count2/_N*100: A6
 restore
 
-esttab A6 using "G:\My Drive\Tables\Participation\nested_logit_FULL_v2_${S_DATE}", ///
-		starlevels(* 0.10 ** 0.05 *** 0.01) ///
-		label title("Table. Nested Logit.") /// 
-		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
-			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
-
-
-
 
 *** Estimate model (with weekend by species + clustered SE)
+
 /* nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 		d_missing_d d_missing_p psdnclosured unem_rate dummy_last_day /// 
 		|| partp: , base(NOPART) || port: , base(NOPORT) || selection: weekend, ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
 estimates save ${results}nlogit_FULL_v7.ster, replace */
-
 estimates use ${results}nlogit_FULL_v7.ster
 estimates store A7
 di "R2-McFadden = " 1 - (e(ll)/ll0)
