@@ -100,9 +100,6 @@ cmset fished_vessel_id time selection
 cmclogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 			d_missing_d d_missing_p psdnclosured unem_rate msqdweekend i.dummy_last_day, ///
 	base("No-Participation")   // from(start, skip)
-estimates store base
-scalar ll0 = e(ll)
-matrix start=e(b) 
 
 ** Create nested logit variables
 cap drop port
@@ -135,12 +132,16 @@ constraint 10 [/port]LAATUNA_tau = 1
 
 *** Estimate model
 set processors 4
+estimates use ${results}nlogit_FULL.ster
+matrix sB=e(b)
 
 nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 		d_missing_d d_missing_p psdnclosured unem_rate msqdweekend dummy_last_day /// 
 		|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul)
-	estimates save ${results}nlogit_1_FULL.ster, replace
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id) from(sB, copy)
+	estimates save ${results}nlogit_FULL_clustered.ster, replace
+
+
 preserve
 	qui predict phat
 	by fished_haul, sort: egen max_prob = max(phat) 
