@@ -96,6 +96,11 @@ tab check_if_choice
 keep if check_if_choice
 tab check_if_choice
 
+cmset fished_haul selection
+cmclogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			d_missing_d d_missing_p psdnclosured unem_rate msqdweekend i.dummy_last_day, ///
+	base("No-Participation")   // from(start, skip)
+
 cmset fished_vessel_id time selection
 cmclogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 			d_missing_d d_missing_p psdnclosured unem_rate msqdweekend i.dummy_last_day, ///
@@ -129,14 +134,22 @@ constraint 8 [/port]SBA_tau = 1
 constraint 9 [/partp]PART_tau = 1 
 constraint 10 [/port]LAATUNA_tau = 1
 
-
-*** Estimate model
 set processors 4
-estimates use ${results}nlogit_FULL.ster
-estimates store A1
 
 
-** Create nested logit variables
+*** Estimate model (with Species instead of ports)
+estimates use ${results}nlogit_FULL_v2.ster
+estimates store A2
+
+*** Estimate model (with weekend by species)
+estimates use ${results}nlogit_FULL_v4.ster
+estimates store A4
+
+*** Estimate model (with price * TUNA)
+estimates use ${results}nlogit_FULL_v5.ster
+estimates store A5
+
+
 cap drop port
 cap label drop lb_port
 cap drop partp
@@ -150,14 +163,18 @@ nlogitgen port = selection( ///
     NOPORT: No-Participation)
 nlogitgen partp = port(PART: CMCK | MSQD | PSDN | NANC | TUNA, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
-
 nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		d_missing_d d_missing_p psdnclosured msqdweekend unem_rate dummy_last_day /// 
+		d_missing_d d_missing_p psdnclosured  unem_rate dummy_last_day msqdweekend /// 
 		|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) 
-estimates save ${results}nlogit_FULL_v2.ster, replace
-estimates store A2
-esttab A1 A2 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL.rtf", ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
+estimates save ${results}nlogit_FULL_v6.ster, replace
+
+
+
+
+
+
+esttab A1 A2 A4 A5 A6 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N, fmt(0) ///
@@ -165,74 +182,7 @@ esttab A1 A2 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL.rtf", /
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
 
 
-** Create nested logit variables
-cap drop port
-cap label drop lb_port
-cap drop partp
-cap label drop lb_partp
-nlogitgen port = selection( ///
-	LAA: LAA-CMCK | LAA-MSQD | LAA-PSDN | LAA-NANC, ///
-	LAATUNA: LAA-YTNA, ///
-    MNA: MNA-MSQD | MNA-NANC | MNA-PSDN, /// 
-    MRA: MRA-MSQD, ///
-    SBA: SBA-MSQD | SBA-CMCK, /// 
-    SFA: SFA-MSQD | SFA-NANC, /// 
-    NOPORT: No-Participation)
-nlogitgen partp = port(PART: LAA | MNA | MRA | SBA | SFA, PARTTUNA: LAATUNA, NOPART: NOPORT)
-nlogittree selection port partp, choice(fished) case(fished_haul) 
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		d_missing_d d_missing_p psdnclosured msqdweekend unem_rate dummy_last_day /// 
-		|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul)
-estimates save ${results}nlogit_FULL_v3.ster, replace
-estimates store A3
-esttab A1 A2 A3 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL.rtf", ///
-		starlevels(* 0.10 ** 0.05 *** 0.01) ///
-		label title("Table. Nested Logit.") /// 
-		stats(N, fmt(0) ///
-			labels("Observations"))  ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
 
 
-** Create nested logit variables
-cap drop port
-cap label drop lb_port
-cap drop partp
-cap label drop lb_partp
-nlogitgen port = selection( ///
-	LAA: LAA-CMCK | LAA-MSQD | LAA-PSDN | LAA-NANC, ///
-	LAATUNA: LAA-YTNA, ///
-    MNA: MNA-MSQD | MNA-NANC | MNA-PSDN, /// 
-    MRA: MRA-MSQD, ///
-    SBA: SBA-MSQD | SBA-CMCK, /// 
-    SFA: SFA-MSQD | SFA-NANC, /// 
-    NOPORT: No-Participation)
-nlogitgen partp = port(PART: LAA | LAATUNA | MNA | MRA | SBA | SFA, NOPART: NOPORT)
-nlogittree selection port partp, choice(fished) case(fished_haul) 
 
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		d_missing_d d_missing_p psdnclosured msqdweekend unem_rate dummy_last_day /// 
-		|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul)
-estimates save ${results}nlogit_FULL_clustered.ster, replace
-estimates store A4
-esttab A1 A2 A3 A4 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL.rtf", ///
-		starlevels(* 0.10 ** 0.05 *** 0.01) ///
-		label title("Table. Nested Logit.") /// 
-		stats(N, fmt(0) ///
-			labels("Observations"))  ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
-
-
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		d_missing_d d_missing_p psdnclosured unem_rate dummy_last_day /// 
-		|| partp: , base(NOPART) || port: , base(NOPORT) || selection: weekend, ///
-	base("No-Participation") case(fished_haul)
-estimates save ${results}nlogit_FULL_clustered_weekend.ster, replace
-estimates store A5
-esttab A1 A2 A3 A4 A5 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL.rtf", ///
-		starlevels(* 0.10 ** 0.05 *** 0.01) ///
-		label title("Table. Nested Logit.") /// 
-		stats(N, fmt(0) ///
-			labels("Observations"))  ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
+** Note: Model with ports nest and participation in CPS or Tuna do not converge. Model with YTNA within LAA not consistent with RUM.
