@@ -244,13 +244,21 @@ preserve
 restore
 
 
+esttab A2 A4 A5 A6 A7 using "G:\My Drive\Tables\Participation\nested_logit_FULL_v2_${S_DATE}", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Nested Logit.") /// 
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
+
+
 *** Estimate model (with weekend by species + clustered SE)
 
-/* nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 		d_missing_d d_missing_p psdnclosured unem_rate dummy_last_day /// 
-		|| partp: , base(NOPART) || port: , base(NOPORT) || selection: weekend, ///
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
-estimates save ${results}nlogit_FULL_v7.ster, replace */
+estimates save ${results}nlogit_FULL_v7.ster, replace
 estimates use ${results}nlogit_FULL_v7.ster
 estimates store A7
 di "R2-McFadden = " 1 - (e(ll)/ll0)
@@ -282,7 +290,7 @@ preserve
 restore
 
 
-esttab A2 A4 A5 A6 A7 using "G:\My Drive\Tables\Participation\nested_logit_FULL_v2_${S_DATE}", ///
+esttab A2 A4 A5 A6 A7 using "G:\My Drive\Tables\Participation\nested_logit_FULL_v2_${S_DATE}_2.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
@@ -291,10 +299,8 @@ esttab A2 A4 A5 A6 A7 using "G:\My Drive\Tables\Participation\nested_logit_FULL_
 
 
 
-
-
 /* * Then try adding mean_catch, exp_revenue, exp_value, 
-esttab A7 A8 A9 A10 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL_v2_${S_DATE}.rtf", ///
+esttab  A2 A4 A5 A6 A7 A8 A9 A10 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL_v2_${S_DATE}.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
@@ -302,7 +308,7 @@ esttab A7 A8 A9 A10 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL_
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
 
 * add lunarill
-esttab A7 A11 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL_v2_${S_DATE}.rtf", ///
+esttab A2 A4 A5 A6 A7 A8 A9 A10 A11 using "C:\Users\fequezad\OneDrive\PostDoc\nested_logit_FULL_v2_${S_DATE}.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
