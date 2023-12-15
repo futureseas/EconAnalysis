@@ -10,7 +10,6 @@ clear all
 
 ** Import data
 use rdo_Stata_c4_full.dta, clear
-corr mean_avail mean_price
 
 ** Add addtional variables
 merge m:1 selection set_month using "dbp_month.dta"

@@ -164,11 +164,6 @@ preserve
 restore
 
 *** Estimate model (using catch)
-nlogit fished mean_catch mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		d_missing_d d_missing_p d_missing_catch psdnclosured unem_rate dummy_last_day  /// 
-		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
-estimates save ${results}nlogit_FULL_v8.ster, replace
 estimates use ${results}nlogit_FULL_v8.ster
 estimates store A8
 estimates describe A8
