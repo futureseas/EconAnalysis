@@ -271,9 +271,83 @@ preserve
 restore
 
 
+*** Estimate model (using SDM and price 30 days)
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		d_missing_d d_missing_p2 psdnclosured unem_rate dummy_last_day /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
+estimates save ${results}nlogit_FULL_v11.ster, replace
+estimates use ${results}nlogit_FULL_v11.ster
+estimates store A11
+estimates describe A11
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A11
+lrtest A7 A11, force
+estadd scalar lr_p = r(p): A11
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A11
+estadd scalar bic = S[1,6]: A11
+estadd scalar aicc = S[1,7]: A11
+estadd scalar caic = S[1,8]: A11
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A11
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A11
+restore
+
+*** Estimate model (using catch and price 30 days)
+nlogit fished mean_catch mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		d_missing_d d_missing_p2 d_missing_catch psdnclosured unem_rate dummy_last_day  /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
+estimates save ${results}nlogit_FULL_v12.ster, replace
+estimates use ${results}nlogit_FULL_v12.ster
+estimates store A12
+estimates describe A12
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A12
+lrtest A8 A12, force
+estadd scalar lr_p = r(p): A12
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A12
+estadd scalar bic = S[1,6]: A12
+estadd scalar aicc = S[1,7]: A12
+estadd scalar caic = S[1,8]: A12
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A12
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A12
+restore
+
 *** Save table
 
-esttab  A7 A8 A9 A10 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_4.rtf", ///
+esttab  A7 A8 A9 A10 A11 A12 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_4.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
