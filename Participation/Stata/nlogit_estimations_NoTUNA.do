@@ -136,11 +136,6 @@ estimates use ${results}nlogit_FULL_v7.ster
 estimates store A7
 
 *** Estimate model (adding mean_catch)
-nlogit fished mean_catch mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		d_missing_d d_missing_p d_missing_catch psdnclosured unem_rate dummy_last_day /// 
-		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
-estimates save ${results}nlogit_FULL_v8.ster, replace
 estimates use ${results}nlogit_FULL_v8.ster
 estimates store A8
 di "R2-McFadden = " 1 - (e(ll)/ll0)
@@ -170,12 +165,6 @@ preserve
 	dis count2/_N*100 "%"
 	estadd scalar perc2 = count2/_N*100: A8
 restore
-esttab  A7 A8 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_3.rtf", ///
-		starlevels(* 0.10 ** 0.05 *** 0.01) ///
-		label title("Table. Nested Logit.") /// 
-		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
-			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
 
 *** Estimate model (adding expected value)
 gen exp_value = mean_price * mean_avail
@@ -221,7 +210,7 @@ esttab  A7 A8 A9 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_D
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
 
-*** Estimate model (adding exppected revenue)
+*** Estimate model (adding expected revenue)
 gen exp_revenue = mean_price * mean_catch
 label variable exp_revenue "Expected revenue"
 nlogit fished exp_revenue wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
