@@ -356,3 +356,90 @@ esttab  A7 A8 A9 A10 A11 A12 using "G:\My Drive\Tables\Participation\nested_logi
 
 ** Note: Model with ports nest and participation in CPS or Tuna do not converge. Model with YTNA within LAA not consistent with RUM.
 
+
+
+*** Estimate model (using SDM and price 30 days)
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		d_missing_d d_missing_p2 psdnclosured unem_rate dummy_last_day /// 
+		|| partp: , base(NOPART) || port: weekend lunarill, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
+estimates save ${results}nlogit_FULL_v13.ster, replace
+estimates use ${results}nlogit_FULL_v13.ster
+estimates store A13
+estimates describe A13
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A13
+lrtest A7 A13, force
+estadd scalar lr_p = r(p): A13
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A13
+estadd scalar bic = S[1,6]: A13
+estadd scalar aicc = S[1,7]: A13
+estadd scalar caic = S[1,8]: A13
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A13
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A13
+restore
+
+*** Estimate model (using catch and price 30 days)
+nlogit fished mean_catch mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		d_missing_d d_missing_p2 d_missing_catch psdnclosured unem_rate dummy_last_day  /// 
+		|| partp: , base(NOPART) || port: weekend lunarill, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
+estimates save ${results}nlogit_FULL_v14.ster, replace
+estimates use ${results}nlogit_FULL_v14.ster
+estimates store A14
+estimates describe A14
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A14
+lrtest A8 A14, force
+estadd scalar lr_p = r(p): A14
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A14
+estadd scalar bic = S[1,6]: A14
+estadd scalar aicc = S[1,7]: A14
+estadd scalar caic = S[1,8]: A14
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A14
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A14
+restore
+
+*** Save table
+
+esttab  A7 A8 A9 A10 A11 A12 A13 A14 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_4.rtf", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Nested Logit.") /// 
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
+
+
+*** WITHOUT STATE DEPENDENCY!!!

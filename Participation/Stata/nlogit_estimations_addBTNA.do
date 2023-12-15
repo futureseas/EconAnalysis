@@ -124,8 +124,8 @@ nlogit fished mean_catch mean_price wind_max_220_mh dist_to_cog dist_port_to_cat
 		d_missing_d d_missing_p d_missing_catch psdnclosured btnaclosured unem_rate dummy_last_day  /// 
 		|| partp: , base(NOPART) || port: weekend lunarill, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
-estimates save ${results}nlogit_FULL_v10.ster, replace
-estimates use ${results}nlogit_FULL_v10.ster
+estimates save ${results}nlogit_FULL_btna1.ster, replace
+estimates use ${results}nlogit_FULL_btna1.ster
 estimates store A1
 estimates describe A1
 di "R2-McFadden = " 1 - (e(ll)/ll0)
@@ -156,10 +156,63 @@ preserve
 	estadd scalar perc2 = count2/_N*100: A1
 restore
 
+*** Set nested logit
+cap drop port
+cap label drop lb_port
+cap drop partp
+cap label drop lb_partp
+nlogitgen port = selection( ///
+	CMCK: LAA-CMCK | SBA-CMCK, ///
+	MSQD: LAA-MSQD | MNA-MSQD | MRA-MSQD | SBA-MSQD | SFA-MSQD, ///
+	PSDN: LAA-PSDN | MNA-PSDN, ///
+	NANC: LAA-NANC | MNA-NANC | SFA-NANC, ///
+	YTNA: LAA-YTNA, ///
+	BTNA: LAA-BTNA, ///
+    NOPORT: No-Participation)
+nlogitgen partp = port(PART: CMCK | MSQD | PSDN | NANC | YTNA | BTNA, NOPART: NOPORT)
+nlogittree selection port partp, choice(fished) case(fished_haul) 
+
+
+nlogit fished mean_catch mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		d_missing_d d_missing_p d_missing_catch psdnclosured btnaclosured unem_rate dummy_last_day  /// 
+		|| partp: , base(NOPART) || port: weekend lunarill, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
+estimates save ${results}nlogit_FULL_btna2.ster, replace
+estimates use ${results}nlogit_FULL_btna2.ster
+estimates store A2
+estimates describe A2
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): A2
+lrtest base A2, force
+estadd scalar lr_p = r(p): A2
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: A2
+estadd scalar bic = S[1,6]: A2
+estadd scalar aicc = S[1,7]: A2
+estadd scalar caic = S[1,8]: A2
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: A2
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: A2
+restore
+
 
 *** Save table
 
-esttab  A7 A8 A9 A10 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_4.rtf", ///
+esttab  A1 A2 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_btna.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
