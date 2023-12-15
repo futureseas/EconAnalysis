@@ -453,3 +453,5 @@ esttab  F1 F2 F3 F4 F5 using "G:\My Drive\Tables\Participation\nested_logit_FULL
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
 
 // ** Note: Model with ports nest and participation in CPS or Tuna do not converge. Model with YTNA within LAA not consistent with RUM.
+
+** ADD TUNA * MEAN_PRICE if using regressions
