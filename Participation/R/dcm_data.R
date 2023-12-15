@@ -358,6 +358,8 @@ rm(wind, wind_2020_2020)
 ## Dummy for squid and sardine
 samps <- samps %>% mutate(dPSDN = ifelse(grepl("PSDN", selection) == TRUE, 1, 0)) 
 samps <- samps %>% mutate(dMSQD = ifelse(grepl("MSQD", selection) == TRUE, 1, 0)) 
+samps <- samps %>% mutate(dBTNA = ifelse(grepl("BTNA", selection) == TRUE, 1, 0)) 
+
 
 
 #------------------------------------------
@@ -399,6 +401,15 @@ samps <- samps %>%
     dplyr::mutate(Weekend = ifelse(chron::is.weekend(set_date), 1, 0)) %>% 
   dplyr::mutate(MSQD.Closure.d = MSQD.Closure * dMSQD) %>% 
   dplyr::mutate(MSQD.Weekend = Weekend * dMSQD)
+
+
+#------------------------------------------------------------------
+## Incorporate closure dummy for bluefin tuna
+samps <- samps %>%
+  dplyr::mutate(BTNA.Closure = 
+                  ifelse(set_date >= "2014-09-05" & set_date < "2014-11-12", 1, 
+                  ifelse(set_date >= "2017-08-28" & set_date < "2017-12-31", 1, 0))) %>% 
+  dplyr::mutate(BTNA.Closure.d = BTNA.Closure * dBTNA) %>% 
 
 
 #------------------------------------------
