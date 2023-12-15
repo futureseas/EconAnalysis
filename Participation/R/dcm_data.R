@@ -409,7 +409,7 @@ samps <- samps %>%
   dplyr::mutate(BTNA.Closure = 
                   ifelse(set_date >= "2014-09-05" & set_date < "2014-11-12", 1, 
                   ifelse(set_date >= "2017-08-28" & set_date < "2017-12-31", 1, 0))) %>% 
-  dplyr::mutate(BTNA.Closure.d = BTNA.Closure * dBTNA) %>% 
+  dplyr::mutate(BTNA.Closure.d = BTNA.Closure * dBTNA)
 
 
 #------------------------------------------
@@ -552,9 +552,8 @@ rdo_Stata_noid <- rdo_Stata %>%
 write.csv(rdo_Stata_noid,"C:\\Users\\fequezad\\OneDrive\\PostDoc\\rdo_Stata_c4_full_noid.csv", row.names = FALSE)
 
 
-# ########################################
-# ## Compare mean_catch v/s mean_catch2 ##
-# ########################################
+# ## Compare mean_catch v/s mean_catch2
+#
 # rdo_Stata <- readRDS(file = "C:\\Data\\PacFIN data\\rdo_Stata_c4_full.rds")
 # compare_catch_data <- rdo_Stata %>% 
 #   mutate(Port = substr(selection, 1, 3)) %>%
@@ -568,6 +567,10 @@ write.csv(rdo_Stata_noid,"C:\\Users\\fequezad\\OneDrive\\PostDoc\\rdo_Stata_c4_f
 # 
 # Model <- lm(avg_catch ~ avg_catch2 + factor(Port) + factor(Species), data = compare_catch_data)
 # summary(Model)
+
+
+
+
 
 
 

@@ -10,6 +10,7 @@ clear all
 
 ** Import data
 use rdo_Stata_c4_full.dta, clear
+corr mean_avail mean_price
 
 ** Add addtional variables
 merge m:1 selection set_month using "dbp_month.dta"
@@ -121,7 +122,7 @@ nlogittree selection port partp, choice(fished) case(fished_haul)
 
 
 nlogit fished mean_catch mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		d_missing_d d_missing_p d_missing_catch psdnclosured unem_rate dummy_last_day  /// 
+		d_missing_d d_missing_p d_missing_catch psdnclosured btnaclosured unem_rate dummy_last_day  /// 
 		|| partp: , base(NOPART) || port: weekend lunarill, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
 estimates save ${results}nlogit_FULL_v10.ster, replace
