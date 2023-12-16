@@ -59,9 +59,9 @@ vessel2 <- Node$new("Vessel")
   
 SetGraphStyle(vessel2, rankdir = "TB")
 SetEdgeStyle(vessel2, arrowhead = "vee", color = "grey35", penwidth = 2)
-SetNodeStyle(vessel2, style = "filled,rounded", shape = "box", fillcolor = "DarkGreen", 
+SetNodeStyle(vessel2, style = "filled,rounded", shape = "box", fillcolor = "ivory2", fontcolor = "black", 
              fontname = "helvetica", tooltip = GetDefaultTooltip)
-SetNodeStyle(vessel2$`No participate`, fillcolor = "Firebrick")
-SetNodeStyle(vessel2$Participate$Yellowfin, fillcolor = "Blue")
+SetNodeStyle(vessel2$`No participate`, fillcolor = "indianred3")
+SetNodeStyle(vessel2$Participate, fillcolor = "lightcyan2")
 plot(vessel2)
 
