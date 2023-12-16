@@ -361,7 +361,7 @@ preserve
 restore
 
 nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured unem_rate dummy_prev_days_port d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+		psdnclosured unem_rate dummy_prev_days dummy_prev_days_port d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
 estimates save ${results}nlogit_FULL_B4.ster, replace
@@ -528,7 +528,7 @@ preserve
 	estadd scalar perc4 = count2/_N*100: B6
 restore
 
-esttab  B1 B2 B3 B4 B5 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_Final_B.rtf", ///
+esttab  B1 B2 B3 B4 B5 B6 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_Final_B.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 perc3 perc4 lr_p aicc caic, fmt(0 3) ///
