@@ -83,8 +83,7 @@ library(brms)
 set.seed(1234)
 
 logit <- brm(active_year ~ LAT + DISTANCE_A + PSDN.Closure + prev_years_active + diversity_all +
-               (1 + PSDN.Closure | group_all) + 
-               (1 | VESSEL_NUM), 
+               (1 + PSDN.Closure | group_all) + (1 | VESSEL_NUM), 
             data = annual.part, 
             seed = 123,
             family = bernoulli(link = "logit"), 
