@@ -43,7 +43,7 @@ annual.part <- complete(annual.part, VESSEL_NUM, set_year) %>%
 ## Add closure
 annual.part <- annual.part %>%
   dplyr::mutate(PSDN.Closure = 
-    ifelse(set_year >= 2005, 1, 0))
+    ifelse(set_year >= 2015, 1, 0))
 
 ## Add center of gravity
 raw_inputs <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\RAW_cluster_inputs.csv")
@@ -58,12 +58,12 @@ library(brms)
 
 set.seed(1234)
 
-logit <- brm(active_year ~ LAT + (1 | group_all), 
-            data = annual.part,
-            family = bernoulli,
-            cluster = 4)
+logit <- brm(active_year ~ LAT + DISTANCE_A + PSDN.Closure + (1 + PSDN.Closure + LAT | group_all) + (1 | VESSEL_NUM), 
+            data = annual.part, seed = 123,
+            family = bernoulli, chain = 1, cores = 4)
 
-
+summary(logit)
+plot(conditional_effects(logit), points = TRUE)
 
 
 
