@@ -54,7 +54,7 @@ annual.part <- annual.part %>%
 ## Add center of gravity
 raw_inputs <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\RAW_cluster_inputs.csv")
 annual.part <- merge(annual.part, raw_inputs, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE) %>%
-  dplyr::filter(group_all == 4 | group_all == 5) %>% mutate(PSDN.Closure = as.factor(PSDN.Closure))
+  dplyr::filter(group_all == 4) %>% mutate(PSDN.Closure = as.factor(PSDN.Closure))
 
 
 ## Diversity index
@@ -70,9 +70,34 @@ HHI<-as.data.frame(vegan::diversity(HHI, index="invsimpson"))
 HHI$VESSEL_NUM <- rownames(HHI)
 names(HHI)<-c("diversity_all", "VESSEL_NUM")
 HHI$diversity[which(!is.finite(HHI$diversity_all))] <- 0
-
 annual.part <- merge(annual.part, HHI, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE) 
 
+
+#############
+## Add SDM ##
+#############
+
+#### Merge data with SDM Pacific Sardine
+SDM_PSDN <- read.csv(file = here::here("Landings", "SDM", "PSDN_SDM_port_month.csv")) %>% 
+  group_by(LANDING_YEAR) %>% summarize(lagged_PSDN_SDM_60 = mean(SDM_60, na.rm = TRUE)) %>%
+  rename(set_year = LANDING_YEAR) %>% mutate(set_year = set_year + 1)
+
+SDM_MSQD <- read.csv(file = here::here("Landings", "SDM", "MSQD_SDM_port_month.csv"))%>% 
+  group_by(LANDING_YEAR) %>% summarize(lagged_MSQD_SDM_90 = mean(SDM_90, na.rm = TRUE)) %>%
+  rename(set_year = LANDING_YEAR) %>% mutate(set_year = set_year + 1)
+
+SDM_MSQD_Spawn <- read.csv(file = here::here("Landings", "SDM", "MSQD_Spawn_SDM_port_month.csv"))%>% 
+  group_by(LANDING_YEAR) %>% summarize(lagged_MSQD_SPAWN_SDM_90 = mean(SDM_SPAWN_90, na.rm = TRUE)) %>%
+  rename(set_year = LANDING_YEAR) %>% mutate(set_year = set_year + 1)
+
+SDM_NANC <- read.csv(file = here::here("Landings", "SDM", "NANC_SDM_port_month.csv"))%>% 
+  group_by(LANDING_YEAR) %>% summarize(lagged_NANC_SDM_20 = mean(SDM_20, na.rm = TRUE)) %>%
+  rename(set_year = LANDING_YEAR) %>% mutate(set_year = set_year + 1)
+
+annual.part <- merge(annual.part, SDM_PSDN, by = c("set_year"), all.x = TRUE)
+annual.part <- merge(annual.part, SDM_NANC, by = c("set_year"), all.x = TRUE)
+annual.part <- merge(annual.part, SDM_MSQD, by = c("set_year"), all.x = TRUE) 
+annual.part <- merge(annual.part, SDM_MSQD_Spawn, by = c("set_year"), all.x = TRUE) 
 
 
 ######################
@@ -82,14 +107,19 @@ library(brms)
 
 set.seed(1234)
 
-logit <- brm(active_year ~ LAT + DISTANCE_A + PSDN.Closure + prev_years_active + diversity_all +
-               (1 + PSDN.Closure | group_all) + (1 | VESSEL_NUM), 
+logit <- brm(active_year ~ prev_years_active + 
+               PSDN.Closure + 
+               lagged_PSDN_SDM_60 + 
+               lagged_MSQD_SDM_90 + 
+               lagged_NANC_SDM_20 +
+               diversity_all +
+               (1 | VESSEL_NUM), 
             data = annual.part, 
             seed = 123,
             family = bernoulli(link = "logit"), 
-            warmup = 750, 
+            warmup = 500, 
             iter = 2000,
-            chain = 2, cores = 4)
+            chain = 1, cores = 4)
 
 summary(logit)
 plot(conditional_effects(logit), points = TRUE)
@@ -106,4 +136,4 @@ AUC <- ROCR::performance(Pred, measure = "auc")
 AUC <- AUC@y.values[[1]]
 AUC
 
-# 92% already!
+# 97.7% already!
