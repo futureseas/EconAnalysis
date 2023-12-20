@@ -243,11 +243,11 @@ gc()
 ### Estimate model ###
 ######################
 
-annual.part3 <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>% dplyr::filter(group_all == 4)
+annual.part4 <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>% dplyr::filter(group_all == 4)
 
 logit <- brm(active_year ~  years_active + mean_HHI + mean_COG + mean_LI + 
                mean_PRICE + mean_SDM + (1 | VESSEL_NUM), 
-            data = annual.part3, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
+            data = annual.part4, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
             iter = 2000, chain = 1, cores = 4)
             summary(logit)
             plot(conditional_effects(logit), points = TRUE)
