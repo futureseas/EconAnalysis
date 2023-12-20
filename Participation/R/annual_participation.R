@@ -145,8 +145,11 @@ gc()
 #    Single_COG, Single_Permit, Value, DISTANCE_A, DISTANCE_B, i, Distance_A, Distance_B)
 # gc()
 # save.image("C:/Users/fequezad/work_save.RData")
+
+##############################################################################################
+##############################################################################################
+
 # load("C:/Users/fequezad/work_save.RData")
-# 
 # 
 # 
 # # Expand data
@@ -154,10 +157,12 @@ gc()
 #   mutate(active_year = ifelse(is.na(active_year), 0, active_year))
 # 
 # 
-# ## Add SDM
+# ## Add MSQD Spawn SDM
 # SDM_MSQD_Spawn <- read.csv(file = here::here("Landings", "SDM", "MSQD_Spawn_SDM_port_month.csv")) %>%
 #   merge(Coords, by=c("PORT_NAME", "AGENCY_CODE"))
-#   ports <- SDM_MSQD_Spawn %>%
+# SDM_MSQD <- read.csv(file = here::here("Landings", "SDM", "MSQD_SDM_port_month.csv")) %>%
+#   merge(Coords, by=c("PORT_NAME", "AGENCY_CODE"))
+# ports <- SDM_MSQD_Spawn %>%
 #     dplyr::select(c("Latitude", "Longitude", "PORT_NAME")) %>%
 #     unique()
 # registerDoParallel(cl = 4)
@@ -177,6 +182,11 @@ gc()
 #     summarize(MSQD_SPAWN_SDM_90 = mean(SDM_SPAWN_90, na.rm = TRUE)) %>%
 #     rename(set_year = LANDING_YEAR) %>%
 #     mutate(group_all = ii)
+#   SDM_MSQD_cluster <- setDT(SDM_MSQD)[PORT_NAME %chin% distPorts$PORT_NAME] %>%
+#     group_by(LANDING_YEAR) %>%
+#     summarize(MSQD_SDM_90 = mean(SDM_90, na.rm = TRUE)) %>%
+#     rename(set_year = LANDING_YEAR) %>%
+#     mutate(group_all = ii)
 #   Price_MSQD <- Ticket_clust %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR, PORT_NAME) %>%
 #     dplyr::filter(PACFIN_SPECIES_CODE == "MSQD")
 #     Price_MSQD <- setDT(Price_MSQD)[PORT_NAME %chin% distPorts$PORT_NAME] %>%
@@ -184,7 +194,8 @@ gc()
 #       summarize(MSQD_Price = mean(AFI_PRICE_PER_POUND, na.rm = TRUE)) %>%
 #       rename(set_year = LANDING_YEAR) %>%
 #       mutate(group_all = ii)
-#   SDM_PRICE_MSQD <- merge(SDM_MSQD_Spawn_cluster, Price_MSQD, by = (c("group_all", "set_year")))
+#   SDM_PRICE_MSQD <- merge(SDM_MSQD_Spawn_cluster, SDM_MSQD_cluster, by = (c("group_all", "set_year")))
+#   SDM_PRICE_MSQD <- merge(SDM_PRICE_MSQD, Price_MSQD, by = (c("group_all", "set_year")))
 #   return(SDM_PRICE_MSQD)
 # }
 # registerDoSEQ()
@@ -192,75 +203,139 @@ gc()
 # PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
 # annual.part <- merge(annual.part, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 # annual.part <- merge(annual.part, SDM_PRICE_MSQD_data, by = (c("group_all", "set_year")), all.x = TRUE, all.y = FALSE)
-# rm(PAM_Vessel_Groups, SDM_PRICE_MSQD_data, SDM_MSQD_Spawn, SDM_PRICE_MSQD_cluster, ports, Coords, Cluster_Geography, cgi, Ticket_clust)
-# 
+# rm(PAM_Vessel_Groups, SDM_PRICE_MSQD_data, SDM_MSQD_Spawn, SDM_MSQD, SDM_PRICE_MSQD_cluster, ports, Coords, Cluster_Geography, cgi, Ticket_clust)
 # 
 # # SDM_PSDN <- read.csv(file = here::here("Landings", "SDM", "PSDN_SDM_port_month.csv")) %>%
 # #   group_by(LANDING_YEAR) %>% summarize(PSDN_SDM_60 = mean(SDM_60, na.rm = TRUE)) %>%
-# #   rename(set_year = LANDING_YEAR)
-# # SDM_MSQD <- read.csv(file = here::here("Landings", "SDM", "MSQD_SDM_port_month.csv"))%>%
-# #   group_by(LANDING_YEAR) %>% summarize(MSQD_SDM_90 = mean(SDM_90, na.rm = TRUE)) %>%
 # #   rename(set_year = LANDING_YEAR)
 # # SDM_NANC <- read.csv(file = here::here("Landings", "SDM", "NANC_SDM_port_month.csv"))%>%
 # #   group_by(LANDING_YEAR) %>% summarize(NANC_SDM_20 = mean(SDM_20, na.rm = TRUE)) %>%
 # #   rename(set_year = LANDING_YEAR)
 # # annual.part <- merge(annual.part, SDM_PSDN, by = c("set_year"), all.x = TRUE)
 # # annual.part <- merge(annual.part, SDM_NANC, by = c("set_year"), all.x = TRUE)
-# # annual.part <- merge(annual.part, SDM_MSQD, by = c("set_year"), all.x = TRUE)
 # 
 # 
 # ### Get revenue ###
 # annual.part <- annual.part %>%
-#   mutate(rev_MSQD = MSQD_Price * MSQD_SPAWN_SDM_90)
+#   mutate(rev_MSQD_SPAWN = MSQD_Price * MSQD_SPAWN_SDM_90) %>%
+#   mutate(rev_MSQD = MSQD_Price * MSQD_SDM_90)
+# 
+# #-------------------------------------------
+# ## Include unemployment.
+# unem_CA <- 
+#   readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192133_ae51a3.xlsx", range = "A11:I263") %>%
+#   dplyr::select(c('Year', 'Period', 'unemployment rate')) %>% 
+#   rename(LANDING_YEAR = 'Year') %>%
+#   rename(unem_rate_CA = 'unemployment rate') %>% 
+#   group_by(LANDING_YEAR) %>%
+#   summarize(mean.unemployment.CA = mean(unem_rate_CA))
+# unem_OR <- readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192159_36a94e.xlsx", range = "A11:I263") %>%
+#   dplyr::select(c('Year', 'Period', 'unemployment rate')) %>% 
+#   rename(LANDING_YEAR = 'Year') %>%
+#   rename(unem_rate_OR = 'unemployment rate') %>% 
+#   group_by(LANDING_YEAR) %>%
+#   summarize(mean.unemployment.OR = mean(unem_rate_OR)) %>% 
+#   arrange(LANDING_YEAR) %>% 
+#   dplyr::select(-c(LANDING_YEAR))
+# unem_WA <- readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192208_d35a30.xlsx", range = "A11:I263") %>%
+#   dplyr::select(c('Year', 'Period', 'unemployment rate')) %>% 
+#   rename(LANDING_YEAR = 'Year') %>%
+#   rename(unem_rate_WA = 'unemployment rate') %>% 
+#   group_by(LANDING_YEAR) %>%
+#   summarize(mean.unemployment.WA = mean(unem_rate_WA)) %>% 
+#   arrange(LANDING_YEAR) %>% 
+#   dplyr::select(-c(LANDING_YEAR))
+# unem <- cbind(unem_CA, unem_OR, unem_WA) %>% 
+#   rename(set_year = LANDING_YEAR)
+#   rm(unem_CA, unem_OR, unem_WA)
+# 
+# annual.part <- annual.part %>% 
+#   merge(unem, by = "set_year", all.x = TRUE, all.y = FALSE)
+#   rm(unem)
+# 
+# 
+# ### Include fuel price
+# fuel.prices.state <- 
+#   readxl::read_excel(here::here("Data", "Fuel_prices", "state_averages.xls"), sheet = "state_averages") %>%
+#   dplyr::rename(LANDING_YEAR = YEAR) %>%
+#   dplyr::rename(LANDING_MONTH = MONTH) %>%
+#   dplyr::rename(AGENCY_CODE = STATE) %>%
+#   dplyr::rename(diesel.price = avgpricegal) %>%
+#   dplyr::select(-c('avgpricettl')) %>%
+#   mutate(AGENCY_CODE = 
+#            ifelse(AGENCY_CODE == 'WA', 'W', 
+#                   ifelse(AGENCY_CODE == 'CA', 'C', 
+#                          ifelse(AGENCY_CODE == 'OR', 'O', 'A')))) %>%
+#   group_by(AGENCY_CODE, LANDING_YEAR) %>%
+#   summarize(diesel.price.year = mean(diesel.price)) %>%
+#   pivot_wider(names_from = AGENCY_CODE, values_from = diesel.price.year) %>%
+#     rename(diesel.price.WA = W) %>%
+#     rename(diesel.price.CA = C) %>%
+#     rename(diesel.price.AK = A) %>%
+#     rename(diesel.price.OR = O) %>%
+#     rename(set_year = LANDING_YEAR)
+# 
+# annual.part <- annual.part %>% 
+#   merge(fuel.prices.state, by = "set_year", all.x = TRUE, all.y = FALSE)
+#   rm(fuel.prices.state)
 # 
 # 
 # ### Computing moving averages
-# annual.part2 <- annual.part %>%
+# annual.part <- annual.part %>%
 #   arrange(VESSEL_NUM, set_year) %>%
 #   group_by(VESSEL_NUM) %>%
-#   mutate(years_active = RcppRoll::roll_sum(active_year, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_HHI     = RcppRoll::roll_mean(diversity_all, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_COG     = RcppRoll::roll_mean(LAT, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_LI      = RcppRoll::roll_mean(DISTANCE_A, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_PRICE   = RcppRoll::roll_mean(MSQD_Price, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_SDM     = RcppRoll::roll_mean(MSQD_SPAWN_SDM_90, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_Revenue = RcppRoll::roll_mean(rev_MSQD, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(years_active        = RcppRoll::roll_sum(active_year, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_HHI            = RcppRoll::roll_mean(diversity_all, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_COG            = RcppRoll::roll_mean(LAT, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_LI             = RcppRoll::roll_mean(DISTANCE_A, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_PRICE          = RcppRoll::roll_mean(MSQD_Price, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_MSQD_SDM       = RcppRoll::roll_mean(MSQD_SDM_90, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_MSQD_SPAWN_SDM = RcppRoll::roll_mean(MSQD_SPAWN_SDM_90, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_Revenue        = RcppRoll::roll_mean(rev_MSQD, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_Revenue_SPAWN  = RcppRoll::roll_mean(rev_MSQD_SPAWN, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_unem.CA        = RcppRoll::roll_mean(mean.unemployment.CA, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_diesel.CA      = RcppRoll::roll_mean(diesel.price.CA, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
 #   ungroup() %>%
 #   filter(set_year>=2005) %>%
-#   dplyr::select(c('years_active', 'mean_HHI', 'mean_COG' , 'mean_LI' , 'mean_PRICE',
-#                   'mean_SDM' , 'mean_Revenue', 'VESSEL_NUM', 'set_year', 'active_year', 'group_all'))
+#   dplyr::select(c('years_active', 'mean_HHI', 'mean_COG' , 'mean_LI' , 'mean_PRICE', 'mean_MSQD_SDM', 'mean_MSQD_SPAWN_SDM' , 
+#                   'mean_Revenue', 'mean_Revenue_SPAWN', 'VESSEL_NUM', 'set_year', 'active_year', 'group_all', 'mean_unem.CA', 'mean_diesel.CA'))
 # 
 # ## Filter data
-# annual.part3 <- annual.part2 %>%
+# annual.part <- annual.part %>%
 #   group_by(VESSEL_NUM) %>%
 #   mutate(n_years = sum(active_year)) %>%
 #   ungroup() %>%
 #   filter(n_years >= 5)
 # 
-# saveRDS(annual.part3, "C:/Data/PacFIN data/annual_part.RDS")
+# saveRDS(annual.part, "C:/Data/PacFIN data/annual_part.RDS")
+
 
 ######################
 ### Estimate model ###
 ######################
 
-annual.part4 <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>% dplyr::filter(group_all == 4)
+annual.part <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>% 
+  dplyr::filter(group_all == 4)
 
-logit <- brm(active_year ~  years_active + mean_PRICE + mean_SDM + (1 | VESSEL_NUM), 
-            data = annual.part4, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
+
+logit <- brm(active_year ~  years_active + mean_Revenue_SPAWN + mean_unem.CA  + mean_diesel.CA 
+             + (1 | VESSEL_NUM) + (1 | set_year), 
+            data = annual.part6, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
             iter = 2000, chain = 1, cores = 4)
             summary(logit)
             plot(conditional_effects(logit), points = TRUE)
 
-
+### Maybe try SDM (not spawn) --- Add diesel price and unemployment rate
+            
 ### Obtain AUC
 library(tidybayes)
 library(ROCR)
 
 Prob <- predict(logit, type="response")
 Prob <- Prob[,1]
-Pred <- ROCR::prediction(Prob, as.vector(pull(annual.part, active_year)))
+Pred <- ROCR::prediction(Prob, as.vector(pull(annual.part4, active_year)))
 AUC <- ROCR::performance(Pred, measure = "auc")
 AUC <- AUC@y.values[[1]]
 AUC
 
-# 97.7% already!
+# 97.5% already!
