@@ -2,13 +2,13 @@
 ## Annual participation model ##
 ################################
 
-library(tidyverse)
-library(data.table)
-library(raster)   
-library(doParallel)
-library(brms)
-rm(list = ls())
-gc()
+# library(tidyverse)
+# library(data.table)
+# library(raster)   
+# library(doParallel)
+# library(brms)
+# rm(list = ls())
+# gc()
 
 
 # ## Read data (vessel has more than 20 trips in a year to be considered active)
@@ -314,26 +314,31 @@ gc()
 ### Estimate model ###
 ######################
 
+library(tidyverse)
+library(tidybayes)
+library(ROCR)
+library(data.table)
+library(brms)
+rm(list = ls())
+gc()
+
 ## Load data
 annual.part <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>% 
   dplyr::filter(group_all == 4)
-
+  colnames(annual.part)
 
 ##  Estimate bayesian model
-logit <- brm(active_year ~  years_active + mean_Revenue_SPAWN + mean_unem.CA + mean_diesel.CA  + (1 | VESSEL_NUM) + (1 | set_year), 
+logit <- brm(active_year ~  years_active + mean_PRICE + mean_MSQD_SPAWN_SDM + 
+               mean_unem.CA + mean_diesel.CA + mean_COG + I(mean_COG^2) + (1 | VESSEL_NUM) + (1 | set_year), 
             data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
             iter = 2000, chain = 1, cores = 4)
             summary(logit)
             
 ## Plot marginal effects     
-plot(conditional_effects(logit), points = TRUE)
+conditional_effects(logit)
 
-
-            
-### Obtain AUC
-library(tidybayes)
-library(ROCR)
-
+             
+### Obtain AUC # 98% already!
 Prob <- predict(logit, type="response")
 Prob <- Prob[,1]
 Pred <- ROCR::prediction(Prob, as.vector(pull(annual.part, active_year)))
@@ -341,4 +346,4 @@ AUC <- ROCR::performance(Pred, measure = "auc")
 AUC <- AUC@y.values[[1]]
 AUC
 
-# 98% already!
+
