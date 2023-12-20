@@ -314,17 +314,21 @@ gc()
 ### Estimate model ###
 ######################
 
+## Load data
 annual.part <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>% 
   dplyr::filter(group_all == 4)
 
 
+##  Estimate bayesian model
 logit <- brm(active_year ~  years_active + mean_Revenue_SPAWN + mean_unem.CA + mean_diesel.CA  + (1 | VESSEL_NUM) + (1 | set_year), 
             data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
             iter = 2000, chain = 1, cores = 4)
             summary(logit)
-            plot(conditional_effects(logit), points = TRUE)
+            
+## Plot marginal effects     
+plot(conditional_effects(logit), points = TRUE)
 
-### Maybe try SDM (not spawn) --- Add diesel price and unemployment rate
+
             
 ### Obtain AUC
 library(tidybayes)
@@ -332,9 +336,9 @@ library(ROCR)
 
 Prob <- predict(logit, type="response")
 Prob <- Prob[,1]
-Pred <- ROCR::prediction(Prob, as.vector(pull(annual.part4, active_year)))
+Pred <- ROCR::prediction(Prob, as.vector(pull(annual.part, active_year)))
 AUC <- ROCR::performance(Pred, measure = "auc")
 AUC <- AUC@y.values[[1]]
 AUC
 
-# 97.5% already!
+# 98% already!
