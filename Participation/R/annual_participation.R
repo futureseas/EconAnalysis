@@ -1,16 +1,16 @@
-################################
-## Annual participation model ##
-################################
-
+# ################################
+# ## Annual participation model ##
+# ################################
+# 
 # library(tidyverse)
 # library(data.table)
-# library(raster)   
+# library(raster)
 # library(doParallel)
 # library(brms)
 # rm(list = ls())
 # gc()
-
-
+# 
+# 
 # ## Read data (vessel has more than 20 trips in a year to be considered active)
 # annual.part <- readRDS(file = "C:/Data/PacFIN data/vessel_part_year.RDS")
 # Tickets <- readRDS("C:/Data/PacFIN data/Tickets.rds")
@@ -41,7 +41,7 @@
 # rm(Tickets)
 # Ticket_Coords<-aggregate(AFI_EXVESSEL_REVENUE ~ VESSEL_NUM+PORT_NAME+AGENCY_CODE+Latitude+Longitude+LANDING_YEAR, data=Ticket_coordinates, FUN=sum)
 # registerDoParallel(cl = 4)
-# getDoParWorkers() 
+# getDoParWorkers()
 # COG_allyears <- foreach::foreach(ii = 2000:2020, .packages = c('tidyverse', 'raster')) %dopar% {
 #   source("C:/GitHub/EconAnalysis/Clustering/CGI_Function.R")
 #   Ticket_Coords2 <- Ticket_Coords %>% dplyr::filter(LANDING_YEAR == ii)
@@ -51,7 +51,7 @@
 #   Permit_COG<-NULL
 #   for (i in 1:length(List)) {
 #     Permit = List[i]
-#     Single_Permit<- Ticket_Coords[which(Ticket_Coords$VESSEL_NUM==Permit),]
+#     Single_Permit<- Ticket_Coords2[which(Ticket_Coords2$VESSEL_NUM==Permit),]
 #     Single_COG<-cgi(x=Single_Permit$Longitude, y=Single_Permit$Latitude, z=Single_Permit$AFI_EXVESSEL_REVENUE, plot=F)
 #     Single_COG <- data.frame(lon = c(Single_COG$xaxe1[1], Single_COG$xaxe1[2], Single_COG$xaxe2[1], Single_COG$xaxe2[2],
 #                                      Single_COG$xcg),
@@ -77,29 +77,29 @@
 #   return(Vessel_Geography)
 # }
 # COG_data <- plyr::ldply(COG_allyears)
-# annual.part <- merge(annual.part, COG_data, 
-#                      by = (c("VESSEL_NUM", "set_year")), 
-#                      all.x = TRUE, all.y = FALSE) 
+# annual.part <- merge(annual.part, COG_data,
+#                      by = (c("VESSEL_NUM", "set_year")),
+#                      all.x = TRUE, all.y = FALSE)
 # rm(Ticket_Coords, COG_allyears, COG_data)
 # gc()
 # 
 # ## Diversity index
 # HHI_allyears <- foreach::foreach(ii = 2000:2020,  .packages = c('tidyverse')) %dopar% {
 #     Tickets_filt <- Ticket_coordinates %>% filter(LANDING_YEAR == ii)
-#     HHI<-aggregate(AFI_EXVESSEL_REVENUE~ PACFIN_SPECIES_COMMON_NAME + VESSEL_NUM, data=Tickets_filt, FUN=sum) 
+#     HHI<-aggregate(AFI_EXVESSEL_REVENUE~ PACFIN_SPECIES_COMMON_NAME + VESSEL_NUM, data=Tickets_filt, FUN=sum)
 #     HHI<-reshape2::dcast(HHI, VESSEL_NUM ~ PACFIN_SPECIES_COMMON_NAME, value.var="AFI_EXVESSEL_REVENUE", fill=0)
 #     rownames(HHI) <- HHI[,1]
 #     HHI <- HHI[,-1]
 #     HHI<-as.data.frame(vegan::diversity(HHI, index="invsimpson"))
 #     HHI$VESSEL_NUM <- rownames(HHI)
 #     names(HHI)<-c("diversity_all", "VESSEL_NUM")
-#     HHI$diversity_all[which(!is.finite(HHI$diversity_all))] <- 0  
+#     HHI$diversity_all[which(!is.finite(HHI$diversity_all))] <- 0
 #     HHI$set_year <- ii
 #     return(HHI)
 # }
 # registerDoSEQ()
 # HHI_data <- plyr::ldply(HHI_allyears)
-# annual.part <- merge(annual.part, HHI_data, by = (c("VESSEL_NUM", "set_year")), all.x = TRUE, all.y = FALSE) 
+# annual.part <- merge(annual.part, HHI_data, by = (c("VESSEL_NUM", "set_year")), all.x = TRUE, all.y = FALSE)
 # annual.part <- annual.part %>%
 #   mutate(diversity_all = ifelse(is.na(diversity_all), 0, diversity_all)) %>%
 #   mutate(diversity_all = ifelse(active_year == 1, 0, diversity_all)) %>%
@@ -141,15 +141,16 @@
 # Permit_COG<-Permit_COG[c(1,2,3,4)]
 # names(Permit_COG)[1]<-"VESSEL_NUM"
 # Cluster_Geography <- Permit_COG
-# rm(Line_Coord_A, Line_Coord_B, List, Permit, Permit_COG, Permit_ID, Point_Coord, 
+# rm(Line_Coord_A, Line_Coord_B, List, Permit, Permit_COG, Permit_ID, Point_Coord,
 #    Single_COG, Single_Permit, Value, DISTANCE_A, DISTANCE_B, i, Distance_A, Distance_B)
 # gc()
 # save.image("C:/Users/fequezad/work_save.RData")
-
-##############################################################################################
-##############################################################################################
-
-# load("C:/Users/fequezad/work_save.RData")
+# 
+# ##############################################################################################
+# ##############################################################################################
+# 
+# 
+# # load("C:/Users/fequezad/work_save.RData")
 # 
 # 
 # # Expand data
@@ -222,49 +223,49 @@
 # 
 # #-------------------------------------------
 # ## Include unemployment.
-# unem_CA <- 
+# unem_CA <-
 #   readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192133_ae51a3.xlsx", range = "A11:I263") %>%
-#   dplyr::select(c('Year', 'Period', 'unemployment rate')) %>% 
+#   dplyr::select(c('Year', 'Period', 'unemployment rate')) %>%
 #   rename(LANDING_YEAR = 'Year') %>%
-#   rename(unem_rate_CA = 'unemployment rate') %>% 
+#   rename(unem_rate_CA = 'unemployment rate') %>%
 #   group_by(LANDING_YEAR) %>%
 #   summarize(mean.unemployment.CA = mean(unem_rate_CA))
 # unem_OR <- readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192159_36a94e.xlsx", range = "A11:I263") %>%
-#   dplyr::select(c('Year', 'Period', 'unemployment rate')) %>% 
+#   dplyr::select(c('Year', 'Period', 'unemployment rate')) %>%
 #   rename(LANDING_YEAR = 'Year') %>%
-#   rename(unem_rate_OR = 'unemployment rate') %>% 
+#   rename(unem_rate_OR = 'unemployment rate') %>%
 #   group_by(LANDING_YEAR) %>%
-#   summarize(mean.unemployment.OR = mean(unem_rate_OR)) %>% 
-#   arrange(LANDING_YEAR) %>% 
+#   summarize(mean.unemployment.OR = mean(unem_rate_OR)) %>%
+#   arrange(LANDING_YEAR) %>%
 #   dplyr::select(-c(LANDING_YEAR))
 # unem_WA <- readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192208_d35a30.xlsx", range = "A11:I263") %>%
-#   dplyr::select(c('Year', 'Period', 'unemployment rate')) %>% 
+#   dplyr::select(c('Year', 'Period', 'unemployment rate')) %>%
 #   rename(LANDING_YEAR = 'Year') %>%
-#   rename(unem_rate_WA = 'unemployment rate') %>% 
+#   rename(unem_rate_WA = 'unemployment rate') %>%
 #   group_by(LANDING_YEAR) %>%
-#   summarize(mean.unemployment.WA = mean(unem_rate_WA)) %>% 
-#   arrange(LANDING_YEAR) %>% 
+#   summarize(mean.unemployment.WA = mean(unem_rate_WA)) %>%
+#   arrange(LANDING_YEAR) %>%
 #   dplyr::select(-c(LANDING_YEAR))
-# unem <- cbind(unem_CA, unem_OR, unem_WA) %>% 
+# unem <- cbind(unem_CA, unem_OR, unem_WA) %>%
 #   rename(set_year = LANDING_YEAR)
 #   rm(unem_CA, unem_OR, unem_WA)
 # 
-# annual.part <- annual.part %>% 
+# annual.part <- annual.part %>%
 #   merge(unem, by = "set_year", all.x = TRUE, all.y = FALSE)
 #   rm(unem)
 # 
 # 
 # ### Include fuel price
-# fuel.prices.state <- 
+# fuel.prices.state <-
 #   readxl::read_excel(here::here("Data", "Fuel_prices", "state_averages.xls"), sheet = "state_averages") %>%
 #   dplyr::rename(LANDING_YEAR = YEAR) %>%
 #   dplyr::rename(LANDING_MONTH = MONTH) %>%
 #   dplyr::rename(AGENCY_CODE = STATE) %>%
 #   dplyr::rename(diesel.price = avgpricegal) %>%
 #   dplyr::select(-c('avgpricettl')) %>%
-#   mutate(AGENCY_CODE = 
-#            ifelse(AGENCY_CODE == 'WA', 'W', 
-#                   ifelse(AGENCY_CODE == 'CA', 'C', 
+#   mutate(AGENCY_CODE =
+#            ifelse(AGENCY_CODE == 'WA', 'W',
+#                   ifelse(AGENCY_CODE == 'CA', 'C',
 #                          ifelse(AGENCY_CODE == 'OR', 'O', 'A')))) %>%
 #   group_by(AGENCY_CODE, LANDING_YEAR) %>%
 #   summarize(diesel.price.year = mean(diesel.price)) %>%
@@ -275,7 +276,7 @@
 #     rename(diesel.price.OR = O) %>%
 #     rename(set_year = LANDING_YEAR)
 # 
-# annual.part <- annual.part %>% 
+# annual.part <- annual.part %>%
 #   merge(fuel.prices.state, by = "set_year", all.x = TRUE, all.y = FALSE)
 #   rm(fuel.prices.state)
 # 
@@ -297,7 +298,7 @@
 #   mutate(mean_diesel.CA      = RcppRoll::roll_mean(diesel.price.CA, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
 #   ungroup() %>%
 #   filter(set_year>=2005) %>%
-#   dplyr::select(c('years_active', 'mean_HHI', 'mean_COG' , 'mean_LI' , 'mean_PRICE', 'mean_MSQD_SDM', 'mean_MSQD_SPAWN_SDM' , 
+#   dplyr::select(c('years_active', 'mean_HHI', 'mean_COG' , 'mean_LI' , 'mean_PRICE', 'mean_MSQD_SDM', 'mean_MSQD_SPAWN_SDM' ,
 #                   'mean_Revenue', 'mean_Revenue_SPAWN', 'VESSEL_NUM', 'set_year', 'active_year', 'group_all', 'mean_unem.CA', 'mean_diesel.CA'))
 # 
 # ## Filter data
@@ -327,15 +328,19 @@ annual.part <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>%
   dplyr::filter(group_all == 4)
   colnames(annual.part)
 
+#   
+# set_prior("normal(0,1)", class = "b", lb = 0, coef = "mean_MSQD_SPAWN_SDM")
+#   
+
 ##  Estimate bayesian model
 logit <- brm(active_year ~  years_active + mean_PRICE + mean_MSQD_SPAWN_SDM + 
                mean_unem.CA + mean_diesel.CA + mean_COG + I(mean_COG^2) + (1 | VESSEL_NUM) + (1 | set_year), 
             data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
-            iter = 2000, chain = 1, cores = 4)
+            iter = 2000, chain = 1, cores = 4) # ,  backend = "cmdstanr", threads = threading(4)
             summary(logit)
             
 ## Plot marginal effects     
-conditional_effects(logit)
+conditional_effects(logit, ask = FALSE)
 
              
 ### Obtain AUC # 98% already!
