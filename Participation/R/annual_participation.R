@@ -318,9 +318,8 @@ annual.part <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>%
   dplyr::filter(group_all == 4)
 
 
-logit <- brm(active_year ~  years_active + mean_Revenue_SPAWN + mean_unem.CA  + mean_diesel.CA 
-             + (1 | VESSEL_NUM) + (1 | set_year), 
-            data = annual.part6, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
+logit <- brm(active_year ~  years_active + mean_Revenue_SPAWN + mean_unem.CA + mean_diesel.CA  + (1 | VESSEL_NUM) + (1 | set_year), 
+            data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
             iter = 2000, chain = 1, cores = 4)
             summary(logit)
             plot(conditional_effects(logit), points = TRUE)
