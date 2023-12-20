@@ -2,127 +2,255 @@
 ## Annual participation model ##
 ################################
 
-### WORK TO DO: Add SDMs
-
-
-library(dplyr)
-library(ggplot2)
-library(tidyr)
+library(tidyverse)
 library(data.table)
-
+library(raster)   
+library(doParallel)
+library(brms)
 rm(list = ls())
 gc()
 
-## Read data (vessel has more than 20 trips in a year to be considered active)
-annual.part <- readRDS(file = "C:\\Data\\PacFIN data\\vessel_part_year.RDS")
-  
 
-# Expand data 
-annual.part <- complete(annual.part, VESSEL_NUM, set_year) %>%
-mutate(active_year = ifelse(is.na(active_year), 0, active_year)) %>%
-mutate(prev_years_active = RcppRoll::roll_sum(active_year, 5, fill = NA, align = "right", na.rm = TRUE))  %>%
-filter(set_year >= 2005, set_year <= 2020) 
-  
-## Filter data
-annual.part <- annual.part %>%  
-  group_by(VESSEL_NUM) %>%
-  mutate(n_years = sum(active_year)) %>% ungroup() %>%
-  filter(n_years >= 5)
-
-# ## Check how many years each vessel participate
-# n_years_active <- annual.part %>% group_by(VESSEL_NUM) %>%
-#   summarize(n_years = sum(active_year))
-# n_vessels_per_year <- annual.part %>% group_by(set_year) %>%
-#   summarize(n_years = sum(active_year))
-
-# # Plor participation
-# ggplot(annual.part.exp, aes(x=set_year, y=VESSEL_NUM, color=active_year)) +
-#   geom_point(size=1)
-
-
-
-#################################
-### Add explanatory variables ###
-#################################
-
-
-## Add closure
-annual.part <- annual.part %>%
-  dplyr::mutate(PSDN.Closure = 
-    ifelse(set_year >= 2015, 1, 0))
-
-## Add center of gravity
-raw_inputs <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\RAW_cluster_inputs.csv")
-annual.part <- merge(annual.part, raw_inputs, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE) %>%
-  dplyr::filter(group_all == 4) %>% mutate(PSDN.Closure = as.factor(PSDN.Closure))
-
-
-## Diversity index
-Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
-Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
-Tickets<-rbind(Tickets1, Tickets2)
-rm(Tickets1, Tickets2)
-HHI<-aggregate(AFI_EXVESSEL_REVENUE~ PACFIN_SPECIES_COMMON_NAME + VESSEL_NUM, data=Tickets, FUN=sum) 
-HHI<-reshape2::dcast(HHI, VESSEL_NUM ~ PACFIN_SPECIES_COMMON_NAME, value.var="AFI_EXVESSEL_REVENUE", fill=0)
-rownames(HHI) <- HHI[,1]
-HHI <- HHI[,-1]
-HHI<-as.data.frame(vegan::diversity(HHI, index="invsimpson"))
-HHI$VESSEL_NUM <- rownames(HHI)
-names(HHI)<-c("diversity_all", "VESSEL_NUM")
-HHI$diversity[which(!is.finite(HHI$diversity_all))] <- 0
-annual.part <- merge(annual.part, HHI, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE) 
-
-
-#############
-## Add SDM ##
-#############
-
-#### Merge data with SDM Pacific Sardine
-SDM_PSDN <- read.csv(file = here::here("Landings", "SDM", "PSDN_SDM_port_month.csv")) %>% 
-  group_by(LANDING_YEAR) %>% summarize(lagged_PSDN_SDM_60 = mean(SDM_60, na.rm = TRUE)) %>%
-  rename(set_year = LANDING_YEAR) %>% mutate(set_year = set_year + 1)
-
-SDM_MSQD <- read.csv(file = here::here("Landings", "SDM", "MSQD_SDM_port_month.csv"))%>% 
-  group_by(LANDING_YEAR) %>% summarize(lagged_MSQD_SDM_90 = mean(SDM_90, na.rm = TRUE)) %>%
-  rename(set_year = LANDING_YEAR) %>% mutate(set_year = set_year + 1)
-
-SDM_MSQD_Spawn <- read.csv(file = here::here("Landings", "SDM", "MSQD_Spawn_SDM_port_month.csv"))%>% 
-  group_by(LANDING_YEAR) %>% summarize(lagged_MSQD_SPAWN_SDM_90 = mean(SDM_SPAWN_90, na.rm = TRUE)) %>%
-  rename(set_year = LANDING_YEAR) %>% mutate(set_year = set_year + 1)
-
-SDM_NANC <- read.csv(file = here::here("Landings", "SDM", "NANC_SDM_port_month.csv"))%>% 
-  group_by(LANDING_YEAR) %>% summarize(lagged_NANC_SDM_20 = mean(SDM_20, na.rm = TRUE)) %>%
-  rename(set_year = LANDING_YEAR) %>% mutate(set_year = set_year + 1)
-
-annual.part <- merge(annual.part, SDM_PSDN, by = c("set_year"), all.x = TRUE)
-annual.part <- merge(annual.part, SDM_NANC, by = c("set_year"), all.x = TRUE)
-annual.part <- merge(annual.part, SDM_MSQD, by = c("set_year"), all.x = TRUE) 
-annual.part <- merge(annual.part, SDM_MSQD_Spawn, by = c("set_year"), all.x = TRUE) 
-
+# ## Read data (vessel has more than 20 trips in a year to be considered active)
+# annual.part <- readRDS(file = "C:/Data/PacFIN data/vessel_part_year.RDS")
+# Tickets <- readRDS("C:/Data/PacFIN data/Tickets.rds")
+# 
+# 
+# # ## Check how many years each vessel participate
+# # n_years_active <- annual.part %>% group_by(VESSEL_NUM) %>%
+# #   summarize(n_years = sum(active_year))
+# # n_vessels_per_year <- annual.part %>% group_by(set_year) %>%
+# #   summarize(n_years = sum(active_year))
+# 
+# # # Plor participation
+# # ggplot(annual.part.exp, aes(x=set_year, y=VESSEL_NUM, color=active_year)) +
+# #   geom_point(size=1)
+# 
+# 
+# 
+# #################################
+# ### Add explanatory variables ###
+# #################################
+# 
+# 
+# ###########################################################################
+# ## Add Vessel Center of Gravity and Inertia.
+# Coords<-read.csv("C:/GitHub/EconAnalysis/Clustering/Port_Zips_1.10.22.csv")
+# Coords<-Coords[c(-1,-4)]
+# Ticket_coordinates<-merge(Tickets, Coords, by=c("PORT_NAME", "AGENCY_CODE"))
+# rm(Tickets)
+# Ticket_Coords<-aggregate(AFI_EXVESSEL_REVENUE ~ VESSEL_NUM+PORT_NAME+AGENCY_CODE+Latitude+Longitude+LANDING_YEAR, data=Ticket_coordinates, FUN=sum)
+# registerDoParallel(cl = 4)
+# getDoParWorkers() 
+# COG_allyears <- foreach::foreach(ii = 2000:2020, .packages = c('tidyverse', 'raster')) %dopar% {
+#   source("C:/GitHub/EconAnalysis/Clustering/CGI_Function.R")
+#   Ticket_Coords2 <- Ticket_Coords %>% dplyr::filter(LANDING_YEAR == ii)
+#   Permit_ID <- as.data.frame(unique(Ticket_Coords2$VESSEL_NUM))
+#   names(Permit_ID)<-"VESSEL_NUM"
+#   List<-as.list(as.character(Permit_ID$VESSEL_NUM))
+#   Permit_COG<-NULL
+#   for (i in 1:length(List)) {
+#     Permit = List[i]
+#     Single_Permit<- Ticket_Coords[which(Ticket_Coords$VESSEL_NUM==Permit),]
+#     Single_COG<-cgi(x=Single_Permit$Longitude, y=Single_Permit$Latitude, z=Single_Permit$AFI_EXVESSEL_REVENUE, plot=F)
+#     Single_COG <- data.frame(lon = c(Single_COG$xaxe1[1], Single_COG$xaxe1[2], Single_COG$xaxe2[1], Single_COG$xaxe2[2],
+#                                      Single_COG$xcg),
+#                              lat = c(Single_COG$yaxe1[1], Single_COG$yaxe1[2], Single_COG$yaxe2[1], Single_COG$yaxe2[2],
+#                                      Single_COG$ycg),group = c("A", "A", "B", "B","C"))
+#     Point_Coord<-Single_COG[which(Single_COG$group=="C"),]
+#     Line_Coord_A<-Single_COG[which(Single_COG$group=="A"),]
+#     Line_Coord_B<-Single_COG[which(Single_COG$group=="B"),]
+#     Distance_A<-pointDistance(c(Line_Coord_A[1,1], Line_Coord_A[1,2]), c(Line_Coord_A[2,1],  Line_Coord_A[2,2]), lonlat=TRUE)
+#     Distance_B<-pointDistance(c(Line_Coord_B[1,1], Line_Coord_B[1,2]), c(Line_Coord_B[2,1],  Line_Coord_B[2,2]), lonlat=TRUE)
+#     Value<-as.data.frame(c(Permit, Point_Coord$lon, Point_Coord$lat, Distance_A, Distance_B))
+#     names(Value)<-c("uniqueid", "LON", "LAT", "DISTANCE_A", "DISTANCE_B")
+#     Permit_COG<-rbind(Permit_COG, Value)
+#   }
+#   Permit_COG$DISTANCE_A <- sub(NaN, 0, Permit_COG$DISTANCE_A)
+#   Permit_COG$DISTANCE_B <- sub(NaN, 0, Permit_COG$DISTANCE_B)
+#   Permit_COG$DISTANCE_A<-as.numeric(Permit_COG$DISTANCE_A)
+#   Permit_COG$DISTANCE_B<-as.numeric(Permit_COG$DISTANCE_B)
+#   Permit_COG<-Permit_COG[c(1,3,4)]
+#   names(Permit_COG)[1]<-"VESSEL_NUM"
+#   Vessel_Geography<-Permit_COG
+#   Vessel_Geography$set_year <- ii
+#   return(Vessel_Geography)
+# }
+# COG_data <- plyr::ldply(COG_allyears)
+# annual.part <- merge(annual.part, COG_data, 
+#                      by = (c("VESSEL_NUM", "set_year")), 
+#                      all.x = TRUE, all.y = FALSE) 
+# rm(Ticket_Coords, COG_allyears, COG_data)
+# gc()
+# 
+# ## Diversity index
+# HHI_allyears <- foreach::foreach(ii = 2000:2020,  .packages = c('tidyverse')) %dopar% {
+#     Tickets_filt <- Ticket_coordinates %>% filter(LANDING_YEAR == ii)
+#     HHI<-aggregate(AFI_EXVESSEL_REVENUE~ PACFIN_SPECIES_COMMON_NAME + VESSEL_NUM, data=Tickets_filt, FUN=sum) 
+#     HHI<-reshape2::dcast(HHI, VESSEL_NUM ~ PACFIN_SPECIES_COMMON_NAME, value.var="AFI_EXVESSEL_REVENUE", fill=0)
+#     rownames(HHI) <- HHI[,1]
+#     HHI <- HHI[,-1]
+#     HHI<-as.data.frame(vegan::diversity(HHI, index="invsimpson"))
+#     HHI$VESSEL_NUM <- rownames(HHI)
+#     names(HHI)<-c("diversity_all", "VESSEL_NUM")
+#     HHI$diversity_all[which(!is.finite(HHI$diversity_all))] <- 0  
+#     HHI$set_year <- ii
+#     return(HHI)
+# }
+# registerDoSEQ()
+# HHI_data <- plyr::ldply(HHI_allyears)
+# annual.part <- merge(annual.part, HHI_data, by = (c("VESSEL_NUM", "set_year")), all.x = TRUE, all.y = FALSE) 
+# annual.part <- annual.part %>%
+#   mutate(diversity_all = ifelse(is.na(diversity_all), 0, diversity_all)) %>%
+#   mutate(diversity_all = ifelse(active_year == 1, 0, diversity_all)) %>%
+#   arrange(VESSEL_NUM, set_year)
+# rm(HHI_data, HHI_allyears)
+# 
+# ## Get cluster inertia
+# PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
+# Ticket_clust <- merge(Ticket_coordinates, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+# rm(Ticket_coordinates, PAM_Vessel_Groups)
+# gc()
+# Ticket_clust <- Ticket_clust[!is.na(Ticket_clust$group_all), ]
+# source("C:\\GitHub\\EconAnalysis\\Clustering/CGI_Function.R")
+# Permit_ID <- as.data.frame(unique(Ticket_clust$group_all))
+# names(Permit_ID) <- "group_all"
+# List<-as.list(as.character(Permit_ID$group_all))
+# Permit_COG<-NULL
+# for (i in 1:length(List)) {
+#     Permit = List[i]
+#     Single_Permit<- Ticket_clust[which(Ticket_clust$group_all==Permit),]
+#     Single_COG <- cgi(x=Single_Permit$Longitude, y=Single_Permit$Latitude, z=Single_Permit$AFI_EXVESSEL_REVENUE, plot=F)
+#     Single_COG <- data.frame(lon = c(Single_COG$xaxe1[1], Single_COG$xaxe1[2], Single_COG$xaxe2[1], Single_COG$xaxe2[2],
+#                                      Single_COG$xcg),
+#                              lat = c(Single_COG$yaxe1[1], Single_COG$yaxe1[2], Single_COG$yaxe2[1], Single_COG$yaxe2[2],
+#                                      Single_COG$ycg),group = c("A", "A", "B", "B","C"))
+#     Point_Coord<-Single_COG[which(Single_COG$group=="C"),]
+#     Line_Coord_A<-Single_COG[which(Single_COG$group=="A"),]
+#     Line_Coord_B<-Single_COG[which(Single_COG$group=="B"),]
+#     Distance_A<-pointDistance(c(Line_Coord_A[1,1], Line_Coord_A[1,2]), c(Line_Coord_A[2,1],  Line_Coord_A[2,2]), lonlat=TRUE)
+#     Distance_B<-pointDistance(c(Line_Coord_B[1,1], Line_Coord_B[1,2]), c(Line_Coord_B[2,1],  Line_Coord_B[2,2]), lonlat=TRUE)
+#     Value<-as.data.frame(c(Permit, Point_Coord$lon, Point_Coord$lat, Distance_A, Distance_B))
+#     names(Value)<-c("uniqueid", "LON", "LAT", "DISTANCE_A", "DISTANCE_B")
+#     Permit_COG<-rbind(Permit_COG, Value)
+# }
+# Permit_COG$DISTANCE_A <- sub(NaN, 0, Permit_COG$DISTANCE_A)
+# Permit_COG$DISTANCE_B <- sub(NaN, 0, Permit_COG$DISTANCE_B)
+# Permit_COG$DISTANCE_A<-as.numeric(Permit_COG$DISTANCE_A)/1000
+# Permit_COG$DISTANCE_B<-as.numeric(Permit_COG$DISTANCE_B)/1000
+# Permit_COG<-Permit_COG[c(1,2,3,4)]
+# names(Permit_COG)[1]<-"VESSEL_NUM"
+# Cluster_Geography <- Permit_COG
+# rm(Line_Coord_A, Line_Coord_B, List, Permit, Permit_COG, Permit_ID, Point_Coord, 
+#    Single_COG, Single_Permit, Value, DISTANCE_A, DISTANCE_B, i, Distance_A, Distance_B)
+# gc()
+# save.image("C:/Users/fequezad/work_save.RData")
+# load("C:/Users/fequezad/work_save.RData")
+# 
+# 
+# 
+# # Expand data
+# annual.part <- complete(annual.part, VESSEL_NUM, set_year) %>%
+#   mutate(active_year = ifelse(is.na(active_year), 0, active_year))
+# 
+# 
+# ## Add SDM
+# SDM_MSQD_Spawn <- read.csv(file = here::here("Landings", "SDM", "MSQD_Spawn_SDM_port_month.csv")) %>%
+#   merge(Coords, by=c("PORT_NAME", "AGENCY_CODE"))
+#   ports <- SDM_MSQD_Spawn %>%
+#     dplyr::select(c("Latitude", "Longitude", "PORT_NAME")) %>%
+#     unique()
+# registerDoParallel(cl = 4)
+# getDoParWorkers()
+# SDM_PRICE_MSQD_cluster <- foreach::foreach(ii = 1:8,
+#   .packages = c('tidyverse', 'raster', 'geosphere', 'data.table')) %dopar% {
+#   distPorts <- ports %>%
+#     mutate(dist = by(., 1:nrow(.), function(row) {
+#       distHaversine(c(row$Longitude, row$Latitude), c(row$Longitude, Cluster_Geography[ii,]$LAT))
+#       })) %>%
+#     mutate(dist = dist / 1000)  %>%
+#     dplyr::filter(dist <= Cluster_Geography[ii,]$DISTANCE_A) %>%
+#     dplyr::select(c(PORT_NAME)) %>%
+#     unique()
+#   SDM_MSQD_Spawn_cluster <- setDT(SDM_MSQD_Spawn)[PORT_NAME %chin% distPorts$PORT_NAME] %>%
+#     group_by(LANDING_YEAR) %>%
+#     summarize(MSQD_SPAWN_SDM_90 = mean(SDM_SPAWN_90, na.rm = TRUE)) %>%
+#     rename(set_year = LANDING_YEAR) %>%
+#     mutate(group_all = ii)
+#   Price_MSQD <- Ticket_clust %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR, PORT_NAME) %>%
+#     dplyr::filter(PACFIN_SPECIES_CODE == "MSQD")
+#     Price_MSQD <- setDT(Price_MSQD)[PORT_NAME %chin% distPorts$PORT_NAME] %>%
+#       group_by(LANDING_YEAR) %>%
+#       summarize(MSQD_Price = mean(AFI_PRICE_PER_POUND, na.rm = TRUE)) %>%
+#       rename(set_year = LANDING_YEAR) %>%
+#       mutate(group_all = ii)
+#   SDM_PRICE_MSQD <- merge(SDM_MSQD_Spawn_cluster, Price_MSQD, by = (c("group_all", "set_year")))
+#   return(SDM_PRICE_MSQD)
+# }
+# registerDoSEQ()
+# SDM_PRICE_MSQD_data <- plyr::ldply(SDM_PRICE_MSQD_cluster)
+# PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
+# annual.part <- merge(annual.part, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+# annual.part <- merge(annual.part, SDM_PRICE_MSQD_data, by = (c("group_all", "set_year")), all.x = TRUE, all.y = FALSE)
+# rm(PAM_Vessel_Groups, SDM_PRICE_MSQD_data, SDM_MSQD_Spawn, SDM_PRICE_MSQD_cluster, ports, Coords, Cluster_Geography, cgi, Ticket_clust)
+# 
+# 
+# # SDM_PSDN <- read.csv(file = here::here("Landings", "SDM", "PSDN_SDM_port_month.csv")) %>%
+# #   group_by(LANDING_YEAR) %>% summarize(PSDN_SDM_60 = mean(SDM_60, na.rm = TRUE)) %>%
+# #   rename(set_year = LANDING_YEAR)
+# # SDM_MSQD <- read.csv(file = here::here("Landings", "SDM", "MSQD_SDM_port_month.csv"))%>%
+# #   group_by(LANDING_YEAR) %>% summarize(MSQD_SDM_90 = mean(SDM_90, na.rm = TRUE)) %>%
+# #   rename(set_year = LANDING_YEAR)
+# # SDM_NANC <- read.csv(file = here::here("Landings", "SDM", "NANC_SDM_port_month.csv"))%>%
+# #   group_by(LANDING_YEAR) %>% summarize(NANC_SDM_20 = mean(SDM_20, na.rm = TRUE)) %>%
+# #   rename(set_year = LANDING_YEAR)
+# # annual.part <- merge(annual.part, SDM_PSDN, by = c("set_year"), all.x = TRUE)
+# # annual.part <- merge(annual.part, SDM_NANC, by = c("set_year"), all.x = TRUE)
+# # annual.part <- merge(annual.part, SDM_MSQD, by = c("set_year"), all.x = TRUE)
+# 
+# 
+# ### Get revenue ###
+# annual.part <- annual.part %>%
+#   mutate(rev_MSQD = MSQD_Price * MSQD_SPAWN_SDM_90)
+# 
+# 
+# ### Computing moving averages
+# annual.part2 <- annual.part %>%
+#   arrange(VESSEL_NUM, set_year) %>%
+#   group_by(VESSEL_NUM) %>%
+#   mutate(years_active = RcppRoll::roll_sum(active_year, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_HHI     = RcppRoll::roll_mean(diversity_all, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_COG     = RcppRoll::roll_mean(LAT, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_LI      = RcppRoll::roll_mean(DISTANCE_A, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_PRICE   = RcppRoll::roll_mean(MSQD_Price, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_SDM     = RcppRoll::roll_mean(MSQD_SPAWN_SDM_90, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_Revenue = RcppRoll::roll_mean(rev_MSQD, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   ungroup() %>%
+#   filter(set_year>=2005) %>%
+#   dplyr::select(c('years_active', 'mean_HHI', 'mean_COG' , 'mean_LI' , 'mean_PRICE',
+#                   'mean_SDM' , 'mean_Revenue', 'VESSEL_NUM', 'set_year', 'active_year', 'group_all'))
+# 
+# ## Filter data
+# annual.part3 <- annual.part2 %>%
+#   group_by(VESSEL_NUM) %>%
+#   mutate(n_years = sum(active_year)) %>%
+#   ungroup() %>%
+#   filter(n_years >= 5)
+# 
+# saveRDS(annual.part3, "C:/Data/PacFIN data/annual_part.RDS")
 
 ######################
 ### Estimate model ###
 ######################
-library(brms)
 
-set.seed(1234)
+annual.part3 <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>% dplyr::filter(group_all == 4)
 
-logit <- brm(active_year ~ prev_years_active + 
-               PSDN.Closure + 
-               lagged_PSDN_SDM_60 + 
-               lagged_MSQD_SDM_90 + 
-               lagged_NANC_SDM_20 +
-               diversity_all +
-               (1 | VESSEL_NUM), 
-            data = annual.part, 
-            seed = 123,
-            family = bernoulli(link = "logit"), 
-            warmup = 500, 
-            iter = 2000,
-            chain = 1, cores = 4)
-
-summary(logit)
-plot(conditional_effects(logit), points = TRUE)
+logit <- brm(active_year ~  years_active + mean_HHI + mean_COG + mean_LI + 
+               mean_PRICE + mean_SDM + (1 | VESSEL_NUM), 
+            data = annual.part3, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
+            iter = 2000, chain = 1, cores = 4)
+            summary(logit)
+            plot(conditional_effects(logit), points = TRUE)
 
 
 ### Obtain AUC
