@@ -483,8 +483,8 @@ rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NU
                                mean_price, mean_price2, mean_catch, mean_catch2, mean_avail, diesel_price, dCPUE, dPrice30, 
                                dDieselState, dCPUE90, wind_max_220_mh, dummy_last_day, dummy_prev_days_port,
                                dummy_prev_days, dummy_prev_year_days, dummy_clust_prev_days, lat_cg, dist_to_cog, 
-                               dist_port_to_catch_area, dist_port_to_catch_area_zero, PSDN.Closure, PSDN.Total.Closure, 
-                               WA.Closure, MSQD.Closure, Weekend, PSDN.Closure.d, PSDN.Total.Closure.d, WA.Closure.d, 
+                               dist_port_to_catch_area, dist_port_to_catch_area_zero, PSDN.Closure, BTNA.Closure, PSDN.Total.Closure, 
+                               WA.Closure, MSQD.Closure, Weekend, BTNA.Closure.d, PSDN.Closure.d, PSDN.Total.Closure.d, WA.Closure.d, 
                                MSQD.Closure.d, MSQD.Weekend, dParticipate, unem_rate, d_missing_catch, d_missing_catch2, 
                                d_missing, d_missing_p, d_missing_p2, d_missing_cpue, d_missing_d, Vessel.length, 
                                lunar.ill, Price.Fishmeal.AFI, dPrice30_s, dPrice90_s,dPrice30_s2, dPrice90_s2)

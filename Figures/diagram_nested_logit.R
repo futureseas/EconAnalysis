@@ -1,4 +1,7 @@
+
+
 gc()
+rm(list = ls())
 library(data.tree)
 
 # vessel <- Node$new("Vessel")
@@ -34,34 +37,35 @@ library(data.tree)
 # plot(vessel)
 #   
 
-
 vessel2 <- Node$new("Vessel")
   part <- vessel2$AddChild("Participate")
     msqd <- part$AddChild("Squid")
-      laa <- msqd$AddChild("LA")
+      laa <- msqd$AddChild("Los\nAngeles")
       mna <- msqd$AddChild("Monterey")
       mra <- msqd$AddChild("Morrobay")
-      sba <- msqd$AddChild("Santa Barbara")
-      sfa <- msqd$AddChild("San Francisco")
+      sba <- msqd$AddChild("Santa\nBarbara")
+      sfa <- msqd$AddChild("San\nFrancisco")
     cmck <- part$AddChild("Mackerel")
-      laa <- cmck$AddChild("LA")
-      sba <- cmck$AddChild("Santa Barbara")
+      laa <- cmck$AddChild("Los\nAngeles")
+      sba <- cmck$AddChild("Santa\nBarbara")
     nanc <- part$AddChild("Anchovy")
-      laa <- nanc$AddChild("LA")
+      laa <- nanc$AddChild("Los\nAngeles")
       mna <- nanc$AddChild("Monterey")
-      sfa <- nanc$AddChild("San Francisco")
+      sfa <- nanc$AddChild("San\nFrancisco")
     psdn <- part$AddChild("Sardine")
-      laa <- psdn$AddChild("LA")
+      laa <- psdn$AddChild("Los\nAngeles")
       mna <- psdn$AddChild("Monterey")
-    ytna <- part$AddChild("Yellowfin")
-      laa <- ytna$AddChild("LA")
-  nopart <- vessel2$AddChild("No participate")
+    tuna <- part$AddChild("Tuna")
+      ytna <- tuna$AddChild("Yellowfin")
+      btna <- tuna$AddChild("Bluefin")
+  nopart <- vessel2$AddChild("No\nparticipate")
   
 SetGraphStyle(vessel2, rankdir = "TB")
 SetEdgeStyle(vessel2, arrowhead = "vee", color = "grey35", penwidth = 2)
-SetNodeStyle(vessel2, style = "filled,rounded", shape = "box", fillcolor = "ivory2", fontcolor = "black", 
+SetNodeStyle(vessel2, style = "filled,rounded", shape = "box", fontcolor = "black",fillcolor = "lightgrey", 
              fontname = "helvetica", tooltip = GetDefaultTooltip)
-SetNodeStyle(vessel2$`No participate`, fillcolor = "indianred3")
-SetNodeStyle(vessel2$Participate, fillcolor = "lightcyan2")
+SetNodeStyle(vessel2$`No\nparticipate`, fillcolor = "firebrick1")
+SetNodeStyle(vessel2$Participate, fillcolor = "ivory1")
+SetNodeStyle(vessel2$Participate$Tuna, fillcolor = "powderblue")
 plot(vessel2)
 
