@@ -337,10 +337,12 @@ annual.part <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>%
   dplyr::filter(group_all == 4) %>%
     mutate(mean_COG = ifelse(is.na(mean_COG), mean(mean_COG, na.rm=TRUE), mean_COG)) %>%
     mutate(mean_HHI = ifelse(is.na(mean_HHI), 0, mean_HHI)) %>%
-    mutate(mean_LI  = ifelse(is.na(mean_LI), 0, mean_LI))
+    mutate(mean_LI  = ifelse(is.na(mean_LI), 0, mean_LI)) %>%
+    mutate(PSDN.Closure = as.factor(ifelse(set_year_actual >= 2015, 1, 0))) %>%
+    mutate(years_active = years_active - active_year)
 
 ##  Estimate bayesian model
-logit <- brm(active_year ~  mean_MSQD_SPAWN_SDM + mean_PRICE + mean_unem.CA 
+logit <- brm(active_year ~ years_active + mean_Revenue + mean_unem.CA + PSDN.Closure + mean_LI
              + (1 | VESSEL_NUM) + (1 | set_year_actual), 
             data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
             iter = 2000, chain = 1, cores = 4) 
@@ -350,7 +352,7 @@ logit <- brm(active_year ~  mean_MSQD_SPAWN_SDM + mean_PRICE + mean_unem.CA
             # ,  backend = "cmdstanr", threads = threading(4)
             
 ## Plot marginal effects     
-conditional_effects(logit, ask = FALSE)
+conditional_effects(logit)
 
              
 ### Obtain AUC # 98% already!
