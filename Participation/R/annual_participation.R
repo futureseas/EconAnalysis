@@ -1,18 +1,18 @@
-# ################################
-# ## Annual participation model ##
-# ################################
-# 
-# library(tidyverse)
-# library(data.table)
-# library(raster)
-# library(doParallel)
-# library(brms)
-# rm(list = ls())
-# gc()
-# 
-# 
+################################
+## Annual participation model ##
+################################
+
+library(tidyverse)
+library(data.table)
+library(raster)
+library(doParallel)
+library(brms)
+rm(list = ls())
+gc()
+
+
 # ## Read data (vessel has more than 20 trips in a year to be considered active)
-# annual.part <- readRDS(file = "C:/Data/PacFIN data/vessel_part_year.RDS")
+# annual.part <- readRDS(file = "C:/Data/PacFIN data/vessel_part_year.RDS") 
 # Tickets <- readRDS("C:/Data/PacFIN data/Tickets.rds")
 # 
 # 
@@ -33,7 +33,7 @@
 # #################################
 # 
 # 
-# ###########################################################################
+# #-------------------------------------------
 # ## Add Vessel Center of Gravity and Inertia.
 # Coords<-read.csv("C:/GitHub/EconAnalysis/Clustering/Port_Zips_1.10.22.csv")
 # Coords<-Coords[c(-1,-4)]
@@ -77,12 +77,10 @@
 #   return(Vessel_Geography)
 # }
 # COG_data <- plyr::ldply(COG_allyears)
-# annual.part <- merge(annual.part, COG_data,
-#                      by = (c("VESSEL_NUM", "set_year")),
-#                      all.x = TRUE, all.y = FALSE)
-# rm(Ticket_Coords, COG_allyears, COG_data)
-# gc()
+# rm(COG_allyears, Ticket_Coords)
+#    
 # 
+# #-------------------------------------------
 # ## Diversity index
 # HHI_allyears <- foreach::foreach(ii = 2000:2020,  .packages = c('tidyverse')) %dopar% {
 #     Tickets_filt <- Ticket_coordinates %>% filter(LANDING_YEAR == ii)
@@ -97,15 +95,12 @@
 #     HHI$set_year <- ii
 #     return(HHI)
 # }
-# registerDoSEQ()
 # HHI_data <- plyr::ldply(HHI_allyears)
-# annual.part <- merge(annual.part, HHI_data, by = (c("VESSEL_NUM", "set_year")), all.x = TRUE, all.y = FALSE)
-# annual.part <- annual.part %>%
-#   mutate(diversity_all = ifelse(is.na(diversity_all), 0, diversity_all)) %>%
-#   mutate(diversity_all = ifelse(active_year == 1, 0, diversity_all)) %>%
-#   arrange(VESSEL_NUM, set_year)
-# rm(HHI_data, HHI_allyears)
+# rm(HHI_allyears)
+# registerDoSEQ()
 # 
+# 
+# #-------------------------------------------
 # ## Get cluster inertia
 # PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
 # Ticket_clust <- merge(Ticket_coordinates, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
@@ -144,20 +139,9 @@
 # rm(Line_Coord_A, Line_Coord_B, List, Permit, Permit_COG, Permit_ID, Point_Coord,
 #    Single_COG, Single_Permit, Value, DISTANCE_A, DISTANCE_B, i, Distance_A, Distance_B)
 # gc()
-# save.image("C:/Users/fequezad/work_save.RData")
-# 
-# ##############################################################################################
-# ##############################################################################################
 # 
 # 
-# # load("C:/Users/fequezad/work_save.RData")
-# 
-# 
-# # Expand data
-# annual.part <- complete(annual.part, VESSEL_NUM, set_year) %>%
-#   mutate(active_year = ifelse(is.na(active_year), 0, active_year))
-# 
-# 
+# #-------------------------------------------
 # ## Add MSQD Spawn SDM
 # SDM_MSQD_Spawn <- read.csv(file = here::here("Landings", "SDM", "MSQD_Spawn_SDM_port_month.csv")) %>%
 #   merge(Coords, by=c("PORT_NAME", "AGENCY_CODE"))
@@ -201,11 +185,7 @@
 # }
 # registerDoSEQ()
 # SDM_PRICE_MSQD_data <- plyr::ldply(SDM_PRICE_MSQD_cluster)
-# PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
-# annual.part <- merge(annual.part, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
-# annual.part <- merge(annual.part, SDM_PRICE_MSQD_data, by = (c("group_all", "set_year")), all.x = TRUE, all.y = FALSE)
-# rm(PAM_Vessel_Groups, SDM_PRICE_MSQD_data, SDM_MSQD_Spawn, SDM_MSQD, SDM_PRICE_MSQD_cluster, ports, Coords, Cluster_Geography, cgi, Ticket_clust)
-# 
+# rm(SDM_MSQD_Spawn, SDM_MSQD, SDM_PRICE_MSQD_cluster, ports, Coords, Cluster_Geography, cgi, Ticket_clust)
 # # SDM_PSDN <- read.csv(file = here::here("Landings", "SDM", "PSDN_SDM_port_month.csv")) %>%
 # #   group_by(LANDING_YEAR) %>% summarize(PSDN_SDM_60 = mean(SDM_60, na.rm = TRUE)) %>%
 # #   rename(set_year = LANDING_YEAR)
@@ -215,11 +195,6 @@
 # # annual.part <- merge(annual.part, SDM_PSDN, by = c("set_year"), all.x = TRUE)
 # # annual.part <- merge(annual.part, SDM_NANC, by = c("set_year"), all.x = TRUE)
 # 
-# 
-# ### Get revenue ###
-# annual.part <- annual.part %>%
-#   mutate(rev_MSQD_SPAWN = MSQD_Price * MSQD_SPAWN_SDM_90) %>%
-#   mutate(rev_MSQD = MSQD_Price * MSQD_SDM_90)
 # 
 # #-------------------------------------------
 # ## Include unemployment.
@@ -248,13 +223,10 @@
 #   dplyr::select(-c(LANDING_YEAR))
 # unem <- cbind(unem_CA, unem_OR, unem_WA) %>%
 #   rename(set_year = LANDING_YEAR)
-#   rm(unem_CA, unem_OR, unem_WA)
-# 
-# annual.part <- annual.part %>%
-#   merge(unem, by = "set_year", all.x = TRUE, all.y = FALSE)
-#   rm(unem)
+# rm(unem_CA, unem_OR, unem_WA)
 # 
 # 
+# #-------------------------------------------
 # ### Include fuel price
 # fuel.prices.state <-
 #   readxl::read_excel(here::here("Data", "Fuel_prices", "state_averages.xls"), sheet = "state_averages") %>%
@@ -263,51 +235,88 @@
 #   dplyr::rename(AGENCY_CODE = STATE) %>%
 #   dplyr::rename(diesel.price = avgpricegal) %>%
 #   dplyr::select(-c('avgpricettl')) %>%
-#   mutate(AGENCY_CODE =
-#            ifelse(AGENCY_CODE == 'WA', 'W',
-#                   ifelse(AGENCY_CODE == 'CA', 'C',
-#                          ifelse(AGENCY_CODE == 'OR', 'O', 'A')))) %>%
+#   mutate(AGENCY_CODE = ifelse(AGENCY_CODE == 'WA', 'W', ifelse(AGENCY_CODE == 'CA', 'C', ifelse(AGENCY_CODE == 'OR', 'O', 'A')))) %>%
 #   group_by(AGENCY_CODE, LANDING_YEAR) %>%
 #   summarize(diesel.price.year = mean(diesel.price)) %>%
 #   pivot_wider(names_from = AGENCY_CODE, values_from = diesel.price.year) %>%
-#     rename(diesel.price.WA = W) %>%
-#     rename(diesel.price.CA = C) %>%
-#     rename(diesel.price.AK = A) %>%
-#     rename(diesel.price.OR = O) %>%
-#     rename(set_year = LANDING_YEAR)
+#   rename(diesel.price.WA = W) %>%
+#   rename(diesel.price.CA = C) %>%
+#   rename(diesel.price.AK = A) %>%
+#   rename(diesel.price.OR = O) %>%
+#   rename(set_year = LANDING_YEAR)
 # 
+# ###
+# gc()
+# save.image("C:/Users/fequezad/work_save.RData")
+
+
+##############################################################################################
+##############################################################################################
+
+
+# load("C:/Users/fequezad/work_save.RData")
+# 
+# 
+# ##-----------------------------------
+# # Expand data
+# annual.part <- complete(annual.part, VESSEL_NUM, set_year) %>%
+#   mutate(active_year = ifelse(is.na(active_year), 0, active_year)) %>%
+#   mutate(set_year_actual = set_year) %>%
+#   mutate(set_year = set_year - 1)
+# 
+# ##-----------------------------------
+# # Merge data
+# PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
 # annual.part <- annual.part %>%
+#   merge(HHI_data, by = (c("VESSEL_NUM", "set_year")), all.x = TRUE, all.y = FALSE) %>%
+#   mutate(diversity_all = ifelse(is.na(diversity_all), 0, diversity_all)) %>%
+#   arrange(VESSEL_NUM, set_year_actual) %>% 
+#   merge(COG_data, by = (c("VESSEL_NUM", "set_year")), all.x = TRUE, all.y = FALSE) %>%
+#   merge(PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE) %>%
+#   merge(SDM_PRICE_MSQD_data, by = (c("group_all", "set_year")), all.x = TRUE, all.y = FALSE) %>%
+#   merge(unem, by = "set_year", all.x = TRUE, all.y = FALSE) %>%
 #   merge(fuel.prices.state, by = "set_year", all.x = TRUE, all.y = FALSE)
-#   rm(fuel.prices.state)
+#   rm(PAM_Vessel_Groups, HHI_data, COG_data, SDM_PRICE_MSQD_data, unem, fuel.prices.state)
 # 
+#   
+# ##-----------------------------------
+# ### Get revenue ###
+# annual.part <- annual.part %>%
+#   mutate(rev_MSQD_SPAWN = MSQD_Price * MSQD_SPAWN_SDM_90) %>%
+#   mutate(rev_MSQD = MSQD_Price * MSQD_SDM_90)
 # 
+#   
+# ##-----------------------------------  
 # ### Computing moving averages
 # annual.part <- annual.part %>%
-#   arrange(VESSEL_NUM, set_year) %>%
+#   arrange(VESSEL_NUM, set_year_actual) %>%
 #   group_by(VESSEL_NUM) %>%
-#   mutate(years_active        = RcppRoll::roll_sum(active_year, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_HHI            = RcppRoll::roll_mean(diversity_all, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_COG            = RcppRoll::roll_mean(LAT, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_LI             = RcppRoll::roll_mean(DISTANCE_A, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_PRICE          = RcppRoll::roll_mean(MSQD_Price, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_MSQD_SDM       = RcppRoll::roll_mean(MSQD_SDM_90, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_MSQD_SPAWN_SDM = RcppRoll::roll_mean(MSQD_SPAWN_SDM_90, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_Revenue        = RcppRoll::roll_mean(rev_MSQD, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_Revenue_SPAWN  = RcppRoll::roll_mean(rev_MSQD_SPAWN, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(years_active        = RcppRoll::roll_sum(active_year,           5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_HHI            = RcppRoll::roll_mean(diversity_all,        5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_COG            = RcppRoll::roll_mean(LAT,                  5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_LI             = RcppRoll::roll_mean(DISTANCE_A,           5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_PRICE          = RcppRoll::roll_mean(MSQD_Price,           5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_MSQD_SDM       = RcppRoll::roll_mean(MSQD_SDM_90,          5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_MSQD_SPAWN_SDM = RcppRoll::roll_mean(MSQD_SPAWN_SDM_90,    5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_Revenue        = RcppRoll::roll_mean(rev_MSQD,             5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_Revenue_SPAWN  = RcppRoll::roll_mean(rev_MSQD_SPAWN,       5, fill = NA, align = "right", na.rm = TRUE)) %>%
 #   mutate(mean_unem.CA        = RcppRoll::roll_mean(mean.unemployment.CA, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_diesel.CA      = RcppRoll::roll_mean(diesel.price.CA, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_diesel.CA      = RcppRoll::roll_mean(diesel.price.CA,      5, fill = NA, align = "right", na.rm = TRUE)) %>%
 #   ungroup() %>%
-#   filter(set_year>=2005) %>%
+#   filter(set_year_actual>=2005) %>%
 #   dplyr::select(c('years_active', 'mean_HHI', 'mean_COG' , 'mean_LI' , 'mean_PRICE', 'mean_MSQD_SDM', 'mean_MSQD_SPAWN_SDM' ,
-#                   'mean_Revenue', 'mean_Revenue_SPAWN', 'VESSEL_NUM', 'set_year', 'active_year', 'group_all', 'mean_unem.CA', 'mean_diesel.CA'))
+#                   'mean_Revenue', 'mean_Revenue_SPAWN', 'VESSEL_NUM', 'set_year', 'set_year_actual', 'active_year', 'group_all',
+#                   'mean_unem.CA', 'mean_diesel.CA'))
 # 
+# ##-----------------------------------  
 # ## Filter data
 # annual.part <- annual.part %>%
 #   group_by(VESSEL_NUM) %>%
 #   mutate(n_years = sum(active_year)) %>%
 #   ungroup() %>%
 #   filter(n_years >= 5)
-# 
+#            
+# ###
 # saveRDS(annual.part, "C:/Data/PacFIN data/annual_part.RDS")
 
 
@@ -325,19 +334,19 @@ gc()
 
 ## Load data
 annual.part <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>% 
-  dplyr::filter(group_all == 4)
-  colnames(annual.part)
-
-#   
-# set_prior("normal(0,1)", class = "b", lb = 0, coef = "mean_MSQD_SPAWN_SDM")
-#   
+  dplyr::filter(group_all == 4) %>%
+    mutate(mean_COG = ifelse(is.na(mean_COG), mean(mean_COG, na.rm=TRUE), mean_COG)) %>%
+    mutate(mean_HHI = ifelse(is.na(mean_HHI), 0, mean_HHI)) %>%
+    mutate(mean_LI  = ifelse(is.na(mean_LI), 0, mean_LI))
 
 ##  Estimate bayesian model
-logit <- brm(active_year ~  years_active + mean_PRICE + mean_MSQD_SPAWN_SDM + 
-               mean_unem.CA + mean_diesel.CA + mean_COG + I(mean_COG^2) + (1 | VESSEL_NUM) + (1 | set_year), 
+logit <- brm(active_year ~  mean_MSQD_SDM + mean_PRICE + mean_unem.CA 
+             + (1 | VESSEL_NUM) + (1 | set_year_actual), 
             data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
             iter = 2000, chain = 1, cores = 4) # ,  backend = "cmdstanr", threads = threading(4)
             summary(logit)
+            
+            # set_prior("normal(0,1)", class = "b", lb = 0, coef = "mean_MSQD_SPAWN_SDM"),
             
 ## Plot marginal effects     
 conditional_effects(logit, ask = FALSE)
