@@ -340,13 +340,14 @@ annual.part <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>%
     mutate(mean_LI  = ifelse(is.na(mean_LI), 0, mean_LI))
 
 ##  Estimate bayesian model
-logit <- brm(active_year ~  mean_MSQD_SDM + mean_PRICE + mean_unem.CA 
+logit <- brm(active_year ~  mean_MSQD_SPAWN_SDM + mean_PRICE + mean_unem.CA 
              + (1 | VESSEL_NUM) + (1 | set_year_actual), 
             data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 500, 
-            iter = 2000, chain = 1, cores = 4) # ,  backend = "cmdstanr", threads = threading(4)
+            iter = 2000, chain = 1, cores = 4) 
             summary(logit)
             
             # set_prior("normal(0,1)", class = "b", lb = 0, coef = "mean_MSQD_SPAWN_SDM"),
+            # ,  backend = "cmdstanr", threads = threading(4)
             
 ## Plot marginal effects     
 conditional_effects(logit, ask = FALSE)
