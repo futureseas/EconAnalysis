@@ -341,6 +341,10 @@ annual.part <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>%
     mutate(years_active = years_active - active_year) %>%
   dplyr::filter(group_all == 4 | group_all == 5)
 
+
+## Calculate weight averages for prices and sdm!
+
+
 ##  Estimate bayesian model
 
 logit_all <- brm(active_year ~ mean_MSQD_SDM + mean_PRICE + mean_unem.CA + PSDN.Closure + mean_HHI + mean_COG + I(mean_COG^2) + 
