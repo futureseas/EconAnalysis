@@ -390,7 +390,7 @@ logit_all <- brm(active_year ~ mean_SDM + mean_PRICE + mean_unem + PSDN.Closure 
                           (1 | group_all) + (1 | VESSEL_NUM) + (1 | set_year_actual), 
               data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 2000, 
               iter = 4000, chain = 4, cores = 4,
-              prior = c(set_prior("lognormal(0,1)", class = "b", coef = "mean_MSQD_SDM")),
+              prior = c(set_prior("lognormal(0,1)", class = "b", coef = "mean_SDM")),
               control = list(adapt_delta = 0.999))
             summary(logit_all)
             saveRDS(logit_all, "logit_all.RDS")
