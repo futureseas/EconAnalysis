@@ -1,18 +1,18 @@
-################################
-## Annual participation model ##
-################################
-
-library(tidyverse)
-library(data.table)
-library(raster)
-library(doParallel)
-library(brms)
-rm(list = ls())
-gc()
-
-
+# ################################
+# ## Annual participation model ##
+# ################################
+# 
+# library(tidyverse)
+# library(data.table)
+# library(raster)
+# library(doParallel)
+# library(brms)
+# rm(list = ls())
+# gc()
+# 
+# 
 # ## Read data (vessel has more than 20 trips in a year to be considered active)
-# annual.part <- readRDS(file = "C:/Data/PacFIN data/vessel_part_year.RDS") 
+# annual.part <- readRDS(file = "C:/Data/PacFIN data/vessel_part_year.RDS")
 # Tickets <- readRDS("C:/Data/PacFIN data/Tickets.rds")
 # 
 # 
@@ -78,7 +78,7 @@ gc()
 # }
 # COG_data <- plyr::ldply(COG_allyears)
 # rm(COG_allyears, Ticket_Coords)
-#    
+# 
 # 
 # #-------------------------------------------
 # ## Diversity index
@@ -137,7 +137,7 @@ gc()
 # names(Permit_COG)[1]<-"VESSEL_NUM"
 # Cluster_Geography <- Permit_COG
 # rm(Line_Coord_A, Line_Coord_B, List, Permit, Permit_COG, Permit_ID, Point_Coord,
-#    Single_COG, Single_Permit, Value, DISTANCE_A, DISTANCE_B, i, Distance_A, Distance_B)
+#    Single_COG, Single_Permit, Value, i, Distance_A, Distance_B)
 # gc()
 # 
 # 
@@ -147,12 +147,16 @@ gc()
 #   merge(Coords, by=c("PORT_NAME", "AGENCY_CODE"))
 # SDM_MSQD <- read.csv(file = here::here("Landings", "SDM", "MSQD_SDM_port_month.csv")) %>%
 #   merge(Coords, by=c("PORT_NAME", "AGENCY_CODE"))
+# SDM_PSDN <- read.csv(file = here::here("Landings", "SDM", "PSDN_SDM_port_month.csv")) %>%
+#   merge(Coords, by=c("PORT_NAME", "AGENCY_CODE"))
+# SDM_NANC <- read.csv(file = here::here("Landings", "SDM", "NANC_SDM_port_month.csv")) %>%
+#   merge(Coords, by=c("PORT_NAME", "AGENCY_CODE"))
 # ports <- SDM_MSQD_Spawn %>%
 #     dplyr::select(c("Latitude", "Longitude", "PORT_NAME")) %>%
 #     unique()
 # registerDoParallel(cl = 4)
 # getDoParWorkers()
-# SDM_PRICE_MSQD_cluster <- foreach::foreach(ii = 1:8,
+# SDM_PRICE_cluster <- foreach::foreach(ii = 1:8,
 #   .packages = c('tidyverse', 'raster', 'geosphere', 'data.table')) %dopar% {
 #   distPorts <- ports %>%
 #     mutate(dist = by(., 1:nrow(.), function(row) {
@@ -172,6 +176,16 @@ gc()
 #     summarize(MSQD_SDM_90 = mean(SDM_90, na.rm = TRUE)) %>%
 #     rename(set_year = LANDING_YEAR) %>%
 #     mutate(group_all = ii)
+#   SDM_PSDN_cluster <- setDT(SDM_PSDN)[PORT_NAME %chin% distPorts$PORT_NAME] %>%
+#     group_by(LANDING_YEAR) %>%
+#     summarize(PSDN_SDM_60 = mean(SDM_60, na.rm = TRUE)) %>%
+#     rename(set_year = LANDING_YEAR) %>%
+#     mutate(group_all = ii)
+#   SDM_NANC_cluster <- setDT(SDM_NANC)[PORT_NAME %chin% distPorts$PORT_NAME] %>%
+#     group_by(LANDING_YEAR) %>%
+#     summarize(NANC_SDM_20 = mean(SDM_20, na.rm = TRUE)) %>%
+#     rename(set_year = LANDING_YEAR) %>%
+#     mutate(group_all = ii)
 #   Price_MSQD <- Ticket_clust %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR, PORT_NAME) %>%
 #     dplyr::filter(PACFIN_SPECIES_CODE == "MSQD")
 #     Price_MSQD <- setDT(Price_MSQD)[PORT_NAME %chin% distPorts$PORT_NAME] %>%
@@ -179,21 +193,31 @@ gc()
 #       summarize(MSQD_Price = mean(AFI_PRICE_PER_POUND, na.rm = TRUE)) %>%
 #       rename(set_year = LANDING_YEAR) %>%
 #       mutate(group_all = ii)
-#   SDM_PRICE_MSQD <- merge(SDM_MSQD_Spawn_cluster, SDM_MSQD_cluster, by = (c("group_all", "set_year")))
-#   SDM_PRICE_MSQD <- merge(SDM_PRICE_MSQD, Price_MSQD, by = (c("group_all", "set_year")))
-#   return(SDM_PRICE_MSQD)
+#   Price_PSDN <- Ticket_clust %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR, PORT_NAME) %>%
+#     dplyr::filter(PACFIN_SPECIES_CODE == "PSDN")
+#     Price_PSDN <- setDT(Price_PSDN)[PORT_NAME %chin% distPorts$PORT_NAME] %>%
+#       group_by(LANDING_YEAR) %>%
+#       summarize(PSDN_Price = mean(AFI_PRICE_PER_POUND, na.rm = TRUE)) %>%
+#       rename(set_year = LANDING_YEAR) %>%
+#       mutate(group_all = ii)
+#   Price_NANC <- Ticket_clust %>% group_by(PACFIN_SPECIES_CODE, LANDING_YEAR, PORT_NAME) %>%
+#     dplyr::filter(PACFIN_SPECIES_CODE == "NANC")
+#     Price_NANC <- setDT(Price_NANC)[PORT_NAME %chin% distPorts$PORT_NAME] %>%
+#       group_by(LANDING_YEAR) %>%
+#       summarize(NANC_Price = mean(AFI_PRICE_PER_POUND, na.rm = TRUE)) %>%
+#       rename(set_year = LANDING_YEAR) %>%
+#       mutate(group_all = ii)
+#   SDM_PRICE <- merge(SDM_MSQD_Spawn_cluster, SDM_MSQD_cluster, by = (c("group_all", "set_year")))
+#   SDM_PRICE <- merge(SDM_PRICE, SDM_PSDN_cluster, by = (c("group_all", "set_year")))
+#   SDM_PRICE <- merge(SDM_PRICE, SDM_NANC_cluster, by = (c("group_all", "set_year")))
+#   SDM_PRICE <- merge(SDM_PRICE, Price_MSQD, by = (c("group_all", "set_year")))
+#   SDM_PRICE <- merge(SDM_PRICE, Price_NANC, by = (c("group_all", "set_year")))
+#   SDM_PRICE <- merge(SDM_PRICE, Price_PSDN, by = (c("group_all", "set_year")))
+#   return(SDM_PRICE)
 # }
 # registerDoSEQ()
-# SDM_PRICE_MSQD_data <- plyr::ldply(SDM_PRICE_MSQD_cluster)
-# rm(SDM_MSQD_Spawn, SDM_MSQD, SDM_PRICE_MSQD_cluster, ports, Coords, Cluster_Geography, cgi, Ticket_clust)
-# # SDM_PSDN <- read.csv(file = here::here("Landings", "SDM", "PSDN_SDM_port_month.csv")) %>%
-# #   group_by(LANDING_YEAR) %>% summarize(PSDN_SDM_60 = mean(SDM_60, na.rm = TRUE)) %>%
-# #   rename(set_year = LANDING_YEAR)
-# # SDM_NANC <- read.csv(file = here::here("Landings", "SDM", "NANC_SDM_port_month.csv"))%>%
-# #   group_by(LANDING_YEAR) %>% summarize(NANC_SDM_20 = mean(SDM_20, na.rm = TRUE)) %>%
-# #   rename(set_year = LANDING_YEAR)
-# # annual.part <- merge(annual.part, SDM_PSDN, by = c("set_year"), all.x = TRUE)
-# # annual.part <- merge(annual.part, SDM_NANC, by = c("set_year"), all.x = TRUE)
+# SDM_PRICE_data <- plyr::ldply(SDM_PRICE_cluster)
+# rm(SDM_MSQD_Spawn, SDM_MSQD, SDM_PSDN, SDM_NANC, SDM_PRICE_cluster, ports, Coords, Cluster_Geography, cgi, Ticket_clust)
 # 
 # 
 # #-------------------------------------------
@@ -270,23 +294,16 @@ gc()
 # annual.part <- annual.part %>%
 #   merge(HHI_data, by = (c("VESSEL_NUM", "set_year")), all.x = TRUE, all.y = FALSE) %>%
 #   mutate(diversity_all = ifelse(is.na(diversity_all), 0, diversity_all)) %>%
-#   arrange(VESSEL_NUM, set_year_actual) %>% 
+#   arrange(VESSEL_NUM, set_year_actual) %>%
 #   merge(COG_data, by = (c("VESSEL_NUM", "set_year")), all.x = TRUE, all.y = FALSE) %>%
 #   merge(PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE) %>%
-#   merge(SDM_PRICE_MSQD_data, by = (c("group_all", "set_year")), all.x = TRUE, all.y = FALSE) %>%
+#   merge(SDM_PRICE_data, by = (c("group_all", "set_year")), all.x = TRUE, all.y = FALSE) %>%
 #   merge(unem, by = "set_year", all.x = TRUE, all.y = FALSE) %>%
 #   merge(fuel.prices.state, by = "set_year", all.x = TRUE, all.y = FALSE)
-#   rm(PAM_Vessel_Groups, HHI_data, COG_data, SDM_PRICE_MSQD_data, unem, fuel.prices.state)
+#   rm(PAM_Vessel_Groups, HHI_data, COG_data, SDM_PRICE_data, unem, fuel.prices.state)
 # 
-#   
+# 
 # ##-----------------------------------
-# ### Get revenue ###
-# annual.part <- annual.part %>%
-#   mutate(rev_MSQD_SPAWN = MSQD_Price * MSQD_SPAWN_SDM_90) %>%
-#   mutate(rev_MSQD = MSQD_Price * MSQD_SDM_90)
-# 
-#   
-# ##-----------------------------------  
 # ### Computing moving averages
 # annual.part <- annual.part %>%
 #   arrange(VESSEL_NUM, set_year_actual) %>%
@@ -295,27 +312,34 @@ gc()
 #   mutate(mean_HHI            = RcppRoll::roll_mean(diversity_all,        5, fill = NA, align = "right", na.rm = TRUE)) %>%
 #   mutate(mean_COG            = RcppRoll::roll_mean(LAT,                  5, fill = NA, align = "right", na.rm = TRUE)) %>%
 #   mutate(mean_LI             = RcppRoll::roll_mean(DISTANCE_A,           5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_PRICE          = RcppRoll::roll_mean(MSQD_Price,           5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_NANC_PRICE     = RcppRoll::roll_mean(NANC_Price,           5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_NANC_SDM       = RcppRoll::roll_mean(NANC_SDM_20,          5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_PSDN_PRICE     = RcppRoll::roll_mean(PSDN_Price,           5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_PSDN_SDM       = RcppRoll::roll_mean(PSDN_SDM_60,          5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_MSQD_PRICE     = RcppRoll::roll_mean(MSQD_Price,           5, fill = NA, align = "right", na.rm = TRUE)) %>%
 #   mutate(mean_MSQD_SDM       = RcppRoll::roll_mean(MSQD_SDM_90,          5, fill = NA, align = "right", na.rm = TRUE)) %>%
 #   mutate(mean_MSQD_SPAWN_SDM = RcppRoll::roll_mean(MSQD_SPAWN_SDM_90,    5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_Revenue        = RcppRoll::roll_mean(rev_MSQD,             5, fill = NA, align = "right", na.rm = TRUE)) %>%
-#   mutate(mean_Revenue_SPAWN  = RcppRoll::roll_mean(rev_MSQD_SPAWN,       5, fill = NA, align = "right", na.rm = TRUE)) %>%
 #   mutate(mean_unem.CA        = RcppRoll::roll_mean(mean.unemployment.CA, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
 #   mutate(mean_diesel.CA      = RcppRoll::roll_mean(diesel.price.CA,      5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_unem.OR        = RcppRoll::roll_mean(mean.unemployment.OR, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_diesel.OR      = RcppRoll::roll_mean(diesel.price.OR,      5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_unem.WA        = RcppRoll::roll_mean(mean.unemployment.WA, 5, fill = NA, align = "right", na.rm = TRUE)) %>%
+#   mutate(mean_diesel.WA      = RcppRoll::roll_mean(diesel.price.WA,      5, fill = NA, align = "right", na.rm = TRUE)) %>%
 #   ungroup() %>%
 #   filter(set_year_actual>=2005) %>%
-#   dplyr::select(c('years_active', 'mean_HHI', 'mean_COG' , 'mean_LI' , 'mean_PRICE', 'mean_MSQD_SDM', 'mean_MSQD_SPAWN_SDM' ,
-#                   'mean_Revenue', 'mean_Revenue_SPAWN', 'VESSEL_NUM', 'set_year', 'set_year_actual', 'active_year', 'group_all',
-#                   'mean_unem.CA', 'mean_diesel.CA'))
+#   dplyr::select(c('years_active', 'mean_HHI', 'mean_COG' , 'mean_LI' , 'mean_MSQD_PRICE', 'mean_MSQD_SDM',
+#                   'mean_NANC_PRICE', 'mean_NANC_SDM', 'mean_MSQD_SPAWN_SDM', 'mean_PSDN_PRICE', 'mean_PSDN_SDM',
+#                   'VESSEL_NUM', 'set_year', 'set_year_actual', 'active_year', 'group_all', 
+#                   'mean_unem.CA', 'mean_diesel.CA', 'mean_unem.OR', 'mean_diesel.OR', 'mean_unem.WA', 'mean_diesel.WA'))
 # 
-# ##-----------------------------------  
+# ##-----------------------------------
 # ## Filter data
 # annual.part <- annual.part %>%
 #   group_by(VESSEL_NUM) %>%
 #   mutate(n_years = sum(active_year)) %>%
 #   ungroup() %>%
 #   filter(n_years >= 5)
-#            
+# 
 # ###
 # saveRDS(annual.part, "C:/Data/PacFIN data/annual_part.RDS")
 
@@ -338,25 +362,38 @@ annual.part <- readRDS("C:/Data/PacFIN data/annual_part.RDS") %>%
     mutate(mean_HHI = ifelse(is.na(mean_HHI), 0, mean_HHI)) %>%
     mutate(mean_LI  = ifelse(is.na(mean_LI), 0, mean_LI)) %>%
     mutate(PSDN.Closure = as.factor(ifelse(set_year_actual >= 2015, 1, 0))) %>%
-    mutate(years_active = years_active - active_year) %>%
-  dplyr::filter(group_all == 4 | group_all == 5)
+    mutate(years_active = years_active - active_year) 
 
+## Calculate weight averages for prices and SDM
+annual.part <- annual.part %>%
+  mutate(mean_SDM = ifelse(group_all == 4, mean_PSDN_SDM * 0.0608 + mean_MSQD_SDM * 0.9005 + mean_NANC_SDM * 0.0101, 
+                    ifelse(group_all == 5, mean_PSDN_SDM * 0.3132 + mean_MSQD_SDM * 0.5222 + mean_NANC_SDM * 0.0014, 
+                    ifelse(group_all == 6, mean_PSDN_SDM * 0.7960 + mean_MSQD_SDM * 0.0028 + mean_NANC_SDM * 0.1288,
+                    ifelse(group_all == 7, mean_PSDN_SDM * 0.2005 + mean_MSQD_SDM * 0.3092 + mean_NANC_SDM * 0.1927, 
+                           NA))))) %>%
+  mutate(mean_PRICE = ifelse(group_all == 4, mean_PSDN_PRICE * 0.0608 + mean_MSQD_PRICE * 0.9005 + mean_NANC_PRICE * 0.0101,		
+                      ifelse(group_all == 5, mean_PSDN_PRICE * 0.3132 + mean_MSQD_PRICE * 0.5222 + mean_NANC_PRICE * 0.0014,
+                      ifelse(group_all == 6, mean_PSDN_PRICE * 0.7960 + mean_MSQD_PRICE * 0.0028 + mean_NANC_PRICE * 0.1288,
+                      ifelse(group_all == 7, mean_PSDN_PRICE * 0.2005 + mean_MSQD_PRICE * 0.3092 + mean_NANC_PRICE * 0.1927,
+                           NA))))) %>%
+  mutate(mean_unem = ifelse(group_all == 4, 0.93 * mean_unem.CA + 0.01 * mean_unem.OR, 
+                     ifelse(group_all == 5, 0.54 * mean_unem.CA + 0.21 * mean_unem.OR + 0.21 * mean_unem.WA,
+                     ifelse(group_all == 6, 0.44 * mean_unem.OR + 0.55 * mean_unem.WA,
+                     ifelse(group_all == 7, 0.95 * mean_unem.CA,
+                            NA))))) %>%
+  dplyr::filter(group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7)
+           
+           
+##  Estimate Bayesian model
 
-## Calculate weight averages for prices and sdm!
-
-
-##  Estimate bayesian model
-
-logit_all <- brm(active_year ~ mean_MSQD_SDM + mean_PRICE + mean_unem.CA + PSDN.Closure + mean_HHI + mean_COG + I(mean_COG^2) + 
-                          (1 + mean_MSQD_SDM + mean_PRICE + mean_unem.CA + PSDN.Closure + mean_HHI + mean_COG + I(mean_COG^2) | group_all) +
-                          (1 | VESSEL_NUM) + 
-                          (1 | set_year_actual), 
+logit_all <- brm(active_year ~ mean_SDM + mean_PRICE + mean_unem + PSDN.Closure + mean_HHI + mean_COG + I(mean_COG^2) + 
+                          (1 | group_all) + (1 | VESSEL_NUM) + (1 | set_year_actual), 
               data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 2000, 
               iter = 4000, chain = 4, cores = 4,
               prior = c(set_prior("lognormal(0,1)", class = "b", coef = "mean_MSQD_SDM")),
               control = list(adapt_delta = 0.999))
             summary(logit_all)
-            
+            saveRDS(logit_all, "logit_all.RDS")
 
 ## Plot marginal effects     
 conditional_effects(logit_all)
