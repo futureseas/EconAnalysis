@@ -381,25 +381,36 @@ annual.part <- annual.part %>%
                      ifelse(group_all == 6, 0.44 * mean_unem.OR + 0.55 * mean_unem.WA,
                      ifelse(group_all == 7, 0.95 * mean_unem.CA,
                             NA))))) %>%
-  dplyr::filter(group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7)
+  dplyr::filter(group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>% drop_na()
            
            
 ##  Estimate Bayesian model
 
-logit_all <- brm(active_year ~ mean_SDM + mean_PRICE + mean_unem + PSDN.Closure + mean_HHI + mean_COG + I(mean_COG^2) + 
+logit_all <- brm(active_year ~ mean_SDM + mean_PRICE + mean_unem + PSDN.Closure + mean_HHI + 
                           (1 | group_all) + (1 | VESSEL_NUM) + (1 | set_year_actual), 
-              data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 2000, 
-              iter = 4000, chain = 4, cores = 4,
-              prior = c(set_prior("lognormal(0,1)", class = "b", coef = "mean_SDM")),
+              data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 1000, 
+              iter = 3000, chain = 4, cores = 4,
+              prior = c(set_prior("lognormal(0,1)", class = "b", coef = "mean_PRICE")),
+              #           set_prior("lognormal(0,1)", class = "b", coef = "mean_PRICE")),
               control = list(adapt_delta = 0.999))
             summary(logit_all)
             saveRDS(logit_all, "logit_all.RDS")
+            
+logit_all_2 <- brm(active_year ~ mean_SDM + mean_unem + PSDN.Closure + mean_HHI + 
+                               (1 | group_all) + (1 | VESSEL_NUM) + (1 | set_year_actual), 
+                             data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 1000, 
+                             iter = 3000, chain = 4, cores = 4,
+                             control = list(adapt_delta = 0.999))
+            summary(logit_all_2)
+            saveRDS(logit_all_2, "logit_all_2.RDS")
 
+LOO(logit_all, logit_all_2)
+            
 ## Plot marginal effects     
-conditional_effects(logit_all)
+conditional_effects(logit_all_2)
 
-### Obtain AUC # 92%
-Prob <- predict(logit, type="response")
+### Obtain AUC # 89%
+Prob <- predict(logit_all, type="response")
 Prob <- Prob[,1]
 Pred <- ROCR::prediction(Prob, as.vector(pull(annual.part, active_year)))
 AUC <- ROCR::performance(Pred, measure = "auc")
