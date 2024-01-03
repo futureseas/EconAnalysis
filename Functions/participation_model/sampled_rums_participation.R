@@ -21,7 +21,7 @@
 
 #' @export
 
-sampled_rums <- function(data_in, cluster = 4,
+sampled_rums <- function(data_in, cluster = 5,
                          min_year = 2013, max_year = 2017,
                          min_year_prob = 2013, max_year_prob = 2017,
                          min_year_est = 2012, max_year_est = 2019,

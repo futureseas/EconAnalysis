@@ -384,37 +384,61 @@ annual.part <- annual.part %>%
   dplyr::filter(group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>% drop_na()
            
            
-##  Estimate Bayesian model
-
-logit_all <- brm(active_year ~ mean_SDM + mean_PRICE + mean_unem + PSDN.Closure + mean_HHI + 
-                          (1 | group_all) + (1 | VESSEL_NUM) + (1 | set_year_actual), 
-              data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 1000, 
-              iter = 3000, chain = 4, cores = 4,
-              prior = c(set_prior("lognormal(0,1)", class = "b", coef = "mean_PRICE")),
-              #           set_prior("lognormal(0,1)", class = "b", coef = "mean_PRICE")),
-              control = list(adapt_delta = 0.999))
-            summary(logit_all)
-            saveRDS(logit_all, "logit_all.RDS")
+# ##  Estimate Bayesian model
+# 
+# logit_all <- brm(active_year ~ mean_SDM + mean_PRICE + mean_unem + PSDN.Closure + mean_HHI + 
+#                           (1 | group_all) + (1 | VESSEL_NUM) + (1 | set_year_actual), 
+#               data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 1000, 
+#               iter = 3000, chain = 4, cores = 4,
+#               prior = c(set_prior("lognormal(0,1)", class = "b", coef = "mean_PRICE")),
+#               #           set_prior("lognormal(0,1)", class = "b", coef = "mean_PRICE")),
+#               control = list(adapt_delta = 0.999))
+#             summary(logit_all)
+#             saveRDS(logit_all, "logit_all.RDS")
+#             
+# logit_all_2 <- brm(active_year ~ mean_SDM + mean_unem + PSDN.Closure + mean_HHI + 
+#                                (1 | group_all) + (1 | VESSEL_NUM) + (1 | set_year_actual), 
+#                              data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 1000, 
+#                              iter = 3000, chain = 4, cores = 4,
+#                              control = list(adapt_delta = 0.999))
+#             summary(logit_all_2)
+#             saveRDS(logit_all_2, "logit_all_2.RDS")
+# 
+# LOO(logit_all, logit_all_2)
             
-logit_all_2 <- brm(active_year ~ mean_SDM + mean_unem + PSDN.Closure + mean_HHI + 
-                               (1 | group_all) + (1 | VESSEL_NUM) + (1 | set_year_actual), 
-                             data = annual.part, seed = 123, family = bernoulli(link = "logit"), warmup = 1000, 
-                             iter = 3000, chain = 4, cores = 4,
-                             control = list(adapt_delta = 0.999))
-            summary(logit_all_2)
-            saveRDS(logit_all_2, "logit_all_2.RDS")
+logit_all_2 <- readRDS("logit_all_2.RDS")
 
-LOO(logit_all, logit_all_2)
-            
-## Plot marginal effects     
-conditional_effects(logit_all_2)
+
+## Check model
+pp_check(logit_all_2)
+
+## Check convergence
+launch_shinystan(logit_all_2)
+
+### Population parameters ###
+mcmc_plot(logit_all_2, regex = TRUE, variable = 
+            c("b_mean_SDM",
+              "b_mean_unem",
+              "b_PSDN.Closure",
+              "b_mean_HHI",
+              "b_Intercept")) +
+  theme(axis.text.y = element_text(hjust = 0)) + scale_y_discrete(
+    labels = c(
+      "b_mean_SDM" = "mean(AVailability)",
+      "b_mean_unem" = "mean(Unemployment)",
+      "b_PSDN.Closure1" = "PSDN Closure",
+      "b_mean_HHI" = "mean(Diversity)",
+      "b_Intercept" = "Intercept"))
 
 ### Obtain AUC # 89%
-Prob <- predict(logit_all, type="response")
+Prob <- predict(logit_all_2, type="response")
 Prob <- Prob[,1]
 Pred <- ROCR::prediction(Prob, as.vector(pull(annual.part, active_year)))
 AUC <- ROCR::performance(Pred, measure = "auc")
 AUC <- AUC@y.values[[1]]
 AUC
 
+
+## Plot marginal effects     
+conditional_effects(logit_all_2)
 
