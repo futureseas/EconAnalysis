@@ -44,7 +44,8 @@ hauls <- dat %>%
                 group_all %in% 5) %>% 
   distinct(trip_id, .keep_all = T) %>% 
   dplyr::select(trip_id, VESSEL_NUM, set_year, set_month, 
-                set_day, Revenue, selection, n_obs_within_FTID) %>% as.data.frame
+                set_day, Revenue, selection, n_obs_within_FTID) %>% as.data.frame %>% 
+  dplyr::filter(n_obs_within_FTID==1)
 
 
 pre <- hauls %>% 
@@ -78,6 +79,6 @@ all <- hauls %>%
   ungroup() %>% 
   dplyr::mutate(NP_n_choice_occ = ifelse(selection == "No-Participation", time_chosen, 0)) %>%
   dplyr::mutate(n_choice_occ = sum(fished) - max(NP_n_choice_occ))  %>%
-  dplyr::mutate(perc_chosen = round(time_chosen*100/n_choice_occ, digits = 1)) %>%
+  dplyr::mutate(perc_chosen = time_chosen*100/n_choice_occ, digits = 1) %>%
   dplyr::select(c('perc_chosen', 'selection')) %>% unique()
 
