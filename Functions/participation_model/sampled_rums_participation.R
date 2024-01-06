@@ -39,7 +39,7 @@ sampled_rums <- function(data_in, cluster = 5,
   # library(tidyverse)
   # library(lubridate)
   # data_in <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
-  # cluster <- 4
+  # cluster <- 5
   # min_year_prob <- 2013
   # max_year_prob <- 2017
   # min_year_est <- 2012
@@ -52,7 +52,7 @@ sampled_rums <- function(data_in, cluster = 5,
   # seed <- 300
   # ncores <- 4
   # rev_scale <- 1000
-  # sample_choices <- TRUE
+  # sample_choices <- FALSE
   # ################
 
   dat <- data_in 
