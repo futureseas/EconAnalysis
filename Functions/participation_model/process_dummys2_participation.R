@@ -37,8 +37,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
                             species.list.number.sdm1 = species.list.number.sdm){
 
   # ### Delete
-  # xx <- 150  # 6
-  # td1 <- td
+  # xx <- 12  # 6
+  # td1 <- td %>% arrange(fished_haul)
   # dat1 <- dat
   # SDM.PSDN <- psdn.sdm
   # SDM.MSQD <- msqd.sdm
@@ -206,7 +206,8 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
       } else {
         est_catch$NANC_SDM_60 <- 0
       }
-      est_catch$group_all <- fltz
+      est_catch$group_all <- fltz 
+      est_catch <- est_catch %>% mutate(group_all = ifelse(group_all == 5, 6, group_all))
       id_catch <- species.list.number.sdm1 %>% dplyr::filter(species.list_sdm == species)
       id_catch1 <- id_catch$id_number
       catch <- as.data.frame(predict(model_catch1[[id_catch1]], est_catch, interval = "prediction"))
@@ -446,7 +447,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   # time.taken
   
   # return data 
-  return(temp_dat)
+ return(temp_dat)
 }
   
 
