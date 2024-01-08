@@ -17,19 +17,19 @@ library(lubridate)
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
-samps1 <- sampled_rums(data_in = participation_data, cluster = 5,
-                         min_year = 2013, max_year = 2017,
-                         min_year_prob = 2013, max_year_prob = 2017,
-                         min_year_est = 2012, max_year_est = 2019,
-                         ndays = 30, nhauls_sampled = 5,
-                         seed = 300, ncores = 4, rev_scale = 1000,
-                         sample_choices = FALSE, k_chosen = 0.5)
-                         ## max_est_year for catch is 2014 (pre-closure)
-
-  samps <- samps1 %>%
-    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-    rm(samps1)
-    saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c5_full.rds")
+# samps1 <- sampled_rums(data_in = participation_data, cluster = 5,
+#                          min_year = 2013, max_year = 2017,
+#                          min_year_prob = 2013, max_year_prob = 2017,
+#                          min_year_est = 2012, max_year_est = 2019,
+#                          ndays = 30, nhauls_sampled = 5,
+#                          seed = 300, ncores = 4, rev_scale = 1000,
+#                          sample_choices = FALSE, k_chosen = 0.5)
+#                          ## max_est_year for catch is 2014 (pre-closure)
+# 
+#   samps <- samps1 %>%
+#     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+#     rm(samps1)
+#     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c5_full.rds")
 
 #----------------------------------
 
@@ -49,11 +49,11 @@ test <-
     # #--------------------------------------------------------------------------
 ## See how many times we have NA
 
-# 4,168 NAs for availability (2.8%) -- (5.8% with full data)
-# 10,909 NAs using catches (with SDM) (7.4%) -- (16.8% with full data)
-# 36,588 NAs using catches (no SDM) (24.8%) -- (51% with full data)
-# 29,330 Nas for dist to catch areas (19.9%) -- (36.4% with full data)
-# 10,320 NAs for mean_price2 (7%) -- (11.5% with full data)
+# 4,168 NAs for availability (2.8%) -- (5.8% with full data -- C5: 4.3%)
+# 10,909 NAs using catches (with SDM) (7.4%) -- (16.8% with full data -- C5: 20.2%)
+# 36,588 NAs using catches (no SDM) (24.8%) -- (51% with full data -- C5: 57.7%)
+# 29,330 Nas for dist to catch areas (19.9%) -- (36.4% with full data -- C5: 57.9%)
+# 10,320 NAs for mean_price2 (7%) -- (11.5% with full data -- C5: 12.7%)
 
 # samps0 <- samps %>%
 #   filter(selection != "No-Participation")
@@ -74,7 +74,8 @@ test <-
 # 
 # ## NA in distance means that it was not recorded
 
-# ### All cases when we do not have availability, it was calculated using CPUE (Tunas)
+# ### All cases when we do not have availability, it was calculated using CPUE 
+# ### (C4: Yellow and Bluefin tunas; C5: Albacore and crab)
 # psych::describe(samps0 %>% dplyr::filter(is.na(samps0$mean_avail)))
 # samps0 %>% dplyr::filter(is.na(samps0$mean_avail)) %>%
 #   group_by(PACFIN_SPECIES_CODE) %>% summarize(total_obs = n()) %>%
@@ -108,22 +109,16 @@ samps1 <- samps %>%
   mutate(mean_price2  = ifelse((is.na(samps$mean_price2)), 0, mean_price2)) %>%
   mutate(dist_port_to_catch_area_zero  = ifelse((is.na(samps$dist_port_to_catch_area)), 0, 
                                                 dist_port_to_catch_area)) 
-  nrow(samps1 %>% dplyr::filter(samps1$d_missing_catch == 1)) 
-    
-# samps1 %>% dplyr::filter(samps1$d_missing_cpue == 1) %>% 
-#   group_by(PACFIN_SPECIES_CODE) %>% summarize(total_obs = n()) %>%
-#   mutate(perc = total_obs*100/nrow(samps1 %>% 
-#                                      dplyr::filter(
-#                                        samps1$d_missing_cpue == 1)))
+
   
 #----------------------------------------------------------------------
 # ### See how many times we need to use CPUE (30 and 90 days), average 30 days prices and State diesel prices
-# # 21.2% State diesel prices --- (24%)
+# # 21.2% State diesel prices --- (24% -- C5: 16.9%)
 # # 0% Prices (30 days) 
-# # 14% Prices 2 (30 days using species) -- (30.9%)
-# # 10.8% Prices 2 (90 days using species) -- (20%)
-# # 8.6% CPUE index (30 days) -- 8.4%
-# # 0.4% CPUE index (90 days) -- 2.2%
+# # 14% Prices 2 (30 days using species) -- (30.9% - C5: 32.7%)
+# # 10.8% Prices 2 (90 days using species) -- (20% - C5: 25%)
+# # 8.6% CPUE index (30 days) -- 8.4% -- C5: 17.9%
+# # 0.4% CPUE index (90 days) -- 2.2% -- C5: 3.1%
 
 samps1 %>%
   filter(selection != "No-Participation")  %>%
@@ -185,7 +180,7 @@ multiday_data <- participation_data %>%
   samps <- merge(samps, multiday_data, by = "fished_haul", all.x = TRUE, all.y = FALSE) 
 
 ### Check if n_obs_within_FTID == 1
-psych::describe(samps %>% group_by(fished_haul) %>% summarise(obs = sum(n_obs_within_FTID)/6))
+psych::describe(samps %>% group_by(fished_haul) %>% summarise(obs = sum(n_obs_within_FTID)/19))
 
 
 #-------------------------------------------
@@ -543,7 +538,7 @@ write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c5_full.csv", row.names = 
 saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c5_full.rds")
 
 #----------------------------------------------------
-## Stata data
+## Stata data (no identifier)
 
 rdo_Stata_noid <- rdo_Stata %>% 
   dplyr::select(-c('fished_VESSEL_NUM'))
