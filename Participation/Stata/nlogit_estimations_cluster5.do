@@ -9,8 +9,8 @@ clear all
 
 
 ** Import data
-// import delimited "C:\Data\PacFIN data\rdo_Stata_c4_full.csv"
-// save "C:\Data\PacFIN data\rdo_Stata_c4_full.dta", replace
+// import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full.csv"
+// save "C:\Data\PacFIN data\rdo_Stata_c5_full.dta", replace
 use "C:\Data\PacFIN data\rdo_Stata_c5_full.dta", clear
 
 ** Add addtional variables
