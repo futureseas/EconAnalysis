@@ -79,11 +79,24 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 keep if selection == "SBA-MSQD" | selection == "MNA-MSQD" | ///
 		selection == "CLO-PSDN" | selection == "LAA-MSQD" | ///
 		selection == "CWA-PSDN" | selection == "SFA-MSQD" | ///
-		selection == "CLW-PSDN" | selection == "CLW-DCRB" | ///
-		selection == "CWA-ALBC" | selection == "CWA-DCRB" | ///
+		selection == "CLW-PSDN" | ///
+		selection == "No-Participation"
+/* 		selection == "CLW-DCRB" | selection == "CWA-ALBC" | selection == "CWA-DCRB" | ///
 		selection == "MRA-MSQD" | selection == "LAA-CMCK" | ///
 		selection == "CBA-MSQD" | selection == "SBA-CMCK" | ///
-		selection == "LAA-NANC" | selection == "No-Participation"
+		selection == "LAA-NANC" | selection == "LAA-PSDN" | 
+		selection == "NPA-MSQD" |  */
+
+
+
+** Drop cases with no choice selected
+cap drop check_if_choice
+sort fished_haul
+by fished_haul: egen check_if_choice = sum(fished)
+tab check_if_choice
+keep if check_if_choice
+tab check_if_choice
+
 
 
 *** Base model to compute R2
@@ -99,27 +112,19 @@ cap label drop lb_port
 cap drop partp
 cap label drop lb_partp
 nlogitgen port = selection( ///
-	MSQD: SBA-MSQD | MNA-MSQD | LAA-MSQD | SFA-MSQD | MRA-MSQD | CBA-MSQD, ///
+	MSQD: SBA-MSQD | MNA-MSQD | LAA-MSQD | SFA-MSQD, ///
 	PSDN: CLO-PSDN | CWA-PSDN | CLW-PSDN, ///
-	DCRB: CLW-DCRB | CWA-DCRB, ///
-	ALBC: CWA-ALBC, ///
-	CMCK: LAA-CMCK | SBA-CMCK, ///
-	NANC: LAA-NANC, ///
 	NOPORT: No-Participation)
-nlogitgen partp = port(PART: MSQD | PSDN | DCRB | ALBC | CMCK | NANC, NOPART: NOPORT)
+nlogitgen partp = port(PART: MSQD | PSDN, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 
-tab waclosured
 
 nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 		psdnclosured msqdclosured waclosured unem_rate dummy_last_day d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
 
-
-
 estimates save ${results}nlogit_FULL_C5.ster, replace
-
 estimates use ${results}nlogit_FULL_C5.ster
 estimates store B2
 estimates describe B2
