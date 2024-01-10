@@ -77,17 +77,15 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 ** Filter model 
 
 keep if selection == "SBA-MSQD" | selection == "MNA-MSQD" | ///
-		selection == "CLO-PSDN" | selection == "LAA-MSQD" | ///
-		selection == "CWA-PSDN" | selection == "SFA-MSQD" | ///
-		selection == "CLW-PSDN" | ///
-		selection == "No-Participation"
-/* 		selection == "CLW-DCRB" | selection == "CWA-ALBC" | selection == "CWA-DCRB" | ///
-		selection == "MRA-MSQD" | selection == "LAA-CMCK" | ///
-		selection == "CBA-MSQD" | selection == "SBA-CMCK" | ///
-		selection == "LAA-NANC" | selection == "LAA-PSDN" | 
-		selection == "NPA-MSQD" |  */
-
-
+		selection == "LAA-MSQD" | selection == "SFA-MSQD" | /// 
+		selection == "CBA-MSQD" | selection == "MRA-MSQD" | ///
+		selection == "NPA-MSQD" | ///		
+	    selection == "CLO-PSDN" | selection == "CWA-PSDN" | ///
+		selection == "CLW-PSDN" | selection == "LAA-PSDN" | ///
+		selection == "CWA-ALBC" | ///
+		selection == "LAA-CMCK" | selection == "SBA-CMCK" | ///
+		selection == "LAA-NANC" | selection == "No-Participation" | ///
+		selection == "CLW-DCRB" | selection == "CWA-DCRB"
 
 ** Drop cases with no choice selected
 cap drop check_if_choice
@@ -112,19 +110,62 @@ cap label drop lb_port
 cap drop partp
 cap label drop lb_partp
 nlogitgen port = selection( ///
-	MSQD: SBA-MSQD | MNA-MSQD | LAA-MSQD | SFA-MSQD, ///
-	PSDN: CLO-PSDN | CWA-PSDN | CLW-PSDN, ///
+	MSQD: SBA-MSQD | MNA-MSQD | LAA-MSQD | SFA-MSQD | CBA-MSQD | MRA-MSQD | NPA-MSQD, ///
+	PSDN: CLO-PSDN | CWA-PSDN | CLW-PSDN | LAA-PSDN, ///
+	ALBC: CWA-ALBC, ///
+	CMCK: LAA-CMCK | SBA-CMCK, ///
+	NANC: LAA-NANC, ///
+	DCRB: CLW-DCRB | CWA-DCRB, ///
 	NOPORT: No-Participation)
-nlogitgen partp = port(PART: MSQD | PSDN, NOPART: NOPORT)
+nlogitgen partp = port(PART: MSQD | PSDN | ALBC | CMCK | NANC, PART_CRAB: DCRB, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 
 
-nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured msqdclosured waclosured unem_rate dummy_last_day d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
-		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
 
+asclogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd, base("No-Participation") casevar(weekend) alternatives(selection) case(fished_haul) 
+
+constraint 1 [/port]DCRB_tau = 1
+constraint 2 [/port]CMCK_tau = 1
+
+nlogit   fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id)
 estimates save ${results}nlogit_FULL_C5.ster, replace
+
+nlogit   fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_id)
+estimates save ${results}nlogit_FULL_C5_v2.ster, replace
+
+
+cap drop port
+cap label drop lb_port
+cap drop partp
+cap label drop lb_partp
+nlogitgen port = selection( ///
+	MSQD: SBA-MSQD | MNA-MSQD | LAA-MSQD | SFA-MSQD | CBA-MSQD | MRA-MSQD | NPA-MSQD, ///
+	PSDN: CLO-PSDN | CWA-PSDN | CLW-PSDN | LAA-PSDN, ///
+	ALBC: CWA-ALBC, ///
+	CMCK: LAA-CMCK | SBA-CMCK, ///
+	NANC: LAA-NANC, ///
+	DCRB: CLW-DCRB | CWA-DCRB, ///
+	NOPORT: No-Participation)
+nlogitgen partp = port(PART: MSQD | PSDN | ALBC | CMCK | NANC | DCRB, NOPART: NOPORT)
+nlogittree selection port partp, choice(fished) case(fished_haul)
+
+nlogit   fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id)
+estimates save ${results}nlogit_FULL_C5_v3.ster, replace
+
+
+
+*** Then try with DCRB within participation
+
 estimates use ${results}nlogit_FULL_C5.ster
 estimates store B2
 estimates describe B2
