@@ -120,22 +120,62 @@ nlogitgen port = selection( ///
 nlogitgen partp = port(PART: MSQD | PSDN | ALBC | CMCK | NANC, PART_CRAB: DCRB, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 asclogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd, base("No-Participation") casevar(weekend) alternatives(selection) case(fished_haul) 
+		psdnclosured dummy_last_day d_d d_pd d_cd d_pcd, base("No-Participation") casevar(weekend) alternatives(selection) case(fished_haul) 
 
 constraint 1 [/port]DCRB_tau = 1
 constraint 2 [/port]CMCK_tau = 1
 
-/* nlogit   fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
-		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id)
-estimates save ${results}nlogit_FULL_C5.ster, replace
+// nlogit   fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
+// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id)
+// estimates save ${results}nlogit_FULL_C5.ster, replace
 
-nlogit   fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
+// nlogit   fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
+// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_id)
+// estimates save ${results}nlogit_FULL_C5_v2.ster, replace
+
+
+
+
+
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day d_d d_pd d_cd unem_rate /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_id)
-estimates save ${results}nlogit_FULL_C5_v2.ster, replace */
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id) ///
+	from(start, skip)
+matrix start=e(b)
+estimates save ${results}nlogit_FULL_C5_v3.ster, replace
+
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day unem_rate d_d d_pd d_cd d_pcd /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id) ///
+	from(start, skip)
+matrix start=e(b)
+estimates save ${results}nlogit_FULL_C5_v4.ster, replace
+
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day unem_rate d_d d_pd d_cd d_pcd /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_id) ///
+	from(start, skip)
+matrix start=e(b)
+estimates save ${results}nlogit_FULL_C5_v5.ster, replace
+
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day unem_rate d_d d_pd d_cd d_pcd msqdclosured /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_id) ///
+	from(start, skip)
+matrix start=e(b)
+estimates save ${results}nlogit_FULL_C5_v6.ster, replace
+
+
+
+
 
 
 /* // This doesn't converge
@@ -269,7 +309,7 @@ preserve
 restore
 
 
-*** Add other missing variables... then unemployment, squid closure and WA closure..
+*** squid closure and WA closure..
 
 *** Save model
 
