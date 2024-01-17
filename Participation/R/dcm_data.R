@@ -354,6 +354,7 @@ rm(wind, wind_2020_2020)
 samps <- samps %>% mutate(dPSDN = ifelse(grepl("PSDN", selection) == TRUE, 1, 0)) 
 samps <- samps %>% mutate(dMSQD = ifelse(grepl("MSQD", selection) == TRUE, 1, 0)) 
 samps <- samps %>% mutate(dBTNA = ifelse(grepl("BTNA", selection) == TRUE, 1, 0)) 
+samps <- samps %>% mutate(dDCRB = ifelse(grepl("DCRB", selection) == TRUE, 1, 0)) 
 
 
 
