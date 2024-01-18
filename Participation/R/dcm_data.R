@@ -409,6 +409,43 @@ samps <- samps %>%
 
 
 #------------------------------------------
+## Incorporate closure dummy for Dungeness Crab
+
+samps <- samps %>%
+  dplyr::mutate(DCRB.Closure.WA = 
+    ifelse(set_date >= "2009-09-15" & set_date < "2009-10-19" & AGENCY_CODE == "W", 1, 
+    ifelse(set_date >= "2010-09-15" & set_date < "2010-11-19" & AGENCY_CODE == "W", 1, 
+    ifelse(set_date >= "2011-09-15" & set_date < "2011-11-20" & AGENCY_CODE == "W", 1, 
+    ifelse(set_date >= "2012-09-15" & set_date < "2012-11-01" & AGENCY_CODE == "W", 1, 
+    ifelse(set_date >= "2013-09-15" & set_date < "2013-11-05" & AGENCY_CODE == "W", 1, 
+    ifelse(set_date >= "2014-09-15" & set_date < "2014-10-17" & AGENCY_CODE == "W", 1,
+    ifelse(set_date >= "2015-09-15" & set_date < "2015-11-01" & AGENCY_CODE == "W", 1,
+    ifelse(set_date >= "2016-09-15" & set_date < "2016-11-01" & AGENCY_CODE == "W", 1,
+    ifelse(set_date >= "2017-09-15" & set_date < "2017-11-01" & AGENCY_CODE == "W", 1,
+    ifelse(set_date >= "2018-09-15" & set_date < "2018-11-01" & AGENCY_CODE == "W", 1, 0))))))))))) %>% 
+    dplyr::mutate(DCRB.Closure.WA.d = DCRB.Closure.WA * dDCRB) %>%
+    mutate(DCRB.Closure.WA = ifelse(selection == "No-Participation", 0, DCRB.Closure.WA))
+
+samps <- samps %>%
+  dplyr::mutate(DCRB.Closure.OR = 
+    ifelse(set_date >= "2007-08-14" & set_date < "2007-12-01" & AGENCY_CODE == "O", 1, 
+    ifelse(set_date >= "2008-08-14" & set_date < "2008-12-01" & AGENCY_CODE == "O", 1, 
+    ifelse(set_date >= "2009-08-14" & set_date < "2009-12-01" & AGENCY_CODE == "O", 1, 
+    ifelse(set_date >= "2010-08-14" & set_date < "2010-12-12" & AGENCY_CODE == "O", 1, 
+    ifelse(set_date >= "2011-08-14" & set_date < "2011-12-15" & AGENCY_CODE == "O", 1, 
+    ifelse(set_date >= "2012-08-14" & set_date < "2012-12-31" & AGENCY_CODE == "O", 1, 
+    ifelse(set_date >= "2013-08-14" & set_date < "2013-12-16" & AGENCY_CODE == "O", 1,
+    ifelse(set_date >= "2014-08-14" & set_date < "2014-12-01" & AGENCY_CODE == "O", 1,
+    ifelse(set_date >= "2015-08-14" & set_date < "2016-01-04" & AGENCY_CODE == "O", 1,
+    ifelse(set_date >= "2016-08-14" & set_date < "2016-12-18" & AGENCY_CODE == "O", 1,
+    ifelse(set_date >= "2017-08-14" & set_date < "2018-01-15" & AGENCY_CODE == "O", 1, 0)))))))))))) %>% 
+    dplyr::mutate(DCRB.Closure.OR.d = DCRB.Closure.OR * dDCRB) %>%
+    mutate(DCRB.Closure.OR = ifelse(selection == "No-Participation", 0, DCRB.Closure.OR))
+
+colnames(samps)
+
+
+#------------------------------------------
 ## WA dummy for sardine
 
 # Include WA dummy for sardine!
@@ -481,7 +518,7 @@ rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NU
                                dummy_prev_days, dummy_prev_year_days, dummy_clust_prev_days, lat_cg, dist_to_cog, 
                                dist_port_to_catch_area, dist_port_to_catch_area_zero, PSDN.Closure, BTNA.Closure, PSDN.Total.Closure, 
                                WA.Closure, MSQD.Closure, Weekend, BTNA.Closure.d, PSDN.Closure.d, PSDN.Total.Closure.d, WA.Closure.d, 
-                               MSQD.Closure.d, MSQD.Weekend, dParticipate, unem_rate, d_missing_catch, d_missing_catch2, 
+                               MSQD.Closure.d, MSQD.Weekend, DCRB.Closure.OR.d, DCRB.Closure.WA.d, dParticipate, unem_rate, d_missing_catch, d_missing_catch2, 
                                d_missing, d_missing_p, d_missing_p2, d_missing_cpue, d_missing_d, Vessel.length, 
                                lunar.ill, Price.Fishmeal.AFI, dPrice30_s, dPrice90_s,dPrice30_s2, dPrice90_s2)
                               rm(samps, samps2)
