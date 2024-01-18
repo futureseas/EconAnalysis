@@ -424,7 +424,7 @@ samps <- samps %>%
     ifelse(set_date >= "2017-09-15" & set_date < "2017-11-01" & AGENCY_CODE == "W", 1,
     ifelse(set_date >= "2018-09-15" & set_date < "2018-11-01" & AGENCY_CODE == "W", 1, 0))))))))))) %>% 
     dplyr::mutate(DCRB.Closure.WA.d = DCRB.Closure.WA * dDCRB) %>%
-    mutate(DCRB.Closure.WA = ifelse(selection == "No-Participation", 0, DCRB.Closure.WA))
+    mutate(DCRB.Closure.WA.d = ifelse(selection == "No-Participation", 0, DCRB.Closure.WA.d))
 
 samps <- samps %>%
   dplyr::mutate(DCRB.Closure.OR = 
@@ -440,7 +440,7 @@ samps <- samps %>%
     ifelse(set_date >= "2016-08-14" & set_date < "2016-12-18" & AGENCY_CODE == "O", 1,
     ifelse(set_date >= "2017-08-14" & set_date < "2018-01-15" & AGENCY_CODE == "O", 1, 0)))))))))))) %>% 
     dplyr::mutate(DCRB.Closure.OR.d = DCRB.Closure.OR * dDCRB) %>%
-    mutate(DCRB.Closure.OR = ifelse(selection == "No-Participation", 0, DCRB.Closure.OR))
+    mutate(DCRB.Closure.OR.d = ifelse(selection == "No-Participation", 0, DCRB.Closure.OR.d))
 
 colnames(samps)
 
