@@ -61,12 +61,14 @@ sampled_rums <- function(data_in, cluster = 5,
   ## Catch models
   
   ## Load SDM 
+  albc.sdm <- readRDS(file = 'Participation/SDMs/sdm_albc.rds')
   psdn.sdm <- readRDS(file = 'Participation/SDMs/sdm_psdn.rds')
   msqd.sdm <- readRDS(file = 'Participation/SDMs/sdm_msqd.rds')
   nanc.sdm <- readRDS(file = 'Participation/SDMs/sdm_nanc.rds')
   phrg.sdm <- readRDS(file = 'Participation/SDMs/sdm_phrg.rds')
   jmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_jmck.rds')
   cmck.sdm <- readRDS(file = 'Participation/SDMs/sdm_cmck.rds')
+  albc.sdm[is.na(albc.sdm)] <- 0
   psdn.sdm[is.na(psdn.sdm)] <- 0
   msqd.sdm[is.na(msqd.sdm)] <- 0
   nanc.sdm[is.na(nanc.sdm)] <- 0
@@ -639,6 +641,7 @@ sampled_rums <- function(data_in, cluster = 5,
   ### Calculate revenues from each period and process dummy variables for past behavior
   
   ## Modify SDMs to be used in function to calculate expected revenue and cost below
+  albc.sdm$set_date <- ymd(paste(albc.sdm$LANDING_YEAR, albc.sdm$LANDING_MONTH, albc.sdm$LANDING_DAY, sep = "-"))
   psdn.sdm$set_date <- ymd(paste(psdn.sdm$LANDING_YEAR, psdn.sdm$LANDING_MONTH, psdn.sdm$LANDING_DAY, sep = "-"))
   msqd.sdm$set_date <- ymd(paste(msqd.sdm$LANDING_YEAR, msqd.sdm$LANDING_MONTH, msqd.sdm$LANDING_DAY, sep = "-"))
   nanc.sdm$set_date <- ymd(paste(nanc.sdm$LANDING_YEAR, nanc.sdm$LANDING_MONTH, nanc.sdm$LANDING_DAY, sep = "-"))
@@ -704,6 +707,7 @@ sampled_rums <- function(data_in, cluster = 5,
     .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
       process_dummys2(xx = ii, td1 = td, dat1 = dat, 
+                      SDM.ALBC = albc.sdm,
                       SDM.PSDN = psdn.sdm,
                       SDM.MSQD = msqd.sdm,
                       SDM.NANC = nanc.sdm,
