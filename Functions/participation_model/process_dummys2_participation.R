@@ -4,6 +4,7 @@
 #' @param xx Index value
 #' @param td1 The tow dates
 #' @param dat1 The Data
+#' @param SDM.ALBC SDM data for albacore
 #' @param SDM.PSDN SDM data for sardine
 #' @param SDM.MSQD SDM data for squid
 #' @param SDM.NANC SDM data for anchovy
@@ -21,6 +22,7 @@
 #' @export
 
 process_dummys2 <- function(xx, td1 = td, dat1 = dat, 
+                            SDM.ALBC = albc.sdm,
                             SDM.PSDN = psdn.sdm,
                             SDM.MSQD = msqd.sdm,
                             SDM.NANC = nanc.sdm,
@@ -41,6 +43,7 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   # td1 <- td %>% arrange(fished_haul)
   # dat1 <- dat
   # SDM.PSDN <- psdn.sdm
+  # SDM.ALBC <- albc.sdm
   # SDM.MSQD <- msqd.sdm
   # SDM.NANC <- nanc.sdm
   # SDM.PHRG <- phrg.sdm
@@ -122,7 +125,22 @@ process_dummys2 <- function(xx, td1 = td, dat1 = dat,
   ########################
   
   if (sel != "No-Participation") {
-    if (species == "PSDN") {
+    if (species == "ALBC") {
+      
+      # Average availability in the past n_days at port
+      catch30y <- dat1 %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter,
+                                                     PORT_AREA_CODE %in% port,
+                                                     Species_Dominant %in% species)
+      catch30y <- mean(catch30y$Landings_mtons, na.rm = TRUE)
+      catch30y2 <- catch30y
+      
+      # Average availability in the past n_days at port
+      avail30y <- SDM.ALBC %>% ungroup %>% dplyr::filter(set_date %within% temp_dat$days30_inter, PORT_AREA_CODE %in% port)
+      avail30y <- mean(avail30y$albc_SDM_180, na.rm = TRUE)
+      dCPUE <- 0
+      dCPUE_90 <- 0
+      
+    } else if (species == "PSDN") {
       # Predict catch using SDM
       vessel.length <- dat1 %>% dplyr::select(c(VESSEL_NUM, Vessel.length)) %>%
         dplyr::filter(VESSEL_NUM %in% temp_dat$fished_VESSEL_NUM) %>% unique()
