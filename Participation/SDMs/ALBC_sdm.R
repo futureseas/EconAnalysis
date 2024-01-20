@@ -96,8 +96,8 @@ for (y in 2000:2020) {
       for (z in 1:max(sdmMelt$LANDING_DAY)) {
         dat_prob_90  <- sdmMelt %>% dplyr::filter(dist <= 90)  %>% dplyr::filter(LANDING_DAY == z)
         dat_prob_180  <- sdmMelt %>% dplyr::filter(dist <= 180)  %>% dplyr::filter(LANDING_DAY == z)
-        SDM_mean_90  <- mean(dat_prob_30$albc.sdm, na.rm = TRUE)
-        SDM_mean_180  <- mean(dat_prob_60$albc.sdm, na.rm = TRUE)
+        SDM_mean_90  <- mean(dat_prob_90$albc.sdm, na.rm = TRUE)
+        SDM_mean_180  <- mean(dat_prob_180$albc.sdm, na.rm = TRUE)
         sdm.albc <- sdm.albc %>%
           add_row(LANDING_YEAR = y, 
                   LANDING_MONTH = m, 
