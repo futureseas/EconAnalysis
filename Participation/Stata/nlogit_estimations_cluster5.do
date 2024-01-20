@@ -125,6 +125,9 @@ asclogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_
 constraint 1 [/port]DCRB_tau = 1
 constraint 2 [/port]CMCK_tau = 1
 
+tab dcpue if selection == "CWA-ALBC"
+tab dcpue90 if selection == "CWA-ALBC"
+
 // nlogit   fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 // 		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
 // 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
