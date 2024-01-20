@@ -413,16 +413,28 @@ samps <- samps %>%
 
 samps <- samps %>%
   dplyr::mutate(DCRB.Closure.WA = 
-    ifelse(set_date >= "2009-09-15" & set_date < "2009-10-19" & AGENCY_CODE == "W", 1, 
-    ifelse(set_date >= "2010-09-15" & set_date < "2010-11-19" & AGENCY_CODE == "W", 1, 
-    ifelse(set_date >= "2011-09-15" & set_date < "2011-11-20" & AGENCY_CODE == "W", 1, 
-    ifelse(set_date >= "2012-09-15" & set_date < "2012-11-01" & AGENCY_CODE == "W", 1, 
-    ifelse(set_date >= "2013-09-15" & set_date < "2013-11-05" & AGENCY_CODE == "W", 1, 
-    ifelse(set_date >= "2014-09-15" & set_date < "2014-10-17" & AGENCY_CODE == "W", 1,
-    ifelse(set_date >= "2015-09-15" & set_date < "2015-11-01" & AGENCY_CODE == "W", 1,
-    ifelse(set_date >= "2016-09-15" & set_date < "2016-11-01" & AGENCY_CODE == "W", 1,
-    ifelse(set_date >= "2017-09-15" & set_date < "2017-11-01" & AGENCY_CODE == "W", 1,
-    ifelse(set_date >= "2018-09-15" & set_date < "2018-11-01" & AGENCY_CODE == "W", 1, 0))))))))))) %>% 
+    ifelse(set_date >= "2009-09-15" & set_date < "2009-12-01" & PORT_AREA_CODE == "CLW", 1, 
+    ifelse(set_date >= "2010-09-15" & set_date < "2010-12-01" & PORT_AREA_CODE == "CLW", 1, 
+    ifelse(set_date >= "2011-09-15" & set_date < "2011-12-15" & PORT_AREA_CODE == "CLW", 1, 
+    ifelse(set_date >= "2012-09-15" & set_date < "2012-12-31" & PORT_AREA_CODE == "CLW", 1, 
+    ifelse(set_date >= "2013-09-15" & set_date < "2013-12-16" & PORT_AREA_CODE == "CLW", 1, 
+    ifelse(set_date >= "2014-09-15" & set_date < "2014-12-01" & PORT_AREA_CODE == "CLW", 1,
+    ifelse(set_date >= "2015-09-15" & set_date < "2016-01-04" & PORT_AREA_CODE == "CLW", 1,
+    ifelse(set_date >= "2016-09-15" & set_date < "2017-01-01" & PORT_AREA_CODE == "CLW", 1,
+    ifelse(set_date >= "2017-09-15" & set_date < "2018-01-15" & PORT_AREA_CODE == "CLW", 1,
+    ifelse(set_date >= "2018-09-15" & set_date < "2019-01-04" & PORT_AREA_CODE == "CLW", 1,
+    ##############################
+    ifelse(set_date >= "2009-09-15" & set_date < "2010-01-02" & PORT_AREA_CODE == "CWA", 1, 
+    ifelse(set_date >= "2010-09-15" & set_date < "2010-01-15" & PORT_AREA_CODE == "CWA", 1, 
+    ifelse(set_date >= "2011-09-15" & set_date < "2012-01-24" & PORT_AREA_CODE == "CWA", 1, 
+    ifelse(set_date >= "2012-09-15" & set_date < "2013-01-24" & PORT_AREA_CODE == "CWA", 1, 
+    ifelse(set_date >= "2013-09-15" & set_date < "2014-01-15" & PORT_AREA_CODE == "CWA", 1, 
+    ifelse(set_date >= "2014-09-15" & set_date < "2015-01-03" & PORT_AREA_CODE == "CWA", 1,
+    ifelse(set_date >= "2015-09-15" & set_date < "2016-01-04" & PORT_AREA_CODE == "CWA", 1,
+    ifelse(set_date >= "2016-09-15" & set_date < "2017-01-07" & PORT_AREA_CODE == "CWA", 1,
+    ifelse(set_date >= "2017-09-15" & set_date < "2018-01-28" & PORT_AREA_CODE == "CWA", 1,
+    ifelse(set_date >= "2018-09-15" & set_date < "2019-01-10" & PORT_AREA_CODE == "CWA", 1,
+           0))))))))))))))))))))) %>% 
     dplyr::mutate(DCRB.Closure.WA.d = DCRB.Closure.WA * dDCRB) %>%
     mutate(DCRB.Closure.WA.d = ifelse(selection == "No-Participation", 0, DCRB.Closure.WA.d))
 
