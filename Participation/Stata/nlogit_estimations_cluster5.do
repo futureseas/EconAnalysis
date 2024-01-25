@@ -104,7 +104,7 @@ estimates store base
 scalar ll0 = e(ll)
 
 
-*** Set nested logit
+/* *** Set nested logit
 cap drop port
 cap label drop lb_port
 cap drop partp
@@ -178,8 +178,8 @@ estimates save ${results}nlogit_FULL_C5_v5.ster, replace
 
 
 **************************************************************************
-
-
+*/
+ 
 cap drop port
 cap label drop lb_port
 cap drop partp
@@ -200,12 +200,11 @@ asclogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_
 constraint 1 [/port]DCRB_tau = 1
 constraint 2 [/port]CMCK_tau = 1
 
+/* 
 nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 		psdnclosured dummy_last_day unem_rate d_d d_pd d_cd d_pcd dcrbclosurewad waclosured msqdclosured /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id) ///
-	from(start, skip)
-
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id)  */
 
 
 
@@ -213,7 +212,7 @@ nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_ca
 *************************************************************************************
 
 
-estimates use ${results}nlogit_FULL_C5.ster
+estimates use ${results}nlogit_FULL_C5_v1.ster
 estimates store B1
 estimates describe B1
 estimates replay B1
@@ -273,7 +272,7 @@ estimates describe B2
 estimates replay B2
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B2
-lrtest base B2, force
+lrtest B1 B2, force
 estadd scalar lr_p = r(p): B2
 estat ic, all
 matrix S = r(S)
@@ -327,7 +326,7 @@ estimates describe B3
 estimates replay B3
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B3
-lrtest base B3, force
+lrtest B2 B3, force
 estadd scalar lr_p = r(p): B3
 estat ic, all
 matrix S = r(S)
@@ -381,7 +380,7 @@ estimates describe B4
 estimates replay B4
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B4
-lrtest base B4, force
+lrtest B3 B4, force
 estadd scalar lr_p = r(p): B4
 estat ic, all
 matrix S = r(S)
@@ -435,7 +434,7 @@ estimates describe B5
 estimates replay B5
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B5
-lrtest base B5, force
+lrtest B4 B5, force
 estadd scalar lr_p = r(p): B5
 estat ic, all
 matrix S = r(S)
@@ -481,7 +480,7 @@ preserve
 	dis count2/_N*100 "%"
 	estadd scalar perc4 = count2/_N*100: B5
 restore
-
+/* 
 *****************************************************************************************************************************
 estimates use ${results}nlogit_FULL_C5_v6.ster
 estimates store B6
@@ -589,12 +588,12 @@ preserve
 	dis count2/_N*100 "%"
 	estadd scalar perc4 = count2/_N*100: B8
 restore
-
+ */
 
 *****************************************************************************************************************************
 *** Save model
 
-esttab  B8 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_C5.rtf", ///
+esttab  B1 B2 B3 B4 B5 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_C5.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 perc3 perc4 lr_p aicc caic, fmt(0 3) ///
