@@ -173,6 +173,8 @@ matrix start=e(b)
 estimates save ${results}nlogit_FULL_C5_v5.ster, replace
 */
 
+estimates use ${results}nlogit_FULL_C5_v4.ster
+matrix start=e(b)
 nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 		psdnclosured dummy_last_day d_d d_pd d_cd d_pcd dcrbclosurewad waclosured msqdclosured /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
