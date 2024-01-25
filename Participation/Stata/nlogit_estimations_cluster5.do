@@ -104,7 +104,7 @@ estimates store base
 scalar ll0 = e(ll)
 
 
-/* *** Set nested logit
+*** Set nested logit
 cap drop port
 cap label drop lb_port
 cap drop partp
@@ -125,17 +125,13 @@ asclogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_
 constraint 1 [/port]DCRB_tau = 1
 constraint 2 [/port]CMCK_tau = 1
 
-tab dcpue if selection == "CWA-ALBC"
-tab dcpue90 if selection == "CWA-ALBC"
-
-
+/* 
 nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 		psdnclosured dummy_last_day unem_rate d_d d_pd d_cd d_pcd /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id)
 matrix start=e(b)
 estimates save ${results}nlogit_FULL_C5_v1.ster, replace
-
 
 // + Crab closure (problem: backed-up last iteration)
 nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
@@ -175,10 +171,19 @@ nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_ca
 	from(start, skip)
 matrix start=e(b)
 estimates save ${results}nlogit_FULL_C5_v5.ster, replace
+*/
+
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day d_d d_pd d_cd d_pcd dcrbclosurewad waclosured msqdclosured /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_id) ///
+	from(start, skip)
+matrix start=e(b)
+estimates save ${results}nlogit_FULL_C5_v6.ster, replace
 
 
 **************************************************************************
-*/
+
  
 cap drop port
 cap label drop lb_port
