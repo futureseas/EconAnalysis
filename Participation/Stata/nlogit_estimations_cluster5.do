@@ -96,7 +96,6 @@ keep if check_if_choice
 tab check_if_choice
 
 
-
 *** Base model to compute R2
 set processors 4
 asclogit fished, base("No-Participation")  alternatives(selection) case(fished_haul) 
@@ -115,9 +114,8 @@ nlogitgen port = selection( ///
 	ALBC: CWA-ALBC, ///
 	CMCK: LAA-CMCK | SBA-CMCK, ///
 	NANC: LAA-NANC, ///
-	DCRB: CLW-DCRB | CWA-DCRB, ///
 	NOPORT: No-Participation)
-nlogitgen partp = port(PART: MSQD | PSDN | ALBC | CMCK | NANC, PART_CRAB: DCRB, NOPART: NOPORT)
+nlogitgen partp = port(PART: MSQD | PSDN | ALBC | CMCK | NANC, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 asclogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 		psdnclosured dummy_last_day d_d d_pd d_cd d_pcd, base("No-Participation") casevar(weekend) alternatives(selection) case(fished_haul) 
@@ -173,19 +171,72 @@ matrix start=e(b)
 estimates save ${results}nlogit_FULL_C5_v5.ster, replace
 */
 
+// estimates use ${results}nlogit_FULL_C5_v4.ster
+// matrix start=e(b)
+// nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 		psdnclosured dummy_last_day d_d d_pd d_cd d_pcd dcrbclosurewad waclosured msqdclosured /// 
+// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_id) ///
+// 	from(start, skip)
+// matrix start=e(b)
+// estimates save ${results}nlogit_FULL_C5_v6.ster, replace
+
+
+// replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
+// replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
+// replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
+// replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
+// replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
+// replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
+// replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
 estimates use ${results}nlogit_FULL_C5_v4.ster
 matrix start=e(b)
+// gen d_dcrb = (selection == "CLW-DCRB" | selection == "CWA-DCRB")
+// gen mean_price_dcrb = mean_price * d_dcrb
+
 nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured dummy_last_day d_d d_pd d_cd d_pcd dcrbclosurewad waclosured msqdclosured /// 
+		psdnclosured dummy_prev_days unem_rate msqdclosured dcrbclosurewad waclosured d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_id) ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id) ///
 	from(start, skip)
 matrix start=e(b)
 estimates save ${results}nlogit_FULL_C5_v6.ster, replace
-
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+restore
+preserve
+	replace dummy_last_day = 0
+	replace dummy_prev_days = 0
+	replace dummy_prev_year_days = 0
+	replace dummy_prev_days_port = 0
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+restore
 
 **************************************************************************
-
  
 cap drop port
 cap label drop lb_port
@@ -214,9 +265,7 @@ nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_ca
 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id)  */
 
 
-
-
-*************************************************************************************
+************************************************************************************************************
 
 
 estimates use ${results}nlogit_FULL_C5_v1.ster
@@ -387,7 +436,7 @@ estimates describe B4
 estimates replay B4
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B4
-lrtest B3 B4, force
+lrtest base B4, force
 estadd scalar lr_p = r(p): B4
 estat ic, all
 matrix S = r(S)
@@ -487,7 +536,7 @@ preserve
 	dis count2/_N*100 "%"
 	estadd scalar perc4 = count2/_N*100: B5
 restore
-/* 
+ 
 *****************************************************************************************************************************
 estimates use ${results}nlogit_FULL_C5_v6.ster
 estimates store B6
@@ -495,7 +544,7 @@ estimates describe B6
 estimates replay B6
 di "R2-McFadden = " 1 - (e(ll)/ll0)
 estadd scalar r2 = 1 - (e(ll)/ll0): B6
-lrtest base B6, force
+lrtest B1 B6, force
 estadd scalar lr_p = r(p): B6
 estat ic, all
 matrix S = r(S)
@@ -542,6 +591,7 @@ preserve
 	estadd scalar perc4 = count2/_N*100: B6
 restore
 
+/*
 *****************************************************************************************************************************
 estimates use ${results}nlogit_FULL_C5_v8.ster
 estimates store B8
@@ -600,7 +650,7 @@ restore
 *****************************************************************************************************************************
 *** Save model
 
-esttab  B1 B2 B3 B4 B5 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_C5.rtf", ///
+esttab  B4 B5 B6 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_C5.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 perc3 perc4 lr_p aicc caic, fmt(0 3) ///

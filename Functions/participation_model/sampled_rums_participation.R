@@ -125,8 +125,7 @@ sampled_rums <- function(data_in, cluster = 5,
   #                            output = "Participation\\Results\\catch_model.docx")
 
 
-  #-------------
-  ## Price models
+  #---- Price models ----
   dat_est <- readRDS("C:/Data/PacFIN data/Tickets_filtered.rds")
   datPanel <- dat_est %>% 
       dplyr::filter(LANDING_YEAR >= min_year_est, LANDING_YEAR <= max_year_est) %>%
