@@ -29,12 +29,12 @@ samps1 <- sampled_rums(data_in = participation_data, cluster = 5,
   samps <- samps1 %>%
     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
     rm(samps1)
-    saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c5_full_v2.rds")
+    saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c5_full_v3.rds")
 
 #----------------------------------
 
 ## Run saved data
-samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c5_full.rds")
+samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c5_full_v3.rds")
 
 
 #----------------------------------
@@ -584,8 +584,8 @@ rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_hau
   #%>% dplyr::select(-c('set_date'))  
 
 ## Save data to run with Stata
-write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c5_full.csv", row.names = FALSE)
-saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c5_full.rds")
+write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c5_full_v3.csv", row.names = FALSE)
+saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c5_full_v3.rds")
 
 #----------------------------------------------------
 ## Stata data (no identifier)
@@ -594,7 +594,7 @@ rdo_Stata_noid <- rdo_Stata %>%
   dplyr::select(-c('fished_VESSEL_NUM'))
 
 ## Save data to run with Stata
-write.csv(rdo_Stata_noid,"C:\\Users\\fequezad\\OneDrive\\PostDoc\\rdo_Stata_c5_full_noid.csv", row.names = FALSE)
+write.csv(rdo_Stata_noid,"C:\\Users\\fequezad\\OneDrive\\PostDoc\\rdo_Stata_c5_full_v3_noid.csv", row.names = FALSE)
 
 
 # ## Compare mean_catch v/s mean_catch2

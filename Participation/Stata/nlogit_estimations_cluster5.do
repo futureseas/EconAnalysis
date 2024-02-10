@@ -188,6 +188,8 @@ estimates save ${results}nlogit_FULL_C5_v5.ster, replace
 // replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
 // replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
 estimates use ${results}nlogit_FULL_C5_v4.ster
+
+
 matrix start=e(b)
 // gen d_dcrb = (selection == "CLW-DCRB" | selection == "CWA-DCRB")
 // gen mean_price_dcrb = mean_price * d_dcrb
