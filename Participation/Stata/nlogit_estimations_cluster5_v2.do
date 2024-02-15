@@ -9,9 +9,9 @@ clear all
 
 
 ** Import data
-// import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.csv", clear
-// save "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.dta", replace
-use "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.dta", clear
+import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full_v3.csv", clear
+save "C:\Data\PacFIN data\rdo_Stata_c5_full_v3.dta", replace
+use "C:\Data\PacFIN data\rdo_Stata_c5_full_v3.dta", clear
 
 ** Add addtional variables
 gen psdnclosured2 = psdnclosured - psdntotalclosured
@@ -87,6 +87,10 @@ keep if selection == "SBA-MSQD" | selection == "MNA-MSQD" | ///
 		selection == "LAA-NANC" | selection == "No-Participation" | ///
 		selection == "CLW-DCRB" | selection == "CWA-DCRB"
 
+drop if d_pcd
+
+
+
 ** Drop cases with no choice selected
 cap drop check_if_choice
 sort fished_haul
@@ -101,7 +105,6 @@ set processors 4
 asclogit fished, base("No-Participation")  alternatives(selection) case(fished_haul) 
 estimates store base
 scalar ll0 = e(ll)
-
 
 *** Set nested logit
 cap drop port
@@ -123,12 +126,11 @@ constraint 2 [/port]CMCK_tau = 1
 
 estimates use ${results}nlogit_FULL_C5_v7.ster
 matrix start=e(b)
+
 nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		unem_rate dummy_last_day psdnclosured dcrbclosurewad msqdclosured waclosured ///
-		d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+		unem_rate dummy_last_day psdnclosured dcrbclosurewad msqdclosured d_d d_pd d_cd /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_id) ///
-	from(start, skip)
+	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_id) from(start, skip)
 matrix start=e(b)
 estimates save ${results}nlogit_FULL_C5_v7.ster, replace
 preserve
@@ -149,7 +151,7 @@ restore
 preserve
 	replace dummy_last_day = 0
 	replace dummy_prev_days = 0
-	replace dummy_prev_year_days = 0
+	replace dummy_prev_year_days = 0. 
 	replace dummy_prev_days_port = 0
 	qui predict phat
 	by fished_haul, sort: egen max_prob = max(phat) 
