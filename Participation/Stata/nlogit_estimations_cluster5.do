@@ -9,9 +9,7 @@ clear all
 
 
 ** Import data
-import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full.csv"
-save "C:\Data\PacFIN data\rdo_Stata_c5_full.dta", replace
-use "C:\Data\PacFIN data\rdo_Stata_c5_full.dta", clear
+import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full_v3.csv"
 
 ** Add addtional variables
 gen psdnclosured2 = psdnclosured - psdntotalclosured
@@ -125,11 +123,19 @@ asclogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_
 constraint 1 [/port]DCRB_tau = 1
 constraint 2 [/port]CMCK_tau = 1
 
-// nlogit   fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
-// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id)
-// estimates save ${results}nlogit_FULL_C5.ster, replace
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id)
+	estimates save ${results}nlogit_FULL_C5.ster, replace
+
+****** COMPARE WITH v2 (SDM ALBC WITHIN 90KM) ********
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id)
+	estimates save ${results}nlogit_FULL_C5_sdmALBC.ster, replace
+
 
 // nlogit   fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 // 		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
