@@ -9,9 +9,9 @@ clear all
 
 
 ** Import data
-import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full_v3.csv", clear
-save "C:\Data\PacFIN data\rdo_Stata_c5_full_v3.dta", replace
-use "C:\Data\PacFIN data\rdo_Stata_c5_full_v3.dta", clear
+import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.csv", clear
+save "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.dta", replace
+use "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.dta", clear
 
 ** Add addtional variables
 gen psdnclosured2 = psdnclosured - psdntotalclosured
@@ -78,18 +78,14 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 
 keep if selection == "SBA-MSQD" | selection == "MNA-MSQD" | ///
 		selection == "LAA-MSQD" | selection == "SFA-MSQD" | /// 
-		selection == "CBA-MSQD" | selection == "MRA-MSQD" | ///
-		selection == "NPA-MSQD" | ///		
+		selection == "CBA-MSQD" | selection == "MRA-MSQD" | ///		
 	    selection == "CLO-PSDN" | selection == "CWA-PSDN" | ///
-		selection == "CLW-PSDN" | selection == "LAA-PSDN" | ///
-		selection == "CWA-ALBC" | ///
+		selection == "CLW-PSDN" | ///
 		selection == "LAA-CMCK" | selection == "SBA-CMCK" | ///
-		selection == "LAA-NANC" | selection == "No-Participation" | ///
-		selection == "CLW-DCRB" | selection == "CWA-DCRB"
-
-drop if d_pcd
-
-
+		selection == "CLW-DCRB" | selection == "CWA-DCRB" | ///
+		selection == "CWA-ALBC" | ///
+		selection == "LAA-NANC" | ///
+		selection == "No-Participation"
 
 ** Drop cases with no choice selected
 cap drop check_if_choice
@@ -112,26 +108,30 @@ cap label drop lb_port
 cap drop partp
 cap label drop lb_partp
 nlogitgen port = selection( ///
-	MSQD: SBA-MSQD | MNA-MSQD | LAA-MSQD | SFA-MSQD | CBA-MSQD | MRA-MSQD | NPA-MSQD, ///
-	PSDN: CLO-PSDN | CWA-PSDN | CLW-PSDN | LAA-PSDN, ///
-	ALBC: CWA-ALBC, ///
+	MSQD: SBA-MSQD | MNA-MSQD | LAA-MSQD | SFA-MSQD | CBA-MSQD | MRA-MSQD, ///
+	PSDN: CLO-PSDN | CWA-PSDN | CLW-PSDN, ///
 	CMCK: LAA-CMCK | SBA-CMCK, ///
-	NANC: LAA-NANC, ///
 	DCRB: CLW-DCRB | CWA-DCRB, ///
+	NANC: LAA-NANC, ///
+	ALBC: CWA-ALBC, ///
 	NOPORT: No-Participation)
-nlogitgen partp = port(PART: MSQD | PSDN | ALBC | CMCK | NANC, PART_CRAB: DCRB, NOPART: NOPORT)
+nlogitgen partp = port(PART: MSQD | PSDN | CMCK | NANC | ALBC, PART_CRAB: DCRB , NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 constraint 1 [/port]DCRB_tau = 1
 constraint 2 [/port]CMCK_tau = 1
 
-estimates use ${results}nlogit_FULL_C5_v7.ster
-matrix start=e(b)
+// NO CRAB OR TUNA IN THIS CASE :(
 
-nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		unem_rate dummy_last_day psdnclosured dcrbclosurewad msqdclosured d_d d_pd d_cd /// 
-		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_id) from(start, skip)
-matrix start=e(b)
+
+// estimates use ${results}nlogit_FULL_C5_v7.ster
+// matrix start=e(b) 
+nlogit fished mean_avail mean_price2 wind_max_220_mh /// 
+		|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id) 
+
+//from(start, skip)
+
+matrix start=e(b) 
 estimates save ${results}nlogit_FULL_C5_v7.ster, replace
 preserve
 	qui predict phat
