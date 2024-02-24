@@ -136,7 +136,7 @@ constraint 2 [/port]CMCK_tau = 1
 estimates use ${results}nlogit_FULL_C5_v2.ster
 matrix start=e(b)
 estimates store B2
-lrtest B1 B2, force
+lrtest base B2, force
 
 
 // + Unemployment Rate
@@ -150,11 +150,6 @@ estimates use ${results}nlogit_FULL_C5_v3.ster
 matrix start=e(b)
 estimates store B3
 lrtest B2 B3, force
-
-
-
-
-
 
 
 // + DCRB closure
