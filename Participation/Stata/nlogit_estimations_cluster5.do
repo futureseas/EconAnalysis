@@ -128,35 +128,34 @@ constraint 2 [/port]CMCK_tau = 1
 ************************
 
 // nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd  /// 
+// 		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd /// 
 // 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id)
-// estimates save ${results}nlogit_FULL_C5.ster, replace
-estimates use ${results}nlogit_FULL_C5.ster
-matrix start=e(b)
-estimates store B1
-
-// // + Unemployment rate
-// nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd unem_rate /// 
-// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id) ///
+// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
 // 	from(start, skip)
 // estimates save ${results}nlogit_FULL_C5_v2.ster, replace
 estimates use ${results}nlogit_FULL_C5_v2.ster
 matrix start=e(b)
 estimates store B2
+lrtest B1 B2, force
 
+
+// + Unemployment Rate
 nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured dummy_last_day d_c d_d d_p d_pc d_pd /// 
+		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd  /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
 	from(start, skip)
-estimates save ${results}nlogit_FULL_C5_v2.ster, replace
-estimates use ${results}nlogit_FULL_C5_v2.ster
+estimates save ${results}nlogit_FULL_C5_v3.ster, replace
+estimates use ${results}nlogit_FULL_C5_v3.ster
 matrix start=e(b)
-estimates store B2
-lrtest B1 B2, force
+estimates store B3
+lrtest B2 B3, force
+
+
+
+
+
+
 
 // + DCRB closure
 // nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
