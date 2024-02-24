@@ -17,7 +17,7 @@ library(lubridate)
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
-samps1 <- sampled_rums(data_in = participation_data, cluster = 5,
+samps1 <- sampled_rums(data_in = participation_data, cluster = 6,
                          min_year = 2013, max_year = 2017,
                          min_year_prob = 2013, max_year_prob = 2017,
                          min_year_est = 2012, max_year_est = 2019,
@@ -29,12 +29,12 @@ samps1 <- sampled_rums(data_in = participation_data, cluster = 5,
   samps <- samps1 %>%
     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
     rm(samps1)
-    saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c5_full_v3.rds")
+    saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c6_full.rds")
 
 #----------------------------------
 
 ## Run saved data
-samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c5_full_v3.rds")
+samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c6_full.rds")
 
 
 #----------------------------------
@@ -575,26 +575,30 @@ rm(fished_haul_select, rdo3)
 
 rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_haul, -rdo_R$fished),]) %>%
   group_by(fished_VESSEL_NUM) %>%
-  dplyr::mutate(fished_VESSEL_ID = cur_group_id()) %>%
+  dplyr::mutate(fished_VESSEL_anon = cur_group_id()) %>%
   ungroup() %>% 
   #dplyr::select(-c('fished_VESSEL_NUM')) %>%
   group_by(set_date) %>%
   dplyr::mutate(time = cur_group_id()) %>%
+  ungroup() %>%
+  #%>% dplyr::select(-c('set_date')) %>%
+  group_by(fished_haul) %>%
+  dplyr::mutate(fished_haul_anon = cur_group_id()) %>%
   ungroup()
-  #%>% dplyr::select(-c('set_date'))  
 
 ## Save data to run with Stata
-write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c5_full_v3.csv", row.names = FALSE)
-saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c5_full_v3.rds")
+write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c6_full.csv", row.names = FALSE)
+saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c6_full.rds")
 
 #----------------------------------------------------
 ## Stata data (no identifier)
 
 rdo_Stata_noid <- rdo_Stata %>% 
-  dplyr::select(-c('fished_VESSEL_NUM'))
+  dplyr::select(-c('fished_VESSEL_NUM')) %>%
+  dplyr::select(-c('fished_haul'))
 
 ## Save data to run with Stata
-write.csv(rdo_Stata_noid,"C:\\Users\\fequezad\\OneDrive\\PostDoc\\rdo_Stata_c5_full_v3_noid.csv", row.names = FALSE)
+write.csv(rdo_Stata_noid,"G:\\My Drive\\Data\\Anonymised data\\rdo_Stata_c6_full_noid.csv", row.names = FALSE)
 
 
 # ## Compare mean_catch v/s mean_catch2
