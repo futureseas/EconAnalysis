@@ -602,15 +602,3 @@ write.csv(rdo_Stata_noid,"G:\\My Drive\\Data\\Anonymised data\\rdo_Stata_c6_full
 # 
 # Model <- lm(avg_catch ~ avg_catch2 + factor(Port) + factor(Species), data = compare_catch_data)
 # summary(Model)
-
-
-
-
-
-
-
-
-
-
-
-
