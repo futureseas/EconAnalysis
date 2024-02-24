@@ -1,7 +1,6 @@
-
-###################
-### Sample choice set for the participation model 
-###################
+#----------------------------------------------#
+# Sample choice set in the Participation model #
+#----------------------------------------------#
 
 #' @param data_in Data going in to the function; default is filt_clusts
 #' @param cluster cluster that we are analyzing 
@@ -29,8 +28,7 @@ sampled_rums <- function(data_in, cluster = 5,
                          nhauls_sampled = 5, seed = 300, 
                          ncores, rev_scale, sample_choices = FALSE, k_chosen = 0.5) {
 
-  # ###############
-  # # Delete
+  # Delete
   # 
   # gc()
   # library(doParallel)
@@ -53,12 +51,12 @@ sampled_rums <- function(data_in, cluster = 5,
   # ncores <- 4
   # rev_scale <- 1000
   # sample_choices <- FALSE
-  # ################
+
 
   dat <- data_in 
   
-  #-------------
-  ## Catch models
+  
+  #### Catch models ####
   
   ## Load SDM 
   albc.sdm <- readRDS(file = 'Participation/SDMs/sdm_albc.rds')
@@ -125,7 +123,7 @@ sampled_rums <- function(data_in, cluster = 5,
   #                            output = "Participation\\Results\\catch_model.docx")
 
 
-  #---- Price models ----
+  #### Price models ####
   dat_est <- readRDS("C:/Data/PacFIN data/Tickets_filtered.rds")
   datPanel <- dat_est %>% 
       dplyr::filter(LANDING_YEAR >= min_year_est, LANDING_YEAR <= max_year_est) %>%
@@ -166,7 +164,6 @@ sampled_rums <- function(data_in, cluster = 5,
     summary(mod_estimate[[209]]) # nanc 52%
     summary(mod_estimate[[233]]) # cmck 30%
 
-  # #-----------------------------------------------------------------------------
   # ## Keep core vessel
   # 
   # core_vessels <- dat %>% 
@@ -184,8 +181,7 @@ sampled_rums <- function(data_in, cluster = 5,
   #     mutate(perc = cumm / total_landings * 100) %>% 
   #     dplyr::filter(perc < 99) %>% dplyr::select(c('VESSEL_NUM')) %>%
   #     unique()
-    
-  #-----------------------------------------------------------------------------
+
   ## Add criteria for just participation in a year
   vessel_part_year <- dat %>% 
       group_by(VESSEL_NUM, set_year) %>%
@@ -233,8 +229,8 @@ sampled_rums <- function(data_in, cluster = 5,
     dplyr::filter(active_year == 1) 
   
   
-  #-----------------------------------------------------------------------------
-  ## Define hauls data used for estimation (in this case, are the trips)
+  #### Define hauls data ####
+  #### used for estimation (in this case, are the trips) 
     
   # 29,554 vs 29,519
   
@@ -250,8 +246,9 @@ sampled_rums <- function(data_in, cluster = 5,
         filter(selection == "No-Participation")
   
     
-  #-----------------------------------------------------------------------------
+  #### Create choice set ####
   if (sample_choices == TRUE) {
+    ##### Sampling choice set #####
     print("Start sampling choices")
     ## Select hauls used to calculate probability for the choice set
     dist_hauls_catch_shares <- hauls %>% dplyr::filter(set_year >= min_year_prob, set_year <= max_year_prob)
@@ -309,7 +306,7 @@ sampled_rums <- function(data_in, cluster = 5,
     
     dbp_month <- as.data.frame(do.call(rbind.data.frame, dbp3))
     
-    ############################################################################
+
     ## Create example plot with the proportion used to sample the choice set.
     #
     # dbp_test <- dbp_month %>% group_by(set_month) %>%
@@ -364,11 +361,8 @@ sampled_rums <- function(data_in, cluster = 5,
     #                     values=c("#08519c", "#049cdb", "#6baed6","#2171b5", "#85db5b", "#4aa72f",
     #                              "#248b37", "#e1dc0d", "#f0eb00", "#d94701", "#6a51a3", "#969696")) +
     #   guides(fill=guide_legend(title="Species / Port areas: "))
-    ############################################################################
-    
-    #-----------------------------------------------------------------------
-    ## Sample Hauls
-    
+
+
     # Set seed
     set.seed(seed)
     seedz <- sample(1:1e7, size = nrow(hauls))
@@ -500,6 +494,7 @@ sampled_rums <- function(data_in, cluster = 5,
     registerDoSEQ()
     print("Done sampling choices")
   } else {
+    ##### Alternative: Use full choice set #####
     print("Full choice set selected")
     
     # Exclude other days of same trip (multiday trips)
@@ -533,10 +528,9 @@ sampled_rums <- function(data_in, cluster = 5,
                                   PORT_AREA_CODE == "SPS" | PORT_AREA_CODE == "WA5", "W", NA))))
     sampled_hauls$fleet_name <- cluster
   }
-  
 
-  #-----------------------------------------------
-  ### Merge coordinates of port landed and the computation of the center of gravity with participation data, and calculate distances from port to COG
+#### Distance from port to COG ####
+### Merge coordinates of port landed and the computation of the center of gravity with participation data, and calculate distances from port to COG
   
   port_coord <- read.csv("C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv") %>% 
     rename(PORT_AREA_CODE = port_group_code) %>% 
@@ -558,7 +552,8 @@ sampled_rums <- function(data_in, cluster = 5,
   List <- as.list(as.character(Permit_ID$VESSEL_NUM))
   Permit_COG<-NULL
   
-  ### Run function 
+  
+  #### Run Center of gravity function ####
   source("C:/GitHub/EconAnalysis/Clustering/CGI_Function.R")
   for (i in 1:length(List)) {
     Permit = List[i]
@@ -597,8 +592,8 @@ sampled_rums <- function(data_in, cluster = 5,
     mutate(dist_to_cog = ifelse(is.na(lat_port), NA, geosphere::distm(c(lon_port, lat_port), c(lon_cg, lat_cg), fun = geosphere::distHaversine))) %>%
     mutate(dist_to_cog = dist_to_cog/1000) %>% ungroup() %>% dplyr::select(-c(lon_port, lat_port, lon_cg))
   
-  #-----------------------------------------------------------------------------
-  ### Calculate interval between previous day and year
+  #### Calculate intervals ####
+  #### between previous day and year
   
   #Obtain previous day, year and day/year date
   sampled_hauls$prev_days_date <- sampled_hauls$set_date - days(ndays)
@@ -636,8 +631,9 @@ sampled_rums <- function(data_in, cluster = 5,
   td$days90_inter <- interval(td$prev_90days_date, td$prev_day_date)
   td$prev_year_days_inter <- interval(td$prev_year_days_date, td$prev_year_set_date)
 
-  #-----------------------------------------------------------------------------
-  ### Calculate revenues from each period and process dummy variables for past behavior
+  
+  #### Calculate revenues ####
+  #### from each period and process dummy variables for past behavior #
   
   ## Modify SDMs to be used in function to calculate expected revenue and cost below
   albc.sdm$set_date <- ymd(paste(albc.sdm$LANDING_YEAR, albc.sdm$LANDING_MONTH, albc.sdm$LANDING_DAY, sep = "-"))
@@ -697,11 +693,9 @@ sampled_rums <- function(data_in, cluster = 5,
     fuel.prices.state <- fuel.prices.state %>% drop_na()
 
   
-  ### Calculate revenues
-  
+  ##### Run function ####
   registerDoParallel(cl = ncores)
   getDoParWorkers()  
-  
   dummys2 <- foreach::foreach(ii = 1:nrow(td),
     .packages = c("dplyr", 'lubridate')) %dopar% {
       source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\process_dummys2_participation.R")
@@ -726,6 +720,7 @@ sampled_rums <- function(data_in, cluster = 5,
   td2 <- plyr::ldply(dummys2)
   saveRDS(td2, file = "C:\\Data\\PacFIN data\\td2.rds")
   
+  ##### Create dummy ####
   registerDoSEQ()
   
   # Create dummy for prev days fishing
@@ -755,9 +750,7 @@ sampled_rums <- function(data_in, cluster = 5,
             'mean_price', 'mean_price2', 'mean_catch', 'mean_catch2', 'mean_avail', 'diesel_price', 'dist_port_to_catch_area', 
             'dCPUE', 'dPrice30', 'dDieselState', 'dCPUE90', 'dPrice30_s', 'dPrice90_s','dPrice30_s2', 'dPrice90_s2')] )
 
-  
-  #-----------------------------------------------
-  ## Return data
+  #### Return data ####
   return(sampled_hauls)
   
 }
