@@ -1,6 +1,6 @@
-########################################################################## 
+#------------------------------------------------------------------------#
 ## Sampling choice set for port-species model based on Hicks REE paper ##
-##########################################################################
+#------------------------------------------------------------------------#
 
 gc()
 rm(list=ls())
@@ -12,8 +12,8 @@ library(plm)
 library(tidyverse)
 library(lubridate)
 
-#-------------------------------------------------------------------------------
-## Sampling choice data including expected revenue, expected cost and past behavior dummies ##
+### Sampling choice data ####
+# including expected revenue, expected cost and past behavior dummies #
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
@@ -31,14 +31,11 @@ samps1 <- sampled_rums(data_in = participation_data, cluster = 6,
     rm(samps1)
     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c6_full.rds")
 
-#----------------------------------
-
-## Run saved data
+### Run saved data ####
 samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c6_full.rds")
 
 
-#----------------------------------
-## Check if there is no similar alternatives within a trip
+# Check if there is no similar alternatives within a trip 
 test <- 
     samps %>% ungroup() %>% 
     group_by(fished_haul,selection) %>%
@@ -46,7 +43,7 @@ test <-
     max(test$n_count)
     rm(test)
     
-    # #--------------------------------------------------------------------------
+#--------------------------------------------------------------------------#
 ## See how many times we have NA
 
 # 4,168 NAs for availability (2.8%) -- (5.8% with full data -- C5: 4.3%)
@@ -84,8 +81,9 @@ test <-
 #                                        is.na(samps0$mean_avail))))
 
 
-#---------------------------------------------------------------------------
-### Create dummies for missing availability and price and convert NA to zero
+#---------------------------------------------------------------------------#
+### Create dummies for missings ####
+#   availability and price and convert NA to zero
 samps1 <- samps %>% 
   mutate(dDieselState   = ifelse((is.na(samps$diesel_price)), 0, dDieselState)) %>%
   mutate(dPrice30       = ifelse((is.na(samps$mean_price)), 0, dPrice30)) %>%
@@ -111,7 +109,6 @@ samps1 <- samps %>%
                                                 dist_port_to_catch_area)) 
 
   
-#----------------------------------------------------------------------
 # ### See how many times we need to use CPUE (30 and 90 days), average 30 days prices and State diesel prices
 # # 21.2% State diesel prices --- (24% -- C5: 16.9%)
 # # 0% Prices (30 days) 
@@ -163,8 +160,7 @@ samps1 %>%
   summarize(n_obs = n(), perc = n()/mean(total))
 
 
-#--------------------------------------------------------------------------
-### Replace values for No-Participation to zero 
+### Replace values for No-Participation to zero ####
 samps <- samps1 %>% 
   mutate(dist_to_cog = ifelse(selection == "No-Participation", 0, dist_to_cog)) %>%
   mutate(lat_cg = ifelse(selection == "No-Participation", 0, lat_cg))
@@ -172,8 +168,7 @@ samps <- samps1 %>%
   samps %>% filter(selection == "No-Participation") %>% psych::describe()
 
   
-#--------------------------------------------------------------------------
-### Incorporate multiday trip data
+### Incorporate multiday trip data ####
 multiday_data <- participation_data %>% 
     dplyr::select(c(trip_id, multiday_trip, n_obs_within_FTID)) %>% unique() %>%
     rename(fished_haul = trip_id)
@@ -183,14 +178,12 @@ multiday_data <- participation_data %>%
 psych::describe(samps %>% group_by(fished_haul) %>% summarise(obs = sum(n_obs_within_FTID)/19))
 
 
-#-------------------------------------------
-### Include lunar data
+### Include lunar data ####
 
 samps <- samps %>% mutate(lunar.ill = lunar::lunar.illumination(as.Date(set_date), shift = 0))
 
 
-#---------------------------------------------------------------------------------------
-### Include world's fish meal price as instrument
+### Include fish meal price as instrument ####
 Deflactor <- read.csv(file = "C:\\Data\\PacFIN data\\deflactor.csv")
 fish.meal <- read.csv(here::here("Data", "Instruments", "PFISHUSDM.csv"), header = TRUE, stringsAsFactors = FALSE)
 fish.meal$DATE <- as.Date(fish.meal$DATE, format = "%m/%d/%Y") 
@@ -205,8 +198,7 @@ rm(fish.meal)
 
 
 
-#--------------------------------------------------------------------------
-### Incorporate wind data 
+### Incorporate wind data ####
 
 ## Read wind data
 wind_2020_2020 <- readRDS("C:/Data/Wind&Current/wind_U_V_2000-2020.RDS") 
@@ -242,7 +234,7 @@ samps <- merge(samps, wind, by = (c('set_date', 'PORT_AREA_CODE')), all.x = TRUE
   mutate(wind_max_220_mh = ifelse(selection == "No-Participation", 0, wind_max_220_mh))
 rm(wind, wind_2020_2020)
                 
-#-------------------------------------------------------------------
+
 ## Do a histogram with the wind speed by port (from Lisa's paper) ##
 # 
 # # Small craft -> 25–38 miles per hour
@@ -292,9 +284,10 @@ rm(wind, wind_2020_2020)
 #   ylab("Frequency") + xlab("Maximum daily wind (miles/hour) within 220km radious") + 
 #   scale_color_manual(name = "Warnings:", values = c("Small craft" = "#ff9224", "Gale" = "#D22B2B"))
 
-#-------------------------------------------------------------------
-# Merge storm warning signals to check correlation between data
-# 
+
+### Merge storm warning signals ####
+### to check correlation between data
+ 
 # warnings.signals <- read.csv(file = "G://My Drive//Data//Storm Warnings//WCports_mww_events09-16.csv")
 # warnings.signals <- warnings.signals %>%
 #   select("pcid", "d_issued", "d_expired", "hurricane", "gale", "smcraft", "mww_other") %>%
@@ -348,9 +341,7 @@ rm(wind, wind_2020_2020)
 #                      values = c("Small craft" = "#ff9224", "Gale" = "#D22B2B"))
 
 
-#-------------------------------------------------------------------
-
-## Dummy for squid and sardine
+### Dummy for species ####
 samps <- samps %>% mutate(dPSDN = ifelse(grepl("PSDN", selection) == TRUE, 1, 0)) 
 samps <- samps %>% mutate(dMSQD = ifelse(grepl("MSQD", selection) == TRUE, 1, 0)) 
 samps <- samps %>% mutate(dBTNA = ifelse(grepl("BTNA", selection) == TRUE, 1, 0)) 
@@ -358,8 +349,8 @@ samps <- samps %>% mutate(dDCRB = ifelse(grepl("DCRB", selection) == TRUE, 1, 0)
 
 
 
-#------------------------------------------
-## Incorporate closure dummy for Pacific sardine
+### Incorporate closure dummy ####
+#### for PSDN ####
 
 samps <- samps %>%
   dplyr::mutate(PSDN.Closure = 
@@ -387,8 +378,7 @@ samps <- samps %>%
 
 
 
-#------------------------------------------------------------------
-## Incorporate closure dummy for market squid and weekend indicator
+#### for MSQD + Weekend ####
 samps <- samps %>%
   dplyr::mutate(MSQD.Closure = 
     ifelse(set_date >= "2010-12-17" & set_date < "2011-03-31", 1, 
@@ -399,8 +389,7 @@ samps <- samps %>%
   dplyr::mutate(MSQD.Weekend = Weekend * dMSQD)
 
 
-#------------------------------------------------------------------
-## Incorporate closure dummy for bluefin tuna
+#### for BTNA ####
 samps <- samps %>%
   dplyr::mutate(BTNA.Closure = 
                   ifelse(set_date >= "2014-09-05" & set_date < "2014-11-12", 1, 
@@ -408,8 +397,8 @@ samps <- samps %>%
   dplyr::mutate(BTNA.Closure.d = BTNA.Closure * dBTNA)
 
 
-#------------------------------------------
-## Incorporate closure dummy for Dungeness Crab
+
+#### for DCRB ####
 
 samps <- samps %>%
   dplyr::mutate(DCRB.Closure.WA = 
@@ -423,7 +412,7 @@ samps <- samps %>%
     ifelse(set_date >= "2016-09-15" & set_date < "2017-01-01" & PORT_AREA_CODE == "CLW", 1,
     ifelse(set_date >= "2017-09-15" & set_date < "2018-01-15" & PORT_AREA_CODE == "CLW", 1,
     ifelse(set_date >= "2018-09-15" & set_date < "2019-01-04" & PORT_AREA_CODE == "CLW", 1,
-    ##############################
+    #
     ifelse(set_date >= "2009-09-15" & set_date < "2010-01-02" & PORT_AREA_CODE == "CWA", 1, 
     ifelse(set_date >= "2010-09-15" & set_date < "2011-01-15" & PORT_AREA_CODE == "CWA", 1, 
     ifelse(set_date >= "2011-09-15" & set_date < "2012-01-24" & PORT_AREA_CODE == "CWA", 1, 
@@ -457,8 +446,7 @@ samps <- samps %>%
 colnames(samps)
 
 
-#------------------------------------------
-## WA dummy for sardine
+#### WA dummy for sardine ####
 
 # Include WA dummy for sardine!
 samps <- samps %>% 
@@ -469,16 +457,14 @@ samps <- samps %>%
   dplyr::mutate(WA.Closure.d = WA.Closure * dPSDN)
 
 
-#------------------------------------------
-## Participation dummy 
+### Participation dummy  ####
 
 samps <- samps %>% 
   dplyr::mutate(dParticipate = ifelse(selection == "No-Participation", 0, 1)) 
 
 
 
-#-------------------------------------------
-## Include unemployment.
+### Include unemployment ####
 
 unem_CA <- readxl::read_excel("Participation/Unemployment/SeriesReport-20230609192133_ae51a3.xlsx", range = "A11:I263") %>%
   mutate(AGENCY_CODE = "C") %>%
@@ -534,9 +520,10 @@ rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NU
                                d_missing, d_missing_p, d_missing_p2, d_missing_cpue, d_missing_d, Vessel.length, 
                                lunar.ill, Price.Fishmeal.AFI, dPrice30_s, dPrice90_s,dPrice30_s2, dPrice90_s2)
                               rm(samps, samps2)
-
-#-----------------------------------------------------------------
-## Drop choice occasions that received no choice (none of them...)
+### Clean data ####
+                              
+#### Drop choice occasions ####
+### that received no choice (none of them...)
 
 rdo2 <- rdo %>%
   group_by(fished_haul) %>%
@@ -546,8 +533,9 @@ rdo2 <- rdo %>%
   dplyr::select(-c(full)) 
 rm(rdo)
 
-#--------------------------------------------------------
-## Exclude NA winds (previous problem with ports...) NONE!
+
+#### Exclude NA winds ####
+### (previous problem with ports...) NONE!
 
 rdo_vessels_out <- rdo2 %>% 
   dplyr::filter(is.na(wind_max_220_mh)) %>%
@@ -557,8 +545,8 @@ rdo3 <- data.table::setDT(rdo2)[fished_haul %ni% rdo_vessels_out$fished_haul]
 rm(rdo2, rdo_vessels_out, `%ni%`)
 
 
-#----------------------------------------------
-# Check more than one hauls in same day (None!)
+#### Check if more than one hauls in same day ####
+### (None!)
 
 fished_haul_select <- rdo3 %>%
   group_by(fished_VESSEL_NUM, set_date) %>%
@@ -570,8 +558,7 @@ rdo_R <- data.table::setDT(rdo3)[fished_haul %chin% fished_haul_select$fished_ha
 rm(fished_haul_select, rdo3)
 
 
-#----------------------------------------------------
-## Stata data
+### Save data ####
 
 rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_haul, -rdo_R$fished),]) %>%
   group_by(fished_VESSEL_NUM) %>%
@@ -590,8 +577,7 @@ rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_hau
 write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c6_full.csv", row.names = FALSE)
 saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c6_full.rds")
 
-#----------------------------------------------------
-## Stata data (no identifier)
+#### Save data with no identifier ####
 
 rdo_Stata_noid <- rdo_Stata %>% 
   dplyr::select(-c('fished_VESSEL_NUM')) %>%
