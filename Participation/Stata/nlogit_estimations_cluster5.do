@@ -8,7 +8,7 @@ cd $path
 clear all
 
 
-** Import data
+** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best)
 import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.csv"
 
 ** Add addtional variables
@@ -87,6 +87,7 @@ keep if selection == "SBA-MSQD" | selection == "MNA-MSQD" | ///
 
 drop if msqdclosured // I THINK THIS HELP!!!
 
+
 ** Drop cases with no choice selected
 cap drop check_if_choice
 sort fished_haul
@@ -139,12 +140,12 @@ estimates store B2
 lrtest base B2, force
 
 // + Unemployment Rate
-nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd  /// 
-		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
-	from(start, skip)
-estimates save ${results}nlogit_FULL_C5_v3.ster, replace
+// nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd  /// 
+// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
+// 	from(start, skip)
+// estimates save ${results}nlogit_FULL_C5_v3.ster, replace
 estimates use ${results}nlogit_FULL_C5_v3.ster
 matrix start=e(b)
 estimates store B3
@@ -152,53 +153,81 @@ lrtest B2 B3, force
 
 
 // + DCRB closure
-nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd dcrbclosurewad  /// 
-		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
-	from(start, skip)
-estimates save ${results}nlogit_FULL_C5_v4.ster, replace
+// nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd dcrbclosurewad  /// 
+// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
+// 	from(start, skip)
+// estimates save ${results}nlogit_FULL_C5_v4.ster, replace
 estimates use ${results}nlogit_FULL_C5_v4.ster
 matrix start=e(b)
 estimates store B4
 lrtest B3 B4, force
 
-// + WA closure
-nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd dcrbclosurewad waclosured  /// 
-		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
-	from(start, skip)
-estimates save ${results}nlogit_FULL_C5_v5.ster, replace
+// + p_cd
+// nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd dcrbclosurewad   /// 
+// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
+// 	from(start, skip)
+// estimates save ${results}nlogit_FULL_C5_v5.ster, replace
 estimates use ${results}nlogit_FULL_C5_v5.ster
 matrix start=e(b)
 estimates store B5
+lrtest B4 B5, force
 
-// lrtest B4 B5, force
-
-// + d_cd
+*------
+// // + d_pcd
 // nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd dcrbclosurewad waclosured  /// 
+// 		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad   /// 
 // 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 // 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
 // 	from(start, skip)
 // estimates save ${results}nlogit_FULL_C5_v6.ster, replace
-// estimates use ${results}nlogit_FULL_C5_v6.ster
-// matrix start=e(b)
-// estimates store B6
-// lrtest B5 B6, force
+estimates use ${results}nlogit_FULL_C5_v6.ster
+matrix start=e(b)
+estimates store B6
+lrtest B5 B6, force
 
-// + d_pcd
+// // + wacloured
 // nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 // 		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
 // 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 // 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
 // 	from(start, skip)
 // estimates save ${results}nlogit_FULL_C5_v7.ster, replace
-// estimates use ${results}nlogit_FULL_C5_v7.ster
+estimates use ${results}nlogit_FULL_C5_v7.ster
+matrix start=e(b)
+estimates store B7
+lrtest B6 B7, force
+lrtest B7 B6, force
+
+// CPUE data
+// nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
+// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_id) ///
+// 	from(start, skip)
+// estimates save ${results}nlogit_FULL_C5_v8.ster, replace
+// estimates use ${results}nlogit_FULL_C5_v8.ster
 // matrix start=e(b)
-// estimates store B7
-// lrtest B6 B7, force
+// estimates store B8
+// lrtest B7 B8, force
+
+// crab and wa no specific
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewa waclosure  /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
+	from(start, skip)
+estimates save ${results}nlogit_FULL_C5_v8.ster, replace
+estimates use ${results}nlogit_FULL_C5_v8.ster
+matrix start=e(b)
+estimates store B9
+lrtest B7 B9, force
+
+
+
 
 *** WITHOUT STATE DEPENDENCY!
 
