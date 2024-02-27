@@ -214,9 +214,9 @@ lrtest B7 B6, force
 // estimates store B8
 // lrtest B7 B8, force
 
-// crab and wa no specific
+// dcrb no specific
 nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewa waclosure  /// 
+		psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewa waclosured  /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
 	from(start, skip)
