@@ -17,22 +17,22 @@ library(lubridate)
 source("C:\\GitHub\\EconAnalysis\\Functions\\participation_model\\sampled_rums_participation.R")
 participation_data <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
-samps1 <- sampled_rums(data_in = participation_data, cluster = 7,
-                         min_year = 2013, max_year = 2017,
-                         min_year_prob = 2013, max_year_prob = 2017,
-                         min_year_est = 2012, max_year_est = 2019,
-                         ndays = 30, nhauls_sampled = 5,
-                         seed = 300, ncores = 4, rev_scale = 1000,
-                         sample_choices = FALSE, k_chosen = 0.5)
-                         ## max_est_year for catch is 2014 (pre-closure)
-
-  samps <- samps1 %>%
-    mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
-    rm(samps1)
-    saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c7_full.rds")
+# samps1 <- sampled_rums(data_in = participation_data, cluster = 5,
+#                          min_year = 2013, max_year = 2017,
+#                          min_year_prob = 2013, max_year_prob = 2017,
+#                          min_year_est = 2012, max_year_est = 2019,
+#                          ndays = 30, nhauls_sampled = 5,
+#                          seed = 300, ncores = 4, rev_scale = 1000,
+#                          sample_choices = FALSE, k_chosen = 0.5)
+#                          ## max_est_year for catch is 2014 (pre-closure)
+# 
+#   samps <- samps1 %>%
+#     mutate(PORT_AREA_CODE = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA))
+#     rm(samps1)
+#     saveRDS(samps, file = "C:\\Data\\PacFIN data\\sample_choice_set_c5_full_v2.rds")
 
 ### Run saved data ####
-samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c7_full.rds")
+samps <- readRDS(file = "C:\\Data\\PacFIN data\\sample_choice_set_c5_full_v2.rds")
 
 
 # Check if there is no similar alternatives within a trip 
@@ -425,7 +425,8 @@ samps <- samps %>%
     ifelse(set_date >= "2018-09-15" & set_date < "2019-01-10" & PORT_AREA_CODE == "CWA", 1,
            0))))))))))))))))))))) %>% 
     dplyr::mutate(DCRB.Closure.WA.d = DCRB.Closure.WA * dDCRB) %>%
-    mutate(DCRB.Closure.WA.d = ifelse(selection == "No-Participation", 0, DCRB.Closure.WA.d))
+    mutate(DCRB.Closure.WA.d = ifelse(selection == "No-Participation", 0, DCRB.Closure.WA.d)) %>%
+    mutate(DCRB.Closure.WA = ifelse(selection == "No-Participation", 0, DCRB.Closure.WA))
 
 samps <- samps %>%
   dplyr::mutate(DCRB.Closure.OR = 
@@ -516,7 +517,7 @@ rdo <- samps2 %>% dplyr::select(fished, fished_haul, selection, fished_VESSEL_NU
                                dummy_prev_days, dummy_prev_year_days, dummy_clust_prev_days, lat_cg, dist_to_cog, 
                                dist_port_to_catch_area, dist_port_to_catch_area_zero, PSDN.Closure, BTNA.Closure, PSDN.Total.Closure, 
                                WA.Closure, MSQD.Closure, Weekend, BTNA.Closure.d, PSDN.Closure.d, PSDN.Total.Closure.d, WA.Closure.d, 
-                               MSQD.Closure.d, MSQD.Weekend, DCRB.Closure.OR.d, DCRB.Closure.WA.d, dParticipate, unem_rate, d_missing_catch, d_missing_catch2, 
+                               MSQD.Closure.d, MSQD.Weekend, DCRB.Closure.OR.d, DCRB.Closure.WA.d, DCRB.Closure.WA, dParticipate, unem_rate, d_missing_catch, d_missing_catch2, 
                                d_missing, d_missing_p, d_missing_p2, d_missing_cpue, d_missing_d, Vessel.length, 
                                lunar.ill, Price.Fishmeal.AFI, dPrice30_s, dPrice90_s,dPrice30_s2, dPrice90_s2)
                               rm(samps, samps2)
@@ -574,8 +575,8 @@ rdo_Stata <- as.data.frame(rdo_R[order(rdo_R$fished_VESSEL_NUM, rdo_R$fished_hau
   ungroup()
 
 ## Save data to run with Stata
-write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c7_full.csv", row.names = FALSE)
-saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c7_full.rds")
+write.csv(rdo_Stata,"C:\\Data\\PacFIN data\\rdo_Stata_c5_full_v2.csv", row.names = FALSE)
+saveRDS(rdo_Stata, file = "C:\\Data\\PacFIN data\\rdo_Stata_c5_full_v2.rds")
 
 #### Save data with no identifier ####
 
@@ -584,7 +585,7 @@ rdo_Stata_noid <- rdo_Stata %>%
   dplyr::select(-c('fished_haul'))
 
 ## Save data to run with Stata
-write.csv(rdo_Stata_noid,"G:\\My Drive\\Data\\Anonymised data\\rdo_Stata_c7_full_noid.csv", row.names = FALSE)
+write.csv(rdo_Stata_noid,"G:\\My Drive\\Data\\Anonymised data\\rdo_Stata_c5_full_v2_noid.csv", row.names = FALSE)
 
 
 # ## Compare mean_catch v/s mean_catch2
@@ -595,7 +596,6 @@ write.csv(rdo_Stata_noid,"G:\\My Drive\\Data\\Anonymised data\\rdo_Stata_c7_full
 #   mutate(Species = substr(selection, 5, 8)) %>% 
 #   filter(mean_catch2 > 0) %>%
 #   group_by(set_date, Species, Port) %>%
-#   summarize(avg_catch = mean(mean_catch),
 #             avg_catch2 = mean(mean_catch2)) %>%
 #   filter(Species == "MSQD" | Species == "NANC" | Species == "PSDN") %>%
 #   dplyr::select(c('avg_catch', 'avg_catch2', 'Species', 'Port')) 
