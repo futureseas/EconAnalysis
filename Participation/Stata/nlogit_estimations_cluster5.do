@@ -9,6 +9,7 @@ clear all
 
 
 ** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best -- V2)
+import delimited "H:\My Drive\Data\Anonymised data\rdo_Stata_c5_full_v2_noid.csv"
 import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.csv"
 
 ** Add addtional variables
