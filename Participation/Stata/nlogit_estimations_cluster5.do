@@ -1,4 +1,5 @@
 global path "C:\GitHub\EconAnalysis\Participation\" 
+
 global results "${path}Results\"
 global figures "${results}Figures\"
 global tables "${results}Tables\"
@@ -10,7 +11,7 @@ clear all
 
 ** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best -- V2)
 import delimited "H:\My Drive\Data\Anonymised data\rdo_Stata_c5_full_v2_noid.csv"
-import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.csv"
+// import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.csv"
 
 ** Add addtional variables
 gen psdnclosured2 = psdnclosured - psdntotalclosured
@@ -339,9 +340,9 @@ preserve
 	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
 	constraint 3 [PART_CRAB]mean_price = 0
 	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			psdnclosured  unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
+			psdnclosured unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
 			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) constraints(1 3) vce(cluster fished_vessel_anon) ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
 		from(start, skip)
 	estimates save ${results}nlogit_FULL_C5_v16.ster, replace
 restore
