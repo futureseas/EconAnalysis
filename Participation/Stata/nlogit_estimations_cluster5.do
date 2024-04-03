@@ -342,7 +342,7 @@ preserve
 	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 			psdnclosured unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
 			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
+		base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_anon) ///
 		from(start, skip)
 	estimates save ${results}nlogit_FULL_C5_v16.ster, replace
 restore
