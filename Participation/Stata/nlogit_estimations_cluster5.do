@@ -9,9 +9,28 @@ cd $path
 clear all
 
 
+** Get historical choice
+import delimited "G:\Mi unidad\Data\Cluster\cluster_aggregates.csv"
+keep if landing_year >= 2006 & landing_year <= 2014
+collapse (mean) mean_landings, by(group_all pacfin_species_code landing_month)
+egen max_value = max(mean_landings), by(group_all landing_month)
+keep if max_value == mean_landings
+keep landing_month group_all pacfin_species_code
+rename pacfin_species_code hist_selection
+rename landing_month set_month
+tempfile hist_data
+save `hist_data'
+
+
 ** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best -- V2)
-import delimited "G:\Mi unidad\Data\Anonymised data\rdo_Stata_c5_full_v2_noid.csv"
+import delimited "G:\Mi unidad\Data\Anonymised data\rdo_Stata_c5_full_v2_noid.csv", clear
+gen group_all = 5
+gen species = substr(selection, 5, 4) 
 // import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.csv"
+
+** Merge with historical data
+merge m:1 group_all set_month using `hist_data', keep(3)
+gen d_hist_selection = (hist_selection == species)
 
 ** Add addtional variables
 gen psdnclosured2 = psdnclosured - psdntotalclosured
@@ -327,7 +346,7 @@ lrtest B15 B14, force
 
 
 *****************************************************************************************************************************
-*** WITHOUT STATE DEPENDENCY!
+*** WITH HIST SELECTION!
 
 **** Test constraint
 preserve
@@ -339,11 +358,11 @@ preserve
 	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
 	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
 	constraint 3 [PART_CRAB]mean_price = 0
-	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			psdnclosured unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
-			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_anon) ///
-		from(start, skip)
+ 	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+ 			psdnclosured d_hist_selection unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
+ 			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+ 		base("No-Participation") case(fished_haul) constraints(1 3) vce(cluster fished_vessel_anon) ///
+ 		from(start, skip)
 	estimates save ${results}nlogit_FULL_C5_v16.ster, replace
 restore
 estimates use ${results}nlogit_FULL_C5_v16.ster
