@@ -1,5 +1,4 @@
 global path "C:\GitHub\EconAnalysis\Participation\" 
-
 global results "${path}Results\"
 global figures "${results}Figures\"
 global tables "${results}Tables\"
@@ -9,14 +8,21 @@ cd $path
 clear all
 
 
+import delimited "C:\GitHub\EconAnalysis\Data\Ports\ports_area_and_name_codes.csv", varnames(1) clear
+tempfile port_area
+save `port_area'
+
 ** Get historical choice
-import delimited "G:\Mi unidad\Data\Cluster\cluster_aggregates.csv"
-keep if landing_year >= 2006 & landing_year <= 2014
-collapse (mean) mean_landings, by(group_all pacfin_species_code landing_month)
-egen max_value = max(mean_landings), by(group_all landing_month)
-keep if max_value == mean_landings
-keep landing_month group_all pacfin_species_code
-rename pacfin_species_code hist_selection
+import delimited "G:\Mi unidad\Data\Cluster\cluster_aggregates.csv", clear
+merge m:1 pacfin_port_code using `port_area', keep(3)
+keep if landing_year >= 2005 & landing_year <= 2014
+collapse (sum) total_landings, by(group_all pacfin_species_code landing_month landing_year port_area_code)
+collapse (mean) mean_landings = total_landings, by(group_all pacfin_species_code landing_month port_area_code)
+bysort group_all landing_month (mean_landings): keep if  mean_landings==mean_landings[_N]
+tab group_all landing_month
+keep landing_month group_all pacfin_species_code port_area_code
+gen  hist_selection = port_area_code + "-" + pacfin_species_code 
+drop pacfin_species_code port_area_code
 rename landing_month set_month
 tempfile hist_data
 save `hist_data'
@@ -25,12 +31,11 @@ save `hist_data'
 ** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best -- V2)
 import delimited "G:\Mi unidad\Data\Anonymised data\rdo_Stata_c5_full_v2_noid.csv", clear
 gen group_all = 5
-gen species = substr(selection, 5, 4) 
-// import delimited "C:\Data\PacFIN data\rdo_Stata_c5_full_v2.csv"
+// gen species = substr(selection, 5, 4) 
 
 ** Merge with historical data
 merge m:1 group_all set_month using `hist_data', keep(3)
-gen d_hist_selection = (hist_selection == species)
+gen d_hist_selection = (hist_selection == selection)
 
 ** Add addtional variables
 gen psdnclosured2 = psdnclosured - psdntotalclosured
@@ -347,6 +352,8 @@ lrtest B15 B14, force
 
 *****************************************************************************************************************************
 *** WITH HIST SELECTION!
+
+tab d_hist_selection
 
 **** Test constraint
 preserve
