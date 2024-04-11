@@ -15,7 +15,7 @@ save `port_area'
 ** Get historical choice
 import delimited "G:\Mi unidad\Data\Cluster\cluster_aggregates.csv", clear
 merge m:1 pacfin_port_code using `port_area', keep(3)
-keep if landing_year >= 2005 & landing_year <= 2014
+keep if landing_year >= 2000 & landing_year <= 2020
 collapse (sum) total_landings, by(group_all pacfin_species_code landing_month landing_year port_area_code)
 collapse (mean) mean_landings = total_landings, by(group_all pacfin_species_code landing_month port_area_code)
 bysort group_all landing_month (mean_landings): keep if  mean_landings==mean_landings[_N]
@@ -345,7 +345,6 @@ lrtest B14 B12, force
 // 	estimates save ${results}nlogit_FULL_C5_v15.ster, replace
 // restore
 estimates use ${results}nlogit_FULL_C5_v15.ster
-matrix start=e(b)
 estimates store B15
 lrtest B15 B14, force
 
@@ -354,6 +353,7 @@ lrtest B15 B14, force
 *** WITH HIST SELECTION!
 
 tab d_hist_selection
+
 
 **** Test constraint
 preserve
@@ -370,10 +370,10 @@ preserve
  			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
  		base("No-Participation") case(fished_haul) constraints(1 3) vce(cluster fished_vessel_anon) ///
  		from(start, skip)
-	estimates save ${results}nlogit_FULL_C5_v16.ster, replace
+	*estimates save ${results}nlogit_FULL_C5_v16.ster, replace
+	estimates save ${results}nlogit_FULL_C5_v16.ster
 restore
 estimates use ${results}nlogit_FULL_C5_v16.ster
-matrix start=e(b)
 estimates store B16
 lrtest B16 B14, force
 
