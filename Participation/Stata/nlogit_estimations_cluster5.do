@@ -355,7 +355,29 @@ lrtest B15 B14, force
 tab d_hist_selection
 
 
-**** Test constraint
+// preserve
+// 	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
+// 	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
+// 	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
+// 	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
+// 	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
+// 	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
+// 	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
+// 	constraint 3 [PART_CRAB]mean_price = 0
+//  	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+//  			psdnclosured d_hist_selection unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
+//  			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+//  		base("No-Participation") case(fished_haul) constraints(1 3) vce(cluster fished_vessel_anon) ///
+//  		from(start, skip)
+// 	*estimates save ${results}nlogit_FULL_C5_v16.ster, replace
+// 	estimates save ${results}nlogit_FULL_C5_v16.ster
+// restore
+// estimates use ${results}nlogit_FULL_C5_v16.ster
+// matrix start=e(b)
+estimates store B16
+lrtest B16 B14, force
+
+
 preserve
 	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
 	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
@@ -368,14 +390,13 @@ preserve
  	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
  			psdnclosured d_hist_selection unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
  			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
- 		base("No-Participation") case(fished_haul) constraints(1 3) vce(cluster fished_vessel_anon) ///
+ 		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_anon) ///
  		from(start, skip)
-	*estimates save ${results}nlogit_FULL_C5_v16.ster, replace
-	estimates save ${results}nlogit_FULL_C5_v16.ster
+	estimates save ${results}nlogit_FULL_C5_v17.ster
 restore
-estimates use ${results}nlogit_FULL_C5_v16.ster
-estimates store B16
-lrtest B16 B14, force
+estimates use ${results}nlogit_FULL_C5_v17.ster
+estimates store B17
+lrtest B17 B16, force
 
 
 *****************************************************************************************************************************
