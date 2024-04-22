@@ -8,16 +8,36 @@ cd $path
 clear all
 
 
+import delimited "C:\GitHub\EconAnalysis\Data\Ports\ports_area_and_name_codes.csv", varnames(1) clear
+tempfile port_area
+save `port_area'
+
+** Get historical choice
+import delimited "G:\Mi unidad\Data\Cluster\cluster_aggregates.csv", clear
+merge m:1 pacfin_port_code using `port_area', keep(3)
+keep if landing_year >= 2000 & landing_year <= 2020
+collapse (sum) total_landings, by(group_all pacfin_species_code landing_month landing_year port_area_code)
+collapse (mean) mean_landings = total_landings, by(group_all pacfin_species_code landing_month port_area_code)
+bysort group_all landing_month (mean_landings): keep if  mean_landings==mean_landings[_N]
+tab group_all landing_month
+keep landing_month group_all pacfin_species_code port_area_code
+gen  hist_selection = port_area_code + "-" + pacfin_species_code 
+drop pacfin_species_code port_area_code
+rename landing_month set_month
+tempfile hist_data
+save `hist_data'
+
+
 ** Import data
-// import delimited "C:\Data\PacFIN data\rdo_Stata_c4_full.csv"
-// save "C:\Data\PacFIN data\rdo_Stata_c4_full.dta", replace
-use "C:\Data\PacFIN data\rdo_Stata_c4_full.dta", clear
+import delimited "G:\Mi unidad\Data\Anonymised data\rdo_Stata_c4_full_noid.csv", clear
+gen group_all = 5
+
+
+** Merge with historical data
+merge m:1 group_all set_month using `hist_data', keep(3)
+gen d_hist_selection = (hist_selection == selection)
 
 ** Add addtional variables
-merge m:1 selection set_month using "dbp_month.dta"
-drop if _merge == 2
-replace hist_selection = 0 if _merge == 1
-drop _merge
 gen psdnclosured2 = psdnclosured - psdntotalclosured
 gen psdnclosure2 = psdnclosure - psdntotalclosure
 replace mean_price2 = mean_price2 / 1000
@@ -79,6 +99,30 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 ** Estimate nested logit **
 ***************************
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 *** Base model to compute R2
 set processors 4
 asclogit fished, base("No-Participation")  alternatives(selection) case(fished_haul) 
@@ -101,12 +145,76 @@ nlogitgen partp = port(PART: CMCK | MSQD | PSDN | NANC | TUNA, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 
 
-// nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 		psdnclosured btnaclosured unem_rate dummy_last_day d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
-// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
-// estimates save ${results}nlogit_FULL_BTNA_2.ster, replace
-estimates use ${results}nlogit_FULL_BTNA_2.ster
+
+
+
+************************
+*** Run nested logit ***
+************************
+*preserve 
+*	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
+*	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
+*	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
+*	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
+*	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
+*	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
+*	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
+*	nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+*			psdnclosured btnaclosured dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+*			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+*		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
+*	estimates save ${results}nlogit_FULL_c4_22042024.ster, replace
+*restore
+estimates use ${results}nlogit_FULL_c4_22042024.ster
+matrix start=e(b)
+estimates store B1
+estimates describe B1
+estimates replay B1
+di "R2-McFadden = " 1 - (e(ll)/ll0)
+estadd scalar r2 = 1 - (e(ll)/ll0): B1
+lrtest base B1, force
+estadd scalar lr_p = r(p): B1
+estat ic, all
+matrix S = r(S)
+estadd scalar aic = S[1,5]: B1
+estadd scalar bic = S[1,6]: B1
+estadd scalar aicc = S[1,7]: B1
+estadd scalar caic = S[1,8]: B1
+preserve
+	qui predict phat
+	by fished_haul, sort: egen max_prob = max(phat) 
+	drop if max_prob != phat
+	by fished_haul, sort: gen nvals = _n == 1 
+	count if nvals
+	dis _N
+	gen selection_hat = 1
+	egen count1 = total(fished)
+	dis count1/_N*100 "%"
+	estadd scalar perc1 = count1/_N*100: B1
+	drop if selection == "No-Participation"
+	egen count2 = total(fished)
+	dis _N
+	dis count2/_N*100 "%"
+	estadd scalar perc2 = count2/_N*100: B1
+restore
+
+
+preserve 
+	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
+	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
+	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
+	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
+	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
+	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
+	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
+	nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured hist_selection unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) ///
+ 		from(start, skip)
+	estimates save ${results}nlogit_FULL_c4_hist_22042024.ster, replace
+restore
+estimates use ${results}nlogit_FULL_c4_hist_22042024.ster
 estimates store B2
 estimates describe B2
 estimates replay B2
@@ -137,106 +245,16 @@ preserve
 	dis count2/_N*100 "%"
 	estadd scalar perc2 = count2/_N*100: B2
 restore
-preserve
-	replace dummy_last_day = 0
-	replace dummy_prev_days = 0
-	replace dummy_prev_year_days = 0
-	replace dummy_prev_days_port = 0
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc3 = count1/_N*100: B2
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc4 = count2/_N*100: B2
-restore
 
-
-*** Include lenght
-
-
-gen d_cog_length = dist_to_cog * vessellength 
-gen d_catch_length = dist_port_to_catch_area_zero * vessellength
-gen wind_length = wind_max_220_mh * vessellength
-
-// nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero wind_length d_cog_length d_catch_length ///
-// 		psdnclosured btnaclosured unem_rate dummy_last_day d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
-// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_id)
-// estimates save ${results}nlogit_FULL_BTNA_3.ster, replace
-estimates use ${results}nlogit_FULL_BTNA_3.ster
-estimates store B3
-estimates describe B3
-estimates replay B3
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): B3
-lrtest B2 B3, force
-estadd scalar lr_p = r(p): B3
-estat ic, all
-matrix S = r(S)
-estadd scalar aic = S[1,5]: B3
-estadd scalar bic = S[1,6]: B3
-estadd scalar aicc = S[1,7]: B3
-estadd scalar caic = S[1,8]: B3
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: B3
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc2 = count2/_N*100: B3
-restore
-preserve
-	replace dummy_last_day = 0
-	replace dummy_prev_days = 0
-	replace dummy_prev_year_days = 0
-	replace dummy_prev_days_port = 0
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc3 = count1/_N*100: B3
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc4 = count2/_N*100: B3
-restore
 
 
 
 *** Save model
 
-esttab  B2 B3 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_Final_BTNA_length.rtf", ///
+esttab  B1 B2 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_c4.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 perc3 perc4 lr_p aicc caic, fmt(0 3) ///
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" ///
 			"Predicted choices (%) -- No SD" "- Excl. No-Participation (%) -- No SD" "LR-test" "AICc" "CAIC" ))  ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
- 
-
-
-
