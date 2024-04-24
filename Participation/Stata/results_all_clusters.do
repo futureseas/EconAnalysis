@@ -112,7 +112,7 @@ preserve
 	replace dummy_prev_days = 0
 	replace dummy_prev_year_days = 0
 	replace dummy_prev_days_port = 0
-	replace hist_selection = 0
+	replace d_hist_selection = 0
 	qui predict phat
 	by fished_haul, sort: egen max_prob = max(phat) 
 	drop if max_prob != phat
@@ -229,7 +229,7 @@ preserve
 	replace dummy_prev_days = 0
 	replace dummy_prev_year_days = 0
 	replace dummy_prev_days_port = 0
-	replace hist_selection = 0
+	replace d_hist_selection = 0
 	qui predict phat
 	by fished_haul, sort: egen max_prob = max(phat) 
 	drop if max_prob != phat
