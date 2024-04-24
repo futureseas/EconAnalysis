@@ -47,13 +47,13 @@ replace d_missing_p = d_missing_p2 if mean_price > 50
 replace mean_price = mean_price2 if mean_price > 50
 
 
-gen d_c   = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 0) 
-gen d_d   = (d_missing_p2 == 0 & d_missing == 0 & d_missing_d == 1) 
-gen d_p   = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 0) 
-gen d_cd  = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 1) 
-gen d_pc  = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 0) 
-gen d_pd  = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 1) 
-gen d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1) 
+gen d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
+gen d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
+gen d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
+gen d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
+gen d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
+gen d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
+gen d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
 qui tabulate set_month, generate(month)
 
 
@@ -99,34 +99,11 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 ** Estimate nested logit **
 ***************************
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 *** Base model to compute R2
 set processors 4
 asclogit fished, base("No-Participation")  alternatives(selection) case(fished_haul) 
 estimates store base
+estimates save ${results}nlogit_C4_base.ster, replace
 scalar ll0 = e(ll)
 
 *** Set nested logit
@@ -145,26 +122,16 @@ nlogitgen partp = port(PART: CMCK | MSQD | PSDN | NANC | TUNA, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 
 
-
-
+save "G:\Mi unidad\Data\Anonymised data\part_model_c4.dta"
 
 ************************
 *** Run nested logit ***
 ************************
-*preserve 
-*	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
-*	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
-*	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
-*	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
-*	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
-*	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
-*	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
-*	nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+* nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 *			psdnclosured btnaclosured dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
 *			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 *		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
 *	estimates save ${results}nlogit_FULL_c4_22042024.ster, replace
-*restore
 estimates use ${results}nlogit_FULL_c4_22042024.ster
 matrix start=e(b)
 estimates store B1
@@ -199,21 +166,12 @@ preserve
 restore
 
 
-preserve 
-	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
-	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
-	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
-	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
-	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
-	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
-	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
-	nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			psdnclosured btnaclosured hist_selection unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
-			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) ///
- 		from(start, skip)
-	estimates save ${results}nlogit_FULL_c4_hist_22042024.ster, replace
-restore
+// nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 			psdnclosured btnaclosured d_hist_selection unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+// 			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) ///
+//  		from(start, skip)
+estimates save ${results}nlogit_FULL_c4_hist_22042024.ster, replace
 estimates use ${results}nlogit_FULL_c4_hist_22042024.ster
 estimates store B2
 estimates describe B2
@@ -251,7 +209,7 @@ restore
 
 *** Save model
 
-esttab  B1 B2 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_c4.rtf", ///
+esttab  B1 B2 using "G:\Mi unidad\Tables\Participation\nested_logit_FULL_${S_DATE}_c4.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 perc3 perc4 lr_p aicc caic, fmt(0 3) ///

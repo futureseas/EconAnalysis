@@ -127,6 +127,7 @@ tab check_if_choice
 set processors 4
 asclogit fished, base("No-Participation")  alternatives(selection) case(fished_haul) 
 estimates store base
+estimates save ${results}nlogit_C5_base.ster, replace
 scalar ll0 = e(ll)
 
 *** Set nested logit
@@ -146,6 +147,18 @@ nlogitgen partp = port(PART: MSQD | PSDN | ALBC | CMCK | NANC, PART_CRAB: DCRB, 
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 constraint 1 [/port]DCRB_tau = 1
 constraint 2 [/port]CMCK_tau = 1
+
+
+preserve
+	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0)
+	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1)
+	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0)
+	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1)
+	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0)
+	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1)
+	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1)
+	save "G:\Mi unidad\Data\Anonymised data\part_model_c5.dta"
+restore
 
 
 ************************
