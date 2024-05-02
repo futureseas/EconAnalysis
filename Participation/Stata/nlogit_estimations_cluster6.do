@@ -101,20 +101,10 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 
 ** Filter model 
 
-drop if selection == "NPS-PINK" | selection == "NPS-SOCK" 
-
-
-// 		selection == "LAA-MSQD" | selection == "SFA-MSQD" | /// 
-// 		selection == "CBA-MSQD" | selection == "MRA-MSQD" | ///
-// 		selection == "NPA-MSQD" | ///		
-// 	    selection == "CLO-PSDN" | selection == "CWA-PSDN" | ///
-// 		selection == "CLW-PSDN" | selection == "LAA-PSDN" | ///
-// 		selection == "CWA-ALBC" | ///
-// 		selection == "LAA-CMCK" | selection == "SBA-CMCK" | ///
-// 		selection == "LAA-NANC" | selection == "No-Participation" | ///
-// 		selection == "CLW-DCRB" | selection == "CWA-DCRB"
-
-
+keep if selection == "CWA-NANC" | selection == "CLO-PSDN" | ///
+		selection == "CLW-PSDN" | selection == "CWA-PSDN" | ///
+		selection == "CLO-NANC" | selection == "CWA-DCRB" | ///
+		selection == "CLW-NANC" | selection == "No-Participation"
 
 
 ** Drop cases with no choice selected
@@ -138,27 +128,28 @@ cap label drop lb_port
 cap drop partp
 cap label drop lb_partp
 nlogitgen port = selection( ///
-        PSDN: CBA-PSDN | CLO-PSDN | CLW-PSDN | CWA-PSDN, ///
-        XMCK: CLO-CMCK | CLO-JMCK, ///
+        PSDN: CLO-PSDN | CLW-PSDN | CWA-PSDN, ///
         NANC: CLO-NANC | CLW-NANC | CWA-NANC, ///
         DCRB: CWA-DCRB , ///
         NOPORT: No-Participation) 
-nlogitgen partp = port(PART: PSDN | XMCK | NANC | DCRB, NOPART: NOPORT)
+nlogitgen partp = port(PART: PSDN | NANC, CRAB_PART: DCRB, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 // constraint 1 [/port]DCRB_tau = 1
 // constraint 2 [/port]CMCK_tau = 1
 
-save "G:\Mi unidad\Data\Anonymised data\part_model_c5.dta", replace
+save "G:\Mi unidad\Data\Anonymised data\part_model_c6.dta", replace
 
+
+tab selection
 
 
 ************************
 *** Run nested logit ***
 ************************
 
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	psdnclosured dcrbclosurewad dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd /// 
-	|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	psdnclosured dcrbclosurewad waclosured dummy_last_day unem_rate d_d /// 
+	|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
 
 
