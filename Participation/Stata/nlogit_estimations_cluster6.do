@@ -147,10 +147,12 @@ tab selection
 *** Run nested logit ***
 ************************
 
-nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	psdnclosured dcrbclosurewad waclosured dummy_last_day unem_rate d_d /// 
-	|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	dcrbclosurewad dummy_last_day unem_rate d_d /// 
+	|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
+
+
 
 
 
