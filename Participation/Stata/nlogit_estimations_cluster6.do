@@ -104,7 +104,8 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 keep if selection == "CWA-NANC" | selection == "CLO-PSDN" | ///
 		selection == "CLW-PSDN" | selection == "CWA-PSDN" | ///
 		selection == "CLO-NANC" | selection == "CWA-DCRB" | ///
-		selection == "CLW-NANC" | selection == "No-Participation"
+		selection == "CLW-NANC" | selection == "CBA-PSDN" | ///
+		selection == "No-Participation"
 
 
 ** Drop cases with no choice selected
@@ -128,7 +129,7 @@ cap label drop lb_port
 cap drop partp
 cap label drop lb_partp
 nlogitgen port = selection( ///
-        PSDN: CLO-PSDN | CLW-PSDN | CWA-PSDN, ///
+        PSDN: CLO-PSDN | CLW-PSDN | CWA-PSDN | CBA-PSDN, ///
         NANC: CLO-NANC | CLW-NANC | CWA-NANC, ///
         DCRB: CWA-DCRB , ///
         NOPORT: No-Participation) 
@@ -148,10 +149,12 @@ tab selection
 ************************
 
 nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	dcrbclosurewad dummy_last_day unem_rate d_d /// 
+	dcrbclosurewad waclosured dummy_last_day unem_rate d_d /// 
 	|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
 
+
+**** Problem with including sardine closure!
 
 
 
