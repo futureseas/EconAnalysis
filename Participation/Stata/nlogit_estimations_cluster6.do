@@ -101,11 +101,16 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 
 ** Filter model 
 
+keep if waclosured == 0 // 98% of the observations
+tab psdnclosured
+
 keep if selection == "CWA-NANC" | selection == "CLO-PSDN" | ///
 		selection == "CLW-PSDN" | selection == "CWA-PSDN" | ///
 		selection == "CLO-NANC" | selection == "CWA-DCRB" | ///
 		selection == "CLW-NANC" | selection == "CBA-PSDN" | ///
+		selection == " " | ///
 		selection == "No-Participation"
+
 
 
 ** Drop cases with no choice selected
@@ -124,6 +129,7 @@ estimates save ${results}nlogit_C6_base.ster, replace
 scalar ll0 = e(ll)
 
 *** Set nested logit
+
 cap drop port
 cap label drop lb_port
 cap drop partp
@@ -141,16 +147,14 @@ nlogittree selection port partp, choice(fished) case(fished_haul)
 save "G:\Mi unidad\Data\Anonymised data\part_model_c6.dta", replace
 
 
-tab selection
-
 
 ************************
 *** Run nested logit ***
 ************************
 
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	dcrbclosurewad waclosured dummy_last_day unem_rate d_d /// 
-	|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	dcrbclosurewad dummy_last_day unem_rate d_d /// 
+	|| partp: psdnclosure mean_price, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
 
 
