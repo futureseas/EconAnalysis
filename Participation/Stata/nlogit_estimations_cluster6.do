@@ -108,7 +108,7 @@ keep if selection == "CWA-NANC" | selection == "CLO-PSDN" | ///
 		selection == "CLW-PSDN" | selection == "CWA-PSDN" | ///
 		selection == "CLO-NANC" | selection == "CWA-DCRB" | ///
 		selection == "CLW-NANC" | selection == "CBA-PSDN" | ///
-		selection == " " | ///
+		selection == "NPS-SOCK" | ///
 		selection == "No-Participation"
 
 
@@ -138,8 +138,9 @@ nlogitgen port = selection( ///
         PSDN: CLO-PSDN | CLW-PSDN | CWA-PSDN | CBA-PSDN, ///
         NANC: CLO-NANC | CLW-NANC | CWA-NANC, ///
         DCRB: CWA-DCRB , ///
+        SOCK: NPS-SOCK, ///
         NOPORT: No-Participation) 
-nlogitgen partp = port(PART: PSDN | NANC, CRAB_PART: DCRB, NOPART: NOPORT)
+nlogitgen partp = port(PART: PSDN | NANC, CRAB_PART: DCRB, SLMN_PART: SOCK, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 // constraint 1 [/port]DCRB_tau = 1
 // constraint 2 [/port]CMCK_tau = 1
@@ -156,9 +157,11 @@ nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_ze
 	dcrbclosurewad dummy_last_day unem_rate d_d /// 
 	|| partp: psdnclosure mean_price, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
+estimates save ${results}nlogit_FULL_C6.ster
 
 
-**** Problem with including sardine closure!
+
+WORK FROM HERE
 
 
 
