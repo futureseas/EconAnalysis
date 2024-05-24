@@ -130,7 +130,7 @@ scalar ll0 = e(ll)
 
 *** Set nested logit
 
-** JMCK AND CMCK have to be separated, or add a constraint
+** JMCK AND CMCK have to be separated by adding a constraint (seoarate nest did not work)
 
 cap drop port
 cap label drop lb_port
