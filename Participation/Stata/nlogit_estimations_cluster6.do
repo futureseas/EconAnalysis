@@ -106,7 +106,7 @@ keep if selection == "CWA-NANC" | selection == "CLO-PSDN" | ///
 		selection == "CLO-NANC" | selection == "CWA-DCRB" | ///
 		selection == "CLW-NANC" | selection == "CBA-PSDN" | ///
 		selection == "NPS-SOCK" | selection == "CLO-CMCK" | ///
-		selection == "CLO-JMCK" | DELETE selection == "NPS-PINK" | ///
+		selection == "CLO-JMCK" | ///
 		selection == "No-Participation"
 
 tab waclosured
@@ -141,7 +141,7 @@ nlogitgen port = selection( ///
         NANC: CLO-NANC | CLW-NANC | CWA-NANC, ///
         OMCK: CLO-CMCK | CLO-JMCK, ///
         DCRB: CWA-DCRB, ///
-        SLMN: NPS-SOCK | NPS-PINK, ///
+        SLMN: NPS-SOCK, ///
         NOPORT: No-Participation) 
 nlogitgen partp = port(PART: PSDN | NANC | OMCK, CRAB_PART: DCRB, SLMN_PART: SLMN, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
@@ -160,7 +160,7 @@ nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_ze
 	dcrbclosurewad dummy_last_day unem_rate d_d /// 
 	|| partp: psdnclosure mean_price, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon)
-estimates save ${results}nlogit_FULL_C6_v4.ster
+estimates save ${results}nlogit_FULL_C6.ster, replace
 
 
 
