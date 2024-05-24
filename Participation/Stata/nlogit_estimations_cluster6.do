@@ -139,14 +139,13 @@ cap label drop lb_partp
 nlogitgen port = selection( ///
         PSDN: CLO-PSDN | CLW-PSDN | CWA-PSDN | CBA-PSDN, ///
         NANC: CLO-NANC | CLW-NANC | CWA-NANC, ///
-        CMCK: CLO-CMCK, ///
-        JMCK: CLO-JMCK, ///
+        OMCK: CLO-CMCK | CLO-JMCK, ///
         DCRB: CWA-DCRB, ///
         SOCK: NPS-SOCK, ///
         NOPORT: No-Participation) 
 nlogitgen partp = port(PART: PSDN | NANC | JMCK | CMCK, CRAB_PART: DCRB, SLMN_PART: SOCK, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
-// constraint 1 [/port]DCRB_tau = 1
+constraint 1 [/port]OMCK_tau = 1
 // constraint 2 [/port]CMCK_tau = 1
 
 save "G:\Mi unidad\Data\Anonymised data\part_model_c6.dta", replace
