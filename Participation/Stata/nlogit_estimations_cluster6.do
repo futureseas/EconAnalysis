@@ -106,7 +106,7 @@ keep if selection == "CWA-NANC" | selection == "CLO-PSDN" | ///
 		selection == "CLO-NANC" | selection == "CWA-DCRB" | ///
 		selection == "CLW-NANC" | selection == "CBA-PSDN" | ///
 		selection == "NPS-SOCK" | selection == "CLO-CMCK" | ///
-		selection == "CLO-JMCK" | selection == "NPS-PINK" | ///
+		selection == "CLO-JMCK" | DELETE selection == "NPS-PINK" | ///
 		selection == "No-Participation"
 
 tab waclosured
@@ -141,10 +141,9 @@ nlogitgen port = selection( ///
         NANC: CLO-NANC | CLW-NANC | CWA-NANC, ///
         OMCK: CLO-CMCK | CLO-JMCK, ///
         DCRB: CWA-DCRB, ///
-        SOCK: NPS-SOCK, ///
-        PINK: NPS-PINK, ///
+        SLMN: NPS-SOCK | NPS-PINK, ///
         NOPORT: No-Participation) 
-nlogitgen partp = port(PART: PSDN | NANC | OMCK, CRAB_PART: DCRB, SLMN_PART: SOCK | PINK, NOPART: NOPORT)
+nlogitgen partp = port(PART: PSDN | NANC | OMCK, CRAB_PART: DCRB, SLMN_PART: SLMN, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 constraint 1 [/port]OMCK_tau = 1
 // constraint 2 [/port]CMCK_tau = 1
