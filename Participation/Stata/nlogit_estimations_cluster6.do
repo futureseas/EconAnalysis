@@ -101,17 +101,17 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 
 ** Filter model 
 
-keep if waclosured == 0 // 98% of the observations
-tab psdnclosured
-
 keep if selection == "CWA-NANC" | selection == "CLO-PSDN" | ///
 		selection == "CLW-PSDN" | selection == "CWA-PSDN" | ///
 		selection == "CLO-NANC" | selection == "CWA-DCRB" | ///
 		selection == "CLW-NANC" | selection == "CBA-PSDN" | ///
 		selection == "NPS-SOCK" | selection == "CLO-CMCK" | ///
-		selection == "CLO-JMCK" | selection == "No-Participation"
+		selection == "CLO-JMCK" | selection == "NPS-PINK" | ///
+		selection == "No-Participation"
 
-
+tab waclosured
+keep if waclosured == 0 // 98,8% of the observations
+tab psdnclosured
 
 ** Drop cases with no choice selected
 cap drop check_if_choice
@@ -142,8 +142,9 @@ nlogitgen port = selection( ///
         OMCK: CLO-CMCK | CLO-JMCK, ///
         DCRB: CWA-DCRB, ///
         SOCK: NPS-SOCK, ///
+        PINK: NPS-PINK, ///
         NOPORT: No-Participation) 
-nlogitgen partp = port(PART: PSDN | NANC | JMCK | CMCK, CRAB_PART: DCRB, SLMN_PART: SOCK, NOPART: NOPORT)
+nlogitgen partp = port(PART: PSDN | NANC | OMCK, CRAB_PART: DCRB, SLMN_PART: SOCK | PINK, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 constraint 1 [/port]OMCK_tau = 1
 // constraint 2 [/port]CMCK_tau = 1
@@ -159,8 +160,8 @@ save "G:\Mi unidad\Data\Anonymised data\part_model_c6.dta", replace
 nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 	dcrbclosurewad dummy_last_day unem_rate d_d /// 
 	|| partp: psdnclosure mean_price, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
-estimates save ${results}nlogit_FULL_C6_v2.ster
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon)
+estimates save ${results}nlogit_FULL_C6_v4.ster
 
 
 
