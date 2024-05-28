@@ -29,8 +29,8 @@ save `hist_data'
 
 
 ** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best -- V2)
-import delimited "G:\Mi unidad\Data\Anonymised data\rdo_Stata_c6_full_noid.csv", clear
-gen group_all = 6
+import delimited "G:\Mi unidad\Data\Anonymised data\rdo_Stata_c7_full_noid.csv", clear
+gen group_all = 7
 // gen species = substr(selection, 5, 4) 
 
 ** Merge with historical data
