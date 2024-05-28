@@ -146,7 +146,7 @@ nlogitgen port = selection( ///
 nlogitgen partp = port(PART: PSDN | NANC | OMCK, CRAB_PART: DCRB, SLMN_PART: SLMN, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 constraint 1 [/port]OMCK_tau = 1
-// constraint 2 [/port]CMCK_tau = 1
+constraint 2 [/port]NANC_tau = 1
 
 save "G:\Mi unidad\Data\Anonymised data\part_model_c6.dta", replace
 
@@ -171,7 +171,7 @@ tab d_hist_selection
 nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 	dcrbclosurewad d_hist_selection unem_rate d_d /// 
 	|| partp: psdnclosure mean_price, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
+	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_anon) from(start, skip)
 estimates save ${results}nlogit_FULL_C6_hist.ster, replace
 estimates use ${results}nlogit_FULL_C6_hist.ster
 estimates store B2
