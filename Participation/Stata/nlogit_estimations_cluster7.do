@@ -13,7 +13,8 @@ tempfile port_area
 save `port_area'
 
 ** Get historical choice
-import delimited "G:\Mi unidad\Data\Cluster\cluster_aggregates.csv", clear
+// import delimited "G:\Mi unidad\Data\Cluster\cluster_aggregates.csv", clear
+import delimited "H:\My Drive\Data\Cluster\cluster_aggregates.csv", clear
 merge m:1 pacfin_port_code using `port_area', keep(3)
 keep if landing_year >= 2000 & landing_year <= 2020
 collapse (sum) total_landings, by(group_all pacfin_species_code landing_month landing_year port_area_code)
@@ -29,7 +30,8 @@ save `hist_data'
 
 
 ** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best -- V2)
-import delimited "G:\Mi unidad\Data\Anonymised data\rdo_Stata_c7_full_noid.csv", clear
+// import delimited "G:\Mi unidad\Data\Anonymised data\rdo_Stata_c7_full_noid.csv", clear
+import delimited "H:\My Drive\Data\Anonymised data\rdo_Stata_c7_full_noid.csv", clear
 gen group_all = 7
 // gen species = substr(selection, 5, 4) 
 
@@ -100,17 +102,21 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 ***************************
 
 ** Filter model 
+keep if ///
+selection == "SBA-MSQD" | /// 
+selection == "SBA-NANC" | /// 
+selection == "LAA-MSQD" | /// 
+selection == "MNA-MSQD" | /// 
+selection == "SDA-NANC" | /// 
+selection == "LAA-CMCK" | /// 
+selection == "LAA-PSDN" | /// 
+selection == "SFA-BLCK" | ///
+selection == "SFA-MSQD" | ///
+selection == "MNA-CMCK" | ///
+selection == "MNA-SMLT" | ///
+selection == "MNA-PSDN" | ///
+selection == "No-Participation"
 
-keep if selection == "CWA-NANC" | selection == "CLO-PSDN" | ///
-		selection == "CLW-PSDN" | selection == "CWA-PSDN" | ///
-		selection == "CLO-NANC" | selection == "CWA-DCRB" | ///
-		selection == "CLW-NANC" | selection == "CBA-PSDN" | ///
-		selection == "NPS-SOCK" | selection == "CLO-CMCK" | ///
-		selection == "CLO-JMCK" | ///
-		selection == "No-Participation"
-
-tab waclosured
-keep if waclosured == 0 // 98,8% of the observations
 tab psdnclosured
 
 ** Drop cases with no choice selected
@@ -125,43 +131,41 @@ tab check_if_choice
 set processors 4
 asclogit fished, base("No-Participation")  alternatives(selection) case(fished_haul) 
 estimates store base
-estimates save ${results}nlogit_C6_base.ster, replace
+estimates save ${results}nlogit_C7_base.ster, replace
 scalar ll0 = e(ll)
 
 *** Set nested logit
-
-** JMCK AND CMCK have to be separated by adding a constraint (seoarate nest did not work)
-
 cap drop port
 cap label drop lb_port
 cap drop partp
 cap label drop lb_partp
 nlogitgen port = selection( ///
-        PSDN: CLO-PSDN | CLW-PSDN | CWA-PSDN | CBA-PSDN, ///
-        NANC: CLO-NANC | CLW-NANC | CWA-NANC, ///
-        OMCK: CLO-CMCK | CLO-JMCK, ///
-        DCRB: CWA-DCRB, ///
-        SLMN: NPS-SOCK, ///
-        NOPORT: No-Participation) 
-nlogitgen partp = port(PART: PSDN | NANC | OMCK, CRAB_PART: DCRB, SLMN_PART: SLMN, NOPART: NOPORT)
+	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | SFA-MSQD, ///
+	NANC: SBA-NANC | SDA-NANC, /// 
+	CMCK: LAA-CMCK | MNA-CMCK, /// 
+	PSDN: LAA-PSDN | MNA-PSDN, ///
+	SMLT: MNA-SMLT, /// 
+	BLCK: SFA-BLCK, ///
+	NOPORT: No-Participation) 
+nlogitgen partp = port(PART: MSQD | NANC | CMCK | PSDN | SMLT, PART_RCKF: BLCK, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
-constraint 1 [/port]OMCK_tau = 1
-constraint 2 [/port]NANC_tau = 1
+// constraint 1 [/port]OMCK_tau = 1
+// constraint 2 [/port]NANC_tau = 1
 
-save "G:\Mi unidad\Data\Anonymised data\part_model_c6.dta", replace
-
+/// save "G:\Mi unidad\Data\Anonymised data\part_model_c7.dta", replace
+save "H:\My Drive\Data\Anonymised data\part_model_c7.dta", replace
 
 
 ************************
 *** Run nested logit ***
 ************************
 
-// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 	dcrbclosurewad dummy_last_day unem_rate d_d /// 
-// 	|| partp: psdnclosure mean_price, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon)
-// estimates save ${results}nlogit_FULL_C6.ster, replace
-estimates use ${results}nlogit_FULL_C6.ster
+nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	psdnclosured dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd /// 
+	|| partp: , base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
+// estimates save ${results}nlogit_FULL_C7.ster, replace
+estimates use ${results}nlogit_FULL_C7.ster
 matrix start=e(b)
 estimates store B1
 lrtest base B1, force
