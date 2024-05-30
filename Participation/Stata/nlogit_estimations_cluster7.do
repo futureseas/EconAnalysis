@@ -115,6 +115,9 @@ selection == "SFA-MSQD" | ///
 selection == "MNA-CMCK" | ///
 selection == "MNA-SMLT" | ///
 selection == "MNA-PSDN" | ///
+selection == "MNA-JMCK" | ///
+selection == "MRA-MSQD" | ///
+selection == "LAA-JMCK" | ///
 selection == "No-Participation"
 
 tab psdnclosured
@@ -140,14 +143,15 @@ cap label drop lb_port
 cap drop partp
 cap label drop lb_partp
 nlogitgen port = selection( ///
-	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | SFA-MSQD, ///
+	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | SFA-MSQD | MRA-MSQD, ///
 	NANC: SBA-NANC | SDA-NANC, /// 
 	CMCK: LAA-CMCK | MNA-CMCK, /// 
 	PSDN: LAA-PSDN | MNA-PSDN, ///
 	SMLT: MNA-SMLT, /// 
 	BLCK: SFA-BLCK, ///
+	JMCK: MNA-JMCK | LAA-JMCK, ///
 	NOPORT: No-Participation) 
-nlogitgen partp = port(PART: MSQD | NANC | CMCK | PSDN | SMLT, PART_RCKF: BLCK, NOPART: NOPORT)
+nlogitgen partp = port(PART: MSQD | NANC | CMCK | PSDN | SMLT | JMCK, PART_RCKF: BLCK, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 // constraint 1 [/port]OMCK_tau = 1
 // constraint 2 [/port]NANC_tau = 1
@@ -160,11 +164,13 @@ save "H:\My Drive\Data\Anonymised data\part_model_c7.dta", replace
 *** Run nested logit ***
 ************************
 
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 	psdnclosured dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd /// 
-	|| partp: , base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
+	|| partp: mean_price, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
 // estimates save ${results}nlogit_FULL_C7.ster, replace
+
+
 estimates use ${results}nlogit_FULL_C7.ster
 matrix start=e(b)
 estimates store B1

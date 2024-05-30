@@ -13,7 +13,7 @@ tempfile port_area
 save `port_area'
 
 ** Get historical choice
-import delimited "G:\Mi unidad\Data\Cluster\cluster_aggregates.csv", clear
+import delimited "H:\My Drive\Data\Cluster\cluster_aggregates.csv", clear
 merge m:1 pacfin_port_code using `port_area', keep(3)
 keep if landing_year >= 2000 & landing_year <= 2020
 collapse (sum) total_landings, by(group_all pacfin_species_code landing_month landing_year port_area_code)
@@ -29,7 +29,7 @@ save `hist_data'
 
 
 ** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best -- V2)
-import delimited "G:\Mi unidad\Data\Anonymised data\rdo_Stata_c6_full_noid.csv", clear
+import delimited "H:\My Drive\Data\Anonymised data\rdo_Stata_c6_full_noid.csv", clear
 gen group_all = 6
 // gen species = substr(selection, 5, 4) 
 
@@ -148,7 +148,7 @@ nlogittree selection port partp, choice(fished) case(fished_haul)
 constraint 1 [/port]OMCK_tau = 1
 constraint 2 [/port]NANC_tau = 1
 
-save "G:\Mi unidad\Data\Anonymised data\part_model_c6.dta", replace
+save "H:\My Drive\Data\Anonymised data\part_model_c6.dta", replace
 
 
 
