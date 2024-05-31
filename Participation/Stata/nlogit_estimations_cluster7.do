@@ -113,12 +113,13 @@ selection == "LAA-PSDN" | ///
 selection == "SFA-BLCK" | ///
 selection == "SFA-MSQD" | ///
 selection == "MNA-CMCK" | ///
-selection == "MNA-SMLT" | ///
 selection == "MNA-PSDN" | ///
 selection == "MNA-JMCK" | ///
 selection == "MRA-MSQD" | ///
 selection == "LAA-JMCK" | ///
 selection == "No-Participation"
+
+// selection == "MNA-SMLT" | ///
 
 tab psdnclosured
 
@@ -150,10 +151,12 @@ nlogitgen port = selection( ///
 	NANC: SBA-NANC | SDA-NANC, /// 
 	OMCK: LAA-CMCK | MNA-CMCK | MNA-JMCK | LAA-JMCK, /// 
 	PSDN: LAA-PSDN | MNA-PSDN, ///
-	SMLT: MNA-SMLT, /// 
 	BLCK: SFA-BLCK, ///
 	NOPORT: No-Participation) 
-nlogitgen partp = port(PART: MSQD | NANC | OMCK | PSDN | SMLT, PART_RCKF: BLCK, NOPART: NOPORT)
+
+	// SMLT: MNA-SMLT, /// 
+
+nlogitgen partp = port(PART: MSQD | NANC | OMCK | PSDN, PART_RCKF: BLCK, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 // constraint 1 [/port]OMCK_tau = 1
 // constraint 2 [/port]NANC_tau = 1
