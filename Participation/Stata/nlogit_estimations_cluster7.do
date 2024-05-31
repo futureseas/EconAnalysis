@@ -102,6 +102,7 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 ***************************
 
 ** Filter model 
+<<<<<<< Updated upstream
 keep if ///
 selection == "SBA-MSQD" | /// 
 selection == "SBA-NANC" | /// 
@@ -119,6 +120,16 @@ selection == "MNA-JMCK" | ///
 selection == "MRA-MSQD" | ///
 selection == "LAA-JMCK" | ///
 selection == "No-Participation"
+=======
+keep if selection == "LAA-PSDN" | selection == "MNA-PSDN" | ///
+	selection == "LAA-CMCK" | selection == "MNA-CMCK" | ///
+	selection == "LAA-JMCK" | selection == "MNA-JMCK" | ///
+	selection == "LAA-MSQD" | selection == "MNA-MSQD" | selection == "MRA-MSQD" | selection == "SBA-MSQD" | selection == "SFA-MSQD" | ///
+	selection == "MNA-NANC" | selection == "SBA-NANC" | selection == "SDA-NANC" | ///
+	selection == "MNA-SMLT" | ///
+	selection == "SFA-BLCK" | ///
+	selection == "No-Participation"
+>>>>>>> Stashed changes
 
 tab psdnclosured
 
@@ -138,11 +149,19 @@ estimates save ${results}nlogit_C7_base.ster, replace
 scalar ll0 = e(ll)
 
 *** Set nested logit
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 cap drop port
 cap label drop lb_port
 cap drop partp
 cap label drop lb_partp
+
+tab selection if fished == 1
+
 nlogitgen port = selection( ///
+<<<<<<< Updated upstream
 	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | SFA-MSQD | MRA-MSQD, ///
 	NANC: SBA-NANC | SDA-NANC, /// 
 	CMCK: LAA-CMCK | MNA-CMCK, /// 
@@ -155,6 +174,23 @@ nlogitgen partp = port(PART: MSQD | NANC | CMCK | PSDN | SMLT | JMCK, PART_RCKF:
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 // constraint 1 [/port]OMCK_tau = 1
 // constraint 2 [/port]NANC_tau = 1
+=======
+	PSDN: LAA-PSDN | MNA-PSDN, ///
+	OMCK: LAA-CMCK | MNA-CMCK | LAA-JMCK | MNA-JMCK, ///
+	MSQD: LAA-MSQD | MNA-MSQD |  MRA-MSQD | SBA-MSQD | SFA-MSQD, ///
+	NANC:  MNA-NANC | SBA-NANC | SDA-NANC, ///
+	SMLT: MNA-SMLT, ///
+	BLCK: SFA-BLCK, ///
+	NOPORT: No-Participation)
+
+
+nlogitgen partp = port(PART: PSDN | OMCK | MSQD | NANC | SMLT, RCKF_PART: BLCK , NOPART: NOPORT)
+nlogittree selection port partp, choice(fished) case(fished_haul) 
+constraint 1 [/port]OMCK_tau = 1
+constraint 2 [/port]NANC_tau = 1
+
+save "G:\Mi unidad\Data\Anonymised data\part_model_c7.dta", replace
+>>>>>>> Stashed changes
 
 /// save "G:\Mi unidad\Data\Anonymised data\part_model_c7.dta", replace
 save "H:\My Drive\Data\Anonymised data\part_model_c7.dta", replace
@@ -164,6 +200,7 @@ save "H:\My Drive\Data\Anonymised data\part_model_c7.dta", replace
 *** Run nested logit ***
 ************************
 
+<<<<<<< Updated upstream
 nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 	psdnclosured dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd /// 
 	|| partp: mean_price, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
@@ -171,6 +208,15 @@ nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_ze
 // estimates save ${results}nlogit_FULL_C7.ster, replace
 
 
+=======
+nlogit fished mean_avail  mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	psdnclosured dummy_last_day unem_rate d_d /// 
+	|| partp: , base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
+
+
+estimates save ${results}nlogit_FULL_C7.ster, replace
+>>>>>>> Stashed changes
 estimates use ${results}nlogit_FULL_C7.ster
 matrix start=e(b)
 estimates store B1
@@ -182,8 +228,8 @@ lrtest base B1, force
 // 	dcrbclosurewad d_hist_selection unem_rate d_d /// 
 // 	|| partp: psdnclosure mean_price, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
 // 	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_anon) from(start, skip)
-// estimates save ${results}nlogit_FULL_C6_hist.ster, replace
-estimates use ${results}nlogit_FULL_C6_hist.ster
+// estimates save ${results}nlogit_FULL_C7_hist.ster, replace
+estimates use ${results}nlogit_FULL_C7_hist.ster
 estimates store B2
 lrtest B1 B2, force
 
