@@ -158,7 +158,7 @@ nlogitgen partp = port(PART: MSQD | NANC | CMCK | PSDN | SMLT | JMCK, PART_RCKF:
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 // constraint 1 [/port]OMCK_tau = 1
 // constraint 2 [/port]NANC_tau = 1
-save "G:\Mi unidad\Data\Anonymised data\part_model_c7.dta", replace
+// save "G:\Mi unidad\Data\Anonymised data\part_model_c7.dta", replace
 
 
 ************************
