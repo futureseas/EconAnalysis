@@ -117,6 +117,7 @@ selection == "MNA-PSDN" | ///
 selection == "MNA-JMCK" | ///
 selection == "MRA-MSQD" | ///
 selection == "LAA-JMCK" | ///
+selection == "MNA-NANC" | ///
 selection == "No-Participation"
 
 // selection == "MNA-SMLT" | ///
@@ -148,7 +149,7 @@ tab selection if fished == 1
 
 nlogitgen port = selection( ///
 	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | SFA-MSQD | MRA-MSQD, ///
-	NANC: SBA-NANC | SDA-NANC, /// 
+	NANC: SBA-NANC | SDA-NANC | MNA-NANC, /// 
 	OMCK: LAA-CMCK | MNA-CMCK | MNA-JMCK | LAA-JMCK, /// 
 	PSDN: LAA-PSDN | MNA-PSDN, ///
 	BLCK: SFA-BLCK, ///
