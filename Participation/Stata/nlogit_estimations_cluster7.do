@@ -148,13 +148,12 @@ tab selection if fished == 1
 nlogitgen port = selection( ///
 	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | SFA-MSQD | MRA-MSQD, ///
 	NANC: SBA-NANC | SDA-NANC, /// 
-	CMCK: LAA-CMCK | MNA-CMCK, /// 
+	OMCK: LAA-CMCK | MNA-CMCK | MNA-JMCK | LAA-JMCK, /// 
 	PSDN: LAA-PSDN | MNA-PSDN, ///
 	SMLT: MNA-SMLT, /// 
 	BLCK: SFA-BLCK, ///
-	JMCK: MNA-JMCK | LAA-JMCK, ///
 	NOPORT: No-Participation) 
-nlogitgen partp = port(PART: MSQD | NANC | CMCK | PSDN | SMLT | JMCK, PART_RCKF: BLCK, NOPART: NOPORT)
+nlogitgen partp = port(PART: MSQD | NANC | OMCK | PSDN | SMLT, PART_RCKF: BLCK, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 // constraint 1 [/port]OMCK_tau = 1
 // constraint 2 [/port]NANC_tau = 1
