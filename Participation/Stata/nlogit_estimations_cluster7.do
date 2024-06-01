@@ -1,4 +1,6 @@
-global path "C:\GitHub\EconAnalysis\Participation\" 
+global path_google "G:\Mi unidad"
+global path_google "H:\My Drive"
+global path "C:\GitHub\EconAnalysis\Participation\"
 global results "${path}Results\"
 global figures "${results}Figures\"
 global tables "${results}Tables\"
@@ -14,7 +16,7 @@ save `port_area'
 
 ** Get historical choice
 // import delimited "G:\Mi unidad\Data\Cluster\cluster_aggregates.csv", clear
-import delimited "G:\Mi unidad\Data\Cluster\cluster_aggregates.csv", clear
+import delimited "${path_google}\Data\Cluster\cluster_aggregates.csv", clear
 merge m:1 pacfin_port_code using `port_area', keep(3)
 keep if landing_year >= 2000 & landing_year <= 2020
 collapse (sum) total_landings, by(group_all pacfin_species_code landing_month landing_year port_area_code)
@@ -30,8 +32,7 @@ save `hist_data'
 
 
 ** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best -- V2)
-// import delimited "G:\Mi unidad\Data\Anonymised data\rdo_Stata_c7_full_noid.csv", clear
-import delimited "G:\Mi unidad\Data\Anonymised data\rdo_Stata_c7_full_noid.csv", clear
+import delimited "${path_google}\Data\Anonymised data\rdo_Stata_c7_full_noid.csv", clear
 gen group_all = 7
 // gen species = substr(selection, 5, 4) 
 
@@ -161,7 +162,7 @@ nlogitgen partp = port(PART: MSQD | NANC | OMCK | PSDN, PART_RCKF: BLCK, NOPART:
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 // constraint 1 [/port]OMCK_tau = 1
 // constraint 2 [/port]NANC_tau = 1
-// save "G:\Mi unidad\Data\Anonymised data\part_model_c7.dta", replace
+// save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
 
 
 ************************
