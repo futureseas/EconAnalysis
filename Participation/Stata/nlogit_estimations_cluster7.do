@@ -1,4 +1,4 @@
-global path_google "G:\Mi unidad"
+//global path_google "G:\Mi unidad"
 global path_google "H:\My Drive"
 global path "C:\GitHub\EconAnalysis\Participation\"
 global results "${path}Results\"
