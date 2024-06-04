@@ -110,19 +110,16 @@ selection == "LAA-MSQD" | ///
 selection == "MNA-MSQD" | /// 
 selection == "SDA-NANC" | /// 
 selection == "LAA-CMCK" | /// 
+selection == "LAA-PSDN" | /// 
 selection == "SFA-MSQD" | ///
 selection == "MNA-CMCK" | ///
+selection == "MNA-PSDN" | ///
 selection == "MNA-JMCK" | ///
 selection == "MRA-MSQD" | ///
 selection == "LAA-JMCK" | ///
 selection == "MNA-NANC" | ///
 selection == "SFA-BLCK" | ///
 selection == "No-Participation"
-
-
-selection == "LAA-PSDN" | /// 
-selection == "MNA-PSDN" | ///
-
 
 drop if msqdclosure
 tab psdnclosured
@@ -154,6 +151,7 @@ nlogitgen port = selection( ///
 	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | SFA-MSQD | MRA-MSQD, ///
 	NANC: SBA-NANC | SDA-NANC | MNA-NANC, /// 
 	OMCK: LAA-CMCK | MNA-CMCK | MNA-JMCK | LAA-JMCK, /// 
+	PSDN: LAA-PSDN | MNA-PSDN, ///
 	BLCK: SFA-BLCK, /// 
 	NOPORT: No-Participation) 
 
@@ -169,7 +167,7 @@ constraint 1 [/port]SMLT_tau = 1
 *** Run nested logit ***
 ************************
 nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	psdnclosured  dummy_last_day  d_c d_d d_p d_cd d_pc d_pd d_pcd unem_rate /// 
+	 dummy_last_day  d_c d_d d_p d_cd d_pc d_pd d_pcd unem_rate /// 
 	|| partp:  , base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon)
 // estimates save ${results}nlogit_FULL_C7.ster, replace
