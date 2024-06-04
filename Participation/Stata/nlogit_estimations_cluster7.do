@@ -120,6 +120,8 @@ selection == "LAA-JMCK" | ///
 selection == "MNA-NANC" | ///
 selection == "No-Participation"
 
+VOLVER A AGREGAR
+
 // selection == "SFA-BLCK" | ///
 // selection == "MNA-SMLT" | ///
 
