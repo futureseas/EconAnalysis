@@ -110,16 +110,19 @@ selection == "LAA-MSQD" | ///
 selection == "MNA-MSQD" | /// 
 selection == "SDA-NANC" | /// 
 selection == "LAA-CMCK" | /// 
-selection == "LAA-PSDN" | /// 
 selection == "SFA-MSQD" | ///
 selection == "MNA-CMCK" | ///
-selection == "MNA-PSDN" | ///
 selection == "MNA-JMCK" | ///
 selection == "MRA-MSQD" | ///
 selection == "LAA-JMCK" | ///
 selection == "MNA-NANC" | ///
 selection == "SFA-BLCK" | ///
 selection == "No-Participation"
+
+
+selection == "LAA-PSDN" | /// 
+selection == "MNA-PSDN" | ///
+
 
 drop if msqdclosure
 tab psdnclosured
@@ -151,7 +154,6 @@ nlogitgen port = selection( ///
 	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | SFA-MSQD | MRA-MSQD, ///
 	NANC: SBA-NANC | SDA-NANC | MNA-NANC, /// 
 	OMCK: LAA-CMCK | MNA-CMCK | MNA-JMCK | LAA-JMCK, /// 
-	PSDN: LAA-PSDN | MNA-PSDN, ///
 	BLCK: SFA-BLCK, /// 
 	NOPORT: No-Participation) 
 
