@@ -1,17 +1,26 @@
 # ################################
 # ## Annual participation model ##
 # ################################
-# 
-# library(tidyverse)
-# library(data.table)
-# library(raster)
-# library(doParallel)
-# library(brms)
-# rm(list = ls())
-# gc()
-# 
+
+library(tidyverse)
+library(data.table)
+library(raster)
+library(doParallel)
+library(brms)
+rm(list = ls())
+gc()
+
 # 
 # ## Read data (vessel has more than 20 trips in a year to be considered active)
+
+c4 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c7_full_noid.csv")
+c5 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c7_full_noid.csv")
+c6 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c7_full_noid.csv")
+c7 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c7_full_noid.csv")
+
+
+
+
 # annual.part <- readRDS(file = "C:/Data/PacFIN data/vessel_part_year.RDS")
 # Tickets <- readRDS("C:/Data/PacFIN data/Tickets.rds")
 # 
@@ -382,8 +391,8 @@ gc()
 #                      ifelse(group_all == 7, 0.95 * mean_unem.CA,
 #                             NA))))) %>%
 #   dplyr::filter(group_all == 4 | group_all == 5 | group_all == 6 | group_all == 7) %>% drop_na()
-           
-           
+
+
 # ##  Estimate Bayesian model
 # 
 # logit_all <- brm(active_year ~ mean_SDM + mean_PRICE + mean_unem + PSDN.Closure + mean_HHI + 
@@ -405,7 +414,7 @@ gc()
 #             saveRDS(logit_all_2, "logit_all_2.RDS")
 # 
 # LOO(logit_all, logit_all_2)
-            
+
 logit_all_2 <- readRDS("logit_all_2.RDS")
 
 
