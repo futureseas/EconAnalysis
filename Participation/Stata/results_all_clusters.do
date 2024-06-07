@@ -3,6 +3,8 @@
 *** All cluster results for Discrete Choice Model ***
 *****************************************************
 
+*global google_path "H:\My Drive\"
+global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -15,7 +17,7 @@ clear all
 
 ****** Cluster 4 *****
 
-use "H:\My Drive\Data\Anonymised data\part_model_c4.dta", clear
+use "${google_path}Data\Anonymised data\part_model_c4.dta", clear
 
 estimates use ${results}nlogit_C4_base.ster
 estimates store base_C4 
@@ -133,7 +135,7 @@ restore
 
 ****** Cluster 5 *****
 
-use "H:\My Drive\Data\Anonymised data\part_model_c5.dta", clear
+use "${google_path}Data\Anonymised data\part_model_c5.dta", clear
 
 estimates use ${results}nlogit_C5_base.ster
 estimates store base_C5 
@@ -250,7 +252,7 @@ restore
 
 ************* Cluster 6
 
-use "H:\My Drive\Data\Anonymised data\part_model_c6.dta", clear
+use "${google_path}Data\Anonymised data\part_model_c6.dta", clear
 
 estimates use ${results}nlogit_C6_base.ster
 estimates store base_C6 
@@ -313,7 +315,7 @@ restore
 
 
 *** Save model
-esttab  C4_v1 C5_v1 C6_v1 using "H:\My Drive\Tables\Participation\nested_logit_${S_DATE}_all_clusters.rtf", ///
+esttab  C4_v1 C5_v1 C6_v1 using "${google_path}Tables\Participation\nested_logit_${S_DATE}_all_clusters_4.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 perc3 perc4 lr_p aicc caic, fmt(0 3) ///
