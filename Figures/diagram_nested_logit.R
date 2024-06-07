@@ -60,7 +60,7 @@ vessel2 <- Node$new("Vessel")
       btna <- tuna$AddChild("Bluefin")
   nopart <- vessel2$AddChild("No\nparticipate")
   
-SetGraphStyle(vessel2, rankdir = "TB")
+SetGraphStyle(vessel2, rankdir = "LR")
 SetEdgeStyle(vessel2, arrowhead = "vee", color = "grey35", penwidth = 2)
 SetNodeStyle(vessel2, style = "filled,rounded", shape = "box", fontcolor = "black",fillcolor = "lightgrey", 
              fontname = "helvetica", tooltip = GetDefaultTooltip)
