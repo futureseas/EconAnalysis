@@ -112,7 +112,7 @@ keep if selection == "SBA-MSQD" | selection == "MNA-MSQD" | ///
 		selection == "LAA-NANC" | selection == "No-Participation" | ///
 		selection == "CLW-DCRB" | selection == "CWA-DCRB"
 
-drop if msqdclosured // I THINK THIS HELP!!!
+drop if msqdclosure // I THINK THIS HELP!!!
 
 
 ** Drop cases with no choice selected
@@ -292,27 +292,29 @@ estat ic, all
 // 		from(start, skip)
 // 	estimates save ${results}nlogit_FULL_C5_v11.ster, replace
 // restore
+
+
 estimates use ${results}nlogit_FULL_C5_v11.ster
 matrix start=e(b)
 estimates store B11
 lrtest B11 B10, force
 
 *** Price in partp with price model
-// preserve
-// 	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
-// 	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
-// 	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
-// 	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
-// 	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
-// 	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
-// 	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
-// 	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 			psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
-// 			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-// 		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
-// 		from(start, skip)
-// 	estimates save ${results}nlogit_FULL_C5_v12.ster, replace
-// restore
+preserve
+	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
+	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
+	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
+	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
+	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
+	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
+	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
+	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
+			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
+		// from(start, skip)
+	estimates save ${results}nlogit_FULL_C5_v12.ster, replace
+restore
 estimates use ${results}nlogit_FULL_C5_v12.ster
 matrix start=e(b)
 estimates store B12
