@@ -13,22 +13,30 @@ gc()
 # 
 # ## Read data (vessel has more than 20 trips in a year to be considered active)
 
-c4 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c7_full_noid.csv")
-c5 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c7_full_noid.csv")
-c6 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c7_full_noid.csv")
-c7 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c7_full_noid.csv")
+c4 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c4_full_noid.csv") %>% 
+  filter(fished == 1) %>% mutate(group_all = 4) %>% filter(selection != "No-Participation")
+c5 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c5_full_v2_noid.csv") %>% 
+  filter(fished == 1) %>% mutate(group_all = 5) %>% dplyr::select(-c(DCRB.Closure.WA)) %>% 
+  filter(selection != "No-Participation")
+c6 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c6_full_noid.csv") %>% 
+  filter(fished == 1) %>% mutate(group_all = 6)  %>% filter(selection != "No-Participation")
+c7 <- read.csv("H:/My Drive/Data/Anonymised data/rdo_Stata_c7_full_noid.csv") %>% 
+  filter(fished == 1) %>% mutate(group_all = 7)  %>% filter(selection != "No-Participation")
+
+annual.part <- rbind(c4, c5, c6, c7) 
 
 
+# Check how many years each vessel participate
 
+n_years_active <- annual.part %>% group_by(fished_VESSEL_anon, set_year) %>%
+  summarize(total_catch = sum(mean_catch)) %>% dplyr::filter(total_catch > 0) %>%
+  mutate(active_year = 1) %>%
+  group_by(fished_VESSEL_anon) %>%
+  summarize(n_years = sum(active_year))
 
-# annual.part <- readRDS(file = "C:/Data/PacFIN data/vessel_part_year.RDS")
-# Tickets <- readRDS("C:/Data/PacFIN data/Tickets.rds")
-# 
-# 
-# # ## Check how many years each vessel participate
-# # n_years_active <- annual.part %>% group_by(VESSEL_NUM) %>%
-# #   summarize(n_years = sum(active_year))
-# # n_vessels_per_year <- annual.part %>% group_by(set_year) %>%
+#-------------------------------------------
+  
+# n_vessels_per_year <- annual.part %>% group_by(set_year) %>%
 # #   summarize(n_years = sum(active_year))
 # 
 # # # Plor participation
