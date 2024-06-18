@@ -1,5 +1,5 @@
-global path_google "G:\Mi unidad"
-//global path_google "H:\My Drive"
+//global path_google "G:\Mi unidad"
+global path_google "H:\My Drive"
 global path "C:\GitHub\EconAnalysis\Participation\"
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -34,6 +34,8 @@ save `hist_data'
 ** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best -- V2)
 import delimited "${path_google}\Data\Anonymised data\rdo_Stata_c7_full_noid.csv", clear
 gen group_all = 7
+
+hist set_month
 // gen species = substr(selection, 5, 4) 
 
 ** Merge with historical data
