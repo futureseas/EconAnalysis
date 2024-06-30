@@ -302,8 +302,7 @@ estimates store B11
 lrtest B11 B10, force
 
 *** Price in partp with price model
-preserve
-	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
+replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
 	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
 	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
 	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
@@ -318,11 +317,20 @@ preserve
 	// estimates save ${results}nlogit_FULL_C5_v12.ster, replace */
 
 	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			dummy_last_day unem_rate  /// 
+			dummy_last_day unem_rate d_d  d_pd d_cd d_pcd  /// 
 			|| partp: mean_price , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
-		// from(start, skip)
-restore
+		matrix start=e(b)
+
+	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			dummy_last_day unem_rate d_d d_cd msqdclosured /// 
+		|| partp: mean_price , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
+
+		
+		matrix start=e(b)
+
+
 
 
 estimates use ${results}nlogit_FULL_C5_v12.ster
