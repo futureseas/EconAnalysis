@@ -1,5 +1,5 @@
-*global google_path "H:\My Drive\"
-global google_path "G:\Mi unidad\"
+global google_path "H:\My Drive\"
+*global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -114,7 +114,7 @@ keep if selection == "SBA-MSQD" | selection == "MNA-MSQD" | ///
 		selection == "LAA-NANC" | selection == "No-Participation" | ///
 		selection == "CLW-DCRB" | selection == "CWA-DCRB"
 
-drop if msqdclosure // I THINK THIS HELP!!!
+* drop if msqdclosure // I THINK THIS HELP!!!
 
 
 ** Drop cases with no choice selected
@@ -310,13 +310,21 @@ preserve
 	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
 	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
 	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
-	nlogit fished  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+/* 	nlogit fished  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 			dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
 			|| partp: mean_price mean_avail psdnclosure, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
 		// from(start, skip)
-	// estimates save ${results}nlogit_FULL_C5_v12.ster, replace
+	// estimates save ${results}nlogit_FULL_C5_v12.ster, replace */
+
+	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			dummy_last_day unem_rate  /// 
+			|| partp: mean_price , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
+		// from(start, skip)
 restore
+
+
 estimates use ${results}nlogit_FULL_C5_v12.ster
 matrix start=e(b)
 estimates store B12
