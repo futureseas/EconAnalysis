@@ -325,18 +325,26 @@ sum d_c d_d d_p d_pc d_pd d_cd d_pcd
 	// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
 	// 	matrix start=e(b)
 
-	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			dummy_last_day unem_rate d_d d_cd msqdclosured /// 
-		|| partp: mean_price , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) // from(start, skip)
-	 estimates save ${results}nlogit_FULL_C5_v12_A.ster, replace 
+	// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	// 		dummy_last_day unem_rate d_d d_cd msqdclosured /// 
+	// 	|| partp: mean_price , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) // from(start, skip)
+	//  estimates save ${results}nlogit_FULL_C5_v12_A.ster, replace 
+	 estimates use ${results}nlogit_FULL_C5_v12_A.ster
+	matrix start=e(b)
+
 
 
 ** No convergence with dcrbclosurewad. Did not converge also if included in partp
-		
+tab msqdclosured
+
+tab psdnclosured
+tab waclosured 
+tab dcrbclosurewad
+ 		
 	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			dummy_last_day unem_rate d_d d_cd msqdclosured /// 
-		|| partp: mean_price dcrbclosurewa, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+			dummy_last_day unem_rate d_d d_cd msqdclosured waclosured /// 
+		|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
 	 estimates save ${results}nlogit_FULL_C5_v12_B.ster, replace 
 
