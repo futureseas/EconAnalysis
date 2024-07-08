@@ -248,15 +248,19 @@ tab dcrbclosurewad
 
 
 	 estimates use ${results}nlogit_FULL_C5_v12_E.ster
+	 	estimates store B12_E
 		matrix start=e(b)
+		estimates describe B12_E
+		estimates replay B12_E
 
 *** Did notwork wth mean_price in base equation
 *** Run this! without constraint?
 
+	constraint 3 [/port]CMCK_tau = 1
 	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 			dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
 		|| partp:  mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
 	 estimates save ${results}nlogit_FULL_C5_v12_F.ster, replace 
 
 		matrix start=e(b)
