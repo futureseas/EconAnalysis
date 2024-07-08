@@ -337,18 +337,53 @@ sum d_c d_d d_p d_pc d_pd d_cd d_pcd
 
 ** No convergence with dcrbclosurewad. Did not converge also if included in partp
 tab msqdclosured
-
 tab psdnclosured
 tab waclosured 
 tab dcrbclosurewad
  		
 	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			dummy_last_day unem_rate d_d d_cd msqdclosured waclosured /// 
+			dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured /// 
 		|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
 	 estimates save ${results}nlogit_FULL_C5_v12_B.ster, replace 
 
 		matrix start=e(b)
+
+
+
+	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured dcrbclosurewad /// 
+		|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
+	 estimates save ${results}nlogit_FULL_C5_v12_C.ster, replace 
+
+		matrix start=e(b)
+
+	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured /// 
+		|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
+	 estimates save ${results}nlogit_FULL_C5_v12_D.ster, replace 
+
+		matrix start=e(b)
+
+	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
+		|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
+	 estimates save ${results}nlogit_FULL_C5_v12_E.ster, replace 
+
+		matrix start=e(b)
+
+
+	nlogit fished mean_avail mean_price  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
+	 estimates save ${results}nlogit_FULL_C5_v12_F.ster, replace 
+
+		matrix start=e(b)
+
 
 
 
