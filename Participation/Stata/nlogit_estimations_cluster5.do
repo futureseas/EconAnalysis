@@ -375,15 +375,18 @@ tab dcrbclosurewad
 
 		matrix start=e(b)
 
+*** Did notwork wth mean_price in base equation
+*** Run this! without constraint?
 
-	nlogit fished mean_avail mean_price  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 			dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
-		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
+		|| partp:  mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
 	 estimates save ${results}nlogit_FULL_C5_v12_F.ster, replace 
 
 		matrix start=e(b)
 
+*** mean availability in partp too??
 
 
 
