@@ -246,15 +246,14 @@ tab dcrbclosurewad
 	//  estimates save ${results}nlogit_FULL_C5_v12_E.ster, replace 
 
 
-
 	 estimates use ${results}nlogit_FULL_C5_v12_E.ster
 	 	estimates store B12_E
 		matrix start=e(b)
 		estimates describe B12_E
 		estimates replay B12_E
 
-*** Did notwork wth mean_price in base equation
-*** Run this! without constraint?
+
+*** Run this model with price constrained to zero!
 
 	constraint 3 [PART_CRAB]mean_price = 0
 	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
@@ -262,8 +261,19 @@ tab dcrbclosurewad
 		|| partp:  mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 		base("No-Participation") case(fished_haul) constraints(1 3) vce(cluster fished_vessel_anon) from(start, skip)
 	 estimates save ${results}nlogit_FULL_C5_v12_F.ster, replace 
+	matrix start=e(b)
+	estimates store B12_F
 
-		matrix start=e(b)
+	lrtest B12_F B12_E, force
+	lrtest B12_E B12_F, force
+
+	*** LR test reject that coefficient for price equal to zero...
+
+
+
+
+
+
 
 *** mean availability in partp too??
 
