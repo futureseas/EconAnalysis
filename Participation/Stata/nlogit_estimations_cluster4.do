@@ -106,6 +106,8 @@ estimates store base
 estimates save ${results}nlogit_C4_base.ster, replace
 scalar ll0 = e(ll)
 
+tab msqdclosured // Always MSQD open!!!
+
 *** Set nested logit
 cap drop port
 cap label drop lb_port

@@ -1,5 +1,5 @@
-global google_path "H:\My Drive\"
-*global google_path "G:\Mi unidad\"
+*global google_path "H:\My Drive\"
+global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -59,6 +59,12 @@ gen d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1)
 qui tabulate set_month, generate(month)
 
 
+*** Get annual price for DCRB
+sort selection set_year
+by selection set_year : egen mean_price_annual = mean(mean_price2) 
+gen mean_price_3 = mean_price
+replace mean_price_3 = mean_price_annual if selection == "CLW-DCRB" | selection == "CWA-DCRB"
+
 ********************************************************************
 ** Create labels
 label variable mean_avail "Expected availability"
@@ -114,8 +120,6 @@ keep if selection == "SBA-MSQD" | selection == "MNA-MSQD" | ///
 		selection == "LAA-NANC" | selection == "No-Participation" | ///
 		selection == "CLW-DCRB" | selection == "CWA-DCRB"
 
-* drop if msqdclosure // I THINK THIS HELP!!!
-
 
 ** Drop cases with no choice selected
 cap drop check_if_choice
@@ -161,7 +165,6 @@ preserve
 	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1)
 	save "${google_path}Data\Anonymised data\part_model_c5.dta", replace
 restore
-
 
 	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
 	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
@@ -255,7 +258,7 @@ tab dcrbclosurewad
 
 *** Run this model with price constrained to zero!
 
-	constraint 3 [PART_CRAB]mean_price = 0
+/* 	constraint 3 [PART_CRAB]mean_price = 0
 	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 			dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
 		|| partp:  mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
@@ -266,69 +269,19 @@ tab dcrbclosurewad
 
 	lrtest B12_F B12_E, force
 	lrtest B12_E B12_F, force
-
+ */
 	*** LR test reject that coefficient for price equal to zero...
 
+	*** Annual price for crab
+	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
+		|| partp:  mean_price_3, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
+	 estimates save ${results}nlogit_FULL_C5_v12_G.ster, replace 
+	matrix start=e(b)
+	estimates store B12_G
 
 
-
-
-
-
-*** mean availability in partp too??
-
-
-
-
-
-estimates use ${results}nlogit_FULL_C5_v12.ster
-matrix start=e(b)
-estimates store B12
-lrtest B12 B10, force
-
-**** Test constraint
-// preserve
-// 	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
-// 	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
-// 	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
-// 	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
-// 	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
-// 	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
-// 	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
-// 	constraint 3 [PART_CRAB]mean_price = 0
-// 	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 			psdnclosured dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
-// 			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-// 		base("No-Participation") case(fished_haul) constraints(1 3) vce(cluster fished_vessel_anon) ///
-// 		from(start, skip)
-// 	estimates save ${results}nlogit_FULL_C5_v14.ster, replace
-// restore
-estimates use ${results}nlogit_FULL_C5_v14.ster
-matrix start=e(b)
-estimates store B14
-lrtest B14 B12, force
-
-
-**** WIth other state dependency
-// preserve
-// 	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
-// 	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
-// 	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
-// 	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
-// 	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
-// 	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
-// 	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
-// 	constraint 3 [PART_CRAB]mean_price = 0
-// 	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 			psdnclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
-// 			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-// 		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
-// 		from(start, skip)
-// 	estimates save ${results}nlogit_FULL_C5_v15.ster, replace
-// restore
-estimates use ${results}nlogit_FULL_C5_v15.ster
-estimates store B15
-lrtest B15 B14, force
 
 
 *****************************************************************************************************************************
@@ -382,7 +335,7 @@ lrtest B17 B16, force
 
 
 *****************************************************************************************************************************
-estimates use ${results}nlogit_FULL_C5_v14.ster
+estimates use ${results}nlogit_FULL_C5_v12_G.ster
 estimates store B14
 estimates describe B14
 estimates replay B14

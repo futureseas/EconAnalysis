@@ -1,3 +1,5 @@
+*global google_path "H:\My Drive\"
+global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -13,7 +15,7 @@ tempfile port_area
 save `port_area'
 
 ** Get historical choice
-import delimited "H:\My Drive\Data\Cluster\cluster_aggregates.csv", clear
+import delimited "${google_path}Data\Cluster\cluster_aggregates.csv", clear
 merge m:1 pacfin_port_code using `port_area', keep(3)
 keep if landing_year >= 2000 & landing_year <= 2020
 collapse (sum) total_landings, by(group_all pacfin_species_code landing_month landing_year port_area_code)
@@ -29,7 +31,7 @@ save `hist_data'
 
 
 ** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best -- V2)
-import delimited "H:\My Drive\Data\Anonymised data\rdo_Stata_c6_full_noid.csv", clear
+import delimited "${google_path}Data\Anonymised data\rdo_Stata_c6_full_noid.csv", clear
 gen group_all = 6
 // gen species = substr(selection, 5, 4) 
 
@@ -55,6 +57,14 @@ gen d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0)
 gen d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
 gen d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
 qui tabulate set_month, generate(month)
+
+
+
+*** Get annual price for DCRB
+sort selection set_year
+by selection set_year : egen mean_price_annual = mean(mean_price2) 
+gen mean_price_3 = mean_price
+replace mean_price_3 = mean_price_annual if selection == "CLW-DCRB" | selection == "CWA-DCRB"
 
 
 ********************************************************************
@@ -109,10 +119,6 @@ keep if selection == "CWA-NANC" | selection == "CLO-PSDN" | ///
 		selection == "CLO-JMCK" | ///
 		selection == "No-Participation"
 
-tab waclosured
-keep if waclosured == 0 // 98,8% of the observations
-tab psdnclosured
-
 ** Drop cases with no choice selected
 cap drop check_if_choice
 sort fished_haul
@@ -148,19 +154,23 @@ nlogittree selection port partp, choice(fished) case(fished_haul)
 constraint 1 [/port]OMCK_tau = 1
 constraint 2 [/port]NANC_tau = 1
 
-save "H:\My Drive\Data\Anonymised data\part_model_c6.dta", replace
+save "${google_path}Data\Anonymised data\part_model_c6.dta", replace
 
 
 
 ************************
 *** Run nested logit ***
 ************************
+tab msqdclosured 
+tab psdnclosured 
+tab waclosured 
+tab dcrbclosurewad
 
-// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 	dcrbclosurewad dummy_last_day unem_rate d_d /// 
-// 	|| partp: psdnclosure mean_price, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon)
-// estimates save ${results}nlogit_FULL_C6.ster, replace
+nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	dummy_last_day unem_rate d_d psdnclosured waclosured dcrbclosurewad  /// 
+	|| partp:  mean_price_3, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon)
+estimates save ${results}nlogit_FULL_C6.ster, replace
 estimates use ${results}nlogit_FULL_C6.ster
 matrix start=e(b)
 estimates store B1
