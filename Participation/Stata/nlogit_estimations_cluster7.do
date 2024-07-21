@@ -171,6 +171,7 @@ tab d_pc
 tab d_pd
 tab d_pcd
 
+** MAYBE CORRELATION IS WITHIN PORTS????
 
 
 ************************
