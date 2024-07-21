@@ -3,6 +3,10 @@
 *** All cluster results for Discrete Choice Model ***
 *****************************************************
 
+
+*** Dan Holland would ask for 30 days state dependency!
+
+
 global google_path "H:\My Drive\"
 *lobal google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
@@ -146,8 +150,7 @@ restore
 ************* Cluster 6
 
 use "${google_path}Data\Anonymised data\part_model_c6.dta", clear
-
-estimates use ${results}nlogit_C6_base.ster
+estimates use ${results}nlogit_FULL_C6_B.ster
 estimates store base_C6 
 scalar ll0_C6 = e(ll)
 

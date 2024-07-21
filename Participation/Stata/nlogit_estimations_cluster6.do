@@ -1,5 +1,5 @@
-*global google_path "H:\My Drive\"
-global google_path "G:\Mi unidad\"
+global google_path "H:\Mi Unidad\"
+*global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -15,6 +15,7 @@ tempfile port_area
 save `port_area'
 
 ** Get historical choice
+
 import delimited "${google_path}Data\Cluster\cluster_aggregates.csv", clear
 merge m:1 pacfin_port_code using `port_area', keep(3)
 keep if landing_year >= 2000 & landing_year <= 2020
@@ -60,11 +61,11 @@ qui tabulate set_month, generate(month)
 
 
 
-*** Get annual price for DCRB
+*** Get annual price for DCRB and SOCK
 sort selection set_year
 by selection set_year : egen mean_price_annual = mean(mean_price2) 
 gen mean_price_3 = mean_price
-replace mean_price_3 = mean_price_annual if selection == "CLW-DCRB" | selection == "CWA-DCRB"
+replace mean_price_3 = mean_price_annual if selection == "CWA-DCRB" | selection == "NPS-SOCK"
 
 
 ********************************************************************
@@ -115,9 +116,11 @@ keep if selection == "CWA-NANC" | selection == "CLO-PSDN" | ///
 		selection == "CLW-PSDN" | selection == "CWA-PSDN" | ///
 		selection == "CLO-NANC" | selection == "CWA-DCRB" | ///
 		selection == "CLW-NANC" | selection == "CBA-PSDN" | ///
-		selection == "NPS-SOCK" | selection == "CLO-CMCK" | ///
-		selection == "CLO-JMCK" | ///
-		selection == "No-Participation"
+		selection == "No-Participation" | ///
+		selection == "NPS-SOCK" | selection == "CLO-CMCK" 
+
+gen waclosure2 = (set_month == 1 | set_month == 2 | set_month == 3)
+
 
 ** Drop cases with no choice selected
 cap drop check_if_choice
@@ -144,11 +147,12 @@ cap drop partp
 cap label drop lb_partp
 nlogitgen port = selection( ///
         PSDN: CLO-PSDN | CLW-PSDN | CWA-PSDN | CBA-PSDN, ///
-        NANC: CLO-NANC | CLW-NANC | CWA-NANC, ///
-        OMCK: CLO-CMCK | CLO-JMCK, ///
+        NANC: CLO-NANC | CWA-NANC | CLW-NANC, ///
         DCRB: CWA-DCRB, ///
+        NOPORT: No-Participation, ///
         SLMN: NPS-SOCK, ///
-        NOPORT: No-Participation) 
+        OMCK: CLO-CMCK)
+
 nlogitgen partp = port(PART: PSDN | NANC | OMCK, CRAB_PART: DCRB, SLMN_PART: SLMN, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 constraint 1 [/port]OMCK_tau = 1
@@ -161,20 +165,49 @@ save "${google_path}Data\Anonymised data\part_model_c6.dta", replace
 ************************
 *** Run nested logit ***
 ************************
-tab msqdclosured 
-tab psdnclosured 
 tab waclosured 
 tab dcrbclosurewad
+tab d_c 
+tab d_d 
+tab d_cd 
+
+
 
 nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	dummy_last_day unem_rate d_d psdnclosured waclosured dcrbclosurewad  /// 
-	|| partp:  mean_price_3, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
+	dummy_last_day unem_rate d_d d_cd /// 
+	|| partp: psdnclosure  mean_price_3, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon)
-estimates save ${results}nlogit_FULL_C6.ster, replace
-estimates use ${results}nlogit_FULL_C6.ster
+estimates save ${results}nlogit_FULL_C6_all.ster, replace
+estimates use ${results}nlogit_FULL_C6_all.ster
 matrix start=e(b)
-estimates store B1
-lrtest base B1, force
+estimates store B1_all
+lrtest base B1_all, force
+
+
+nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	dummy_last_day unem_rate d_d d_cd waclosured /// 
+	|| partp: psdnclosure  mean_price_3, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
+estimates save ${results}nlogit_FULL_C6_B.ster, replace
+estimates use ${results}nlogit_FULL_C6_B.ster
+matrix start=e(b)
+estimates store B1_b
+lrtest B1_all B1_b, force
+
+*** WACLOSURE CANNOT BE EXCLUDED
+
+// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 	dummy_last_day unem_rate d_d d_cd dcrbclosurewad /// 
+// 	|| partp: psdnclosure  mean_price_3, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
+// estimates save ${results}nlogit_FULL_C6_C.ster, replace
+// estimates use ${results}nlogit_FULL_C6_C.ster
+// matrix start=e(b)
+// estimates store B1_c
+// lrtest B1_all B1_c, force
+
+*** WACRAB CAN BE EXCLUDED
+
 
 
 // tab d_hist_selection

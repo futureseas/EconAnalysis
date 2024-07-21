@@ -1,5 +1,5 @@
 //global path_google "G:\Mi unidad"
-global path_google "H:\My Drive"
+global path_google "H:\Mi Unidad"
 global path "C:\GitHub\EconAnalysis\Participation\"
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -113,17 +113,17 @@ selection == "MNA-MSQD" | ///
 selection == "SDA-NANC" | /// 
 selection == "LAA-CMCK" | /// 
 selection == "LAA-PSDN" | /// 
-selection == "SFA-MSQD" | ///
-selection == "MNA-CMCK" | ///
-selection == "MNA-PSDN" | ///
-selection == "MNA-JMCK" | ///
-selection == "MRA-MSQD" | ///
-selection == "LAA-JMCK" | ///
-selection == "MNA-NANC" | ///
-selection == "SFA-BLCK" | ///
 selection == "No-Participation"
 
-drop if msqdclosure
+// selection == "SFA-MSQD" | ///
+// selection == "SFA-BLCK" | ///
+// selection == "MNA-CMCK" | ///
+// selection == "MNA-PSDN" | ///
+// selection == "MNA-JMCK" | ///
+// selection == "MRA-MSQD" | ///
+// selection == "LAA-JMCK" | ///
+
+tab msqdclosured
 tab psdnclosured
 
 ** Drop cases with no choice selected
@@ -150,33 +150,40 @@ cap label drop lb_partp
 tab selection if fished == 1
 
 nlogitgen port = selection( ///
-	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | SFA-MSQD | MRA-MSQD, ///
-	NANC: SBA-NANC | SDA-NANC | MNA-NANC, /// 
-	OMCK: LAA-CMCK | MNA-CMCK | MNA-JMCK | LAA-JMCK, /// 
-	PSDN: LAA-PSDN | MNA-PSDN, ///
-	BLCK: SFA-BLCK, /// 
+	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD, ///
+	NANC: SBA-NANC | SDA-NANC, /// 
+	OMCK: LAA-CMCK, /// 
+	PSDN: LAA-PSDN, ///
 	NOPORT: No-Participation) 
 
 
-nlogitgen partp = port(PART: MSQD | NANC | OMCK | PSDN, PART_RFSH: BLCK, NOPART: NOPORT)
+nlogitgen partp = port(PART: MSQD | NANC | OMCK | PSDN, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
-constraint 1 [/port]SMLT_tau = 1
+// constraint 1 [/port]SMLT_tau = 1
 // constraint 2 [/port]NANC_tau = 1
 // save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
+
+tab d_c
+tab d_d
+tab d_p
+tab d_cd
+tab d_pc
+tab d_pd
+tab d_pcd
+
 
 
 ************************
 *** Run nested logit ***
 ************************
-nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day  d_c d_d d_p d_cd d_pc d_pd d_pcd unem_rate /// 
-	|| partp: mean_price psdnclosure, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
+nlogit fished mean_avail mean_price wind_max_220_mh ///
+	  dummy_last_day d_d d_cd  /// 
+	|| partp: , base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon)
 // estimates save ${results}nlogit_FULL_C7.ster, replace
 
 
 
----------------------------------------------
 
 estimates use ${results}nlogit_FULL_C7.ster
 matrix start=e(b)
