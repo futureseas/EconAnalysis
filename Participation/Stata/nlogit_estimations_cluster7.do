@@ -203,6 +203,17 @@ estimates store B1_A
 lrtest base B1_A, force
 
 
+nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
+	|| partp:  mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
+estimates save ${results}nlogit_FULL_C7_B.ster, replace
+estimates use ${results}nlogit_FULL_C7_B.ster
+matrix start=e(b)
+estimates store B1_B
+lrtest base B1_B, force
+
+
 *** Try weekend for all species interacted
 
 // gen species = substr(selection,5,4)
