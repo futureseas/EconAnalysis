@@ -149,8 +149,8 @@ nlogitgen port = selection( ///
 	NOPORT: No-Participation) 
 nlogitgen partp = port(PART: SBA | LAA | MNA | MRA | SDA | SFA, PART_RFSH: RFSH, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
-// constraint 1 [/partp]SMLT_tau = 1
-// constraint 2 [/partp]NANC_tau = 1
+constraint 1 [/partp]mean_avail = 0
+constraint 2 [/partp]mean_price = 0
 
 save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
 
@@ -172,6 +172,18 @@ estimates save ${results}nlogit_FULL_C7.ster, replace
 estimates use ${results}nlogit_FULL_C7.ster
 matrix start=e(b)
 estimates store B1
+
+
+nlogit fished wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
+	|| partp:  mean_avail mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_anon) 
+estimates save ${results}nlogit_FULL_C7_c.ster, replace
+estimates use ${results}nlogit_FULL_C7_c.ster
+matrix start=e(b)
+estimates store B1_c
+lrtest B1 B1_c, force
+
 
 
 ****************** USING PREV DAYS DUMMY ************************
