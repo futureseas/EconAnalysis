@@ -201,6 +201,8 @@ matrix start=e(b)
 estimates store B1
 lrtest base B1, force
 
+
+*** See if same model but with correlation within species converge... IF not, previous model is the base!!!
 nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd  /// 
 	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
