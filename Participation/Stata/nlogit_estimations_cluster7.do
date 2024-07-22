@@ -1,5 +1,5 @@
-//global path_google "G:\Mi unidad"
-global path_google "H:\Mi Unidad"
+global path_google "G:\Mi unidad"
+*global path_google "H:\Mi Unidad"
 global path "C:\GitHub\EconAnalysis\Participation\"
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -205,14 +205,50 @@ lrtest base B1, force
 *** See if same model but with correlation within species converge...  NOT CONVERGE!!!
 
 *** TRY with msqdweekend!
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd msqdweekend /// 
-	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-estimates save ${results}nlogit_FULL_C7_B.ster, replace
+
+// nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd msqdweekend /// 
+// 	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
+// estimates save ${results}nlogit_FULL_C7_B.ster, replace
 estimates use ${results}nlogit_FULL_C7_B.ster
 matrix start=e(b)
 estimates store B1_B
 lrtest B1 B1_B, force
 
 
+
+*** Try weekend for all species interacted
+
+gen species = substr(selection,5,4)
+tabulate species, generate(sp)
+drop sp8
+
+gen blckweekend = sp1 * weekend 
+gen cmckweekend = sp2 * weekend 
+gen jmckweekend = sp3 * weekend 
+gen nancweekend = sp5 * weekend 
+gen psdnweekend = sp6 * weekend 
+gen smltweekend = sp7 * weekend
+
+
+nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd msqdweekend blckweekend cmckweekend jmckweekend nancweekend psdnweekend smltweekend /// 
+	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
+estimates save ${results}nlogit_FULL_C7_C.ster, replace
+estimates use ${results}nlogit_FULL_C7_C.ster
+matrix start=e(b)
+estimates store B1_C
+lrtest B1_B B1_C, force
+
+
+nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
+	|| partp: weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
+estimates save ${results}nlogit_FULL_C7_C.ster, replace
+estimates use ${results}nlogit_FULL_C7_C.ster
+matrix start=e(b)
+estimates store B1_C
+lrtest B1_B B1_C, force
