@@ -150,27 +150,27 @@ cap label drop lb_partp
 
 tab selection if fished == 1
 
-// nlogitgen port = selection( ///
-// 	SBA: SBA-MSQD | SBA-NANC, ///
-// 	LAA: LAA-MSQD | LAA-CMCK | LAA-PSDN | LAA-JMCK, /// 
-// 	MNA: MNA-MSQD | MNA-CMCK | MNA-PSDN | MNA-JMCK | MNA-SMLT | MNA-NANC, ///
-// 	MRA: MRA-MSQD, ///
-// 	SDA: SDA-NANC, ///
-// 	SFA: SFA-MSQD | SFA-BLCK, /// 
-// 	NOPORT: No-Participation) 
-
 nlogitgen port = selection( ///
-	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | MRA-MSQD | SFA-MSQD, ///
-	NANC: SBA-NANC | MNA-NANC | SDA-NANC, ///
-	CMCK: LAA-CMCK | MNA-CMCK, ///
-	PSDN: LAA-PSDN | MNA-PSDN, ///
-	JMCK: LAA-JMCK | MNA-JMCK, ///
-	SMLT: MNA-SMLT, ///
-	RFSH: SFA-BLCK, /// 
+	SBA: SBA-MSQD | SBA-NANC, ///
+	LAA: LAA-MSQD | LAA-CMCK | LAA-PSDN | LAA-JMCK, /// 
+	MNA: MNA-MSQD | MNA-CMCK | MNA-PSDN | MNA-JMCK | MNA-SMLT | MNA-NANC, ///
+	MRA: MRA-MSQD, ///
+	SDA: SDA-NANC, ///
+	SFA: SFA-MSQD | SFA-BLCK, /// 
 	NOPORT: No-Participation) 
 
-// nlogitgen partp = port(PART: SBA | LAA | MNA | MRA | SDA | SFA, NOPART: NOPORT)
-nlogitgen partp = port(PART: MSQD | NANC | CMCK | PSDN | JMCK | SMLT | RFSH, NOPART: NOPORT)
+// nlogitgen port = selection( ///
+// 	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | MRA-MSQD | SFA-MSQD, ///
+// 	NANC: SBA-NANC | MNA-NANC | SDA-NANC, ///
+// 	CMCK: LAA-CMCK | MNA-CMCK, ///
+// 	PSDN: LAA-PSDN | MNA-PSDN, ///
+// 	JMCK: LAA-JMCK | MNA-JMCK, ///
+// 	SMLT: MNA-SMLT, ///
+// 	RFSH: SFA-BLCK, /// 
+// 	NOPORT: No-Participation) 
+
+nlogitgen partp = port(PART: SBA | LAA | MNA | MRA | SDA | SFA, NOPART: NOPORT)
+// nlogitgen partp = port(PART: MSQD | NANC | CMCK | PSDN | JMCK | SMLT | RFSH, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 // constraint 1 [/port]SMLT_tau = 1
 // constraint 2 [/port]NANC_tau = 1
@@ -202,9 +202,11 @@ estimates store B1
 lrtest base B1, force
 
 
-*** See if same model but with correlation within species converge... IF not, previous model is the base!!!
+*** See if same model but with correlation within species converge...  NOT CONVERGE!!!
+
+*** TRY with msqdweekend!
 nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd  /// 
+	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd msqdweekend /// 
 	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
 estimates save ${results}nlogit_FULL_C7_B.ster, replace
@@ -214,4 +216,3 @@ estimates store B1_B
 lrtest B1 B1_B, force
 
 
-TRY with msqdweekend!
