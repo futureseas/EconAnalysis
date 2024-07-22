@@ -149,8 +149,8 @@ nlogitgen port = selection( ///
 	NOPORT: No-Participation) 
 nlogitgen partp = port(PART: SBA | LAA | MNA | MRA | SDA | SFA, PART_RFSH: RFSH, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
-constraint 1 [/partp]mean_avail = 0
-constraint 2 [/partp]mean_price = 0
+constraint 1 _b[PART:mean_avail]  = 0
+constraint 2 _b[PART:mean_price]  = 0
 
 save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
 
