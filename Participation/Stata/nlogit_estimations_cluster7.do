@@ -149,8 +149,8 @@ nlogitgen port = selection( ///
 	NOPORT: No-Participation) 
 nlogitgen partp = port(PART: SBA | LAA | MNA | MRA | SDA | SFA, PART_RFSH: RFSH, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
-constraint 1 [/port]SMLT_tau = 1
-constraint 2 [/port]NANC_tau = 1
+// constraint 1 [/partp]SMLT_tau = 1
+// constraint 2 [/partp]NANC_tau = 1
 
 save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
 
@@ -163,34 +163,34 @@ save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
 *** Note: Correlation is within ports! (otherwise, model do not converge)
 
 
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+
+nlogit fished wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
-	|| partp: weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
+	|| partp:  mean_avail mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-estimates save ${results}nlogit_FULL_C7_A.ster, replace
-estimates use ${results}nlogit_FULL_C7_A.ster
+estimates save ${results}nlogit_FULL_C7.ster, replace
+estimates use ${results}nlogit_FULL_C7.ster
 matrix start=e(b)
-estimates store B1_A
-lrtest base B1_A, force
+estimates store B1
 
 
-nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
-	|| partp:  mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
+****************** USING PREV DAYS DUMMY ************************
+
+nlogit fished wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	dummy_prev_days dummy_prev_year_days unem_rate msqdclosured psdnclosured d_d d_cd /// 
+	|| partp:  mean_avail mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-estimates save ${results}nlogit_FULL_C7_B.ster, replace
-estimates use ${results}nlogit_FULL_C7_B.ster
+estimates save ${results}nlogit_FULL_C7_prev_days.ster, replace
+estimates use ${results}nlogit_FULL_C7_prev_days.ster
 matrix start=e(b)
-estimates store B1_B
-lrtest base B1_B, force
+estimates store B2
+lrtest B1 B2, force
 
 
-*** Try weekend for all species interacted
-
+*** Try weekend for all species interacted -- Didn´t work!
 // gen species = substr(selection,5,4)
 // tabulate species, generate(sp)
 // drop sp8
-
 // gen blckweekend = sp1 * weekend 
 // gen cmckweekend = sp2 * weekend 
 // gen jmckweekend = sp3 * weekend 
@@ -198,12 +198,3 @@ lrtest base B1_B, force
 // gen psdnweekend = sp6 * weekend 
 // gen smltweekend = sp7 * weekend
 
-// nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd msqdweekend blckweekend cmckweekend jmckweekend nancweekend psdnweekend smltweekend /// 
-// 	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-// estimates save ${results}nlogit_FULL_C7_B.ster, replace
-// estimates use ${results}nlogit_FULL_C7_B.ster
-// matrix start=e(b)
-// estimates store B1_D
-// lrtest B1_C B1_D, force

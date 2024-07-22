@@ -180,8 +180,8 @@ nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_ze
 	dummy_prev_days dummy_prev_year_days unem_rate d_d d_cd waclosured /// 
 	|| partp: psdnclosure  mean_price_3, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
-estimates save ${results}nlogit_FULL_C6_B_v2.ster, replace
-estimates use ${results}nlogit_FULL_C6_B_v2.ster
+estimates save ${results}nlogit_FULL_C6_B_prev_days.ster, replace
+estimates use ${results}nlogit_FULL_C6_B_prev_days.ster
 matrix start=e(b)
 estimates store B2
 lrtest B2 B1, force
