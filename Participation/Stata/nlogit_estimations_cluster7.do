@@ -156,7 +156,8 @@ nlogitgen port = selection( ///
 	MNA: MNA-MSQD | MNA-CMCK | MNA-PSDN | MNA-JMCK | MNA-SMLT | MNA-NANC, ///
 	MRA: MRA-MSQD, ///
 	SDA: SDA-NANC, ///
-	SFA: SFA-MSQD | SFA-BLCK, /// 
+	SFA: SFA-MSQD, ///
+	RFSH:  SFA-BLCK, /// 
 	NOPORT: No-Participation) 
 
 // nlogitgen port = selection( ///
@@ -169,7 +170,7 @@ nlogitgen port = selection( ///
 // 	RFSH: SFA-BLCK, /// 
 // 	NOPORT: No-Participation) 
 
-nlogitgen partp = port(PART: SBA | LAA | MNA | MRA | SDA | SFA, NOPART: NOPORT)
+nlogitgen partp = port(PART: SBA | LAA | MNA | MRA | SDA | SFA, PART_RFSH: RFSH, NOPART: NOPORT)
 // nlogitgen partp = port(PART: MSQD | NANC | CMCK | PSDN | JMCK | SMLT | RFSH, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 // constraint 1 [/port]SMLT_tau = 1
@@ -191,65 +192,36 @@ tab d_pcd
 *** Run nested logit ***
 ************************
 
-// nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd  /// 
-// 	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon)
-// estimates save ${results}nlogit_FULL_C7.ster, replace
-estimates use ${results}nlogit_FULL_C7.ster
-matrix start=e(b)
-estimates store B1
-lrtest base B1, force
-
-
-*** See if same model but with correlation within species converge...  NOT CONVERGE!!!
-
-*** TRY with msqdweekend!
-
-// nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd msqdweekend /// 
-// 	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-// estimates save ${results}nlogit_FULL_C7_B.ster, replace
-estimates use ${results}nlogit_FULL_C7_B.ster
-matrix start=e(b)
-estimates store B1_B
-lrtest B1 B1_B, force
-
-
-
-*** Try weekend for all species interacted
-
-gen species = substr(selection,5,4)
-tabulate species, generate(sp)
-drop sp8
-
-gen blckweekend = sp1 * weekend 
-gen cmckweekend = sp2 * weekend 
-gen jmckweekend = sp3 * weekend 
-gen nancweekend = sp5 * weekend 
-gen psdnweekend = sp6 * weekend 
-gen smltweekend = sp7 * weekend
-
-
-
 nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
 	|| partp: weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-estimates save ${results}nlogit_FULL_C7_C.ster, replace
-estimates use ${results}nlogit_FULL_C7_C.ster
+estimates save ${results}nlogit_FULL_C7_A.ster, replace
+estimates use ${results}nlogit_FULL_C7_A.ster
 matrix start=e(b)
-estimates store B1_C
-lrtest B1_B B1_C, force
+estimates store B1_A
+lrtest base B1_A, force
 
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd msqdweekend blckweekend cmckweekend jmckweekend nancweekend psdnweekend smltweekend /// 
-	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-estimates save ${results}nlogit_FULL_C7_D.ster, replace
-estimates use ${results}nlogit_FULL_C7_D.ster
-matrix start=e(b)
-estimates store B1_D
-lrtest B1_C B1_D, force
 
+*** Try weekend for all species interacted
+
+// gen species = substr(selection,5,4)
+// tabulate species, generate(sp)
+// drop sp8
+
+// gen blckweekend = sp1 * weekend 
+// gen cmckweekend = sp2 * weekend 
+// gen jmckweekend = sp3 * weekend 
+// gen nancweekend = sp5 * weekend 
+// gen psdnweekend = sp6 * weekend 
+// gen smltweekend = sp7 * weekend
+
+// nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd msqdweekend blckweekend cmckweekend jmckweekend nancweekend psdnweekend smltweekend /// 
+// 	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
+// estimates save ${results}nlogit_FULL_C7_B.ster, replace
+// estimates use ${results}nlogit_FULL_C7_B.ster
+// matrix start=e(b)
+// estimates store B1_D
+// lrtest B1_C B1_D, force
