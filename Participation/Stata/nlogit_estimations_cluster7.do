@@ -159,7 +159,6 @@ tab selection if fished == 1
 // 	SFA: SFA-MSQD | SFA-BLCK, /// 
 // 	NOPORT: No-Participation) 
 
-
 nlogitgen port = selection( ///
 	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | MRA-MSQD | SFA-MSQD, ///
 	NANC: SBA-NANC | MNA-NANC | SDA-NANC, ///
@@ -213,3 +212,4 @@ estimates store B1_B
 lrtest B1 B1_B, force
 
 
+TRY with msqdweekend!
