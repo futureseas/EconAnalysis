@@ -232,16 +232,6 @@ gen psdnweekend = sp6 * weekend
 gen smltweekend = sp7 * weekend
 
 
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd msqdweekend blckweekend cmckweekend jmckweekend nancweekend psdnweekend smltweekend /// 
-	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-estimates save ${results}nlogit_FULL_C7_C.ster, replace
-estimates use ${results}nlogit_FULL_C7_C.ster
-matrix start=e(b)
-estimates store B1_C
-lrtest B1_B B1_C, force
-
 
 nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
@@ -252,3 +242,14 @@ estimates use ${results}nlogit_FULL_C7_C.ster
 matrix start=e(b)
 estimates store B1_C
 lrtest B1_B B1_C, force
+
+nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd msqdweekend blckweekend cmckweekend jmckweekend nancweekend psdnweekend smltweekend /// 
+	|| partp: , base(NOPART) || port: , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
+estimates save ${results}nlogit_FULL_C7_D.ster, replace
+estimates use ${results}nlogit_FULL_C7_D.ster
+matrix start=e(b)
+estimates store B1_D
+lrtest B1_C B1_D, force
+
