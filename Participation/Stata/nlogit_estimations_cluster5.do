@@ -33,7 +33,7 @@ save `hist_data'
 ** Import data (It do not work if 180km radius for ALBC -- 90km radius is the best -- V2)
 import delimited "${google_path}Data\Anonymised data\rdo_Stata_c5_full_v2_noid.csv", clear
 gen group_all = 5
-// gen species = substr(selection, 5, 4) 
+
 
 ** Merge with historical data
 merge m:1 group_all set_month using `hist_data', keep(3)
@@ -49,15 +49,14 @@ replace d_missing_p = d_missing_p2 if mean_price > 50
 replace mean_price = mean_price2 if mean_price > 50
 
 
-gen d_c   = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 0) 
-gen d_d   = (d_missing_p2 == 0 & d_missing == 0 & d_missing_d == 1) 
-gen d_p   = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 0) 
-gen d_cd  = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 1) 
-gen d_pc  = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 0) 
-gen d_pd  = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 1) 
-gen d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1) 
+gen d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
+gen d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
+gen d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
+gen d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
+gen d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
+gen d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
+gen d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
 qui tabulate set_month, generate(month)
-
 
 *** Get annual price for DCRB
 sort selection set_year
@@ -112,14 +111,12 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 keep if selection == "SBA-MSQD" | selection == "MNA-MSQD" | ///
 		selection == "LAA-MSQD" | selection == "SFA-MSQD" | /// 
 		selection == "CBA-MSQD" | selection == "MRA-MSQD" | ///
-		selection == "NPA-MSQD" | ///		
-	    selection == "CLO-PSDN" | selection == "CWA-PSDN" | ///
-		selection == "CLW-PSDN" | selection == "LAA-PSDN" | ///
-		selection == "CWA-ALBC" | ///
+		selection == "NPA-MSQD" | selection == "CLO-PSDN" | ///
+		selection == "CWA-PSDN" | selection == "CLW-PSDN" | ///
+		selection == "LAA-PSDN" | selection == "CWA-ALBC" | ///
 		selection == "LAA-CMCK" | selection == "SBA-CMCK" | ///
-		selection == "LAA-NANC" | selection == "No-Participation" | ///
-		selection == "CLW-DCRB" | selection == "CWA-DCRB"
-
+		selection == "LAA-NANC" | selection == "CLW-DCRB" | ///
+		selection == "CWA-DCRB" | selection == "No-Participation"
 
 ** Drop cases with no choice selected
 cap drop check_if_choice
@@ -149,237 +146,42 @@ nlogitgen port = selection( ///
 	NANC: LAA-NANC, ///
 	DCRB: CLW-DCRB | CWA-DCRB, ///
 	NOPORT: No-Participation)
+
 nlogitgen partp = port(PART: MSQD | PSDN | ALBC | CMCK | NANC, PART_CRAB: DCRB, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
 constraint 1 [/port]DCRB_tau = 1
 constraint 2 [/port]CMCK_tau = 1
 
+save "${google_path}Data\Anonymised data\part_model_c5.dta", replace
 
-preserve
-	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0)
-	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1)
-	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0)
-	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1)
-	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0)
-	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1)
-	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1)
-	save "${google_path}Data\Anonymised data\part_model_c5.dta", replace
-restore
-
-	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
-	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
-	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
-	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
-	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
-	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
-	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
-
-sum d_c d_d d_p d_pc d_pd d_cd d_pcd
 
 
 ************************
 *** Run nested logit ***
 ************************
 
-**** USING ALBC 90KM SDM 
+**** Note: Using albacore SDM within 90Km -- 
+****       LR test reject that coefficient for price (estimated) in DCRB equation is equal to zero
+****       Using annual price for crab
+ 
+// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 		dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
+// 		|| partp:  mean_price_3, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) 
+// 	 estimates save ${results}nlogit_FULL_C5_v12_G.ster, replace 
+estimates use ${results}nlogit_FULL_C5_v12_G.ster, replace 
+matrix start=e(b)
+estimates store B12_G
 
 
-*** Price in partp with price model
+****************** USING PREV DAYS DUMMY ************************
 
-
-/* 	nlogit fished  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			dummy_last_day unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
-			|| partp: mean_price mean_avail psdnclosure, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
-		// from(start, skip)
-	// estimates save ${results}nlogit_FULL_C5_v12.ster, replace */
-
-	// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	// 		dummy_last_day unem_rate d_d  d_pd d_cd d_pcd  /// 
-	// 		|| partp: mean_price , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) ///
-	// 	matrix start=e(b)
-
-	// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	// 		dummy_last_day unem_rate d_d d_cd msqdclosured /// 
-	// 	|| partp: mean_price , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) // from(start, skip)
-	//  estimates save ${results}nlogit_FULL_C5_v12_A.ster, replace 
-	// estimates use ${results}nlogit_FULL_C5_v12_A.ster
-	// matrix start=e(b)
-
-
-
-** No convergence with dcrbclosurewad. Did not converge also if included in partp
-tab msqdclosured
-tab psdnclosured
-tab waclosured 
-tab dcrbclosurewad
- 		
-	// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	// 		dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured /// 
-	// 	|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
-	//  estimates save ${results}nlogit_FULL_C5_v12_B.ster, replace 
-
-	// 	matrix start=e(b)
-
-
-
-	// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	// 		dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured dcrbclosurewad /// 
-	// 	|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
-	//  estimates save ${results}nlogit_FULL_C5_v12_C.ster, replace 
-
-	// 	matrix start=e(b)
-
-	// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	// 		dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured /// 
-	// 	|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
-	//  estimates save ${results}nlogit_FULL_C5_v12_D.ster, replace 
-
-	// 	matrix start=e(b)
-
-	// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	// 		dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
-	// 	|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
-	//  estimates save ${results}nlogit_FULL_C5_v12_E.ster, replace 
-
-
-	 estimates use ${results}nlogit_FULL_C5_v12_E.ster
-	 	estimates store B12_E
-		matrix start=e(b)
-		estimates describe B12_E
-		estimates replay B12_E
-
-
-*** Run this model with price constrained to zero!
-
-/* 	constraint 3 [PART_CRAB]mean_price = 0
-	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
-		|| partp:  mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) constraints(1 3) vce(cluster fished_vessel_anon) from(start, skip)
-	 estimates save ${results}nlogit_FULL_C5_v12_F.ster, replace 
-	matrix start=e(b)
-	estimates store B12_F
-
-	lrtest B12_F B12_E, force
-	lrtest B12_E B12_F, force
- */
-	*** LR test reject that coefficient for price equal to zero...
-
-	*** Annual price for crab
-	nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			dummy_last_day unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
+nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		dummy_prev_days dummy_prev_year_days unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
 		|| partp:  mean_price_3, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
-	 estimates save ${results}nlogit_FULL_C5_v12_G.ster, replace 
-	matrix start=e(b)
-	estimates store B12_G
-
-
-
-
-*****************************************************************************************************************************
-*** WITH HIST SELECTION!
-
-tab d_hist_selection
-
-
-// preserve
-// 	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
-// 	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
-// 	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
-// 	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
-// 	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
-// 	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
-// 	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
-// 	constraint 3 [PART_CRAB]mean_price = 0
-//  	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-//  			psdnclosured d_hist_selection unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
-//  			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-//  		base("No-Participation") case(fished_haul) constraints(1 3) vce(cluster fished_vessel_anon) ///
-//  		from(start, skip)
-// 	*estimates save ${results}nlogit_FULL_C5_v16.ster, replace
-// 	estimates save ${results}nlogit_FULL_C5_v16.ster
-// restore
-// estimates use ${results}nlogit_FULL_C5_v16.ster
-// matrix start=e(b)
-estimates store B16
-lrtest B16 B14, force
-
-
-// preserve
-// 	replace d_c   = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 0) 
-// 	replace d_d   = (d_missing_p == 0 & d_missing == 0 & d_missing_d == 1) 
-// 	replace d_p   = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 0) 
-// 	replace d_cd  = (d_missing_p == 0 & d_missing == 1 & d_missing_d == 1) 
-// 	replace d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0) 
-// 	replace d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
-// 	replace d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
-// 	constraint 3 [PART_CRAB]mean_price = 0
-//  	nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-//  			psdnclosured d_hist_selection unem_rate d_c d_d d_p d_pc d_pd d_cd d_pcd dcrbclosurewad waclosured  /// 
-//  			|| partp: mean_price, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-//  		base("No-Participation") case(fished_haul) constraints(1 2 3) vce(cluster fished_vessel_anon) ///
-//  		from(start, skip)
-// 	estimates save ${results}nlogit_FULL_C5_v17.ster
-// restore
-estimates use ${results}nlogit_FULL_C5_v17.ster
-estimates store B17
-lrtest B17 B16, force
-
-
-*****************************************************************************************************************************
-estimates use ${results}nlogit_FULL_C5_v12_G.ster
-estimates store B14
-estimates describe B14
-estimates replay B14
-di "R2-McFadden = " 1 - (e(ll)/ll0)
-estadd scalar r2 = 1 - (e(ll)/ll0): B14
-lrtest base B14, force
-estadd scalar lr_p = r(p): B14
-estat ic, all
-matrix S = r(S)
-estadd scalar aic = S[1,5]: B14
-estadd scalar bic = S[1,6]: B14
-estadd scalar aicc = S[1,7]: B14
-estadd scalar caic = S[1,8]: B14
-preserve
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc1 = count1/_N*100: B14
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc2 = count2/_N*100: B14
-restore
-
-
-
-*****************************************************************************************************************************
-*** Save model
-
-esttab  B1 B2 B3 B4 B5 B6 using "G:\My Drive\Tables\Participation\nested_logit_FULL_${S_DATE}_C5.rtf", ///
-		starlevels(* 0.10 ** 0.05 *** 0.01) ///
-		label title("Table. Nested Logit.") /// 
-		stats(N r2 perc1 perc2 perc3 perc4 lr_p aicc caic, fmt(0 3) ///
-			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" ///
-			"Predicted choices (%) -- No SD" "- Excl. No-Participation (%) -- No SD" "LR-test" "AICc" "CAIC" ))  ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels se noconstant
- 
-
-
-
+	 estimates save ${results}nlogit_FULL_C5_v12_G_prev_days.ster, replace 
+	 estimates use ${results}nlogit_FULL_C5_v12_G_prev_days.ster
+matrix start=e(b)
+estimates store B12_G_prev_days
+lrtest B12_G B12_G_prev_days, force

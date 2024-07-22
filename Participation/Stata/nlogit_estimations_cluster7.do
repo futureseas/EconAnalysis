@@ -15,7 +15,6 @@ tempfile port_area
 save `port_area'
 
 ** Get historical choice
-// import delimited "G:\Mi unidad\Data\Cluster\cluster_aggregates.csv", clear
 import delimited "${path_google}\Data\Cluster\cluster_aggregates.csv", clear
 merge m:1 pacfin_port_code using `port_area', keep(3)
 keep if landing_year >= 2000 & landing_year <= 2020
@@ -35,8 +34,6 @@ save `hist_data'
 import delimited "${path_google}\Data\Anonymised data\rdo_Stata_c7_full_noid.csv", clear
 gen group_all = 7
 
-// hist set_month
-// gen species = substr(selection, 5, 4) 
 
 ** Merge with historical data
 merge m:1 group_all set_month using `hist_data', keep(3)
@@ -60,6 +57,11 @@ gen d_pc  = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 0)
 gen d_pd  = (d_missing_p == 1 & d_missing == 0 & d_missing_d == 1) 
 gen d_pcd = (d_missing_p == 1 & d_missing == 1 & d_missing_d == 1) 
 qui tabulate set_month, generate(month)
+
+
+
+
+
 
 
 ********************************************************************
@@ -106,26 +108,15 @@ label variable d_pcd "Binary: Availability, distance and price missing"
 
 ** Filter model 
 keep if ///
-selection == "SBA-MSQD" | /// 
-selection == "SBA-NANC" | /// 
-selection == "LAA-MSQD" | /// 
-selection == "MNA-MSQD" | /// 
-selection == "SDA-NANC" | /// 
-selection == "LAA-CMCK" | /// 
-selection == "LAA-PSDN" | /// 
-selection == "SFA-BLCK" | ///
-selection == "SFA-MSQD" | ///
-selection == "MNA-CMCK" | ///
-selection == "MNA-SMLT" | ///
-selection == "MNA-PSDN" | ///
-selection == "MNA-JMCK" | ///
-selection == "MRA-MSQD" | ///
-selection == "LAA-JMCK" | ///
-selection == "MNA-NANC" | ///
+selection == "SBA-MSQD" | selection == "SBA-NANC" | /// 
+selection == "LAA-MSQD" | selection == "MNA-MSQD" | /// 
+selection == "SDA-NANC" | selection == "LAA-CMCK" | /// 
+selection == "LAA-PSDN" | selection == "SFA-BLCK" | ///
+selection == "SFA-MSQD" | selection == "MNA-CMCK" | ///
+selection == "MNA-SMLT" | selection == "MNA-PSDN" | ///
+selection == "MNA-JMCK" | selection == "MRA-MSQD" | ///
+selection == "LAA-JMCK" | selection == "MNA-NANC" | ///
 selection == "No-Participation"
-
-tab msqdclosured
-tab psdnclosured
 
 ** Drop cases with no choice selected
 cap drop check_if_choice
@@ -147,9 +138,6 @@ cap drop port
 cap label drop lb_port
 cap drop partp
 cap label drop lb_partp
-
-tab selection if fished == 1
-
 nlogitgen port = selection( ///
 	SBA: SBA-MSQD | SBA-NANC, ///
 	LAA: LAA-MSQD | LAA-CMCK | LAA-PSDN | LAA-JMCK, /// 
@@ -159,38 +147,21 @@ nlogitgen port = selection( ///
 	SFA: SFA-MSQD, ///
 	RFSH:  SFA-BLCK, /// 
 	NOPORT: No-Participation) 
-
-// nlogitgen port = selection( ///
-// 	MSQD: SBA-MSQD | LAA-MSQD | MNA-MSQD | MRA-MSQD | SFA-MSQD, ///
-// 	NANC: SBA-NANC | MNA-NANC | SDA-NANC, ///
-// 	CMCK: LAA-CMCK | MNA-CMCK, ///
-// 	PSDN: LAA-PSDN | MNA-PSDN, ///
-// 	JMCK: LAA-JMCK | MNA-JMCK, ///
-// 	SMLT: MNA-SMLT, ///
-// 	RFSH: SFA-BLCK, /// 
-// 	NOPORT: No-Participation) 
-
 nlogitgen partp = port(PART: SBA | LAA | MNA | MRA | SDA | SFA, PART_RFSH: RFSH, NOPART: NOPORT)
-// nlogitgen partp = port(PART: MSQD | NANC | CMCK | PSDN | JMCK | SMLT | RFSH, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
-// constraint 1 [/port]SMLT_tau = 1
-// constraint 2 [/port]NANC_tau = 1
-// save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
+constraint 1 [/port]SMLT_tau = 1
+constraint 2 [/port]NANC_tau = 1
 
-tab d_c
-tab d_d
-tab d_p
-tab d_cd
-tab d_pc
-tab d_pd
-tab d_pcd
+save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
 
-** Correlation is within ports!!!
 
 
 ************************
 *** Run nested logit ***
 ************************
+
+*** Note: Correlation is within ports! (otherwise, model do not converge)
+
 
 nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
