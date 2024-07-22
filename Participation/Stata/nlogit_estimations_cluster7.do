@@ -184,6 +184,17 @@ matrix start=e(b)
 estimates store B1_c
 lrtest B1 B1_c, force
 
+constraint 3 _b[PART:mean_avail]  = 0
+nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
+	|| partp:   weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) 
+estimates save ${results}nlogit_FULL_C7_basic.ster, replace
+estimates use ${results}nlogit_FULL_C7_basic.ster
+matrix start=e(b)
+estimates store B1_c
+lrtest B1 B1_c, force
+
 
 
 ****************** USING PREV DAYS DUMMY ************************
