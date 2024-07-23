@@ -163,38 +163,22 @@ save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
 *** Note: Correlation is within ports! (otherwise, model do not converge)
 
 
-// nlogit fished wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
-// 	|| partp:  mean_avail mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-// estimates save ${results}nlogit_FULL_C7.ster, replace
+
+nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
+	|| partp: mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
+estimates save ${results}nlogit_FULL_C7.ster, replace
 estimates use ${results}nlogit_FULL_C7.ster
 matrix start=e(b)
 estimates store B1
 
 
-gen mean_avail_rfsh = mean_avail
-replace mean_avail_rfsh = 0 if selection == "SFA-BLCK"
-
-nlogit fished mean_avail_rfsh wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
-	|| partp: mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) 
-estimates save ${results}nlogit_FULL_C7_c.ster, replace
-estimates use ${results}nlogit_FULL_C7_c.ster
-matrix start=e(b)
-estimates store B1_c
-lrtest B1 B1_c, force
-
-
-
-
-
 ****************** USING PREV DAYS DUMMY ************************
 
-// nlogit fished wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 	dummy_prev_days dummy_prev_year_days unem_rate msqdclosured psdnclosured d_d d_cd /// 
-// 	|| partp:  mean_avail mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
+// nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 	  dummy_prev_days dummy_prev_year_days unem_rate msqdclosured psdnclosured d_d d_cd /// 
+// 	|| partp:   mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
 // 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
 // estimates save ${results}nlogit_FULL_C7_prev_days.ster, replace
 // estimates use ${results}nlogit_FULL_C7_prev_days.ster
