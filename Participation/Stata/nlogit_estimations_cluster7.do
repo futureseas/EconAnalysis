@@ -173,7 +173,7 @@ estimates store B1
 
 nlogit fished wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 	  dummy_last_day  msqdclosured psdnclosured d_d d_cd /// 
-	|| partp: mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: mean_avail, ///
+	|| partp: mean_price weekend, base(NOPART) || port: mean_avail, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) from(start, skip)
 
 estimates save ${results}nlogit_FULL_C7_v2.ster, replace
