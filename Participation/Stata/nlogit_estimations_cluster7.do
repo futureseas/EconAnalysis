@@ -161,8 +161,8 @@ save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
 *** Note: Correlation is within ports! (otherwise, model do not converge)
 
 nlogit fished  mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day  msqdclosured psdnclosured d_d d_cd unem_rate msqdweekend /// 
-	|| partp:  , base(NOPART) || port: , base(NOPORT) || selection: , ///
+	  dummy_last_day  msqdclosured psdnclosured d_d d_cd  msqdweekend /// 
+	|| partp: unem_rate , base(NOPART) || port: , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
 
 estimates save ${results}nlogit_FULL_C7.ster, replace
