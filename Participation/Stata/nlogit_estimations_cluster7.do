@@ -171,17 +171,6 @@ matrix start=e(b)
 estimates store B1
 
 
-nlogit fished mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day  msqdclosured psdnclosured d_d d_cd unem_rate msqdweekend /// 
-	|| partp: , base(NOPART) || port: mean_avail, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) from(start, skip)
-
-estimates save ${results}nlogit_FULL_C7_v2.ster, replace
-estimates use ${results}nlogit_FULL_C7_v2.ster
-matrix start=e(b)
-estimates store B1_v2
-
-
 // gen species = substr(selection,5,4)
 // tabulate species, generate(sp)
 // drop sp7
