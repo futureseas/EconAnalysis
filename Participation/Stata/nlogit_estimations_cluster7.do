@@ -171,6 +171,19 @@ matrix start=e(b)
 estimates store B1
 
 
+****************** USING PREV DAYS DUMMY ************************
+
+nlogit fished  mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	  dummy_prev_days dummy_prev_year_days  msqdclosured psdnclosured d_d d_cd  msqdweekend /// 
+	|| partp: unem_rate , base(NOPART) || port: , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
+estimates save ${results}nlogit_FULL_C7_prev_days.ster, replace
+estimates use ${results}nlogit_FULL_C7_prev_days.ster
+matrix start=e(b)
+estimates store B2
+lrtest B1 B2, force
+
+
 // gen species = substr(selection,5,4)
 // tabulate species, generate(sp)
 // drop sp7
@@ -181,18 +194,6 @@ estimates store B1
 // gen psdn_mean_avail = sp5 * mean_avail
 // gen smlt_mean_avail = sp6 * mean_avail
 
-
-****************** USING PREV DAYS DUMMY ************************
-
-// nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 	  dummy_prev_days dummy_prev_year_days unem_rate msqdclosured psdnclosured d_d d_cd /// 
-// 	|| partp:   mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-// estimates save ${results}nlogit_FULL_C7_prev_days.ster, replace
-// estimates use ${results}nlogit_FULL_C7_prev_days.ster
-// matrix start=e(b)
-// estimates store B2
-// lrtest B1 B2, force
 
 
 
