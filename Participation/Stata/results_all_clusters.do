@@ -217,7 +217,7 @@ estimates use ${results}nlogit_C7_base.ster
 estimates store base_C7 
 scalar ll0_C7 = e(ll)
 
-estimates use ${results}nlogit_FULL_C7.ster
+estimates use ${results}nlogit_FULL_C7_v2.ster
 matrix start=e(b)
 estimates store C7_v1
 estimates describe C7_v1
@@ -275,25 +275,6 @@ restore
 
 
 // *** Save model
-// esttab  C5_v1 using "${google_path}Tables\Participation\nested_logit_${S_DATE}_all_clusters_5.tex", ///
-// 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
-// 		label title("Table. Nested Logit.") /// 
-// 		stats(N r2 perc1 perc2 perc3 perc4 lr_p aicc caic, fmt(0 3) ///
-// 			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" ///
-// 			"Predicted choices (%) -- No SD" "- Excl. No-Participation (%) -- No SD" "LR-test" "AICc" "CAIC" ))  ///
-// 		mgroups("Cluster 4" "Cluster 5", pattern(1 0 1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-// 		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant style(tex)
-
-
-// esttab  C6_v1 using "${google_path}Tables\Participation\nested_logit_${S_DATE}_all_clusters_6.tex", ///
-// 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
-// 		label title("Table. Nested Logit.") /// 
-// 		stats(N r2 perc1 perc2 perc3 perc4 lr_p aicc caic, fmt(0 3) ///
-// 			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" ///
-// 			"Predicted choices (%) -- No SD" "- Excl. No-Participation (%) -- No SD" "LR-test" "AICc" "CAIC" ))  ///
-// 		mgroups("Cluster 4" "Cluster 5", pattern(1 0 1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-// 		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant style(tex)
-
 esttab  C4_v1 C5_v1 C6_v1 C7_1 using "${google_path}Tables\Participation\nested_logit_${S_DATE}_all_clusters.tex", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
