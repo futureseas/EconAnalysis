@@ -183,7 +183,7 @@ estimates store B1_v2
 
 
 nlogit fished wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day  msqdclosured psdnclosured d_d d_cd unem_rate /// 
+	  dummy_last_day  msqdclosured psdnclosured d_d d_cd /// 
 	|| partp: mean_price, base(NOPART) || port: mean_avail weekend , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) from(start, skip)
 
