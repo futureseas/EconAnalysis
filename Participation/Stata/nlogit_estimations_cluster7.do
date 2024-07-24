@@ -1,5 +1,5 @@
-*global path_google "G:\Mi unidad"
-global path_google "H:\My drive"
+global path_google "G:\Mi unidad"
+*global path_google "H:\My drive"
 global path "C:\GitHub\EconAnalysis\Participation\"
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -160,8 +160,8 @@ save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
 
 *** Note: Correlation is within ports! (otherwise, model do not converge)
 
-nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
+nlogit fished  mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	  dummy_last_day  msqdclosured psdnclosured d_d d_cd /// 
 	|| partp: mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
 
