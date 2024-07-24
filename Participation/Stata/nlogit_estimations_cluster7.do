@@ -115,7 +115,7 @@ selection == "LAA-PSDN" | selection == "SFA-MSQD" | ///
 selection == "MNA-CMCK" | selection == "MNA-PSDN" | ///
 selection == "MNA-JMCK" | selection == "MRA-MSQD" | ///
 selection == "LAA-JMCK" | selection == "MNA-NANC" | ///
-selection == "MNA-SMLT" | selection == "No-Participation"
+selection == "No-Participation"
 
 ** Drop cases with no choice selected
 cap drop check_if_choice
@@ -140,7 +140,7 @@ cap label drop lb_partp
 nlogitgen port = selection( ///
 	SBA: SBA-MSQD | SBA-NANC, ///
 	LAA: LAA-MSQD | LAA-CMCK | LAA-PSDN | LAA-JMCK, /// 
-	MNA: MNA-MSQD | MNA-CMCK | MNA-PSDN | MNA-JMCK | MNA-NANC | MNA-SMLT, ///
+	MNA: MNA-MSQD | MNA-CMCK | MNA-PSDN | MNA-JMCK | MNA-NANC, ///
 	MRA: MRA-MSQD, ///
 	SDA: SDA-NANC, ///
 	SFA: SFA-MSQD, ///
@@ -160,41 +160,26 @@ save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
 
 *** Note: Correlation is within ports! (otherwise, model do not converge)
 
-// nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
-// 	|| partp: mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-// estimates save ${results}nlogit_FULL_C7.ster, replace
+nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
+	|| partp: mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
+
+estimates save ${results}nlogit_FULL_C7.ster, replace
 estimates use ${results}nlogit_FULL_C7.ster
 matrix start=e(b)
 estimates store B1
 
 
-*** Try weekend for all species interacted 
-gen species = substr(selection,5,4)
-tabulate species, generate(sp)
-drop sp7
-gen cmck_mean_avail = sp1 * mean_avail
-gen jmck_mean_avail = sp2 * mean_avail
-gen msdq_mean_avail = sp3 * mean_avail
-gen nanc_mean_avail = sp4 * mean_avail
-gen psdn_mean_avail = sp5 * mean_avail
-gen smlt_mean_avail = sp6 * mean_avail
-
-
-nlogit fished mean_avail msdq_mean_avail smlt_mean_avail ///
-wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_last_day unem_rate msqdclosured psdnclosured d_d d_cd /// 
-	|| partp: mean_price weekend, base(NOPART) || port: , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-estimates save ${results}nlogit_FULL_C7_m.ster, replace
-estimates use ${results}nlogit_FULL_C7_m.ster
-matrix start=e(b)
-estimates store B1_m
-
-
-
-
+// gen species = substr(selection,5,4)
+// tabulate species, generate(sp)
+// drop sp7
+// gen cmck_mean_avail = sp1 * mean_avail
+// gen jmck_mean_avail = sp2 * mean_avail
+// gen msdq_mean_avail = sp3 * mean_avail
+// gen nanc_mean_avail = sp4 * mean_avail
+// gen psdn_mean_avail = sp5 * mean_avail
+// gen smlt_mean_avail = sp6 * mean_avail
 
 
 ****************** USING PREV DAYS DUMMY ************************
