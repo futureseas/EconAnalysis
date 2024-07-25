@@ -1,5 +1,5 @@
-global path_google "G:\Mi unidad"
-*global path_google "H:\My drive"
+*global path_google "G:\Mi unidad"
+global path_google "H:\My drive"
 global path "C:\GitHub\EconAnalysis\Participation\"
 global results "${path}Results\"
 global figures "${results}Figures\"

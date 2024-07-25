@@ -176,11 +176,11 @@ estimates store B12_G
 
 ****************** USING PREV DAYS DUMMY ************************
 
-nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		dummy_prev_days dummy_prev_year_days unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
-		|| partp:  mean_price_3, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_anon) from(start, skip)
-	 estimates save ${results}nlogit_FULL_C5_v12_G_prev_days.ster, replace 
+// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 		dummy_prev_days dummy_prev_year_days unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
+// 		|| partp:  mean_price_3, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 		base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_anon) from(start, skip)
+// 	 estimates save ${results}nlogit_FULL_C5_v12_G_prev_days.ster, replace 
 	 estimates use ${results}nlogit_FULL_C5_v12_G_prev_days.ster
 matrix start=e(b)
 estimates store B12_G_prev_days
