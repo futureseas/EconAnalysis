@@ -1,5 +1,5 @@
-*global google_path "H:\My Drive\"
-global google_path "G:\Mi unidad\"
+global google_path "H:\My Drive\"
+*global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -169,7 +169,7 @@ save "${google_path}Data\Anonymised data\part_model_c5.dta", replace
 // 		|| partp:  mean_price_3, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 // 		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) 
 // 	 estimates save ${results}nlogit_FULL_C5_v12_G.ster, replace 
-estimates use ${results}nlogit_FULL_C5_v12_G.ster, replace 
+estimates use ${results}nlogit_FULL_C5_v12_G.ster
 matrix start=e(b)
 estimates store B12_G
 

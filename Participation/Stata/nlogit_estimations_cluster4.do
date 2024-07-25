@@ -174,25 +174,14 @@ estimates store B1
 matrix start=e(b)
 
 
-****************** USING PREV DAYS DUMMY ************************
+****************** USING PREV DAYS DUMMY (Note: I had to add TUNA constraint in correlation ************************ 
 
 // nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 // 			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
 // 			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-// 		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
-// 	estimates save ${results}nlogit_FULL_c4_prev_days.ster, replace
-estimates use ${results}nlogit_FULL_c4_prev_days.ster
+// 		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
+// 	estimates save ${results}nlogit_FULL_c4_prev_days_2.ster, replace
+estimates use ${results}nlogit_FULL_c4_prev_days_2.ster
 matrix start=e(b)
 estimates store B2
 lrtest B1 B2, force
-
-
-nlogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
-			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
-	estimates save ${results}nlogit_FULL_c4_prev_days_2.ster, replace
-estimates use ${results}nlogit_FULL_c4_prev_days_2.ster
-matrix start=e(b)
-estimates store B3
-lrtest B2 B3, force

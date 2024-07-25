@@ -283,3 +283,11 @@ esttab  C4_v1 C5_v1 C6_v1 C7_1 using "${google_path}Tables\Participation\nested_
 			"Predicted choices (%) -- No SD" "- Excl. No-Participation (%) -- No SD" "LR-test" "AICc" "CAIC" ))  ///
 		mgroups("Cluster 4" "Cluster 5", pattern(1 0 1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant style(tex)
+
+
+
+
+
+************************************
+
+estimates use ${results}nlogit_FULL_c4_prev_days_2.ster
