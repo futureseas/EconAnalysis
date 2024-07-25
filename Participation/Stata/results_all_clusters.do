@@ -293,3 +293,4 @@ esttab  C4_v1 C5_v1 C6_v1 C7_1 using "${google_path}Tables\Participation\nested_
 estimates use ${results}nlogit_FULL_c4_prev_days_2.ster
 estimates use ${results}nlogit_FULL_C5_v12_G_prev_days.ster
 estimates use ${results}nlogit_FULL_C6_B_prev_days.ster
+estimates use ${results}nlogit_FULL_C7_prev_days.ster
