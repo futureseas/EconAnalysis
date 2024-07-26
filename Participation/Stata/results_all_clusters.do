@@ -272,7 +272,7 @@ preserve
 	estadd scalar perc2 = count2/_N*100: C7_v1
 restore
 
-estimates use ${results}nlogit_FULL_C7_v2.ster
+estimates use ${results}nlogit_FULL_C7.ster
 estimates store C7_v2
 estimates describe C7_v2
 estimates replay C7_v2
