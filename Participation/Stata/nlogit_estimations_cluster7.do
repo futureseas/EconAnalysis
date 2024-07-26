@@ -147,7 +147,7 @@ nlogitgen port = selection( ///
 	NOPORT: No-Participation) 
 nlogitgen partp = port(PART: SBA | LAA | MNA | MRA | SDA | SFA, NOPART: NOPORT)
 nlogittree selection port partp, choice(fished) case(fished_haul) 
-// constraint 1 _b[PART:mean_avail]  = 0
+constraint 1 [/port]LAA_tau = 1
 // constraint 2 _b[PART:mean_price]  = 0
 
 save "${path_google}\Data\Anonymised data\part_model_c7.dta", replace
@@ -170,13 +170,15 @@ matrix start=e(b)
 estimates store B1
 
 
-****************** USING PREV DAYS DUMMY ************************
+****************** USING PREV DAYS DUMMY ************************ 
 
-nlogit fished  mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-	  dummy_prev_days dummy_prev_year_days  msqdclosured psdnclosured d_d d_cd  msqdweekend /// 
-	|| partp: unem_rate , base(NOPART) || port: , base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul)  vce(cluster fished_vessel_anon) 
-estimates save ${results}nlogit_FULL_C7_prev_days.ster, replace
+* I had to constrain LAA correlation in this case
+
+// nlogit fished  mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 	  dummy_prev_days dummy_prev_year_days  msqdclosured psdnclosured d_d d_cd  msqdweekend /// 
+// 	|| partp: unem_rate , base(NOPART) || port: , base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) 
+// estimates save ${results}nlogit_FULL_C7_prev_days.ster, replace
 estimates use ${results}nlogit_FULL_C7_prev_days.ster
 matrix start=e(b)
 estimates store B2
