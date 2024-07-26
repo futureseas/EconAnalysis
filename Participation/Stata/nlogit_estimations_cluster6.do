@@ -162,13 +162,11 @@ save "${google_path}Data\Anonymised data\part_model_c6.dta", replace
 
 *** Note: waclosured cannot be excluded, but dcrbclosurewad
 
-
-
-// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 	dummy_last_day unem_rate d_d d_cd waclosured /// 
-// 	|| partp: psdnclosure  mean_price_3, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
-// 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
-// estimates save ${results}nlogit_FULL_C6_B.ster, replace
+nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	dummy_last_day unem_rate d_d d_cd waclosured /// 
+	|| partp: psdnclosure  mean_price_3, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
+estimates save ${results}nlogit_FULL_C6_B.ster, replace
 estimates use ${results}nlogit_FULL_C6_B.ster
 matrix start=e(b)
 estimates store B1
