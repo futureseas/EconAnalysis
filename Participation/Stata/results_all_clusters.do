@@ -2,13 +2,8 @@
 *****************************************************
 *** All cluster results for Discrete Choice Model ***
 *****************************************************
-
-
-*** Dan Holland would ask for 30 days state dependency!
-
-
 global google_path "H:\My Drive\"
-*lobal google_path "G:\Mi unidad\"
+*global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -23,11 +18,9 @@ clear all
 
 use "${google_path}Data\Anonymised data\part_model_c4.dta", clear
 
-
 estimates use ${results}nlogit_C4_base.ster
 estimates store base_C4 
 scalar ll0_C4 = e(ll)
-
 
 estimates use ${results}nlogit_FULL_c4_prev_days_2.ster
 estimates store C4_v1
@@ -60,28 +53,6 @@ preserve
 	dis count2/_N*100 "%"
 	estadd scalar perc2 = count2/_N*100: C4_v1
 restore
-preserve
-	replace dummy_last_day = 0
-	replace dummy_prev_days = 0
-	replace dummy_prev_year_days = 0
-	replace dummy_prev_days_port = 0
-	replace d_hist_selection = 0
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc3 = count1/_N*100: C4_v1
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc4 = count2/_N*100: C4_v1
-restore
 
 estimates use ${results}nlogit_FULL_c4_22042024.ster
 estimates store C4_v2
@@ -113,28 +84,6 @@ preserve
 	dis _N
 	dis count2/_N*100 "%"
 	estadd scalar perc2 = count2/_N*100: C4_v2
-restore
-preserve
-	replace dummy_last_day = 0
-	replace dummy_prev_days = 0
-	replace dummy_prev_year_days = 0
-	replace dummy_prev_days_port = 0
-	replace d_hist_selection = 0
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc3 = count1/_N*100: C4_v2
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc4 = count2/_N*100: C4_v2
 restore
 
 
@@ -177,29 +126,6 @@ preserve
 	dis count2/_N*100 "%"
 	estadd scalar perc2 = count2/_N*100: C5_v1
 restore
-preserve
-	replace dummy_last_day = 0
-	replace dummy_prev_days = 0
-	replace dummy_prev_year_days = 0
-	replace dummy_prev_days_port = 0
-	replace d_hist_selection = 0
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc3 = count1/_N*100: C5_v1
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc4 = count2/_N*100: C5_v1
-restore
-
 
 estimates use ${results}nlogit_FULL_C5_v12_G.ster
 estimates store C5_v2 
@@ -232,29 +158,6 @@ preserve
 	dis count2/_N*100 "%"
 	estadd scalar perc2 = count2/_N*100: C5_v2
 restore
-preserve
-	replace dummy_last_day = 0
-	replace dummy_prev_days = 0
-	replace dummy_prev_year_days = 0
-	replace dummy_prev_days_port = 0
-	replace d_hist_selection = 0
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc3 = count1/_N*100: C5_v2
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc4 = count2/_N*100: C5_v2
-restore
-
 
 
 ************* Cluster 6
@@ -264,8 +167,6 @@ use "${google_path}Data\Anonymised data\part_model_c6.dta", clear
 estimates use ${results}nlogit_C6_base.ster
 estimates store base_C6 
 scalar ll0_C6 = e(ll)
-
-
 
 estimates use ${results}nlogit_FULL_C6_B_prev_days.ster
 estimates store C6_v1
@@ -298,29 +199,6 @@ preserve
 	dis count2/_N*100 "%"
 	estadd scalar perc2 = count2/_N*100: C6_v1
 restore
-preserve
-	replace dummy_last_day = 0
-	replace dummy_prev_days = 0
-	replace dummy_prev_year_days = 0
-	replace dummy_prev_days_port = 0
-	replace d_hist_selection = 0
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc3 = count1/_N*100: C6_v1
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc4 = count2/_N*100: C6_v1
-restore
-
 
 estimates use ${results}nlogit_FULL_C6_B.ster
 estimates store C6_v2
@@ -352,28 +230,6 @@ preserve
 	dis _N
 	dis count2/_N*100 "%"
 	estadd scalar perc2 = count2/_N*100: C6_v2
-restore
-preserve
-	replace dummy_last_day = 0
-	replace dummy_prev_days = 0
-	replace dummy_prev_year_days = 0
-	replace dummy_prev_days_port = 0
-	replace d_hist_selection = 0
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc3 = count1/_N*100: C6_v2
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc4 = count2/_N*100: C6_v2
 restore
 
 
@@ -415,29 +271,6 @@ preserve
 	dis count2/_N*100 "%"
 	estadd scalar perc2 = count2/_N*100: C7_v1
 restore
-preserve
-	replace dummy_last_day = 0
-	replace dummy_prev_days = 0
-	replace dummy_prev_year_days = 0
-	replace dummy_prev_days_port = 0
-	replace d_hist_selection = 0
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc3 = count1/_N*100: C7_v1
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc4 = count2/_N*100: C7_v1
-restore
-
 
 estimates use ${results}nlogit_FULL_C7_v2.ster
 estimates store C7_v2
@@ -470,45 +303,15 @@ preserve
 	dis count2/_N*100 "%"
 	estadd scalar perc2 = count2/_N*100: C7_v2
 restore
-preserve
-	replace dummy_last_day = 0
-	replace dummy_prev_days = 0
-	replace dummy_prev_year_days = 0
-	replace dummy_prev_days_port = 0
-	replace d_hist_selection = 0
-	qui predict phat
-	by fished_haul, sort: egen max_prob = max(phat) 
-	drop if max_prob != phat
-	by fished_haul, sort: gen nvals = _n == 1 
-	count if nvals
-	dis _N
-	gen selection_hat = 1
-	egen count1 = total(fished)
-	dis count1/_N*100 "%"
-	estadd scalar perc3 = count1/_N*100: C7_v2
-	drop if selection == "No-Participation"
-	egen count2 = total(fished)
-	dis _N
-	dis count2/_N*100 "%"
-	estadd scalar perc4 = count2/_N*100: C7_v2
-restore
 
 
 
-// *** Save model
+*** Save model
 esttab  C4_v1 C4_v2 C5_v1 C5_v2 C6_v1 C6_v2 C7_v1 C7_v2 using "${google_path}Tables\Participation\nested_logit_${S_DATE}_all_clusters.rtf", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
-		stats(N r2 perc1 perc2 perc3 perc4 lr_p aicc caic, fmt(0 3) ///
-			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" ///
-			"Predicted choices (%) -- No SD" "- Excl. No-Participation (%) -- No SD" "LR-test" "AICc" "CAIC" ))  ///
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
 		mgroups("Cluster 4" "Cluster 5" "Cluster 6" "Cluster 7", pattern(1 0 1 0 1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
 		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant //style(tex)
-
-
-
-
-
-************************************
-
 
