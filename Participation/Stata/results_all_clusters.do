@@ -312,6 +312,6 @@ esttab  C4_v1 C4_v2 C5_v1 C5_v2 C6_v1 C6_v2 C7_v1 C7_v2 using "${google_path}Tab
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
-		mgroups("Cluster 4" "Cluster 5" "Cluster 6" "Cluster 7", pattern(1 0 1 0 1 0 1 0) prefix(\multicolumn{@span}{c}{) suffix(}) span erepeat(\cmidrule(lr){@span})) ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant //style(tex)
+		mgroups("Cluster 4" "Cluster 5" "Cluster 6" "Cluster 7", pattern(1 0 1 0 1 0 1 0)) ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant
 
