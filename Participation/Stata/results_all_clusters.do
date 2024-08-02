@@ -307,11 +307,43 @@ restore
 
 
 *** Save model
-esttab  C4_v1 C4_v2 C5_v1 C5_v2 C6_v1 C6_v2 C7_v1 C7_v2 using "${google_path}Tables\Participation\nested_logit_${S_DATE}_all_clusters.rtf", ///
+// esttab  C4_v1 C4_v2 C5_v1 C5_v2 C6_v1 C6_v2 C7_v1 C7_v2 using "${google_path}Tables\Participation\nested_logit_${S_DATE}_all_clusters.rtf", ///
+// 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+// 		label title("Table. Nested Logit.") /// 
+// 		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+// 			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
+// 		mgroups("Cluster 4" "Cluster 5" "Cluster 6" "Cluster 7", pattern(1 0 1 0 1 0 1 0)) ///
+// 		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant
+
+
+
+esttab  C4_v1 C4_v2 using "${google_path}Tables\Participation\nested_logit_cluster4.tex", ///
 		starlevels(* 0.10 ** 0.05 *** 0.01) ///
 		label title("Table. Nested Logit.") /// 
 		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
 			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
-		mgroups("Cluster 4" "Cluster 5" "Cluster 6" "Cluster 7", pattern(1 0 1 0 1 0 1 0)) ///
-		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant style(tex)
 
+
+esttab  C5_v1 C5_v2 using "${google_path}Tables\Participation\nested_logit_cluster5.tex", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Nested Logit.") /// 
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant style(tex)
+
+
+esttab  C6_v1 C6_v2 using "${google_path}Tables\Participation\nested_logit_cluster6.tex", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Nested Logit.") /// 
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant style(tex)
+
+
+esttab  C7_v1 C7_v2 using "${google_path}Tables\Participation\nested_logit_cluster7.tex", ///
+		starlevels(* 0.10 ** 0.05 *** 0.01) ///
+		label title("Table. Nested Logit.") /// 
+		stats(N r2 perc1 perc2 lr_p aicc caic, fmt(0 3) ///
+			labels("Observations" "McFadden R2" "Predicted choices (%)" "- Excl. No-Participation (%)" "LR-test" "AICc" "CAIC" ))  ///
+		replace nodepvars b(%9.3f) not nomtitle nobaselevels noconstant style(tex)
