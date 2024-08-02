@@ -2,8 +2,8 @@
 *****************************************************
 *** All cluster results for Discrete Choice Model ***
 *****************************************************
-global google_path "H:\My Drive\"
-*global google_path "G:\Mi unidad\"
+*global google_path "H:\My Drive\"
+global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -234,6 +234,17 @@ restore
 
 
 ************* Cluster 7
+*global google_path "H:\My Drive\"
+global google_path "G:\Mi unidad\"
+global path "C:\GitHub\EconAnalysis\Participation\" 
+global results "${path}Results\"
+global figures "${results}Figures\"
+global tables "${results}Tables\"
+global contrmap "${path}Contraction mapping\"
+global mwtp "${path}WTP estimation\"
+cd $path
+clear all
+
 
 use "${google_path}Data\Anonymised data\part_model_c7.dta", clear
 estimates use ${results}nlogit_C7_base.ster
@@ -244,6 +255,7 @@ estimates use ${results}nlogit_FULL_C7_prev_days.ster
 estimates store C7_v1
 estimates describe C7_v1
 estimates replay C7_v1
+nlogittree selection port partp, choice(fished) case(fished_haul) 
 di "R2-McFadden = " 1 - (e(ll)/ll0_C7)
 estadd scalar r2 = 1 - (e(ll)/ll0_C7): C7_v1
 lrtest base_C7 C7_v1, force
