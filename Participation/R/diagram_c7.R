@@ -1,0 +1,38 @@
+
+
+gc()
+rm(list = ls())
+library(data.tree)
+
+vessel <- Node$new("Vessel")
+ part <- vessel$AddChild("Participate")
+   laa <- part$AddChild("Los Angeles")
+     cmck <- laa$AddChild("Chub Mackerel")
+     msqd <- laa$AddChild("Squid")
+     jmck <- laa$AddChild("Jack Mackerel")
+     psdn <- laa$AddChild("Sardine")
+   mna <- part$AddChild("Monterey")
+     msqd <- mna$AddChild("Squid")
+     nanc <- mna$AddChild("Anchovy")
+     psdn <- mna$AddChild("Sardine")
+     jmck <- mna$AddChild("Jack Mackerel")
+     cmck <- mna$AddChild("Chub Mackerel")
+   mra <- part$AddChild("Morrobay")
+     msqd <- mra$AddChild("Squid")
+   sba <- part$AddChild("Santa Barbara")
+     nanc <- sba$AddChild("Anchovy")
+     msqd <- sba$AddChild("Squid")
+   sfa <- part$AddChild("San Francisco")
+     msqd <- sfa$AddChild("Squid")
+   sda <- part$AddChild("San Diego")
+     nanc <- sda$AddChild("Anchovy")
+ nopart <- vessel$AddChild("No participate")
+
+SetGraphStyle(vessel, rankdir = "LR")
+SetEdgeStyle(vessel, arrowhead = "vee", color = "grey35", penwidth = 2)
+SetNodeStyle(vessel, style = "filled,rounded", shape = "box", fontcolor = "black",fillcolor = "lightgrey",  
+            fontname = "helvetica", tooltip = GetDefaultTooltip)
+SetNodeStyle(vessel$`No participate`, fillcolor = "firebrick1")
+SetNodeStyle(vessel$Participate, fillcolor = "ivory1")
+plot(vessel)
+ 
