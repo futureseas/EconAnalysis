@@ -1,5 +1,5 @@
-global google_path "H:\My Drive\"
-*global google_path "G:\Mi unidad\"
+*global google_path "H:\My Drive\"
+global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -10,7 +10,7 @@ cd $path
 clear all
 
 
-import delimited "C:\GitHub\EconAnalysis\Data\Ports\ports_area_and_name_codes.csv", varnames(1) clear
+/* import delimited "C:\GitHub\EconAnalysis\Data\Ports\ports_area_and_name_codes.csv", varnames(1) clear
 tempfile port_area
 save `port_area'
 
@@ -153,8 +153,9 @@ constraint 1 [/port]CMCK_tau = 1
 constraint 2 [/port]NANC_tau = 1
 
 save "${google_path}Data\Anonymised data\part_model_c6.dta", replace
-
-
+ */
+use "${google_path}Data\Anonymised data\part_model_c6.dta", clear
+corr dist_to_cog dist_port_to_catch_area_zero if d_missing_d == 0
 
 ************************
 *** Run nested logit ***
