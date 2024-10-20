@@ -106,9 +106,7 @@ clear all
 // ** Estimate nested logit **
 // ***************************
 
-// Create instruments, following Guevara 2015. We need to regress Price on all all the exogenous variables in X, including the intercept,
-// and at least one instrument. Then obtain the residuals and estimate the normal model + residual
-// Bootstrap errors!
+
 
 
 
@@ -194,3 +192,12 @@ estimates use ${results}nlogit_FULL_c4_prev_days_2.ster
 matrix start=e(b)
 estimates store B2
 lrtest B1 B2, force
+
+
+
+****************** ESTIMATE IV NESTED LOGIT ************************
+// Following Guevara 2015. We need to regress Price on all all the exogenous variables in X, including the intercept,
+// and at least one instrument. Then obtain the residuals and estimate the normal model + residual
+// Bootstrap errors!
+
+// Step 1: Include Fishmeal!
