@@ -106,8 +106,9 @@ clear all
 // ** Estimate nested logit **
 // ***************************
 
-
-
+// Create instruments, following Guevara 2015. We need to regress Price on all all the exogenous variables in X, including the intercept,
+// and at least one instrument. Then obtain the residuals and estimate the normal model + residual
+// Bootstrap errors!
 
 
 
