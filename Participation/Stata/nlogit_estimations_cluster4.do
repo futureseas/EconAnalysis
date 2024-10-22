@@ -148,11 +148,10 @@ clear all
 
 // nlogitgen partp = port(PART: CMCK | MSQD | PSDN | NANC | TUNA, NOPART: NOPORT)
 // nlogittree selection port partp, choice(fished) case(fished_haul) 
-// constraint 1 [/port]TUNA_tau = 1
+constraint 1 [/port]TUNA_tau = 1
 
 
 // save "${google_path}Data\Anonymised data\part_model_c4.dta", replace
-
 
 use "${google_path}Data\Anonymised data\part_model_c4.dta", clear
 
@@ -200,4 +199,36 @@ lrtest B1 B2, force
 // and at least one instrument. Then obtain the residuals and estimate the normal model + residual
 // Bootstrap errors!
 
-// Step 1: Include Fishmeal!
+// Step 1: Calculate 30-days Fishmeal moving average
+preserve
+	collapse (mean) pricefishmealafi , by(set_date set_month set_year)
+	gen set_date_numeric = date(set_date, "YMD")
+	format set_date_numeric %td
+	tset set_date_numeric
+	tssmooth ma fishmealprice_ma = price, window(30 0)
+	drop pricefishmealafi set_date set_date_numeric
+	tempfile fishmeal_ma
+	save `fishmeal_ma'
+restore
+
+merge m:m set_month set_year using `fishmeal_ma', nogenerate
+replace fishmealprice_ma = fishmealprice_ma / 1000
+
+sum fishmealprice_ma mean_price2
+corr fishmealprice_ma mean_price2
+	encode selection, gen(selection_num)
+
+// Step 2: Regress mean_price2 on all exogenous variables
+reg mean_price2 c.fishmealprice_ma##i.port mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero psdnclosured btnaclosured ///
+	dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  c.weekend#i.port
+
+// Predict residuals
+predict residuals, residuals
+
+
+// Estimate model with residuals included and getting results using bootstrap
+nlogit fished mean_avail mean_price2 residuals wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(bootstrap, cluster(fished_vessel_anon)) 
+
