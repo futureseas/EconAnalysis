@@ -227,11 +227,28 @@ predict residuals, residuals
 
 
 // Estimate model with residuals included and getting results using bootstrap
-nlogit fished mean_avail mean_price2 residuals wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
 			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon)
+matrix start=e(b)
+estimates save ${results}nlogit_FULL_c4_price2.ster, replace
 
 
-		vce(bootstrap, cluster(fished_vessel_anon)) 
+nlogit fished mean_avail mean_price2 residuals wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
+matrix start=e(b)
+estimates save ${results}nlogit_FULL_c4_price2_IV.ster, replace
+
+
+nlogit fished mean_avail mean_price2 residuals wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(bootstrap, cluster(fished_vessel_anon))  from(start, skip)
+
+estimates save ${results}nlogit_FULL_c4_price2_IV_BT.ster, replace
+		
 
