@@ -265,6 +265,27 @@ cmclogit fished mean_avail mean_price2 residuals wind_max_220_mh dist_to_cog dis
 			casevars(weekend) basealternative("No-Participation") vce(bootstrap, cluster(fished_vessel_anon)) from(start, skip)
 			estimates save ${results}nlogit_FULL_c4_price2_IV_BT.ster, replace
 
+estimates use ${results}nlogit_FULL_c4_price2_IV_BT.ster
+estimates store nr
+
+
+cmclogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd, ///
+			casevars(weekend) basealternative("No-Participation") vce(cluster fished_vessel_anon)
+estimates store re
+lrtest nr re, force
+
+
+nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon)
+		estimates save ${results}nlogit_FULL_c4_noprice.ster, replace
+
+
+		
+
+
 
 
 
@@ -290,6 +311,5 @@ nlogit fished mean_avail mean_price2 residuals wind_max_220_mh dist_to_cog dist_
 			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 		base("No-Participation") case(fished_haul) constraints(1) vce(bootstrap, cluster(fished_vessel_anon))  from(start, skip)
 
-estimates save ${results}nlogit_FULL_c4_price2_IV_BT.ster, replace
-		
+
 
