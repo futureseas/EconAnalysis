@@ -1,5 +1,5 @@
-*global google_path "H:\My Drive\"
-global google_path "G:\Mi unidad\"
+global google_path "H:\My Drive\"
+*global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -216,18 +216,80 @@ replace fishmealprice_ma = fishmealprice_ma / 1000
 
 sum fishmealprice_ma mean_price2
 corr fishmealprice_ma mean_price2
-	encode selection, gen(selection_num)
+encode selection, gen(selection_num)
+gen species = substr(selection, 5, 8)
+gen ports   = substr(selection, 1, 3)
+encode species, generate(species2)
+encode ports, generate(ports2)
+
 
 // Step 2: Regress mean_price2 on all exogenous variables
-reg mean_price2 c.fishmealprice_ma##i.port mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero psdnclosured btnaclosured ///
-	dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  c.weekend#i.port
+reg mean_price2 c.fishmealprice_ma##i.ports2 c.fishmealprice_ma##i.species2 mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero psdnclosured btnaclosured ///
+	dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  c.weekend#i.selection_num
 
 // Predict residuals
 predict residuals, residuals
 
 
-// Estimate model with residuals included and getting results using bootstrap
+// Usando Multinomial Logit
 
+gen set_date_numeric = date(set_date, "YMD")
+format set_date_numeric %td
+cmset fished_vessel_anon set_date_numeric selection 
+
+cmclogit fished mean_avail mean_price wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd, ///
+			casevars(weekend) basealternative("No-Participation") vce(cluster fished_vessel_anon)
+
+
+replace d_c   = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 0) 
+replace d_d   = (d_missing_p2 == 0 & d_missing == 0 & d_missing_d == 1) 
+replace d_p   = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 0) 
+replace d_cd  = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 1) 
+replace d_pc  = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 0) 
+replace d_pd  = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 1) 
+replace d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1) 
+
+cmclogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd, ///
+			casevars(weekend) basealternative("No-Participation") vce(cluster fished_vessel_anon)
+			matrix start=e(b)
+
+cmclogit fished mean_avail mean_price2 residuals wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd, ///
+			casevars(weekend) basealternative("No-Participation") vce(cluster fished_vessel_anon) from(start, skip)
+			matrix start=e(b)
+
+cmclogit fished mean_avail mean_price2 residuals wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd, ///
+			casevars(weekend) basealternative("No-Participation") vce(bootstrap, cluster(fished_vessel_anon)) from(start, skip)
+			estimates save ${results}nlogit_FULL_c4_price2_IV_BT.ster, replace
+
+estimates use ${results}nlogit_FULL_c4_price2_IV_BT.ster
+estimates store nr
+
+
+cmclogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd, ///
+			casevars(weekend) basealternative("No-Participation") vce(cluster fished_vessel_anon)
+estimates store re
+lrtest nr re, force
+
+
+nlogit fished mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon)
+		estimates save ${results}nlogit_FULL_c4_noprice.ster, replace
+
+
+		
+
+
+
+
+
+// Estimate model with residuals included and getting results using bootstrap
 nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 			psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
 			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
@@ -249,6 +311,5 @@ nlogit fished mean_avail mean_price2 residuals wind_max_220_mh dist_to_cog dist_
 			|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 		base("No-Participation") case(fished_haul) constraints(1) vce(bootstrap, cluster(fished_vessel_anon))  from(start, skip)
 
-estimates save ${results}nlogit_FULL_c4_price2_IV_BT.ster, replace
-		
+
 
