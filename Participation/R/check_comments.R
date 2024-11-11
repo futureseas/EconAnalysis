@@ -70,27 +70,57 @@ ggplot(data_c4, aes(x = set_date, y = mean_sdm, group = selection)) +
 ### Daily participation graph ###
 #################################
 
-df.subs <- c4
-
-%>%
-  dplyr::select(c(VESSEL_NUM, Species_Dominant, selection, set_month,
-                  set_date, set_year, group_all)) %>%
-  dplyr::filter(set_year == 2013,
-                set_month ==10,
-                group_all == 4) %>%
-  dplyr::filter(VESSEL_NUM == "648720" | VESSEL_NUM == "643518" |
-                  VESSEL_NUM == "598813" | VESSEL_NUM == "625449" |
-                  VESSEL_NUM == "WN5102SK") %>% drop_na() %>%   
-  group_by(VESSEL_NUM) %>%
-  dplyr::mutate(Vessel = cur_group_id()) %>%
-  ungroup() %>% rename(Month = set_date) %>%
-  rename(Species = Species_Dominant) %>%
-  mutate(Species = ifelse(Species == "CMCK", "Chub Mackerel", 
-                          ifelse(Species == "MSQD", "Market Squid",
-                                 ifelse(Species == "NANC", "Northern Anchovy",
-                                        "Pacific Sardine"))))
+# Select and filter the data
+df.subs <- c4 %>%
+  dplyr::select(c(fished_VESSEL_anon, selection, set_month, set_date, set_year, fished)) %>%
+  dplyr::filter(set_year == 2014, set_month == 7, fished == 1) %>%
+  drop_na() %>% 
+  mutate(Species = substr(selection, nchar(selection) - 3, nchar(selection)),
+         Port = substr(selection, 1, 3)
+  ) 
 
 
-ggplot(df.subs, aes(x=Month, y=Vessel, color=Species)) +
-  geom_point(size=4)
+# Define custom color and shape mappings
+selection_colors <- c(
+  "No-Participation" = "black",
+  "SFA-MSQD" = "orange",
+  "MRA-MSQD" = "red",
+  "MNA-PSDN" = "green",
+  "SFA-NANC" = "orange",
+  "LAA-MSQD" = "blue",
+  "LAA-PSDN" = "blue",
+  "LAA-YTNA" = "blue",
+  "SBA-CMCK" = "purple",
+  "LAA-CMCK" = "blue",
+  "MNA-MSQD" = "green",
+  "LAA-NANC" = "blue",
+  "MNA-NANC" = "green",
+  "LAA-BTNA" = "blue",
+  "SBA-MSQD" = "purple")
+
+
+selection_shapes <- c(
+  "No-Participation" = 4,
+  "SFA-MSQD" = 18,
+  "MRA-MSQD" = 18,
+  "MNA-PSDN" = 15,
+  "SFA-NANC" = 19,
+  "LAA-MSQD" = 18,
+  "LAA-PSDN" = 15,
+  "LAA-YTNA" = 20,
+  "SBA-CMCK" = 17,
+  "LAA-CMCK" = 17,
+  "MNA-MSQD" = 18,
+  "LAA-NANC" = 19,
+  "MNA-NANC" = 19,
+  "LAA-BTNA" = 16,
+  "SBA-MSQD" = 18)  
+
+
+# Plot with color representing Port and shape representing Species
+ggplot(df.subs, aes(x = set_date, y = fished_VESSEL_anon, color = selection, shape = selection)) +
+  geom_point(size = 4) +
+  scale_color_manual(values = selection_colors) +  # Apply color mapping by Port
+  scale_shape_manual(values = selection_shapes) + 
+  theme_minimal()
 
