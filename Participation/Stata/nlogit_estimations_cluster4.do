@@ -1,5 +1,5 @@
-global google_path "H:\My Drive\"
-*global google_path "G:\Mi unidad\"
+*global google_path "H:\My Drive\"
+global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -244,4 +244,5 @@ estimates save ${results}nlogit_FULL_c4_IV.ster, replace
 estimates use ${results}nlogit_FULL_c4_IV.ster
 estimates store B_IV
 matrix start=e(b)
+
 

@@ -80,8 +80,7 @@ df.subs <- c4 %>%
   dplyr::filter(set_year == 2014, set_month == 7, fished == 1) %>%
   drop_na() %>% 
   mutate(Species = substr(selection, nchar(selection) - 3, nchar(selection)),
-         Port = substr(selection, 1, 3)
-  ) 
+         Port = substr(selection, 1, 3)) 
 
 
 # Define custom color and shape mappings
@@ -121,10 +120,38 @@ selection_shapes <- c(
   "SBA-MSQD" = 18)  
 
 
-# Plot with color representing Port and shape representing Species
-ggplot(df.subs, aes(x = set_date, y = fished_VESSEL_anon, color = selection, shape = selection)) +
-  geom_point(size = 4) +
+# Ensure set_date is in Date format
+df.subs <- df.subs %>%
+  mutate(set_date = as.Date(set_date)) %>%  # Convert to Date format
+  mutate(days_since_start = as.numeric(set_date - min(set_date)))  # Calculate days since the first date
+
+# Update the plot with the new x-axis label and variable
+ggplot(df.subs, aes(x = days_since_start, y = fished_VESSEL_anon, color = selection, shape = selection)) +
+  geom_point(size = 3) +
   scale_color_manual(values = selection_colors) +  # Apply color mapping by Port
   scale_shape_manual(values = selection_shapes) + 
-  theme_minimal()
+  labs(x = "Days", y = "Vessel anonymized ID", color = "Alternative", shape = "Alternative") 
+
+## Create metier table
+library(dplyr)
+
+data_c4 <- c4 %>%
+  dplyr::select(fished_VESSEL_anon, selection, set_month, set_date, set_year, fished) %>%
+  dplyr::filter(fished == 1 & selection != "No-Participation") %>%
+  drop_na() %>%
+  mutate(Species = substr(selection, nchar(selection) - 3, nchar(selection)),
+         Port = substr(selection, 1, 3)) %>%
+  count(fished_VESSEL_anon, Species) %>%  # Count occurrences of each Species per vessel
+  group_by(fished_VESSEL_anon) %>%
+  mutate(Frequency = n,                               # Frequency of each Species
+         Percentage = n / sum(n) * 100) %>%           # Calculate percentage within each vessel
+  ungroup() %>%
+  arrange(desc(Frequency)) %>%                        # Sort by Frequency
+  dplyr::select(fished_VESSEL_anon, Species, Frequency, Percentage) %>%
+  dplyr::filter(Percentage > 25)
+
+# Display the table
+print(data_c4)
+
+
 
