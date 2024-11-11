@@ -225,7 +225,7 @@ encode ports, generate(ports2)
 
 // Step 2: Regress mean_price2 on all exogenous variables
 reg mean_price2 c.fishmealprice_ma##i.ports2 c.fishmealprice_ma##i.species2 mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero psdnclosured btnaclosured ///
-	dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  c.weekend#i.selection_num
+	dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  c.weekend#i.selection_num
 
 // Predict residuals
 predict residuals, residuals
