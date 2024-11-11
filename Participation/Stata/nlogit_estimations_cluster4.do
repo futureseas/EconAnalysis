@@ -207,10 +207,9 @@ nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_ca
 		psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
-estimates save ${results}nlogit_FULL_c4_IV.ster, replace
-estimates use ${results}nlogit_FULL_c4_IV.ster
-estimates store B_IV
-matrix start=e(b)
+estimates save ${results}nlogit_FULL_c4_30days.ster, replace
+estimates use ${results}nlogit_FULL_c4_30days.ster
+estimates store B_30
 
 
 
@@ -218,53 +217,54 @@ matrix start=e(b)
 
 
 
-****************** ESTIMATE IV NESTED LOGIT ************************
-// Following Guevara 2015. We need to regress Price on all all the exogenous variables in X, including the intercept,
-// and at least one instrument. Then obtain the residuals and estimate the normal model + residual
-// Bootstrap errors!
 
-// Step 1: Calculate 30-days Fishmeal moving average
-preserve
-	collapse (mean) pricefishmealafi , by(set_date set_month set_year)
-	gen set_date_numeric = date(set_date, "YMD")
-	format set_date_numeric %td
-	tset set_date_numeric
-	tssmooth ma fishmealprice_ma = price, window(30 0)
-	drop pricefishmealafi set_date set_date_numeric
-	tempfile fishmeal_ma
-	save `fishmeal_ma'
-restore
+// ****************** ESTIMATE IV NESTED LOGIT ************************
+// // Following Guevara 2015. We need to regress Price on all all the exogenous variables in X, including the intercept,
+// // and at least one instrument. Then obtain the residuals and estimate the normal model + residual
+// // Bootstrap errors!
 
-merge m:m set_month set_year using `fishmeal_ma', nogenerate
-replace fishmealprice_ma = fishmealprice_ma / 1000
+// // Step 1: Calculate 30-days Fishmeal moving average
+// preserve
+// 	collapse (mean) pricefishmealafi , by(set_date set_month set_year)
+// 	gen set_date_numeric = date(set_date, "YMD")
+// 	format set_date_numeric %td
+// 	tset set_date_numeric
+// 	tssmooth ma fishmealprice_ma = price, window(30 0)
+// 	drop pricefishmealafi set_date set_date_numeric
+// 	tempfile fishmeal_ma
+// 	save `fishmeal_ma'
+// restore
 
-sum fishmealprice_ma mean_price2
-corr fishmealprice_ma mean_price2
-encode selection, gen(selection_num)
-gen species = substr(selection, 5, 8)
-gen ports   = substr(selection, 1, 3)
-encode species, generate(species2)
-encode ports, generate(ports2)
+// merge m:m set_month set_year using `fishmeal_ma', nogenerate
+// replace fishmealprice_ma = fishmealprice_ma / 1000
 
-reg mean_price2 c.fishmealprice_ma##i.species2 mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero psdnclosured btnaclosured ///
-	dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  c.weekend#i.selection_num
+// sum fishmealprice_ma mean_price2
+// corr fishmealprice_ma mean_price2
+// encode selection, gen(selection_num)
+// gen species = substr(selection, 5, 8)
+// gen ports   = substr(selection, 1, 3)
+// encode species, generate(species2)
+// encode ports, generate(ports2)
 
-// Predict residuals
-predict residuals, residuals
-predict mean_price2_hat, xb
+// reg mean_price2 c.fishmealprice_ma##i.species2 mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero psdnclosured btnaclosured ///
+// 	dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  c.weekend#i.selection_num
+
+// // Predict residuals
+// predict residuals, residuals
+// predict mean_price2_hat, xb
 
 
-// Get intial values from previous model
-estimates use ${results}nlogit_FULL_c4_prev_days_2.ster
-matrix start=e(b)
+// // Get intial values from previous model
+// estimates use ${results}nlogit_FULL_c4_prev_days_2.ster
+// matrix start=e(b)
 
-nlogit fished mean_avail mean_price2_hat wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
-		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
-estimates save ${results}nlogit_FULL_c4_IV.ster, replace
-estimates use ${results}nlogit_FULL_c4_IV.ster
-estimates store B_IV
-matrix start=e(b)
+// nlogit fished mean_avail mean_price2_hat wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 		psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+// 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
+// estimates save ${results}nlogit_FULL_c4_IV.ster, replace
+// estimates use ${results}nlogit_FULL_c4_IV.ster
+// estimates store B_IV
+// matrix start=e(b)
 
 
