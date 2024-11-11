@@ -1,5 +1,5 @@
-*global google_path "H:\My Drive\"
-global google_path "G:\Mi unidad\"
+global google_path "H:\My Drive\"
+*global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -225,25 +225,19 @@ encode ports, generate(ports2)
 
 // Step 2: Regress mean_price2 on all exogenous variables
 reg mean_price2 c.fishmealprice_ma##i.ports2 c.fishmealprice_ma##i.species2 mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero psdnclosured btnaclosured ///
-	dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  c.weekend#i.selection_num
+	dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  c.weekend#i.selection_num
 
 // Predict residuals
 predict residuals, residuals
 predict mean_price2_hat, xb
 
-replace d_c   = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 0) 
-replace d_d   = (d_missing_p2 == 0 & d_missing == 0 & d_missing_d == 1) 
-replace d_p   = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 0) 
-replace d_cd  = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 1) 
-replace d_pc  = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 0) 
-replace d_pd  = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 1) 
-replace d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1) 
 
-estimates use ${results}nlogit_FULL_c4_22042024.ster
+// Get intial values from previous model
+estimates use ${results}nlogit_FULL_c4_prev_days_2.ster
 matrix start=e(b)
 
 nlogit fished mean_avail mean_price2_hat wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured btnaclosured dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+		psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
 	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
 estimates save ${results}nlogit_FULL_c4_IV.ster, replace
