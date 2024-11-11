@@ -1,28 +1,18 @@
 library(tidyverse)
-Tickets_final <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+c4_data <- read_csv("G:/Mi unidad/Data/Anonymised data/rdo_Stata_c4_full_noid.csv")
+
 
 #################################
 ### Daily participation graph ###
 #################################
 
-df.subs <- Tickets_final %>%
-  dplyr::select(c(VESSEL_NUM, Species_Dominant, selection, set_month,
-                  set_date, set_year, group_all)) %>%
+df.subs <- c4_data %>%
+  dplyr::select(c(fished_VESSEL_anon, selection, set_month,
+                  set_date, set_year)) %>%
   dplyr::filter(set_year == 2013,
-                set_month ==10,
-                group_all == 4) %>%
- dplyr::filter(VESSEL_NUM == "648720" | VESSEL_NUM == "643518" |
-               VESSEL_NUM == "598813" | VESSEL_NUM == "625449" |
-               VESSEL_NUM == "WN5102SK") %>% drop_na() %>%   
-  group_by(VESSEL_NUM) %>%
-  dplyr::mutate(Vessel = cur_group_id()) %>%
-  ungroup() %>% rename(Month = set_date) %>%
-  rename(Species = Species_Dominant) %>%
-  mutate(Species = ifelse(Species == "CMCK", "Chub Mackerel", 
-                   ifelse(Species == "MSQD", "Market Squid",
-                   ifelse(Species == "NANC", "Northern Anchovy",
-                          "Pacific Sardine"))))
+                set_month ==10) %>% drop_na() 
+
   
 
-ggplot(df.subs, aes(x=Month, y=Vessel, color=Species)) +
-  geom_point(size=4)
+ggplot(df.subs, aes(x=set_date, y=fished_VESSEL_anon, color=selection)) +
+  geom_point(size=3)
