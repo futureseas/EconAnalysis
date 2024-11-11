@@ -1,5 +1,5 @@
-global google_path "H:\My Drive\"
-*global google_path "G:\Mi unidad\"
+*global google_path "H:\My Drive\"
+global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -235,4 +235,9 @@ predict mean_price2_hat, xb
 nlogit fished mean_avail mean_price2_hat wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
 		psdnclosured btnaclosured dummy_last_day unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
 		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
+estimates save ${results}nlogit_FULL_c4_IV.ster, replace
+estimates use ${results}nlogit_FULL_c4_IV.ster
+estimates store B_IV
+matrix start=e(b)
+
