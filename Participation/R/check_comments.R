@@ -135,23 +135,41 @@ ggplot(df.subs, aes(x = days_since_start, y = fished_VESSEL_anon, color = select
 ## Create metier table
 library(dplyr)
 
-data_c4 <- c4 %>%
-  dplyr::select(fished_VESSEL_anon, selection, set_month, set_date, set_year, fished) %>%
-  dplyr::filter(fished == 1 & selection != "No-Participation") %>%
-  drop_na() %>%
-  mutate(Species = substr(selection, nchar(selection) - 3, nchar(selection)),
-         Port = substr(selection, 1, 3)) %>%
-  count(fished_VESSEL_anon, Species) %>%  # Count occurrences of each Species per vessel
-  group_by(fished_VESSEL_anon) %>%
-  mutate(Frequency = n,                               # Frequency of each Species
-         Percentage = n / sum(n) * 100) %>%           # Calculate percentage within each vessel
-  ungroup() %>%
-  arrange(desc(Frequency)) %>%                        # Sort by Frequency
-  dplyr::select(fished_VESSEL_anon, Species, Frequency, Percentage) %>%
-  dplyr::filter(Percentage > 25)
 
-# Display the table
-print(data_c4)
+calculate_switching <- function(data, dataset_name) {
+  data %>%
+    dplyr::select(fished_VESSEL_anon, selection, set_date, fished) %>%
+    dplyr::filter(fished == 1 & selection != "No-Participation") %>%
+    drop_na() %>%
+    arrange(fished_VESSEL_anon, set_date) %>%
+    mutate(Species = substr(selection, nchar(selection) - 3, nchar(selection)),  # Extract species
+           Port = substr(selection, 1, 3),  # Extract port
+           Previous_Species = lag(Species),
+           Previous_Port = lag(Port),
+           Species_Switch = Species != Previous_Species & !is.na(Previous_Species),
+           Port_Switch = Port != Previous_Port & !is.na(Previous_Port)) %>%
+    group_by(fished_VESSEL_anon) %>%
+    summarise(Total_Species_Switches = sum(Species_Switch, na.rm = TRUE),
+              Unique_Species = n_distinct(Species),
+              Total_Port_Switches = sum(Port_Switch, na.rm = TRUE),
+              Unique_Ports = n_distinct(Port)) %>%
+    ungroup() %>%
+    summarise(Dataset = dataset_name,
+              Average_Total_Species_Switches = mean(Total_Species_Switches),
+              SD_Total_Species_Switches = sd(Total_Species_Switches),
+              Average_Unique_Species = mean(Unique_Species),
+              SD_Unique_Species = sd(Unique_Species),
+              Average_Total_Port_Switches = mean(Total_Port_Switches),
+              SD_Total_Port_Switches = sd(Total_Port_Switches),
+              Average_Unique_Ports = mean(Unique_Ports),
+              SD_Unique_Ports = sd(Unique_Ports))
+}
 
+# Apply the function to each dataset
+summary_c4 <- calculate_switching(c4, "c4")
+summary_c5 <- calculate_switching(c5, "c5")
+summary_c6 <- calculate_switching(c6, "c6")
+summary_c7 <- calculate_switching(c7, "c7")
 
-
+# Combine all summaries into a single table
+combined_summary <- bind_rows(summary_c4, summary_c5, summary_c6, summary_c7)

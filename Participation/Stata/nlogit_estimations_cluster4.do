@@ -193,6 +193,30 @@ estimates store B2
 lrtest B1 B2, force
 
 
+****************** USING 30 days MA for Prices ************************ 
+
+replace d_c   = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 0) 
+replace d_d   = (d_missing_p2 == 0 & d_missing == 0 & d_missing_d == 1) 
+replace d_p   = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 0) 
+replace d_cd  = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 1) 
+replace d_pc  = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 0) 
+replace d_pd  = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 1) 
+replace d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1) 
+
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
+estimates save ${results}nlogit_FULL_c4_IV.ster, replace
+estimates use ${results}nlogit_FULL_c4_IV.ster
+estimates store B_IV
+matrix start=e(b)
+
+
+
+
+
+
 
 ****************** ESTIMATE IV NESTED LOGIT ************************
 // Following Guevara 2015. We need to regress Price on all all the exogenous variables in X, including the intercept,
@@ -222,9 +246,7 @@ gen ports   = substr(selection, 1, 3)
 encode species, generate(species2)
 encode ports, generate(ports2)
 
-
-// Step 2: Regress mean_price2 on all exogenous variables
-reg mean_price2 c.fishmealprice_ma##i.ports2 c.fishmealprice_ma##i.species2 mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero psdnclosured btnaclosured ///
+reg mean_price2 c.fishmealprice_ma##i.species2 mean_avail wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero psdnclosured btnaclosured ///
 	dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  c.weekend#i.selection_num
 
 // Predict residuals
