@@ -132,7 +132,93 @@ ggplot(df.subs, aes(x = days_since_start, y = fished_VESSEL_anon, color = select
   scale_shape_manual(values = selection_shapes) + 
   labs(x = "Days", y = "Vessel anonymized ID", color = "Alternative", shape = "Alternative") 
 
-## Create metier table
+
+
+#################################
+### Total participation ###
+#################################
+
+library(dplyr)
+
+# Define a function to find vessels that participate every year in the sample for a given dataset
+calculate_full_participation <- function(data) {
+  data %>%
+    # Filter only rows where vessels participated
+    dplyr::filter(fished == 1) %>%
+    # Select only relevant columns
+    dplyr::select(fished_VESSEL_anon, set_year) %>%
+    # Drop missing values
+    drop_na() %>%
+    # Count unique years each vessel participated in
+    group_by(fished_VESSEL_anon) %>%
+    summarise(years_participated = n_distinct(set_year)) %>%
+    ungroup() %>%
+    # Filter vessels that participated in all years
+    filter(years_participated == n_distinct(data$set_year)) %>%
+    # Count these vessels
+    summarise(full_participation_vessels = (n()/n_distinct(data$fished_VESSEL_anon))*100)
+}
+
+# Calculate full participation for each dataset
+full_participation_c4 <- calculate_full_participation(c4) %>% mutate(dataset = "c4")
+full_participation_c5 <- calculate_full_participation(c5) %>% mutate(dataset = "c5")
+full_participation_c6 <- calculate_full_participation(c6) %>% mutate(dataset = "c6")
+full_participation_c7 <- calculate_full_participation(c7) %>% mutate(dataset = "c7")
+
+# Combine the results
+full_participation_summary <- bind_rows(full_participation_c4, full_participation_c5, full_participation_c6, full_participation_c7)
+
+# View the summary
+full_participation_summary
+
+
+
+
+#################################
+### Yearly participation  ###
+#################################
+
+library(dplyr)
+
+# Define a function to calculate participation summary for a given dataset
+calculate_participation_summary <- function(data) {
+  data %>%
+    dplyr::select(fished_VESSEL_anon, set_year, fished) %>%
+    dplyr::filter(fished == 1) %>%
+    drop_na() %>%
+    group_by(set_year) %>%
+    summarise(
+      participating_vessels = n_distinct(fished_VESSEL_anon)
+    ) %>%
+    mutate(
+      total_vessels = n_distinct(data$fished_VESSEL_anon),
+      participation_percentage = (participating_vessels / total_vessels) * 100
+    )
+}
+
+# Calculate participation summaries for each dataset
+participation_summary_c4 <- calculate_participation_summary(c4)
+participation_summary_c5 <- calculate_participation_summary(c5)
+participation_summary_c6 <- calculate_participation_summary(c6)
+participation_summary_c7 <- calculate_participation_summary(c7)
+
+# Add a column to identify the dataset source
+participation_summary_c4 <- participation_summary_c4 %>% mutate(dataset = "c4")
+participation_summary_c5 <- participation_summary_c5 %>% mutate(dataset = "c5")
+participation_summary_c6 <- participation_summary_c6 %>% mutate(dataset = "c6")
+participation_summary_c7 <- participation_summary_c7 %>% mutate(dataset = "c7")
+
+# Combine the summaries into a single dataframe
+participation_summary <- bind_rows(participation_summary_c4, participation_summary_c5, participation_summary_c6, participation_summary_c7)
+
+# View the combined participation summary
+participation_summary
+
+
+
+############################
+## Create Switching table ##
+############################
 library(dplyr)
 
 
@@ -173,3 +259,13 @@ summary_c7 <- calculate_switching(c7, "c7")
 
 # Combine all summaries into a single table
 combined_summary <- bind_rows(summary_c4, summary_c5, summary_c6, summary_c7)
+
+library(flextable)
+
+# Convert to flextable for DOCX formatting
+summary_table <- flextable(combined_summary)
+
+# Save the table as a DOCX file
+summary_table %>% save_as_docx(
+  path = "C:/GitHub/EconAnalysis/Participation/Results/Switching_Behavior_Summary.docx")
+
