@@ -76,7 +76,9 @@ ggplot(data_c4, aes(x = set_date, y = mean_sdm, group = selection)) +
 
 # Select and filter the data
 df.subs <- c4 %>%
-  dplyr::select(c(fished_VESSEL_anon, selection, set_month, set_date, set_year, fished)) %>%
+  dplyr::select(
+    c(fished_VESSEL_anon, selection, set_month, set_date, set_year, fished)
+    ) %>%
   dplyr::filter(set_year == 2014, set_month == 7, fished == 1) %>%
   drop_na() %>% 
   mutate(Species = substr(selection, nchar(selection) - 3, nchar(selection)),
@@ -123,14 +125,21 @@ selection_shapes <- c(
 # Ensure set_date is in Date format
 df.subs <- df.subs %>%
   mutate(set_date = as.Date(set_date)) %>%  # Convert to Date format
-  mutate(days_since_start = as.numeric(set_date - min(set_date)))  # Calculate days since the first date
+  mutate(days_since_start = as.numeric(set_date - min(set_date))) 
 
 # Update the plot with the new x-axis label and variable
-ggplot(df.subs, aes(x = days_since_start, y = fished_VESSEL_anon, color = selection, shape = selection)) +
+ggplot(df.subs, 
+       aes(x = days_since_start, 
+           y = fished_VESSEL_anon, 
+           color = selection, 
+           shape = selection)) +
   geom_point(size = 3) +
   scale_color_manual(values = selection_colors) +  # Apply color mapping by Port
   scale_shape_manual(values = selection_shapes) + 
-  labs(x = "Days", y = "Vessel anonymized ID", color = "Alternative", shape = "Alternative") 
+  labs(x = "Days", 
+       y = "Vessel anonymized ID", 
+       color = "Alternative", 
+       shape = "Alternative") 
 
 
 
@@ -140,7 +149,8 @@ ggplot(df.subs, aes(x = days_since_start, y = fished_VESSEL_anon, color = select
 
 library(dplyr)
 
-# Define a function to find vessels that participate every year in the sample for a given dataset
+# Define a function to find vessels that participate every year 
+# in the sample for a given dataset
 calculate_full_participation <- function(data) {
   data %>%
     # Filter only rows where vessels participated
@@ -166,7 +176,10 @@ full_participation_c6 <- calculate_full_participation(c6) %>% mutate(dataset = "
 full_participation_c7 <- calculate_full_participation(c7) %>% mutate(dataset = "c7")
 
 # Combine the results
-full_participation_summary <- bind_rows(full_participation_c4, full_participation_c5, full_participation_c6, full_participation_c7)
+full_participation_summary <- bind_rows(full_participation_c4, 
+                                        full_participation_c5, 
+                                        full_participation_c6, 
+                                        full_participation_c7)
 
 # View the summary
 full_participation_summary
@@ -209,7 +222,10 @@ participation_summary_c6 <- participation_summary_c6 %>% mutate(dataset = "c6")
 participation_summary_c7 <- participation_summary_c7 %>% mutate(dataset = "c7")
 
 # Combine the summaries into a single dataframe
-participation_summary <- bind_rows(participation_summary_c4, participation_summary_c5, participation_summary_c6, participation_summary_c7)
+participation_summary <- bind_rows(participation_summary_c4, 
+                                   participation_summary_c5, 
+                                   participation_summary_c6, 
+                                   participation_summary_c7)
 
 # View the combined participation summary
 participation_summary
@@ -228,8 +244,8 @@ calculate_switching <- function(data, dataset_name) {
     dplyr::filter(fished == 1 & selection != "No-Participation") %>%
     drop_na() %>%
     arrange(fished_VESSEL_anon, set_date) %>%
-    mutate(Species = substr(selection, nchar(selection) - 3, nchar(selection)),  # Extract species
-           Port = substr(selection, 1, 3),  # Extract port
+    mutate(Species = substr(selection, nchar(selection) - 3, nchar(selection)),  
+           Port = substr(selection, 1, 3), 
            Previous_Species = lag(Species),
            Previous_Port = lag(Port),
            Species_Switch = Species != Previous_Species & !is.na(Previous_Species),
