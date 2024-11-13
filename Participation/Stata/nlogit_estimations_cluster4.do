@@ -211,6 +211,8 @@ estimates save ${results}nlogit_FULL_c4_30days.ster, replace
 estimates use ${results}nlogit_FULL_c4_30days.ster
 estimates store B_30
 
+estimates describe B_30
+estimates replay B_30S
 
 
 
