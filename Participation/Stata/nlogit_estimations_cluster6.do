@@ -1,5 +1,5 @@
-*global google_path "H:\My Drive\"
-global google_path "G:\Mi unidad\"
+global google_path "H:\My Drive\"
+*global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -188,6 +188,25 @@ lrtest B2 B1, force
 
 ****************** USING 30 days MA for Prices ************************ 
 
+*** Set nested logit (Note: JMCK & CMCK have to be separated by adding a constraint to converge)
+cap drop port
+cap label drop lb_port
+cap drop partp
+cap label drop lb_partp
+nlogitgen port = selection( ///
+        PSDN: CLO-PSDN | CLW-PSDN | CWA-PSDN | CBA-PSDN, ///
+        NANC: CLO-NANC | CWA-NANC | CLW-NANC, ///
+        DCRB: CWA-DCRB, ///
+        NOPORT: No-Participation, ///
+        SLMN: NPS-SOCK, ///
+        CMCK: CLO-CMCK)
+
+
+nlogitgen partp = port(PART: PSDN | NANC | CMCK, CRAB_PART: DCRB, SLMN_PART: SLMN, NOPART: NOPORT)
+nlogittree selection port partp, choice(fished) case(fished_haul) 
+constraint 1 [/port]CMCK_tau = 1
+constraint 2 [/port]NANC_tau = 1
+
 replace d_c   = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 0) 
 replace d_d   = (d_missing_p2 == 0 & d_missing == 0 & d_missing_d == 1) 
 replace d_p   = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 0) 
@@ -196,12 +215,13 @@ replace d_pc  = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 0)
 replace d_pd  = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 1) 
 replace d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1) 
 
-nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-		psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
-		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
-// estimates save ${results}nlogit_FULL_c4_30days.ster, replace
-estimates use ${results}nlogit_FULL_c4_30daysV2.ster
-estimates store B_30
-estimates describe B_30
-estimates replay B_30
+*** Get annual price for DCRB and SOCK
+gen mean_price2_3 = mean_price2
+replace mean_price2_3 = mean_price_annual if selection == "CWA-DCRB" | selection == "NPS-SOCK"
+
+
+nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+	dummy_prev_days dummy_prev_year_days unem_rate d_d d_cd waclosured /// 
+	|| partp: psdnclosure  mean_price2_3, base(NOPART) || port: weekend , base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon)
+estimates save ${results}nlogit_FULL_c6_30days.ster, replace

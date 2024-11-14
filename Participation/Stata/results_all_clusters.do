@@ -14,6 +14,11 @@ cd $path
 clear all
 
 
+// 30 dias
+estimates use ${results}nlogit_FULL_c4_30daysV2.ster
+estimates use ${results}nlogit_FULL_c5_30daysV2.ster
+estimates use ${results}nlogit_FULL_c6_30days.ster
+estimates use ${results}nlogit_FULL_c7_30days.ster,
 ****** Cluster 4 *****
 
 use "${google_path}Data\Anonymised data\part_model_c4.dta", clear
