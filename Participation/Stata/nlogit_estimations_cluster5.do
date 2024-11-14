@@ -224,11 +224,6 @@ replace d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1)
 gen mean_price2_3 = mean_price2
 replace mean_price2_3 = mean_price_annual if selection == "CLW-DCRB" | selection == "CWA-DCRB"
 
-// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
-// 		dummy_prev_days dummy_prev_year_days unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
-// 		|| partp:  mean_price2_3, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
-// 		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
-// estimates save ${results}nlogit_FULL_c5_30days.ster, replace
 estimates use ${results}nlogit_FULL_c5_30days.ster
 matrix start=e(b)
 
