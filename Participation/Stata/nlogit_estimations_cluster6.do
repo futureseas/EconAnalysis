@@ -184,3 +184,24 @@ estimates use ${results}nlogit_FULL_C6_B_prev_days.ster
 matrix start=e(b)
 estimates store B2
 lrtest B2 B1, force
+
+
+****************** USING 30 days MA for Prices ************************ 
+
+replace d_c   = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 0) 
+replace d_d   = (d_missing_p2 == 0 & d_missing == 0 & d_missing_d == 1) 
+replace d_p   = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 0) 
+replace d_cd  = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 1) 
+replace d_pc  = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 0) 
+replace d_pd  = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 1) 
+replace d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1) 
+
+nlogit fished mean_avail mean_price2 wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		psdnclosured btnaclosured dummy_prev_days dummy_prev_year_days unem_rate d_c d_d d_p d_cd d_pc d_pd d_pcd  /// 
+		|| partp: , base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+	base("No-Participation") case(fished_haul) constraints(1) vce(cluster fished_vessel_anon) from(start, skip)
+// estimates save ${results}nlogit_FULL_c4_30days.ster, replace
+estimates use ${results}nlogit_FULL_c4_30daysV2.ster
+estimates store B_30
+estimates describe B_30
+estimates replay B_30

@@ -1,5 +1,5 @@
-*global google_path "H:\My Drive\"
-global google_path "G:\Mi unidad\"
+global google_path "H:\My Drive\"
+*global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -188,3 +188,52 @@ estimates store B12_G
 matrix start=e(b)
 estimates store B12_G_prev_days
 lrtest B12_G B12_G_prev_days, force
+
+
+
+****************** USING 30 days MA for Prices ************************ 
+
+*** Set nested logit
+cap drop port
+cap label drop lb_port
+cap drop partp
+cap label drop lb_partp
+nlogitgen port = selection( ///
+	MSQD: SBA-MSQD | MNA-MSQD | LAA-MSQD | SFA-MSQD | CBA-MSQD | MRA-MSQD | NPA-MSQD, ///
+	PSDN: CLO-PSDN | CWA-PSDN | CLW-PSDN | LAA-PSDN, ///
+	ALBC: CWA-ALBC, ///
+	CMCK: LAA-CMCK | SBA-CMCK, ///
+	NANC: LAA-NANC, ///
+	DCRB: CLW-DCRB | CWA-DCRB, ///
+	NOPORT: No-Participation)
+
+nlogitgen partp = port(PART: MSQD | PSDN | ALBC | CMCK | NANC, PART_CRAB: DCRB, NOPART: NOPORT)
+nlogittree selection port partp, choice(fished) case(fished_haul) 
+constraint 1 [/port]DCRB_tau = 1
+constraint 2 [/port]CMCK_tau = 1
+
+replace d_c   = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 0) 
+replace d_d   = (d_missing_p2 == 0 & d_missing == 0 & d_missing_d == 1) 
+replace d_p   = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 0) 
+replace d_cd  = (d_missing_p2 == 0 & d_missing == 1 & d_missing_d == 1) 
+replace d_pc  = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 0) 
+replace d_pd  = (d_missing_p2 == 1 & d_missing == 0 & d_missing_d == 1) 
+replace d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1) 
+
+*** Get annual price for DCRB
+gen mean_price2_3 = mean_price2
+replace mean_price2_3 = mean_price_annual if selection == "CLW-DCRB" | selection == "CWA-DCRB"
+
+// nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+// 		dummy_prev_days dummy_prev_year_days unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
+// 		|| partp:  mean_price2_3, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+// 		base("No-Participation") case(fished_haul) vce(cluster fished_vessel_anon) from(start, skip)
+// estimates save ${results}nlogit_FULL_c5_30days.ster, replace
+estimates use ${results}nlogit_FULL_c5_30days.ster
+matrix start=e(b)
+
+nlogit fished mean_avail  wind_max_220_mh dist_to_cog dist_port_to_catch_area_zero ///
+		dummy_prev_days dummy_prev_year_days unem_rate d_d d_cd msqdclosured psdnclosured waclosured dcrbclosurewad /// 
+		|| partp:  mean_price2_3, base(NOPART) || port: weekend, base(NOPORT) || selection: , ///
+		base("No-Participation") case(fished_haul) constraints(1 2) vce(cluster fished_vessel_anon) from(start, skip)
+estimates save ${results}nlogit_FULL_c5_30daysV2.ster, replace

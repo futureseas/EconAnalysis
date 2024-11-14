@@ -210,14 +210,6 @@ replace d_pcd = (d_missing_p2 == 1 & d_missing == 1 & d_missing_d == 1)
 // estimates save ${results}nlogit_FULL_c4_30days.ster, replace
 estimates use ${results}nlogit_FULL_c4_30daysV2.ster
 estimates store B_30
-estimates describe B_30
-estimates replay B_30
-
-
-
-
-
-
 
 // ****************** ESTIMATE IV NESTED LOGIT ************************
 // // Following Guevara 2015. We need to regress Price on all all the exogenous variables in X, including the intercept,
