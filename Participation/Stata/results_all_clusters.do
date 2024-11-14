@@ -2,8 +2,8 @@
 *****************************************************
 *** All cluster results for Discrete Choice Model ***
 *****************************************************
-*global google_path "H:\My Drive\"
-global google_path "G:\Mi unidad\"
+global google_path "H:\My Drive\"
+*global google_path "G:\Mi unidad\"
 global path "C:\GitHub\EconAnalysis\Participation\" 
 global results "${path}Results\"
 global figures "${results}Figures\"
@@ -362,18 +362,6 @@ restore
 
 
 ************* Cluster 7
-*global google_path "H:\My Drive\"
-global google_path "G:\Mi unidad\"
-global path "C:\GitHub\EconAnalysis\Participation\" 
-global results "${path}Results\"
-global figures "${results}Figures\"
-global tables "${results}Tables\"
-global contrmap "${path}Contraction mapping\"
-global mwtp "${path}WTP estimation\"
-cd $path
-clear all
-
-
 use "${google_path}Data\Anonymised data\part_model_c7.dta", clear
 estimates use ${results}nlogit_C7_base.ster
 estimates store base_C7 
