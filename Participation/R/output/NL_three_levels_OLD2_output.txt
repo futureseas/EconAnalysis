@@ -1,0 +1,650 @@
+Model run by FACEA using Apollo 0.3.4 on R 4.3.3 for Windows.
+Please acknowledge the use of Apollo by citing Hess & Palma (2019)
+  DOI 10.1016/j.jocm.2019.100170
+  www.ApolloChoiceModelling.com
+
+Model name                                  : NL_three_levels
+Model description                           : Three-level NL model with socio-demographics on mode choice SP data
+Model run at                                : 2024-11-15 16:15:04.31134
+Estimation method                           : bgw
+Model diagnosis                             : Relative function convergence
+Optimisation diagnosis                      : Maximum found
+     hessian properties                     : Negative definite
+     maximum eigenvalue                     : -19.74296
+     reciprocal of condition number         : 8.66575e-08
+Number of individuals                       : 500
+Number of rows in database                  : 7000
+Number of modelled outcomes                 : 7000
+
+Number of cores used                        :  1 
+Model without mixing
+
+LL(start)                                   : -9704.06
+LL at equal shares, LL(0)                   : -9704.06
+LL at observed shares, LL(C)                : -8388.29
+LL(final)                                   : -6338.54
+Rho-squared vs equal shares                  :  0.3468 
+Adj.Rho-squared vs equal shares              :  0.3449 
+Rho-squared vs observed shares               :  0.2444 
+Adj.Rho-squared vs observed shares           :  0.2425 
+AIC                                         :  12715.07 
+BIC                                         :  12845.29 
+
+Estimated parameters                        : 19
+Time taken (hh:mm:ss)                       :  00:00:21.28 
+     pre-estimation                         :  00:00:0.85 
+     estimation                             :  00:00:5.74 
+     post-estimation                        :  00:00:14.68 
+Iterations                                  :  24  
+
+Unconstrained optimisation.
+
+Estimates:
+                         Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
+asc_car                  0.000000          NA          NA          NA          NA            NA            NA
+asc_bus                  1.009903    0.165034       6.119     0.06001    0.217660         4.640       0.04550
+asc_air                  1.068004    0.131062       8.149     0.51887    0.181013         5.900       0.37569
+asc_rail                 1.104811    0.129002       8.564     0.81247    0.184356         5.993       0.56852
+asc_bus_shift_female     0.125228    0.073993       1.692   -11.82243    0.090205         1.388      -9.69758
+asc_air_shift_female     0.120103    0.062217       1.930   -14.14233    0.074229         1.618     -11.85375
+asc_rail_shift_female    0.090477    0.059244       1.527   -15.35204    0.071256         1.270     -12.76419
+b_tt_car                 0.008427  3.0148e-04      27.951 -3289.04313  3.7256e-04        22.619   -2661.51495
+b_tt_bus                 0.001532  2.7582e-04       5.553 -3619.98186  2.9075e-04         5.268   -3434.14957
+b_tt_air                 0.016520    0.001148      14.393  -856.88099    0.001557        10.612    -631.75662
+b_tt_rail                0.012042  7.4086e-04      16.253 -1333.52291    0.001076        11.186    -917.79487
+b_tt_shift_business     -0.004427  2.7278e-04     -16.229 -3682.21086  3.5514e-04       -12.465   -2828.26583
+b_access                 0.011284    0.001079      10.462  -916.65556    0.001335         8.453    -740.69987
+b_cost                  -0.012934  8.7462e-04     -14.788 -1158.13941    0.001048       -12.336    -966.11674
+b_cost_shift_business    0.008753  7.9701e-04      10.982 -1243.70844    0.001104         7.931    -898.15927
+cost_income_elast       -0.899450    0.060042     -14.980   -31.63517    0.066915       -13.442     -28.38599
+b_no_frills              0.000000          NA          NA          NA          NA            NA            NA
+b_wifi                   0.380413    0.029626      12.840   -20.91353    0.036982        10.286     -16.75360
+b_food                   0.150493    0.023323       6.453   -36.42434    0.027417         5.489     -30.98482
+lambda_PT                0.417507    0.030886      13.518   -18.85938    0.038525        10.837     -15.11975
+lambda_fastPT            0.380563    0.025587      14.873   -24.20885    0.037002        10.285     -16.74051
+
+Nesting structure for NL model component :
+Nest: root (1)
+|-------Alternative: car
+'-Nest: PT (0.4175)
+   |----Alternative: bus
+   '-Nest: fastPT (0.3806)
+      |-Alternative: air
+      '-Alternative: rail
+
+
+Overview of choices for NL model component :
+                                    car     bus     air    rail
+Times available                  7000.0 7000.00 7000.00 7000.00
+Times chosen                     1946.0  358.00 1522.00 3174.00
+Percentage chosen overall          27.8    5.11   21.74   45.34
+Percentage chosen when available   27.8    5.11   21.74   45.34
+
+
+Classical covariance matrix:
+                                    asc_bus               asc_air              asc_rail  asc_bus_shift_female
+asc_bus                            0.027236              0.014167              0.013901             -0.002678
+asc_air                            0.014167              0.017177              0.014615             -0.001425
+asc_rail                           0.013901              0.014615              0.016642             -0.001421
+asc_bus_shift_female              -0.002678             -0.001425             -0.001421              0.005475
+asc_air_shift_female              -0.001389             -0.001693             -0.001375              0.003162
+asc_rail_shift_female             -0.001219             -0.001229             -0.001352              0.003143
+b_tt_car                          1.277e-05             1.414e-05             1.461e-05             1.062e-06
+b_tt_bus                         -3.316e-05            -5.622e-06            -5.642e-06             9.196e-07
+b_tt_air                         -6.982e-05            -9.598e-05            -7.360e-05             1.716e-06
+b_tt_rail                        -5.149e-05            -5.206e-05            -6.777e-05             1.316e-06
+b_tt_shift_business               1.353e-05             1.267e-05             1.086e-05            -3.397e-07
+b_access                         -5.857e-05            -6.221e-05            -4.577e-05             1.175e-06
+b_cost                            5.337e-05             4.679e-05             4.748e-05            -3.202e-07
+b_cost_shift_business            -3.774e-05            -3.506e-05            -3.598e-05             1.117e-08
+cost_income_elast                8.5135e-04            4.5733e-04            1.5005e-04            -1.738e-05
+b_wifi                            -0.001581             -0.001721             -0.001636             2.625e-05
+b_food                          -6.4611e-04           -6.9466e-04           -6.6908e-04             1.167e-05
+lambda_PT                         -0.003136             -0.001814             -0.001740             1.372e-05
+lambda_fastPT                     -0.001696             -0.002129             -0.001999             3.956e-05
+                       asc_air_shift_female asc_rail_shift_female              b_tt_car              b_tt_bus
+asc_bus                           -0.001389             -0.001219             1.277e-05            -3.316e-05
+asc_air                           -0.001693             -0.001229             1.414e-05            -5.622e-06
+asc_rail                          -0.001375             -0.001352             1.461e-05            -5.642e-06
+asc_bus_shift_female               0.003162              0.003143             1.062e-06             9.196e-07
+asc_air_shift_female               0.003871              0.003217             9.450e-07             1.513e-07
+asc_rail_shift_female              0.003217              0.003510             8.114e-07            -3.436e-09
+b_tt_car                          9.450e-07             8.114e-07             9.089e-08             1.060e-08
+b_tt_bus                          1.513e-07            -3.436e-09             1.060e-08             7.608e-08
+b_tt_air                          1.203e-06            -4.137e-07             9.165e-08             7.873e-08
+b_tt_rail                         7.294e-07            -5.305e-07             6.418e-08             5.197e-08
+b_tt_shift_business              -5.394e-09             2.750e-07            -2.959e-08            -1.876e-08
+b_access                          6.072e-07            -4.017e-07             6.052e-08             2.845e-08
+b_cost                           -8.038e-07             2.998e-07            -7.024e-08            -4.757e-08
+b_cost_shift_business             7.069e-07             5.312e-08             3.888e-08             2.493e-08
+cost_income_elast                -3.671e-05            -2.299e-05            -3.180e-07            -1.810e-06
+b_wifi                            2.248e-05            -1.345e-05             1.734e-06             1.496e-06
+b_food                            3.481e-06            -6.357e-06             7.715e-07             6.529e-07
+lambda_PT                         3.048e-05            -1.175e-05             2.421e-06             3.143e-06
+lambda_fastPT                     2.703e-05            -1.256e-05             1.938e-06             1.537e-06
+                                   b_tt_air             b_tt_rail   b_tt_shift_business              b_access
+asc_bus                          -6.982e-05            -5.149e-05             1.353e-05            -5.857e-05
+asc_air                          -9.598e-05            -5.206e-05             1.267e-05            -6.221e-05
+asc_rail                         -7.360e-05            -6.777e-05             1.086e-05            -4.577e-05
+asc_bus_shift_female              1.716e-06             1.316e-06            -3.397e-07             1.175e-06
+asc_air_shift_female              1.203e-06             7.294e-07            -5.394e-09             6.072e-07
+asc_rail_shift_female            -4.137e-07            -5.305e-07             2.750e-07            -4.017e-07
+b_tt_car                          9.165e-08             6.418e-08            -2.959e-08             6.052e-08
+b_tt_bus                          7.873e-08             5.197e-08            -1.876e-08             2.845e-08
+b_tt_air                          1.317e-06             6.244e-07            -1.528e-07             2.911e-07
+b_tt_rail                         6.244e-07             5.489e-07            -1.057e-07             3.073e-07
+b_tt_shift_business              -1.528e-07            -1.057e-07             7.441e-08            -8.978e-08
+b_access                          2.911e-07             3.073e-07            -8.978e-08             1.163e-06
+b_cost                           -6.157e-07            -4.260e-07             7.298e-08            -4.407e-07
+b_cost_shift_business             4.096e-07             2.997e-07            -3.231e-08             2.794e-07
+cost_income_elast                 1.383e-07             1.697e-07             2.110e-06             3.247e-07
+b_wifi                            1.695e-05             1.145e-05            -2.684e-06             9.480e-06
+b_food                            6.017e-06             3.989e-06            -1.035e-06             3.511e-06
+lambda_PT                         1.888e-05             1.403e-05            -4.149e-06             1.580e-05
+lambda_fastPT                     2.247e-05             1.519e-05            -3.045e-06             1.269e-05
+                                     b_cost b_cost_shift_business     cost_income_elast                b_wifi
+asc_bus                           5.337e-05            -3.774e-05            8.5135e-04             -0.001581
+asc_air                           4.679e-05            -3.506e-05            4.5733e-04             -0.001721
+asc_rail                          4.748e-05            -3.598e-05            1.5005e-04             -0.001636
+asc_bus_shift_female             -3.202e-07             1.117e-08            -1.738e-05             2.625e-05
+asc_air_shift_female             -8.038e-07             7.069e-07            -3.671e-05             2.248e-05
+asc_rail_shift_female             2.998e-07             5.312e-08            -2.299e-05            -1.345e-05
+b_tt_car                         -7.024e-08             3.888e-08            -3.180e-07             1.734e-06
+b_tt_bus                         -4.757e-08             2.493e-08            -1.810e-06             1.496e-06
+b_tt_air                         -6.157e-07             4.096e-07             1.383e-07             1.695e-05
+b_tt_rail                        -4.260e-07             2.997e-07             1.697e-07             1.145e-05
+b_tt_shift_business               7.298e-08            -3.231e-08             2.110e-06            -2.684e-06
+b_access                         -4.407e-07             2.794e-07             3.247e-07             9.480e-06
+b_cost                            7.650e-07            -5.656e-07            -2.427e-05            -1.380e-05
+b_cost_shift_business            -5.656e-07             6.352e-07             1.806e-05             9.248e-06
+cost_income_elast                -2.427e-05             1.806e-05              0.003605             8.002e-05
+b_wifi                           -1.380e-05             9.248e-06             8.002e-05            8.7771e-04
+b_food                           -6.613e-06             3.968e-06             8.581e-05            4.0021e-04
+lambda_PT                        -1.425e-05             9.961e-06           -1.8566e-04            4.2841e-04
+lambda_fastPT                    -1.414e-05             1.119e-05            -3.017e-05            4.6378e-04
+                                     b_food             lambda_PT         lambda_fastPT
+asc_bus                         -6.4611e-04             -0.003136             -0.001696
+asc_air                         -6.9466e-04             -0.001814             -0.002129
+asc_rail                        -6.6908e-04             -0.001740             -0.001999
+asc_bus_shift_female              1.167e-05             1.372e-05             3.956e-05
+asc_air_shift_female              3.481e-06             3.048e-05             2.703e-05
+asc_rail_shift_female            -6.357e-06            -1.175e-05            -1.256e-05
+b_tt_car                          7.715e-07             2.421e-06             1.938e-06
+b_tt_bus                          6.529e-07             3.143e-06             1.537e-06
+b_tt_air                          6.017e-06             1.888e-05             2.247e-05
+b_tt_rail                         3.989e-06             1.403e-05             1.519e-05
+b_tt_shift_business              -1.035e-06            -4.149e-06            -3.045e-06
+b_access                          3.511e-06             1.580e-05             1.269e-05
+b_cost                           -6.613e-06            -1.425e-05            -1.414e-05
+b_cost_shift_business             3.968e-06             9.961e-06             1.119e-05
+cost_income_elast                 8.581e-05           -1.8566e-04            -3.017e-05
+b_wifi                           4.0021e-04            4.2841e-04            4.6378e-04
+b_food                           5.4394e-04            1.7487e-04            1.8677e-04
+lambda_PT                        1.7487e-04            9.5395e-04            4.5728e-04
+lambda_fastPT                    1.8677e-04            4.5728e-04            6.5471e-04
+
+Robust covariance matrix:
+                                    asc_bus               asc_air              asc_rail  asc_bus_shift_female
+asc_bus                            0.047376              0.029156              0.026297             -0.005071
+asc_air                            0.029156              0.032766              0.030805             -0.002076
+asc_rail                           0.026297              0.030805              0.033987             -0.001671
+asc_bus_shift_female              -0.005071             -0.002076             -0.001671              0.008137
+asc_air_shift_female              -0.001907             -0.001357           -8.4086e-04              0.004839
+asc_rail_shift_female             -0.001632           -9.1419e-04             -0.001026              0.004755
+b_tt_car                          2.231e-05             1.906e-05             1.758e-05             1.376e-06
+b_tt_bus                         -4.435e-05            -1.449e-05            -1.034e-05             2.111e-06
+b_tt_air                        -1.6283e-04           -2.0921e-04           -1.9006e-04             3.955e-06
+b_tt_rail                        -9.706e-05           -1.3249e-04           -1.5741e-04            -1.662e-07
+b_tt_shift_business               1.376e-05             1.162e-05             7.628e-06            -2.134e-06
+b_access                        -1.2859e-04           -1.2350e-04           -1.2129e-04             4.143e-06
+b_cost                           1.3014e-04            1.1532e-04            1.1555e-04            -6.663e-06
+b_cost_shift_business           -1.0767e-04           -1.0504e-04           -1.0847e-04             4.253e-06
+cost_income_elast                  0.001998             1.931e-05             -0.001008           -2.4987e-04
+b_wifi                            -0.003509             -0.003755             -0.003866            -1.653e-05
+b_food                            -0.001479             -0.001369             -0.001444             9.136e-05
+lambda_PT                         -0.005857             -0.003867             -0.003657            4.0085e-04
+lambda_fastPT                     -0.003937             -0.005035             -0.005181             4.279e-05
+                       asc_air_shift_female asc_rail_shift_female              b_tt_car              b_tt_bus
+asc_bus                           -0.001907             -0.001632             2.231e-05            -4.435e-05
+asc_air                           -0.001357           -9.1419e-04             1.906e-05            -1.449e-05
+asc_rail                        -8.4086e-04             -0.001026             1.758e-05            -1.034e-05
+asc_bus_shift_female               0.004839              0.004755             1.376e-06             2.111e-06
+asc_air_shift_female               0.005510              0.004802             1.407e-06             9.191e-07
+asc_rail_shift_female              0.004802              0.005077             1.010e-06             4.417e-07
+b_tt_car                          1.407e-06             1.010e-06             1.388e-07             1.827e-08
+b_tt_bus                          9.191e-07             4.417e-07             1.827e-08             8.453e-08
+b_tt_air                         -4.347e-06            -6.926e-06             1.533e-07             1.717e-07
+b_tt_rail                        -4.528e-06            -5.022e-06             1.299e-07             8.270e-08
+b_tt_shift_business              -3.813e-06            -2.906e-06            -5.053e-08            -3.350e-08
+b_access                         -3.550e-06            -3.948e-06             1.023e-07             6.870e-08
+b_cost                            2.323e-06             2.087e-06            -6.614e-08            -1.029e-07
+b_cost_shift_business            -4.929e-06            -4.138e-06             2.607e-08             5.953e-08
+cost_income_elast                 2.784e-05            2.5386e-04            -1.544e-06            -2.361e-06
+b_wifi                          -2.4983e-04           -2.3055e-04             3.300e-06             3.448e-06
+b_food                          -1.3946e-04            -9.681e-05             1.984e-06             1.589e-06
+lambda_PT                         4.393e-05            -3.072e-05             3.709e-06             5.563e-06
+lambda_fastPT                   -2.0334e-04           -2.2900e-04             3.400e-06             3.196e-06
+                                   b_tt_air             b_tt_rail   b_tt_shift_business              b_access
+asc_bus                         -1.6283e-04            -9.706e-05             1.376e-05           -1.2859e-04
+asc_air                         -2.0921e-04           -1.3249e-04             1.162e-05           -1.2350e-04
+asc_rail                        -1.9006e-04           -1.5741e-04             7.628e-06           -1.2129e-04
+asc_bus_shift_female              3.955e-06            -1.662e-07            -2.134e-06             4.143e-06
+asc_air_shift_female             -4.347e-06            -4.528e-06            -3.813e-06            -3.550e-06
+asc_rail_shift_female            -6.926e-06            -5.022e-06            -2.906e-06            -3.948e-06
+b_tt_car                          1.533e-07             1.299e-07            -5.053e-08             1.023e-07
+b_tt_bus                          1.717e-07             8.270e-08            -3.350e-08             6.870e-08
+b_tt_air                          2.423e-06             1.386e-06            -1.671e-07             7.710e-07
+b_tt_rail                         1.386e-06             1.159e-06            -1.038e-07             7.956e-07
+b_tt_shift_business              -1.671e-07            -1.038e-07             1.261e-07            -5.721e-08
+b_access                          7.710e-07             7.956e-07            -5.721e-08             1.782e-06
+b_cost                           -1.134e-06            -7.940e-07             2.160e-08            -8.757e-07
+b_cost_shift_business             9.770e-07             6.990e-07             5.768e-08             6.738e-07
+cost_income_elast                -2.906e-07             4.712e-06             4.310e-06             7.141e-07
+b_wifi                            3.564e-05             2.667e-05            -2.836e-06             2.352e-05
+b_food                            1.273e-05             1.023e-05            -1.061e-06             1.060e-05
+lambda_PT                         3.712e-05             2.638e-05            -4.170e-06             3.080e-05
+lambda_fastPT                     4.889e-05             3.560e-05            -2.658e-06             2.891e-05
+                                     b_cost b_cost_shift_business     cost_income_elast                b_wifi
+asc_bus                          1.3014e-04           -1.0767e-04              0.001998             -0.003509
+asc_air                          1.1532e-04           -1.0504e-04             1.931e-05             -0.003755
+asc_rail                         1.1555e-04           -1.0847e-04             -0.001008             -0.003866
+asc_bus_shift_female             -6.663e-06             4.253e-06           -2.4987e-04            -1.653e-05
+asc_air_shift_female              2.323e-06            -4.929e-06             2.784e-05           -2.4983e-04
+asc_rail_shift_female             2.087e-06            -4.138e-06            2.5386e-04           -2.3055e-04
+b_tt_car                         -6.614e-08             2.607e-08            -1.544e-06             3.300e-06
+b_tt_bus                         -1.029e-07             5.953e-08            -2.361e-06             3.448e-06
+b_tt_air                         -1.134e-06             9.770e-07            -2.906e-07             3.564e-05
+b_tt_rail                        -7.940e-07             6.990e-07             4.712e-06             2.667e-05
+b_tt_shift_business               2.160e-08             5.768e-08             4.310e-06            -2.836e-06
+b_access                         -8.757e-07             6.738e-07             7.141e-07             2.352e-05
+b_cost                            1.099e-06            -9.830e-07            -1.643e-05            -2.534e-05
+b_cost_shift_business            -9.830e-07             1.218e-06             1.782e-05             2.129e-05
+cost_income_elast                -1.643e-05             1.782e-05              0.004478            -8.997e-07
+b_wifi                           -2.534e-05             2.129e-05            -8.997e-07              0.001368
+b_food                           -1.268e-05             1.010e-05             2.923e-05            6.4788e-04
+lambda_PT                        -2.692e-05             2.262e-05           -5.8508e-04            7.9229e-04
+lambda_fastPT                    -2.904e-05             2.738e-05             5.170e-05              0.001019
+                                     b_food             lambda_PT         lambda_fastPT
+asc_bus                           -0.001479             -0.005857             -0.003937
+asc_air                           -0.001369             -0.003867             -0.005035
+asc_rail                          -0.001444             -0.003657             -0.005181
+asc_bus_shift_female              9.136e-05            4.0085e-04             4.279e-05
+asc_air_shift_female            -1.3946e-04             4.393e-05           -2.0334e-04
+asc_rail_shift_female            -9.681e-05            -3.072e-05           -2.2900e-04
+b_tt_car                          1.984e-06             3.709e-06             3.400e-06
+b_tt_bus                          1.589e-06             5.563e-06             3.196e-06
+b_tt_air                          1.273e-05             3.712e-05             4.889e-05
+b_tt_rail                         1.023e-05             2.638e-05             3.560e-05
+b_tt_shift_business              -1.061e-06            -4.170e-06            -2.658e-06
+b_access                          1.060e-05             3.080e-05             2.891e-05
+b_cost                           -1.268e-05            -2.692e-05            -2.904e-05
+b_cost_shift_business             1.010e-05             2.262e-05             2.738e-05
+cost_income_elast                 2.923e-05           -5.8508e-04             5.170e-05
+b_wifi                           6.4788e-04            7.9229e-04              0.001019
+b_food                           7.5169e-04            3.5681e-04            4.3258e-04
+lambda_PT                        3.5681e-04              0.001484            9.2210e-04
+lambda_fastPT                    4.3258e-04            9.2210e-04              0.001369
+
+Classical correlation matrix:
+                                    asc_bus               asc_air              asc_rail  asc_bus_shift_female
+asc_bus                             1.00000               0.65500               0.65294             -0.219322
+asc_air                             0.65500               1.00000               0.86440             -0.146947
+asc_rail                            0.65294               0.86440               1.00000             -0.148907
+asc_bus_shift_female               -0.21932              -0.14695              -0.14891              1.000000
+asc_air_shift_female               -0.13531              -0.20762              -0.17130              0.686847
+asc_rail_shift_female              -0.12465              -0.15830              -0.17686              0.717076
+b_tt_car                            0.25672               0.35776               0.37556              0.047607
+b_tt_bus                           -0.72843              -0.15552              -0.15856              0.045060
+b_tt_air                           -0.36862              -0.63807              -0.49708              0.020211
+b_tt_rail                          -0.42115              -0.53613              -0.70911              0.024014
+b_tt_shift_business                 0.30051               0.35452               0.30869             -0.016831
+b_access                           -0.32904              -0.44003              -0.32891              0.014717
+b_cost                              0.36977               0.40819               0.42081             -0.004948
+b_cost_shift_business              -0.28692              -0.33567              -0.34997            1.8947e-04
+cost_income_elast                   0.08592               0.05812               0.01937             -0.003912
+b_wifi                             -0.32344              -0.44323              -0.42796              0.011973
+b_food                             -0.16786              -0.22726              -0.22238              0.006765
+lambda_PT                          -0.61519              -0.44821              -0.43675              0.006004
+lambda_fastPT                      -0.40168              -0.63491              -0.60557              0.020897
+                       asc_air_shift_female asc_rail_shift_female              b_tt_car              b_tt_bus
+asc_bus                           -0.135306             -0.124646               0.25672             -0.728427
+asc_air                           -0.207623             -0.158305               0.35776             -0.155516
+asc_rail                          -0.171297             -0.176860               0.37556             -0.158562
+asc_bus_shift_female               0.686847              0.717076               0.04761              0.045060
+asc_air_shift_female               1.000000              0.872670               0.05038              0.008816
+asc_rail_shift_female              0.872670              1.000000               0.04543           -2.1026e-04
+b_tt_car                           0.050381              0.045427               1.00000              0.127511
+b_tt_bus                           0.008816           -2.1026e-04               0.12751              1.000000
+b_tt_air                           0.016848             -0.006084               0.26487              0.248693
+b_tt_rail                          0.015824             -0.012086               0.28736              0.254337
+b_tt_shift_business             -3.1782e-04              0.017014              -0.35987             -0.249404
+b_access                           0.009048             -0.006286               0.18612              0.095631
+b_cost                            -0.014771              0.005786              -0.26640             -0.197175
+b_cost_shift_business              0.014255              0.001125               0.16180              0.113393
+cost_income_elast                 -0.009826             -0.006463              -0.01757             -0.109284
+b_wifi                             0.012194             -0.007663               0.19411              0.183038
+b_food                             0.002399             -0.004601               0.10972              0.101501
+lambda_PT                          0.015860             -0.006419               0.26003              0.368886
+lambda_fastPT                      0.016979             -0.008289               0.25125              0.217779
+                                   b_tt_air             b_tt_rail   b_tt_shift_business              b_access
+asc_bus                           -0.368624             -0.421147               0.30051             -0.329038
+asc_air                           -0.638071             -0.536127               0.35452             -0.440035
+asc_rail                          -0.497076             -0.709106               0.30869             -0.328913
+asc_bus_shift_female               0.020211              0.024014              -0.01683              0.014717
+asc_air_shift_female               0.016848              0.015824           -3.1782e-04              0.009048
+asc_rail_shift_female             -0.006084             -0.012086               0.01701             -0.006286
+b_tt_car                           0.264867              0.287355              -0.35987              0.186115
+b_tt_bus                           0.248693              0.254337              -0.24940              0.095631
+b_tt_air                           1.000000              0.734322              -0.48792              0.235126
+b_tt_rail                          0.734322              1.000000              -0.52284              0.384543
+b_tt_shift_business               -0.487921             -0.522839               1.00000             -0.305137
+b_access                           0.235126              0.384543              -0.30514              1.000000
+b_cost                            -0.613357             -0.657461               0.30590             -0.467123
+b_cost_shift_business              0.447763              0.507496              -0.14862              0.324982
+cost_income_elast                  0.002007              0.003814               0.12884              0.005014
+b_wifi                             0.498460              0.521743              -0.33213              0.296665
+b_food                             0.224793              0.230868              -0.16262              0.139582
+lambda_PT                          0.532608              0.613243              -0.49248              0.474179
+lambda_fastPT                      0.765216              0.801393              -0.43621              0.459657
+                                     b_cost b_cost_shift_business     cost_income_elast                b_wifi
+asc_bus                            0.369768             -0.286923              0.085917             -0.323437
+asc_air                            0.408192             -0.335666              0.058116             -0.443231
+asc_rail                           0.420815             -0.349971              0.019372             -0.427961
+asc_bus_shift_female              -0.004948            1.8947e-04             -0.003912              0.011973
+asc_air_shift_female              -0.014771              0.014255             -0.009826              0.012194
+asc_rail_shift_female              0.005786              0.001125             -0.006463             -0.007663
+b_tt_car                          -0.266401              0.161802             -0.017570              0.194109
+b_tt_bus                          -0.197175              0.113393             -0.109284              0.183038
+b_tt_air                          -0.613357              0.447763              0.002007              0.498460
+b_tt_rail                         -0.657461              0.507496              0.003814              0.521743
+b_tt_shift_business                0.305903             -0.148619              0.128837             -0.332131
+b_access                          -0.467123              0.324982              0.005014              0.296665
+b_cost                             1.000000             -0.811400             -0.462144             -0.532510
+b_cost_shift_business             -0.811400              1.000000              0.377476              0.391655
+cost_income_elast                 -0.462144              0.377476              1.000000              0.044985
+b_wifi                            -0.532510              0.391655              0.044985              1.000000
+b_food                            -0.324176              0.213470              0.061277              0.579207
+lambda_PT                         -0.527497              0.404644             -0.100117              0.468185
+lambda_fastPT                     -0.632023              0.548719             -0.019641              0.611802
+                                     b_food             lambda_PT         lambda_fastPT
+asc_bus                           -0.167863             -0.615191             -0.401677
+asc_air                           -0.227259             -0.448206             -0.634909
+asc_rail                          -0.222385             -0.436745             -0.605571
+asc_bus_shift_female               0.006765              0.006004              0.020897
+asc_air_shift_female               0.002399              0.015860              0.016979
+asc_rail_shift_female             -0.004601             -0.006419             -0.008289
+b_tt_car                           0.109723              0.260031              0.251253
+b_tt_bus                           0.101501              0.368886              0.217779
+b_tt_air                           0.224793              0.532608              0.765216
+b_tt_rail                          0.230868              0.613243              0.801393
+b_tt_shift_business               -0.162624             -0.492477             -0.436209
+b_access                           0.139582              0.474179              0.459657
+b_cost                            -0.324176             -0.527497             -0.632023
+b_cost_shift_business              0.213470              0.404644              0.548719
+cost_income_elast                  0.061277             -0.100117             -0.019641
+b_wifi                             0.579207              0.468185              0.611802
+b_food                             1.000000              0.242766              0.312976
+lambda_PT                          0.242766              1.000000              0.578618
+lambda_fastPT                      0.312976              0.578618              1.000000
+
+Robust correlation matrix:
+                                    asc_bus               asc_air              asc_rail  asc_bus_shift_female
+asc_bus                              1.0000              0.740015               0.65534             -0.258300
+asc_air                              0.7400              1.000000               0.92312             -0.127170
+asc_rail                             0.6553              0.923120               1.00000             -0.100469
+asc_bus_shift_female                -0.2583             -0.127170              -0.10047              1.000000
+asc_air_shift_female                -0.1180             -0.100983              -0.06145              0.722655
+asc_rail_shift_female               -0.1052             -0.070877              -0.07811              0.739799
+b_tt_car                             0.2751              0.282566               0.25590              0.040932
+b_tt_bus                            -0.7009             -0.275392              -0.19299              0.080474
+b_tt_air                            -0.4806             -0.742414              -0.66226              0.028162
+b_tt_rail                           -0.4143             -0.679970              -0.79320             -0.001712
+b_tt_shift_business                  0.1781              0.180788               0.11650             -0.066623
+b_access                            -0.4426             -0.511107              -0.49286              0.034404
+b_cost                               0.5703              0.607629               0.59780             -0.070456
+b_cost_shift_business               -0.4482             -0.525810              -0.53312              0.042717
+cost_income_elast                    0.1372              0.001595              -0.08170             -0.041395
+b_wifi                              -0.4360             -0.560904              -0.56702             -0.004954
+b_food                              -0.2478             -0.275775              -0.28576              0.036941
+lambda_PT                           -0.6985             -0.554501              -0.51486              0.115346
+lambda_fastPT                       -0.4888             -0.751753              -0.75946              0.012820
+                       asc_air_shift_female asc_rail_shift_female              b_tt_car              b_tt_bus
+asc_bus                           -0.118033              -0.10520               0.27511              -0.70088
+asc_air                           -0.100983              -0.07088               0.28257              -0.27539
+asc_rail                          -0.061445              -0.07811               0.25590              -0.19299
+asc_bus_shift_female               0.722655               0.73980               0.04093               0.08047
+asc_air_shift_female               1.000000               0.90797               0.05088               0.04259
+asc_rail_shift_female              0.907969               1.00000               0.03804               0.02132
+b_tt_car                           0.050879               0.03804               1.00000               0.16865
+b_tt_bus                           0.042588               0.02132               0.16865               1.00000
+b_tt_air                          -0.037616              -0.06244               0.26435               0.37936
+b_tt_rail                         -0.056669              -0.06548               0.32379               0.26422
+b_tt_shift_business               -0.144650              -0.11483              -0.38193              -0.32440
+b_access                          -0.035827              -0.04151               0.20561               0.17701
+b_cost                             0.029847               0.02793              -0.16931              -0.33747
+b_cost_shift_business             -0.060170              -0.05262               0.06341               0.18552
+cost_income_elast                  0.005605               0.05324              -0.06194              -0.12135
+b_wifi                            -0.091005              -0.08749               0.23952               0.32068
+b_food                            -0.068525              -0.04955               0.19424               0.19930
+lambda_PT                          0.015361              -0.01119               0.25841               0.49660
+lambda_fastPT                     -0.074033              -0.08685               0.24664               0.29707
+                                   b_tt_air             b_tt_rail   b_tt_shift_business              b_access
+asc_bus                           -0.480552             -0.414270               0.17805             -0.442596
+asc_air                           -0.742414             -0.679970               0.18079             -0.511107
+asc_rail                          -0.662256             -0.793196               0.11650             -0.492861
+asc_bus_shift_female               0.028162             -0.001712              -0.06662              0.034404
+asc_air_shift_female              -0.037616             -0.056669              -0.14465             -0.035827
+asc_rail_shift_female             -0.062442             -0.065477              -0.11483             -0.041506
+b_tt_car                           0.264353              0.323788              -0.38193              0.205611
+b_tt_bus                           0.379356              0.264224              -0.32440              0.177013
+b_tt_air                           1.000000              0.827389              -0.30217              0.371019
+b_tt_rail                          0.827389              1.000000              -0.27140              0.553664
+b_tt_shift_business               -0.302173             -0.271398               1.00000             -0.120678
+b_access                           0.371019              0.553664              -0.12068              1.000000
+b_cost                            -0.694802             -0.703493               0.05800             -0.625730
+b_cost_shift_business              0.568651              0.588396               0.14717              0.457385
+cost_income_elast                 -0.002789              0.065414               0.18136              0.007995
+b_wifi                             0.619034              0.670061              -0.21589              0.476455
+b_food                             0.298317              0.346768              -0.10897              0.289684
+lambda_PT                          0.619009              0.636010              -0.30476              0.598943
+lambda_fastPT                      0.848803              0.893704              -0.20231              0.585237
+                                     b_cost b_cost_shift_business     cost_income_elast                b_wifi
+asc_bus                             0.57029              -0.44823              0.137162             -0.435980
+asc_air                             0.60763              -0.52581              0.001595             -0.560904
+asc_rail                            0.59780              -0.53312             -0.081698             -0.567021
+asc_bus_shift_female               -0.07046               0.04272             -0.041395             -0.004954
+asc_air_shift_female                0.02985              -0.06017              0.005605             -0.091005
+asc_rail_shift_female               0.02793              -0.05262              0.053243             -0.087490
+b_tt_car                           -0.16931               0.06341             -0.061944              0.239524
+b_tt_bus                           -0.33747               0.18552             -0.121346              0.320677
+b_tt_air                           -0.69480               0.56865             -0.002789              0.619034
+b_tt_rail                          -0.70349               0.58840              0.065414              0.670061
+b_tt_shift_business                 0.05800               0.14717              0.181359             -0.215894
+b_access                           -0.62573               0.45738              0.007995              0.476455
+b_cost                              1.00000              -0.84955             -0.234254             -0.653601
+b_cost_shift_business              -0.84955               1.00000              0.241307              0.521530
+cost_income_elast                  -0.23425               0.24131              1.000000           -3.6357e-04
+b_wifi                             -0.65360               0.52153           -3.6357e-04              1.000000
+b_food                             -0.44126               0.33387              0.015930              0.638978
+lambda_PT                          -0.66640               0.53209             -0.226959              0.556089
+lambda_fastPT                      -0.74850               0.67045              0.020880              0.744393
+                                     b_food             lambda_PT         lambda_fastPT
+asc_bus                            -0.24778              -0.69845              -0.48884
+asc_air                            -0.27577              -0.55450              -0.75175
+asc_rail                           -0.28576              -0.51486              -0.75946
+asc_bus_shift_female                0.03694               0.11535               0.01282
+asc_air_shift_female               -0.06853               0.01536              -0.07403
+asc_rail_shift_female              -0.04955              -0.01119              -0.08685
+b_tt_car                            0.19424               0.25841               0.24664
+b_tt_bus                            0.19930               0.49660               0.29707
+b_tt_air                            0.29832               0.61901               0.84880
+b_tt_rail                           0.34677               0.63601               0.89370
+b_tt_shift_business                -0.10897              -0.30476              -0.20231
+b_access                            0.28968               0.59894               0.58524
+b_cost                             -0.44126              -0.66640              -0.74850
+b_cost_shift_business               0.33387               0.53209               0.67045
+cost_income_elast                   0.01593              -0.22696               0.02088
+b_wifi                              0.63898               0.55609               0.74439
+b_food                              1.00000               0.33781               0.42640
+lambda_PT                           0.33781               1.00000               0.64685
+lambda_fastPT                       0.42640               0.64685               1.00000
+
+ 20 most extreme outliers in terms of lowest average per choice prediction:
+  ID Avg prob per choice
+ 467           0.1942145
+ 276           0.2030383
+ 183           0.2075765
+ 157           0.2098378
+ 107           0.2230900
+ 452           0.2265051
+ 464           0.2266072
+ 133           0.2288143
+ 498           0.2292326
+ 474           0.2323000
+ 317           0.2329649
+  23           0.2330244
+ 197           0.2365775
+  48           0.2483848
+ 377           0.2507816
+ 146           0.2511964
+ 293           0.2531714
+ 396           0.2536544
+ 221           0.2549901
+ 339           0.2579445
+
+Changes in parameter estimates from starting values:
+                          Initial    Estimate  Difference
+asc_car                     0.000    0.000000    0.000000
+asc_bus                     0.000    1.009903    1.009903
+asc_air                     0.000    1.068004    1.068004
+asc_rail                    0.000    1.104811    1.104811
+asc_bus_shift_female        0.000    0.125228    0.125228
+asc_air_shift_female        0.000    0.120103    0.120103
+asc_rail_shift_female       0.000    0.090477    0.090477
+b_tt_car                    0.000    0.008427    0.008427
+b_tt_bus                    0.000    0.001532    0.001532
+b_tt_air                    0.000    0.016520    0.016520
+b_tt_rail                   0.000    0.012042    0.012042
+b_tt_shift_business         0.000   -0.004427   -0.004427
+b_access                    0.000    0.011284    0.011284
+b_cost                      0.000   -0.012934   -0.012934
+b_cost_shift_business       0.000    0.008753    0.008753
+cost_income_elast           0.000   -0.899450   -0.899450
+b_no_frills                 0.000    0.000000    0.000000
+b_wifi                      0.000    0.380413    0.380413
+b_food                      0.000    0.150493    0.150493
+lambda_PT                   1.000    0.417507   -0.582493
+lambda_fastPT               1.000    0.380563   -0.619437
+
+Settings and functions used in model definition:
+
+apollo_control
+--------------
+                       Value                                                                
+modelName              "NL_three_levels"                                                    
+modelDescr             "Three-level NL model with socio-demographics on mode choice SP data"
+indivID                "ID"                                                                 
+mixing                 "FALSE"                                                              
+outputDirectory        "C:/GitHub/EconAnalysis/Participation/R/output/"                     
+debug                  "FALSE"                                                              
+nCores                 "1"                                                                  
+workInLogs             "FALSE"                                                              
+seed                   "13"                                                                 
+HB                     "FALSE"                                                              
+noValidation           "FALSE"                                                              
+noDiagnostics          "FALSE"                                                              
+calculateLLC           "TRUE"                                                               
+analyticHessian        "FALSE"                                                              
+memorySaver            "FALSE"                                                              
+panelData              "TRUE"                                                               
+analyticGrad           "TRUE"                                                               
+analyticGrad_manualSet "FALSE"                                                              
+overridePanel          "FALSE"                                                              
+preventOverridePanel   "FALSE"                                                              
+noModification         "FALSE"                                                              
+
+Hessian routines attempted
+--------------------------
+numerical second derivative of LL (using numDeriv)
+
+Scaling used in computing Hessian
+---------------------------------
+                            Value
+asc_bus               1.009903330
+asc_air               1.068004391
+asc_rail              1.104810752
+asc_bus_shift_female  0.125228092
+asc_air_shift_female  0.120102865
+asc_rail_shift_female 0.090477416
+b_tt_car              0.008426742
+b_tt_bus              0.001531752
+b_tt_air              0.016519922
+b_tt_rail             0.012041510
+b_tt_shift_business   0.004426886
+b_access              0.011283996
+b_cost                0.012933819
+b_cost_shift_business 0.008753138
+cost_income_elast     0.899449871
+b_wifi                0.380413250
+b_food                0.150492909
+lambda_PT             0.417506797
+lambda_fastPT         0.380563025
+
+
+apollo_probabilities
+----------------------
+function(apollo_beta, apollo_inputs, functionality="estimate"){
+  
+  ### Attach inputs and detach after function exit
+  apollo_attach(apollo_beta, apollo_inputs)
+  on.exit(apollo_detach(apollo_beta, apollo_inputs))
+  
+  ### Create list of probabilities P
+  P = list()
+  
+  ### Create alternative specific constants and coefficients using interactions with socio-demographics
+  asc_bus_value   = asc_bus  + asc_bus_shift_female * female
+  asc_air_value   = asc_air  + asc_air_shift_female * female
+  asc_rail_value  = asc_rail + asc_rail_shift_female * female
+  b_tt_car_value  = b_tt_car + b_tt_shift_business * business
+  b_tt_bus_value  = b_tt_bus + b_tt_shift_business * business
+  b_tt_air_value  = b_tt_air + b_tt_shift_business * business
+  b_tt_rail_value = b_tt_rail + b_tt_shift_business * business
+  b_cost_value    = ( b_cost +  b_cost_shift_business * business ) * ( income / mean_income ) ^ cost_income_elast
+  
+  ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
+  V = list()
+  V[["car"]]  = asc_car        + b_tt_car_value  * time_car                           + b_cost_value * cost_car
+  V[["bus"]]  = asc_bus_value  + b_tt_bus_value  * time_bus  + b_access * access_bus  + b_cost_value * cost_bus 
+  V[["air"]]  = asc_air_value  + b_tt_air_value  * time_air  + b_access * access_air  + b_cost_value * cost_air   + b_no_frills * ( service_air == 1 )  + b_wifi * ( service_air == 2 )  + b_food * ( service_air == 3 )
+  V[["rail"]] = asc_rail_value + b_tt_rail_value * time_rail + b_access * access_rail + b_cost_value * cost_rail  + b_no_frills * ( service_rail == 1 ) + b_wifi * ( service_rail == 2 ) + b_food * ( service_rail == 3 )
+  
+  ### Specify nests for NL model
+  nlNests      = list(root=1, PT=lambda_PT, fastPT=lambda_fastPT)
+  
+  ### Specify tree structure for NL model
+  nlStructure= list()
+  nlStructure[["root"]]   = c("car","PT")
+  nlStructure[["PT"]]     = c("bus","fastPT")
+  nlStructure[["fastPT"]] = c("air","rail")
+  
+  ### Define settings for NL model
+  nl_settings <- list(
+    alternatives = c(car=1, bus=2, air=3, rail=4),
+    avail        = list(car=1, bus=1, air=1, rail=1),
+    choiceVar    = choice,
+    utilities    = V,
+    nlNests      = nlNests,
+    nlStructure  = nlStructure
+  )
+  
+  ### Compute probabilities using NL model
+  P[["model"]] = apollo_nl(nl_settings, functionality)
+  
+  ### Take product across observation for same individual
+  P = apollo_panelProd(P, apollo_inputs, functionality)
+  
+  ### Prepare and return outputs of function
+  P = apollo_prepareProb(P, apollo_inputs, functionality)
+  return(P)
+}
