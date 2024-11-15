@@ -5,7 +5,7 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : NL_three_levels_constraints_on_lambdas
 Model description                           : Participation, location and target species decisions
-Model run at                                : 2024-11-15 19:07:08.979238
+Model run at                                : 2024-11-15 18:51:56.276807
 Estimation method                           : bgw
 Model diagnosis                             : False convergence
 Number of individuals                       : 46
@@ -15,57 +15,57 @@ Number of modelled outcomes                 : 29160
 Number of cores used                        :  4 
 Model without mixing
 
-LL(start)                                   : -52849.6
+LL(start)                                   : -54146.1
 LL at equal shares, LL(0)                   : -78966.74
 LL at observed shares, LL(C)                : -38918.41
-LL(final)                                   : -38679.5
-Rho-squared vs equal shares                  :  0.5102 
-Adj.Rho-squared vs equal shares              :  0.5099 
-Rho-squared vs observed shares               :  0.0061 
-Adj.Rho-squared vs observed shares           :  0.0059 
-AIC                                         :  77402.99 
-BIC                                         :  77585.17 
+LL(final)                                   : -38689.24
+Rho-squared vs equal shares                  :  0.5101 
+Adj.Rho-squared vs equal shares              :  0.5098 
+Rho-squared vs observed shares               :  0.0059 
+Adj.Rho-squared vs observed shares           :  0.0057 
+AIC                                         :  77422.49 
+BIC                                         :  77604.66 
 
 Estimated parameters                        : 22
-Time taken (hh:mm:ss)                       :  00:00:46.93 
-     pre-estimation                         :  00:00:13.75 
-     estimation                             :  00:00:32.86 
-     post-estimation                        :  00:00:0.32 
-Iterations                                  :  39 (False convergence) 
+Time taken (hh:mm:ss)                       :  00:00:52.86 
+     pre-estimation                         :  00:00:9.7 
+     estimation                             :  00:00:42.74 
+     post-estimation                        :  00:00:0.42 
+Iterations                                  :  57 (False convergence) 
 
 Unconstrained optimisation.
 
 Estimates:
                         Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
-asc_sfa_nanc           237.27174          NA          NA          NA          NA            NA            NA
-asc_laa_nanc           204.35094          NA          NA          NA          NA            NA            NA
-asc_laa_cmck           -15.72276          NA          NA          NA          NA            NA            NA
-asc_laa_msqd             0.32107          NA          NA          NA          NA            NA            NA
-asc_laa_ytna            -3.55151          NA          NA          NA          NA            NA            NA
-asc_mna_msqd             0.08327          NA          NA          NA          NA            NA            NA
-asc_sba_msqd             0.53673          NA          NA          NA          NA            NA            NA
-asc_laa_btna            -1.82159          NA          NA          NA          NA            NA            NA
-asc_sfa_msqd            -0.74366          NA          NA          NA          NA            NA            NA
-asc_mna_psdn            -5.84874          NA          NA          NA          NA            NA            NA
-asc_sba_cmck          -165.70812          NA          NA          NA          NA            NA            NA
-asc_mra_msqd            -1.40445          NA          NA          NA          NA            NA            NA
-asc_laa_psdn            -5.91002          NA          NA          NA          NA            NA            NA
-asc_mna_nanc             8.43313          NA          NA          NA          NA            NA            NA
-asc_no_participation     0.00000          NA          NA          NA          NA            NA            NA
-B_mean_avail             1.37592          NA          NA          NA          NA            NA            NA
-B_mean_price            -2.23467          NA          NA          NA          NA            NA            NA
-lambda_part              1.43102          NA          NA          NA          NA            NA            NA
-lambda_cmck             79.42253          NA          NA          NA          NA            NA            NA
-lambda_msqd              0.56030          NA          NA          NA          NA            NA            NA
-lambda_psdn              0.28268          NA          NA          NA          NA            NA            NA
-lambda_nanc            -83.45547          NA          NA          NA          NA            NA            NA
-lambda_tuna              1.34749          NA          NA          NA          NA            NA            NA
+asc_sfa_nanc            412.3660          NA          NA          NA          NA            NA            NA
+asc_laa_nanc            357.7690          NA          NA          NA          NA            NA            NA
+asc_laa_cmck            -22.9581          NA          NA          NA          NA            NA            NA
+asc_laa_msqd              1.3214          NA          NA          NA          NA            NA            NA
+asc_laa_ytna             -2.5447          NA          NA          NA          NA            NA            NA
+asc_mna_msqd              1.0840          NA          NA          NA          NA            NA            NA
+asc_sba_msqd              1.5372          NA          NA          NA          NA            NA            NA
+asc_laa_btna             -0.8086          NA          NA          NA          NA            NA            NA
+asc_sfa_msqd              0.2572          NA          NA          NA          NA            NA            NA
+asc_mna_psdn             82.9762          NA          NA          NA          NA            NA            NA
+asc_sba_cmck           -283.1159          NA          NA          NA          NA            NA            NA
+asc_mra_msqd             -0.4039          NA          NA          NA          NA            NA            NA
+asc_laa_psdn            113.0605          NA          NA          NA          NA            NA            NA
+asc_mna_nanc             18.6227          NA          NA          NA          NA            NA            NA
+asc_no_participation      1.0000          NA          NA          NA          NA            NA            NA
+B_mean_avail              1.3736          NA          NA          NA          NA            NA            NA
+B_mean_price             -2.2346          NA          NA          NA          NA            NA            NA
+lambda_part               1.4291          NA          NA          NA          NA            NA            NA
+lambda_cmck             137.8211          NA          NA          NA          NA            NA            NA
+lambda_msqd               0.5603          NA          NA          NA          NA            NA            NA
+lambda_psdn            -147.0317          NA          NA          NA          NA            NA            NA
+lambda_nanc            -144.4507          NA          NA          NA          NA            NA            NA
+lambda_tuna               1.3422          NA          NA          NA          NA            NA            NA
 
 Nesting structure for NL model component :
 Nest: root (1)
 |-------Alternative: no_participation
-'-Nest: part (1.431)
-   |-Nest: cmck (79.4225)
+'-Nest: part (1.4291)
+   |-Nest: cmck (137.8211)
    |  |-Alternative: laa_cmck
    |  '-Alternative: sba_cmck
    |-Nest: msqd (0.5603)
@@ -74,22 +74,25 @@ Nest: root (1)
    |  |-Alternative: mra_msqd
    |  |-Alternative: sba_msqd
    |  '-Alternative: sfa_msqd
-   |-Nest: psdn (0.2827)
+   |-Nest: psdn (-147.0317)
    |  |-Alternative: laa_psdn
    |  '-Alternative: mna_psdn
-   |-Nest: nanc (-83.4555)
+   |-Nest: nanc (-144.4507)
    |  |-Alternative: laa_nanc
    |  |-Alternative: mna_nanc
    |  '-Alternative: sfa_nanc
-   '-Nest: tuna (1.3475)
+   '-Nest: tuna (1.3422)
       |-Alternative: laa_ytna
       '-Alternative: laa_btna
 
-WARNING: The nesting parameter for nest "cmck" should be between 0 and 1.431 (the nesting parameter for nest "part"), yet its value is
-  79.4225. 
+WARNING: The nesting parameter for nest "cmck" should be between 0 and 1.4291 (the nesting parameter for nest "part"), yet its value
+  is 137.8211. 
 
-WARNING: The nesting parameter for nest "nanc" should be between 0 and 1.431 (the nesting parameter for nest "part"), yet its value is
-  -83.4555. 
+WARNING: The nesting parameter for nest "psdn" should be between 0 and 1.4291 (the nesting parameter for nest "part"), yet its value
+  is -147.0317. 
+
+WARNING: The nesting parameter for nest "nanc" should be between 0 and 1.4291 (the nesting parameter for nest "part"), yet its value
+  is -144.4507. 
 
 
 Overview of choices for NL model component :
@@ -391,52 +394,52 @@ lambda_tuna            NA           NA           NA           NA
 
  20 most extreme outliers in terms of lowest average per choice prediction:
   row Avg prob per choice
- <NA>        0.0007806162
- <NA>        0.0008178562
- <NA>        0.0010692243
- <NA>        0.0013395768
- <NA>        0.0014596675
- <NA>        0.0016512012
- <NA>        0.0016902155
- <NA>        0.0016926982
- <NA>        0.0016945628
- <NA>        0.0016949537
- <NA>        0.0016956760
- <NA>        0.0017007648
- <NA>        0.0017102663
- <NA>        0.0017102663
- <NA>        0.0017137725
- <NA>        0.0017137725
- <NA>        0.0017137725
- <NA>        0.0017273076
- <NA>        0.0017318292
- <NA>        0.0017318292
+ <NA>        0.0007768645
+ <NA>        0.0008140466
+ <NA>        0.0010687177
+ <NA>        0.0013354111
+ <NA>        0.0014563800
+ <NA>        0.0016478305
+ <NA>        0.0016822209
+ <NA>        0.0016847676
+ <NA>        0.0016867593
+ <NA>        0.0016873558
+ <NA>        0.0016877930
+ <NA>        0.0016973848
+ <NA>        0.0017056396
+ <NA>        0.0017056396
+ <NA>        0.0017091359
+ <NA>        0.0017091359
+ <NA>        0.0017091359
+ <NA>        0.0017278847
+ <NA>        0.0017323841
+ <NA>        0.0017323841
 
 Changes in parameter estimates from starting values:
                          Initial    Estimate  Difference
-asc_sfa_nanc             -3.0000   237.27174   240.27174
-asc_laa_nanc             -3.0000   204.35094   207.35094
-asc_laa_cmck             -3.0000   -15.72276   -12.72276
-asc_laa_msqd             -3.0000     0.32107     3.32107
-asc_laa_ytna             -3.0000    -3.55151    -0.55151
-asc_mna_msqd             -3.0000     0.08327     3.08327
-asc_sba_msqd             -3.0000     0.53673     3.53673
-asc_laa_btna             -3.0000    -1.82159     1.17841
-asc_sfa_msqd             -3.0000    -0.74366     2.25634
-asc_mna_psdn             -3.0000    -5.84874    -2.84874
-asc_sba_cmck             -3.0000  -165.70812  -162.70812
-asc_mra_msqd             -3.0000    -1.40445     1.59555
-asc_laa_psdn             -3.0000    -5.91002    -2.91002
-asc_mna_nanc             -3.0000     8.43313    11.43313
-asc_no_participation      0.0000     0.00000     0.00000
-B_mean_avail              1.1000     1.37592     0.27592
-B_mean_price              0.3000    -2.23467    -2.53467
-lambda_part               1.0000     1.43102     0.43102
-lambda_cmck               0.5000    79.42253    78.92253
-lambda_msqd               0.5000     0.56030     0.06030
-lambda_psdn               0.5000     0.28268    -0.21732
-lambda_nanc               0.5000   -83.45547   -83.95547
-lambda_tuna               0.5000     1.34749     0.84749
+asc_sfa_nanc             -3.0000    412.3660   415.36597
+asc_laa_nanc             -3.0000    357.7690   360.76901
+asc_laa_cmck             -3.0000    -22.9581   -19.95814
+asc_laa_msqd             -3.0000      1.3214     4.32144
+asc_laa_ytna             -3.0000     -2.5447     0.45534
+asc_mna_msqd             -3.0000      1.0840     4.08398
+asc_sba_msqd             -3.0000      1.5372     4.53724
+asc_laa_btna             -3.0000     -0.8086     2.19145
+asc_sfa_msqd             -3.0000      0.2572     3.25720
+asc_mna_psdn             -3.0000     82.9762    85.97618
+asc_sba_cmck             -3.0000   -283.1159  -280.11591
+asc_mra_msqd             -3.0000     -0.4039     2.59610
+asc_laa_psdn             -3.0000    113.0605   116.06048
+asc_mna_nanc             -3.0000     18.6227    21.62272
+asc_no_participation      1.0000      1.0000     0.00000
+B_mean_avail              1.1000      1.3736     0.27355
+B_mean_price              0.3000     -2.2346    -2.53459
+lambda_part               1.0000      1.4291     0.42914
+lambda_cmck               0.5000    137.8211   137.32106
+lambda_msqd               0.5000      0.5603     0.06034
+lambda_psdn               0.5000   -147.0317  -147.53171
+lambda_nanc               0.5000   -144.4507  -144.95071
+lambda_tuna               0.5000      1.3422     0.84218
 
 Settings and functions used in model definition:
 

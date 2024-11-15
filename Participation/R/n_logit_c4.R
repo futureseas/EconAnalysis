@@ -220,14 +220,3 @@ apollo_saveOutput(model,saveOutput_settings = list(printT1=1))
 ### Print outputs of additional diagnostics to new output file (remember to close file writing when complete)
 apollo_sink()
 
-# ----------------------------------------------------------------- #
-#---- LR TEST AGAINST TWO-LEVEL NL MODEL                         ----
-# ----------------------------------------------------------------- #
-
-apollo_lrTest("NL_two_levels", model)
-
-# ----------------------------------------------------------------- #
-#---- switch off writing to file                                 ----
-# ----------------------------------------------------------------- #
-
-apollo_sink()
