@@ -11,15 +11,18 @@ library(apollo)
 ### Initialise code
 apollo_initialise()
 
+setwd("C:/GitHub/EconAnalysis/Participation/R")
+
 
 ### Set core controls
 apollo_control = list(
-  modelName       = "NL_three_levels_constraints_on_lambdas",
+  modelName       = "NL_participation_model",
   modelDescr      = "Participation, location and target species decisions",
   indivID         = "fished_vessel_anon", 
-  outputDirectory = "C:/GitHub/EconAnalysis/Participation/R/output",
+  outputDirectory = "output",
   panelData       = FALSE,
-  nCores          = 4
+  nCores          = 4,
+  workInLogs      = FALSE
 )
 
 
@@ -28,25 +31,26 @@ apollo_control = list(
 # ################################################################# #
 
 ### Read database 
-# library(haven)
-# data <- read_dta("G:/Mi Unidad/Data/Anonymised data/part_model_c4.dta")
-# saveRDS(data, "G:/Mi Unidad/Data/Anonymised data/part_model_c4.rds")
+# library(readstata13)
+# data <- read.dta13("H:/My Drive/Data/Anonymised data/part_model_c4.dta")
+# saveRDS(data, "H:/My Drive/Data/Anonymised data/part_model_c4.rds")
 
 library(tidyr)
-long_data = readRDS("G:/Mi Unidad/Data/Anonymised data/part_model_c4.rds") %>%
-  dplyr::select("fished_haul_anon", "fished_vessel_anon",  "selection", "fished", "fished_vessel_anon", "mean_avail", 
-                "mean_price", "wind_max_220_mh", "dist_to_cog", "dist_port_to_catch_area_zero", 
-                "psdnclosured", "btnaclosured", "dummy_prev_days", "dummy_prev_year_days", 
-                "unem_rate", "d_c", "d_d", "d_p", "d_cd", "d_pc", "d_pd", "d_pcd")
+long_data = readRDS("H:/My Drive/Data/Anonymised data/part_model_c4.rds") %>%
+  dplyr::select("fished_haul_anon", "fished_vessel_anon", "selection", "fished",
+                "fished_vessel_anon", "mean_avail", "mean_price", 
+                "wind_max_220_mh", "dist_to_cog", "dist_port_to_catch_area_zero",
+                "psdnclosure", "btnaclosure", "dummy_prev_days", "dummy_prev_year_days",
+                "unem_rate", "d_d", "d_cd", "weekend")
 
 long_data$selection <- tolower(gsub("-", "_", long_data$selection))
 
 database <- long_data %>%
   pivot_wider(
     names_from = selection,                  # Unique values for alternatives
-    values_from = c(fished, mean_avail, mean_price, wind_max_220_mh, dist_to_cog, dist_port_to_catch_area_zero, 
-                    psdnclosured, btnaclosured, dummy_prev_days, dummy_prev_year_days, 
-                    unem_rate, d_c, d_d, d_p, d_cd, d_pc, d_pd, d_pcd))
+    values_from = c(fished, mean_avail, mean_price, wind_max_220_mh, dist_to_cog, 
+                    dist_port_to_catch_area_zero, dummy_prev_days, dummy_prev_year_days, 
+                    unem_rate, d_d, d_cd))
 
 database$choice <- ifelse(database$fished_sfa_nanc == 1, 1,                              
                    ifelse(database$fished_laa_nanc == 1, 2,
@@ -79,29 +83,44 @@ database <- database[order(database$fished_vessel_anon, database$fished_haul_ano
 
 ### Vector of parameters, including any that are kept fixed in estimation
 
-apollo_beta=c(asc_sfa_nanc         = -3,
-              asc_laa_nanc         = -3,
-              asc_laa_cmck         = -3,
-              asc_laa_msqd         = -3,
-              asc_laa_ytna         = -3,
-              asc_mna_msqd         = -3,
-              asc_sba_msqd         = -3,
-              asc_laa_btna         = -3,
-              asc_sfa_msqd         = -3,
-              asc_mna_psdn         = -3,
-              asc_sba_cmck         = -3,
-              asc_mra_msqd         = -3,
-              asc_laa_psdn         = -3,
-              asc_mna_nanc         = -3,
-              asc_no_participation = 0,
-              B_mean_avail         = 1.1,
-              B_mean_price         = 0.3,
-              lambda_part          = 1, 
-              lambda_cmck          = 0.5,
-              lambda_msqd          = 0.5,
-              lambda_psdn          = 0.5,
-              lambda_nanc          = 0.5,
-              lambda_tuna          = 0.5)
+apollo_beta=c(asc_sfa_nanc                   = -3,
+              asc_laa_nanc                   = -3,
+              asc_laa_cmck                   = -3,
+              asc_laa_msqd                   = -3,
+              asc_laa_ytna                   = -3,
+              asc_mna_msqd                   = -3,
+              asc_sba_msqd                   = -3,
+              asc_laa_btna                   = -3,
+              asc_sfa_msqd                   = -3,
+              asc_mna_psdn                   = -3,
+              asc_sba_cmck                   = -3,
+              asc_mra_msqd                   = -3,
+              asc_laa_psdn                   = -3,
+              asc_mna_nanc                   = -3,
+              asc_no_participation           = 0,
+              B_mean_avail                   = 1.1,
+              B_mean_price                   = 0.3,
+              B_wind_max_220_mh              = 1,
+              B_dist_to_cog                  = 1,
+              B_dist_port_to_catch_area_zero = 1,
+              B_dummy_prev_days              = 1,
+              B_dummy_prev_year_days         = 1,
+              B_unem_rate                    = 1,
+              B_d_d                          = 1,
+              B_d_cd                         = 1,
+              c_btna                         = 1,
+              c_psdn                         = 1,
+              w_nanc                         = 1,
+              w_cmck                         = 1,
+              w_msqd                         = 1,
+              w_tuna                         = 1,
+              w_psdn                         = 1,
+              lambda_part                    = 0.9, 
+              lambda_cmck                    = 0.5,
+              lambda_msqd                    = 0.5,
+              lambda_psdn                    = 0.5,
+              lambda_nanc                    = 0.5,
+              lambda_tuna                    = 0.5)
 
 # ### Vector with names (in quotes) of parameters to be kept fixed at their starting value in apollo_beta, use apollo_beta_fixed = c() if none
 apollo_fixed = c("asc_no_participation")
@@ -133,22 +152,23 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
 # 
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
   V = list()
-  V[["sfa_nanc"]]         = asc_sfa_nanc + B_mean_avail * mean_avail_sfa_nanc + B_mean_price * mean_price_sfa_nanc        
-  V[["laa_nanc"]]         = asc_laa_nanc + B_mean_avail * mean_avail_laa_nanc + B_mean_price * mean_price_laa_nanc        
-  V[["laa_cmck"]]         = asc_laa_cmck + B_mean_avail * mean_avail_laa_cmck + B_mean_price * mean_price_laa_cmck        
-  V[["laa_msqd"]]         = asc_laa_msqd + B_mean_avail * mean_avail_laa_msqd + B_mean_price * mean_price_laa_msqd        
-  V[["laa_ytna"]]         = asc_laa_ytna + B_mean_avail * mean_avail_laa_ytna + B_mean_price * mean_price_laa_ytna        
-  V[["mna_msqd"]]         = asc_mna_msqd + B_mean_avail * mean_avail_mna_msqd + B_mean_price * mean_price_mna_msqd        
-  V[["sba_msqd"]]         = asc_sba_msqd + B_mean_avail * mean_avail_sba_msqd + B_mean_price * mean_price_sba_msqd        
-  V[["laa_btna"]]         = asc_laa_btna + B_mean_avail * mean_avail_laa_btna + B_mean_price * mean_price_laa_btna        
-  V[["sfa_msqd"]]         = asc_sfa_msqd + B_mean_avail * mean_avail_sfa_msqd + B_mean_price * mean_price_sfa_msqd        
-  V[["mna_psdn"]]         = asc_mna_psdn + B_mean_avail * mean_avail_mna_psdn + B_mean_price * mean_price_mna_psdn        
-  V[["sba_cmck"]]         = asc_sba_cmck + B_mean_avail * mean_avail_sba_cmck + B_mean_price * mean_price_sba_cmck        
-  V[["mra_msqd"]]         = asc_mra_msqd + B_mean_avail * mean_avail_mra_msqd + B_mean_price * mean_price_mra_msqd        
-  V[["laa_psdn"]]         = asc_laa_psdn + B_mean_avail * mean_avail_laa_psdn + B_mean_price * mean_price_laa_psdn        
-  V[["mna_nanc"]]         = asc_mna_nanc + B_mean_avail * mean_avail_mna_nanc + B_mean_price * mean_price_mna_nanc        
+  V[["sfa_nanc"]]         = asc_sfa_nanc + w_nanc * weekend +                       + B_mean_avail * mean_avail_sfa_nanc + B_mean_price * mean_price_sfa_nanc  +   B_wind_max_220_mh * wind_max_220_mh_sfa_nanc + B_dist_to_cog * dist_to_cog_sfa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_nanc + B_dummy_prev_days * dummy_prev_days_sfa_nanc + B_dummy_prev_year_days * dummy_prev_year_days_sfa_nanc + B_unem_rate * unem_rate_sfa_nanc + B_d_d * d_d_sfa_nanc + B_d_cd * d_cd_sfa_nanc 
+  V[["laa_nanc"]]         = asc_laa_nanc + w_nanc * weekend +                       + B_mean_avail * mean_avail_laa_nanc + B_mean_price * mean_price_laa_nanc  +   B_wind_max_220_mh * wind_max_220_mh_laa_nanc + B_dist_to_cog * dist_to_cog_laa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_nanc + B_dummy_prev_days * dummy_prev_days_laa_nanc + B_dummy_prev_year_days * dummy_prev_year_days_laa_nanc + B_unem_rate * unem_rate_laa_nanc + B_d_d * d_d_laa_nanc + B_d_cd * d_cd_laa_nanc 
+  V[["laa_cmck"]]         = asc_laa_cmck + w_cmck * weekend +                       + B_mean_avail * mean_avail_laa_cmck + B_mean_price * mean_price_laa_cmck  +   B_wind_max_220_mh * wind_max_220_mh_laa_cmck + B_dist_to_cog * dist_to_cog_laa_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_cmck + B_dummy_prev_days * dummy_prev_days_laa_cmck + B_dummy_prev_year_days * dummy_prev_year_days_laa_cmck + B_unem_rate * unem_rate_laa_cmck + B_d_d * d_d_laa_cmck + B_d_cd * d_cd_laa_cmck 
+  V[["laa_msqd"]]         = asc_laa_msqd + w_msqd * weekend +                       + B_mean_avail * mean_avail_laa_msqd + B_mean_price * mean_price_laa_msqd  +   B_wind_max_220_mh * wind_max_220_mh_laa_msqd + B_dist_to_cog * dist_to_cog_laa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd + B_dummy_prev_days * dummy_prev_days_laa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_laa_msqd + B_unem_rate * unem_rate_laa_msqd + B_d_d * d_d_laa_msqd + B_d_cd * d_cd_laa_msqd 
+  V[["laa_ytna"]]         = asc_laa_ytna + w_tuna * weekend +                       + B_mean_avail * mean_avail_laa_ytna + B_mean_price * mean_price_laa_ytna  +   B_wind_max_220_mh * wind_max_220_mh_laa_ytna + B_dist_to_cog * dist_to_cog_laa_ytna + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_ytna + B_dummy_prev_days * dummy_prev_days_laa_ytna + B_dummy_prev_year_days * dummy_prev_year_days_laa_ytna + B_unem_rate * unem_rate_laa_ytna + B_d_d * d_d_laa_ytna + B_d_cd * d_cd_laa_ytna 
+  V[["mna_msqd"]]         = asc_mna_msqd + w_msqd * weekend +                       + B_mean_avail * mean_avail_mna_msqd + B_mean_price * mean_price_mna_msqd  +   B_wind_max_220_mh * wind_max_220_mh_mna_msqd + B_dist_to_cog * dist_to_cog_mna_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd + B_dummy_prev_days * dummy_prev_days_mna_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mna_msqd + B_unem_rate * unem_rate_mna_msqd + B_d_d * d_d_mna_msqd + B_d_cd * d_cd_mna_msqd 
+  V[["sba_msqd"]]         = asc_sba_msqd + w_msqd * weekend +                       + B_mean_avail * mean_avail_sba_msqd + B_mean_price * mean_price_sba_msqd  +   B_wind_max_220_mh * wind_max_220_mh_sba_msqd + B_dist_to_cog * dist_to_cog_sba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd + B_dummy_prev_days * dummy_prev_days_sba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sba_msqd + B_unem_rate * unem_rate_sba_msqd + B_d_d * d_d_sba_msqd + B_d_cd * d_cd_sba_msqd  
+  V[["laa_btna"]]         = asc_laa_btna + w_tuna * weekend + c_btna * btna_closure + B_mean_avail * mean_avail_laa_btna + B_mean_price * mean_price_laa_btna  +   B_wind_max_220_mh * wind_max_220_mh_laa_btna + B_dist_to_cog * dist_to_cog_laa_btna + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_btna + B_dummy_prev_days * dummy_prev_days_laa_btna + B_dummy_prev_year_days * dummy_prev_year_days_laa_btna + B_unem_rate * unem_rate_laa_btna + B_d_d * d_d_laa_btna + B_d_cd * d_cd_laa_btna  
+  V[["sfa_msqd"]]         = asc_sfa_msqd + w_msqd * weekend +                       + B_mean_avail * mean_avail_sfa_msqd + B_mean_price * mean_price_sfa_msqd  +   B_wind_max_220_mh * wind_max_220_mh_sfa_msqd + B_dist_to_cog * dist_to_cog_sfa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd + B_dummy_prev_days * dummy_prev_days_sfa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sfa_msqd + B_unem_rate * unem_rate_sfa_msqd + B_d_d * d_d_sfa_msqd + B_d_cd * d_cd_sfa_msqd  
+  V[["mna_psdn"]]         = asc_mna_psdn + w_psdn * weekend + c_psdn * psdn_closure + B_mean_avail * mean_avail_mna_psdn + B_mean_price * mean_price_mna_psdn  +   B_wind_max_220_mh * wind_max_220_mh_mna_psdn + B_dist_to_cog * dist_to_cog_mna_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_psdn + B_dummy_prev_days * dummy_prev_days_mna_psdn + B_dummy_prev_year_days * dummy_prev_year_days_mna_psdn + B_unem_rate * unem_rate_mna_psdn + B_d_d * d_d_mna_psdn + B_d_cd * d_cd_mna_psdn  
+  V[["sba_cmck"]]         = asc_sba_cmck + w_cmck * weekend +                       + B_mean_avail * mean_avail_sba_cmck + B_mean_price * mean_price_sba_cmck  +   B_wind_max_220_mh * wind_max_220_mh_sba_cmck + B_dist_to_cog * dist_to_cog_sba_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_cmck + B_dummy_prev_days * dummy_prev_days_sba_cmck + B_dummy_prev_year_days * dummy_prev_year_days_sba_cmck + B_unem_rate * unem_rate_sba_cmck + B_d_d * d_d_sba_cmck + B_d_cd * d_cd_sba_cmck  
+  V[["mra_msqd"]]         = asc_mra_msqd + w_msqd * weekend +                       + B_mean_avail * mean_avail_mra_msqd + B_mean_price * mean_price_mra_msqd  +   B_wind_max_220_mh * wind_max_220_mh_mra_msqd + B_dist_to_cog * dist_to_cog_mra_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mra_msqd + B_dummy_prev_days * dummy_prev_days_mra_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mra_msqd + B_unem_rate * unem_rate_mra_msqd + B_d_d * d_d_mra_msqd + B_d_cd * d_cd_mra_msqd  
+  V[["laa_psdn"]]         = asc_laa_psdn + w_psdn * weekend + c_psdn * psdn_closure + B_mean_avail * mean_avail_laa_psdn + B_mean_price * mean_price_laa_psdn  +   B_wind_max_220_mh * wind_max_220_mh_laa_psdn + B_dist_to_cog * dist_to_cog_laa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_psdn + B_dummy_prev_days * dummy_prev_days_laa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_laa_psdn + B_unem_rate * unem_rate_laa_psdn + B_d_d * d_d_laa_psdn + B_d_cd * d_cd_laa_psdn  
+  V[["mna_nanc"]]         = asc_mna_nanc + w_nanc * weekend +                       + B_mean_avail * mean_avail_mna_nanc + B_mean_price * mean_price_mna_nanc  +   B_wind_max_220_mh * wind_max_220_mh_mna_nanc + B_dist_to_cog * dist_to_cog_mna_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_nanc + B_dummy_prev_days * dummy_prev_days_mna_nanc + B_dummy_prev_year_days * dummy_prev_year_days_mna_nanc + B_unem_rate * unem_rate_mna_nanc + B_d_d * d_d_mna_nanc + B_d_cd * d_cd_mna_nanc  
   V[["no_participation"]] = asc_no_participation
   
+
   ### Specify nests for NL model
   nlNests      = list(root=1, part = lambda_part,
                       cmck = lambda_cmck, msqd = lambda_msqd, psdn = lambda_psdn, 
@@ -170,9 +190,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
     alternatives = c(
       sfa_nanc = 1, laa_nanc = 2, laa_cmck = 3, laa_msqd = 4, laa_ytna = 5, mna_msqd = 6, sba_msqd = 7, laa_btna = 8, 
       sfa_msqd = 9, mna_psdn = 10, sba_cmck = 11, mra_msqd = 12, laa_psdn = 13, mna_nanc = 14, no_participation = 15),
-    avail = list(
-      sfa_nanc = 1, laa_nanc = 1, laa_cmck = 1, laa_msqd = 1, laa_ytna = 1, mna_msqd = 1, sba_msqd = 1, laa_btna = 1,                      
-      sfa_msqd = 1, mna_psdn = 1, sba_cmck = 1, mra_msqd = 1, laa_psdn = 1, mna_nanc = 1, no_participation = 1),
+    avail        = 1,
     choiceVar    = choice,
     utilities    = V,
     nlNests      = nlNests,
@@ -193,9 +211,19 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
 # ################################################################# #
 #### MODEL ESTIMATION                                            ####
 # ################################################################# #
-
 model = apollo_estimate(apollo_beta, apollo_fixed, 
-                        apollo_probabilities, apollo_inputs)
+                        apollo_probabilities, apollo_inputs, 
+                        estimate_settings=list(constraints=c("lambda_part < 1 + 1e-10",
+                                                             "lambda_part - lambda_cmck > -1e-10",
+                                                             "lambda_part - lambda_msqd > -1e-10",
+                                                             "lambda_part - lambda_psdn > -1e-10",
+                                                             "lambda_part - lambda_nanc > -1e-10",
+                                                             "lambda_part - lambda_tuna > -1e-10",
+                                                             "lambda_cmck > 0",
+                                                             "lambda_msqd > 0",
+                                                             "lambda_psdn > 0",
+                                                             "lambda_nanc > 0",
+                                                             "lambda_tuna > 0")))
 
 # ################################################################# #
 #### MODEL OUTPUTS                                               ####
