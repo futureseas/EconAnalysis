@@ -1,0 +1,379 @@
+WARNING: Estimation routine changed to 'BFGS'. Only 'BFGS' supports constrained optimization. 
+Preparing user-defined functions.
+
+Testing likelihood function...
+
+Overview of choices for NL model component :
+                                 sfa_nanc laa_nanc laa_cmck laa_msqd laa_ytna mna_msqd sba_msqd laa_btna sfa_msqd
+Times available                  29160.00 29160.00 29160.00    29160 29160.00 29160.00 29160.00 29160.00  29160.0
+Times chosen                        51.00    80.00   370.00     2042   105.00  2371.00  3838.00    52.00    671.0
+Percentage chosen overall            0.17     0.27     1.27        7     0.36     8.13    13.16     0.18      2.3
+Percentage chosen when available     0.17     0.27     1.27        7     0.36     8.13    13.16     0.18      2.3
+                                 mna_psdn sba_cmck mra_msqd laa_psdn mna_nanc no_participation
+Times available                  29160.00 29160.00 29160.00 29160.00 29160.00         29160.00
+Times chosen                       148.00    55.00   126.00   124.00   805.00         18322.00
+Percentage chosen overall            0.51     0.19     0.43     0.43     2.76            62.83
+Percentage chosen when available     0.51     0.19     0.43     0.43     2.76            62.83
+
+Nesting structure for NL model component :
+Nest: root (1)
+|-------Alternative: no_participation
+'-Nest: part (0.3166)
+   |-Nest: cmck (0.1713)
+   |  |-Alternative: laa_cmck
+   |  '-Alternative: sba_cmck
+   |-Nest: msqd (0.2893)
+   |  |-Alternative: laa_msqd
+   |  |-Alternative: mna_msqd
+   |  |-Alternative: mra_msqd
+   |  |-Alternative: sba_msqd
+   |  '-Alternative: sfa_msqd
+   |-Nest: psdn (0.0714)
+   |  |-Alternative: laa_psdn
+   |  '-Alternative: mna_psdn
+   |-Nest: nanc (0.068)
+   |  |-Alternative: laa_nanc
+   |  |-Alternative: mna_nanc
+   |  '-Alternative: sfa_nanc
+   '-Nest: tuna (0.3166)
+      |-Alternative: laa_ytna
+      '-Alternative: laa_btna
+
+Pre-processing likelihood function...
+Creating cluster...
+Preparing workers for multithreading...
+Analytical gradients could not be calculated for all components, numerical gradients will be used.
+
+Testing influence of parameters.....................................
+Starting main estimation
+Initial function value: -22946.85 
+Initial gradient value:
+                  asc_sfa_nanc                   asc_laa_nanc                   asc_laa_cmck 
+                  7.885595e+01                   1.538666e+02                  -3.795579e+02 
+                  asc_laa_msqd                   asc_laa_ytna                   asc_mna_msqd 
+                  5.740627e+02                  -9.679844e+01                  -5.510259e+02 
+                  asc_sba_msqd                   asc_laa_btna                   asc_sfa_msqd 
+                  1.442765e+02                  -7.373785e+01                   2.036217e+02 
+                  asc_mna_psdn                   asc_sba_cmck                   asc_mra_msqd 
+                  9.190946e+00                   8.693102e+01                  -1.228641e+01 
+                  asc_laa_psdn                   asc_mna_nanc                         c_btna 
+                  1.464943e+02                  -1.168643e+02                  -2.585875e-02 
+                        c_psdn                         w_nanc                         w_cmck 
+                  3.868181e+01                  -3.538541e+01                  -2.913202e+00 
+                        w_msqd                         w_tuna                         w_psdn 
+                 -1.357477e+02                   1.901302e+01                  -3.087916e+00 
+                   lambda_part                    lambda_cmck                    lambda_msqd 
+                  4.329311e+02                   5.705224e+02                   2.152414e+03 
+                   lambda_psdn                    lambda_nanc                    lambda_tuna 
+                  4.753927e+02                   1.944216e+03                   1.654232e+02 
+                  B_mean_avail                   B_mean_price              B_wind_max_220_mh 
+                 -6.259162e+01                  -7.518792e+01                  -1.661751e+03 
+                         B_d_d                         B_d_cd B_dist_port_to_catch_area_zero 
+                  3.490462e+00                   8.308274e+00                   9.089429e+02 
+             B_dummy_prev_days         B_dummy_prev_year_days               B_unem_rate_part 
+                 -5.617152e+02                  -3.239949e+02                   7.703162e+02 
+                 B_dist_to_cog 
+                 -1.138158e+04 
+initial  value 22946.852334 
+iter   2 value 22946.758864
+iter   3 value 22946.752865
+iter   4 value 22906.925941
+iter   5 value 22825.136502
+iter   6 value 22778.394944
+iter   7 value 22742.132897
+iter   8 value 22721.639244
+iter   9 value 22716.403810
+iter  10 value 22700.199872
+iter  11 value 22668.026205
+iter  12 value 22654.098744
+iter  13 value 22638.621843
+iter  14 value 22632.054638
+iter  15 value 22626.300657
+iter  16 value 22617.986029
+iter  17 value 22613.005829
+iter  18 value 22602.675379
+iter  19 value 22599.099598
+iter  20 value 22597.294151
+iter  21 value 22594.649418
+iter  22 value 22592.634140
+iter  23 value 22588.469716
+iter  24 value 22586.383758
+iter  25 value 22584.308871
+iter  26 value 22582.208847
+iter  27 value 22579.641318
+iter  28 value 22577.049448
+iter  29 value 22562.820767
+iter  30 value 22550.415507
+iter  31 value 22534.493947
+iter  32 value 22529.482797
+iter  33 value 22523.171154
+iter  34 value 22519.658178
+iter  35 value 22514.311264
+iter  36 value 22498.406577
+iter  37 value 22495.215826
+iter  38 value 22476.694795
+iter  39 value 22476.516622
+iter  40 value 22476.364807
+iter  41 value 22476.209091
+iter  42 value 22476.043098
+iter  43 value 22475.040080
+iter  44 value 22465.141177
+iter  45 value 22463.405657
+iter  46 value 22463.232948
+iter  47 value 22463.199812
+iter  48 value 22463.166318
+iter  49 value 22463.161410
+iter  50 value 22463.144681
+iter  51 value 22462.450789
+iter  52 value 22462.425436
+iter  53 value 22462.408165
+iter  54 value 22462.389676
+iter  55 value 22462.372471
+iter  56 value 22462.371439
+iter  57 value 22462.369969
+iter  58 value 22462.367361
+iter  59 value 22462.348343
+iter  60 value 22462.118895
+iter  61 value 22462.118015
+iter  62 value 22462.116674
+iter  63 value 22462.115640
+iter  64 value 22462.102092
+iter  65 value 22462.087832
+iter  66 value 22462.077175
+iter  66 value 22462.076883
+iter  66 value 22462.076855
+final  value 22462.076855 
+converged
+
+Estimated parameters with approximate standard errors from BHHH matrix:
+                                  Estimate     BHHH se BHH t-ratio (0)
+asc_sfa_nanc                     -2.725588    0.234499        -11.6230
+asc_laa_nanc                     -2.812708    0.148294        -18.9671
+asc_laa_cmck                     -2.461981    0.147142        -16.7320
+asc_laa_msqd                     -2.060255    0.177669        -11.5961
+asc_laa_ytna                     -3.337996    0.285824        -11.6785
+asc_mna_msqd                     -2.272968    0.177289        -12.8207
+asc_sba_msqd                     -2.060473    0.176580        -11.6688
+asc_laa_btna                     -3.894551    0.438998         -8.8715
+asc_sfa_msqd                     -2.277221    0.181327        -12.5586
+asc_mna_psdn                     -2.629635    0.146510        -17.9485
+asc_sba_cmck                     -2.509583    0.153060        -16.3961
+asc_mra_msqd                     -2.603898    0.192101        -13.5548
+asc_laa_psdn                     -2.665058    0.148020        -18.0047
+asc_mna_nanc                     -2.389068    0.128524        -18.5884
+c_btna                           -4.410463   10.490206         -0.4204
+c_psdn                           -0.410774    0.105865         -3.8802
+w_nanc                           -4.654122    0.219628        -21.1910
+w_cmck                           -3.729953    0.177897        -20.9669
+w_msqd                           -3.735824    0.074831        -49.9235
+w_tuna                           -3.053440    0.184596        -16.5412
+w_psdn                           -4.020204    0.188737        -21.3005
+lambda_part                       0.352301    0.018688         18.8518
+lambda_cmck                       0.461248    0.052301          8.8192
+lambda_msqd                       0.361454    0.018390         19.6553
+lambda_psdn                       0.358387    0.069646          5.1459
+lambda_nanc                       0.246704    0.024727          9.9770
+lambda_tuna                       0.999995    0.181223          5.5180
+B_mean_avail                      1.132818    0.096610         11.7256
+B_mean_price                      0.299529    0.111861          2.6777
+B_wind_max_220_mh                -0.041436    0.002767        -14.9736
+B_d_d                            -0.998831    0.076293        -13.0920
+B_d_cd                           -1.199003    0.285210         -4.2039
+B_dist_port_to_catch_area_zero   -0.003933  4.8393e-04         -8.1274
+B_dummy_prev_days                 1.191174    0.059341         20.0732
+B_dummy_prev_year_days            0.149246    0.014452         10.3267
+B_unem_rate_part                  0.194141    0.011261         17.2397
+asc_no_participation              0.000000          NA              NA
+B_unem_rate_nopart                0.000000          NA              NA
+w_nopart                          0.000000          NA              NA
+B_dist_to_cog                    -0.001493   9.988e-05        -14.9469
+
+Final LL: -22462.0757
+
+Nesting structure for NL model component :
+Nest: root (1)
+|-------Alternative: no_participation
+'-Nest: part (0.3523)
+   |-Nest: cmck (0.4612)
+   |  |-Alternative: laa_cmck
+   |  '-Alternative: sba_cmck
+   |-Nest: msqd (0.3615)
+   |  |-Alternative: laa_msqd
+   |  |-Alternative: mna_msqd
+   |  |-Alternative: mra_msqd
+   |  |-Alternative: sba_msqd
+   |  '-Alternative: sfa_msqd
+   |-Nest: psdn (0.3584)
+   |  |-Alternative: laa_psdn
+   |  '-Alternative: mna_psdn
+   |-Nest: nanc (0.2467)
+   |  |-Alternative: laa_nanc
+   |  |-Alternative: mna_nanc
+   |  '-Alternative: sfa_nanc
+   '-Nest: tuna (1)
+      |-Alternative: laa_ytna
+      '-Alternative: laa_btna
+
+WARNING: The nesting parameter for nest "cmck" should be between 0 and 0.3523 (the nesting parameter for nest
+  "part"), yet its value is 0.4612. 
+
+WARNING: The nesting parameter for nest "msqd" should be between 0 and 0.3523 (the nesting parameter for nest
+  "part"), yet its value is 0.3615. 
+
+WARNING: The nesting parameter for nest "psdn" should be between 0 and 0.3523 (the nesting parameter for nest
+  "part"), yet its value is 0.3584. 
+
+WARNING: The nesting parameter for nest "tuna" should be between 0 and 0.3523 (the nesting parameter for nest
+  "part"), yet its value is 1. 
+
+Calculating log-likelihood at equal shares (LL(0)) for applicable models...
+Calculating log-likelihood at observed shares from estimation data (LL(c)) for applicable models...
+Calculating LL of each model component...
+Calculating other model fit measures
+Computing covariance matrix using numerical methods (numDeriv).
+ 0%....25%....50%....75%....100%
+Negative definite Hessian with maximum eigenvalue: -0.012189
+
+Model run by felip using Apollo 0.3.4 on R 4.3.2 for Windows.
+Please acknowledge the use of Apollo by citing Hess & Palma (2019)
+  DOI 10.1016/j.jocm.2019.100170
+  www.ApolloChoiceModelling.com
+
+Model name                                  : NL_participation_model
+Model description                           : Participation, location and target species decisions
+Model run at                                : 2024-11-17 11:36:06.780907
+Estimation method                           : bfgs
+Model diagnosis                             : successful convergence
+Optimisation diagnosis                      : Maximum found
+     hessian properties                     : Negative definite
+     maximum eigenvalue                     : -0.012189
+     reciprocal of condition number         : 3.18147e-11
+Number of individuals                       : 46
+Number of rows in database                  : 29160
+Number of modelled outcomes                 : 29160
+
+Number of cores used                        :  4 
+Model without mixing
+
+LL(start)                                   : -22946.85
+LL at equal shares, LL(0)                   : -78966.74
+LL at observed shares, LL(C)                : -38918.41
+LL(final)                                   : -22462.08
+Rho-squared vs equal shares                  :  0.7156 
+Adj.Rho-squared vs equal shares              :  0.7151 
+Rho-squared vs observed shares               :  0.4228 
+Adj.Rho-squared vs observed shares           :  0.4223 
+AIC                                         :  44998.15 
+BIC                                         :  45304.53 
+
+Estimated parameters                        : 37
+Time taken (hh:mm:ss)                       :  00:09:38.16 
+     pre-estimation                         :  00:00:17.76 
+     estimation                             :  00:04:28.88 
+     post-estimation                        :  00:04:51.51 
+Iterations                                  :  73  
+
+Constrained optimisation:
+ lambda_part < 1 + 1e-10
+ lambda_cmck < 1 + 1e-10
+ lambda_msqd < 1 + 1e-10
+ lambda_psdn < 1 + 1e-10
+ lambda_nanc < 1 + 1e-10
+ lambda_tuna < 1 + 1e-10
+ lambda_cmck > 0
+ lambda_msqd > 0
+ lambda_psdn > 0
+ lambda_nanc > 0
+ lambda_tuna > 0
+ lambda_part > 0
+
+
+Estimates:
+                                  Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
+asc_sfa_nanc                     -2.725588    0.196335    -13.8823    -18.9756    0.184941      -14.7376      -20.1447
+asc_laa_nanc                     -2.812708    0.140543    -20.0131    -27.1284    0.140102      -20.0762      -27.2138
+asc_laa_cmck                     -2.461981    0.129090    -19.0719    -26.8184    0.124117      -19.8360      -27.8929
+asc_laa_msqd                     -2.060255    0.146523    -14.0609    -20.8858    0.136526      -15.0905      -22.4151
+asc_laa_ytna                     -3.337996    0.256773    -12.9998    -16.8943    0.253206      -13.1829      -17.1323
+asc_mna_msqd                     -2.272968    0.147109    -15.4509    -22.2485    0.138142      -16.4538      -23.6927
+asc_sba_msqd                     -2.060473    0.146618    -14.0534    -20.8738    0.137828      -14.9496      -22.2050
+asc_laa_btna                     -3.894551    0.394955     -9.8608    -12.3927    0.384930      -10.1176      -12.7154
+asc_sfa_msqd                     -2.277221    0.153805    -14.8059    -21.3077    0.146586      -15.5350      -22.3569
+asc_mna_psdn                     -2.629635    0.131810    -19.9502    -27.5368    0.129410      -20.3202      -28.0475
+asc_sba_cmck                     -2.509583    0.139280    -18.0182    -25.1980    0.135512      -18.5193      -25.8988
+asc_mra_msqd                     -2.603898    0.160988    -16.1745    -22.3862    0.150985      -17.2461      -23.8692
+asc_laa_psdn                     -2.665058    0.135102    -19.7263    -27.1281    0.133692      -19.9343      -27.4142
+asc_mna_nanc                     -2.389068    0.116111    -20.5758    -29.1883    0.113163      -21.1118      -29.9486
+c_btna                           -4.410463    9.057443     -0.4869     -0.5973    8.167629       -0.5400       -0.6624
+c_psdn                           -0.410774    0.104788     -3.9201    -13.4632    0.106028       -3.8742      -13.3057
+w_nanc                           -4.654122    0.254438    -18.2918    -22.2220    0.315809      -14.7371      -17.9036
+w_cmck                           -3.729953    0.185297    -20.1296    -25.5263    0.194172      -19.2096      -24.3597
+w_msqd                           -3.735824    0.073714    -50.6796    -64.2455    0.074157      -50.3773      -63.8623
+w_tuna                           -3.053440    0.154507    -19.7625    -26.2347    0.134553      -22.6932      -30.1252
+w_psdn                           -4.020204    0.237252    -16.9448    -21.1598    0.315269      -12.7517      -15.9236
+lambda_part                       0.352301    0.017491     20.1419    -37.0306    0.017332       20.3266      -37.3700
+lambda_cmck                       0.461248    0.051970      8.8753    -10.3666    0.052635        8.7631      -10.2355
+lambda_msqd                       0.361454    0.017500     20.6544    -36.4883    0.017752       20.3607      -35.9694
+lambda_psdn                       0.358387    0.067241      5.3299     -9.5420    0.066524        5.3874       -9.6449
+lambda_nanc                       0.246704    0.025634      9.6240    -29.3865    0.027179        9.0769      -27.7158
+lambda_tuna                       0.999995    0.155010      6.4512  -3.140e-05    0.144097        6.9397    -3.378e-05
+B_mean_avail                      1.132818    0.092330     12.2693      1.4385    0.092327       12.2696        1.4386
+B_mean_price                      0.299529    0.084369      3.5502     -8.3025    0.073784        4.0595       -9.4935
+B_wind_max_220_mh                -0.041436    0.002892    -14.3255   -360.0496    0.003077      -13.4686     -338.5125
+B_d_d                            -0.998831    0.073877    -13.5201    -27.0560    0.076712      -13.0205      -26.0563
+B_d_cd                           -1.199003    0.273111     -4.3902     -8.0517    0.264246       -4.5374       -8.3218
+B_dist_port_to_catch_area_zero   -0.003933  4.6742e-04     -8.4144  -2147.8185  4.6913e-04       -8.3838    -2139.9986
+B_dummy_prev_days                 1.191174    0.056467     21.0949      3.3856    0.057950       20.5552        3.2989
+B_dummy_prev_year_days            0.149246    0.014249     10.4743    -59.7071    0.014433       10.3406      -58.9450
+B_unem_rate_part                  0.194141    0.010344     18.7679    -77.9035    0.010166       19.0968      -79.2688
+asc_no_participation              0.000000          NA          NA          NA          NA            NA            NA
+B_unem_rate_nopart                0.000000          NA          NA          NA          NA            NA            NA
+w_nopart                          0.000000          NA          NA          NA          NA            NA            NA
+B_dist_to_cog                    -0.001493   8.581e-05    -17.3976  -1.167e+04   7.990e-05      -18.6845    -1.253e+04
+
+Nesting structure for NL model component :
+Nest: root (1)
+|-------Alternative: no_participation
+'-Nest: part (0.3523)
+   |-Nest: cmck (0.4612)
+   |  |-Alternative: laa_cmck
+   |  '-Alternative: sba_cmck
+   |-Nest: msqd (0.3615)
+   |  |-Alternative: laa_msqd
+   |  |-Alternative: mna_msqd
+   |  |-Alternative: mra_msqd
+   |  |-Alternative: sba_msqd
+   |  '-Alternative: sfa_msqd
+   |-Nest: psdn (0.3584)
+   |  |-Alternative: laa_psdn
+   |  '-Alternative: mna_psdn
+   |-Nest: nanc (0.2467)
+   |  |-Alternative: laa_nanc
+   |  |-Alternative: mna_nanc
+   |  '-Alternative: sfa_nanc
+   '-Nest: tuna (1)
+      |-Alternative: laa_ytna
+      '-Alternative: laa_btna
+
+WARNING: The nesting parameter for nest "cmck" should be between 0 and 0.3523 (the nesting parameter for nest
+  "part"), yet its value is 0.4612. 
+
+WARNING: The nesting parameter for nest "msqd" should be between 0 and 0.3523 (the nesting parameter for nest
+  "part"), yet its value is 0.3615. 
+
+WARNING: The nesting parameter for nest "psdn" should be between 0 and 0.3523 (the nesting parameter for nest
+  "part"), yet its value is 0.3584. 
+
+WARNING: The nesting parameter for nest "tuna" should be between 0 and 0.3523 (the nesting parameter for nest
+  "part"), yet its value is 1. 
+
+
+Old result file "output/NL_participation_model_output.txt" 
+ renamed to: "output/NL_participation_model_OLD8_output.txt"
+Old result file "output/NL_participation_model_estimates.csv" 
+ renamed to: "output/NL_participation_model_OLD8_estimates.csv"
+Old result file "output/NL_participation_model_model.rds" 
+ renamed to: "output/NL_participation_model_OLD8_model.rds"
+Model output saved to output/NL_participation_model_output.txt 
+Estimates saved to output/NL_participation_model_estimates.csv 
+Model object saved to output/NL_participation_model.rds 
