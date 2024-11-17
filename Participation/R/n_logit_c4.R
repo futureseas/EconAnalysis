@@ -127,7 +127,7 @@ apollo_fixed = c("asc_no_participation")
 
 
 ### Read in starting values for at least some parameters from existing model output file
-# apollo_beta=apollo_readBeta(apollo_beta,apollo_fixed,"NL_participation_model",overwriteFixed=FALSE)
+apollo_beta=apollo_readBeta(apollo_beta,apollo_fixed,"NL_participation_model",overwriteFixed=FALSE)
 
 
 # ################################################################# #
