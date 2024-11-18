@@ -35,8 +35,11 @@ apollo_control = list(
 # data <- read.dta13("H:/My Drive/Data/Anonymised data/part_model_c4.dta")
 # saveRDS(data, "H:/My Drive/Data/Anonymised data/part_model_c4.rds")
 
+# google_dir <- "H:/My Drive/"
+google_dir <- "G:/Mi unidad/"
+
 library(tidyr)
-long_data = readRDS("H:/My Drive/Data/Anonymised data/part_model_c4.rds") %>%
+long_data = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c4.rds")) %>%
   dplyr::select("fished_haul_anon", "fished_vessel_anon", "selection", "fished",
                 "fished_vessel_anon", "mean_avail", "mean_price", 
                 "wind_max_220_mh", "dist_to_cog", "dist_port_to_catch_area_zero",
