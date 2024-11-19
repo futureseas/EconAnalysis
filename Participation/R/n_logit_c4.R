@@ -232,34 +232,34 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
 # ################################################################# #
 #### MODEL ESTIMATION                                            ####
 # ################################################################# #
-# model = apollo_estimate(apollo_beta, apollo_fixed, 
-#                         apollo_probabilities, apollo_inputs, 
-#                         estimate_settings=list(constraints=c("lambda_part < 1 + 1e-10",
-#                                                              "lambda_part - lambda_cmck > -1e-10",
-#                                                              "lambda_part - lambda_msqd > -1e-10",
-#                                                              "lambda_part - lambda_psdn > -1e-10",
-#                                                              "lambda_part - lambda_nanc > -1e-10",
-#                                                              "lambda_part - lambda_tuna > -1e-10",
-#                                                              "lambda_cmck > 0",
-#                                                              "lambda_msqd > 0",
-#                                                              "lambda_psdn > 0",
-#                                                              "lambda_nanc > 0",
-#                                                              "lambda_tuna > 0")))
-
-model = apollo_estimate(apollo_beta, apollo_fixed, 
-                        apollo_probabilities, apollo_inputs, 
+model = apollo_estimate(apollo_beta, apollo_fixed,
+                        apollo_probabilities, apollo_inputs,
                         estimate_settings=list(constraints=c("lambda_part < 1 + 1e-10",
-                                                             "lambda_cmck < 1 + 1e-10",
-                                                             "lambda_msqd < 1 + 1e-10",
-                                                             "lambda_psdn < 1 + 1e-10",
-                                                             "lambda_nanc < 1 + 1e-10",
-                                                             "lambda_tuna < 1 + 1e-10",
+                                                             "lambda_part - lambda_cmck > -1e-10",
+                                                             "lambda_part - lambda_msqd > -1e-10",
+                                                             "lambda_part - lambda_psdn > -1e-10",
+                                                             "lambda_part - lambda_nanc > -1e-10",
+                                                             "lambda_part - lambda_tuna > -1e-10",
                                                              "lambda_cmck > 0",
                                                              "lambda_msqd > 0",
                                                              "lambda_psdn > 0",
                                                              "lambda_nanc > 0",
-                                                             "lambda_tuna > 0",
-                                                             "lambda_part > 0")))
+                                                             "lambda_tuna > 0")))
+
+# model = apollo_estimate(apollo_beta, apollo_fixed, 
+#                         apollo_probabilities, apollo_inputs, 
+#                         estimate_settings=list(constraints=c("lambda_part < 1 + 1e-10",
+#                                                              "lambda_cmck < 1 + 1e-10",
+#                                                              "lambda_msqd < 1 + 1e-10",
+#                                                              "lambda_psdn < 1 + 1e-10",
+#                                                              "lambda_nanc < 1 + 1e-10",
+#                                                              "lambda_tuna < 1 + 1e-10",
+#                                                              "lambda_cmck > 0",
+#                                                              "lambda_msqd > 0",
+#                                                              "lambda_psdn > 0",
+#                                                              "lambda_nanc > 0",
+#                                                              "lambda_tuna > 0",
+#                                                              "lambda_part > 0")))
 
 # ################################################################# #
 #### MODEL OUTPUTS                                               ####
