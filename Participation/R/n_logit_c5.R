@@ -16,7 +16,7 @@ setwd("C:/GitHub/EconAnalysis/Participation/R")
 
 ### Set core controls
 apollo_control = list(
-  modelName       = "NL_participation_model",
+  modelName       = "NL_participation_model_c5",
   modelDescr      = "Participation, location and target species decisions",
   indivID         = "fished_vessel_anon", 
   outputDirectory = "output",
@@ -30,16 +30,17 @@ apollo_control = list(
 #### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
 # ################################################################# #
 
-### Read database 
-# library(readstata13)
-# data <- read.dta13("H:/My Drive/Data/Anonymised data/part_model_c4.dta")
-# saveRDS(data, "H:/My Drive/Data/Anonymised data/part_model_c4.rds")
-
 # google_dir <- "H:/My Drive/"
 google_dir <- "G:/Mi unidad/"
 
+
+## Read database
+library(readstata13)
 library(tidyr)
-long_data = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c4.rds")) %>%
+data <- read.dta13(paste0(google_dir, "Data/Anonymised data/part_model_c5.dta"))
+saveRDS(data, paste0(google_dir, "Data/Anonymised data/part_model_c5.rds"))
+
+long_data = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c5.rds")) %>%
   dplyr::select("fished_haul_anon", "fished_vessel_anon", "selection", "fished",
                 "fished_vessel_anon", "mean_avail", "mean_price", 
                 "wind_max_220_mh", "dist_to_cog", "dist_port_to_catch_area_zero",
@@ -55,7 +56,10 @@ database <- long_data %>%
     values_from = c(fished, mean_avail, mean_price, wind_max_220_mh, dist_to_cog, 
                     dist_port_to_catch_area_zero, dummy_prev_days, dummy_prev_year_days, 
                     unem_rate, d_d, d_cd)) %>%
-  dplyr::mutate(unem_rate = unem_rate_sfa_nanc)
+  dplyr::mutate(unem_rate = mean(c(unem_rate_laa_msqd, unem_rate_clo_psdn, unem_rate_clw_psdn))) %>%
+                  dplyr::mutate(unem_rate_ca = unem_rate_laa_psdn,
+                                unem_rate_or = unem_rate_clo_psdn,
+                                unem_rate_wa = unem_rate_clw_psdn)
 
 database$choice <- ifelse(database$fished_sfa_nanc == 1, 1,                              
                    ifelse(database$fished_laa_nanc == 1, 2,
