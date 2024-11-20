@@ -11,8 +11,9 @@ library(apollo)
 
 ### Initialise code
 apollo_initialise()
-
 setwd("C:/GitHub/EconAnalysis/Participation/R")
+
+
 
 
 ### Set core controls
@@ -256,6 +257,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   P = apollo_prepareProb(P, apollo_inputs, functionality)
   return(P)
 }
+
 
 # ################################################################# #
 #### MODEL ESTIMATION                                            ####
