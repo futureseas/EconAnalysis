@@ -4,6 +4,7 @@
 
 ### Clear memory
 rm(list = ls())
+PC = "home"
 
 ### Load Apollo library
 library(apollo)
@@ -30,25 +31,28 @@ apollo_control = list(
 #### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
 # ################################################################# #
 
-# google_dir <- "H:/My Drive/"
-google_dir <- "G:/Mi unidad/"
 
+if (PC == "home") {
+  google_dir <- "H:/My Drive/"
+} else if (PC == "work") {
+  google_dir <- "G:/Mi unidad/"
+}
 
 ## Read database
-library(readstata13)
 library(tidyr)
-data <- read.dta13(paste0(google_dir, "Data/Anonymised data/part_model_c5.dta"))
-saveRDS(data, paste0(google_dir, "Data/Anonymised data/part_model_c5.rds"))
+# library(readstata13)
+# data <- read.dta13(paste0(google_dir, "Data/Anonymised data/part_model_c5.dta"))
+# saveRDS(data, paste0(google_dir, "Data/Anonymised data/part_model_c5.rds"))
 
-long_data = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c5.rds")) %>%
+long_data <- readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c5.rds")) %>%
   dplyr::select("fished_haul_anon", "fished_vessel_anon", "selection", "fished",
                 "fished_vessel_anon", "mean_avail", "mean_price", 
                 "wind_max_220_mh", "dist_to_cog", "dist_port_to_catch_area_zero",
                 "psdnclosure", "btnaclosure", "dummy_prev_days", "dummy_prev_year_days",
                 "unem_rate", "d_d", "d_cd", "weekend") 
   
-
 long_data$selection <- tolower(gsub("-", "_", long_data$selection))
+unique(long_data$selection)
 
 database <- long_data %>%
   pivot_wider(
@@ -60,6 +64,16 @@ database <- long_data %>%
                   dplyr::mutate(unem_rate_ca = unem_rate_laa_psdn,
                                 unem_rate_or = unem_rate_clo_psdn,
                                 unem_rate_wa = unem_rate_clw_psdn)
+
+
+
+[1] "clo_psdn"         "sba_cmck"         "mna_msqd"         "sba_msqd"        
+[5] "laa_nanc"         "laa_cmck"         "no_participation" "mra_msqd"        
+[9] "cwa_psdn"         "laa_msqd"         "laa_psdn"         "clw_psdn"        
+[13] "cwa_dcrb"         "clw_dcrb"         "npa_msqd"         "sfa_msqd"        
+[17] "cba_msqd"         "cwa_albc" 
+
+
 
 database$choice <- ifelse(database$fished_sfa_nanc == 1, 1,                              
                    ifelse(database$fished_laa_nanc == 1, 2,
