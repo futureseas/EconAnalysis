@@ -66,31 +66,25 @@ database <- long_data %>%
                                 unem_rate_wa = unem_rate_clw_psdn)
 
 
-
-[1] "clo_psdn"         "sba_cmck"         "mna_msqd"         "sba_msqd"        
-[5] "laa_nanc"         "laa_cmck"         "no_participation" "mra_msqd"        
-[9] "cwa_psdn"         "laa_msqd"         "laa_psdn"         "clw_psdn"        
-[13] "cwa_dcrb"         "clw_dcrb"         "npa_msqd"         "sfa_msqd"        
-[17] "cba_msqd"         "cwa_albc" 
-
-
-
-database$choice <- ifelse(database$fished_sfa_nanc == 1, 1,                              
-                   ifelse(database$fished_laa_nanc == 1, 2,
-                   ifelse(database$fished_laa_cmck == 1, 3,                              
+database$choice <- ifelse(database$fished_mna_msqd == 1, 1,
+                   ifelse(database$fished_sba_msqd == 1, 2,        
+                   ifelse(database$fished_mra_msqd == 1, 3,        
                    ifelse(database$fished_laa_msqd == 1, 4,
-                   ifelse(database$fished_laa_ytna == 1, 5,
-                   ifelse(database$fished_mna_msqd == 1, 6,                              
-                   ifelse(database$fished_sba_msqd == 1, 7,
-                   ifelse(database$fished_laa_btna == 1, 8,                              
-                   ifelse(database$fished_sfa_msqd == 1, 9,
-                   ifelse(database$fished_mna_psdn == 1, 10,                              
-                   ifelse(database$fished_sba_cmck == 1, 11,
-                   ifelse(database$fished_mra_msqd == 1, 12,                              
-                   ifelse(database$fished_laa_psdn == 1, 13,
-                   ifelse(database$fished_mna_nanc == 1, 14,
-                   ifelse(database$fished_no_participation == 1, 15, NA)
-                   ))))))))))))))      
+                   ifelse(database$fished_npa_msqd == 1, 5,
+                   ifelse(database$fished_sfa_msqd == 1, 6,
+                   ifelse(database$fished_cba_msqd == 1, 7,
+                   ifelse(database$fished_laa_psdn == 1, 8,
+                   ifelse(database$fished_clo_psdn == 1, 9,
+                   ifelse(database$fished_cwa_psdn == 1, 10,
+                   ifelse(database$fished_clw_psdn == 1, 11,        
+                   ifelse(database$fished_sba_cmck == 1, 12,
+                   ifelse(database$fished_laa_cmck == 1, 13,
+                   ifelse(database$fished_laa_nanc == 1, 14,
+                   ifelse(database$fished_cwa_albc == 1, 15, 
+                   ifelse(database$fished_cwa_dcrb == 1, 16,
+                   ifelse(database$fished_clw_dcrb == 1, 17,
+                   ifelse(database$fished_no_participation == 1, 18, NA)
+                   )))))))))))))))))
 
 ### Check variables 
 # df_selected <- database %>%
