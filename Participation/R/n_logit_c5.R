@@ -85,6 +85,9 @@ database$choice <- ifelse(database$fished_mna_msqd == 1, 1,
                    ifelse(database$fished_no_participation == 1, 18, NA)
                    )))))))))))))))))
 
+unique(database$choice)
+
+
 ### Check variables 
 df_selected <- database %>%
   dplyr::select(starts_with("d_cd_"))
@@ -207,7 +210,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   V[["cwa_albc"]]         = + B_mean_price_part * mean_price_3_cwa_albc + asc_cwa_albc + B_mean_avail * mean_avail_cwa_albc + B_wind_max_220_mh * wind_max_220_mh_cwa_albc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_albc + B_dummy_prev_days * dummy_prev_days_cwa_albc + B_dummy_prev_year_days * dummy_prev_year_days_cwa_albc + B_dist_to_cog * dist_to_cog_cwa_albc + w_albc * weekend + B_unem_rate * unem_rate_wa                                            + B_d_d * d_d_cwa_albc                             
   V[["cwa_dcrb"]]         = + B_mean_price_crab * mean_price_3_cwa_dcrb + asc_cwa_dcrb + B_mean_avail * mean_avail_cwa_dcrb + B_wind_max_220_mh * wind_max_220_mh_cwa_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_dcrb + B_dummy_prev_days * dummy_prev_days_cwa_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_cwa_dcrb + B_dist_to_cog * dist_to_cog_cwa_dcrb + w_dcrb * weekend + B_unem_rate * unem_rate_wa + c_dcrb * dcrbclosurewad                  + B_d_d * d_d_cwa_dcrb + B_d_cd * d_cd_cwa_dcrb                            
   V[["clw_dcrb"]]         = + B_mean_price_crab * mean_price_3_clw_dcrb + asc_clw_dcrb + B_mean_avail * mean_avail_clw_dcrb + B_wind_max_220_mh * wind_max_220_mh_clw_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_dcrb + B_dummy_prev_days * dummy_prev_days_clw_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_clw_dcrb + B_dist_to_cog * dist_to_cog_clw_dcrb + w_dcrb * weekend + B_unem_rate * unem_rate_wa + c_dcrb * dcrbclosurewad                  + B_d_d * d_d_clw_dcrb + B_d_cd * d_cd_clw_dcrb                            
-  V[["no_participation"]] = asc_no_participation + w_nopart * weekend + B_mean_price_no_part * mean_price_no_participation
+  V[["no_participation"]] = asc_no_participation + w_nopart * weekend + B_mean_price_no_part * mean_price_3_no_participation
   
 
   ### Specify nests for NL model
