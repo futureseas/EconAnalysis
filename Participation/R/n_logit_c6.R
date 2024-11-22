@@ -4,9 +4,10 @@
 
 ### Clear memory
 rm(list = ls())
+PC = "home" ### Where I am working?
 
-### Where I am working?
-PC = "home"
+
+
 
 if (PC == "home") {
   google_dir <- "H:/My Drive/"
