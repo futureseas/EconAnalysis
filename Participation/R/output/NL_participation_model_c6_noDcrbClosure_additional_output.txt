@@ -1,0 +1,63 @@
+
+Apollo model summary
+
+Model name                   : NL_participation_model_c6_noDcrbClosure
+Model description            : Participation, location and target species decisions
+Estimation method            : bfgs
+Modelled outcomes            : 2581
+
+LL(final)                    : -1914.32
+Estimated parameters         : 34
+
+
+Estimates (robust covariance matrix, 1-sided p-values):
+
+                               estimate std. error t-ratio p (1-sided)    
+B_mean_avail                    2.8e+00    1.2e+00     2.4       0.008 ** 
+B_wind_max_220_mh              -5.2e-02    8.4e-03    -6.2       2e-10 ***
+B_dist_to_cog                  -4.4e-03    9.6e-04    -4.6       2e-06 ***
+B_dist_port_to_catch_area_zero -1.8e-02    1.4e-02    -1.3       0.103    
+B_dummy_prev_days               2.1e+00    3.9e-01     5.3       5e-08 ***
+B_dummy_prev_year_days          3.2e-01    9.1e-02     3.5       2e-04 ***
+B_unem_rate                     3.6e-01    5.5e-02     6.6       2e-11 ***
+B_d_d                          -9.6e-01    4.5e-01    -2.1       0.016 *  
+c_wa                           -4.6e+00    1.2e+00    -3.9       4e-05 ***
+c_psdn_part                     9.6e-02    2.8e-01     0.3       0.368    
+c_psdn_crab                     1.4e+00    2.3e-01     6.2       3e-10 ***
+c_psdn_slmn                    -4.1e+00    6.0e-01    -6.8       4e-12 ***
+B_mean_price_part               4.1e+00    1.6e+00     2.6       0.005 ** 
+B_mean_price_crab               7.7e-02    7.6e-02     1.0       0.158    
+B_mean_price_slmn               5.6e+00    2.8e-01    19.8      <2e-16 ***
+w_psdn                         -1.2e-01    1.1e-01    -1.2       0.120    
+w_nanc                         -4.8e-01    1.1e-01    -4.4       6e-06 ***
+w_dcrb                         -4.0e-01    1.7e-02   -23.7      <2e-16 ***
+w_slmn                          7.2e-01    7.6e-02     9.5      <2e-16 ***
+w_cmck                         -3.0e-02    3.6e-01    -0.1       0.467    
+asc_cba_psdn                   -4.4e+00    9.0e-01    -4.9       5e-07 ***
+asc_clo_psdn                   -5.3e+00    9.9e-01    -5.3       4e-08 ***
+asc_clw_psdn                   -5.3e+00    9.8e-01    -5.5       2e-08 ***
+asc_cwa_psdn                   -5.0e+00    6.9e-01    -7.3       2e-13 ***
+asc_clo_nanc                   -6.1e+00    9.9e-01    -6.2       4e-10 ***
+asc_clw_nanc                   -9.4e+00    2.2e+00    -4.2       1e-05 ***
+asc_cwa_nanc                   -5.3e+00    9.3e-01    -5.8       4e-09 ***
+asc_clo_cmck                   -5.5e+00    8.8e-01    -6.2       3e-10 ***
+asc_cwa_dcrb                   -7.5e+00    8.2e-01    -9.1      <2e-16 ***
+asc_nps_sock                   -1.6e+01    3.5e-01   -47.2      <2e-16 ***
+lambda_part                     4.6e-01    1.1e-01     4.4       5e-06 ***
+lambda_nanc                     4.6e-01    1.3e-01     3.7       1e-04 ***
+lambda_psdn                     3.4e-01    8.1e-02     4.2       2e-05 ***
+B_d_cd                         -4.0e+00    8.2e-01    -4.9       6e-07 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+For more detailed output, use apollo_modelOutput
+                                              LL par
+NL_participation_model_c6_noDcrbClosure -1914.32  34
+NL_participation_model_c6               -1913.87  35
+Difference                                  0.45   1
+
+Likelihood ratio test-value:    0.9 
+Degrees of freedom:             1 
+Likelihood ratio test p-value:  0.3428 
+INFORMATION: The p-value from the test is returned invisibly as an output from this function. Calling the function via
+  result=apollo_lrTest(...) will save this output in an object called result (or otherwise named object). 
