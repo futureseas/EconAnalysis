@@ -6,49 +6,52 @@ Model description            : Participation, location and target species decisi
 Estimation method            : bfgs
 Modelled outcomes            : 29160
 
-LL(final)                    : -22591.83
-Estimated parameters         : 36
+LL(final)                    : -22498.26
+Estimated parameters         : 39
 
 
 Estimates (robust covariance matrix, 1-sided p-values):
 
                                estimate std. error t-ratio p (1-sided)    
-asc_sfa_nanc                   -2.57785    0.25997    -9.9      <2e-16 ***
-asc_laa_nanc                   -2.81994    0.24735   -11.4      <2e-16 ***
-asc_laa_cmck                   -2.43825    0.22806   -10.7      <2e-16 ***
-asc_laa_msqd                   -1.97063    0.17909   -11.0      <2e-16 ***
-asc_laa_ytna                   -2.95569    0.27779   -10.6      <2e-16 ***
-asc_mna_msqd                   -2.13770    0.19499   -11.0      <2e-16 ***
-asc_sba_msqd                   -1.95947    0.17960   -10.9      <2e-16 ***
-asc_laa_btna                   -2.91710    0.26918   -10.8      <2e-16 ***
-asc_sfa_msqd                   -2.15917    0.22378    -9.6      <2e-16 ***
-asc_mna_psdn                   -2.58957    0.24283   -10.7      <2e-16 ***
-asc_sba_cmck                   -2.49596    0.23093   -10.8      <2e-16 ***
-asc_mra_msqd                   -2.49077    0.24239   -10.3      <2e-16 ***
-asc_laa_psdn                   -2.67328    0.24257   -11.0      <2e-16 ***
-asc_mna_nanc                   -2.34747    0.21306   -11.0      <2e-16 ***
-c_btna                         -4.49571    0.59732    -7.5       3e-14 ***
-c_psdn                         -0.63115    0.24926    -2.5       0.006 ** 
-w_nanc                         -4.71080    0.24192   -19.5      <2e-16 ***
-w_cmck                         -3.74693    0.26666   -14.1      <2e-16 ***
-w_msqd                         -3.73566    0.14670   -25.5      <2e-16 ***
-w_tuna                         -3.02445    0.15066   -20.1      <2e-16 ***
-w_psdn                         -4.03084    0.34948   -11.5      <2e-16 ***
-lambda_part                     0.36814    0.04147     8.9      <2e-16 ***
-lambda_cmck                     0.36814    0.05798     6.3       1e-10 ***
-lambda_msqd                     0.36814    0.03914     9.4      <2e-16 ***
-lambda_psdn                     0.30602    0.07982     3.8       6e-05 ***
-lambda_nanc                     0.25631    0.05251     4.9       5e-07 ***
-lambda_tuna                     0.36813    0.06267     5.9       2e-09 ***
-B_mean_avail                    1.03511    0.13648     7.6       2e-14 ***
-B_mean_price                    0.09401    0.01684     5.6       1e-08 ***
-B_wind_max_220_mh              -0.04170    0.00426    -9.8      <2e-16 ***
-B_d_d                          -0.78040    0.08844    -8.8      <2e-16 ***
-B_dist_port_to_catch_area_zero -0.00250    0.00068    -3.7       1e-04 ***
-B_dummy_prev_days               1.26987    0.13991     9.1      <2e-16 ***
-B_dummy_prev_year_days          0.15348    0.03425     4.5       4e-06 ***
-B_unem_rate_part                0.18496    0.01333    13.9      <2e-16 ***
-B_dist_to_cog                  -0.00149    0.00022    -6.8       6e-12 ***
+asc_sfa_nanc                   -2.43836    0.23703   -10.3      <2e-16 ***
+asc_laa_nanc                   -2.77366    0.22800   -12.2      <2e-16 ***
+asc_laa_cmck                   -2.32283    0.20845   -11.1      <2e-16 ***
+asc_laa_msqd                   -1.78327    0.16422   -10.9      <2e-16 ***
+asc_laa_ytna                   -2.79991    0.24851   -11.3      <2e-16 ***
+asc_mna_msqd                   -2.01592    0.17935   -11.2      <2e-16 ***
+asc_sba_msqd                   -1.78859    0.16428   -10.9      <2e-16 ***
+asc_laa_btna                   -2.75790    0.23944   -11.5      <2e-16 ***
+asc_sfa_msqd                   -2.02651    0.20807    -9.7      <2e-16 ***
+asc_mna_psdn                   -2.53890    0.22387   -11.3      <2e-16 ***
+asc_sba_cmck                   -2.37374    0.21137   -11.2      <2e-16 ***
+asc_mra_msqd                   -2.34096    0.22676   -10.3      <2e-16 ***
+asc_laa_psdn                   -2.56213    0.22468   -11.4      <2e-16 ***
+asc_mna_nanc                   -2.33366    0.20257   -11.5      <2e-16 ***
+c_btna                         -4.46454    0.58588    -7.6       1e-14 ***
+c_psdn                         -0.51476    0.26033    -2.0       0.024 *  
+w_nanc                         -4.66014    0.23918   -19.5      <2e-16 ***
+w_cmck                         -3.74502    0.26664   -14.0      <2e-16 ***
+w_msqd                         -3.73865    0.14674   -25.5      <2e-16 ***
+w_tuna                         -3.01574    0.14862   -20.3      <2e-16 ***
+w_psdn                         -4.00658    0.34472   -11.6      <2e-16 ***
+lambda_part                     0.36620    0.03902     9.4      <2e-16 ***
+lambda_cmck                     0.36619    0.05605     6.5       3e-11 ***
+lambda_msqd                     0.36482    0.03979     9.2      <2e-16 ***
+lambda_psdn                     0.31479    0.06848     4.6       2e-06 ***
+lambda_nanc                     0.24293    0.05026     4.8       7e-07 ***
+lambda_tuna                     0.36620    0.06222     5.9       2e-09 ***
+B_mean_avail                    1.17898    0.14058     8.4      <2e-16 ***
+B_mean_price                    0.05860    0.02085     2.8       0.002 ** 
+B_wind_max_220_mh              -0.04166    0.00429    -9.7      <2e-16 ***
+B_d_d                          -0.86236    0.09478    -9.1      <2e-16 ***
+B_d_cd                         -1.22990    0.22137    -5.6       1e-08 ***
+B_d_pd                         -1.37224    0.23475    -5.8       3e-09 ***
+B_d_pcd                        -1.22990    0.22137    -5.6       1e-08 ***
+B_dist_port_to_catch_area_zero -0.00374    0.00087    -4.3       8e-06 ***
+B_dummy_prev_days               1.21127    0.13366     9.1      <2e-16 ***
+B_dummy_prev_year_days          0.14751    0.03455     4.3       1e-05 ***
+B_unem_rate_part                0.18179    0.01308    13.9      <2e-16 ***
+B_dist_to_cog                  -0.00151    0.00022    -6.9       2e-12 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
