@@ -6,9 +6,6 @@
 rm(list = ls())
 PC = "work" ### Where I am working?
 
-
-
-
 if (PC == "home") {
   google_dir <- "H:/My Drive/"
   n_cores <- 4

@@ -1,0 +1,1485 @@
+Model run by FACEA using Apollo 0.3.4 on R 4.3.3 for Windows.
+Please acknowledge the use of Apollo by citing Hess & Palma (2019)
+  DOI 10.1016/j.jocm.2019.100170
+  www.ApolloChoiceModelling.com
+
+Model name                                  : NL_participation_model_c6_v2
+Model description                           : Participation, location and target species decisions
+Model run at                                : 2024-11-28 16:41:39.637479
+Estimation method                           : bgw
+Model diagnosis                             : Relative function convergence
+Optimisation diagnosis                      : Saddle point found
+     hessian properties                     : Some eigenvalues are positive and others negative
+     maximum eigenvalue                     : 0
+     reciprocal of condition number         : not calculated (Hessian is not negative definite)
+Number of individuals                       : 11
+Number of rows in database                  : 2581
+Number of modelled outcomes                 : 2581
+
+Number of cores used                        :  14 
+Model without mixing
+
+LL(start)                                   : -2174.12
+LL at equal shares, LL(0)                   : -6188.97
+LL at observed shares, LL(C)                : -3273.79
+LL(final)                                   : -1924.1
+Rho-squared vs equal shares                  :  0.6891 
+Adj.Rho-squared vs equal shares              :  0.6844 
+Rho-squared vs observed shares               :  0.4123 
+Adj.Rho-squared vs observed shares           :  0.4065 
+AIC                                         :  3906.2 
+BIC                                         :  4076.02 
+
+Estimated parameters                        : 29
+Time taken (hh:mm:ss)                       :  00:00:25.79 
+     pre-estimation                         :  00:00:10.67 
+     estimation                             :  00:00:3.38 
+     post-estimation                        :  00:00:11.74 
+Iterations                                  :  19  
+
+Unconstrained optimisation.
+
+Estimates:
+                                  Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
+B_mean_avail                      2.891213          NA          NA          NA          NA            NA            NA
+B_wind_max_220_mh                -0.053923          NA          NA          NA          NA            NA            NA
+B_dist_to_cog                    -0.004991          NA          NA          NA          NA            NA            NA
+B_dist_port_to_catch_area_zero   -0.040709          NA          NA          NA          NA            NA            NA
+B_dummy_prev_days                 3.839020          NA          NA          NA          NA            NA            NA
+B_dummy_prev_year_days            0.359721          NA          NA          NA          NA            NA            NA
+B_unem_rate                       0.335066          NA          NA          NA          NA            NA            NA
+B_d_d                            -2.181435          NA          NA          NA          NA            NA            NA
+c_wa                           -214.590368          NA          NA          NA          NA            NA            NA
+c_dcrb                           -2.000000          NA          NA          NA          NA            NA            NA
+c_psdn                          -67.335562          NA          NA          NA          NA            NA            NA
+B_mean_price_part                 5.102627          NA          NA          NA          NA            NA            NA
+B_mean_price_crab                 0.214659          NA          NA          NA          NA            NA            NA
+B_mean_price_slmn                 7.103796          NA          NA          NA          NA            NA            NA
+w_psdn                            0.013312          NA          NA          NA          NA            NA            NA
+w_nanc                           -0.564964          NA          NA          NA          NA            NA            NA
+w_dcrb                           -0.348601          NA          NA          NA          NA            NA            NA
+w_slmn                            0.743761          NA          NA          NA          NA            NA            NA
+w_cmck                            0.288462          NA          NA          NA          NA            NA            NA
+asc_cba_psdn                     -5.148653          NA          NA          NA          NA            NA            NA
+asc_clo_psdn                     -6.156807          NA          NA          NA          NA            NA            NA
+asc_clw_psdn                     -5.948903          NA          NA          NA          NA            NA            NA
+asc_cwa_psdn                     -5.370893          NA          NA          NA          NA            NA            NA
+asc_clo_nanc                     -7.609681          NA          NA          NA          NA            NA            NA
+asc_clw_nanc                    -11.060388          NA          NA          NA          NA            NA            NA
+asc_cwa_nanc                     -6.058981          NA          NA          NA          NA            NA            NA
+asc_clo_cmck                     -7.281623          NA          NA          NA          NA            NA            NA
+asc_cwa_dcrb                     -7.409541          NA          NA          NA          NA            NA            NA
+asc_nps_sock                    -20.165620          NA          NA          NA          NA            NA            NA
+asc_no_participation              0.000000          NA          NA          NA          NA            NA            NA
+w_nopart                          0.000000          NA          NA          NA          NA            NA            NA
+B_mean_price_no_part              0.000000          NA          NA          NA          NA            NA            NA
+B_d_cd                          -18.706830          NA          NA          NA          NA            NA            NA
+c_no_participation                0.000000          NA          NA          NA          NA            NA            NA
+
+
+Overview of choices for MNL model component :
+                                 cba_psdn clo_psdn clw_psdn cwa_psdn clo_nanc clw_nanc cwa_nanc clo_cmck cwa_dcrb nps_sock
+Times available                    2581.0  2581.00  2581.00  2581.00  2581.00  2581.00  2581.00  2581.00  2581.00  2581.00
+Times chosen                         13.0   195.00   110.00   104.00    39.00    22.00   415.00     8.00    28.00    14.00
+Percentage chosen overall             0.5     7.56     4.26     4.03     1.51     0.85    16.08     0.31     1.08     0.54
+Percentage chosen when available      0.5     7.56     4.26     4.03     1.51     0.85    16.08     0.31     1.08     0.54
+                                 no_participation
+Times available                           2581.00
+Times chosen                              1633.00
+Percentage chosen overall                   63.27
+Percentage chosen when available            63.27
+
+
+
+Classical covariance matrix:
+                                                 B_mean_avail              B_wind_max_220_mh                  B_dist_to_cog
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                               B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                  B_unem_rate                          B_d_d                           c_wa
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                       c_psdn              B_mean_price_part              B_mean_price_crab
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                            B_mean_price_slmn                         w_psdn                         w_nanc
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                       w_dcrb                         w_slmn                         w_cmck
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cba_psdn                   asc_clo_psdn                   asc_clw_psdn
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cwa_psdn                   asc_clo_nanc                   asc_clw_nanc
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cwa_nanc                   asc_clo_cmck                   asc_cwa_dcrb
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_nps_sock                         B_d_cd
+B_mean_avail                                               NA                             NA
+B_wind_max_220_mh                                          NA                             NA
+B_dist_to_cog                                              NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA
+B_dummy_prev_days                                          NA                             NA
+B_dummy_prev_year_days                                     NA                             NA
+B_unem_rate                                                NA                             NA
+B_d_d                                                      NA                             NA
+c_wa                                                       NA                             NA
+c_psdn                                                     NA                             NA
+B_mean_price_part                                          NA                             NA
+B_mean_price_crab                                          NA                             NA
+B_mean_price_slmn                                          NA                             NA
+w_psdn                                                     NA                             NA
+w_nanc                                                     NA                             NA
+w_dcrb                                                     NA                             NA
+w_slmn                                                     NA                             NA
+w_cmck                                                     NA                             NA
+asc_cba_psdn                                               NA                             NA
+asc_clo_psdn                                               NA                             NA
+asc_clw_psdn                                               NA                             NA
+asc_cwa_psdn                                               NA                             NA
+asc_clo_nanc                                               NA                             NA
+asc_clw_nanc                                               NA                             NA
+asc_cwa_nanc                                               NA                             NA
+asc_clo_cmck                                               NA                             NA
+asc_cwa_dcrb                                               NA                             NA
+asc_nps_sock                                               NA                             NA
+B_d_cd                                                     NA                             NA
+
+Robust covariance matrix:
+                                                 B_mean_avail              B_wind_max_220_mh                  B_dist_to_cog
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                               B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                  B_unem_rate                          B_d_d                           c_wa
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                       c_psdn              B_mean_price_part              B_mean_price_crab
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                            B_mean_price_slmn                         w_psdn                         w_nanc
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                       w_dcrb                         w_slmn                         w_cmck
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cba_psdn                   asc_clo_psdn                   asc_clw_psdn
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cwa_psdn                   asc_clo_nanc                   asc_clw_nanc
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cwa_nanc                   asc_clo_cmck                   asc_cwa_dcrb
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_nps_sock                         B_d_cd
+B_mean_avail                                               NA                             NA
+B_wind_max_220_mh                                          NA                             NA
+B_dist_to_cog                                              NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA
+B_dummy_prev_days                                          NA                             NA
+B_dummy_prev_year_days                                     NA                             NA
+B_unem_rate                                                NA                             NA
+B_d_d                                                      NA                             NA
+c_wa                                                       NA                             NA
+c_psdn                                                     NA                             NA
+B_mean_price_part                                          NA                             NA
+B_mean_price_crab                                          NA                             NA
+B_mean_price_slmn                                          NA                             NA
+w_psdn                                                     NA                             NA
+w_nanc                                                     NA                             NA
+w_dcrb                                                     NA                             NA
+w_slmn                                                     NA                             NA
+w_cmck                                                     NA                             NA
+asc_cba_psdn                                               NA                             NA
+asc_clo_psdn                                               NA                             NA
+asc_clw_psdn                                               NA                             NA
+asc_cwa_psdn                                               NA                             NA
+asc_clo_nanc                                               NA                             NA
+asc_clw_nanc                                               NA                             NA
+asc_cwa_nanc                                               NA                             NA
+asc_clo_cmck                                               NA                             NA
+asc_cwa_dcrb                                               NA                             NA
+asc_nps_sock                                               NA                             NA
+B_d_cd                                                     NA                             NA
+
+Classical correlation matrix:
+                                                 B_mean_avail              B_wind_max_220_mh                  B_dist_to_cog
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                               B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                  B_unem_rate                          B_d_d                           c_wa
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                       c_psdn              B_mean_price_part              B_mean_price_crab
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                            B_mean_price_slmn                         w_psdn                         w_nanc
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                       w_dcrb                         w_slmn                         w_cmck
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cba_psdn                   asc_clo_psdn                   asc_clw_psdn
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cwa_psdn                   asc_clo_nanc                   asc_clw_nanc
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cwa_nanc                   asc_clo_cmck                   asc_cwa_dcrb
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_nps_sock                         B_d_cd
+B_mean_avail                                               NA                             NA
+B_wind_max_220_mh                                          NA                             NA
+B_dist_to_cog                                              NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA
+B_dummy_prev_days                                          NA                             NA
+B_dummy_prev_year_days                                     NA                             NA
+B_unem_rate                                                NA                             NA
+B_d_d                                                      NA                             NA
+c_wa                                                       NA                             NA
+c_psdn                                                     NA                             NA
+B_mean_price_part                                          NA                             NA
+B_mean_price_crab                                          NA                             NA
+B_mean_price_slmn                                          NA                             NA
+w_psdn                                                     NA                             NA
+w_nanc                                                     NA                             NA
+w_dcrb                                                     NA                             NA
+w_slmn                                                     NA                             NA
+w_cmck                                                     NA                             NA
+asc_cba_psdn                                               NA                             NA
+asc_clo_psdn                                               NA                             NA
+asc_clw_psdn                                               NA                             NA
+asc_cwa_psdn                                               NA                             NA
+asc_clo_nanc                                               NA                             NA
+asc_clw_nanc                                               NA                             NA
+asc_cwa_nanc                                               NA                             NA
+asc_clo_cmck                                               NA                             NA
+asc_cwa_dcrb                                               NA                             NA
+asc_nps_sock                                               NA                             NA
+B_d_cd                                                     NA                             NA
+
+Robust correlation matrix:
+                                                 B_mean_avail              B_wind_max_220_mh                  B_dist_to_cog
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                               B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                  B_unem_rate                          B_d_d                           c_wa
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                       c_psdn              B_mean_price_part              B_mean_price_crab
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                            B_mean_price_slmn                         w_psdn                         w_nanc
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                       w_dcrb                         w_slmn                         w_cmck
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cba_psdn                   asc_clo_psdn                   asc_clw_psdn
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cwa_psdn                   asc_clo_nanc                   asc_clw_nanc
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_cwa_nanc                   asc_clo_cmck                   asc_cwa_dcrb
+B_mean_avail                                               NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_wa                                                       NA                             NA                             NA
+c_psdn                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA
+asc_nps_sock                                               NA                             NA                             NA
+B_d_cd                                                     NA                             NA                             NA
+                                                 asc_nps_sock                         B_d_cd
+B_mean_avail                                               NA                             NA
+B_wind_max_220_mh                                          NA                             NA
+B_dist_to_cog                                              NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA
+B_dummy_prev_days                                          NA                             NA
+B_dummy_prev_year_days                                     NA                             NA
+B_unem_rate                                                NA                             NA
+B_d_d                                                      NA                             NA
+c_wa                                                       NA                             NA
+c_psdn                                                     NA                             NA
+B_mean_price_part                                          NA                             NA
+B_mean_price_crab                                          NA                             NA
+B_mean_price_slmn                                          NA                             NA
+w_psdn                                                     NA                             NA
+w_nanc                                                     NA                             NA
+w_dcrb                                                     NA                             NA
+w_slmn                                                     NA                             NA
+w_cmck                                                     NA                             NA
+asc_cba_psdn                                               NA                             NA
+asc_clo_psdn                                               NA                             NA
+asc_clw_psdn                                               NA                             NA
+asc_cwa_psdn                                               NA                             NA
+asc_clo_nanc                                               NA                             NA
+asc_clw_nanc                                               NA                             NA
+asc_cwa_nanc                                               NA                             NA
+asc_clo_cmck                                               NA                             NA
+asc_cwa_dcrb                                               NA                             NA
+asc_nps_sock                                               NA                             NA
+B_d_cd                                                     NA                             NA
+
+ 11 most extreme outliers in terms of lowest average per choice prediction:
+ ID Avg prob per choice
+  9           0.4005240
+ 11           0.4140198
+  6           0.4177149
+  3           0.4224571
+ 10           0.4782140
+  2           0.4952784
+  4           0.4957004
+  1           0.5058195
+  8           0.5076364
+  5           0.5225468
+  7           0.5395656
+
+Changes in parameter estimates from starting values:
+                                   Initial    Estimate  Difference
+B_mean_avail                      2.813954    2.891213    0.077259
+B_wind_max_220_mh                -0.052278   -0.053923   -0.001645
+B_dist_to_cog                    -0.004443   -0.004991 -5.4851e-04
+B_dist_port_to_catch_area_zero   -0.017787   -0.040709   -0.022922
+B_dummy_prev_days                 2.064164    3.839020    1.774857
+B_dummy_prev_year_days            0.318182    0.359721    0.041539
+B_unem_rate                       0.362855    0.335066   -0.027789
+B_d_d                            -0.963341   -2.181435   -1.218094
+c_wa                             -4.633672 -214.590368 -209.956697
+c_dcrb                           -2.000000   -2.000000    0.000000
+c_psdn                           -2.000000  -67.335562  -65.335562
+B_mean_price_part                 4.123829    5.102627    0.978798
+B_mean_price_crab                 0.076563    0.214659    0.138096
+B_mean_price_slmn                 5.610793    7.103796    1.493004
+w_psdn                           -0.123464    0.013312    0.136776
+w_nanc                           -0.477130   -0.564964   -0.087834
+w_dcrb                           -0.398683   -0.348601    0.050082
+w_slmn                            0.720276    0.743761    0.023485
+w_cmck                           -0.029741    0.288462    0.318203
+asc_cba_psdn                     -4.411562   -5.148653   -0.737091
+asc_clo_psdn                     -5.316406   -6.156807   -0.840401
+asc_clw_psdn                     -5.318820   -5.948903   -0.630083
+asc_cwa_psdn                     -4.979693   -5.370893   -0.391199
+asc_clo_nanc                     -6.065940   -7.609681   -1.543741
+asc_clw_nanc                     -9.389570  -11.060388   -1.670818
+asc_cwa_nanc                     -5.335848   -6.058981   -0.723133
+asc_clo_cmck                     -5.464764   -7.281623   -1.816859
+asc_cwa_dcrb                     -7.483766   -7.409541    0.074225
+asc_nps_sock                    -16.304903  -20.165620   -3.860716
+asc_no_participation              0.000000    0.000000    0.000000
+w_nopart                          0.000000    0.000000    0.000000
+B_mean_price_no_part              0.000000    0.000000    0.000000
+B_d_cd                           -4.000000  -18.706830  -14.706830
+c_no_participation                0.000000    0.000000    0.000000
+
+Settings and functions used in model definition:
+
+apollo_control
+--------------
+                       Value                                                 
+modelName              "NL_participation_model_c6_v2"                        
+modelDescr             "Participation, location and target species decisions"
+indivID                "fished_vessel_anon"                                  
+outputDirectory        "output/"                                             
+panelData              "TRUE"                                                
+nCores                 "14"                                                  
+workInLogs             "TRUE"                                                
+debug                  "FALSE"                                               
+seed                   "13"                                                  
+mixing                 "FALSE"                                               
+HB                     "FALSE"                                               
+noValidation           "FALSE"                                               
+noDiagnostics          "FALSE"                                               
+calculateLLC           "TRUE"                                                
+analyticHessian        "FALSE"                                               
+memorySaver            "FALSE"                                               
+analyticGrad           "FALSE"                                               
+analyticGrad_manualSet "FALSE"                                               
+overridePanel          "FALSE"                                               
+preventOverridePanel   "FALSE"                                               
+noModification         "FALSE"                                               
+
+Hessian routines attempted
+--------------------------
+numerical second derivative of LL (using numDeriv)
+
+Scaling used in computing Hessian
+---------------------------------
+                                      Value
+B_mean_avail                   2.891213e+00
+B_wind_max_220_mh              5.392294e-02
+B_dist_to_cog                  4.991309e-03
+B_dist_port_to_catch_area_zero 4.070880e-02
+B_dummy_prev_days              3.839020e+00
+B_dummy_prev_year_days         3.597212e-01
+B_unem_rate                    3.350660e-01
+B_d_d                          2.181435e+00
+c_wa                           2.145904e+02
+c_psdn                         6.733556e+01
+B_mean_price_part              5.102627e+00
+B_mean_price_crab              2.146593e-01
+B_mean_price_slmn              7.103796e+00
+w_psdn                         1.331205e-02
+w_nanc                         5.649640e-01
+w_dcrb                         3.486008e-01
+w_slmn                         7.437611e-01
+w_cmck                         2.884621e-01
+asc_cba_psdn                   5.148653e+00
+asc_clo_psdn                   6.156807e+00
+asc_clw_psdn                   5.948903e+00
+asc_cwa_psdn                   5.370893e+00
+asc_clo_nanc                   7.609681e+00
+asc_clw_nanc                   1.106039e+01
+asc_cwa_nanc                   6.058981e+00
+asc_clo_cmck                   7.281623e+00
+asc_cwa_dcrb                   7.409541e+00
+asc_nps_sock                   2.016562e+01
+B_d_cd                         1.870683e+01
+
+
+apollo_probabilities
+----------------------
+function(apollo_beta, apollo_inputs, functionality="estimate"){
+  
+  ### Attach inputs and detach after function exit
+  apollo_attach(apollo_beta, apollo_inputs)
+  on.exit(apollo_detach(apollo_beta, apollo_inputs))
+  
+  ### Create list of probabilities P
+  P = list()
+  
+# 
+  ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
+  V = list()
+  V[["cba_psdn"]]         = asc_cba_psdn + B_mean_avail * mean_avail_cba_psdn + B_wind_max_220_mh * wind_max_220_mh_cba_psdn + B_dist_to_cog * dist_to_cog_cba_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cba_psdn + B_dummy_prev_days * dummy_prev_days_cba_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cba_psdn  + B_unem_rate * unem_rate_or + B_d_d * d_d_cba_psdn                                     + c_psdn * psdnclosure + B_mean_price_part * mean_price_3_cba_psdn + w_psdn * weekend
+  V[["clo_psdn"]]         = asc_clo_psdn + B_mean_avail * mean_avail_clo_psdn + B_wind_max_220_mh * wind_max_220_mh_clo_psdn + B_dist_to_cog * dist_to_cog_clo_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_psdn + B_dummy_prev_days * dummy_prev_days_clo_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clo_psdn  + B_unem_rate * unem_rate_or + B_d_d * d_d_clo_psdn                                     + c_psdn * psdnclosure + B_mean_price_part * mean_price_3_clo_psdn + w_psdn * weekend
+  V[["clw_psdn"]]         = asc_clw_psdn + B_mean_avail * mean_avail_clw_psdn + B_wind_max_220_mh * wind_max_220_mh_clw_psdn + B_dist_to_cog * dist_to_cog_clw_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_psdn + B_dummy_prev_days * dummy_prev_days_clw_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clw_psdn  + B_unem_rate * unem_rate_wa + B_d_d * d_d_clw_psdn  + c_wa * waclosure_clw_psdn        + c_psdn * psdnclosure + B_mean_price_part * mean_price_3_clw_psdn + w_psdn * weekend
+  V[["cwa_psdn"]]         = asc_cwa_psdn + B_mean_avail * mean_avail_cwa_psdn + B_wind_max_220_mh * wind_max_220_mh_cwa_psdn + B_dist_to_cog * dist_to_cog_cwa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_psdn + B_dummy_prev_days * dummy_prev_days_cwa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cwa_psdn  + B_unem_rate * unem_rate_wa + B_d_d * d_d_cwa_psdn  + c_wa * waclosure_cwa_psdn        + c_psdn * psdnclosure + B_mean_price_part * mean_price_3_cwa_psdn + w_psdn * weekend
+  V[["clo_nanc"]]         = asc_clo_nanc + B_mean_avail * mean_avail_clo_nanc + B_wind_max_220_mh * wind_max_220_mh_clo_nanc + B_dist_to_cog * dist_to_cog_clo_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_nanc + B_dummy_prev_days * dummy_prev_days_clo_nanc + B_dummy_prev_year_days * dummy_prev_year_days_clo_nanc  + B_unem_rate * unem_rate_or + B_d_d * d_d_clo_nanc                                                            + B_mean_price_part * mean_price_3_clo_nanc + w_nanc * weekend
+  V[["clw_nanc"]]         = asc_clw_nanc + B_mean_avail * mean_avail_clw_nanc + B_wind_max_220_mh * wind_max_220_mh_clw_nanc + B_dist_to_cog * dist_to_cog_clw_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_nanc + B_dummy_prev_days * dummy_prev_days_clw_nanc + B_dummy_prev_year_days * dummy_prev_year_days_clw_nanc  + B_unem_rate * unem_rate_wa + B_d_d * d_d_clw_nanc                                                            + B_mean_price_part * mean_price_3_clw_nanc + w_nanc * weekend
+  V[["cwa_nanc"]]         = asc_cwa_nanc + B_mean_avail * mean_avail_cwa_nanc + B_wind_max_220_mh * wind_max_220_mh_cwa_nanc + B_dist_to_cog * dist_to_cog_cwa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_nanc + B_dummy_prev_days * dummy_prev_days_cwa_nanc + B_dummy_prev_year_days * dummy_prev_year_days_cwa_nanc  + B_unem_rate * unem_rate_wa + B_d_d * d_d_cwa_nanc                                                            + B_mean_price_part * mean_price_3_cwa_nanc + w_nanc * weekend
+  V[["clo_cmck"]]         = asc_clo_cmck + B_mean_avail * mean_avail_clo_cmck + B_wind_max_220_mh * wind_max_220_mh_clo_cmck + B_dist_to_cog * dist_to_cog_clo_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_cmck + B_dummy_prev_days * dummy_prev_days_clo_cmck + B_dummy_prev_year_days * dummy_prev_year_days_clo_cmck  + B_unem_rate * unem_rate_or + B_d_d * d_d_clo_cmck                                                            + B_mean_price_part * mean_price_3_clo_cmck + w_cmck * weekend
+  V[["cwa_dcrb"]]         = asc_cwa_dcrb + B_mean_avail * mean_avail_cwa_dcrb + B_wind_max_220_mh * wind_max_220_mh_cwa_dcrb + B_dist_to_cog * dist_to_cog_cwa_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_dcrb + B_dummy_prev_days * dummy_prev_days_cwa_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_cwa_dcrb  + B_unem_rate * unem_rate_wa + B_d_d * d_d_cwa_dcrb  + c_dcrb * dcrbclosurewad_cwa_dcrb                        + B_mean_price_crab * mean_price_3_cwa_dcrb + w_dcrb * weekend + c_dcrb * dcrbclosurewad_cwa_dcrb
+  V[["nps_sock"]]         = asc_nps_sock + B_mean_avail * mean_avail_nps_sock + B_wind_max_220_mh * wind_max_220_mh_nps_sock + B_dist_to_cog * dist_to_cog_nps_sock + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_nps_sock + B_dummy_prev_days * dummy_prev_days_nps_sock + B_dummy_prev_year_days * dummy_prev_year_days_nps_sock  + B_unem_rate * unem_rate_wa + B_d_d * d_d_nps_sock                                                            + B_mean_price_slmn * mean_price_3_nps_sock + w_slmn * weekend + B_d_cd * d_cd_nps_sock                           
+  V[["no_participation"]] = asc_no_participation + w_nopart * weekend + B_mean_price_no_part * mean_price_3_no_participation + c_no_participation * psdnclosure
+
+
+  ### Specify nests for NL model
+  # nlNests      = list(root=1, part = lambda_part,
+  #                     nanc = lambda_nanc, psdn = lambda_psdn)   ### Specify tree structure for NL model
+  # 
+  # ### Specify tree structure for NL model
+  # nlStructure= list()
+  # nlStructure[["root"]] = c("no_participation", "part", "nps_sock", "cwa_dcrb")
+  # nlStructure[["part"]] = c("nanc", "psdn", "clo_cmck" )
+  # nlStructure[["nanc"]] = c("clo_nanc", "clw_nanc", "cwa_nanc")
+  # nlStructure[["psdn"]] = c("cba_psdn", "clo_psdn", "clw_psdn", "cwa_psdn")   ### Define settings for NL model
+
+  nl_settings <- list(
+    alternatives = c(cba_psdn =1,
+	                 clo_psdn =2,
+	                 clw_psdn =3,
+	                 cwa_psdn =4,
+	                 clo_nanc =5,
+	                 clw_nanc =6,
+	                 cwa_nanc =7,
+	                 clo_cmck =8,
+	                 cwa_dcrb =9,
+	                 nps_sock =10, 
+					 no_participation = 11),
+    avail        = 1,
+    choiceVar    = choice,
+    utilities    = V
+    # ,
+    # nlNests      = nlNests,
+    # nlStructure  = nlStructure
+  )
+  
+  ### Compute probabilities using NL model
+  P[["model"]] = apollo_mnl(nl_settings, functionality)
+  
+  # ### Take product across observation for same individual
+  P = apollo_panelProd(P, apollo_inputs, functionality)
+  
+  ### Prepare and return outputs of function
+  P = apollo_prepareProb(P, apollo_inputs, functionality)
+  return(P)
+}

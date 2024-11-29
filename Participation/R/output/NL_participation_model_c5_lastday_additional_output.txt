@@ -1,0 +1,61 @@
+
+Apollo model summary
+
+Model name                   : NL_participation_model_c5_lastday
+Model description            : Participation, location and target species decisions
+Estimation method            : bfgs
+Modelled outcomes            : 6806
+
+LL(final)                    : -5221.07
+Estimated parameters         : 42
+
+
+Estimates (robust covariance matrix, 1-sided p-values):
+
+                               estimate std. error t-ratio p (1-sided)    
+B_mean_avail                     1.5601     0.6871     2.3       0.012 *  
+B_wind_max_220_mh               -0.0442     0.0070    -6.4       1e-10 ***
+B_dist_to_cog                   -0.0014     0.0002    -6.9       4e-12 ***
+B_dist_port_to_catch_area_zero  -0.0087     0.0020    -4.3       7e-06 ***
+B_dummy_last_day                 1.8840     0.2820     6.7       1e-11 ***
+B_unem_rate                      0.2002     0.0423     4.7       1e-06 ***
+B_d_d                           -2.4510     0.4231    -5.8       3e-09 ***
+c_psdn                          -1.6697     0.6284    -2.7       0.004 ** 
+c_dcrb                          -2.7332     1.0413    -2.6       0.004 ** 
+B_mean_price_part                1.8488     0.8620     2.1       0.016 *  
+B_mean_price_crab                0.0100     0.0481     0.2       0.417    
+asc_mna_msqd                    -3.5444     0.9958    -3.6       2e-04 ***
+asc_sba_msqd                    -2.8298     1.0409    -2.7       0.003 ** 
+asc_mra_msqd                    -4.2789     1.2577    -3.4       3e-04 ***
+asc_laa_msqd                    -3.3217     1.1087    -3.0       0.001 ** 
+asc_npa_msqd                    -3.5849     1.5668    -2.3       0.011 *  
+asc_sfa_msqd                    -4.0412     1.0549    -3.8       6e-05 ***
+asc_cba_msqd                    -2.9812     1.1057    -2.7       0.004 ** 
+asc_laa_psdn                    -3.5232     0.7070    -5.0       3e-07 ***
+asc_clo_psdn                    -1.8838     0.5585    -3.4       4e-04 ***
+asc_cwa_psdn                     0.2756     0.5530     0.5       0.309    
+asc_clw_psdn                    -0.2872     0.6883    -0.4       0.338    
+asc_sba_cmck                    -3.1265     0.7953    -3.9       4e-05 ***
+asc_laa_cmck                    -3.7150     0.7666    -4.8       6e-07 ***
+asc_laa_nanc                    -3.6141     0.9731    -3.7       1e-04 ***
+asc_cwa_albc                    -6.5473     2.9297    -2.2       0.013 *  
+asc_cwa_dcrb                    -2.2930     0.6961    -3.3       5e-04 ***
+asc_clw_dcrb                    -1.6253     0.6875    -2.4       0.009 ** 
+lambda_part                      0.4976     0.0877     5.7       7e-09 ***
+lambda_cmck                      0.4689     0.1054     4.4       4e-06 ***
+lambda_msqd                      0.4778     0.0781     6.1       5e-10 ***
+lambda_psdn                      0.2428     0.0864     2.8       0.002 ** 
+lambda_part_crab                 1.0000     0.3177     3.1       8e-04 ***
+w_nanc                          -6.4767     0.5630   -11.5      <2e-16 ***
+w_msqd                          -3.1252     0.2652   -11.8      <2e-16 ***
+w_psdn                          -0.8507     0.1979    -4.3       9e-06 ***
+w_albc                          -0.8640     0.2860    -3.0       0.001 ** 
+w_cmck                          -2.9473     0.5799    -5.1       2e-07 ***
+w_dcrb                          -0.5484     0.1393    -3.9       4e-05 ***
+c_msqd                          -3.6465     0.8981    -4.1       2e-05 ***
+c_wa                            -6.0462     1.3742    -4.4       5e-06 ***
+B_d_cd                          -8.3924     2.3434    -3.6       2e-04 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+For more detailed output, use apollo_modelOutput
