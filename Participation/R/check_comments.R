@@ -5,8 +5,8 @@
 gc()
 rm(list=ls())
 
-#dir = "H:\\My Drive\\"
-dir = "G:\\Mi unidad\\"
+dir = "H:\\My Drive\\"
+#dir = "G:\\Mi unidad\\"
 
 
 ## Load packages ##
@@ -75,7 +75,7 @@ ggplot(data_c4, aes(x = set_date, y = mean_sdm, group = selection)) +
 #################################
 
 # Select and filter the data
-df.subs <- c4 %>%
+df.subs <- c5 %>%
   dplyr::select(
     c(fished_VESSEL_anon, selection, set_month, set_date, set_year, fished)
     ) %>%
@@ -104,22 +104,22 @@ selection_colors <- c(
   "SBA-MSQD" = "purple")
 
 
-selection_shapes <- c(
-  "No-Participation" = 4,
-  "SFA-MSQD" = 18,
-  "MRA-MSQD" = 18,
-  "MNA-PSDN" = 15,
-  "SFA-NANC" = 19,
-  "LAA-MSQD" = 18,
-  "LAA-PSDN" = 15,
-  "LAA-YTNA" = 20,
-  "SBA-CMCK" = 17,
-  "LAA-CMCK" = 17,
-  "MNA-MSQD" = 18,
-  "LAA-NANC" = 19,
-  "MNA-NANC" = 19,
-  "LAA-BTNA" = 16,
-  "SBA-MSQD" = 18)  
+# selection_shapes <- c(
+#   "No-Participation" = 4,
+#   "SFA-MSQD" = 18,
+#   "MRA-MSQD" = 18,
+#   "MNA-PSDN" = 15,
+#   "SFA-NANC" = 19,
+#   "LAA-MSQD" = 18,
+#   "LAA-PSDN" = 15,
+#   "LAA-YTNA" = 20,
+#   "SBA-CMCK" = 17,
+#   "LAA-CMCK" = 17,
+#   "MNA-MSQD" = 18,
+#   "LAA-NANC" = 19,
+#   "MNA-NANC" = 19,
+#   "LAA-BTNA" = 16,
+#   "SBA-MSQD" = 18)  
 
 
 # Ensure set_date is in Date format
