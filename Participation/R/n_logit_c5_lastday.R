@@ -4,15 +4,23 @@
 
 ### Clear memory
 rm(list = ls())
-PC = "work"
+PC = "home"
+
+if (PC == "home") {
+  google_dir <- "H:/My Drive/"
+  n_cores <- 3
+} else if (PC == "work") {
+  google_dir <- "G:/Mi unidad/"
+  n_cores <- 14
+}
+
+
+### Initialise code
 
 ### Load Apollo library
 library(apollo)
-
-### Initialise code
 apollo_initialise()
 setwd("C:/GitHub/EconAnalysis/Participation/R")
-
 
 
 
@@ -31,13 +39,6 @@ apollo_control = list(
 # ################################################################# #
 #### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
 # ################################################################# #
-
-
-if (PC == "home") {
-  google_dir <- "H:/My Drive/"
-} else if (PC == "work") {
-  google_dir <- "G:/Mi unidad/"
-}
 
 ## Read database
 library(tidyr)

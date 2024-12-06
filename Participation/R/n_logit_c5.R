@@ -23,7 +23,7 @@ apollo_control = list(
   indivID         = "fished_vessel_anon", 
   outputDirectory = "output",
   panelData       = TRUE,
-  nCores          = 14,
+  nCores          = 3,
   workInLogs      = TRUE
 )
 
