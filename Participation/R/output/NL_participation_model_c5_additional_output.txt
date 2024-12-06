@@ -60,11 +60,3 @@ B_d_cd                         -6.7e+00    1.5e+00    -4.6       2e-06 ***
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 For more detailed output, use apollo_modelOutput
-           used  (Mb) gc trigger  (Mb) max used  (Mb)
-Ncells  3520236 188.1    7009657 374.4  7009657 374.4
-Vcells 12323985  94.1   40263508 307.2 50324471 384.0
-
-        LAA-BTNA         LAA-CMCK         LAA-MSQD         LAA-NANC         LAA-PSDN         LAA-YTNA         MNA-MSQD         MNA-NANC         MNA-PSDN         MRA-MSQD 
-           29160            29160            29160            29160            29160            29160            29160            29160            29160            29160 
-No-Participation         SBA-CMCK         SBA-MSQD         SFA-MSQD         SFA-NANC 
-           29160            29160            29160            29160            29160 

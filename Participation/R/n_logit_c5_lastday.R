@@ -4,7 +4,7 @@
 
 ### Clear memory
 rm(list = ls())
-PC = "home"
+PC = "work"
 
 if (PC == "home") {
   google_dir <- "H:/My Drive/"
@@ -31,7 +31,7 @@ apollo_control = list(
   indivID         = "fished_vessel_anon", 
   outputDirectory = "output",
   panelData       = TRUE,
-  nCores          = 14,
+  nCores          = n_cores,
   workInLogs      = TRUE
 )
 
@@ -175,7 +175,7 @@ apollo_fixed = c("asc_no_participation", "w_nopart", "B_mean_price_no_part")
 
 
 # # ### Read in starting values for at least some parameters from existing model output file
-apollo_beta=apollo_readBeta(apollo_beta,apollo_fixed,"NL_participation_model_c5",overwriteFixed=FALSE)
+apollo_beta=apollo_readBeta(apollo_beta,apollo_fixed,"NL_participation_model_c5_lastday_OLD1",overwriteFixed=FALSE)
 
 
 # ################################################################# #
@@ -204,9 +204,9 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   V[["sba_msqd"]]         = asc_sba_msqd + B_mean_price_part * mean_price_3_sba_msqd + B_mean_avail * mean_avail_sba_msqd + B_wind_max_220_mh * wind_max_220_mh_sba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd + B_dummy_last_day * dummy_last_day_sba_msqd + B_dist_to_cog * dist_to_cog_sba_msqd + B_unem_rate * unem_rate_ca + c_msqd * msqdclosure             + B_d_d * d_d_sba_msqd + B_d_cd * d_cd_sba_msqd + w_msqd * weekend                            
   V[["mra_msqd"]]         = asc_mra_msqd + B_mean_price_part * mean_price_3_mra_msqd + B_mean_avail * mean_avail_mra_msqd + B_wind_max_220_mh * wind_max_220_mh_mra_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mra_msqd + B_dummy_last_day * dummy_last_day_mra_msqd + B_dist_to_cog * dist_to_cog_mra_msqd + B_unem_rate * unem_rate_ca + c_msqd * msqdclosure             + B_d_d * d_d_mra_msqd + B_d_cd * d_cd_mra_msqd + w_msqd * weekend                            
   V[["laa_msqd"]]         = asc_laa_msqd + B_mean_price_part * mean_price_3_laa_msqd + B_mean_avail * mean_avail_laa_msqd + B_wind_max_220_mh * wind_max_220_mh_laa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd + B_dummy_last_day * dummy_last_day_laa_msqd + B_dist_to_cog * dist_to_cog_laa_msqd + B_unem_rate * unem_rate_ca + c_msqd * msqdclosure             + B_d_d * d_d_laa_msqd + B_d_cd * d_cd_laa_msqd + w_msqd * weekend                            
-  V[["npa_msqd"]]         = asc_npa_msqd + B_mean_price_part * mean_price_3_npa_msqd + B_mean_avail * mean_avail_npa_msqd + B_wind_max_220_mh * wind_max_220_mh_npa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_npa_msqd + B_dummy_last_day * dummy_last_day_npa_msqd + B_dist_to_cog * dist_to_cog_npa_msqd + B_unem_rate * unem_rate_ca + c_msqd * msqdclosure             + B_d_d * d_d_npa_msqd + B_d_cd * d_cd_npa_msqd + w_msqd * weekend    
+  V[["npa_msqd"]]         = asc_npa_msqd + B_mean_price_part * mean_price_3_npa_msqd + B_mean_avail * mean_avail_npa_msqd + B_wind_max_220_mh * wind_max_220_mh_npa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_npa_msqd + B_dummy_last_day * dummy_last_day_npa_msqd + B_dist_to_cog * dist_to_cog_npa_msqd + B_unem_rate * unem_rate_or + c_msqd * msqdclosure             + B_d_d * d_d_npa_msqd + B_d_cd * d_cd_npa_msqd + w_msqd * weekend    
   V[["sfa_msqd"]]         = asc_sfa_msqd + B_mean_price_part * mean_price_3_sfa_msqd + B_mean_avail * mean_avail_sfa_msqd + B_wind_max_220_mh * wind_max_220_mh_sfa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd + B_dummy_last_day * dummy_last_day_sfa_msqd + B_dist_to_cog * dist_to_cog_sfa_msqd + B_unem_rate * unem_rate_ca + c_msqd * msqdclosure             + B_d_d * d_d_sfa_msqd + B_d_cd * d_cd_sfa_msqd + w_msqd * weekend                            
-  V[["cba_msqd"]]         = asc_cba_msqd + B_mean_price_part * mean_price_3_cba_msqd + B_mean_avail * mean_avail_cba_msqd + B_wind_max_220_mh * wind_max_220_mh_cba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cba_msqd + B_dummy_last_day * dummy_last_day_cba_msqd + B_dist_to_cog * dist_to_cog_cba_msqd + B_unem_rate * unem_rate_ca + c_msqd * msqdclosure             + B_d_d * d_d_cba_msqd + B_d_cd * d_cd_cba_msqd + w_msqd * weekend                             
+  V[["cba_msqd"]]         = asc_cba_msqd + B_mean_price_part * mean_price_3_cba_msqd + B_mean_avail * mean_avail_cba_msqd + B_wind_max_220_mh * wind_max_220_mh_cba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cba_msqd + B_dummy_last_day * dummy_last_day_cba_msqd + B_dist_to_cog * dist_to_cog_cba_msqd + B_unem_rate * unem_rate_or + c_msqd * msqdclosure             + B_d_d * d_d_cba_msqd + B_d_cd * d_cd_cba_msqd + w_msqd * weekend                             
   V[["laa_psdn"]]         = asc_laa_psdn + B_mean_price_part * mean_price_3_laa_psdn + B_mean_avail * mean_avail_laa_psdn + B_wind_max_220_mh * wind_max_220_mh_laa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_psdn + B_dummy_last_day * dummy_last_day_laa_psdn + B_dist_to_cog * dist_to_cog_laa_psdn + B_unem_rate * unem_rate_ca + c_psdn * psdnclosure             + B_d_d * d_d_laa_psdn + B_d_cd * d_cd_laa_psdn + w_psdn * weekend     
   V[["clo_psdn"]]         = asc_clo_psdn + B_mean_price_part * mean_price_3_clo_psdn + B_mean_avail * mean_avail_clo_psdn + B_wind_max_220_mh * wind_max_220_mh_clo_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_psdn + B_dummy_last_day * dummy_last_day_clo_psdn + B_dist_to_cog * dist_to_cog_clo_psdn + B_unem_rate * unem_rate_or + c_psdn * psdnclosure             + B_d_d * d_d_clo_psdn + B_d_cd * d_cd_clo_psdn + w_psdn * weekend                             
   V[["cwa_psdn"]]         = asc_cwa_psdn + B_mean_price_part * mean_price_3_cwa_psdn + B_mean_avail * mean_avail_cwa_psdn + B_wind_max_220_mh * wind_max_220_mh_cwa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_psdn + B_dummy_last_day * dummy_last_day_cwa_psdn + B_dist_to_cog * dist_to_cog_cwa_psdn + B_unem_rate * unem_rate_wa + c_psdn * psdnclosure             + B_d_d * d_d_cwa_psdn + B_d_cd * d_cd_cwa_psdn + w_psdn * weekend + c_wa * waclosure_cwa_psdn                             

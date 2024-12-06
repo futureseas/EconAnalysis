@@ -4,7 +4,7 @@
 
 ### Clear memory
 rm(list = ls())
-PC = "home"
+PC = "work"
 
 ### Load Apollo library
 library(apollo)
@@ -13,9 +13,6 @@ library(apollo)
 apollo_initialise()
 setwd("C:/GitHub/EconAnalysis/Participation/R")
 
-
-
-
 ### Set core controls
 apollo_control = list(
   modelName       = "NL_participation_model_c5",
@@ -23,7 +20,7 @@ apollo_control = list(
   indivID         = "fished_vessel_anon", 
   outputDirectory = "output",
   panelData       = TRUE,
-  nCores          = 3,
+  nCores          = 14,
   workInLogs      = TRUE
 )
 

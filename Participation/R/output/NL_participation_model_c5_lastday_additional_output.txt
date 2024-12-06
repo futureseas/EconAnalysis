@@ -6,55 +6,55 @@ Model description            : Participation, location and target species decisi
 Estimation method            : bfgs
 Modelled outcomes            : 6806
 
-LL(final)                    : -5221.07
+LL(final)                    : -5220.81
 Estimated parameters         : 42
 
 
 Estimates (robust covariance matrix, 1-sided p-values):
 
                                estimate std. error t-ratio p (1-sided)    
-B_mean_avail                     1.5601     0.6871     2.3       0.012 *  
-B_wind_max_220_mh               -0.0442     0.0070    -6.4       1e-10 ***
-B_dist_to_cog                   -0.0014     0.0002    -6.9       4e-12 ***
-B_dist_port_to_catch_area_zero  -0.0087     0.0020    -4.3       7e-06 ***
-B_dummy_last_day                 1.8840     0.2820     6.7       1e-11 ***
-B_unem_rate                      0.2002     0.0423     4.7       1e-06 ***
-B_d_d                           -2.4510     0.4231    -5.8       3e-09 ***
-c_psdn                          -1.6697     0.6284    -2.7       0.004 ** 
-c_dcrb                          -2.7332     1.0413    -2.6       0.004 ** 
-B_mean_price_part                1.8488     0.8620     2.1       0.016 *  
-B_mean_price_crab                0.0100     0.0481     0.2       0.417    
-asc_mna_msqd                    -3.5444     0.9958    -3.6       2e-04 ***
-asc_sba_msqd                    -2.8298     1.0409    -2.7       0.003 ** 
-asc_mra_msqd                    -4.2789     1.2577    -3.4       3e-04 ***
-asc_laa_msqd                    -3.3217     1.1087    -3.0       0.001 ** 
-asc_npa_msqd                    -3.5849     1.5668    -2.3       0.011 *  
-asc_sfa_msqd                    -4.0412     1.0549    -3.8       6e-05 ***
-asc_cba_msqd                    -2.9812     1.1057    -2.7       0.004 ** 
-asc_laa_psdn                    -3.5232     0.7070    -5.0       3e-07 ***
-asc_clo_psdn                    -1.8838     0.5585    -3.4       4e-04 ***
-asc_cwa_psdn                     0.2756     0.5530     0.5       0.309    
-asc_clw_psdn                    -0.2872     0.6883    -0.4       0.338    
-asc_sba_cmck                    -3.1265     0.7953    -3.9       4e-05 ***
-asc_laa_cmck                    -3.7150     0.7666    -4.8       6e-07 ***
-asc_laa_nanc                    -3.6141     0.9731    -3.7       1e-04 ***
-asc_cwa_albc                    -6.5473     2.9297    -2.2       0.013 *  
-asc_cwa_dcrb                    -2.2930     0.6961    -3.3       5e-04 ***
-asc_clw_dcrb                    -1.6253     0.6875    -2.4       0.009 ** 
-lambda_part                      0.4976     0.0877     5.7       7e-09 ***
-lambda_cmck                      0.4689     0.1054     4.4       4e-06 ***
-lambda_msqd                      0.4778     0.0781     6.1       5e-10 ***
-lambda_psdn                      0.2428     0.0864     2.8       0.002 ** 
-lambda_part_crab                 1.0000     0.3177     3.1       8e-04 ***
-w_nanc                          -6.4767     0.5630   -11.5      <2e-16 ***
-w_msqd                          -3.1252     0.2652   -11.8      <2e-16 ***
-w_psdn                          -0.8507     0.1979    -4.3       9e-06 ***
-w_albc                          -0.8640     0.2860    -3.0       0.001 ** 
-w_cmck                          -2.9473     0.5799    -5.1       2e-07 ***
-w_dcrb                          -0.5484     0.1393    -3.9       4e-05 ***
-c_msqd                          -3.6465     0.8981    -4.1       2e-05 ***
-c_wa                            -6.0462     1.3742    -4.4       5e-06 ***
-B_d_cd                          -8.3924     2.3434    -3.6       2e-04 ***
+B_mean_avail                    1.56013    0.69416     2.2       0.012 *  
+B_wind_max_220_mh              -0.04424    0.00711    -6.2       3e-10 ***
+B_dist_to_cog                  -0.00140    0.00021    -6.8       6e-12 ***
+B_dist_port_to_catch_area_zero -0.00870    0.00201    -4.3       7e-06 ***
+B_dummy_last_day                1.88404    0.28579     6.6       2e-11 ***
+B_unem_rate                     0.20017    0.04160     4.8       7e-07 ***
+B_d_d                          -2.45105    0.43635    -5.6       1e-08 ***
+c_psdn                         -1.66968    0.62166    -2.7       0.004 ** 
+c_dcrb                         -2.73319    1.03991    -2.6       0.004 ** 
+B_mean_price_part               1.84883    0.85412     2.2       0.015 *  
+B_mean_price_crab               0.01004    0.04795     0.2       0.417    
+asc_mna_msqd                   -3.54444    0.97959    -3.6       1e-04 ***
+asc_sba_msqd                   -2.82985    1.02314    -2.8       0.003 ** 
+asc_mra_msqd                   -4.27890    1.24382    -3.4       3e-04 ***
+asc_laa_msqd                   -3.32171    1.09448    -3.0       0.001 ** 
+asc_npa_msqd                   -3.58494    1.65935    -2.2       0.015 *  
+asc_sfa_msqd                   -4.04124    1.03976    -3.9       5e-05 ***
+asc_cba_msqd                   -2.98120    1.11593    -2.7       0.004 ** 
+asc_laa_psdn                   -3.52321    0.69833    -5.0       2e-07 ***
+asc_clo_psdn                   -1.88384    0.54823    -3.4       3e-04 ***
+asc_cwa_psdn                    0.27562    0.52834     0.5       0.301    
+asc_clw_psdn                   -0.28718    0.66113    -0.4       0.332    
+asc_sba_cmck                   -3.12646    0.78303    -4.0       3e-05 ***
+asc_laa_cmck                   -3.71501    0.75671    -4.9       5e-07 ***
+asc_laa_nanc                   -3.61414    0.96266    -3.8       9e-05 ***
+asc_cwa_albc                   -6.54729    2.86607    -2.3       0.011 *  
+asc_cwa_dcrb                   -2.29301    0.69727    -3.3       5e-04 ***
+asc_clw_dcrb                   -1.62530    0.67971    -2.4       0.008 ** 
+lambda_part                     0.49763    0.08885     5.6       1e-08 ***
+lambda_cmck                     0.46886    0.10426     4.5       3e-06 ***
+lambda_msqd                     0.47785    0.08051     5.9       1e-09 ***
+lambda_psdn                     0.24284    0.08712     2.8       0.003 ** 
+lambda_part_crab                1.00000    0.31763     3.1       8e-04 ***
+w_nanc                         -6.47673    0.55475   -11.7      <2e-16 ***
+w_msqd                         -3.12523    0.26818   -11.7      <2e-16 ***
+w_psdn                         -0.85069    0.20072    -4.2       1e-05 ***
+w_albc                         -0.86401    0.29471    -2.9       0.002 ** 
+w_cmck                         -2.94731    0.57935    -5.1       2e-07 ***
+w_dcrb                         -0.54839    0.14001    -3.9       4e-05 ***
+c_msqd                         -3.64652    0.90240    -4.0       3e-05 ***
+c_wa                           -6.04621    1.40416    -4.3       8e-06 ***
+B_d_cd                         -8.39235    2.34225    -3.6       2e-04 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 

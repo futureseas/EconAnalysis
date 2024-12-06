@@ -4,7 +4,7 @@
 
 ### Clear memory
 rm(list = ls())
-PC = "home"
+PC = "work"
 
 if (PC == "home") {
   google_dir <- "H:/My Drive/"
@@ -38,12 +38,6 @@ apollo_control = list(
 #### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
 # ################################################################# #
 
-
-if (PC == "home") {
-  google_dir <- "H:/My Drive/"
-} else if (PC == "work") {
-  google_dir <- "G:/Mi unidad/"
-}
 
 ## Read database
 library(tidyr)
