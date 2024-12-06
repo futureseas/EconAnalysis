@@ -82,44 +82,27 @@ df.subs <- c6 %>%
   dplyr::filter(set_year == 2014, set_month == 7, fished == 1) %>%
   drop_na() %>% 
   mutate(Species = substr(selection, nchar(selection) - 3, nchar(selection)),
-         Port = substr(selection, 1, 3)) 
+         Port = substr(selection, 1, 3)) %>%
+  dplyr::filter(selection %in% c("CBA-PSDN", "CLO-PSDN", "CLO-NANC", "CLO-CMCK", "No-Participation"))
 
 
 # Define custom color and shape mappings
 selection_colors <- c(
   "No-Participation" = "black",
-  "SFA-MSQD" = "orange",
-  "MRA-MSQD" = "red",
-  "MNA-PSDN" = "lightgreen",
-  "SFA-NANC" = "orange",
-  "LAA-MSQD" = "blue",
-  "LAA-PSDN" = "blue",
-  "LAA-YTNA" = "blue",
-  "SBA-CMCK" = "purple",
-  "LAA-CMCK" = "blue",
-  "MNA-MSQD" = "lightgreen",
-  "LAA-NANC" = "blue",
-  "MNA-NANC" = "lightgreen",
-  "LAA-BTNA" = "blue",
-  "SBA-MSQD" = "purple")
+  "CBA-PSDN" = "orange",
+  "CLO-PSDN" = "blue",
+  "CLO-NANC" = "blue",
+  "CLO-CMCK" = "blue"
+)
 
 
-# selection_shapes <- c(
-#   "No-Participation" = 4,
-#   "SFA-MSQD" = 18,
-#   "MRA-MSQD" = 18,
-#   "MNA-PSDN" = 15,
-#   "SFA-NANC" = 19,
-#   "LAA-MSQD" = 18,
-#   "LAA-PSDN" = 15,
-#   "LAA-YTNA" = 20,
-#   "SBA-CMCK" = 17,
-#   "LAA-CMCK" = 17,
-#   "MNA-MSQD" = 18,
-#   "LAA-NANC" = 19,
-#   "MNA-NANC" = 19,
-#   "LAA-BTNA" = 16,
-#   "SBA-MSQD" = 18)  
+selection_shapes <- c(
+  "No-Participation" = 4,
+  "CBA-PSDN" = 18,
+  "CLO-PSDN" = 18,
+  "CLO-NANC" = 20,
+  "CLO-CMCK" = 19
+)  
 
 
 # Ensure set_date is in Date format
