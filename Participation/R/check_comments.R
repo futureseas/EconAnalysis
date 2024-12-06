@@ -5,8 +5,8 @@
 gc()
 rm(list=ls())
 
-dir = "H:\\My Drive\\"
-#dir = "G:\\Mi unidad\\"
+#dir = "H:\\My Drive\\"
+dir = "G:\\Mi unidad\\"
 
 
 ## Load packages ##
@@ -75,7 +75,7 @@ ggplot(data_c4, aes(x = set_date, y = mean_sdm, group = selection)) +
 #################################
 
 # Select and filter the data
-df.subs <- c5 %>%
+df.subs <- c6 %>%
   dplyr::select(
     c(fished_VESSEL_anon, selection, set_month, set_date, set_year, fished)
     ) %>%
