@@ -26,13 +26,13 @@ vessel <- Node$new("Vessel")
      msqd <- sfa$AddChild("Squid")
    sda <- part$AddChild("San Diego")
      nanc <- sda$AddChild("Anchovy")
- nopart <- vessel$AddChild("No participate")
+ nopart <- vessel$AddChild("No\nparticipation")
 
 SetGraphStyle(vessel, rankdir = "LR")
 SetEdgeStyle(vessel, arrowhead = "vee", color = "grey35", penwidth = 2)
 SetNodeStyle(vessel, style = "filled,rounded", shape = "box", fontcolor = "black",fillcolor = "lightgrey",  
             fontname = "helvetica", tooltip = GetDefaultTooltip)
-SetNodeStyle(vessel$`No participate`, fillcolor = "firebrick1")
+SetNodeStyle(vessel$`No\nparticipation`, fillcolor = "firebrick1")
 SetNodeStyle(vessel$Participate, fillcolor = "ivory1")
 plot(vessel)
  
