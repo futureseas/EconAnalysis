@@ -5,8 +5,8 @@
 gc()
 rm(list=ls())
 
-dir = "H:\\My Drive\\"
-#dir = "G:\\Mi unidad\\"
+#dir = "H:\\My Drive\\"
+dir = "G:\\Mi unidad\\"
 
 
 ## Load packages ##
@@ -86,15 +86,17 @@ df.subs <- c4 %>%
          set_date = set_date + random_offset,
          ) %>% 
   ungroup() %>%
-  select(c('set_date', 'fished_VESSEL_anon', 'selection')) %>%
-  mutate(
-    simulated_selection = sample(selection, size = n(), replace = TRUE)
-  ) %>%
+  select(c('set_date', 'fished_VESSEL_anon', 'selection')) %>% 
   mutate(set_year = year(set_date), set_month = month(set_date)) %>%
-  dplyr::filter(set_year == 2014, set_month == 9) %>%
+  dplyr::filter(set_year == 2014 & (set_month == 8 | set_month == 9 | set_month == 10)) %>%
+    mutate(
+      simulated_selection = sample(selection, size = n(), replace = TRUE)
+    ) %>%
   drop_na() %>% 
   mutate(Species = substr(selection, nchar(selection) - 3, nchar(selection)),
-         Port = substr(selection, 1, 3)) 
+         Port = substr(selection, 1, 3)) %>%
+  dplyr::filter(set_month == 9)
+
 
 
 
