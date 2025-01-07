@@ -18,10 +18,10 @@ setwd("C:/GitHub/EconAnalysis")
 
 #-----------------------------------------------------
 ### Load in the data
-Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
-Tickets2 <- fread("C:/Data/PacFIN data/FutureSeasIII_2010_2020.csv")
-Tickets_raw<-rbind(Tickets1, Tickets2)
-rm(Tickets1, Tickets2)
+# Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
+Tickets_raw <- fread("C:/FutureSeasIII_2010_2020.csv")
+# Tickets_raw<-rbind(Tickets1, Tickets2)
+# rm(Tickets1, Tickets2)
 
 
 #-----------------------------------------------------

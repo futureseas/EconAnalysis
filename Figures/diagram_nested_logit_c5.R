@@ -38,7 +38,7 @@ library(data.tree)
 #   
 
 vessel2 <- Node$new("Vessel")
-  part <- vessel2$AddChild("Participate in CPS or Tuna")
+  part <- vessel2$AddChild("Participate in CPS\nor Albacore")
     msqd <- part$AddChild("Squid")
       laa <- msqd$AddChild("Los\nAngeles")
       mna <- msqd$AddChild("Monterey")
@@ -70,8 +70,8 @@ SetEdgeStyle(vessel2, arrowhead = "vee", color = "grey35", penwidth = 2)
 SetNodeStyle(vessel2, style = "filled,rounded", shape = "box", fontcolor = "black",fillcolor = "lightgrey", 
              fontname = "helvetica", tooltip = GetDefaultTooltip)
 SetNodeStyle(vessel2$`No\nparticipation`, fillcolor = "firebrick1")
-SetNodeStyle(vessel2$`Participate in CPS or Tuna`, fillcolor = "ivory1")
-SetNodeStyle(vessel2$`Participate in CPS or Tuna`$Albacore, fillcolor = "powderblue")
+SetNodeStyle(vessel2$`Participate in CPS\nor Albacore`, fillcolor = "ivory1")
+SetNodeStyle(vessel2$`Participate in CPS\nor Albacore`$Albacore, fillcolor = "powderblue")
 SetNodeStyle(vessel2$`Participate in Crab` , fillcolor = "powderblue")
 plot(vessel2)
 
