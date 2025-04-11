@@ -13,7 +13,7 @@ library(furrr)
 library(future)
 
 # 🧠 Use all cores (or set manually like workers = 4)
-plan(multisession, workers = parallel::detectCores() - 1)
+plan(multisession, workers = parallel::detectCores() - 2)
 
 # 🔐 Authenticate with editable scope
 drive_auth(scopes = "https://www.googleapis.com/auth/drive")
@@ -48,35 +48,41 @@ get_all_files_recursive <- function(folder_id, parent_path = "") {
 # 📦 List all files to download
 all_files <- get_all_files_recursive("1w3ywfQSS23JSUZFmVG6otpaq1VSjGyuw")
 
-# 📥 Download in parallel with resume support
-download_files_parallel <- function(files_df, dest_dir = "C:/Data/Future Projections CPS SC-GAMs ROMS Domain") {
-  failed <- list()
-  
-  future_walk(seq_len(nrow(files_df)), function(i) {
-    file_row <- files_df[i, ]
+# Number of chunks (can match number of workers or more for load balancing)
+chunk_count <- 100
+
+# Split files into smaller chunks
+file_chunks <- split(all_files, cut(seq_len(nrow(all_files)), breaks = chunk_count, labels = FALSE))
+
+download_chunk <- function(file_chunk, dest_dir) {
+  for (i in seq_len(nrow(file_chunk))) {
+    file_row <- file_chunk[i, ]
     local_path <- fs::path(dest_dir, file_row$name)
     
     if (fs::file_exists(local_path)) {
       message("✅ Already downloaded: ", file_row$name)
-      return(NULL)
+      next
     }
     
     fs::dir_create(fs::path_dir(local_path))
     
     tryCatch({
-      googledrive::drive_download(file = file_row, path = local_path, overwrite = FALSE)
+      drive_download(file = file_row, path = local_path, overwrite = FALSE)
       message("⬇️ Downloaded: ", file_row$name)
     }, error = function(e) {
-      message("❌ Failed to download: ", file_row$name)
-      failed[[length(failed) + 1]] <<- list(name = file_row$name, id = file_row$id, error = e$message)
+      message("❌ Failed to download: ", file_row$name, " - ", e$message)
     })
-  }, .options = furrr_options(seed = TRUE))
-  
-  return(failed)
+  }
 }
 
-# 🚀 Run the parallel downloader
-failed_downloads <- download_files_parallel(all_files)
+# Use future_walk on file chunks
+future_walk(
+  file_chunks,
+  download_chunk,
+  dest_dir = "C:/Data/Future Projections CPS SC-GAMs ROMS Domain",
+  .options = furrr_options(seed = TRUE)
+)
+
 
 # 🛠️ Retry any failed downloads sequentially
 if (length(failed_downloads) > 0) {
