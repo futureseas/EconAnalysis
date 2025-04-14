@@ -51,7 +51,7 @@ with_progress({
     function(ym) {
       y <- ym$year
       m <- ym$month
-      nc_path <- sprintf("C:/Data/Future Projections CPS SC-GAMs ROMS Domain/sardine/sardSDMs_proj_%d_%d.nc", m, y)
+      nc_path <- sprintf("C:/Data/Future Projections CPS SC-GAMs ROMS Domain/anchovy/anchSDMs_proj_%d_%d.nc", m, y)
       if (!file.exists(nc_path)) return(NULL)
       
       dat <- tryCatch(nc_open(nc_path), error = function(e) return(NULL))
@@ -103,4 +103,4 @@ with_progress({
 # 💾 Combine and write to file
 results_clean <- results_list[!sapply(results_list, is.null)]
 SDM_all <- rbindlist(results_clean, fill = TRUE)
-fwrite(SDM_all, "C:/Data/PSDN_FutureSDM_port_day.csv")
+fwrite(SDM_all, "C:/Data/NANC_FutureSDM_port_day.csv")
