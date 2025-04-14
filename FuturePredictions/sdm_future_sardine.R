@@ -17,7 +17,6 @@ port_codes <- fread("C:/GitHub/EconAnalysis/Data/Ports/Ports.landing.FF.csv")
 ports_coord <- fread(here("Data", "Ports", "port_names.csv"))
 ports <- merge(port_codes, ports_coord, by = c("PORT_NAME", "AGENCY_CODE")) |> na.omit()
 port_locs <- ports[, .(AGENCY_CODE, PORT_NAME, Latitude, Longitude)]
-
 distLand <- fread(here("FuturePredictions", "DistLandROMSPoints.csv"))[, .(lon, lat, distLand)]
 grid <- unique(distLand[, .(lon, lat)])
 
