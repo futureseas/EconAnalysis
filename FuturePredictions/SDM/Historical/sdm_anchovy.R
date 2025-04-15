@@ -35,7 +35,7 @@ dist_list <- lapply(1:nrow(port_locs), function(i) {
   )
 })
 port_dists <- rbindlist(dist_list)
-near_ports <- port_dists[dist <= 20]
+near_ports <- port_dists[dist <= 60]
 
 # Merge port distances into grid
 setkey(near_ports, lon, lat)
@@ -43,7 +43,7 @@ setkey(distLand, lon, lat)
 grid <- merge(distLand, near_ports, by = c("lon", "lat"))
 
 # 🔁 Process each (year, month) in parallel
-ym_grid <- expand.grid(year = 2070:2090, month = 1:12)
+ym_grid <- expand.grid(year = 2000:2019, month = 1:12)
 
 with_progress({
   results_list <- future_map(
@@ -51,7 +51,7 @@ with_progress({
     function(ym) {
       y <- ym$year
       m <- ym$month
-      nc_path <- sprintf("C:/Data/Future Projections CPS SC-GAMs ROMS Domain/anchovy/anchSDMs_proj_%d_%d.nc", m, y)
+      nc_path <- sprintf("C:/Data/Historical CPS SC-GAMs ROMS Domain/anchovy/anch_%d_%d_mboost_roms.nc", m, y)
       if (!file.exists(nc_path)) return(NULL)
       
       dat <- tryCatch(nc_open(nc_path), error = function(e) return(NULL))
@@ -60,34 +60,17 @@ with_progress({
       lon <- ncvar_get(dat, "lon")
       lat <- ncvar_get(dat, "lat")
       tim <- ncvar_get(dat, "time")
-      predGFDL <- ncvar_get(dat, "predGAMBOOST_GFDL")
-      predIPSL <- ncvar_get(dat, "predGAMBOOST_IPSL")
-      predHADL <- ncvar_get(dat, "predGAMBOOST_HADL")
+      pred <- ncvar_get(dat, "predGAMBOOST")
       nc_close(dat)
-      
-      dimnames(predGFDL) <- list(lon = lon, lat = lat, time = tim)
-      dimnames(predIPSL) <- list(lon = lon, lat = lat, time = tim)
-      dimnames(predHADL) <- list(lon = lon, lat = lat, time = tim)
-      
-      gfdl_dt <- melt(predGFDL, value.name = "GFDL")
-      ipsl_dt <- melt(predIPSL, value.name = "IPSL")
-      hadl_dt <- melt(predHADL, value.name = "HADL")
-      
-      sdm_dt <- Reduce(function(x, y) merge(x, y, by = c("lon", "lat", "time")),
-                       list(as.data.table(gfdl_dt), as.data.table(ipsl_dt), as.data.table(hadl_dt)))
-      
+      dimnames(pred) <- list(lon = lon, lat = lat, time = tim)
+      sdm_dt <- as.data.table(data.table::melt(pred, value.name = "pred"))
+      setnames(sdm_dt, c("lon", "lat", "time", "pred"))
       sdm_dt[, date := as.Date("1900-01-01") + as.numeric(time)]
       sdm_dt[, time := NULL]
-      
       sdm_dt <- merge(sdm_dt, grid, by = c("lon", "lat"))
       sdm_dt <- sdm_dt[distLand < 500000]
       
-      result <- sdm_dt[, .(
-        SDM_20_GFDL = mean(GFDL, na.rm = TRUE),
-        SDM_20_IPSL = mean(IPSL, na.rm = TRUE),
-        SDM_20_HADL = mean(HADL, na.rm = TRUE)
-      ), by = .(date, PORT_AREA_CODE)]
-      
+      result <- sdm_dt[, .(SDM_60 = mean(pred, na.rm = TRUE)), by = .(date, PORT_AREA_CODE)]
       result[, `:=`(
         LANDING_YEAR = year(date),
         LANDING_MONTH = month(date),
@@ -103,4 +86,4 @@ with_progress({
 # 💾 Combine and write to file
 results_clean <- results_list[!sapply(results_list, is.null)]
 SDM_all <- rbindlist(results_clean, fill = TRUE)
-fwrite(SDM_all, here("FuturePredictions", "SDM", "NANC_FutureSDM_port_day_20km.csv"))
+fwrite(SDM_all, here("FuturePredictions", "SDM", "Historical", "NANC_SDM_port_day.csv"))
