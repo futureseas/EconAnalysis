@@ -11,12 +11,12 @@ library(apollo)
 ### Initialise code
 apollo_initialise()
 
-setwd("C:/GitHub/EconAnalysis/Participation/R")
+setwd("C:/GitHub/EconAnalysis/FuturePredictions/DCM")
 
 
 ### Set core controls
 apollo_control = list(
-  modelName       = "NL_participation_model_c4",
+  modelName       = "NL_participation_model_c4_for_predictions",
   modelDescr      = "Participation, location and target species decisions",
   indivID         = "fished_vessel_anon", 
   outputDirectory = "output",
@@ -246,56 +246,6 @@ model = apollo_estimate(apollo_beta, apollo_fixed,
                                                              "lambda_nanc > 0",
                                                              "lambda_tuna > 0")))
 
-# model = apollo_estimate(apollo_beta, apollo_fixed, 
-#                         apollo_probabilities, apollo_inputs, 
-#                         estimate_settings=list(constraints=c("lambda_part < 1 + 1e-10",
-#                                                              "lambda_cmck < 1 + 1e-10",
-#                                                              "lambda_msqd < 1 + 1e-10",
-#                                                              "lambda_psdn < 1 + 1e-10",
-#                                                              "lambda_nanc < 1 + 1e-10",
-#                                                              "lambda_tuna < 1 + 1e-10",
-#                                                              "lambda_cmck > 0",
-#                                                              "lambda_msqd > 0",
-#                                                              "lambda_psdn > 0",
-#                                                              "lambda_nanc > 0",
-#                                                              "lambda_tuna > 0",
-#                                                              "lambda_part > 0")))
-
-# ################################################################# #
-#### MODEL OUTPUTS                                               ####
-# ################################################################# #
-
-# ----------------------------------------------------------------- #
-#---- FORMATTED OUTPUT (TO SCREEN)                               ----
-# ----------------------------------------------------------------- #
-
-apollo_modelOutput(model,modelOutput_settings = list(printT1=1))
-
-# ----------------------------------------------------------------- #
-#---- FORMATTED OUTPUT (TO FILE, using model name)               ----
-# ----------------------------------------------------------------- #
-
-apollo_saveOutput(model,saveOutput_settings = list(printT1=1))
-
-# ################################################################# #
-##### POST-PROCESSING                                            ####
-# ################################################################# #
-
-### Print outputs of additional diagnostics to new output file (remember to close file writing when complete)
-apollo_sink()
 
 
-# ################################################################# #
-##### Create Table                                               ####
-# ################################################################# #
-
-summary_results <- summary(model)
-estimates <- summary_results$   # Parameter estimates
-p_values = summary_results$pValue     # p-values
-
-
-
-
-
-
-
+saveRDS(model, file = "output/NL_participation_model_c4.rds")

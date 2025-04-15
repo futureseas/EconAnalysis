@@ -19,7 +19,7 @@ handlers(global = TRUE)
 # Load static data
 ports <- fread("C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv") %>% drop_na()
 port_locs <- ports[, .(port_group_code, lat, lon)]
-distLand <- fread(here("FuturePredictions", "DistLandROMSPoints.csv"))[, .(lon, lat, distLand)]
+distLand <- fread(here("FuturePredictions", "SDM", "DistLandROMSPoints.csv"))[, .(lon, lat, distLand)]
 grid <- unique(distLand[, .(lon, lat)])
 
 # 📍 Precompute distance to ports
@@ -35,7 +35,7 @@ dist_list <- lapply(1:nrow(port_locs), function(i) {
   )
 })
 port_dists <- rbindlist(dist_list)
-near_ports <- port_dists[dist <= 60]
+near_ports <- port_dists[dist <= 20]
 
 # Merge port distances into grid
 setkey(near_ports, lon, lat)
@@ -83,9 +83,9 @@ with_progress({
       sdm_dt <- sdm_dt[distLand < 500000]
       
       result <- sdm_dt[, .(
-        SDM_60_GFDL = mean(GFDL, na.rm = TRUE),
-        SDM_60_IPSL = mean(IPSL, na.rm = TRUE),
-        SDM_60_HADL = mean(HADL, na.rm = TRUE)
+        SDM_20_GFDL = mean(GFDL, na.rm = TRUE),
+        SDM_20_IPSL = mean(IPSL, na.rm = TRUE),
+        SDM_20_HADL = mean(HADL, na.rm = TRUE)
       ), by = .(date, PORT_AREA_CODE)]
       
       result[, `:=`(
@@ -103,4 +103,4 @@ with_progress({
 # 💾 Combine and write to file
 results_clean <- results_list[!sapply(results_list, is.null)]
 SDM_all <- rbindlist(results_clean, fill = TRUE)
-fwrite(SDM_all, "C:/Data/NANC_FutureSDM_port_day.csv")
+fwrite(SDM_all, here("FuturePredictions", "SDM", "NANC_FutureSDM_port_day_20km.csv"))
