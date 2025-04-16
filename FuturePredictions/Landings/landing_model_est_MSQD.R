@@ -68,7 +68,7 @@ set.seed(123)
        family = gaussian,
        price_model + landing_model + set_rescor(TRUE),
        prior = prior_lognormal,
-       iter = 2000, warmup = 1000, chains = 4, cores = 4,
+       iter = 2000, warmup = 1000, chains = 4, cores = 16,
        control = list(max_treedepth = 15, adapt_delta = 0.99),
        file = here::here("FuturePredictions", "Landings", "fit_qMSQD_check")) %>% 
          add_criterion(fit_qMSQD_NRC, c("loo"))
