@@ -19,7 +19,7 @@ handlers(global = TRUE)
 # Load static data
 ports <- fread("C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv") %>% drop_na()
 port_locs <- ports[, .(port_group_code, lat, lon)]
-distLand <- fread(here("FuturePredictions", "DistLandROMSPoints.csv"))[, .(lon, lat, distLand)]
+distLand <- fread(here("FuturePredictions", "SDM", "DistLandROMSPoints.csv"))[, .(lon, lat, distLand)]
 grid <- unique(distLand[, .(lon, lat)])
 
 # 📍 Precompute distance to ports
