@@ -1,6 +1,6 @@
 
 #
-### SQUID Landing model ###
+### MSQD Landing model ###
 #
 
 #---- Setup ----
@@ -77,10 +77,10 @@ landing_model <- bf(log(MSQD_Landings) ~
 
 # Create priors
 prior_lognormal <- c(
-  prior(lognormal(0,1), class = b, resp = MSQDPricez,      coef = Price.Fishmeal.AFI_z),
-  prior(lognormal(0,1), class = b, resp = logMSQDLandings, coef = Length_z),
-  prior(lognormal(0,1), class = b, resp = logMSQDLandings, coef = MSQD_Price_z),
-  prior(lognormal(0,1), class = b, resp = logMSQDLandings, coef = MSQD_SDM_90),
+  prior(lognormal(0,1), class = b,     resp = MSQDPricez,      coef = Price.Fishmeal.AFI_z),
+  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = Length_z),
+  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_Price_z),
+  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_SDM_90),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SDM_90:NANC_SDM_20),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SDM_90:PSDN_SDM_60:PSDN.Open),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = NANC_SDM_20),
@@ -90,16 +90,17 @@ prior_lognormal <- c(
   prior(exponential(1), class = sigma, resp = logMSQDLandings),
   prior(lkj(2),         class = rescor))
 
-set.seed(123)
 
+#---- Estimations ----
+
+set.seed(123)
 init_fun <- function() list(
   b = rep(1.1, 10),
   sigma = 1,
   L = diag(2)  # para la correlación residual
 )
-
-#---- Estimations ----
 unlink("Landings/Estimations/fit_qMSQD_boost_GAM.rds")
+
 fit_qMSQD <- brm(
   data = data,
   family = gaussian,
