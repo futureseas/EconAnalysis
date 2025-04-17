@@ -1,12 +1,10 @@
 
-###########################
+#
 ### SQUID Landing model ###
-###########################
+#
 
-#----------------------------
-# Setup #
+#---- Setup ----
 
-## Take month out from price eq factor(LANDING_MONTH) #
 rm(list = ls(all.names = TRUE)) 
 gc()
 
@@ -35,25 +33,56 @@ library("data.table")
 library("reshape2")
 library('doBy')
 
+setwd("C:/GitHub/EconAnalysis/FuturePredictions")
 
-#-----------------------------------------------
+#---- Data ----
+
 ## Obtain dataset for estimation and run landing models with new SDMs
 
-data <- readRDS(here::here("Landings", "Predictions", "prediction_MSQD.rds"))
+data <- readRDS("Landings/Data/prediction_MSQD.rds") %>%
+  select(9:ncol(.))%>%
+  select(-MSQD_SDM_90, -MSQD_SPAWN_SDM_90, 
+         -MSQD_SDM_90_z, -MSQD_SPAWN_SDM_90_z,
+         -PSDN_SDM_60, -PSDN_SDM_60_z, 
+         -NANC_SDM_20, -NANC_SDM_20)
+
+## Add new SDMs (GAM Boost)
+MSQD_sdm_data <- read.csv("SDM/Historical/MSQD_SDM_port_day.csv") %>%
+  group_by(LANDING_MONTH, PORT_AREA_CODE, LANDING_YEAR) %>%
+  summarise(MSQD_SDM_90 = mean(SDM_90, na.rm = TRUE), .groups = "drop")
+
+PSDN_sdm_data <- read.csv("SDM/Historical/PSDN_SDM_port_day.csv") %>%
+  group_by(LANDING_MONTH, PORT_AREA_CODE, LANDING_YEAR) %>%
+  summarise(PSDN_SDM_60 = mean(SDM_60, na.rm = TRUE), .groups = "drop")
+
+NANC_sdm_data <- read.csv("SDM/Historical/NANC_SDM_port_day_merged.csv") %>%
+  group_by(LANDING_MONTH, PORT_AREA_CODE, LANDING_YEAR) %>%
+  summarise(NANC_SDM_60 = mean(SDM_60, na.rm = TRUE), 
+            NANC_SDM_20 = mean(SDM_20, na.rm = TRUE), 
+            .groups = "drop")
+
+## Merge data
+data <- data %>%
+  left_join(MSQD_sdm_data, by = c("PORT_AREA_CODE", "LANDING_MONTH", "LANDING_YEAR")) %>%
+  left_join(PSDN_sdm_data, by = c("PORT_AREA_CODE", "LANDING_MONTH", "LANDING_YEAR")) %>%
+  left_join(NANC_sdm_data, by = c("PORT_AREA_CODE", "LANDING_MONTH", "LANDING_YEAR"))
+
+
+#---- Equations ----
 
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(MSQD_Landings) ~
-  1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + Length_z +
- (1 + MSQD_SPAWN_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SPAWN_SDM_90 + NANC_SDM_20:MSQD_SPAWN_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure | port_cluster_ID))
+  1 + MSQD_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SDM_90 + NANC_SDM_20:MSQD_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure + Length_z +
+ (1 + MSQD_SDM_90 + MSQD_Price_z + PSDN_SDM_60:PSDN.Open:MSQD_SDM_90 + NANC_SDM_20:MSQD_SDM_90 + PSDN_SDM_60:PSDN.Open + NANC_SDM_20 + PSDN.Total.Closure | port_cluster_ID))
 
 # Create priors
 prior_lognormal <- c(
   prior(lognormal(0,1), class = b, resp = MSQDPricez,      coef = Price.Fishmeal.AFI_z),
   prior(lognormal(0,1), class = b, resp = logMSQDLandings, coef = Length_z),
   prior(lognormal(0,1), class = b, resp = logMSQDLandings, coef = MSQD_Price_z),
-  prior(lognormal(0,1), class = b, resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90),
-  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90:NANC_SDM_20),
-  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open),
+  prior(lognormal(0,1), class = b, resp = logMSQDLandings, coef = MSQD_SDM_90),
+  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SDM_90:NANC_SDM_20),
+  prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SDM_90:PSDN_SDM_60:PSDN.Open),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = NANC_SDM_20),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = PSDN_SDM_60:PSDN.Open),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = PSDN.Total.Closure),
@@ -69,8 +98,8 @@ init_fun <- function() list(
   L = diag(2)  # para la correlación residual
 )
 
-
-unlink(here::here("FuturePredictions", "Landings", "fit_qMSQD_check.rds"))
+#---- Estimations ----
+unlink("Landings/Estimations/fit_qMSQD_boost_GAM.rds")
 fit_qMSQD <- brm(
   data = data,
   family = gaussian,
@@ -80,6 +109,6 @@ fit_qMSQD <- brm(
   init = init_fun,
   refresh = 10,
   control = list(max_treedepth = 15, adapt_delta = 0.99),
-  file = here::here("FuturePredictions", "Landings", "fit_qMSQD_check"))
+  file = "Landings/Estimations/fit_qMSQD_boost_GAM.rds")
 
  
