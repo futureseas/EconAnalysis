@@ -17,3 +17,8 @@ Comments/econ_landings_paper_BM_IK-v2.pdf
 Slides/ECCWO-5 presentation.pptx
 Participation/dbp_month.dta
 Participation/dbp_month.dta
+FuturePredictions/Landings/Data/prediction_MSQD.rds
+FuturePredictions/Landings/Data/prediction_MSQD_noclosure.rds
+FuturePredictions/Landings/Data/prediction_NANC.rds
+FuturePredictions/Landings/Data/prediction_NANC_noclosure.rds
+FuturePredictions/Landings/Data/prediction_PSDN.rds

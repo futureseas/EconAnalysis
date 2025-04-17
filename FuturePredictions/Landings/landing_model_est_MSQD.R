@@ -39,8 +39,7 @@ library('doBy')
 #-----------------------------------------------
 ## Obtain dataset for estimation and run landing models with new SDMs
 
-estimation <- readRDS(here::here("FuturePredictions", "Landings", "fit_qMSQD.rds"))
-data <- estimation$data
+data <- readRDS(here::here("Landings", "Predictions", "prediction_MSQD.rds"))
 
 price_model   <- bf(MSQD_Price_z ~ 1 + Price.Fishmeal.AFI_z + (1 | port_ID))
 landing_model <- bf(log(MSQD_Landings) ~
@@ -49,10 +48,10 @@ landing_model <- bf(log(MSQD_Landings) ~
 
 # Create priors
 prior_lognormal <- c(
-  prior(lognormal(0,1), class = b,     resp = MSQDPricez,      coef = Price.Fishmeal.AFI_z),
-  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = Length_z),
-  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_Price_z),
-  prior(lognormal(0,1), class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90),
+  prior(lognormal(0,1), class = b, resp = MSQDPricez,      coef = Price.Fishmeal.AFI_z),
+  prior(lognormal(0,1), class = b, resp = logMSQDLandings, coef = Length_z),
+  prior(lognormal(0,1), class = b, resp = logMSQDLandings, coef = MSQD_Price_z),
+  prior(lognormal(0,1), class = b, resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90:NANC_SDM_20),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = MSQD_SPAWN_SDM_90:PSDN_SDM_60:PSDN.Open),
   prior(normal(0,1),    class = b,     resp = logMSQDLandings, coef = NANC_SDM_20),
@@ -63,13 +62,24 @@ prior_lognormal <- c(
   prior(lkj(2),         class = rescor))
 
 set.seed(123)
- fit_qMSQD <-
-   brm(data = data,
-       family = gaussian,
-       price_model + landing_model + set_rescor(TRUE),
-       prior = prior_lognormal,
-       iter = 2000, warmup = 1000, chains = 4, cores = 16,
-       control = list(max_treedepth = 15, adapt_delta = 0.99),
-       file = here::here("FuturePredictions", "Landings", "fit_qMSQD_check")) %>% 
-         add_criterion(fit_qMSQD_NRC, c("loo"))
+
+init_fun <- function() list(
+  b = rep(1.1, 10),
+  sigma = 1,
+  L = diag(2)  # para la correlación residual
+)
+
+
+unlink(here::here("FuturePredictions", "Landings", "fit_qMSQD_check.rds"))
+fit_qMSQD <- brm(
+  data = data,
+  family = gaussian,
+  price_model + landing_model + set_rescor(TRUE),
+  prior = prior_lognormal,
+  iter = 2000, warmup = 1000, chains = 4, cores = 4,
+  init = init_fun,
+  refresh = 10,
+  control = list(max_treedepth = 15, adapt_delta = 0.99),
+  file = here::here("FuturePredictions", "Landings", "fit_qMSQD_check"))
+
  
