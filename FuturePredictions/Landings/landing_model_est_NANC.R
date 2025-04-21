@@ -41,8 +41,7 @@ setwd("C:/GitHub/EconAnalysis/FuturePredictions")
 
 data <- readRDS("Landings/Data/prediction_NANC.rds") %>%
   select(9:ncol(.))%>%
-  select(-MSQD_SDM_90, -MSQD_SPAWN_SDM_90, 
-         -MSQD_SDM_90_z, -MSQD_SPAWN_SDM_90_z,
+  select(-MSQD_SPAWN_SDM_90, -MSQD_SPAWN_SDM_90_z,
          -PSDN_SDM_60, -PSDN_SDM_60_z, 
          -NANC_SDM_20, -NANC_SDM_20)
 
@@ -77,7 +76,7 @@ landing_model <- bf(log(NANC_Landings) ~
 
 
 ## Create priors
-get_prior(data = dataset_nanc_landing,
+get_prior(data = data,
            family = gaussian,
            price_model + landing_model + set_rescor(TRUE))
 
