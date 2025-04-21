@@ -78,7 +78,7 @@ landing_model <- bf(log(PSDN_Landings) ~
 
 
 # Create priors
-get_prior(data = dataset_psdn_landing,
+get_prior(data = data,
           family = gaussian,
           price_model + landing_model + set_rescor(TRUE))
 prior_lognormal <- c(
