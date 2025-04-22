@@ -114,3 +114,5 @@ fit_qPSDN <- brm(
   refresh = 10,
   control = list(max_treedepth = 15, adapt_delta = 0.99),
   file = "Landings/Estimations/fit_qPSDN_boost_GAM.rds")
+
+shinystan::launch_shinystan(fit_qPSDN)
