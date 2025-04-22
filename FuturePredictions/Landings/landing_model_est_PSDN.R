@@ -109,10 +109,9 @@ fit_qPSDN <- brm(
   family = gaussian,
   price_model + landing_model + set_rescor(TRUE),
   prior = prior_lognormal,
-  iter = 2000, warmup = 1000, chains = 4, cores = 4,
+  iter = 3000, warmup = 1250, chains = 4, cores = 4,
   init = init_fun,
   refresh = 10,
   control = list(max_treedepth = 15, adapt_delta = 0.99),
   file = "Landings/Estimations/fit_qPSDN_boost_GAM.rds")
 
-shinystan::launch_shinystan(fit_qPSDN)
