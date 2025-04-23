@@ -102,7 +102,7 @@ init_fun <- function() list(
   sigma = 1,
   L = diag(2)  # para la correlación residual
 )
-unlink("Landings/Estimations/fit_qPSDN_boost_GAM.rds")
+#unlink("Landings/Estimations/fit_qPSDN_boost_GAM.rds")
 
 fit_qPSDN <- brm(
   data = data,
