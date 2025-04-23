@@ -350,16 +350,16 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
 # ################################################################# #
 model = apollo_estimate(apollo_beta, apollo_fixed,
                         apollo_probabilities, apollo_inputs,
-                        estimate_settings=list(constraints=c("lambda_part < 1 + 1e-10",
-                                                             "lambda_part - lambda_cmck > -1e-10",
-                                                             "lambda_part - lambda_msqd > -1e-10",
-                                                             "lambda_part - lambda_psdn > -1e-10",
-                                                             "lambda_part - lambda_nanc > -1e-10",
-                                                             "lambda_part - lambda_tuna > -1e-10",
-                                                             "lambda_cmck > 0",
-                                                             "lambda_msqd > 0",
-                                                             "lambda_psdn > 0",
-                                                             "lambda_nanc > 0",
-                                                             "lambda_tuna > 0")))
+                        estimate_settings=list(constraints=c("lambda_part < 1 + 1e-5",
+                                                             "lambda_part - lambda_cmck > -1e-5",
+                                                             "lambda_part - lambda_msqd > -1e-5",
+                                                             "lambda_part - lambda_psdn > -1e-5",
+                                                             "lambda_part - lambda_nanc > -1e-5",
+                                                             "lambda_part - lambda_tuna > -1e-5",
+                                                             "lambda_cmck > 1e-5",
+                                                             "lambda_msqd > 1e-5",
+                                                             "lambda_psdn > 1e-5",
+                                                             "lambda_nanc > 1e-5",
+                                                             "lambda_tuna > 1e-5"), estimationRoutine = "hb"))
 
 saveRDS(model, file = "output/NL_participation_model_c4_for_predictions.rds")
