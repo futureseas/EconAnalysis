@@ -362,6 +362,4 @@ model = apollo_estimate(apollo_beta, apollo_fixed,
                                                              "lambda_nanc > 0",
                                                              "lambda_tuna > 0")))
 
-
-
 saveRDS(model, file = "output/NL_participation_model_c4_for_predictions.rds")
