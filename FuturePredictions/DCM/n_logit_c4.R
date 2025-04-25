@@ -197,13 +197,13 @@ database$choice <- ifelse(database$fished_sfa_nanc == 1, 1,
                    ))))))))))))))      
 
 ### Check variables 
-# df_selected <- database %>%
-#   dplyr::select(starts_with("d_cd_"))
-# summary(df_selected)
-# 
-# df_selected <- database %>%
-#   dplyr::select(starts_with("d_d_"))
-# summary(df_selected)
+df_selected <- database %>%
+  dplyr::select(starts_with("d_cd_"))
+summary(df_selected)
+
+df_selected <- database %>%
+  dplyr::select(starts_with("d_d_"))
+summary(df_selected)
 
 df_selected <- database %>%
   dplyr::select(starts_with("unem_rate_"))
@@ -243,14 +243,15 @@ apollo_beta=c(asc_sfa_nanc                   = -2.75,
               w_nanc                         = -4,
               w_cmck                         = -4,
               w_msqd                         = -4,
-              w_tuna                         = -4,
+              w_ytna                         = -4,
+              w_btna                         = -4,
               w_psdn                         = -4,
-              lambda_part                    = 0.9, 
+              lambda_part_cps                = 0.9, 
               lambda_cmck                    = 0.5,
               lambda_msqd                    = 0.5,
               lambda_psdn                    = 0.5,
               lambda_nanc                    = 0.5,
-              lambda_tuna                    = 0.5,
+              lambda_part_tuna               = 0.5,
               B_mean_avail                   = 1.15,
               B_mean_price                   = 0.3,
               B_wind_max_220_mh              = -0.05,
@@ -268,7 +269,7 @@ apollo_fixed = c("asc_no_participation", "B_unem_rate_nopart", "w_nopart")
 
 
 ### Read in starting values for at least some parameters from existing model output file
-apollo_beta=apollo_readBeta(apollo_beta,apollo_fixed,"NL_participation_model",overwriteFixed=FALSE)
+# apollo_beta=apollo_readBeta(apollo_beta,apollo_fixed,"NL_participation_model_c4_for_predictions",overwriteFixed=FALSE)
 
 
 # ################################################################# #
@@ -297,10 +298,10 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   V[["laa_nanc"]]         = asc_laa_nanc + w_nanc * weekend                        + B_mean_avail * mean_avail_laa_nanc + B_mean_price * mean_price_laa_nanc + B_wind_max_220_mh * wind_max_220_mh_laa_nanc + B_d_d * d_d_laa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_nanc + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_laa_nanc                           
   V[["laa_cmck"]]         = asc_laa_cmck + w_cmck * weekend                        + B_mean_avail * mean_avail_laa_cmck + B_mean_price * mean_price_laa_cmck + B_wind_max_220_mh * wind_max_220_mh_laa_cmck + B_d_d * d_d_laa_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_cmck + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_laa_cmck                           
   V[["laa_msqd"]]         = asc_laa_msqd + w_msqd * weekend                        + B_mean_avail * mean_avail_laa_msqd + B_mean_price * mean_price_laa_msqd + B_wind_max_220_mh * wind_max_220_mh_laa_msqd + B_d_d * d_d_laa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_laa_msqd                           
-  V[["laa_ytna"]]         = asc_laa_ytna + w_tuna * weekend                        + B_mean_avail * mean_avail_laa_ytna + B_mean_price * mean_price_laa_ytna + B_wind_max_220_mh * wind_max_220_mh_laa_ytna + B_d_d * d_d_laa_ytna + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_ytna + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_laa_ytna + B_d_cd * d_cd_laa_ytna  
+  V[["laa_ytna"]]         = asc_laa_ytna + w_ytna * weekend                        + B_mean_avail * mean_avail_laa_ytna + B_mean_price * mean_price_laa_ytna + B_wind_max_220_mh * wind_max_220_mh_laa_ytna + B_d_d * d_d_laa_ytna + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_ytna + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_laa_ytna + B_d_cd * d_cd_laa_ytna  
   V[["mna_msqd"]]         = asc_mna_msqd + w_msqd * weekend                        + B_mean_avail * mean_avail_mna_msqd + B_mean_price * mean_price_mna_msqd + B_wind_max_220_mh * wind_max_220_mh_mna_msqd + B_d_d * d_d_mna_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_mna_msqd                           
   V[["sba_msqd"]]         = asc_sba_msqd + w_msqd * weekend                        + B_mean_avail * mean_avail_sba_msqd + B_mean_price * mean_price_sba_msqd + B_wind_max_220_mh * wind_max_220_mh_sba_msqd + B_d_d * d_d_sba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_sba_msqd                            
-  V[["laa_btna"]]         = asc_laa_btna + w_tuna * weekend + c_btna * btnaclosure + B_mean_avail * mean_avail_laa_btna + B_mean_price * mean_price_laa_btna + B_wind_max_220_mh * wind_max_220_mh_laa_btna + B_d_d * d_d_laa_btna + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_btna + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_laa_btna + B_d_cd * d_cd_laa_btna   
+  V[["laa_btna"]]         = asc_laa_btna + w_btna * weekend + c_btna * btnaclosure + B_mean_avail * mean_avail_laa_btna + B_mean_price * mean_price_laa_btna + B_wind_max_220_mh * wind_max_220_mh_laa_btna + B_d_d * d_d_laa_btna + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_btna + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_laa_btna + B_d_cd * d_cd_laa_btna   
   V[["sfa_msqd"]]         = asc_sfa_msqd + w_msqd * weekend                        + B_mean_avail * mean_avail_sfa_msqd + B_mean_price * mean_price_sfa_msqd + B_wind_max_220_mh * wind_max_220_mh_sfa_msqd + B_d_d * d_d_sfa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_sfa_msqd                            
   V[["mna_psdn"]]         = asc_mna_psdn + w_psdn * weekend + c_psdn * psdnclosure + B_mean_avail * mean_avail_mna_psdn + B_mean_price * mean_price_mna_psdn + B_wind_max_220_mh * wind_max_220_mh_mna_psdn + B_d_d * d_d_mna_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_psdn + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_mna_psdn                            
   V[["sba_cmck"]]         = asc_sba_cmck + w_cmck * weekend                        + B_mean_avail * mean_avail_sba_cmck + B_mean_price * mean_price_sba_cmck + B_wind_max_220_mh * wind_max_220_mh_sba_cmck + B_d_d * d_d_sba_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_cmck + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_sba_cmck                            
@@ -311,19 +312,19 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   
 
   ### Specify nests for NL model
-  nlNests      = list(root=1, part = lambda_part,
+  nlNests      = list(root=1, part_cps = lambda_part_cps,
                       cmck = lambda_cmck, msqd = lambda_msqd, psdn = lambda_psdn, 
-                      nanc = lambda_nanc, tuna = lambda_tuna)   ### Specify tree structure for NL model
+                      nanc = lambda_nanc, part_tuna = lambda_part_tuna)   ### Specify tree structure for NL model
   
   ### Specify tree structure for NL model
   nlStructure= list()
-  nlStructure[["root"]] = c("no_participation", "part")
-  nlStructure[["part"]] = c("cmck", "msqd", "psdn", "nanc", "tuna")
+  nlStructure[["root"]] = c("no_participation", "part_cps", "part_tuna")
+  nlStructure[["part_cps"]] = c("cmck", "msqd", "psdn", "nanc")
   nlStructure[["cmck"]] = c("laa_cmck", "sba_cmck")
   nlStructure[["msqd"]] = c("laa_msqd", "mna_msqd", "mra_msqd", "sba_msqd", "sfa_msqd")
   nlStructure[["psdn"]] = c("laa_psdn", "mna_psdn")
   nlStructure[["nanc"]] = c("laa_nanc", "mna_nanc", "sfa_nanc")
-  nlStructure[["tuna"]] = c("laa_ytna", "laa_btna")
+  nlStructure[["part_tuna"]] = c("laa_ytna", "laa_btna")
 
   
   ### Define settings for NL model
@@ -354,17 +355,17 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
 # ################################################################# #
 model = apollo_estimate(apollo_beta, apollo_fixed,
                         apollo_probabilities, apollo_inputs,
-                        estimate_settings=list(constraints=c("lambda_part < 1 + 1e-5",
-                                                             "lambda_part - lambda_cmck > -1e-5",
-                                                             "lambda_part - lambda_msqd > -1e-5",
-                                                             "lambda_part - lambda_psdn > -1e-5",
-                                                             "lambda_part - lambda_nanc > -1e-5",
-                                                             "lambda_part - lambda_tuna > -1e-5",
-                                                             "lambda_cmck > 1e-5",
-                                                             "lambda_msqd > 1e-5",
-                                                             "lambda_psdn > 1e-5",
-                                                             "lambda_nanc > 1e-5",
-                                                             "lambda_tuna > 1e-5")))
-
+                        estimate_settings=list(constraints=c("lambda_part_cps < 1 + 1e-5",
+                                                             "lambda_part_tuna < 1 + 1e-5",
+                                                             "lambda_part_cps - lambda_cmck > -1e-5",
+                                                             "lambda_part_cps - lambda_msqd > -1e-5",
+                                                             "lambda_part_cps - lambda_psdn > -1e-5",
+                                                             "lambda_part_cps - lambda_nanc > -1e-5",
+                                                             "lambda_cmck > -1e-5",
+                                                             "lambda_msqd > -1e-5",
+                                                             "lambda_psdn > -1e-5",
+                                                             "lambda_nanc > -1e-5",
+                                                             "lambda_part_cps > 1e-5",
+                                                             "lambda_part_tuna > 1e-5")))
 
 saveRDS(model, file = "output/NL_participation_model_c4_for_predictions.rds")
