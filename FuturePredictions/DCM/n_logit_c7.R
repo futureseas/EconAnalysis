@@ -25,7 +25,7 @@ setwd("C:/GitHub/EconAnalysis/Participation/R")
 
 ### Set core controls
 apollo_control = list(
-  modelName       = "NL_participation_model_c7",
+  modelName       = "NL_participation_model_c7_for_predictions",
   modelDescr      = "Participation, location and target species decisions",
   indivID         = "fished_vessel_anon", 
   outputDirectory = "output",

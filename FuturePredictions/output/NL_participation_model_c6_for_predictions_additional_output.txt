@@ -1,0 +1,15 @@
+
+Apollo model summary
+
+Model name                   : NL_participation_model_c6_for_predictions
+Model description            : Participation, location and target species decisions
+Estimation method            : bfgs
+Modelled outcomes            : 2580
+
+LL(final)                    : -1873.03
+Estimated parameters         : 33
+
+
+Estimates (no standard errors computed):
+
+For more detailed output, use apollo_modelOutput

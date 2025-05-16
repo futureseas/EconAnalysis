@@ -3,9 +3,6 @@
 # ################################################################# #
 
 
-### CHECK IF VARIABLES ARE OK TO BE INCLUDED!
-
-
 ### Clear memory
 rm(list = ls())
 
@@ -368,4 +365,37 @@ model = apollo_estimate(apollo_beta, apollo_fixed,
                                                              "lambda_part_cps > 1e-5",
                                                              "lambda_part_tuna > 1e-5")))
 
+
+# ################################################################# #
+#### MODEL OUTPUTS                                               ####
+# ################################################################# #
+
+# ----------------------------------------------------------------- #
+#---- FORMATTED OUTPUT (TO SCREEN)                               ----
+# ----------------------------------------------------------------- #
+
+apollo_modelOutput(model,modelOutput_settings = list(printT1=1))
+
+# ----------------------------------------------------------------- #
+#---- FORMATTED OUTPUT (TO FILE, using model name)               ----
+# ----------------------------------------------------------------- #
+
+apollo_saveOutput(model,saveOutput_settings = list(printT1=1))
 saveRDS(model, file = "output/NL_participation_model_c4_for_predictions.rds")
+
+# ################################################################# #
+##### POST-PROCESSING                                            ####
+# ################################################################# #
+
+### Print outputs of additional diagnostics to new output file (remember to close file writing when complete)
+apollo_sink()
+
+
+# ################################################################# #
+##### Create Table                                               ####
+# ################################################################# #
+
+summary(model)
+
+
+
