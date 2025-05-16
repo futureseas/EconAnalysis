@@ -43,9 +43,87 @@ apollo_control = list(
 ## Read database
 library(tidyr)
 library(dplyr)
-# library(readstata13)
-# data <- read.dta13(paste0(google_dir, "Data/Anonymised data/part_model_c7.dta"))
-# saveRDS(data, paste0(google_dir, "Data/Anonymised data/part_model_c7.rds"))
+
+
+#### New code ####
+
+## Add new SDMs (GAM Boost) -- Calculate 30-day moving average (excluding current day) for each port
+MSQD_sdm_data_MA <- read.csv("SDM/Historical/MSQD_SDM_port_day.csv") 
+MSQD_sdm_data_MA$date <- as.Date(MSQD_sdm_data_MA$date)
+MSQD_sdm_data_MA <- MSQD_sdm_data_MA %>%
+  group_by(PORT_AREA_CODE) %>%
+  arrange(date) %>%
+  mutate(
+    SDM_30day_MA = rollapply(SDM_90, 
+                             width = 30, 
+                             FUN = mean, 
+                             align = "right",
+                             fill = NA,
+                             partial = FALSE)) %>%
+  mutate(MSQD_SDM_30day_MA_lag = lag(SDM_30day_MA, 1)) %>%
+  ungroup() %>% 
+  select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE, MSQD_SDM_30day_MA_lag)) %>%
+  mutate(date = as.Date(paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep = "-"))) %>%
+  dplyr::select(date, PORT_AREA_CODE, MSQD_SDM_30day_MA_lag)
+
+
+PSDN_sdm_data_MA <- read.csv("SDM/Historical/PSDN_SDM_port_day.csv") 
+PSDN_sdm_data_MA$date <- as.Date(PSDN_sdm_data_MA$date)
+PSDN_sdm_data_MA <- PSDN_sdm_data_MA %>%
+  group_by(PORT_AREA_CODE) %>%
+  arrange(date) %>%
+  mutate(
+    SDM_30day_MA = rollapply(SDM_60, 
+                             width = 30, 
+                             FUN = mean, 
+                             align = "right",
+                             fill = NA,
+                             partial = FALSE)) %>%
+  mutate(PSDN_SDM_30day_MA_lag = lag(SDM_30day_MA, 1)) %>%
+  ungroup() %>% 
+  select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE, PSDN_SDM_30day_MA_lag)) %>%
+  mutate(date = as.Date(paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep = "-"))) %>%
+  dplyr::select(date, PORT_AREA_CODE, PSDN_SDM_30day_MA_lag)
+
+NANC_sdm_data_MA <- read.csv("SDM/Historical/NANC_SDM_port_day.csv") 
+NANC_sdm_data_MA$date <- as.Date(NANC_sdm_data_MA$date)
+NANC_sdm_data_MA <- NANC_sdm_data_MA %>%
+  group_by(PORT_AREA_CODE) %>%
+  arrange(date) %>%
+  mutate(
+    SDM_30day_MA = rollapply(SDM_60, 
+                             width = 30, 
+                             FUN = mean, 
+                             align = "right",
+                             fill = NA,
+                             partial = FALSE)) %>%
+  mutate(NANC_SDM_30day_MA_lag = lag(SDM_30day_MA, 1)) %>%
+  ungroup() %>% 
+  select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE, NANC_SDM_30day_MA_lag))%>%
+  mutate(date = as.Date(paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep = "-"))) %>%
+  dplyr::select(date, PORT_AREA_CODE, NANC_SDM_30day_MA_lag)
+
+
+CMCK_sdm_data_MA <- read.csv("SDM/Historical/CMCK_SDM_port_day.csv") 
+CMCK_sdm_data_MA$date <- as.Date(CMCK_sdm_data_MA$date)
+CMCK_sdm_data_MA <- CMCK_sdm_data_MA %>%
+  group_by(PORT_AREA_CODE) %>%
+  arrange(date) %>%
+  mutate(
+    SDM_30day_MA = rollapply(SDM_60, 
+                             width = 30, 
+                             FUN = mean, 
+                             align = "right",
+                             fill = NA,
+                             partial = FALSE)) %>%
+  mutate(CMCK_SDM_30day_MA_lag = lag(SDM_30day_MA, 1)) %>%
+  ungroup() %>% 
+  select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE, CMCK_SDM_30day_MA_lag)) %>%
+  mutate(date = as.Date(paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep = "-"))) %>%
+  dplyr::select(date, PORT_AREA_CODE, CMCK_SDM_30day_MA_lag)
+
+
+### Old code ####
 
 long_data <- readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c7.rds")) %>%
   dplyr::select("fished_haul_anon", "fished_vessel_anon", "selection", "fished",
@@ -53,11 +131,49 @@ long_data <- readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c7.rds"
                 "wind_max_220_mh", "dist_to_cog", "dist_port_to_catch_area_zero",
                 "psdnclosure", "msqdclosure", "waclosure", "dcrbclosurewad", 
                 "dummy_prev_days", "dummy_prev_year_days", "unem_rate", 
-                "d_d", "weekend") 
+                "d_d", "weekend", "set_date") 
 
 long_data$selection <- tolower(gsub("-", "_", long_data$selection))
 long_data %>% dplyr::group_by(selection) %>%
   dplyr::summarise(n_fished = sum(fished))
+
+####################### Addition ####
+# Prepare the long_data by extracting port codes from selection names
+long_data <- long_data %>%
+  mutate(
+    PORT_AREA_CODE = toupper(substr(selection, 1, 3)),
+    SPECIES = toupper(substr(selection, 5, 8)),
+    date = as.Date(set_date)
+  ) 
+
+# Merge the data
+long_data <- long_data %>%
+  left_join(MSQD_sdm_data_MA, 
+            by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) %>%
+  left_join(PSDN_sdm_data_MA, 
+            by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) %>%
+  left_join(NANC_sdm_data_MA, 
+            by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) %>%
+  left_join(CMCK_sdm_data_MA, 
+            by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) 
+
+
+long_data <- long_data %>%
+  dplyr::mutate(mean_avail = case_when(
+    SPECIES == "MSQD" ~ MSQD_SDM_30day_MA_lag,
+    SPECIES == "NANC" ~ NANC_SDM_30day_MA_lag,
+    SPECIES == "CMCK" ~ CMCK_SDM_30day_MA_lag,
+    SPECIES == "PSDN" ~ PSDN_SDM_30day_MA_lag,
+    TRUE ~ mean_avail  # Keep original value for other cases
+  )) %>%
+  dplyr::select(-any_of(c("SPECIES", "PORT_AREA_CODE", 
+                          "MSQD_SDM_30day_MA_lag", "CMCK_SDM_30day_MA_lag", 
+                          "NANC_SDM_30day_MA_lag", "PSDN_SDM_30day_MA_lag",
+                          "date"))) %>% 
+  filter(set_date != "2016-02-29")
+
+
+############################
 
 database <- long_data %>%
   pivot_wider(
@@ -263,6 +379,7 @@ apollo_modelOutput(model,modelOutput_settings = list(printT1=1))
 # ----------------------------------------------------------------- #
 
 apollo_saveOutput(model,saveOutput_settings = list(printT1=1))
+saveRDS(model, file = "output/NL_participation_model_c7_for_predictions.rds")
 
 # ################################################################# #
 ##### POST-PROCESSING                                            ####
