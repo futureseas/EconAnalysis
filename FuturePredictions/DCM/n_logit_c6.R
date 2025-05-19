@@ -18,8 +18,11 @@ if (PC == "home") {
 }
 
 
-### Load Apollo library
+### Load library
 library(apollo)
+library(tidyverse)
+library(dplyr)
+library(zoo)
 
 ### Initialise code
 apollo_initialise()
@@ -41,12 +44,6 @@ apollo_control = list(
 # ################################################################# #
 #### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
 # ################################################################# #
-
-
-## Read database
-library(tidyr)
-library(dplyr)
-
 
 
 #### New code ####

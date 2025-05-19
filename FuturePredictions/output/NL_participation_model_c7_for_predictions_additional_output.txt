@@ -6,47 +6,47 @@ Model description            : Participation, location and target species decisi
 Estimation method            : bfgs
 Modelled outcomes            : 2481
 
-LL(final)                    : -1680.48
+LL(final)                    : -1677.71
 Estimated parameters         : 34
 
 
 Estimates (robust covariance matrix, 1-sided p-values):
 
                                estimate std. error t-ratio p (1-sided)    
-B_mean_avail                     3.6489     8.6780     0.4       0.337    
-B_mean_price                     1.2840     1.3237     1.0       0.166    
-B_wind_max_220_mh               -0.0369     0.0106    -3.5       2e-04 ***
-B_dist_to_cog                   -0.0026     0.0015    -1.8       0.037 *  
-B_dist_port_to_catch_area_zero  -0.0096     0.0097    -1.0       0.161    
-B_dummy_prev_days                2.0570     1.0340     2.0       0.023 *  
-B_dummy_prev_year_days           0.1397     0.4641     0.3       0.382    
-c_msqd                          -5.0000     1.0386    -4.8       7e-07 ***
-c_psdn                          -0.8437     0.1942    -4.3       7e-06 ***
-B_d_d                           -0.3862     0.3525    -1.1       0.137    
-B_unem_rate_part                 0.1006     0.0911     1.1       0.135    
-w_cmck                          -1.2609     1.0722    -1.2       0.120    
-w_jmck                          -1.5738     1.3609    -1.2       0.124    
-w_msqd                          -2.3518     0.5655    -4.2       2e-05 ***
-w_psdn                          -1.5788     1.0744    -1.5       0.071 .  
-w_nanc                          -1.6271     0.3266    -5.0       3e-07 ***
-asc_laa_cmck                    -3.8314     1.4640    -2.6       0.004 ** 
-asc_mna_cmck                    -4.9341     1.9928    -2.5       0.007 ** 
-asc_laa_jmck                    -3.9076     1.5435    -2.5       0.006 ** 
-asc_mna_jmck                    -5.4194     2.1488    -2.5       0.006 ** 
-asc_laa_msqd                    -4.7863     2.5072    -1.9       0.028 *  
-asc_mra_msqd                    -4.7733     2.1510    -2.2       0.013 *  
-asc_sba_msqd                    -4.8593     3.0677    -1.6       0.057 .  
-asc_sfa_msqd                    -5.1170     2.4298    -2.1       0.018 *  
-asc_mna_msqd                    -4.4390     2.4511    -1.8       0.035 *  
-asc_laa_psdn                    -3.5290     1.3851    -2.5       0.005 ** 
-asc_mna_psdn                    -4.1917     2.3329    -1.8       0.036 *  
-asc_mna_nanc                    -4.6027     3.2679    -1.4       0.079 .  
-asc_sba_nanc                    -4.7302     3.2408    -1.5       0.072 .  
-asc_sda_nanc                    -4.8170     2.3972    -2.0       0.022 *  
-lambda_part                      0.4743     0.3377     1.4       0.080 .  
-lambda_laa                       0.4465     0.1289     3.5       3e-04 ***
-lambda_sba                       0.2092     2.5110     0.1       0.467    
-lambda_mna                       0.4743     0.2719     1.7       0.041 *  
+B_mean_avail                     4.2278     3.7779     1.1       0.132    
+B_mean_price                     1.1184     0.8553     1.3       0.096 .  
+B_wind_max_220_mh               -0.0379     0.0137    -2.8       0.003 ** 
+B_dist_to_cog                   -0.0026     0.0036    -0.7       0.233    
+B_dist_port_to_catch_area_zero  -0.0102     0.0151    -0.7       0.250    
+B_dummy_prev_days                1.9996     2.2934     0.9       0.192    
+B_dummy_prev_year_days           0.1630     0.1784     0.9       0.181    
+c_msqd                          -5.0190     3.0368    -1.7       0.049 *  
+c_psdn                          -0.7668     0.3751    -2.0       0.020 *  
+B_d_d                           -0.4596     0.3411    -1.3       0.089 .  
+B_unem_rate_part                 0.0859     0.0312     2.7       0.003 ** 
+w_cmck                          -1.3359     1.3905    -1.0       0.168    
+w_jmck                          -1.6389     1.4210    -1.2       0.124    
+w_msqd                          -2.5103     0.4102    -6.1       5e-10 ***
+w_psdn                          -1.6627     1.1254    -1.5       0.070 .  
+w_nanc                          -1.5838     0.3446    -4.6       2e-06 ***
+asc_laa_cmck                    -3.7130     2.8033    -1.3       0.093 .  
+asc_mna_cmck                    -4.6641     3.4874    -1.3       0.091 .  
+asc_laa_jmck                    -3.7911     2.8509    -1.3       0.092 .  
+asc_mna_jmck                    -5.7027     4.4735    -1.3       0.101    
+asc_laa_msqd                    -4.6987     3.2506    -1.4       0.074 .  
+asc_mra_msqd                    -4.6808     3.3801    -1.4       0.083 .  
+asc_sba_msqd                    -4.8025     3.6671    -1.3       0.095 .  
+asc_sfa_msqd                    -5.0632     4.5123    -1.1       0.131    
+asc_mna_msqd                    -4.3348     3.0464    -1.4       0.077 .  
+asc_laa_psdn                    -3.4012     2.5843    -1.3       0.094 .  
+asc_mna_psdn                    -4.1528     3.1081    -1.3       0.091 .  
+asc_mna_nanc                    -4.6443     3.7014    -1.3       0.105    
+asc_sba_nanc                    -4.7527     3.7902    -1.3       0.105    
+asc_sda_nanc                    -4.6592     3.4862    -1.3       0.091 .  
+lambda_part                      0.4637     0.6163     0.8       0.226    
+lambda_laa                       0.4423     0.2873     1.5       0.062 .  
+lambda_sba                       0.2512     0.4034     0.6       0.267    
+lambda_mna                       0.4637     0.4512     1.0       0.152    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 

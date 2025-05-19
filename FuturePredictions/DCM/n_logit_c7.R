@@ -39,9 +39,12 @@ apollo_control = list(
 # ################################################################# #
 
 
-## Read database
-library(tidyr)
+### Load library
+library(apollo)
+library(tidyverse)
 library(dplyr)
+library(zoo)
+
 
 
 #### New code ####
@@ -121,6 +124,24 @@ CMCK_sdm_data_MA <- CMCK_sdm_data_MA %>%
   mutate(date = as.Date(paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep = "-"))) %>%
   dplyr::select(date, PORT_AREA_CODE, CMCK_SDM_30day_MA_lag)
 
+JMCK_sdm_data_MA <- read.csv("SDM/Historical/JMCK_SDM_port_day.csv") 
+JMCK_sdm_data_MA$date <- as.Date(JMCK_sdm_data_MA$date)
+JMCK_sdm_data_MA <- JMCK_sdm_data_MA %>%
+  group_by(PORT_AREA_CODE) %>%
+  arrange(date) %>%
+  mutate(
+    SDM_30day_MA = rollapply(SDM_60, 
+                             width = 30, 
+                             FUN = mean, 
+                             align = "right",
+                             fill = NA,
+                             partial = FALSE)) %>%
+  mutate(JMCK_SDM_30day_MA_lag = lag(SDM_30day_MA, 1)) %>%
+  ungroup() %>% 
+  select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE, JMCK_SDM_30day_MA_lag)) %>%
+  mutate(date = as.Date(paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep = "-"))) %>%
+  dplyr::select(date, PORT_AREA_CODE, JMCK_SDM_30day_MA_lag)
+
 
 ### Old code ####
 
@@ -154,6 +175,8 @@ long_data <- long_data %>%
   left_join(NANC_sdm_data_MA, 
             by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) %>%
   left_join(CMCK_sdm_data_MA, 
+            by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) %>%
+  left_join(JMCK_sdm_data_MA, 
             by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) 
 
 
@@ -163,11 +186,13 @@ long_data <- long_data %>%
     SPECIES == "NANC" ~ NANC_SDM_30day_MA_lag,
     SPECIES == "CMCK" ~ CMCK_SDM_30day_MA_lag,
     SPECIES == "PSDN" ~ PSDN_SDM_30day_MA_lag,
+    SPECIES == "JMCK" ~ PSDN_SDM_30day_MA_lag,
     TRUE ~ mean_avail  # Keep original value for other cases
   )) %>%
   dplyr::select(-any_of(c("SPECIES", "PORT_AREA_CODE", 
                           "MSQD_SDM_30day_MA_lag", "CMCK_SDM_30day_MA_lag", 
                           "NANC_SDM_30day_MA_lag", "PSDN_SDM_30day_MA_lag",
+                          "JMCK_SDM_30day_MA_lag",
                           "date"))) %>% 
   filter(set_date != "2016-02-29")
 
