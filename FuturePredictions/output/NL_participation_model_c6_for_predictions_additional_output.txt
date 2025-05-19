@@ -6,10 +6,47 @@ Model description            : Participation, location and target species decisi
 Estimation method            : bfgs
 Modelled outcomes            : 2580
 
-LL(final)                    : -1873.03
+LL(final)                    : -1871.35
 Estimated parameters         : 33
 
 
-Estimates (no standard errors computed):
+Estimates (robust covariance matrix, 1-sided p-values):
+
+                               estimate std. error t-ratio p (1-sided)    
+B_mean_avail                     4.5222     1.7475     2.6       0.005 ** 
+B_wind_max_220_mh               -0.0493     0.0078    -6.3       1e-10 ***
+B_dist_to_cog                   -0.0046     0.0011    -4.1       2e-05 ***
+B_dist_port_to_catch_area_zero  -0.0282     0.0156    -1.8       0.036 *  
+B_dummy_prev_days                2.1716     0.2077    10.5      <2e-16 ***
+B_dummy_prev_year_days           0.3044     0.0935     3.3       6e-04 ***
+B_unem_rate                      0.2302     0.1128     2.0       0.021 *  
+B_d_d                           -1.1411     0.5177    -2.2       0.014 *  
+c_wa                            -2.2222     0.5734    -3.9       5e-05 ***
+c_dcrb                          -0.1176     0.1281    -0.9       0.179    
+c_psdn                          -5.8858     0.6808    -8.6      <2e-16 ***
+B_mean_price_part                3.4274     1.2895     2.7       0.004 ** 
+B_mean_price_crab                0.0280     0.0250     1.1       0.132    
+B_mean_price_slmn                8.5271     0.3275    26.0      <2e-16 ***
+w_psdn                          -0.0653     0.0962    -0.7       0.249    
+w_nanc                          -0.4912     0.1069    -4.6       2e-06 ***
+w_dcrb                          -0.3809     0.0171   -22.3      <2e-16 ***
+w_slmn                           0.7413     0.0810     9.2      <2e-16 ***
+w_cmck                           0.0181     0.3963     0.0       0.482    
+asc_cba_psdn                    -3.8935     1.2066    -3.2       6e-04 ***
+asc_clo_psdn                    -4.7827     1.3684    -3.5       2e-04 ***
+asc_clw_psdn                    -5.0406     1.3124    -3.8       6e-05 ***
+asc_cwa_psdn                    -4.8198     1.1194    -4.3       8e-06 ***
+asc_clo_nanc                    -6.3539     1.5894    -4.0       3e-05 ***
+asc_clw_nanc                    -9.1281     2.3908    -3.8       7e-05 ***
+asc_cwa_nanc                    -5.4521     1.3871    -3.9       4e-05 ***
+asc_clo_cmck                    -4.8764     0.9939    -4.9       5e-07 ***
+asc_cwa_dcrb                    -6.1984     0.5378   -11.5      <2e-16 ***
+asc_nps_sock                   -21.6046     0.5407   -40.0      <2e-16 ***
+lambda_part                      0.5100     0.0657     7.8       4e-15 ***
+lambda_nanc                      0.5090     0.1215     4.2       1e-05 ***
+lambda_psdn                      0.3780     0.0644     5.9       2e-09 ***
+B_d_cd                          -7.3889     0.9210    -8.0       6e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 For more detailed output, use apollo_modelOutput
