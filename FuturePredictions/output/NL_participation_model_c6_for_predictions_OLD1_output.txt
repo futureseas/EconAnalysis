@@ -5,7 +5,7 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : NL_participation_model_c6_for_predictions
 Model description                           : Participation, location and target species decisions
-Model run at                                : 2025-05-19 15:22:24.080128
+Model run at                                : 2025-05-16 12:04:06.343001
 Estimation method                           : bfgs
 Model diagnosis                             : successful convergence
 Optimisation diagnosis                      : Saddle point found
@@ -31,10 +31,10 @@ AIC                                         :  3812.06
 BIC                                         :  4005.3 
 
 Estimated parameters                        : 33
-Time taken (hh:mm:ss)                       :  00:01:18.99 
-     pre-estimation                         :  00:00:10.81 
-     estimation                             :  00:00:48.24 
-     post-estimation                        :  00:00:19.95 
+Time taken (hh:mm:ss)                       :  00:01:13.37 
+     pre-estimation                         :  00:00:11.67 
+     estimation                             :  00:00:38.36 
+     post-estimation                        :  00:00:23.34 
 Iterations                                  :  85  
 
 Constrained optimisation:
