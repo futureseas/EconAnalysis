@@ -166,8 +166,26 @@ database <- database %>%
 
 ## ---- Add closure ----
 database <- database %>%
-  mutate(PSDN_closure = ifelse(set_year>2015, 1, 0))
+  mutate(PSDN_closure = ifelse(set_year>2015, 1, 0)) 
 
+## ---- Lagged values  ----
+database <- database %>%
+  arrange(group_all, VESSEL_NUM, set_year) %>%
+  group_by(group_all, VESSEL_NUM) %>%
+  mutate(
+    lag_fishmeal_price = lag(fishmeal_price),
+    lag_diesel_price = lag(diesel_price),
+    lag_unem_rate = lag(unem_rate),
+    lag_mean_price_MSQD = lag(mean_price_MSQD),
+    lag_mean_price_PSDN = lag(mean_price_PSDN),
+    lag_mean_price_NANC = lag(mean_price_NANC),
+    lag_mean_price_CMCK = lag(mean_price_CMCK),
+    lag_mean_avail_MSQD = lag(mean_avail_MSQD),
+    lag_mean_avail_PSDN = lag(mean_avail_PSDN),
+    lag_mean_avail_NANC = lag(mean_avail_NANC),
+    lag_mean_avail_CMCK = lag(mean_avail_CMCK)
+  ) %>%
+  ungroup()
 
 
 
@@ -175,55 +193,67 @@ database <- database %>%
 
 rm(list = setdiff(ls(), "database"))
 saveRDS(database, "annual_data_part.RDS")
-database <- readRDS("annual_data_part.RDS")
+database <- readRDS("annual_data_part.RDS") %>% filter(!is.na(lag_unem_rate)) %>%
+  group_by(group_all) %>%
+  mutate(across(
+    c(starts_with("lag_"), length, lat_cgo, fishmeal_price),
+    ~ scale(.)[, 1]
+  )) %>%
+  ungroup()
 
-# get lagged values!!!
+priors <- c(
+  set_prior("normal(0, 1)", class = "b"),  # weakly informative
+  set_prior("normal(1, 0.5)", class = "b", coef = "lag_mean_avail_MSQD"),
+  set_prior("normal(1, 0.5)", class = "b", coef = "lag_mean_avail_PSDN"),
+  set_prior("normal(0.5, 0.5)", class = "b", coef = "lag_fishmeal_price"),
+  set_prior("normal(-0.5, 0.5)", class = "b", coef = "PSDN_closure"),
+  set_prior("normal(0, 2)", class = "Intercept")
+)
 
-annual_logit <- brm(year_participation ~ diesel_price + unem_rate +  + PSDN_closure + 
-                     mean_price_CMCK + mean_price_MSQD + mean_price_NANC + mean_price_PSDN + 
-                     mean_avail_MSQD + mean_avail_PSDN + mean_avail_NANC + mean_avail_CMCK + 
-                     length + lat_cgo + (1 | group_all),
-              data = database, seed = 123, family = bernoulli(link = "logit"), warmup = 1000,
-              iter = 3000, chain = 4, cores = 4,
-              control = list(adapt_delta = 0.999))
+# library(corrplot)
+# corr_vars <- database %>%
+#   dplyr::select(starts_with("lag_"), diesel_price, unem_rate, length, lat_cgo) %>%
+#   na.omit()
+# corrplot::corrplot(cor(corr_vars), method = "circle")
 
+
+annual_logit <- brm(year_participation ~ 
+                      unem_rate + 
+                      lag_fishmeal_price +
+                      lag_mean_avail_MSQD + lag_mean_avail_PSDN + 
+                      lag_mean_avail_MSQD:lag_mean_avail_PSDN + 
+                      length + lat_cgo + 
+                      PSDN_closure + (1 + PSDN_closure | group_all),
+                    data = database, 
+                    seed = 123, 
+                    family = bernoulli(link = "logit"), 
+                    warmup = 1000,
+                    iter = 3000, 
+                    chains = 4, 
+                    cores = 4,
+                    control = list(adapt_delta = 0.999), 
+                    prior = priors)
             summary(annual_logit)
+            
             saveRDS(annual_logit, "annual_logit.RDS")
            
          
-
-
-
 ##---- Check model ----
-pp_check(anual_logit)
+pp_check(annual_logit)
+shinystan::launch_shinystan(annual_logit)
 
-## Check convergence
-launch_shinystan(anual_logit)
-# 
-# ### Population parameters ###
-# mcmc_plot(logit_all_2, regex = TRUE, variable = 
-#             c("b_mean_SDM",
-#               "b_mean_unem",
-#               "b_PSDN.Closure",
-#               "b_mean_HHI",
-#               "b_Intercept")) +
-#   theme(axis.text.y = element_text(hjust = 0)) + scale_y_discrete(
-#     labels = c(
-#       "b_mean_SDM" = "mean(AVailability)",
-#       "b_mean_unem" = "mean(Unemployment)",
-#       "b_PSDN.Closure1" = "PSDN Closure",
-#       "b_mean_HHI" = "mean(Diversity)",
-#       "b_Intercept" = "Intercept"))
-# 
-# ### Obtain AUC # 89%
-# Prob <- predict(logit_all_2, type="response")
-# Prob <- Prob[,1]
-# Pred <- ROCR::prediction(Prob, as.vector(pull(annual.part, active_year)))
-# AUC <- ROCR::performance(Pred, measure = "auc")
-# AUC <- AUC@y.values[[1]]
-# AUC
-# 
-# 
-# ##---- Plot marginal effects ----    
-# conditional_effects(logit_all_2)
-# 
+
+##---- How accurate the model is? 81% ----
+
+Prob <- predict(annual_logit, type = "response")[, 1]
+true_labels <- database$year_participation
+Pred <- ROCR::prediction(Prob, true_labels)
+AUC <- ROCR::performance(Pred, measure = "auc")
+AUC_value <- AUC@y.values[[1]]
+print(paste("AUC:", round(AUC_value, 3)))
+
+ 
+##---- Plot marginal effects ----    
+conditional_effects(annual_logit)
+
+
