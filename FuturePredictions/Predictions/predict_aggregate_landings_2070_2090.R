@@ -55,41 +55,26 @@ CMCK_SDM_day <- read_csv("FuturePredictions/SDM/Future/CMCK_FutureSDM_port_day.c
 
 PSDN_SDM_year <- PSDN_SDM_day %>% 
   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(SDM_60_GFDL = mean(SDM_60_GFDL, na.rm = TRUE),
-            SDM_60_IPSL = mean(SDM_60_IPSL, na.rm = TRUE),
-            SDM_60_HADL = mean(SDM_60_HADL, na.rm = TRUE))
-ALBC_SDM_year <- ALBC_SDM_day %>% 
-  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(SDM_90_GFDL = mean(SDM_90_GFDL, na.rm = TRUE),
-            SDM_90_IPSL = mean(SDM_90_IPSL, na.rm = TRUE),
-            SDM_90_HADL = mean(SDM_90_HADL, na.rm = TRUE))
-HERR_SDM_year <- HERR_SDM_day %>% 
-  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(SDM_20_GFDL = mean(SDM_20_GFDL, na.rm = TRUE),
-            SDM_20_IPSL = mean(SDM_20_IPSL, na.rm = TRUE),
-            SDM_20_HADL = mean(SDM_20_HADL, na.rm = TRUE))
-JMCK_SDM_year <- JMCK_SDM_day %>% 
-  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(SDM_60_GFDL = mean(SDM_60_GFDL, na.rm = TRUE),
-            SDM_60_IPSL = mean(SDM_60_IPSL, na.rm = TRUE),
-            SDM_60_HADL = mean(SDM_60_HADL, na.rm = TRUE))
+  summarize(lag_mean_avail_PSDN_GFDL = mean(SDM_60_GFDL, na.rm = TRUE),
+            lag_mean_avail_PSDN_IPSL = mean(SDM_60_IPSL, na.rm = TRUE),
+            lag_mean_avail_PSDN_HADL = mean(SDM_60_HADL, na.rm = TRUE))
 MSQD_SDM_year <- MSQD_SDM_day %>% 
   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(SDM_90_GFDL = mean(SDM_90_GFDL, na.rm = TRUE),
-            SDM_90_IPSL = mean(SDM_90_IPSL, na.rm = TRUE),
-            SDM_90_HADL = mean(SDM_90_HADL, na.rm = TRUE))
-NANC_SDM_year <- NANC_SDM_day %>% 
-  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(SDM_60_GFDL = mean(SDM_60_GFDL, na.rm = TRUE),
-            SDM_60_IPSL = mean(SDM_60_IPSL, na.rm = TRUE),
-            SDM_60_HADL = mean(SDM_60_HADL, na.rm = TRUE))
-CMCK_SDM_year <- CMCK_SDM_day %>% 
-  group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-  summarize(SDM_60_GFDL = mean(SDM_60_GFDL, na.rm = TRUE),
-            SDM_60_IPSL = mean(SDM_60_IPSL, na.rm = TRUE),
-            SDM_60_HADL = mean(SDM_60_HADL, na.rm = TRUE))
+  summarize(lag_mean_avail_MSQD_GFDL = mean(SDM_90_GFDL, na.rm = TRUE),
+            lag_mean_avail_MSQD_IPSL = mean(SDM_90_IPSL, na.rm = TRUE),
+            lag_mean_avail_MSQD_HADL = mean(SDM_90_HADL, na.rm = TRUE))
+
+SDM_year <- merge(PSDN_SDM_year, MSQD_SDM_year, by = c("LANDING_YEAR", "PORT_AREA_CODE"))
+
 
 ##---- Link SDM to cluster (group_all) ----
+
+### Cluster 4 
+
+ports_c4 <- c("SFA", "LAA", "MNA", "SBA", "MRA")
+ports_c5 <- c("MNA", "SBA", "MRA", "LAA", "NPA", "SFA", "CBA", "CLO", "CWA", "CLW")
+ports_c6 <- c("CBA", "CLO", "CLW", "CWA", "NPS")
+ports_c7 <- c("LAA", "MNA", "MRA", "SBA", "SFA", "SDA")
 
 
 #---- Predict annual participation ----
