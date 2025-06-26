@@ -72,19 +72,112 @@ SDM_year <- merge(PSDN_SDM_year, MSQD_SDM_year, by = c("LANDING_YEAR", "PORT_ARE
 ### Cluster 4 
 
 ports_c4 <- c("SFA", "LAA", "MNA", "SBA", "MRA")
+SDM_year_c4 <- SDM_year %>% 
+  filter(PORT_AREA_CODE %in% ports_c4) %>%
+  group_by(LANDING_YEAR) %>% 
+  summarize(lag_mean_avail_PSDN_GFDL = mean(lag_mean_avail_PSDN_GFDL, na.rm = TRUE),
+            lag_mean_avail_PSDN_IPSL = mean(lag_mean_avail_PSDN_IPSL, na.rm = TRUE),
+            lag_mean_avail_PSDN_HADL = mean(lag_mean_avail_PSDN_HADL, na.rm = TRUE),
+            lag_mean_avail_MSQD_GFDL = mean(lag_mean_avail_MSQD_GFDL, na.rm = TRUE),
+            lag_mean_avail_MSQD_IPSL = mean(lag_mean_avail_MSQD_IPSL, na.rm = TRUE),
+            lag_mean_avail_MSQD_HADL = mean(lag_mean_avail_MSQD_HADL, na.rm = TRUE)) %>%
+  mutate(LANDING_YEAR = LANDING_YEAR + 1,
+         group_all = 4) %>%
+  rename(set_year = LANDING_YEAR)
+  
+  
+### Cluster 5 
+
 ports_c5 <- c("MNA", "SBA", "MRA", "LAA", "NPA", "SFA", "CBA", "CLO", "CWA", "CLW")
+SDM_year_c5 <- SDM_year %>% 
+  filter(PORT_AREA_CODE %in% ports_c4) %>%
+  group_by(LANDING_YEAR) %>% 
+  summarize(lag_mean_avail_PSDN_GFDL = mean(lag_mean_avail_PSDN_GFDL, na.rm = TRUE),
+            lag_mean_avail_PSDN_IPSL = mean(lag_mean_avail_PSDN_IPSL, na.rm = TRUE),
+            lag_mean_avail_PSDN_HADL = mean(lag_mean_avail_PSDN_HADL, na.rm = TRUE),
+            lag_mean_avail_MSQD_GFDL = mean(lag_mean_avail_MSQD_GFDL, na.rm = TRUE),
+            lag_mean_avail_MSQD_IPSL = mean(lag_mean_avail_MSQD_IPSL, na.rm = TRUE),
+            lag_mean_avail_MSQD_HADL = mean(lag_mean_avail_MSQD_HADL, na.rm = TRUE)) %>%
+  mutate(LANDING_YEAR = LANDING_YEAR + 1,
+         group_all = 5) %>%
+  rename(set_year = LANDING_YEAR)
+
+
+### Cluster 6 
+
 ports_c6 <- c("CBA", "CLO", "CLW", "CWA", "NPS")
+SDM_year_c6 <- SDM_year %>% 
+  filter(PORT_AREA_CODE %in% ports_c4) %>%
+  group_by(LANDING_YEAR) %>% 
+  summarize(lag_mean_avail_PSDN_GFDL = mean(lag_mean_avail_PSDN_GFDL, na.rm = TRUE),
+            lag_mean_avail_PSDN_IPSL = mean(lag_mean_avail_PSDN_IPSL, na.rm = TRUE),
+            lag_mean_avail_PSDN_HADL = mean(lag_mean_avail_PSDN_HADL, na.rm = TRUE),
+            lag_mean_avail_MSQD_GFDL = mean(lag_mean_avail_MSQD_GFDL, na.rm = TRUE),
+            lag_mean_avail_MSQD_IPSL = mean(lag_mean_avail_MSQD_IPSL, na.rm = TRUE),
+            lag_mean_avail_MSQD_HADL = mean(lag_mean_avail_MSQD_HADL, na.rm = TRUE)) %>%
+  mutate(LANDING_YEAR = LANDING_YEAR + 1,
+         group_all = 6) %>%
+  rename(set_year = LANDING_YEAR)
+
+### Cluster 7 
+
 ports_c7 <- c("LAA", "MNA", "MRA", "SBA", "SFA", "SDA")
+SDM_year_c7 <- SDM_year %>% 
+  filter(PORT_AREA_CODE %in% ports_c4) %>%
+  group_by(LANDING_YEAR) %>% 
+  summarize(lag_mean_avail_PSDN_GFDL = mean(lag_mean_avail_PSDN_GFDL, na.rm = TRUE),
+            lag_mean_avail_PSDN_IPSL = mean(lag_mean_avail_PSDN_IPSL, na.rm = TRUE),
+            lag_mean_avail_PSDN_HADL = mean(lag_mean_avail_PSDN_HADL, na.rm = TRUE),
+            lag_mean_avail_MSQD_GFDL = mean(lag_mean_avail_MSQD_GFDL, na.rm = TRUE),
+            lag_mean_avail_MSQD_IPSL = mean(lag_mean_avail_MSQD_IPSL, na.rm = TRUE),
+            lag_mean_avail_MSQD_HADL = mean(lag_mean_avail_MSQD_HADL, na.rm = TRUE)) %>%
+  mutate(LANDING_YEAR = LANDING_YEAR + 1,
+         group_all = 7) %>%
+  rename(set_year = LANDING_YEAR)
+
+### Merge 
+SDM_year_all <- rbind(SDM_year_c4,SDM_year_c5,SDM_year_c6,SDM_year_c7)
+future_data <- future_data %>%
+  left_join(SDM_year_all, by = c("set_year", "group_all")) %>%
+  mutate(PSDN_closure = 0)
 
 
 #---- Predict annual participation ----
-future_data$annual_part_prob <- predict(annual_model, newdata = future_data, type = "response") %>%
-  as.vector()
-future_data <- future_data %>%
-  mutate(pred_annual_participation = ifelse(annual_part_prob > 0.5, 1, 0))
 
+# Define climate models
+climate_models <- c("GFDL", "IPSL", "HADL")
 
+# Initialize list to store prediction results
+participation_predictions <- list()
 
+for (cm in climate_models) {
+  
+  # Dynamically assign the correct predictors for each model
+  future_data_model <- future_data %>%
+    mutate(
+      lag_mean_avail_PSDN = .data[[paste0("lag_mean_avail_PSDN_", cm)]],
+      lag_mean_avail_MSQD = .data[[paste0("lag_mean_avail_MSQD_", cm)]]
+    )
+  
+  # Predict probability
+  future_data_model_pred <- predict(annual_model, newdata = future_data_model, type = "response")
+  future_data_model<- cbind(future_data_model, future_data_model_pred)
+  
+  # Predict binary participation
+  future_data_model <- future_data_model %>%
+    mutate(
+      pred_annual_participation = ifelse(Estimate > 0.5, 1, 0),
+      climate_model = cm
+    )
+  
+  # Store
+  participation_predictions[[cm]] <- future_data_model
+}
+
+# Combine all into one data frame
+future_participation_all <- bind_rows(participation_predictions)
+
+### ALL VESSEL PARTICIPATE EVERYYEAR!
 
 
 # ---- Calculate monthly participation ----
