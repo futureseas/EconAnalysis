@@ -207,9 +207,14 @@ future_data <- expand.grid(
 ) %>%
   as_tibble() %>%
   crossing(all_dates)  
-rm(list = c("annual_data", "all_dates"))
+rm(list = c("all_dates"))
 
 # Include clusters
+clusters <- annual_data %>% select(group_all, VESSEL_NUM) %>% unique()
+Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
+Tickets_clust <- merge(Tickets_exp_md, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
+rm(PAM_Vessel_Groups)
+Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 
 
 # Include alternatives by clusters
