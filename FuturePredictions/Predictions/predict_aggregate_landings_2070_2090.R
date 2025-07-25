@@ -14,174 +14,6 @@ library(purrr)
 library(readr)
 
 
-#### Anual participation ####
-
-## ---- Load Annual Participation Model and Data ----
-# annual_model <- readRDS("C:/GitHub/EconAnalysis/FuturePredictions/Predictions/Models/annual_logit.RDS")
-# annual_data <- readRDS("C:/GitHub/EconAnalysis/FuturePredictions/Predictions/Data/annual_data_part.RDS") 
-# 
-# 
-# #---- Create future database ----
-# vars_to_average <- setdiff(names(annual_data), c("VESSEL_NUM", "set_year", "year_participation"))
-# vessel_means <- annual_data %>%
-#   group_by(VESSEL_NUM) %>%
-#   summarise(across(all_of(vars_to_average), mean, na.rm = TRUE), .groups = "drop")
-# 
-# future_years <- 2070:2090
-# 
-# future_data <- expand.grid(
-#     VESSEL_NUM = unique(annual_data$VESSEL_NUM),
-#     set_year = future_years) %>%
-#   as_tibble()
-# 
-# future_data <- future_data %>%
-#   left_join(vessel_means, by = "VESSEL_NUM") %>%
-#   select(VESSEL_NUM, set_year, everything())
-# 
-# 
-# #---- Merge with future SDMs ----
-# 
-# ##---- Load Future SDMs ----
-# PSDN_SDM_day <- read_csv("FuturePredictions/SDM/Future/PSDN_FutureSDM_port_day.csv")
-# ALBC_SDM_day <- read_csv("FuturePredictions/SDM/Future/ALBC_FutureSDM_port_day.csv")
-# HERR_SDM_day <- read_csv("FuturePredictions/SDM/Future/HERR_FutureSDM_port_day.csv")
-# JMCK_SDM_day <- read_csv("FuturePredictions/SDM/Future/JMCK_FutureSDM_port_day.csv")
-# MSQD_SDM_day <- read_csv("FuturePredictions/SDM/Future/MSQD_FutureSDM_port_day.csv")
-# NANC_SDM_day <- read_csv("FuturePredictions/SDM/Future/NANC_FutureSDM_port_day_merged.csv")
-# CMCK_SDM_day <- read_csv("FuturePredictions/SDM/Future/CMCK_FutureSDM_port_day.csv")
-# 
-# 
-# ##---- Get annual average by port ----
-# 
-# PSDN_SDM_year <- PSDN_SDM_day %>% 
-#   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-#   summarize(lag_mean_avail_PSDN_GFDL = mean(SDM_60_GFDL, na.rm = TRUE),
-#             lag_mean_avail_PSDN_IPSL = mean(SDM_60_IPSL, na.rm = TRUE),
-#             lag_mean_avail_PSDN_HADL = mean(SDM_60_HADL, na.rm = TRUE))
-# MSQD_SDM_year <- MSQD_SDM_day %>% 
-#   group_by(LANDING_YEAR, PORT_AREA_CODE) %>% 
-#   summarize(lag_mean_avail_MSQD_GFDL = mean(SDM_90_GFDL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_IPSL = mean(SDM_90_IPSL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_HADL = mean(SDM_90_HADL, na.rm = TRUE))
-# 
-# SDM_year <- merge(PSDN_SDM_year, MSQD_SDM_year, by = c("LANDING_YEAR", "PORT_AREA_CODE"))
-# 
-# 
-# ##---- Link SDM to cluster (group_all) ----
-# 
-# ### Cluster 4 
-# 
-# ports_c4 <- c("SFA", "LAA", "MNA", "SBA", "MRA")
-# SDM_year_c4 <- SDM_year %>% 
-#   filter(PORT_AREA_CODE %in% ports_c4) %>%
-#   group_by(LANDING_YEAR) %>% 
-#   summarize(lag_mean_avail_PSDN_GFDL = mean(lag_mean_avail_PSDN_GFDL, na.rm = TRUE),
-#             lag_mean_avail_PSDN_IPSL = mean(lag_mean_avail_PSDN_IPSL, na.rm = TRUE),
-#             lag_mean_avail_PSDN_HADL = mean(lag_mean_avail_PSDN_HADL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_GFDL = mean(lag_mean_avail_MSQD_GFDL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_IPSL = mean(lag_mean_avail_MSQD_IPSL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_HADL = mean(lag_mean_avail_MSQD_HADL, na.rm = TRUE)) %>%
-#   mutate(LANDING_YEAR = LANDING_YEAR + 1,
-#          group_all = 4) %>%
-#   rename(set_year = LANDING_YEAR)
-#   
-#   
-# ### Cluster 5 
-# 
-# ports_c5 <- c("MNA", "SBA", "MRA", "LAA", "NPA", "SFA", "CBA", "CLO", "CWA", "CLW")
-# SDM_year_c5 <- SDM_year %>% 
-#   filter(PORT_AREA_CODE %in% ports_c4) %>%
-#   group_by(LANDING_YEAR) %>% 
-#   summarize(lag_mean_avail_PSDN_GFDL = mean(lag_mean_avail_PSDN_GFDL, na.rm = TRUE),
-#             lag_mean_avail_PSDN_IPSL = mean(lag_mean_avail_PSDN_IPSL, na.rm = TRUE),
-#             lag_mean_avail_PSDN_HADL = mean(lag_mean_avail_PSDN_HADL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_GFDL = mean(lag_mean_avail_MSQD_GFDL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_IPSL = mean(lag_mean_avail_MSQD_IPSL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_HADL = mean(lag_mean_avail_MSQD_HADL, na.rm = TRUE)) %>%
-#   mutate(LANDING_YEAR = LANDING_YEAR + 1,
-#          group_all = 5) %>%
-#   rename(set_year = LANDING_YEAR)
-# 
-# 
-# ### Cluster 6 
-# 
-# ports_c6 <- c("CBA", "CLO", "CLW", "CWA", "NPS")
-# SDM_year_c6 <- SDM_year %>% 
-#   filter(PORT_AREA_CODE %in% ports_c4) %>%
-#   group_by(LANDING_YEAR) %>% 
-#   summarize(lag_mean_avail_PSDN_GFDL = mean(lag_mean_avail_PSDN_GFDL, na.rm = TRUE),
-#             lag_mean_avail_PSDN_IPSL = mean(lag_mean_avail_PSDN_IPSL, na.rm = TRUE),
-#             lag_mean_avail_PSDN_HADL = mean(lag_mean_avail_PSDN_HADL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_GFDL = mean(lag_mean_avail_MSQD_GFDL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_IPSL = mean(lag_mean_avail_MSQD_IPSL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_HADL = mean(lag_mean_avail_MSQD_HADL, na.rm = TRUE)) %>%
-#   mutate(LANDING_YEAR = LANDING_YEAR + 1,
-#          group_all = 6) %>%
-#   rename(set_year = LANDING_YEAR)
-# 
-# ### Cluster 7 
-# 
-# ports_c7 <- c("LAA", "MNA", "MRA", "SBA", "SFA", "SDA")
-# SDM_year_c7 <- SDM_year %>% 
-#   filter(PORT_AREA_CODE %in% ports_c4) %>%
-#   group_by(LANDING_YEAR) %>% 
-#   summarize(lag_mean_avail_PSDN_GFDL = mean(lag_mean_avail_PSDN_GFDL, na.rm = TRUE),
-#             lag_mean_avail_PSDN_IPSL = mean(lag_mean_avail_PSDN_IPSL, na.rm = TRUE),
-#             lag_mean_avail_PSDN_HADL = mean(lag_mean_avail_PSDN_HADL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_GFDL = mean(lag_mean_avail_MSQD_GFDL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_IPSL = mean(lag_mean_avail_MSQD_IPSL, na.rm = TRUE),
-#             lag_mean_avail_MSQD_HADL = mean(lag_mean_avail_MSQD_HADL, na.rm = TRUE)) %>%
-#   mutate(LANDING_YEAR = LANDING_YEAR + 1,
-#          group_all = 7) %>%
-#   rename(set_year = LANDING_YEAR)
-# 
-# ### Merge 
-# SDM_year_all <- rbind(SDM_year_c4,SDM_year_c5,SDM_year_c6,SDM_year_c7)
-# future_data <- future_data %>%
-#   left_join(SDM_year_all, by = c("set_year", "group_all")) %>%
-#   mutate(PSDN_closure = 0)
-# 
-# 
-# #---- Predict annual participation ----
-# 
-# # Define climate models
-# climate_models <- c("GFDL", "IPSL", "HADL")
-# 
-# # Initialize list to store prediction results
-# participation_predictions <- list()
-# 
-# for (cm in climate_models) {
-#   
-#   # Dynamically assign the correct predictors for each model
-#   future_data_model <- future_data %>%
-#     mutate(
-#       lag_mean_avail_PSDN = .data[[paste0("lag_mean_avail_PSDN_", cm)]],
-#       lag_mean_avail_MSQD = .data[[paste0("lag_mean_avail_MSQD_", cm)]]
-#     )
-#   
-#   # Predict probability
-#   future_data_model_pred <- predict(annual_model, newdata = future_data_model, type = "response")
-#   future_data_model<- cbind(future_data_model, future_data_model_pred)
-#   
-#   # Predict binary participation
-#   future_data_model <- future_data_model %>%
-#     mutate(
-#       pred_annual_participation = ifelse(Estimate > 0.5, 1, 0),
-#       climate_model = cm
-#     )
-#   
-#   # Store
-#   participation_predictions[[cm]] <- future_data_model
-# }
-# 
-# # Combine all into one data frame
-# future_participation_all <- bind_rows(participation_predictions)
-# 
-
-
-### ALL VESSEL PARTICIPATE EVERYYEAR!
-
-
 # ---- Calculate monthly participation ----
 
 # Define month of the season per cluster to do predictions....
@@ -189,7 +21,7 @@ library(readr)
 annual_data <- readRDS("C:/GitHub/EconAnalysis/FuturePredictions/Predictions/Data/annual_data_part.RDS") 
 
 # Define future years
-future_years <- 2090:2100
+future_years <- 2080:2090
 
 # Create a sequence of valid dates for those years
 all_dates <- expand.grid(
@@ -211,11 +43,8 @@ rm(list = c("all_dates"))
 
 # Include clusters
 clusters <- annual_data %>% select(group_all, VESSEL_NUM) %>% unique()
-Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
-Tickets_clust <- merge(Tickets_exp_md, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
-rm(PAM_Vessel_Groups)
-Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
-
+rm(annual_data)
+future_data <- left_join(future_data, clusters, by = ("VESSEL_NUM"))
 
 # Include alternatives by clusters
 
@@ -225,21 +54,268 @@ c4_alt = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c4.rds")) %
   dplyr::select("selection") %>% 
   unique() %>% 
   mutate(group_all = 4)
-
 c5_alt = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c5.rds")) %>% 
   dplyr::select("selection") %>% 
   unique() %>% 
   mutate(group_all = 5)
-
 c6_alt = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c6.rds")) %>% 
   dplyr::select("selection") %>% 
   unique() %>% 
   mutate(group_all = 6)
-
 c7_alt = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c7.rds")) %>% 
   dplyr::select("selection") %>% 
   unique() %>% 
   mutate(group_all = 7)
+
+alternatives_cluster <- rbind(c4_alt, c5_alt, c6_alt, c7_alt)
+future_data <- left_join(future_data, alternatives_cluster, by = ("group_all"))
+
+
+
+# Add SDMs (GAM Boost) -- Calculate 30-day moving average (excluding current day) for each port
+
+library(dplyr)
+library(zoo)
+
+process_sdm_data <- function(file_path, sdm_prefix, species_code) {
+  read.csv(file_path) %>%
+    mutate(date = as.Date(date)) %>%
+    group_by(PORT_AREA_CODE) %>%
+    arrange(date) %>%
+    mutate(across(starts_with(sdm_prefix), 
+                  ~rollapply(.x, width = 30, FUN = mean, align = "right", fill = NA), 
+                  .names = "MA_{.col}")) %>%
+    mutate(across(starts_with(paste0("MA_", sdm_prefix)), 
+                  lag, .names = "lag_{.col}")) %>%
+    ungroup() %>%
+    mutate(date = as.Date(paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep = "-"))) %>%
+    select(date, PORT_AREA_CODE,
+           starts_with(paste0("lag_MA_", sdm_prefix))) %>%
+    rename_with(
+      ~gsub(paste0("lag_MA_", sdm_prefix), paste0(species_code, "_SDM_30day_MA_"), .x),
+      starts_with(paste0("lag_MA_", sdm_prefix))
+    )
+}
+
+MSQD_sdm_data_MA <- process_sdm_data(
+  file_path = "C:/GitHub/EconAnalysis/FuturePredictions/SDM/Future/MSQD_FutureSDM_port_day.csv",
+  sdm_prefix = "SDM_90_",
+  species_code = "MSQD"
+)
+
+PSDN_sdm_data_MA <- process_sdm_data(
+  file_path = "C:/GitHub/EconAnalysis/FuturePredictions/SDM/Future/PSDN_FutureSDM_port_day.csv",
+  sdm_prefix = "SDM_60_",
+  species_code = "PSDN"
+)
+
+NANC_sdm_data_MA <- process_sdm_data(
+  file_path = "C:/GitHub/EconAnalysis/FuturePredictions/SDM/Future/NANC_FutureSDM_port_day_merged.csv",
+  sdm_prefix = "SDM_60_",
+  species_code = "NANC"
+)
+
+CMCK_sdm_data_MA <- process_sdm_data(
+  file_path = "C:/GitHub/EconAnalysis/FuturePredictions/SDM/Future/CMCK_FutureSDM_port_day.csv",
+  sdm_prefix = "SDM_60_",
+  species_code = "CMCK"
+)
+
+ALBC_sdm_data_MA <- process_sdm_data(
+  file_path = "C:/GitHub/EconAnalysis/FuturePredictions/SDM/Future/ALBC_FutureSDM_port_day.csv",
+  sdm_prefix = "SDM_90_",
+  species_code = "ALBC"
+)
+
+JMCK_sdm_data_MA <- process_sdm_data(
+  file_path = "C:/GitHub/EconAnalysis/FuturePredictions/SDM/Future/JMCK_FutureSDM_port_day.csv",
+  sdm_prefix = "SDM_60_",
+  species_code = "JMCK"
+)
+
+# Index average for YTNA BTNA and DCRB
+
+library(lubridate)
+
+process_monthly_avail <- function(file_path, cohort) {
+  readRDS(file_path) %>%
+    select(selection, mean_avail, set_date) %>%
+    distinct() %>%
+    mutate(
+      month = month(set_date),
+      cohort = cohort
+    ) %>%
+    group_by(month, selection, cohort) %>%
+    summarize(mean_avail = mean(mean_avail, na.rm = TRUE), .groups = "drop")
+}
+
+avail_c4 <- process_monthly_avail(paste0(google_dir, "Data/Anonymised data/part_model_c4.rds"), "c4")
+avail_c5 <- process_monthly_avail(paste0(google_dir, "Data/Anonymised data/part_model_c5.rds"), "c5")
+avail_c6 <- process_monthly_avail(paste0(google_dir, "Data/Anonymised data/part_model_c6.rds"), "c6")
+avail_c7 <- process_monthly_avail(paste0(google_dir, "Data/Anonymised data/part_model_c7.rds"), "c7")
+
+avail_all <- bind_rows(avail_c4, avail_c5, avail_c6, avail_c7) %>% 
+  group_by(month, selection) %>%
+  summarize(mean_avail_GFDL = mean(mean_avail, na.rm = TRUE),
+            mean_avail_IPSL = mean(mean_avail, na.rm = TRUE),
+            mean_avail_HADL = mean(mean_avail, na.rm = TRUE), .groups = "drop")
+
+
+# Merge data to create mean_avail
+
+future_data2 <- future_data %>%
+  left_join(avail_all, by = c("month", "selection")) %>%
+  mutate(date = as.Date(paste(set_year, month, day, sep = "-")),
+         PORT_AREA_CODE = toupper(substr(selection, 1, 3)),
+         SPECIES = toupper(substr(selection, 5, 8)))
+
+future_data3 <- future_data2 %>%
+  left_join(MSQD_sdm_data_MA, 
+            by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) %>%
+  left_join(PSDN_sdm_data_MA, 
+            by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) %>%
+  left_join(NANC_sdm_data_MA, 
+            by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) %>%
+  left_join(CMCK_sdm_data_MA, 
+            by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) %>%
+  left_join(JMCK_sdm_data_MA, 
+            by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE")) %>%
+  left_join(ALBC_sdm_data_MA, 
+            by = c("date" = "date", "PORT_AREA_CODE" = "PORT_AREA_CODE"))
+
+
+future_data <- future_data3 %>%
+  dplyr::mutate(mean_avail_GFDL = case_when(
+    SPECIES == "MSQD" ~ MSQD_SDM_30day_MA_GFDL,
+    SPECIES == "NANC" ~ NANC_SDM_30day_MA_GFDL,
+    SPECIES == "CMCK" ~ CMCK_SDM_30day_MA_GFDL,
+    SPECIES == "PSDN" ~ PSDN_SDM_30day_MA_GFDL,
+    SPECIES == "ALBC" ~ PSDN_SDM_30day_MA_GFDL,
+    SPECIES == "JMCK" ~ PSDN_SDM_30day_MA_GFDL,
+    TRUE ~ mean_avail_GFDL  # Keep original value for other cases
+  )) %>%
+  dplyr::mutate(mean_avail_IPSL = case_when(
+    SPECIES == "MSQD" ~ MSQD_SDM_30day_MA_IPSL,
+    SPECIES == "NANC" ~ NANC_SDM_30day_MA_IPSL,
+    SPECIES == "CMCK" ~ CMCK_SDM_30day_MA_IPSL,
+    SPECIES == "PSDN" ~ PSDN_SDM_30day_MA_IPSL,
+    SPECIES == "ALBC" ~ PSDN_SDM_30day_MA_IPSL,
+    SPECIES == "JMCK" ~ PSDN_SDM_30day_MA_IPSL,
+    TRUE ~ mean_avail_IPSL  # Keep original value for other cases
+  )) %>%
+  dplyr::mutate(mean_avail_HADL = case_when(
+    SPECIES == "MSQD" ~ MSQD_SDM_30day_MA_HADL,
+    SPECIES == "NANC" ~ NANC_SDM_30day_MA_HADL,
+    SPECIES == "CMCK" ~ CMCK_SDM_30day_MA_HADL,
+    SPECIES == "PSDN" ~ PSDN_SDM_30day_MA_HADL,
+    SPECIES == "ALBC" ~ PSDN_SDM_30day_MA_HADL,
+    SPECIES == "JMCK" ~ PSDN_SDM_30day_MA_HADL,
+    TRUE ~ mean_avail_HADL # Keep original value for other cases
+  )) %>%
+  dplyr::select(-any_of(c("SPECIES", "PORT_AREA_CODE", 
+                          "MSQD_SDM_30day_MA_GFDL", 
+                          "CMCK_SDM_30day_MA_GFDL", 
+                          "NANC_SDM_30day_MA_GFDL", 
+                          "PSDN_SDM_30day_MA_GFDL", 
+                          "ALBC_SDM_30day_MA_GFDL", 
+                          "JMCK_SDM_30day_MA_GFDL",
+                          "MSQD_SDM_30day_MA_IPSL", 
+                          "CMCK_SDM_30day_MA_IPSL", 
+                          "NANC_SDM_30day_MA_IPSL", 
+                          "PSDN_SDM_30day_MA_IPSL", 
+                          "ALBC_SDM_30day_MA_IPSL", 
+                          "JMCK_SDM_30day_MA_IPSL",
+                          "MSQD_SDM_30day_MA_HADL", 
+                          "CMCK_SDM_30day_MA_HADL", 
+                          "NANC_SDM_30day_MA_HADL", 
+                          "PSDN_SDM_30day_MA_HADL", 
+                          "ALBC_SDM_30day_MA_HADL", 
+                          "JMCK_SDM_30day_MA_HADL",
+                          "date"))) 
+
+rm(list = c("avail_all", "avail_c4", "avail_c5", "avail_c6", "avail_c7", "future_data2",
+            "future_data3", "clusters", "c4_alt", "c5_alt", "c6_alt", "c7_alt", 
+            "MSQD_sdm_data_MA", "PSDN_sdm_data_MA", "NANC_sdm_data_MA", "CMCK_sdm_data_MA", 
+            "JMCK_sdm_data_MA", "ALBC_sdm_data_MA")) 
+
+
+# Cargar modelos nested logit
+
+model_c4 <- readRDS("C:/GitHub/EconAnalysis/FuturePredictions/output/NL_participation_model_c4_for_predictions_model.rds")
+model_c5 <- readRDS("C:/GitHub/EconAnalysis/FuturePredictions/output/NL_participation_model_c5_for_predictions_model.rds")
+model_c6 <- readRDS("C:/GitHub/EconAnalysis/FuturePredictions/output/NL_participation_model_c6_for_predictions_model.rds")
+model_c7 <- readRDS("C:/GitHub/EconAnalysis/FuturePredictions/output/NL_participation_model_c7_for_predictions_model.rds")
+
+
+# Add other covariates
+
+future_data_c4 <- future_data %>% 
+  filter(group_all == 4) %>%
+  mutate(
+    date = as.Date(paste(set_year, month, day, sep = "-")),
+    PORT_AREA_CODE = toupper(substr(selection, 1, 3)),
+    SPECIES = toupper(substr(selection, 5, 8)),
+    weekend = as.integer(weekdays(date) %in% c("Saturday", "Sunday")),
+    d_d = 0
+  )
+
+historical_data <- readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c4.rds")) %>%
+  filter(selection != "No-Participation") %>%
+  mutate(
+    PORT_AREA_CODE = toupper(substr(selection, 1, 3)),
+    SPECIES = toupper(substr(selection, 5, 8)))
+
+mean_price_by_specie <- historical_data %>%
+  group_by(SPECIES) %>%
+  summarise(mean_price = mean(mean_price, na.rm = TRUE))
+
+wind_by_port_month <- historical_data %>%
+  group_by(PORT_AREA_CODE, set_month) %>%
+  summarise(wind_max_220_mh = mean(wind_max_220_mh, na.rm = TRUE))
+
+dist_to_area_by_specie_port <- historical_data %>%
+  group_by(SPECIES, PORT_AREA_CODE) %>%
+  summarise(dist_port_to_catch_area_zero = mean(dist_port_to_catch_area_zero, na.rm = TRUE))
+
+unem_by_port <- historical_data %>%
+  group_by(PORT_AREA_CODE) %>%
+  summarise(unem_rate = mean(unem_rate, na.rm = TRUE))
+
+dist_to_cog_by_port_vessel <- historical_data %>%
+  mutate(fished_vessel_anon = group_all * 100 + fished_vessel_anon ) %>%
+  group_by(PORT_AREA_CODE, fished_vessel_anon) %>%
+  summarise(dist_to_cog = mean(dist_to_cog, na.rm = TRUE))
+
+
+future_data_c4 <- future_data_c4 %>%
+  left_join(mean_price_by_specie, by = c("SPECIES")) %>%
+  left_join(wind_by_port_month, by = c("PORT_AREA_CODE", "month" = "set_month")) %>%
+  left_join(dist_to_area_by_specie_port, by = c("SPECIES", "PORT_AREA_CODE")) %>%
+  left_join(unem_by_port, by = c("PORT_AREA_CODE")) %>%
+  left_join(dist_to_cog_by_port_vessel, by = c("PORT_AREA_CODE", "VESSEL_NUM" = "fished_vessel_anon")) %>%
+  mutate(
+    mean_price = ifelse(selection == "No-Participation", 0, mean_price),
+    wind_max_220_mh = ifelse(selection == "No-Participation", 0, wind_max_220_mh),
+    dist_port_to_catch_area_zero = ifelse(selection == "No-Participation", 0, dist_port_to_catch_area_zero),
+    unem_rate = ifelse(selection == "No-Participation", 0, unem_rate),
+    dist_to_cog = ifelse(selection == "No-Participation", 0, dist_to_cog)
+  ) %>%
+  dplyr::select(-c(PORT_AREA_CODE, SPECIES))
+
+future_data_c4$selection <- tolower(gsub("-", "_", future_data_c4$selection))
+
+database <- future_data_c4 %>%
+  pivot_wider(
+    names_from = selection,                  # Unique values for alternatives
+    values_from = c(mean_avail_GFDL, mean_avail_IPSL, mean_avail_HADL, mean_price, wind_max_220_mh, dist_to_cog, 
+                    dist_port_to_catch_area_zero, unem_rate, d_d)) %>%
+  dplyr::mutate(unem_rate = unem_rate_sfa_nanc)
+
+
+#########################################
+
+## Predict!!
+
 
 
 
@@ -247,18 +323,9 @@ c7_alt = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c7.rds")) %
 #########################################
 
 
-
-
 # Assume we will read in or compute daily participation with SDM + economics per cluster
 # Expected output: daily_participation_df with columns VESSEL_NUM, DATE, cluster, participates_today
 
-# Placeholder:
-daily_participation_df <- tibble(
-  VESSEL_NUM = integer(),
-  DATE = as.Date(character()),
-  cluster = integer(),
-  participates_today = integer()  # 1 if yes, 0 if not
-)
 
 # --- Step 3: Aggregate Daily to Monthly Participation ---
 monthly_participation <- daily_participation_df %>%
@@ -306,3 +373,6 @@ monthly_data <- monthly_data %>%
 # --- Final Output ---
 # monthly_data now includes predicted landings per port-month-cluster
 saveRDS(monthly_data, "Landings/Output/predicted_monthly_landings.rds")
+
+
+#### ANNUAL LANDING BY PORTS BY DIFFERENT CLIMATE MODELS VS HISTORICAL ANUAL LANDINGS
