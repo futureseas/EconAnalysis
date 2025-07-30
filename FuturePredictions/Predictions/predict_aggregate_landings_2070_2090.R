@@ -350,9 +350,6 @@ for (grp in groups) {
     
     apollo_inputs <- apollo_validateInputs()
     
-    
-    
-    
     prediction <- apollo_prediction(
       model = model,
       apollo_probabilities = apollo_probabilities,
@@ -393,49 +390,51 @@ for (grp in groups) {
 }
 
 ### Monthly participation 
+pred_c4_GFDL <- pred_c4_GFDL %>% mutate(scenario == "GFDL") %>% 
+  rename(predicted_choice_GFDL = predicted_choice) 
+pred_c4_IPSL <- pred_c4_IPSL %>% mutate(scenario == "IPSL") %>% 
+  rename(predicted_choice_IPSL = predicted_choice)  %>% 
+  dplyr::select(c(predicted_choice_IPSL))
+pred_c4_HADL <- pred_c4_HADL  %>% 
+  rename(predicted_choice_HADL = predicted_choice) %>%  
+  dplyr::select(c(predicted_choice_HADL))
+
+pred_c4 <- cbind(pred_c4_GFDL, pred_c4_IPSL)
+pred_c4 <- cbind(pred_c4, pred_c4_HADL)
 
 
-# #### LANDINGS PREDICTION! ####
-# 
-# 
-# # Assume we will read in or compute daily participation with SDM + economics per cluster
-# # Expected output: daily_participation_df with columns VESSEL_NUM, DATE, cluster, participates_today
-# 
-# 
-# # --- Step 3: Aggregate Daily to Monthly Participation ---
-# monthly_participation <- daily_participation_df %>%
-#   mutate(
-#     year = year(DATE),
-#     month = month(DATE)
-#   ) %>%
-#   group_by(year, month, cluster) %>%
-#   summarize(
-#     vessels_participating = n_distinct(VESSEL_NUM[participates_today == 1]),
-#     .groups = "drop"
-#   )
-# 
-# # --- Step 4: Predict Monthly Landings (MSQD, PSDN, NANC) ---
-# # These are already modeled in landing_model_est_MSQD.R and landing_model_est_NANC.R
-# 
-# # Load fitted models (assumed saved from brm with file=...)
-# fit_MSQD <- readRDS("Landings/Estimations/fit_qMSQD_boost_GAM.rds")
-# fit_NANC <- readRDS("Landings/Estimations/fit_qNANC_boost_GAM.rds")
-# # (Add fit_PSDN when ready)
-# 
-# # Load monthly prediction dataset (future SDM, prices, port clusters, etc.)
-# monthly_data <- readRDS("Landings/Data/future_monthly_data.rds")  # Placeholder path
-# 
-# # Merge predicted monthly participation
-# monthly_data <- monthly_data %>%
-#   left_join(monthly_participation, by = c("LANDING_YEAR" = "year", "LANDING_MONTH" = "month", "port_cluster_ID" = "cluster"))
-# 
-# # Predict MSQD
-# monthly_data$pred_log_MSQD <- predict(fit_MSQD, newdata = monthly_data, resp = "logMSQDLandings") %>%
-#   as.data.frame() %>% pull(Estimate)
-# 
-# # Predict NANC
-# monthly_data$pred_log_NANC <- predict(fit_NANC, newdata = monthly_data, resp = "logNANCLandings") %>%
-#   as.data.frame() %>% pull(Estimate)
+
+### Monthly participation data to estimate landings ####
+monthly_part_c4_GFDL <- pred_c4 %>% 
+  filter(predicted_choice_GFDL != "no_participation") %>%
+  mutate(n_count = 1,
+         group_all = 4) %>%
+  group_by(fished_vessel_anon, month, set_year, predicted_choice_GFDL) %>%
+  summarize(n_days_part = sum(n_count)) %>% 
+  filter(n_days_part > 9) %>%
+  mutate(
+    PORT_AREA_CODE = toupper(substr(predicted_choice_GFDL, 1, 3)),
+    SPECIES = toupper(substr(predicted_choice_GFDL, 5, 8)))
+
+ 
+
+# --- Predict Monthly Landings (MSQD, PSDN, NANC) ---
+
+fit_MSQD <- readRDS("Landings/Estimations/fit_qMSQD_boost_GAM.rds")
+fit_NANC <- readRDS("Landings/Estimations/fit_qNANC_boost_GAM.rds")
+
+# Predict MSQD
+monthly_part_c4_GFDL_MSQD <- monthly_part_c4_GFDL %>% 
+  filter(SPECIES == "MSQD")
+
+monthly_part_c4_GFDL_MSQD$pred_log_MSQD <- 
+  predict(fit_MSQD, newdata = monthly_part_c4_GFDL_MSQD, resp = "logMSQDLandings") %>% 
+  as.data.frame() %>% 
+  pull(Estimate)
+
+  FALTA AGREGAR DATOS!!!
+  
+
 # 
 # # Optional: convert from log-scale
 # monthly_data <- monthly_data %>%
@@ -445,7 +444,7 @@ for (grp in groups) {
 #     # Add PSDN_Landings when available
 #   )
 # 
-# # --- Final Output ---
-# # monthly_data now includes predicted landings per port-month-cluster
-# saveRDS(monthly_data, "Landings/Output/predicted_monthly_landings.rds")
-# 
+
+  CALCULAR LANDINGS POR AÑO ESPECIE!!!
+  
+
