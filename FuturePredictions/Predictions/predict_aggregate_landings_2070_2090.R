@@ -48,8 +48,8 @@ future_data <- left_join(future_data, clusters, by = ("VESSEL_NUM"))
 
 # Include alternatives by clusters
 
-google_dir <- "G:/Mi unidad/"
-#google_dir <- "H:/My Drive/"
+#google_dir <- "G:/Mi unidad/"
+google_dir <- "H:/My Drive/"
 
 c4_alt = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c4.rds")) %>% 
   dplyr::select("selection") %>% 
@@ -374,6 +374,8 @@ for (grp in groups) {
       pred_df$predicted_choice[remaining_rows] <- max_alts
     }
     
+    pred_df <- pred_df %>% dplyr::select(c(predicted_choice))
+    
     # Ensure both have a row identifier
     database$row_id <- seq_len(nrow(database))
     pred_df$row_id <- seq_len(nrow(pred_df))
@@ -390,9 +392,7 @@ for (grp in groups) {
   }
 }
 
-
-
-
+### Monthly participation 
 
 
 # #### LANDINGS PREDICTION! ####
