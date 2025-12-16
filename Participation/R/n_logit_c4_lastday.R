@@ -11,7 +11,7 @@ library(apollo)
 ### Initialise code
 apollo_initialise()
 
-setwd("C:/GitHub/EconAnalysis/Participation/R")
+setwd("D:/GitHub/EconAnalysis/Participation")
 
 
 ### Set core controls
@@ -21,7 +21,7 @@ apollo_control = list(
   indivID         = "fished_vessel_anon", 
   outputDirectory = "output",
   panelData       = TRUE,
-  nCores          = 14,
+  nCores          = 18,
   workInLogs      = TRUE
 )
 
@@ -29,6 +29,7 @@ apollo_control = list(
 # ################################################################# #
 #### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
 # ################################################################# #
+
 
 ### Read database 
 # library(readstata13)
@@ -39,6 +40,7 @@ apollo_control = list(
 google_dir <- "G:/Mi unidad/"
 
 library(tidyr)
+library(tidyverse)
 long_data = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c4.rds")) %>%
   dplyr::select("fished_haul_anon", "fished_vessel_anon", "selection", "fished",
                 "fished_vessel_anon", "mean_avail", "mean_price", 
@@ -77,6 +79,33 @@ database$choice <- ifelse(database$fished_sfa_nanc == 1, 1,
 ### Add a numeric alternative column to your dataset
 database$choice <- as.integer(database$choice)
 database <- database[order(database$fished_vessel_anon, database$fished_haul_anon), ]
+
+
+## Add SDMs (daily, MA 7, MA 14) -- Calculate 30-day moving average (excluding current day) for each port
+MSQD_sdm_data <- readRDS("SDMs/sdm_msqd.rds") %>%
+  mutate(
+    date = make_date(LANDING_YEAR, LANDING_MONTH, LANDING_DAY),
+    across(where(is.numeric), ~ ifelse(is.nan(.x), NA_real_, .x))
+  )
+
+MSQD_sdm_data <- MSQD_sdm_data %>%
+  group_by(PORT_AREA_CODE) %>%
+  arrange(date) %>%
+  mutate(
+    SDM_30day_MA = rollapply(SDM_90, 
+                             width = 30, 
+                             FUN = mean, 
+                             align = "right",
+                             fill = NA,
+                             partial = FALSE)) %>%
+  mutate(MSQD_SDM_30day_MA_lag = lag(SDM_30day_MA, 1)) %>%
+  ungroup() %>% 
+  select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE, MSQD_SDM_30day_MA_lag)) %>%
+  mutate(date = as.Date(paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep = "-"))) %>%
+  dplyr::select(date, PORT_AREA_CODE, MSQD_SDM_30day_MA_lag)
+
+
+
 
 
 # ################################################################# #

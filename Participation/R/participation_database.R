@@ -14,12 +14,12 @@ library(tidyr)
 library(geosphere)
 library(tidyverse)  
 
-setwd("C:/GitHub/EconAnalysis")
+setwd("D:/GitHub/EconAnalysis")
 
 #-----------------------------------------------------
 ### Load in the data
 # Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
-Tickets_raw <- fread("C:/FutureSeasIII_2010_2020.csv")
+Tickets_raw <- fread("D:/FutureSeasIII_2010_2020.csv")
 # Tickets_raw<-rbind(Tickets1, Tickets2)
 # rm(Tickets1, Tickets2)
 
@@ -28,14 +28,15 @@ Tickets_raw <- fread("C:/FutureSeasIII_2010_2020.csv")
 ### Add port area
 port_area <- read.csv(file = here::here("Data", "Ports", "ports_area_and_name_codes.csv"))
 Tickets_raw <- Tickets_raw %>% merge(port_area, by = c("PACFIN_PORT_CODE"), all.x = TRUE)
-rm(port_area)
+rm(port_area) # 2,344,447 entries
+
 
 
 #-----------------------------------------------------
 ### Filter by type of catch
 Tickets_raw <- Tickets_raw %>% 
   filter(REMOVAL_TYPE_CODE == "C" | REMOVAL_TYPE_CODE == "D" | REMOVAL_TYPE_CODE == "E") %>% 
-  drop_na(PORT_AREA_CODE)
+  drop_na(PORT_AREA_CODE) ### 61,879 entries deleted
 
 
 #-----------------------------------------------------
@@ -49,7 +50,7 @@ Tickets <- dplyr::select(Tickets_raw, c(AGENCY_CODE, FTID, LANDING_YEAR, LANDING
   mutate(AFI_PRICE_PER_MTONS = AFI_PRICE_PER_POUND/0.000453592)
   Tickets$FTID_unique <- udpipe::unique_identifier(Tickets, fields = c("FTID", "VESSEL_NUM", "LANDING_YEAR"))
   
-  saveRDS(Tickets, "C:/Data/PacFIN data/Tickets_filtered.rds")
+  # saveRDS(Tickets, "C:/Data/PacFIN data/Tickets_filtered.rds")
 
 
 #-----------------------------------------------------
@@ -147,8 +148,8 @@ names(FF_Vessels)[1]<-"VESSEL_NUM"
 #-----------------------------------------------------
 ### Filter rows with non-zero revenues and only keep the species dominant (no by-catch)
 
-Tickets<-Tickets[which(Tickets$Revenue > 0),] # 137,971 row deleted
-Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) %>% # 44,035 row deleted 
+Tickets<-Tickets[which(Tickets$Revenue > 0),] # 109,499 row deleted
+Tickets <- Tickets %>% filter(PACFIN_SPECIES_CODE == Species_Dominant) %>% # 512,739 row deleted 
   mutate(selection = paste(PORT_AREA_CODE, Species_Dominant, sep = "-", collapse = NULL)) 
 
 #-----------------------------------------------------
@@ -160,7 +161,7 @@ Tickets_chr <- merge(Tickets_chr, Vessel.chr.horsepower, by = c("VESSEL_NUM"), a
 
 Tickets_catch <- Tickets_chr %>% 
   mutate(max_days_sea = ifelse(is.na(max_days_sea), 1, max_days_sea))
-saveRDS(Tickets_catch, "C:/Data/PacFIN data/Tickets_filtered_catch.rds")
+#saveRDS(Tickets_catch, "C:/Data/PacFIN data/Tickets_filtered_catch.rds")
 
 
 #---------------------------------------------------------------------
