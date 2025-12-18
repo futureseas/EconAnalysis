@@ -11,7 +11,7 @@ library(apollo)
 ### Initialise code
 apollo_initialise()
 
-setwd("C:/GitHub/EconAnalysis/Participation/R")
+setwd("D:/GitHub/EconAnalysis/Participation/R")
 
 
 ### Set core controls
@@ -116,19 +116,18 @@ apollo_beta=c(asc_sfa_nanc                   = -2.75,
               asc_mra_msqd                   = -2.75,
               asc_laa_psdn                   = -2.75,
               asc_mna_nanc                   = -2.75,
-              c_btna                         = -4.4,
               c_psdn                         = -0.4,
               w_nanc                         = -4,
               w_cmck                         = -4,
               w_msqd                         = -4,
               w_tuna                         = -4,
               w_psdn                         = -4,
-              lambda_part                    = 0.9, 
-              lambda_cmck                    = 0.5,
-              lambda_msqd                    = 0.5,
-              lambda_psdn                    = 0.5,
-              lambda_nanc                    = 0.5,
-              lambda_tuna                    = 0.5,
+              theta_part = 0,
+              theta_cmck = 12,
+              theta_msqd = 0,
+              theta_psdn = 0,
+              theta_nanc = 0,
+              theta_tuna = 12,
               B_mean_avail                   = 1.15,
               B_mean_price                   = 0.3,
               B_wind_max_220_mh              = -0.05,
@@ -144,7 +143,7 @@ apollo_beta=c(asc_sfa_nanc                   = -2.75,
               B_dist_to_cog                  = -0.001)
 
 # ### Vector with names (in quotes) of parameters to be kept fixed at their starting value in apollo_beta, use apollo_beta_fixed = c() if none
-apollo_fixed = c("asc_no_participation", "B_unem_rate_nopart", "w_nopart")
+apollo_fixed = c("asc_no_participation", "B_unem_rate_nopart", "w_nopart", "theta_cmck", "theta_tuna")
 
 
 ### Read in starting values for at least some parameters from existing model output file
@@ -167,8 +166,16 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   apollo_attach(apollo_beta, apollo_inputs)
   on.exit(apollo_detach(apollo_beta, apollo_inputs))
   
+  lambda_part <- 1/(1 + exp(-theta_part))  # (0,1)
+  lambda_cmck <- lambda_part * (1/(1 + exp(-theta_cmck)))
+  lambda_msqd <- lambda_part * (1/(1 + exp(-theta_msqd)))
+  lambda_psdn <- lambda_part * (1/(1 + exp(-theta_psdn)))
+  lambda_nanc <- lambda_part * (1/(1 + exp(-theta_nanc)))
+  lambda_tuna <- lambda_part * (1/(1 + exp(-theta_tuna)))
+  
   ### Create list of probabilities P
   P = list()
+  
   
 # 
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
@@ -180,7 +187,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   V[["laa_ytna"]]         = asc_laa_ytna + w_tuna * weekend                        + B_mean_avail * mean_avail_laa_ytna + B_mean_price * mean_price_laa_ytna + B_wind_max_220_mh * wind_max_220_mh_laa_ytna + B_d_d * d_d_laa_ytna + B_d_cd * d_cd_laa_ytna + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_ytna + B_dummy_prev_days * dummy_prev_days_laa_ytna + B_dummy_prev_year_days * dummy_prev_year_days_laa_ytna + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_laa_ytna  
   V[["mna_msqd"]]         = asc_mna_msqd + w_msqd * weekend                        + B_mean_avail * mean_avail_mna_msqd + B_mean_price * mean_price_mna_msqd + B_wind_max_220_mh * wind_max_220_mh_mna_msqd + B_d_d * d_d_mna_msqd                          + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd + B_dummy_prev_days * dummy_prev_days_mna_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mna_msqd + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_mna_msqd  
   V[["sba_msqd"]]         = asc_sba_msqd + w_msqd * weekend                        + B_mean_avail * mean_avail_sba_msqd + B_mean_price * mean_price_sba_msqd + B_wind_max_220_mh * wind_max_220_mh_sba_msqd + B_d_d * d_d_sba_msqd                          + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd + B_dummy_prev_days * dummy_prev_days_sba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sba_msqd + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_sba_msqd   
-  V[["laa_btna"]]         = asc_laa_btna + w_tuna * weekend + c_btna * btnaclosure + B_mean_avail * mean_avail_laa_btna + B_mean_price * mean_price_laa_btna + B_wind_max_220_mh * wind_max_220_mh_laa_btna + B_d_d * d_d_laa_btna + B_d_cd * d_cd_laa_btna + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_btna + B_dummy_prev_days * dummy_prev_days_laa_btna + B_dummy_prev_year_days * dummy_prev_year_days_laa_btna + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_laa_btna   
+  V[["laa_btna"]]         = asc_laa_btna + w_tuna * weekend                        + B_mean_avail * mean_avail_laa_btna + B_mean_price * mean_price_laa_btna + B_wind_max_220_mh * wind_max_220_mh_laa_btna + B_d_d * d_d_laa_btna + B_d_cd * d_cd_laa_btna + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_btna + B_dummy_prev_days * dummy_prev_days_laa_btna + B_dummy_prev_year_days * dummy_prev_year_days_laa_btna + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_laa_btna   
   V[["sfa_msqd"]]         = asc_sfa_msqd + w_msqd * weekend                        + B_mean_avail * mean_avail_sfa_msqd + B_mean_price * mean_price_sfa_msqd + B_wind_max_220_mh * wind_max_220_mh_sfa_msqd + B_d_d * d_d_sfa_msqd                          + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd + B_dummy_prev_days * dummy_prev_days_sfa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sfa_msqd + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_sfa_msqd   
   V[["mna_psdn"]]         = asc_mna_psdn + w_psdn * weekend + c_psdn * psdnclosure + B_mean_avail * mean_avail_mna_psdn + B_mean_price * mean_price_mna_psdn + B_wind_max_220_mh * wind_max_220_mh_mna_psdn + B_d_d * d_d_mna_psdn                          + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_psdn + B_dummy_prev_days * dummy_prev_days_mna_psdn + B_dummy_prev_year_days * dummy_prev_year_days_mna_psdn + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_mna_psdn   
   V[["sba_cmck"]]         = asc_sba_cmck + w_cmck * weekend                        + B_mean_avail * mean_avail_sba_cmck + B_mean_price * mean_price_sba_cmck + B_wind_max_220_mh * wind_max_220_mh_sba_cmck + B_d_d * d_d_sba_cmck                          + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_cmck + B_dummy_prev_days * dummy_prev_days_sba_cmck + B_dummy_prev_year_days * dummy_prev_year_days_sba_cmck + B_unem_rate_part * unem_rate + B_dist_to_cog * dist_to_cog_sba_cmck   
@@ -206,12 +213,33 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   nlStructure[["tuna"]] = c("laa_ytna", "laa_btna")
 
   
+  
+  avail <- list(
+    sfa_nanc = 1,
+    laa_nanc = 1,
+    laa_cmck = 1,
+    laa_msqd = 1,
+    laa_ytna = 1,
+    mna_msqd = 1,
+    sba_msqd = 1,
+    laa_btna = 1 - btnaclosure,   
+    sfa_msqd = 1,
+    mna_psdn = 1,
+    sba_cmck = 1,
+    mra_msqd = 1,
+    laa_psdn = 1,
+    mna_nanc = 1,
+    no_participation = 1
+  )
+  
+  
+  
   ### Define settings for NL model
   nl_settings <- list(
     alternatives = c(
       sfa_nanc = 1, laa_nanc = 2, laa_cmck = 3, laa_msqd = 4, laa_ytna = 5, mna_msqd = 6, sba_msqd = 7, laa_btna = 8, 
       sfa_msqd = 9, mna_psdn = 10, sba_cmck = 11, mra_msqd = 12, laa_psdn = 13, mna_nanc = 14, no_participation = 15),
-    avail        = 1,
+    avail        = avail,
     choiceVar    = choice,
     utilities    = V,
     nlNests      = nlNests,
@@ -221,7 +249,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   ### Compute probabilities using NL model
   P[["model"]] = apollo_nl(nl_settings, functionality)
   
-  ### Take product across observation for same individual
+  # ### Take product across observation for same individual
   P = apollo_panelProd(P, apollo_inputs, functionality)
   
   ### Prepare and return outputs of function
@@ -232,34 +260,27 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
 # ################################################################# #
 #### MODEL ESTIMATION                                            ####
 # ################################################################# #
+# model = apollo_estimate(apollo_beta, apollo_fixed,
+#                         apollo_probabilities, apollo_inputs,
+#                         estimate_settings=list(constraints = c(
+#   "lambda_part < 1 - 1e-6",
+#   "lambda_part > 1e-6",
+#   "lambda_cmck > 1e-6", "lambda_cmck < lambda_part - 1e-6",
+#   "lambda_msqd > 1e-6", "lambda_msqd < lambda_part - 1e-6",
+#   "lambda_psdn > 1e-6", "lambda_psdn < lambda_part - 1e-6",
+#   "lambda_nanc > 1e-6", "lambda_nanc < lambda_part - 1e-6",
+#   "lambda_tuna > 1e-6", "lambda_tuna < lambda_part - 1e-6"
+# )))
+
+
 model = apollo_estimate(apollo_beta, apollo_fixed,
                         apollo_probabilities, apollo_inputs,
-                        estimate_settings=list(constraints=c("lambda_part < 1 + 1e-10",
-                                                             "lambda_part - lambda_cmck > -1e-10",
-                                                             "lambda_part - lambda_msqd > -1e-10",
-                                                             "lambda_part - lambda_psdn > -1e-10",
-                                                             "lambda_part - lambda_nanc > -1e-10",
-                                                             "lambda_part - lambda_tuna > -1e-10",
-                                                             "lambda_cmck > 0",
-                                                             "lambda_msqd > 0",
-                                                             "lambda_psdn > 0",
-                                                             "lambda_nanc > 0",
-                                                             "lambda_tuna > 0")))
+                        estimate_settings=list())
 
-# model = apollo_estimate(apollo_beta, apollo_fixed, 
-#                         apollo_probabilities, apollo_inputs, 
-#                         estimate_settings=list(constraints=c("lambda_part < 1 + 1e-10",
-#                                                              "lambda_cmck < 1 + 1e-10",
-#                                                              "lambda_msqd < 1 + 1e-10",
-#                                                              "lambda_psdn < 1 + 1e-10",
-#                                                              "lambda_nanc < 1 + 1e-10",
-#                                                              "lambda_tuna < 1 + 1e-10",
-#                                                              "lambda_cmck > 0",
-#                                                              "lambda_msqd > 0",
-#                                                              "lambda_psdn > 0",
-#                                                              "lambda_nanc > 0",
-#                                                              "lambda_tuna > 0",
-#                                                              "lambda_part > 0")))
+# model <- apollo_addCovariance(model, apollo_inputs)  # computes Hessian + classical/robust cov
+apollo_modelOutput(model)
+
+
 
 # ################################################################# #
 #### MODEL OUTPUTS                                               ####
@@ -270,25 +291,25 @@ model = apollo_estimate(apollo_beta, apollo_fixed,
 # ----------------------------------------------------------------- #
 
 apollo_modelOutput(model,modelOutput_settings = list(printT1=1))
-
-# ----------------------------------------------------------------- #
-#---- FORMATTED OUTPUT (TO FILE, using model name)               ----
-# ----------------------------------------------------------------- #
-
+# 
+# # ----------------------------------------------------------------- #
+# #---- FORMATTED OUTPUT (TO FILE, using model name)               ----
+# # ----------------------------------------------------------------- #
+# 
 apollo_saveOutput(model,saveOutput_settings = list(printT1=1))
-
-# ################################################################# #
-##### POST-PROCESSING                                            ####
-# ################################################################# #
-
-### Print outputs of additional diagnostics to new output file (remember to close file writing when complete)
+# 
+# # ################################################################# #
+# ##### POST-PROCESSING                                            ####
+# # ################################################################# #
+# 
+# ### Print outputs of additional diagnostics to new output file (remember to close file writing when complete)
 apollo_sink()
-
-
-# ################################################################# #
-##### Create Table                                               ####
-# ################################################################# #
-
+# 
+# 
+# # ################################################################# #
+# ##### Create Table                                               ####
+# # ################################################################# #
+# 
 summary_results <- summary(model)
 estimates <- summary_results$   # Parameter estimates
 p_values = summary_results$pValue     # p-values

@@ -1,0 +1,160 @@
+
+Apollo model summary
+
+Model name                   : NL_participation_model_c4
+Model description            : Participation, location and target species decisions
+Estimation method            : bgw
+Modelled outcomes            : 29160
+
+LL(final)                    : -22494.07
+Estimated parameters         : 34
+
+
+Estimates (robust covariance matrix, 1-sided p-values):
+
+                               estimate std. error t-ratio p (1-sided)    
+asc_sfa_nanc                   -2.55043    0.31281    -8.2       2e-16 ***
+asc_laa_nanc                   -2.76944    0.24613   -11.3      <2e-16 ***
+asc_laa_cmck                   -2.38664    0.23200   -10.3      <2e-16 ***
+asc_laa_msqd                   -1.90811    0.24475    -7.8       3e-15 ***
+asc_laa_ytna                   -2.97208    0.40591    -7.3       1e-13 ***
+asc_mna_msqd                   -2.13407    0.25563    -8.3      <2e-16 ***
+asc_sba_msqd                   -1.90737    0.23629    -8.1       3e-16 ***
+asc_laa_btna                   -3.14874    0.55505    -5.7       7e-09 ***
+asc_sfa_msqd                   -2.12345    0.28078    -7.6       2e-14 ***
+asc_mna_psdn                   -2.57986    0.24198   -10.7      <2e-16 ***
+asc_sba_cmck                   -2.39986    0.22174   -10.8      <2e-16 ***
+asc_mra_msqd                   -2.46661    0.29477    -8.4      <2e-16 ***
+asc_laa_psdn                   -2.60979    0.25223   -10.3      <2e-16 ***
+asc_mna_nanc                   -2.33636    0.21683   -10.8      <2e-16 ***
+c_psdn                         -0.45999    0.25599    -1.8        0.04 *  
+w_nanc                         -4.68920    0.24541   -19.1      <2e-16 ***
+w_cmck                         -3.74417    0.27391   -13.7      <2e-16 ***
+w_msqd                         -3.73844    0.14807   -25.2      <2e-16 ***
+w_tuna                         -2.98393    0.14476   -20.6      <2e-16 ***
+w_psdn                         -4.01940    0.35686   -11.3      <2e-16 ***
+theta_part                     -0.52075    0.15672    -3.3       4e-04 ***
+theta_msqd                      4.68715    5.51923     0.8        0.20    
+theta_psdn                      2.46898    2.56566     1.0        0.17    
+theta_nanc                      0.65483    0.51477     1.3        0.10    
+B_mean_avail                    1.08372    0.16042     6.8       7e-12 ***
+B_mean_price                    0.19522    0.12103     1.6        0.05 .  
+B_wind_max_220_mh              -0.04170    0.00414   -10.1      <2e-16 ***
+B_d_d                          -1.00398    0.09909   -10.1      <2e-16 ***
+B_d_cd                         -0.86277    0.16239    -5.3       5e-08 ***
+B_dist_port_to_catch_area_zero -0.00431    0.00090    -4.8       8e-07 ***
+B_dummy_prev_days               1.21838    0.12382     9.8      <2e-16 ***
+B_dummy_prev_year_days          0.15228    0.03502     4.3       7e-06 ***
+B_unem_rate_part                0.18679    0.01375    13.6      <2e-16 ***
+B_dist_to_cog                  -0.00153    0.00022    -7.1       7e-13 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+For more detailed output, use apollo_modelOutput
+Model run by Felipe using Apollo 0.3.6 on R 4.5.2 for Windows.
+Please acknowledge the use of Apollo by citing Hess & Palma (2019)
+  DOI 10.1016/j.jocm.2019.100170
+  www.ApolloChoiceModelling.com
+
+Model name                                  : NL_participation_model_c4
+Model description                           : Participation, location and target species decisions
+Model run at                                : 2025-12-18 17:35:19.680653
+Estimation method                           : bgw
+Estimation diagnosis                        : Relative function convergence
+Optimisation diagnosis                      : Maximum found
+     hessian properties                     : Negative definite
+     maximum eigenvalue                     : -0.130907
+     reciprocal of condition number         : 3.53583e-10
+Number of individuals                       : 46
+Number of rows in database                  : 29160
+Number of modelled outcomes                 : 29160
+
+Number of cores used                        :  14 
+Model without mixing
+
+LL(start)                                   : -23210.79
+LL at equal shares, LL(0)                   : -78607.08
+LL at observed shares, LL(C)                : -38908.16
+LL(final)                                   : -22494.07
+Rho-squared vs equal shares                  :  0.7138 
+Adj.Rho-squared vs equal shares              :  0.7134 
+Rho-squared vs observed shares               :  0.4219 
+Adj.Rho-squared vs observed shares           :  0.4214 
+AIC                                         :  45056.14 
+BIC                                         :  45337.68 
+
+Estimated parameters                        : 34
+Time taken (hh:mm:ss)                       :  00:01:50.62 
+     pre-estimation                         :  00:00:15.12 
+     estimation                             :  00:00:19.55 
+     post-estimation                        :  00:01:15.95 
+Iterations                                  :  18  
+
+Unconstrained optimisation.
+
+Estimates:
+                                  Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
+asc_sfa_nanc                     -2.550434    0.186284     -13.691    -19.0593    0.312815       -8.1532      -11.3500
+asc_laa_nanc                     -2.769438    0.139379     -19.870    -27.0446    0.246126      -11.2521      -15.3151
+asc_laa_cmck                     -2.386639    0.125308     -19.046    -27.0266    0.232000      -10.2872      -14.5976
+asc_laa_msqd                     -1.908108    0.138361     -13.791    -21.0182    0.244749       -7.7962      -11.8820
+asc_laa_ytna                     -2.972077    0.225859     -13.159    -17.5865    0.405906       -7.3221       -9.7857
+asc_mna_msqd                     -2.134068    0.139525     -15.295    -22.4624    0.255632       -8.3482      -12.2601
+asc_sba_msqd                     -1.907368    0.138520     -13.770    -20.9888    0.236286       -8.0723      -12.3045
+asc_laa_btna                     -3.148741    0.324266      -9.710    -12.7942    0.555049       -5.6729       -7.4746
+asc_sfa_msqd                     -2.123451    0.145871     -14.557    -21.4124    0.280784       -7.5626      -11.1240
+asc_mna_psdn                     -2.579860    0.129850     -19.868    -27.5691    0.241980      -10.6614      -14.7940
+asc_sba_cmck                     -2.399859    0.129230     -18.570    -26.3086    0.221737      -10.8230      -15.3329
+asc_mra_msqd                     -2.466610    0.153458     -16.073    -22.5899    0.294771       -8.3679      -11.7603
+asc_laa_psdn                     -2.609787    0.132770     -19.656    -27.1883    0.252228      -10.3469      -14.3116
+asc_mna_nanc                     -2.336360    0.114075     -20.481    -29.2470    0.216831      -10.7750      -15.3869
+c_psdn                           -0.459993    0.110389      -4.167    -13.2259    0.255993       -1.7969       -5.7033
+w_nanc                           -4.689197    0.264678     -17.717    -21.4948    0.245406      -19.1079      -23.1828
+w_cmck                           -3.744174    0.193838     -19.316    -24.4750    0.273914      -13.6692      -17.3199
+w_msqd                           -3.738445    0.073843     -50.627    -64.1693    0.148065      -25.2487      -32.0025
+w_tuna                           -2.983934    0.158136     -18.869    -25.1931    0.144759      -20.6131      -27.5212
+w_psdn                           -4.019400    0.245300     -16.386    -20.4623    0.356862      -11.2632      -14.0654
+theta_part                       -0.520750    0.077483      -6.721    -19.6270    0.156717       -3.3229       -9.7038
+theta_cmck                       12.000000          NA          NA          NA          NA            NA            NA
+theta_msqd                        4.687152    2.643898       1.773      1.3946    5.519230        0.8492        0.6681
+theta_psdn                        2.468978    2.399535       1.029      0.6122    2.565658        0.9623        0.5726
+theta_nanc                        0.654834    0.279476       2.343     -1.2350    0.514773        1.2721       -0.6705
+theta_tuna                       12.000000          NA          NA          NA          NA            NA            NA
+B_mean_avail                      1.083719    0.091229      11.879      0.9177    0.160424        6.7553        0.5219
+B_mean_price                      0.195223    0.077682       2.513    -10.3599    0.121033        1.6130       -6.6492
+B_wind_max_220_mh                -0.041705    0.002890     -14.433   -360.5028    0.004143      -10.0656     -251.4196
+B_d_d                            -1.003976    0.072766     -13.797    -27.5401    0.099086      -10.1324      -20.2247
+B_d_cd                           -0.862769    0.205217      -4.204     -9.0770    0.162391       -5.3129      -11.4709
+B_dist_port_to_catch_area_zero   -0.004313  4.7972e-04      -8.990  -2093.5339  8.9760e-04       -4.8050    -1118.8918
+B_dummy_prev_days                 1.218381    0.057068      21.350      3.8267    0.123824        9.8396        1.7636
+B_dummy_prev_year_days            0.152285    0.014466      10.527    -58.6014    0.035020        4.3485      -24.2064
+B_unem_rate_part                  0.186785    0.010109      18.477    -80.4440    0.013746       13.5880      -59.1587
+asc_no_participation              0.000000          NA          NA          NA          NA            NA            NA
+B_unem_rate_nopart                0.000000          NA          NA          NA          NA            NA            NA
+w_nopart                          0.000000          NA          NA          NA          NA            NA            NA
+B_dist_to_cog                    -0.001530   8.699e-05     -17.590  -1.151e+04  2.1598e-04       -7.0843    -4637.1110
+
+Nesting structure for NL model component :
+Nest: root (1)
+|-------Alternative: no_participation
+'-Nest: part (0.3727)
+   |-Nest: cmck (0.3727)
+   |  |-Alternative: laa_cmck
+   |  '-Alternative: sba_cmck
+   |-Nest: msqd (0.3693)
+   |  |-Alternative: laa_msqd
+   |  |-Alternative: mna_msqd
+   |  |-Alternative: mra_msqd
+   |  |-Alternative: sba_msqd
+   |  '-Alternative: sfa_msqd
+   |-Nest: psdn (0.3436)
+   |  |-Alternative: laa_psdn
+   |  '-Alternative: mna_psdn
+   |-Nest: nanc (0.2453)
+   |  |-Alternative: laa_nanc
+   |  |-Alternative: mna_nanc
+   |  '-Alternative: sfa_nanc
+   '-Nest: tuna (0.3727)
+      |-Alternative: laa_ytna
+      '-Alternative: laa_btna
+
