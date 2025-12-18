@@ -7,6 +7,9 @@ rm(list = ls())
 
 ### Load Apollo library
 library(apollo)
+library(tidyverse)
+library(slider)
+library(zoo)
 
 ### Initialise code
 apollo_initialise()
@@ -39,22 +42,134 @@ apollo_control = list(
 # google_dir <- "H:/My Drive/"
 google_dir <- "G:/Mi unidad/"
 
-library(tidyr)
-library(tidyverse)
-long_data = readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c4.rds")) %>%
-  dplyr::select("fished_haul_anon", "fished_vessel_anon", "selection", "fished",
-                "fished_vessel_anon", "mean_avail", "mean_price", 
-                "wind_max_220_mh", "dist_to_cog", "dist_port_to_catch_area_zero",
-                "psdnclosure", "btnaclosure", "dummy_last_day",
-                "unem_rate", "d_d", "d_cd", "weekend") 
-  
+long_data <- readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c4.rds")) %>%
+  select(set_date, fished_haul_anon, fished_vessel_anon, selection, fished,
+         mean_avail, mean_price, wind_max_220_mh, dist_to_cog, dist_port_to_catch_area_zero,
+         psdnclosure, btnaclosure, dummy_last_day, unem_rate, d_d, d_cd, weekend) %>%
+  mutate(
+    selection = tolower(gsub("-", "_", selection)),
+    date = as.Date(set_date)
+  ) %>%
+  mutate(
+    # outside option
+    PORT_AREA_CODE = case_when(
+      selection == "no_participation" ~ "NOPART",
+      TRUE ~ str_to_upper(str_extract(selection, "^[a-z]{3}"))
+    )
+  ) %>%
+  mutate(
+    # outside option
+    sp4 = case_when(
+      selection == "no_participation" ~ "NOPART",
+      TRUE ~ str_to_upper(str_extract(selection, "[a-z]{4}$"))
+    )
+  )
 
-long_data$selection <- tolower(gsub("-", "_", long_data$selection))
+
+## Add SDMs (daily, MA 7, MA 14) 
+prepare_sdm <- function(sdm_rds,
+                        species_code,
+                        sdm_col,          # ej "SDM_90"
+                        port_var = "PORT_AREA_CODE") {
+  
+  sdm <- readRDS(sdm_rds) %>%
+    mutate(
+      date = if(!"date" %in% names(.))
+        make_date(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)
+      else date,
+      across(where(is.numeric), ~ ifelse(is.nan(.x), NA_real_, .x))
+    ) %>%
+    arrange(.data[[port_var]], date) %>%
+    group_by(.data[[port_var]]) %>%
+    mutate(
+      !!paste0(species_code, "_daily") := .data[[sdm_col]],
+      !!paste0(species_code, "_t1")    := lag(.data[[sdm_col]], 1),
+      !!paste0(species_code, "_MA7_t1")  := slide_dbl(lag(.data[[sdm_col]],1), mean, .before = 6),
+      !!paste0(species_code, "_MA14_t1") := slide_dbl(lag(.data[[sdm_col]],1), mean, .before = 13),
+      !!paste0(species_code, "_MA30_t1") := slide_dbl(lag(.data[[sdm_col]],1), mean, .before = 29)
+    ) %>%
+    ungroup() %>%
+    select(
+      .data[[port_var]], date,
+      starts_with(paste0(species_code, "_"))
+    )
+  
+  return(sdm)
+}
+
+MSQD_sdm <- prepare_sdm("SDMs/sdm_msqd.rds", "MSQD", "MSQD_SDM_90")
+PSDN_sdm <- prepare_sdm("SDMs/sdm_psdn.rds", "PSDN", "PSDN_SDM_60")
+NANC_sdm <- prepare_sdm("SDMs/sdm_nanc.rds", "NANC", "NANC_SDM_60")
+JMCK_sdm <- prepare_sdm("SDMs/sdm_jmck.rds", "JMCK", "JMCK_SDM_60")
+CMCK_sdm <- prepare_sdm("SDMs/sdm_cmck.rds", "CMCK", "CMCK_SDM_60")
+PHRG_sdm <- prepare_sdm("SDMs/sdm_phrg.rds", "PHRG", "PHRG_SDM_20")
+ALBC_sdm <- prepare_sdm("SDMs/sdm_albc.rds", "ALBC", "ALBC_SDM_90")
+)
+
+
+sdm_all <- Reduce(
+  function(x, y) left_join(x, y, by = c("PORT_AREA_CODE", "date")),
+  list(MSQD_sdm, PSDN_sdm, NANC_sdm, JMCK_sdm, CMCK_sdm, PHRG_sdm)
+)
+
+
+##### Unir SDM con LONG DATA
+
+long_data2 <- long_data %>%
+  left_join(sdm_all, by = c("PORT_AREA_CODE","date"))
+
+long_data2 <- long_data2 %>%
+  mutate(
+    mean_avail_MA30 = case_when(
+      sp4 == "MSQD" ~ MSQD_MA30_t1,
+      sp4 == "PSDN" ~ PSDN_MA30_t1,
+      sp4 == "NANC" ~ NANC_MA30_t1,
+      sp4 == "JMCK" ~ JMCK_MA30_t1,
+      sp4 == "CMCK" ~ CMCK_MA30_t1,
+      sp4 == "PHRG" ~ PHRG_MA30_t1,
+      sp4 == "NOPART" ~ 0,
+      TRUE ~ NA_real_
+    ),
+    mean_avail_MA14 = case_when(
+      sp4 == "MSQD" ~ MSQD_MA14_t1,
+      sp4 == "PSDN" ~ PSDN_MA14_t1,
+      sp4 == "NANC" ~ NANC_MA14_t1,
+      sp4 == "JMCK" ~ JMCK_MA14_t1,
+      sp4 == "CMCK" ~ CMCK_MA14_t1,
+      sp4 == "PHRG" ~ PHRG_MA14_t1,
+      sp4 == "NOPART" ~ 0,
+      TRUE ~ NA_real_
+    ),
+    mean_avail_MA7 = case_when(
+      sp4 == "MSQD" ~ MSQD_MA7_t1,
+      sp4 == "PSDN" ~ PSDN_MA7_t1,
+      sp4 == "NANC" ~ NANC_MA7_t1,
+      sp4 == "JMCK" ~ JMCK_MA7_t1,
+      sp4 == "CMCK" ~ CMCK_MA7_t1,
+      sp4 == "PHRG" ~ PHRG_MA7_t1,
+      sp4 == "NOPART" ~ 0,
+      TRUE ~ NA_real_
+    ),
+    avail_t1_daily = case_when(
+      sp4 == "MSQD" ~ MSQD_t1,
+      sp4 == "PSDN" ~ PSDN_t1,
+      sp4 == "NANC" ~ NANC_t1,
+      sp4 == "JMCK" ~ JMCK_t1,
+      sp4 == "CMCK" ~ CMCK_t1,
+      sp4 == "PHRG" ~ PHRG_t1,
+      sp4 == "NOPART" ~ 0,
+      TRUE ~ NA_real_
+    )
+  )
+
+
+
+##### Long to wide
 
 database <- long_data %>%
   pivot_wider(
     names_from = selection,                  # Unique values for alternatives
-    values_from = c(fished, mean_avail, mean_price, wind_max_220_mh, dist_to_cog, 
+    values_from = c(set_date, fished, mean_avail, mean_price, wind_max_220_mh, dist_to_cog, 
                     dist_port_to_catch_area_zero, dummy_last_day, 
                     unem_rate, d_d, d_cd)) %>%
   dplyr::mutate(unem_rate = unem_rate_sfa_nanc)
@@ -81,28 +196,13 @@ database$choice <- as.integer(database$choice)
 database <- database[order(database$fished_vessel_anon, database$fished_haul_anon), ]
 
 
-## Add SDMs (daily, MA 7, MA 14) -- Calculate 30-day moving average (excluding current day) for each port
-MSQD_sdm_data <- readRDS("SDMs/sdm_msqd.rds") %>%
-  mutate(
-    date = make_date(LANDING_YEAR, LANDING_MONTH, LANDING_DAY),
-    across(where(is.numeric), ~ ifelse(is.nan(.x), NA_real_, .x))
-  )
 
-MSQD_sdm_data <- MSQD_sdm_data %>%
-  group_by(PORT_AREA_CODE) %>%
-  arrange(date) %>%
-  mutate(
-    SDM_30day_MA = rollapply(SDM_90, 
-                             width = 30, 
-                             FUN = mean, 
-                             align = "right",
-                             fill = NA,
-                             partial = FALSE)) %>%
-  mutate(MSQD_SDM_30day_MA_lag = lag(SDM_30day_MA, 1)) %>%
-  ungroup() %>% 
-  select(c(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, PORT_AREA_CODE, MSQD_SDM_30day_MA_lag)) %>%
-  mutate(date = as.Date(paste(LANDING_YEAR, LANDING_MONTH, LANDING_DAY, sep = "-"))) %>%
-  dplyr::select(date, PORT_AREA_CODE, MSQD_SDM_30day_MA_lag)
+
+
+
+
+
+
 
 
 
