@@ -1,0 +1,15 @@
+
+Apollo model summary
+
+Model name                   : NL_participation_model_c4_lastday_R&R
+Model description            : Participation, location and target species decisions
+Estimation method            : bfgs
+Modelled outcomes            : 29160
+
+LL(final)                    : -23164.81
+Estimated parameters         : 36
+
+
+Estimates (no standard errors computed):
+
+For more detailed output, use apollo_modelOutput

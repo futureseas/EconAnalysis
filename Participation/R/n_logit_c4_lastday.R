@@ -19,10 +19,10 @@ setwd("D:/GitHub/EconAnalysis/Participation")
 
 ### Set core controls
 apollo_control = list(
-  modelName       = "NL_participation_model_c4_lastday",
+  modelName       = "NL_participation_model_c4_lastday_R&R",
   modelDescr      = "Participation, location and target species decisions",
   indivID         = "fished_vessel_anon", 
-  outputDirectory = "output",
+  outputDirectory = "R/output",
   panelData       = TRUE,
   nCores          = 18,
   workInLogs      = TRUE
@@ -48,17 +48,13 @@ long_data <- readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c4.rds"
          psdnclosure, btnaclosure, dummy_last_day, unem_rate, d_d, d_cd, weekend) %>%
   mutate(
     selection = tolower(gsub("-", "_", selection)),
-    date = as.Date(set_date)
+    date      = as.Date(set_date)
   ) %>%
   mutate(
-    # outside option
     PORT_AREA_CODE = case_when(
       selection == "no_participation" ~ "NOPART",
       TRUE ~ str_to_upper(str_extract(selection, "^[a-z]{3}"))
-    )
-  ) %>%
-  mutate(
-    # outside option
+    ),
     sp4 = case_when(
       selection == "no_participation" ~ "NOPART",
       TRUE ~ str_to_upper(str_extract(selection, "[a-z]{4}$"))
@@ -69,7 +65,7 @@ long_data <- readRDS(paste0(google_dir, "Data/Anonymised data/part_model_c4.rds"
 ## Add SDMs (daily, MA 7, MA 14) 
 prepare_sdm <- function(sdm_rds,
                         species_code,
-                        sdm_col,          # ej "SDM_90"
+                        sdm_col,
                         port_var = "PORT_AREA_CODE") {
   
   sdm <- readRDS(sdm_rds) %>%
@@ -82,17 +78,17 @@ prepare_sdm <- function(sdm_rds,
     arrange(.data[[port_var]], date) %>%
     group_by(.data[[port_var]]) %>%
     mutate(
-      !!paste0(species_code, "_daily") := .data[[sdm_col]],
-      !!paste0(species_code, "_t1")    := lag(.data[[sdm_col]], 1),
-      !!paste0(species_code, "_MA7_t1")  := slide_dbl(lag(.data[[sdm_col]],1), mean, .before = 6),
-      !!paste0(species_code, "_MA14_t1") := slide_dbl(lag(.data[[sdm_col]],1), mean, .before = 13),
-      !!paste0(species_code, "_MA30_t1") := slide_dbl(lag(.data[[sdm_col]],1), mean, .before = 29)
+      !!paste0(species_code, "_daily")  := .data[[sdm_col]],
+      !!paste0(species_code, "_t1")     := dplyr::lag(.data[[sdm_col]], 1),
+      !!paste0(species_code, "_MA7_t1")  := slide_dbl(dplyr::lag(.data[[sdm_col]], 1),
+                                                     ~ mean(.x, na.rm = TRUE), .before = 6),
+      !!paste0(species_code, "_MA14_t1") := slide_dbl(dplyr::lag(.data[[sdm_col]], 1),
+                                                     ~ mean(.x, na.rm = TRUE), .before = 13),
+      !!paste0(species_code, "_MA30_t1") := slide_dbl(dplyr::lag(.data[[sdm_col]], 1),
+                                                     ~ mean(.x, na.rm = TRUE), .before = 29)
     ) %>%
     ungroup() %>%
-    select(
-      .data[[port_var]], date,
-      starts_with(paste0(species_code, "_"))
-    )
+    select(.data[[port_var]], date, starts_with(paste0(species_code, "_")))
   
   return(sdm)
 }
@@ -103,23 +99,86 @@ NANC_sdm <- prepare_sdm("SDMs/sdm_nanc.rds", "NANC", "NANC_SDM_60")
 JMCK_sdm <- prepare_sdm("SDMs/sdm_jmck.rds", "JMCK", "JMCK_SDM_60")
 CMCK_sdm <- prepare_sdm("SDMs/sdm_cmck.rds", "CMCK", "CMCK_SDM_60")
 PHRG_sdm <- prepare_sdm("SDMs/sdm_phrg.rds", "PHRG", "PHRG_SDM_20")
-ALBC_sdm <- prepare_sdm("SDMs/sdm_albc.rds", "ALBC", "ALBC_SDM_90")
-)
+ALBC_sdm <- prepare_sdm("SDMs/sdm_albc.rds", "ALBC", "albc_SDM_90")
 
 
 sdm_all <- Reduce(
   function(x, y) left_join(x, y, by = c("PORT_AREA_CODE", "date")),
-  list(MSQD_sdm, PSDN_sdm, NANC_sdm, JMCK_sdm, CMCK_sdm, PHRG_sdm)
+  list(MSQD_sdm, PSDN_sdm, NANC_sdm, JMCK_sdm, CMCK_sdm, PHRG_sdm, ALBC_sdm)
 )
 
+### Add CPU Index
 
-##### Unir SDM con LONG DATA
+cpue_raw <- readRDS("D:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds") %>%
+  mutate(date = make_date(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
+  select(PORT_AREA_CODE, Species_Dominant, date, CPUE_index)
+
+cpue_expanded <- cpue_raw %>%
+  group_by(PORT_AREA_CODE, Species_Dominant) %>%
+  complete(date = seq(min(date), max(date), by = "day")) %>%
+  ungroup() %>%
+  arrange(PORT_AREA_CODE, Species_Dominant, date) %>%
+  group_by(PORT_AREA_CODE, Species_Dominant) %>%
+  mutate(
+    CPUE_MA30_t1 = slide_dbl(
+      dplyr::lag(CPUE_index, 1),
+      ~ if (all(is.na(.x))) NA_real_ else mean(.x, na.rm = TRUE),
+      .before = 29
+    ),
+    CPUE_MA90_t1 = slide_dbl(
+      dplyr::lag(CPUE_index, 1),
+      ~ if (all(is.na(.x))) NA_real_ else mean(.x, na.rm = TRUE),
+      .before = 89
+    )
+  ) %>%
+  ungroup()
+
+
+
+# ################################################################# #
+#### MERGE SDM + CPUE INTO LONG DATA                             ####
+# ################################################################# #
 
 long_data2 <- long_data %>%
-  left_join(sdm_all, by = c("PORT_AREA_CODE","date"))
+  left_join(sdm_all, by = c("PORT_AREA_CODE", "date")) %>%
+  left_join(
+    cpue_expanded,
+    by = c("PORT_AREA_CODE" = "PORT_AREA_CODE",
+           "date" = "date",
+           "sp4"  = "Species_Dominant")
+  ) %>%
+  mutate(
+    CPUE_avail_t1      = dplyr::coalesce(CPUE_MA30_t1, CPUE_MA90_t1),
+    used_90d_fallback  = as.integer(is.na(CPUE_MA30_t1) & !is.na(CPUE_MA90_t1)),
+    is_CPUE            = as.integer(sp4 %in% c("BTNA", "YTNA"))
+  )
+
 
 long_data2 <- long_data2 %>%
   mutate(
+    CPUE_avail_t1 = dplyr::coalesce(CPUE_MA30_t1, CPUE_MA90_t1),
+    used_90d_fallback = as.integer(is.na(CPUE_MA30_t1) & !is.na(CPUE_MA90_t1))
+  )
+
+
+# ################################################################# #
+#### BUILD MULTIPLE AVAILABILITY MEASURES                         ####
+# ################################################################# #
+
+long_data2 <- long_data2 %>%
+  mutate(
+    mean_avail_daily = case_when(
+      sp4 == "MSQD" ~ MSQD_daily,
+      sp4 == "PSDN" ~ PSDN_daily,
+      sp4 == "NANC" ~ NANC_daily,
+      sp4 == "JMCK" ~ JMCK_daily,
+      sp4 == "CMCK" ~ CMCK_daily,
+      sp4 == "PHRG" ~ PHRG_daily,
+      sp4 == "ALBC" ~ ALBC_daily,
+      sp4 %in% c("BTNA","YTNA") ~ CPUE_avail_t1,
+      sp4 == "NOPART" ~ 0,
+      TRUE ~ NA_real_
+    ),
     mean_avail_MA30 = case_when(
       sp4 == "MSQD" ~ MSQD_MA30_t1,
       sp4 == "PSDN" ~ PSDN_MA30_t1,
@@ -127,6 +186,8 @@ long_data2 <- long_data2 %>%
       sp4 == "JMCK" ~ JMCK_MA30_t1,
       sp4 == "CMCK" ~ CMCK_MA30_t1,
       sp4 == "PHRG" ~ PHRG_MA30_t1,
+      sp4 == "ALBC" ~ ALBC_MA30_t1,
+      sp4 %in% c("BTNA","YTNA") ~ CPUE_avail_t1,
       sp4 == "NOPART" ~ 0,
       TRUE ~ NA_real_
     ),
@@ -137,6 +198,8 @@ long_data2 <- long_data2 %>%
       sp4 == "JMCK" ~ JMCK_MA14_t1,
       sp4 == "CMCK" ~ CMCK_MA14_t1,
       sp4 == "PHRG" ~ PHRG_MA14_t1,
+      sp4 == "ALBC" ~ ALBC_MA14_t1,
+      sp4 %in% c("BTNA","YTNA") ~ CPUE_avail_t1,
       sp4 == "NOPART" ~ 0,
       TRUE ~ NA_real_
     ),
@@ -147,16 +210,20 @@ long_data2 <- long_data2 %>%
       sp4 == "JMCK" ~ JMCK_MA7_t1,
       sp4 == "CMCK" ~ CMCK_MA7_t1,
       sp4 == "PHRG" ~ PHRG_MA7_t1,
+      sp4 == "ALBC" ~ ALBC_MA7_t1,
+      sp4 %in% c("BTNA","YTNA") ~ CPUE_avail_t1,
       sp4 == "NOPART" ~ 0,
       TRUE ~ NA_real_
     ),
-    avail_t1_daily = case_when(
+    mean_avail_t1_daily = case_when(
       sp4 == "MSQD" ~ MSQD_t1,
       sp4 == "PSDN" ~ PSDN_t1,
       sp4 == "NANC" ~ NANC_t1,
       sp4 == "JMCK" ~ JMCK_t1,
       sp4 == "CMCK" ~ CMCK_t1,
       sp4 == "PHRG" ~ PHRG_t1,
+      sp4 == "ALBC" ~ ALBC_t1,
+      sp4 %in% c("BTNA","YTNA") ~ CPUE_avail_t1,
       sp4 == "NOPART" ~ 0,
       TRUE ~ NA_real_
     )
@@ -164,46 +231,145 @@ long_data2 <- long_data2 %>%
 
 
 
-##### Long to wide
+# ################################################################# #
+#### AVAILABILITY SPEC SWITCH + CONSISTENT MISSING HANDLING       ####
+# ################################################################# #
+# NOTE: In this application, mean_price has no missing.
+# We will (i) define d_missing_avail by spec, (ii) update d_d/d_cd/d_c
+# using the new missing availability, and (iii) handle CPUE dummies.
 
-database <- long_data %>%
-  pivot_wider(
-    names_from = selection,                  # Unique values for alternatives
-    values_from = c(set_date, fished, mean_avail, mean_price, wind_max_220_mh, dist_to_cog, 
-                    dist_port_to_catch_area_zero, dummy_last_day, 
-                    unem_rate, d_d, d_cd)) %>%
-  dplyr::mutate(unem_rate = unem_rate_sfa_nanc)
+avail_specs <- list(
+  daily   = "mean_avail_daily",
+  MA7     = "mean_avail_MA7",
+  MA14    = "mean_avail_MA14",
+  MA30    = "mean_avail_MA30",
+  t1daily = "mean_avail_t1_daily"
+)
 
-database$choice <- ifelse(database$fished_sfa_nanc == 1, 1,                              
-                   ifelse(database$fished_laa_nanc == 1, 2,
-                   ifelse(database$fished_laa_cmck == 1, 3,                              
-                   ifelse(database$fished_laa_msqd == 1, 4,
-                   ifelse(database$fished_laa_ytna == 1, 5,
-                   ifelse(database$fished_mna_msqd == 1, 6,                              
-                   ifelse(database$fished_sba_msqd == 1, 7,
-                   ifelse(database$fished_laa_btna == 1, 8,                              
-                   ifelse(database$fished_sfa_msqd == 1, 9,
-                   ifelse(database$fished_mna_psdn == 1, 10,                              
-                   ifelse(database$fished_sba_cmck == 1, 11,
-                   ifelse(database$fished_mra_msqd == 1, 12,                              
-                   ifelse(database$fished_laa_psdn == 1, 13,
-                   ifelse(database$fished_mna_nanc == 1, 14,
-                   ifelse(database$fished_no_participation == 1, 15, NA)
-                   ))))))))))))))      
+prepare_avail_spec <- function(data, avail_var){
+  
+  data %>%
+    mutate(
+      # availability used in THIS model
+      mean_avail = .data[[avail_var]],
+      
+      # # missing availability (spec-specific)
+      d_missing_avail = as.integer(is.na(mean_avail)),
+      # 
+      # # NA -> 0 (so utilities can be computed)
+      mean_avail = tidyr::replace_na(mean_avail, 0),
+      # 
+      # infer "distance missing" from original d_d / d_cd (built under MA30)
+      dist_miss = as.integer(d_d == 1 | d_cd == 1),
+      # 
+      # # update missing-pattern dummies using the NEW availability missing
+      # d_cd = as.integer(dist_miss == 1 & d_missing_avail == 1),
+      # d_d  = as.integer(dist_miss == 1 & d_missing_avail == 0),
+      d_c  = as.integer(dist_miss == 0 & d_missing_avail == 1),
+      # 
+      # CPUE: missing only for CPUE alternatives
+      d_missing_cpue = as.integer(is_CPUE == 1 & d_missing_avail == 1),
+      
+    ) %>%
+    select(-dist_miss)
+}
 
-### Add a numeric alternative column to your dataset
-database$choice <- as.integer(database$choice)
-database <- database[order(database$fished_vessel_anon, database$fished_haul_anon), ]
+data_by_avail <- lapply(avail_specs, function(v){
+  prepare_avail_spec(long_data2, v)
+})
+
+names(data_by_avail)
+# "daily" "MA7" "MA14" "MA30" "t1daily"
+
+data <- data_by_avail$MA30
 
 
 
+##############################
+##### Long to wide (B)
+########################
+
+alts <- c(
+  "sfa_nanc",
+  "laa_nanc",
+  "laa_cmck",
+  "laa_msqd",
+  "laa_ytna",
+  "mna_msqd",
+  "sba_msqd",
+  "laa_btna",
+  "sfa_msqd",
+  "mna_psdn",
+  "sba_cmck",
+  "mra_msqd",
+  "laa_psdn",
+  "mna_nanc",
+  "no_participation"
+)
+
+# -----
+# WIDE builder: expects df_long already contains the spec-specific:
+#   mean_avail, d_missing_avail, d_c, d_d, d_cd, d_missing_cpue (optional)
+# -----
+
+make_database_wide_B_safe <- function(df_long, alts){
+  
+  df_long <- df_long %>%
+    filter(selection %in% alts) %>%
+    mutate(selection = factor(selection, levels = alts))
+  
+  common <- df_long %>%
+    group_by(fished_vessel_anon, fished_haul_anon) %>%
+    summarise(
+      set_date = first(set_date),
+      weekend  = first(weekend),
+      unem_rate = first(unem_rate[selection != "no_participation" & !is.na(unem_rate)]),
+      btnaclosure = max(btnaclosure, na.rm = TRUE),
+      psdnclosure = max(psdnclosure, na.rm = TRUE),
+      .groups = "drop"
+    )
+  
+  choice_long <- df_long %>%
+    filter(fished == 1) %>%
+    distinct(fished_vessel_anon, fished_haul_anon, selection) %>%
+    mutate(choice = as.integer(selection)) %>%
+    select(fished_vessel_anon, fished_haul_anon, choice)
+  
+  alt_vars <- c(
+    "fished","mean_avail","mean_price","wind_max_220_mh","dist_to_cog",
+    "dist_port_to_catch_area_zero","dummy_last_day",
+    "d_missing_avail","d_missing_cpue","d_c","d_d","d_cd"
+  )
+  
+  alt_wide <- df_long %>%
+    select(fished_vessel_anon, fished_haul_anon, selection, any_of(alt_vars)) %>%
+    pivot_wider(
+      names_from  = selection,
+      values_from = any_of(alt_vars)
+    )
+  
+  database <- common %>%
+    left_join(alt_wide, by = c("fished_vessel_anon", "fished_haul_anon")) %>%
+    left_join(choice_long, by = c("fished_vessel_anon", "fished_haul_anon")) %>%
+    mutate(choice = as.integer(choice)) %>%
+    arrange(fished_vessel_anon, fished_haul_anon)
+  
+  return(database)
+}
 
 
+# ---------------------------------------
+# Build 5 long datasets (spec-specific)
+# Wide for each spec
+# ---------------------------------------
+
+databases <- lapply(data_by_avail, function(df){
+  make_database_wide_B_safe(df, alts = alts)
+})
 
 
-
-
-
+database <- databases$MA30
+# listo para Apollo
 
 
 
@@ -258,8 +424,8 @@ apollo_beta=c(B_mean_avail                   = 0.7,
 apollo_fixed = c("asc_no_participation", "B_unem_rate_nopart", "w_nopart")
 
 
-### Read in starting values for at least some parameters from existing model output file
-apollo_beta=apollo_readBeta(apollo_beta,apollo_fixed,"NL_participation_model",overwriteFixed=FALSE)
+# ### Read in starting values for at least some parameters from existing model output file
+apollo_beta=apollo_readBeta(apollo_beta,apollo_fixed,"NL_participation_model_c4_lastday",overwriteFixed=FALSE)
 
 
 # ################################################################# #
