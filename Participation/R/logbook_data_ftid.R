@@ -10,7 +10,7 @@ library(readxl)
 # Link to logbook -- MARKET SQUID
 
 ## Oregon Squid
-sqd.logbook.OR.2016 <- readxl::read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2016") %>%
+sqd.logbook.OR.2016 <- readxl::read_excel("D:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2016") %>%
   dplyr::rename(set_number = `Set #`) %>%
   mutate(Lat = Lat + min...9/60) %>%
   mutate(Long = Long + min...11/60) %>%
@@ -30,7 +30,7 @@ sqd.logbook.OR.2016 <- readxl::read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks
   dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
   ungroup()
 
-sqd.logbook.OR.2018 <- read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2018") %>%
+sqd.logbook.OR.2018 <- read_excel("D:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2018") %>%
   mutate(Lat = Lat + Min/60) %>%
   mutate(Long = Long + mins/60) %>%
   mutate(AGENCY_CODE="O") %>%
@@ -51,7 +51,7 @@ sqd.logbook.OR.2018 <- read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Squid 
   dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
   ungroup()
 
-sqd.logbook.OR.2019 <- read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2019") %>%
+sqd.logbook.OR.2019 <- read_excel("D:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2019") %>%
   dplyr::rename(set_number = Set) %>%
   mutate(lat = Lat + lat/60) %>%
   mutate(lon = Long + long/60) %>%
@@ -69,7 +69,7 @@ sqd.logbook.OR.2019 <- read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Squid 
   dplyr::select(c('lat', 'lon', 'VESSEL_NUM', 'AGENCY_CODE', 'set_date', 'FTID', 'set_number')) %>%
   ungroup()
 
-sqd.logbook.OR.2020 <- read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2020") %>%
+sqd.logbook.OR.2020 <- read_excel("D:\\Data\\ODFW CPS logbooks\\Squid logbooks.xlsx", sheet = "Squid 2020") %>%
   dplyr::rename(set_number = `Set No.`) %>%
   mutate(Lat = Lat + Min/60) %>%
   mutate(Long = Long + mins/60) %>%
@@ -103,7 +103,7 @@ rm(sqd.logbook.OR.2016, sqd.logbook.OR.2018, sqd.logbook.OR.2019, sqd.logbook.OR
 
 
 ## California Squid
-sqd.logbook.vessel <- read_csv("C:\\Data\\Logbooks\\CDFW CPS logbooks\\MarketSquidVesselDataExtract.csv") %>%
+sqd.logbook.vessel <- read_csv("D:\\Data\\CDFW CPS logbooks\\MarketSquidVesselDataExtract.csv") %>%
   dplyr::rename(lat = SetLatitude) %>%
   dplyr::rename(lon = SetLongitude) %>%
   dplyr::rename(VESSEL_NUM = VesselID) %>%
@@ -118,7 +118,7 @@ sqd.logbook.vessel <- read_csv("C:\\Data\\Logbooks\\CDFW CPS logbooks\\MarketSqu
   drop_na(lon) %>%
   drop_na(lat)
 
-sqd.logbook.light.brail <- read_csv("C:\\Data\\Logbooks\\CDFW CPS logbooks\\MarketSquidLightBrailLogDataExtract.csv") %>%
+sqd.logbook.light.brail <- read_csv("D:\\Data\\CDFW CPS logbooks\\MarketSquidLightBrailLogDataExtract.csv") %>%
   dplyr::rename(lat = Lat_DD) %>%
   dplyr::rename(lon = Long_DD) %>%
   dplyr::rename(VESSEL_NUM = VesselID) %>%
@@ -140,7 +140,7 @@ rm(sqd.logbook.OR, sqd.logbook.vessel,sqd.logbook.light.brail)
 
 ###-------------------------------------------
 # Link to logbook -- NORTHERN ANCHOVY
-nanc.logbook.OR <- readxl::read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Anchovy logbooks.xlsx", sheet = "2016") %>%
+nanc.logbook.OR <- readxl::read_excel("D:\\Data\\ODFW CPS logbooks\\Anchovy logbooks.xlsx", sheet = "2016") %>%
   dplyr::rename("lat_D" = "Lat (D)") %>% 
   dplyr::rename("lat_min" = "Lat (DM)") %>%
   mutate(lat = lat_D + lat_min/60) %>%
@@ -165,7 +165,7 @@ rm(nanc.logbook.OR)
 
 # PACIFIC SARDINE
 ## Oregon
-psdn.logbook.OR <- read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Sardine logbooks.xlsx", sheet = "Sardine") %>%
+psdn.logbook.OR <- read_excel("D:\\Data\\ODFW CPS logbooks\\Sardine logbooks.xlsx", sheet = "Sardine") %>%
   mutate(lat = Lat + LatMin/60) %>%
   mutate(lon = Long + LongMin/60) %>%
   mutate(AGENCY_CODE = "O") %>%
@@ -183,7 +183,7 @@ psdn.logbook.OR <- read_excel("C:\\Data\\Logbooks\\ODFW CPS logbooks\\Sardine lo
 
 psdn.logbook <- psdn.logbook.OR %>% mutate(PACFIN_SPECIES_CODE = "PSDN")
 
-psdn.logbook.WA.NO_FTID <- read_excel("C:\\Data\\Logbooks\\WDFW CPS logbooks\\WA Sardine Logbook Flatfile Data Reques 20-15485.xlsx") %>%
+psdn.logbook.WA.NO_FTID <- read_excel("D:\\Data\\WDFW CPS logbooks\\WA Sardine Logbook Flatfile Data Reques 20-15485.xlsx") %>%
   mutate(lat = `Latitude Degrees` + `Latitude Minutes`/60) %>%
   mutate(lon = `Longitude Degrees` + `Longitude Minutes`/60) %>%
   mutate(AGENCY_CODE = "W") %>%
@@ -208,7 +208,7 @@ logbooks.FTID <- rbind(sqd.logbook, nanc.logbook, psdn.logbook) %>%
 logbooks.coord <- logbooks.FTID %>%
   group_by(FTID, PACFIN_SPECIES_CODE) %>% summarize(lat_logbook = mean(lat), lon_logbook = mean(lon))
 
-saveRDS(logbooks.coord, "C:\\Data\\Logbooks\\logbooks_FTID.rds")
+saveRDS(logbooks.coord, "D:\\Data\\logbooks_FTID.rds")
 
 
 

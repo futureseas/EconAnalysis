@@ -19,7 +19,7 @@ setwd("D:/GitHub/EconAnalysis")
 #-----------------------------------------------------
 ### Load in the data
 # Tickets1 <- fread("C:/Data/PacFIN data/FutureSeasIII_2000_2009.csv")
-Tickets_raw <- fread("D:/FutureSeasIII_2010_2020.csv")
+Tickets_raw <- fread("D:/Data/FutureSeasIII_2010_2020.csv")
 # Tickets_raw<-rbind(Tickets1, Tickets2)
 # rm(Tickets1, Tickets2)
 
@@ -186,7 +186,7 @@ Catch.per.trip <- Tickets_chr %>%
   mutate(CPUE_index = sigmoid(CPUE.z)) %>%
   dplyr::select(-c('mean.CPUE', 'sd.CPUE', 'CPUE', 'CPUE.z'))
 
-saveRDS(Catch.per.trip, "C:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds")
+# saveRDS(Catch.per.trip, "D:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds")
 
 
 #----------------------------------------------------------------------------------------
@@ -263,7 +263,7 @@ Tickets_exp_md <- Tickets_exp %>%
 
 #-----------------------------------------------------
 ### Merge with cluster data
-PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
+PAM_Vessel_Groups <- read.csv("D:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
 Tickets_clust <- merge(Tickets_exp_md, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 rm(PAM_Vessel_Groups)
 Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
@@ -271,8 +271,8 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
 #-----------------------------------------------
 ### Merge data to fishing locations
 
-loogbook_coord <- readRDS("C:/Data/Logbooks/logbooks_FTID.rds")
-catch_area_coord <- readRDS("C:/GitHub/EconAnalysis/Participation/BlockAreas/catchareas_FTID.rds")
+loogbook_coord <- readRDS("D:/Data/logbooks_FTID.rds")
+catch_area_coord <- readRDS("D:/GitHub/EconAnalysis/Participation/BlockAreas/catchareas_FTID.rds")
 
 Tickets_coord <- merge(Tickets_clust, loogbook_coord, 
                      by = (c('FTID', 'PACFIN_SPECIES_CODE')),
@@ -458,7 +458,7 @@ Tickets_final$trip_id <- udpipe::unique_identifier(Tickets_final, fields = c('VE
 #------------------------------------------------------
 ### Save participation data
 
-saveRDS(Tickets_final, "C:\\Data\\PacFIN data\\participation_data.rds")
+saveRDS(Tickets_final, "D:\\Data\\participation_data.rds")
 #Tickets_final <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
 
 
