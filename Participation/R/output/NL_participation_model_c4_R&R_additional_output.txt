@@ -1,0 +1,47 @@
+Out of the 40 parameters in apollo_beta, 30 were updated with values from the input file.
+3 parameters in apollo_beta were kept fixed at their starting values rather than being updated from the input file.
+
+Analytic gradients cannot be used with setting workInLogs
+All checks on apollo_control completed.
+All checks on database completed.
+WARNING: Elements theta_cmck, theta_tuna in 'apollo_fixed' are constrained to values other than zero or one. This may be intentional. If not, stop this function by pressing the "Escape" key and adjust the starting values accordingly. 
+Preparing user-defined functions.
+
+Testing likelihood function...
+
+Overview of choices for NL model component :
+                                 sfa_nanc laa_nanc laa_cmck laa_msqd laa_ytna mna_msqd sba_msqd laa_btna sfa_msqd mna_psdn sba_cmck mra_msqd laa_psdn mna_nanc no_participation
+Times available                  29160.00 29160.00 29160.00    29160 29160.00 29160.00 29160.00 23947.00  29160.0 29160.00 29160.00 29160.00 29160.00 29160.00         29160.00
+Times chosen                        51.00    80.00   370.00     2042   105.00  2371.00  3838.00    52.00    671.0   148.00    55.00   126.00   124.00   805.00         18322.00
+Percentage chosen overall            0.17     0.27     1.27        7     0.36     8.13    13.16     0.18      2.3     0.51     0.19     0.43     0.43     2.76            62.83
+Percentage chosen when available     0.17     0.27     1.27        7     0.36     8.13    13.16     0.22      2.3     0.51     0.19     0.43     0.43     2.76            62.83
+
+Nesting structure for NL model component :
+Nest: root (1)
+|-------Alternative: no_participation
+'-Nest: part (0.5)
+   |-Nest: cmck (0.5)
+   |  |-Alternative: laa_cmck
+   |  '-Alternative: sba_cmck
+   |-Nest: msqd (0.25)
+   |  |-Alternative: laa_msqd
+   |  |-Alternative: mna_msqd
+   |  |-Alternative: mra_msqd
+   |  |-Alternative: sba_msqd
+   |  '-Alternative: sfa_msqd
+   |-Nest: psdn (0.25)
+   |  |-Alternative: laa_psdn
+   |  '-Alternative: mna_psdn
+   |-Nest: nanc (0.25)
+   |  |-Alternative: laa_nanc
+   |  |-Alternative: mna_nanc
+   |  '-Alternative: sfa_nanc
+   '-Nest: tuna (0.5)
+      |-Alternative: laa_ytna
+      '-Alternative: laa_btna
+
+Pre-processing likelihood function...
+Creating cluster...
+Preparing workers for multithreading...
+
+Testing influence of parameters.............................
