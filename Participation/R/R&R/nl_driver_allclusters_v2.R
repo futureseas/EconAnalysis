@@ -65,16 +65,15 @@ build_database <- function(long_data_spec, alts, case_vars){
     summarise(across(all_of(case_vars), ~ first(.x)), .groups="drop")
 
   alt_data <- long_data_spec %>%
-    select(all_of(id_vars), selection,
-           fished, mean_avail, mean_price, wind_max_220_mh, dist_to_cog,
-           dist_port_to_catch_area_zero, dummy_prev_days, dummy_prev_year_days,
-           d_d, d_cd, d_c, unem_rate) %>%
+    select(all_of(id_vars), selection, any_of(c("fished", "mean_avail", "mean_price", "mean_price_3", "wind_max_220_mh", "dist_to_cog",
+           "dist_port_to_catch_area_zero", "dummy_prev_days", "dummy_prev_year_days",
+           "d_d", "d_cd", "d_c", "unem_rate", "waclosure", "dcrbclosurewad"))) %>%
     pivot_wider(
       id_cols = all_of(id_vars),
       names_from  = selection,
-      values_from = c(fished, mean_avail, mean_price, wind_max_220_mh, dist_to_cog,
-                      dist_port_to_catch_area_zero, dummy_prev_days, dummy_prev_year_days,
-                      d_d, d_cd, d_c, unem_rate)
+      values_from = any_of(c("fished", "mean_avail", "mean_price", "mean_price_3", "wind_max_220_mh", "dist_to_cog",
+                             "dist_port_to_catch_area_zero", "dummy_prev_days", "dummy_prev_year_days",
+                             "d_d", "d_cd", "d_c", "unem_rate", "waclosure", "dcrbclosurewad"))
     )
 
   database <- alt_data %>% left_join(case_data, by=id_vars)
@@ -142,8 +141,8 @@ run_cluster <- function(cluster_id, rds_file, alts, apollo_beta_base, apollo_fix
 
   long_data <- readRDS(rds_file) %>%
     select(any_of(c("set_date","fished_haul_anon","fished_vessel_anon","selection","fished",
-                    "mean_avail","mean_price","wind_max_220_mh","dist_to_cog","dist_port_to_catch_area_zero",
-                    "psdnclosure","btnaclosure","msqdclosure","waclosure","dcrbclosure",
+                    "mean_avail","mean_price", "mean_price_3", "wind_max_220_mh","dist_to_cog","dist_port_to_catch_area_zero",
+                    "psdnclosure","btnaclosure","msqdclosure","waclosure", "dcrbclosure", "dcrbclosurewad",
                     "dummy_prev_days","dummy_prev_year_days","unem_rate","d_d","d_cd","weekend"))) %>%
     mutate(selection = tolower(gsub("-", "_", selection)),
            date = as.Date(set_date)) %>%
