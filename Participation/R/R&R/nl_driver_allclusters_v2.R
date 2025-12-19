@@ -231,39 +231,62 @@ run_cluster <- function(cluster_id, rds_file, alts, apollo_beta_base, apollo_fix
       )
     )
 
-  avail_specs <- list(daily="mean_avail_daily", MA7="mean_avail_MA7", MA14="mean_avail_MA14",
-                      MA30="mean_avail_MA30", t1daily="mean_avail_t1_daily")
+  avail_specs <- list(MA30="mean_avail_MA30")
+  
+  # avail_specs <- list(daily="mean_avail_daily", MA7="mean_avail_MA7", MA14="mean_avail_MA14",
+  #                     MA30="mean_avail_MA30", t1daily="mean_avail_t1_daily")
   data_by_avail <- lapply(avail_specs, function(v) prepare_avail_spec(long_data2, v))
   databases <- lapply(names(data_by_avail), function(nm) build_database(data_by_avail[[nm]], alts, case_vars))
   names(databases) <- names(data_by_avail)
-
+  
   models <- list()
-
+  
   for(spec in names(databases)){
+    
     apollo_control$modelName <- paste0("NL_participation_model_", cluster_id, "_R&R_", spec)
+    
     database <- databases[[spec]]
-
-    dc_cols <- grep("^d_c_", names(database), value=TRUE)
-    dc_ok <- (length(dc_cols)>0) && any(sapply(dc_cols, function(v) any(database[[v]]==1, na.rm=TRUE))) &&
-             isTRUE(use_d_c_by_spec[[spec]]==1)
-
+    assign("database", database, envir = .GlobalEnv)
+    
+    dc_cols <- grep("^d_c_", names(database), value = TRUE)
+    has_dc  <- (length(dc_cols) > 0) && any(sapply(dc_cols, function(v) any(database[[v]] == 1, na.rm = TRUE)))
+    want_dc <- isTRUE(use_d_c_by_spec[[spec]])
+    dc_ok   <- has_dc && want_dc
+    
+    apollo_beta  <- apollo_beta_base
     apollo_fixed <- apollo_fixed_base
     if(!dc_ok) apollo_fixed <- unique(c(apollo_fixed, "B_d_c"))
-
-    apollo_beta <- apollo_beta_base
-    apollo_beta <- apollo_readBeta(apollo_beta, apollo_fixed,
-                                   paste0("NL_participation_model_", cluster_id),
-                                   overwriteFixed=FALSE)
+    apollo_fixed <- intersect(apollo_fixed, names(apollo_beta))
+    
+    
+    # >>> CLAVE: subir ambos al GlobalEnv ANTES de validateInputs
+    assign("apollo_beta",  apollo_beta,  envir = .GlobalEnv)
+    assign("apollo_fixed", apollo_fixed, envir = .GlobalEnv)
+    assign("database",     database,     envir = .GlobalEnv)
+    assign("apollo_control", apollo_control, envir = .GlobalEnv)
 
     apollo_inputs <- apollo_validateInputs()
     apollo_inputs$use_d_c <- as.numeric(dc_ok)
-
-    cat("\n---", cluster_id, spec, "dc_ok=", dc_ok, "B_d_c fixed=", ("B_d_c" %in% apollo_fixed), "\n")
-    model_spec <- apollo_estimate(apollo_beta, apollo_fixed, apollo_prob_fun, apollo_inputs,
-                                  estimate_settings=list())
-    apollo_saveOutput(model_spec, saveOutput_settings=list(printT1=1))
+    
+    apollo_beta <- apollo_readBeta(apollo_beta, apollo_fixed,
+                                   paste0("NL_participation_model_", cluster_id),
+                                   overwriteFixed = FALSE)
+    
+    cat("\n---", cluster_id, spec,
+        "dc_ok=", dc_ok,
+        "B_d_c fixed=", ("B_d_c" %in% apollo_fixed), "\n")
+    
+    
+    assign("apollo_beta", apollo_beta, envir = .GlobalEnv)
+    
+    model_spec <- apollo_estimate(apollo_beta, apollo_fixed,
+                                  apollo_prob_fun, apollo_inputs,
+                                  estimate_settings = list())
+    
+    apollo_saveOutput(model_spec, saveOutput_settings = list(printT1 = 1))
     models[[spec]] <- model_spec
   }
+  
 
   comp <- data.frame(
     cluster = cluster_id,
@@ -721,7 +744,8 @@ apollo_probabilities_c7 = function(apollo_beta, apollo_inputs, functionality="es
 
 
 # ---- Run all clusters ----
-use_d_c_by_spec <- c(daily=1, MA7=1, MA14=0, MA30=0, t1daily=1)  # tweak if needed
+# use_d_c_by_spec <- c(daily=1, MA7=1, MA14=0, MA30=0, t1daily=1)  # tweak if needed
+use_d_c_by_spec <- c(MA30=0)  # tweak if needed
 
 res_c4 <- run_cluster("c4", paste0(google_dir,"Data/Anonymised data/part_model_c4.rds"),
   alts=c("sfa_nanc", "laa_nanc", "laa_cmck", "laa_msqd", "laa_ytna", "mna_msqd", "sba_msqd", "laa_btna", "sfa_msqd", "mna_psdn", "sba_cmck", "mra_msqd", "laa_psdn", "mna_nanc", "no_participation"),
@@ -734,7 +758,7 @@ res_c5 <- run_cluster("c5", paste0(google_dir,"Data/Anonymised data/part_model_c
   alts=c("mna_msqd", "sba_msqd", "mra_msqd", "laa_msqd", "npa_msqd", "sfa_msqd", "cba_msqd", "laa_psdn", "clo_psdn", "cwa_psdn", "clw_psdn", "sba_cmck", "laa_cmck", "laa_nanc", "cwa_albc", "cwa_dcrb", "clw_dcrb", "no_participation"),
   apollo_beta_base=apollo_beta_c5, apollo_fixed_base=apollo_fixed_c5,
   apollo_prob_fun=apollo_probabilities_c5,
-  case_vars=c("unem_rate","weekend","psdnclosure","msqdclosure","waclosure","dcrbclosure"),
+  case_vars=c("unem_rate","weekend","psdnclosure","msqdclosure","waclosure"),
   use_d_c_by_spec=use_d_c_by_spec)
 
 res_c6 <- run_cluster("c6", paste0(google_dir,"Data/Anonymised data/part_model_c6.rds"),
