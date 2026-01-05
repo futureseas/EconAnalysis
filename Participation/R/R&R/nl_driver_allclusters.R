@@ -571,7 +571,7 @@ ll_fun <- function(b){
   beta_tmp <- inp$apollo_beta
   beta_tmp[names(b)] <- b
   
-  P <- apollo_prob_fun(beta_tmp, inp, functionality = "estimate")
+  P <- apollo_probabilities_c5(beta_tmp, inp, functionality = "estimate")
   apollo_llCalc(P, inp)
 }
 

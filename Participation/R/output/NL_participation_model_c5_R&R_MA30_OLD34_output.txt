@@ -5,7 +5,7 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : NL_participation_model_c5_R&R_MA30
 Model description                           : Participation, location and target species decisions
-Model run at                                : 2026-01-05 17:14:18.567068
+Model run at                                : 2026-01-05 16:46:19.205842
 Estimation method                           : bgw
 Estimation diagnosis                        : Relative function convergence
 Optimisation diagnosis                      : Unknown (no Hessian calculated)
@@ -16,67 +16,67 @@ Number of modelled outcomes                 : 6806
 Number of cores used                        :  18 
 Model without mixing
 
-LL(start)                                   : -28732.49
-LL at equal shares, LL(0)                   : -18607.29
-LL at observed shares, LL(C)                : -8682.37
-LL(final)                                   : -4747.31
-Rho-squared vs equal shares                  :  0.7449 
-Adj.Rho-squared vs equal shares              :  0.7433 
-Rho-squared vs observed shares               :  0.4532 
-Adj.Rho-squared vs observed shares           :  0.4517 
-AIC                                         :  9554.62 
-BIC                                         :  9759.39 
+LL(start)                                   : -28732.53
+LL at equal shares, LL(0)                   : -18716.07
+LL at observed shares, LL(C)                : -8706.26
+LL(final)                                   : -4754.65
+Rho-squared vs equal shares                  :  0.746 
+Adj.Rho-squared vs equal shares              :  0.7444 
+Rho-squared vs observed shares               :  0.4539 
+Adj.Rho-squared vs observed shares           :  0.4524 
+AIC                                         :  9569.3 
+BIC                                         :  9774.06 
 
 Estimated parameters                        : 30
-Time taken (hh:mm:ss)                       :  00:00:27.37 
-     pre-estimation                         :  00:00:11.6 
-     estimation                             :  00:00:14.94 
-     post-estimation                        :  00:00:0.84 
-Iterations                                  :  27  
+Time taken (hh:mm:ss)                       :  00:00:22.75 
+     pre-estimation                         :  00:00:10.73 
+     estimation                             :  00:00:11.28 
+     post-estimation                        :  00:00:0.74 
+Iterations                                  :  30  
 
 Unconstrained optimisation.
 
 Estimates:
                                   Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
-B_mean_avail                      2.375788          NA          NA          NA          NA            NA            NA
-B_wind_max_220_mh                -0.068806          NA          NA          NA          NA            NA            NA
-B_dist_to_cog                  -8.6833e-04          NA          NA          NA          NA            NA            NA
-B_dist_port_to_catch_area_zero   -0.004550          NA          NA          NA          NA            NA            NA
-B_dummy_prev_days                 2.561479          NA          NA          NA          NA            NA            NA
-B_dummy_prev_year_days            0.388250          NA          NA          NA          NA            NA            NA
-B_unem_rate                       0.400033          NA          NA          NA          NA            NA            NA
-B_d_d                            -1.737181          NA          NA          NA          NA            NA            NA
+B_mean_avail                      2.609533          NA          NA          NA          NA            NA            NA
+B_wind_max_220_mh                -0.069808          NA          NA          NA          NA            NA            NA
+B_dist_to_cog                  -8.6892e-04          NA          NA          NA          NA            NA            NA
+B_dist_port_to_catch_area_zero   -0.003503          NA          NA          NA          NA            NA            NA
+B_dummy_prev_days                 2.584402          NA          NA          NA          NA            NA            NA
+B_dummy_prev_year_days            0.390956          NA          NA          NA          NA            NA            NA
+B_unem_rate                       0.392443          NA          NA          NA          NA            NA            NA
+B_d_d                            -1.477112          NA          NA          NA          NA            NA            NA
 c_dcrb                            0.000000          NA          NA          NA          NA            NA            NA
 c_psdn                            0.000000          NA          NA          NA          NA            NA            NA
-B_mean_price_part                 4.035202          NA          NA          NA          NA            NA            NA
-B_mean_price_crab                 0.090402          NA          NA          NA          NA            NA            NA
-asc_mna_msqd                     -8.294532          NA          NA          NA          NA            NA            NA
-asc_sba_msqd                     -8.124231          NA          NA          NA          NA            NA            NA
-asc_mra_msqd                     -9.067154          NA          NA          NA          NA            NA            NA
-asc_laa_msqd                     -8.487938          NA          NA          NA          NA            NA            NA
+B_mean_price_part                 3.871049          NA          NA          NA          NA            NA            NA
+B_mean_price_crab                 0.084210          NA          NA          NA          NA            NA            NA
+asc_mna_msqd                     -8.190232          NA          NA          NA          NA            NA            NA
+asc_sba_msqd                     -8.033294          NA          NA          NA          NA            NA            NA
+asc_mra_msqd                     -8.970424          NA          NA          NA          NA            NA            NA
+asc_laa_msqd                     -8.370951          NA          NA          NA          NA            NA            NA
 asc_npa_msqd                     -8.298985          NA          NA          NA          NA            NA            NA
-asc_sfa_msqd                     -8.748589          NA          NA          NA          NA            NA            NA
-asc_cba_msqd                     -8.102730          NA          NA          NA          NA            NA            NA
+asc_sfa_msqd                     -8.686168          NA          NA          NA          NA            NA            NA
+asc_cba_msqd                     -8.096228          NA          NA          NA          NA            NA            NA
 asc_laa_psdn                     -7.260191          NA          NA          NA          NA            NA            NA
-asc_clo_psdn                     -5.712128          NA          NA          NA          NA            NA            NA
-asc_cwa_psdn                     -4.287443          NA          NA          NA          NA            NA            NA
-asc_clw_psdn                     -4.601551          NA          NA          NA          NA            NA            NA
+asc_clo_psdn                     -5.761909          NA          NA          NA          NA            NA            NA
+asc_cwa_psdn                     -4.554481          NA          NA          NA          NA            NA            NA
+asc_clw_psdn                     -4.841657          NA          NA          NA          NA            NA            NA
 asc_sba_cmck                     -6.688885          NA          NA          NA          NA            NA            NA
-asc_laa_cmck                     -7.747608          NA          NA          NA          NA            NA            NA
+asc_laa_cmck                     -7.683418          NA          NA          NA          NA            NA            NA
 asc_laa_nanc                     -6.924795          NA          NA          NA          NA            NA            NA
-asc_cwa_albc                    -17.837503          NA          NA          NA          NA            NA            NA
-asc_cwa_dcrb                     -6.281667          NA          NA          NA          NA            NA            NA
-asc_clw_dcrb                     -5.767065          NA          NA          NA          NA            NA            NA
-theta_part                        0.666373          NA          NA          NA          NA            NA            NA
+asc_cwa_albc                    -17.625482          NA          NA          NA          NA            NA            NA
+asc_cwa_dcrb                     -6.554516          NA          NA          NA          NA            NA            NA
+asc_clw_dcrb                     -6.204586          NA          NA          NA          NA            NA            NA
+theta_part                        0.653230          NA          NA          NA          NA            NA            NA
 theta_cmck                       10.000000          NA          NA          NA          NA            NA            NA
 theta_msqd                       10.000000          NA          NA          NA          NA            NA            NA
-theta_psdn                        0.085193          NA          NA          NA          NA            NA            NA
+theta_psdn                        0.039990          NA          NA          NA          NA            NA            NA
 theta_part_crab                  10.000000          NA          NA          NA          NA            NA            NA
-w_msqd                           -3.717635          NA          NA          NA          NA            NA            NA
-w_psdn                           -0.579042          NA          NA          NA          NA            NA            NA
-w_albc                           -0.364951          NA          NA          NA          NA            NA            NA
-w_cmck                           -3.323443          NA          NA          NA          NA            NA            NA
-w_dcrb                           -0.454148          NA          NA          NA          NA            NA            NA
+w_msqd                           -3.719920          NA          NA          NA          NA            NA            NA
+w_psdn                           -0.579879          NA          NA          NA          NA            NA            NA
+w_albc                           -0.360750          NA          NA          NA          NA            NA            NA
+w_cmck                           -3.321169          NA          NA          NA          NA            NA            NA
+w_dcrb                           -0.485161          NA          NA          NA          NA            NA            NA
 asc_no_participation              0.000000          NA          NA          NA          NA            NA            NA
 w_nopart                          0.000000          NA          NA          NA          NA            NA            NA
 B_mean_price_no_part              0.000000          NA          NA          NA          NA            NA            NA
@@ -84,8 +84,8 @@ B_mean_price_no_part              0.000000          NA          NA          NA  
 Nesting structure for NL model component :
 Nest: root (1)
 |-------Alternative: no_participation
-|-Nest: part (0.6607)
-|  |-Nest: msqd (0.6607)
+|-Nest: part (0.6577)
+|  |-Nest: msqd (0.6577)
 |  |  |-Alternative: mna_msqd
 |  |  |-Alternative: sba_msqd
 |  |  |-Alternative: mra_msqd
@@ -93,10 +93,10 @@ Nest: root (1)
 |  |  |-Alternative: npa_msqd
 |  |  |-Alternative: sfa_msqd
 |  |  '-Alternative: cba_msqd
-|  |-Nest: cmck (0.6607)
+|  |-Nest: cmck (0.6577)
 |  |  |-Alternative: sba_cmck
 |  |  '-Alternative: laa_cmck
-|  |-Nest: psdn (0.3444)
+|  |-Nest: psdn (0.3354)
 |  |  |-Alternative: laa_psdn
 |  |  |-Alternative: clo_psdn
 |  |  |-Alternative: cwa_psdn
@@ -110,10 +110,10 @@ Nest: root (1)
 
 Overview of choices for NL model component :
                                  mna_msqd sba_msqd mra_msqd laa_msqd npa_msqd sfa_msqd cba_msqd laa_psdn clo_psdn cwa_psdn clw_psdn sba_cmck laa_cmck laa_nanc cwa_albc cwa_dcrb clw_dcrb no_participation
-Times available                   6767.00  6767.00  6767.00  6767.00  6767.00  6767.00  6767.00  3277.00  6806.00  3204.00  3204.00  6806.00  6806.00  4883.00   6806.0  6596.00  2890.00          6806.00
+Times available                   6767.00  6767.00  6767.00  6767.00  6767.00  6767.00  6767.00  3277.00  6806.00  3204.00  3204.00  6806.00  6806.00  4883.00   6806.0  6596.00  4560.00          6806.00
 Times chosen                       332.00  1030.00    30.00   194.00    11.00    76.00    22.00    13.00   314.00    85.00    71.00    14.00    23.00    15.00     34.0    30.00    52.00          4460.00
 Percentage chosen overall            4.88    15.13     0.44     2.85     0.16     1.12     0.32     0.19     4.61     1.25     1.04     0.21     0.34     0.22      0.5     0.44     0.76            65.53
-Percentage chosen when available     4.91    15.22     0.44     2.87     0.16     1.12     0.33     0.40     4.61     2.65     2.22     0.21     0.34     0.31      0.5     0.45     1.80            65.53
+Percentage chosen when available     4.91    15.22     0.44     2.87     0.16     1.12     0.33     0.40     4.61     2.65     2.22     0.21     0.34     0.31      0.5     0.45     1.14            65.53
 
 
 Classical covariance matrix:
@@ -746,26 +746,26 @@ w_dcrb                                                     NA                   
 
  20 most extreme outliers in terms of lowest average per choice prediction:
  ID Avg prob per choice
-  1           0.4142393
- 20           0.4444059
-  5           0.4597206
- 19           0.4836485
-  4           0.4852151
- 13           0.4899860
- 16           0.4920297
- 15           0.4949143
- 17           0.5027736
- 22           0.5224821
- 18           0.5227950
-  3           0.5313291
-  6           0.5365478
- 12           0.5395507
- 21           0.5493789
- 11           0.5536585
-  7           0.5723159
- 10           0.5757215
-  2           0.6622977
- 14           0.6783876
+  1           0.4139609
+ 20           0.4436145
+  5           0.4579032
+ 19           0.4838084
+  4           0.4844664
+ 13           0.4892685
+ 16           0.4920189
+ 15           0.4926545
+ 17           0.5026890
+ 22           0.5221116
+ 18           0.5225097
+  3           0.5313326
+  6           0.5340569
+ 12           0.5387582
+ 21           0.5487777
+ 11           0.5532150
+  7           0.5731475
+ 10           0.5735610
+  2           0.6616040
+ 14           0.6802034
 
 Settings and functions used in model definition:
 
@@ -875,7 +875,7 @@ function(apollo_beta, apollo_inputs, functionality="estimate"){
     laa_nanc = 1 - weekend,
     cwa_albc = 1,
     cwa_dcrb = 1 - d_cd_cwa_dcrb ,
-    clw_dcrb = (1 - dcrbclosurewad_clw_dcrb) * (1 - d_cd_clw_dcrb),
+    clw_dcrb = (1 - dcrbclosurewad_clw_dcrb) * (1 - d_cd_cwa_dcrb),
     no_participation = 1
   )
 
@@ -903,4 +903,3 @@ function(apollo_beta, apollo_inputs, functionality="estimate"){
   P = apollo_prepareProb(P, apollo_inputs, functionality)
   return(P)
 }
-<bytecode: 0x0000014509e42f98>
