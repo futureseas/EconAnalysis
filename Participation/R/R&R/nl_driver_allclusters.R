@@ -560,29 +560,31 @@ res_c5 <- run_cluster("c5", paste0(google_dir,"Data/Anonymised data/part_model_c
 
 
 m <- res_c5$models[["MA30"]]
-# 1) toma inputs guardados dentro del modelo (esto es lo clave)
+
+# usa inputs del modelo (o tu apollo_inputs_last si es el bueno)
 inp <- apollo_inputs_last
 
-# 2) toma el vector de parámetros estimados (solo libres)
+# parámetros libres estimados
 b_hat <- m$estimate
 
-# 3) define loglik usando EXACTAMENTE inp$database
+# loglik function
 ll_fun <- function(b){
-  beta_tmp <- inp$apollo_beta
+  beta_tmp <- apollo_beta_c5              # <-- NO inp$apollo_beta_c5
   beta_tmp[names(b)] <- b
   
   P <- apollo_probabilities_c5(beta_tmp, inp, functionality = "estimate")
+  
+  # <-- CLAVE: pasar apollo_inputs con nombre
   apollo_llCalc(P, inp)
 }
 
-# 4) Hessiano numérico + VCV con ginv (sin library())
 H <- numDeriv::hessian(func = ll_fun, x = b_hat)
 V <- MASS::ginv(-H)
 
 se <- sqrt(pmax(0, diag(V)))
 names(se) <- names(b_hat)
-
 se
+
 
 
 
