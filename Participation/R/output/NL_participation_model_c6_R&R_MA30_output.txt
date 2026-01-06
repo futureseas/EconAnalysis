@@ -5,7 +5,7 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : NL_participation_model_c6_R&R_MA30
 Model description                           : Participation, location and target species decisions
-Model run at                                : 2026-01-06 16:02:52.264502
+Model run at                                : 2026-01-06 16:37:46.43423
 Estimation method                           : bgw
 Estimation diagnosis                        : Relative function convergence
 Optimisation diagnosis                      : Unknown (no Hessian calculated)
@@ -28,10 +28,10 @@ AIC                                         :  3809.37
 BIC                                         :  3979.19 
 
 Estimated parameters                        : 29
-Time taken (hh:mm:ss)                       :  00:00:11.85 
-     pre-estimation                         :  00:00:8.58 
-     estimation                             :  00:00:3.13 
-     post-estimation                        :  00:00:0.14 
+Time taken (hh:mm:ss)                       :  00:00:10.53 
+     pre-estimation                         :  00:00:7.9 
+     estimation                             :  00:00:2.52 
+     post-estimation                        :  00:00:0.11 
 Iterations                                  :  11  
 
 Unconstrained optimisation.
