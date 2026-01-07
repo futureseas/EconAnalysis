@@ -910,6 +910,9 @@ use_d_c_by_spec <- c(daily=1, MA7=1, MA14=0, MA30=0, t1daily=1)  # tweak if need
 #   case_vars=c("weekend","psdnclosure","btnaclosure"),
 #   use_d_c_by_spec=use_d_c_by_spec)
 # saveRDS(res_c4, "res_c4.rds")
+saveRDS(apollo_beta_c4, "apollo_beta_c4.rds")
+saveRDS(apollo_fixed_c4, "apollo_fixed_c4.rds")
+saveRDS(apollo_probabilities_c4, "apollo_probabilities_c4.rds")
 res_c4 <- readRDS("res_c4.rds")
 
 # res_c5 <- run_cluster("c5", paste0(google_dir,"Data/Anonymised data/part_model_c5.rds"),
@@ -919,6 +922,9 @@ res_c4 <- readRDS("res_c4.rds")
 #   case_vars=c("weekend","psdnclosure","msqdclosure"),
 #   use_d_c_by_spec=use_d_c_by_spec)
 # saveRDS(res_c5, "res_c5.rds")
+saveRDS(apollo_beta_c5, "apollo_beta_c5.rds")
+saveRDS(apollo_fixed_c5, "apollo_fixed_c5.rds")
+saveRDS(apollo_probabilities_c5, "apollo_probabilities_c5.rds")
 res_c5 <- readRDS("res_c5.rds")
 
 # res_c6 <- run_cluster("c6", paste0(google_dir,"Data/Anonymised data/part_model_c6.rds"),
@@ -928,6 +934,9 @@ res_c5 <- readRDS("res_c5.rds")
 #   case_vars=c("weekend","psdnclosure","msqdclosure"),
 #   use_d_c_by_spec=use_d_c_by_spec)
 # saveRDS(res_c6, "res_c6.rds")
+saveRDS(apollo_beta_c6, "apollo_beta_c6.rds")
+saveRDS(apollo_fixed_c6, "apollo_fixed_c6.rds")
+saveRDS(apollo_probabilities_c6, "apollo_probabilities_c6.rds")
 res_c6 <- readRDS("res_c6.rds")
 
 # res_c7 <- run_cluster("c7", paste0(google_dir,"Data/Anonymised data/part_model_c7.rds"),
@@ -937,6 +946,9 @@ res_c6 <- readRDS("res_c6.rds")
 #   case_vars=c("weekend","psdnclosure","msqdclosure"),
 #   use_d_c_by_spec=use_d_c_by_spec)
 # saveRDS(res_c7, "res_c7.rds")
+saveRDS(apollo_beta_c7, "apollo_beta_c7.rds")
+saveRDS(apollo_fixed_c7, "apollo_fixed_c7.rds")
+saveRDS(apollo_probabilities_c7, "apollo_probabilities_c7.rds")
 res_c7 <- readRDS("res_c7.rds")
 
 # comp_all <- bind_rows(res_c4$comp, res_c5$comp, res_c6$comp, res_c7$comp) %>% arrange(cluster, AIC)
