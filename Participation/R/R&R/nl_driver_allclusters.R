@@ -557,9 +557,9 @@ N <- nrow(apollo_inputs$database)
     sba_msqd = 1 - msqdclosure,
     mra_msqd = 1 - msqdclosure,
     laa_msqd = 1 - msqdclosure,
-    npa_msqd = 1 - msqdclosure,
+    npa_msqd = 1,
     sfa_msqd = 1 - msqdclosure,
-    cba_msqd = 1 - msqdclosure,
+    cba_msqd = 1,
     laa_psdn = 1,
     clo_psdn = 1,
     cwa_psdn = 1 - waclosure_cwa_psdn,
@@ -939,271 +939,273 @@ res_c6 <- readRDS("res_c6.rds")
 # saveRDS(res_c7, "res_c7.rds")
 res_c7 <- readRDS("res_c7.rds")
 
-comp_all <- bind_rows(res_c4$comp, res_c5$comp, res_c6$comp, res_c7$comp) %>% arrange(cluster, AIC)
-print(comp_all)
-write.csv(comp_all, file=file.path("R","output","LL_AIC_BIC_allclusters.csv"), row.names=FALSE)
-# writexl::write_xlsx(comp_all, path=file.path("R","output","LL_AIC_BIC_allclusters.xlsx"))
+# comp_all <- bind_rows(res_c4$comp, res_c5$comp, res_c6$comp, res_c7$comp) %>% arrange(cluster, AIC)
+# print(comp_all)
+# write.csv(comp_all, file=file.path("R","output","LL_AIC_BIC_allclusters.csv"), row.names=FALSE)
+# # writexl::write_xlsx(comp_all, path=file.path("R","output","LL_AIC_BIC_allclusters.xlsx"))
+# 
+# 
+# 
+# 
+# #### OUT OF SAMPLE METRIC ####
+# 
+# oos_compare_cluster <- function(res_cluster,
+#                                 apollo_beta_base, apollo_fixed_base,
+#                                 apollo_prob_fun,
+#                                 cut_date = as.Date("2017-01-01"),
+#                                 specs = c("daily","MA7","MA14","MA30","t1daily"),
+#                                 nCores = 1,
+#                                 cl = "cX",
+#                                 date_var = "set_date",
+#                                 indiv_id = NULL,   # opcional: "fished_vessel_anon" para perIndiv
+#                                 eps = 1e-300,
+#                                 verbose = TRUE){
+#   
+#   # ---------- helpers ----------
+#   safe_date <- function(x){
+#     if(inherits(x, "Date")) return(x)
+#     as.Date(x)
+#   }
+#   
+#   extract_probvec <- function(P_test){
+#     # Queremos un vector numérico de probs "del elegido"
+#     # Casos típicos:
+#     #  A) P_test$model$chosen (validate a veces)
+#     #  B) P_test$model es vector numérico (prediction a veces)
+#     #  C) P_test$model es lista sin nombres (names NULL) -> unlist
+#     if(is.null(P_test)) stop("P_test es NULL")
+#     
+#     if(!is.null(P_test$model)){
+#       m <- P_test$model
+#       
+#       # A: lista nombrada con chosen
+#       if(is.list(m) && !is.null(names(m)) && "chosen" %in% names(m)){
+#         return(as.numeric(m$chosen))
+#       }
+#       
+#       # B: vector numérico
+#       if(is.numeric(m) && is.atomic(m)){
+#         return(as.numeric(m))
+#       }
+#       
+#       # C: lista (posiblemente sin nombres)
+#       if(is.list(m)){
+#         v <- unlist(m, use.names = FALSE)
+#         v <- as.numeric(v)
+#         return(v)
+#       }
+#     }
+#     
+#     # fallback: intenta unlist del objeto completo
+#     v <- unlist(P_test, use.names = FALSE)
+#     as.numeric(v)
+#   }
+#   
+#   drop_parameter <- function(beta, fixed, par){
+#     if(par %in% names(beta)) beta <- beta[names(beta) != par]
+#     if(par %in% fixed) fixed <- setdiff(fixed, par)
+#     list(beta = beta, fixed = fixed)
+#   }
+#   
+#   # ---------- main ----------
+#   out <- list()
+#   
+#   for(sp in specs){
+#     
+#     if(verbose){
+#       cat("\n==============================\n")
+#       cat("Running OOS for cluster:", cl, "\n")
+#       cat("Running OOS for spec:", sp, "\n")
+#       cat("==============================\n")
+#     }
+#     
+#     # база wide del spec
+#     if(is.null(res_cluster$models[[sp]])) {
+#       if(verbose) cat("  -> spec no existe en res_cluster$models\n")
+#       next
+#     }
+#     db <- res_cluster$models[[sp]]$database_wide
+#     if(is.null(db)) {
+#       if(verbose) cat("  -> database_wide es NULL\n")
+#       next
+#     }
+#     
+#     # fechas
+#     if(!(date_var %in% names(db))) stop(paste0("No existe columna fecha: ", date_var))
+#     db[[date_var]] <- safe_date(db[[date_var]])
+#     
+#     db_train <- db[ db[[date_var]] <  cut_date, , drop = FALSE]
+#     db_test  <- db[ db[[date_var]] >= cut_date, , drop = FALSE]
+#     
+#     if(nrow(db_train) == 0 || nrow(db_test) == 0){
+#       if(verbose) cat("  -> train o test vacío. Saltando.\n")
+#       next
+#     }
+#     
+#     # --- ESTIMAR EN TRAIN ---
+#     apollo_control <- res_cluster$models[[sp]]$apollo_control
+#     apollo_control$modelName <- paste0(apollo_control$modelName, "_", sp, "_train")
+#     apollo_control$nCores <- nCores
+#     
+#     # Apollo usa objetos en GlobalEnv
+#     assign("database", db_train, envir = .GlobalEnv)
+#     assign("apollo_control", apollo_control, envir = .GlobalEnv)
+#     
+#     apollo_beta  <- apollo_beta_base
+#     apollo_fixed <- apollo_fixed_base
+#     
+#     # si el spec/cluster define use_d_c, lo pasamos a inputs luego
+#     use_d_c_val <- 0
+#     if(!is.null(res_cluster$models[[sp]]$apollo_inputs$use_d_c)){
+#       use_d_c_val <- res_cluster$models[[sp]]$apollo_inputs$use_d_c
+#       # normaliza a 0/1
+#       use_d_c_val <- as.numeric(!is.na(use_d_c_val) && use_d_c_val > 0)
+#     }
+#     
+#     # Si use_d_c es 0, saca B_d_c (evita "no influye en LL" / "no encontrado")
+#     if(use_d_c_val == 0){
+#       tmp <- drop_parameter(apollo_beta, apollo_fixed, "B_d_c")
+#       apollo_beta  <- tmp$beta
+#       apollo_fixed <- tmp$fixed
+#     }
+#     
+#     assign("apollo_beta",  apollo_beta,  envir = .GlobalEnv)
+#     assign("apollo_fixed", apollo_fixed, envir = .GlobalEnv)
+#     
+#     apollo_inputs <- apollo_validateInputs()
+#     # inyecta use_d_c si aplica
+#     apollo_inputs$use_d_c <- use_d_c_val
+#     
+#     m_train <- apollo_estimate(apollo_beta, apollo_fixed, apollo_prob_fun, apollo_inputs)
+#     beta_hat <- m_train$estimate
+#     
+#     # --- EVALUAR EN TEST (betas fijos) ---
+#     apollo_control_test <- apollo_control
+#     apollo_control_test$modelName <- paste0(apollo_control$modelName, "_", sp, "_test")
+#     
+#     assign("database", db_test, envir = .GlobalEnv)
+#     assign("apollo_control", apollo_control_test, envir = .GlobalEnv)
+#     
+#     apollo_inputs_test <- apollo_validateInputs()
+#     apollo_inputs_test$use_d_c <- use_d_c_val
+#     
+#     # IMPORTANT: usa prediction para OOS (pero si tu prob_fun no soporta, cambia a validate)
+#     P_test <- try(apollo_prob_fun(beta_hat, apollo_inputs_test, functionality = "prediction"),
+#                   silent = TRUE)
+#     
+#     if(inherits(P_test, "try-error")){
+#       # fallback a validate (en varios de tus casos validate sí devuelve estructura útil)
+#       if(verbose) cat("  -> prediction falló, usando validate.\n")
+#       P_test <- apollo_prob_fun(beta_hat, apollo_inputs_test, functionality = "validate")
+#     }
+#     
+#     p_vec <- extract_probvec(P_test)
+#     
+#     # --- decidir si p_vec está a nivel obs o indiv ---
+#     # si indiv_id se entrega, intentamos LL perIndiv agrupando por indiv_id usando p_obs (si viene por obs)
+#     # pero por defecto calculamos por "elemento de p_vec"
+#     n_elem <- length(p_vec)
+#     
+#     # clamp
+#     p_vec <- pmax(p_vec, eps)
+#     LL_test <- sum(log(p_vec))
+#     
+#     
+#     # calcular pseudo-r2
+#     avail_mat <- do.call(
+#       cbind,
+#       lapply(P_test$model[setdiff(names(P_test$model), "chosen")], 
+#              function(x) as.numeric(x > 0))
+#     )
+#     
+#     n_alt_avail <- rowSums(avail_mat)
+#     p_null <- 1 / n_alt_avail
+#     LL_null_test <- sum(log(p_null))
+#     pseudoR2_oos <- 1 - (LL_test / LL_null_test)
+#     
+#     row <- data.frame(
+#       cluster = cl,
+#       spec = sp,
+#       nTrain = nrow(db_train),
+#       nTest  = nrow(db_test),
+#       nProb  = n_elem,
+#       LL_test = LL_test,
+#       LL_null_test = LL_null_test,
+#       pseudoR2_oos = pseudoR2_oos,
+#       LL_test_perElem = LL_test / n_elem,
+#       LL_test_perIndiv = LL_test / length(unique(db_test$fished_vessel_anon)),
+#       nIndiv_test = length(unique(db_test$fished_vessel_anon))
+#     )
+#     
+#     # (opcional) si p_vec parece por obs y existe indiv_id, calcula LL perIndiv
+#     if(!is.null(indiv_id) && (indiv_id %in% names(db_test)) && n_elem == nrow(db_test)){
+#       ids <- db_test[[indiv_id]]
+#       ll_by_obs <- log(pmax(p_vec, eps))
+#       ll_by_ind <- tapply(ll_by_obs, ids, sum)
+#       row$LL_test_perIndiv <- mean(ll_by_ind)
+#       row$nIndiv_test <- length(ll_by_ind)
+#     } else {
+#       row$LL_test_perIndiv <- NA_real_
+#       row$nIndiv_test <- NA_integer_
+#     }
+#     
+#     out[[sp]] <- row
+#   }
+#   
+#   # bind final
+#   out_df <- do.call(rbind, out)
+#   
+#   # orden: mejor LL (más alto, menos negativo)
+#   out_df <- out_df[order(out_df$LL_test_perElem, decreasing = TRUE), ]
+#   
+#   rownames(out_df) <- NULL
+#   out_df
+# }
+# 
+# 
+# 
+# oos_results <- list()
+# 
+# for(k in 4:7){
+#   cl <- paste0("c", k)
+#   
+#   res_cluster       <- get(paste0("res_", cl))
+#   apollo_beta_base  <- get(paste0("apollo_beta_", cl))
+#   apollo_fixed_base <- get(paste0("apollo_fixed_", cl))
+#   apollo_prob_fun   <- get(paste0("apollo_probabilities_", cl))
+#   
+#   oos_results[[cl]] <- oos_compare_cluster(
+#     res_cluster = res_cluster,
+#     apollo_beta_base  = apollo_beta_base,
+#     apollo_fixed_base = apollo_fixed_base,
+#     apollo_prob_fun   = apollo_prob_fun,
+#     cut_date = as.Date("2017-01-01"),
+#     specs = c("daily","MA7","MA14","MA30","t1daily"),
+#     nCores = 1,
+#     cl = cl,
+#     date_var = "set_date",
+#     indiv_id = "fished_vessel_anon",  # si existe en tu db_wide; si no, pon NULL
+#     verbose = TRUE
+#   )
+# }
+# 
+# 
+# ## Tabla
+# 
+# library(dplyr)
+# 
+# 
+# oos_table <- bind_rows(
+#   oos_results$c4,
+#   oos_results$c5,
+#   oos_results$c6,
+#   oos_results$c7
+# )
+# 
+# writexl::write_xlsx(oos_table, path=file.path("R","output","OOS_results_sdm_variation.xlsx"))
+# saveRDS(oos_table, "oos_table.RDS")
+
+oos_table <- readRDS("oos_table.RDS")
 
 
-
-
-#### OUT OF SAMPLE METRIC ####
-
-oos_compare_cluster <- function(res_cluster,
-                                apollo_beta_base, apollo_fixed_base,
-                                apollo_prob_fun,
-                                cut_date = as.Date("2017-01-01"),
-                                specs = c("daily","MA7","MA14","MA30","t1daily"),
-                                nCores = 1,
-                                cl = "cX",
-                                date_var = "set_date",
-                                indiv_id = NULL,   # opcional: "fished_vessel_anon" para perIndiv
-                                eps = 1e-300,
-                                verbose = TRUE){
-  
-  # ---------- helpers ----------
-  safe_date <- function(x){
-    if(inherits(x, "Date")) return(x)
-    as.Date(x)
-  }
-  
-  extract_probvec <- function(P_test){
-    # Queremos un vector numérico de probs "del elegido"
-    # Casos típicos:
-    #  A) P_test$model$chosen (validate a veces)
-    #  B) P_test$model es vector numérico (prediction a veces)
-    #  C) P_test$model es lista sin nombres (names NULL) -> unlist
-    if(is.null(P_test)) stop("P_test es NULL")
-    
-    if(!is.null(P_test$model)){
-      m <- P_test$model
-      
-      # A: lista nombrada con chosen
-      if(is.list(m) && !is.null(names(m)) && "chosen" %in% names(m)){
-        return(as.numeric(m$chosen))
-      }
-      
-      # B: vector numérico
-      if(is.numeric(m) && is.atomic(m)){
-        return(as.numeric(m))
-      }
-      
-      # C: lista (posiblemente sin nombres)
-      if(is.list(m)){
-        v <- unlist(m, use.names = FALSE)
-        v <- as.numeric(v)
-        return(v)
-      }
-    }
-    
-    # fallback: intenta unlist del objeto completo
-    v <- unlist(P_test, use.names = FALSE)
-    as.numeric(v)
-  }
-  
-  drop_parameter <- function(beta, fixed, par){
-    if(par %in% names(beta)) beta <- beta[names(beta) != par]
-    if(par %in% fixed) fixed <- setdiff(fixed, par)
-    list(beta = beta, fixed = fixed)
-  }
-  
-  # ---------- main ----------
-  out <- list()
-  
-  for(sp in specs){
-    
-    if(verbose){
-      cat("\n==============================\n")
-      cat("Running OOS for cluster:", cl, "\n")
-      cat("Running OOS for spec:", sp, "\n")
-      cat("==============================\n")
-    }
-    
-    # база wide del spec
-    if(is.null(res_cluster$models[[sp]])) {
-      if(verbose) cat("  -> spec no existe en res_cluster$models\n")
-      next
-    }
-    db <- res_cluster$models[[sp]]$database_wide
-    if(is.null(db)) {
-      if(verbose) cat("  -> database_wide es NULL\n")
-      next
-    }
-    
-    # fechas
-    if(!(date_var %in% names(db))) stop(paste0("No existe columna fecha: ", date_var))
-    db[[date_var]] <- safe_date(db[[date_var]])
-    
-    db_train <- db[ db[[date_var]] <  cut_date, , drop = FALSE]
-    db_test  <- db[ db[[date_var]] >= cut_date, , drop = FALSE]
-    
-    if(nrow(db_train) == 0 || nrow(db_test) == 0){
-      if(verbose) cat("  -> train o test vacío. Saltando.\n")
-      next
-    }
-    
-    # --- ESTIMAR EN TRAIN ---
-    apollo_control <- res_cluster$models[[sp]]$apollo_control
-    apollo_control$modelName <- paste0(apollo_control$modelName, "_", sp, "_train")
-    apollo_control$nCores <- nCores
-    
-    # Apollo usa objetos en GlobalEnv
-    assign("database", db_train, envir = .GlobalEnv)
-    assign("apollo_control", apollo_control, envir = .GlobalEnv)
-    
-    apollo_beta  <- apollo_beta_base
-    apollo_fixed <- apollo_fixed_base
-    
-    # si el spec/cluster define use_d_c, lo pasamos a inputs luego
-    use_d_c_val <- 0
-    if(!is.null(res_cluster$models[[sp]]$apollo_inputs$use_d_c)){
-      use_d_c_val <- res_cluster$models[[sp]]$apollo_inputs$use_d_c
-      # normaliza a 0/1
-      use_d_c_val <- as.numeric(!is.na(use_d_c_val) && use_d_c_val > 0)
-    }
-    
-    # Si use_d_c es 0, saca B_d_c (evita "no influye en LL" / "no encontrado")
-    if(use_d_c_val == 0){
-      tmp <- drop_parameter(apollo_beta, apollo_fixed, "B_d_c")
-      apollo_beta  <- tmp$beta
-      apollo_fixed <- tmp$fixed
-    }
-    
-    assign("apollo_beta",  apollo_beta,  envir = .GlobalEnv)
-    assign("apollo_fixed", apollo_fixed, envir = .GlobalEnv)
-    
-    apollo_inputs <- apollo_validateInputs()
-    # inyecta use_d_c si aplica
-    apollo_inputs$use_d_c <- use_d_c_val
-    
-    m_train <- apollo_estimate(apollo_beta, apollo_fixed, apollo_prob_fun, apollo_inputs)
-    beta_hat <- m_train$estimate
-    
-    # --- EVALUAR EN TEST (betas fijos) ---
-    apollo_control_test <- apollo_control
-    apollo_control_test$modelName <- paste0(apollo_control$modelName, "_", sp, "_test")
-    
-    assign("database", db_test, envir = .GlobalEnv)
-    assign("apollo_control", apollo_control_test, envir = .GlobalEnv)
-    
-    apollo_inputs_test <- apollo_validateInputs()
-    apollo_inputs_test$use_d_c <- use_d_c_val
-    
-    # IMPORTANT: usa prediction para OOS (pero si tu prob_fun no soporta, cambia a validate)
-    P_test <- try(apollo_prob_fun(beta_hat, apollo_inputs_test, functionality = "prediction"),
-                  silent = TRUE)
-    
-    if(inherits(P_test, "try-error")){
-      # fallback a validate (en varios de tus casos validate sí devuelve estructura útil)
-      if(verbose) cat("  -> prediction falló, usando validate.\n")
-      P_test <- apollo_prob_fun(beta_hat, apollo_inputs_test, functionality = "validate")
-    }
-    
-    p_vec <- extract_probvec(P_test)
-    
-    # --- decidir si p_vec está a nivel obs o indiv ---
-    # si indiv_id se entrega, intentamos LL perIndiv agrupando por indiv_id usando p_obs (si viene por obs)
-    # pero por defecto calculamos por "elemento de p_vec"
-    n_elem <- length(p_vec)
-    
-    # clamp
-    p_vec <- pmax(p_vec, eps)
-    LL_test <- sum(log(p_vec))
-    
-    
-    # calcular pseudo-r2
-    avail_mat <- do.call(
-      cbind,
-      lapply(P_test$model[setdiff(names(P_test$model), "chosen")], 
-             function(x) as.numeric(x > 0))
-    )
-    
-    n_alt_avail <- rowSums(avail_mat)
-    p_null <- 1 / n_alt_avail
-    LL_null_test <- sum(log(p_null))
-    pseudoR2_oos <- 1 - (LL_test / LL_null_test)
-    
-    row <- data.frame(
-      cluster = cl,
-      spec = sp,
-      nTrain = nrow(db_train),
-      nTest  = nrow(db_test),
-      nProb  = n_elem,
-      LL_test = LL_test,
-      LL_null_test = LL_null_test,
-      pseudoR2_oos = pseudoR2_oos,
-      LL_test_perElem = LL_test / n_elem,
-      LL_test_perIndiv = LL_test / length(unique(db_test$fished_vessel_anon)),
-      nIndiv_test = length(unique(db_test$fished_vessel_anon))
-    )
-    
-    # (opcional) si p_vec parece por obs y existe indiv_id, calcula LL perIndiv
-    if(!is.null(indiv_id) && (indiv_id %in% names(db_test)) && n_elem == nrow(db_test)){
-      ids <- db_test[[indiv_id]]
-      ll_by_obs <- log(pmax(p_vec, eps))
-      ll_by_ind <- tapply(ll_by_obs, ids, sum)
-      row$LL_test_perIndiv <- mean(ll_by_ind)
-      row$nIndiv_test <- length(ll_by_ind)
-    } else {
-      row$LL_test_perIndiv <- NA_real_
-      row$nIndiv_test <- NA_integer_
-    }
-    
-    out[[sp]] <- row
-  }
-  
-  # bind final
-  out_df <- do.call(rbind, out)
-  
-  # orden: mejor LL (más alto, menos negativo)
-  out_df <- out_df[order(out_df$LL_test_perElem, decreasing = TRUE), ]
-  
-  rownames(out_df) <- NULL
-  out_df
-}
-
-
-
-oos_results <- list()
-
-for(k in 4:7){
-  cl <- paste0("c", k)
-  
-  res_cluster       <- get(paste0("res_", cl))
-  apollo_beta_base  <- get(paste0("apollo_beta_", cl))
-  apollo_fixed_base <- get(paste0("apollo_fixed_", cl))
-  apollo_prob_fun   <- get(paste0("apollo_probabilities_", cl))
-  
-  oos_results[[cl]] <- oos_compare_cluster(
-    res_cluster = res_cluster,
-    apollo_beta_base  = apollo_beta_base,
-    apollo_fixed_base = apollo_fixed_base,
-    apollo_prob_fun   = apollo_prob_fun,
-    cut_date = as.Date("2017-01-01"),
-    specs = c("daily","MA7","MA14","MA30","t1daily"),
-    nCores = 1,
-    cl = cl,
-    date_var = "set_date",
-    indiv_id = "fished_vessel_anon",  # si existe en tu db_wide; si no, pon NULL
-    verbose = TRUE
-  )
-}
-
-
-## Tabla
-
-library(dplyr)
-
-
-oos_table <- bind_rows(
-  oos_results$c4,
-  oos_results$c5,
-  oos_results$c6,
-  oos_results$c7
-)
-
-oos_table
-
-
-writexl::write_xlsx(oos_table, path=file.path("R","output","OOS_results_sdm_variation.xlsx"))
 
