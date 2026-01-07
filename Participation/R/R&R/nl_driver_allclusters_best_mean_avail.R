@@ -1,7 +1,6 @@
 ############################################################
 # DRIVER: Run all clusters using BEST SDM spec (mean_avail)
 #         + baseline vs species × mean_avail (species-level)
-# Author: you (with ChatGPT help)
 ############################################################
 
 # --- Packages ---
