@@ -5,7 +5,7 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : NL_participation_model_c6_R&R_MA14
 Model description                           : Participation, location and target species decisions
-Model run at                                : 2026-01-06 16:37:35.572796
+Model run at                                : 2026-01-07 10:54:07.3751
 Estimation method                           : bgw
 Estimation diagnosis                        : Relative function convergence
 Optimisation diagnosis                      : Unknown (no Hessian calculated)
@@ -16,58 +16,58 @@ Number of modelled outcomes                 : 2581
 Number of cores used                        :  18 
 Model without mixing
 
-LL(start)                                   : -1914.64
+LL(start)                                   : -2007.92
 LL at equal shares, LL(0)                   : -5523.23
 LL at observed shares, LL(C)                : -3024.73
 LL(final)                                   : -1884.97
 Rho-squared vs equal shares                  :  0.6587 
-Adj.Rho-squared vs equal shares              :  0.6535 
+Adj.Rho-squared vs equal shares              :  0.6536 
 Rho-squared vs observed shares               :  0.3768 
-Adj.Rho-squared vs observed shares           :  0.3705 
-AIC                                         :  3827.95 
-BIC                                         :  3997.77 
+Adj.Rho-squared vs observed shares           :  0.3709 
+AIC                                         :  3825.95 
+BIC                                         :  3989.91 
 
-Estimated parameters                        : 29
-Time taken (hh:mm:ss)                       :  00:00:10.8 
-     pre-estimation                         :  00:00:8.19 
-     estimation                             :  00:00:2.49 
+Estimated parameters                        : 28
+Time taken (hh:mm:ss)                       :  00:00:11.91 
+     pre-estimation                         :  00:00:8.48 
+     estimation                             :  00:00:3.29 
      post-estimation                        :  00:00:0.13 
-Iterations                                  :  12  
+Iterations                                  :  16  
 
 Unconstrained optimisation.
 
 Estimates:
                                   Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
-B_mean_avail                      0.848090          NA          NA          NA          NA            NA            NA
+B_mean_avail                      0.848073          NA          NA          NA          NA            NA            NA
 B_wind_max_220_mh                -0.051432          NA          NA          NA          NA            NA            NA
 B_dist_to_cog                    -0.004523          NA          NA          NA          NA            NA            NA
 B_dist_port_to_catch_area_zero   -0.024740          NA          NA          NA          NA            NA            NA
-B_dummy_prev_days                 2.419990          NA          NA          NA          NA            NA            NA
-B_dummy_prev_year_days            0.314025          NA          NA          NA          NA            NA            NA
-B_unem_rate                       0.240641          NA          NA          NA          NA            NA            NA
-B_d_d                            -1.198407          NA          NA          NA          NA            NA            NA
-c_dcrb                            0.010361          NA          NA          NA          NA            NA            NA
-B_mean_price_part                 3.383534          NA          NA          NA          NA            NA            NA
-B_mean_price_crab                 0.047441          NA          NA          NA          NA            NA            NA
-B_mean_price_slmn                 9.997021          NA          NA          NA          NA            NA            NA
-w_psdn                           -0.050804          NA          NA          NA          NA            NA            NA
-w_nanc                           -0.505227          NA          NA          NA          NA            NA            NA
-w_dcrb                           -0.398403          NA          NA          NA          NA            NA            NA
-w_slmn                            0.736545          NA          NA          NA          NA            NA            NA
-w_cmck                            0.052148          NA          NA          NA          NA            NA            NA
-asc_cba_psdn                     -2.861333          NA          NA          NA          NA            NA            NA
-asc_clo_psdn                     -3.581987          NA          NA          NA          NA            NA            NA
-asc_clw_psdn                     -3.620718          NA          NA          NA          NA            NA            NA
-asc_cwa_psdn                     -3.411460          NA          NA          NA          NA            NA            NA
-asc_clo_nanc                     -4.580153          NA          NA          NA          NA            NA            NA
-asc_clw_nanc                     -7.280303          NA          NA          NA          NA            NA            NA
-asc_cwa_nanc                     -3.844986          NA          NA          NA          NA            NA            NA
-asc_clo_cmck                     -4.482071          NA          NA          NA          NA            NA            NA
-asc_cwa_dcrb                     -4.831250          NA          NA          NA          NA            NA            NA
-asc_nps_sock                    -23.179805          NA          NA          NA          NA            NA            NA
-theta_part                        0.258139          NA          NA          NA          NA            NA            NA
+B_dummy_prev_days                 2.419987          NA          NA          NA          NA            NA            NA
+B_dummy_prev_year_days            0.314028          NA          NA          NA          NA            NA            NA
+B_unem_rate                       0.240642          NA          NA          NA          NA            NA            NA
+B_d_d                            -1.198415          NA          NA          NA          NA            NA            NA
+c_dcrb                            0.010371          NA          NA          NA          NA            NA            NA
+B_mean_price_part                 3.383536          NA          NA          NA          NA            NA            NA
+B_mean_price_crab                 0.047449          NA          NA          NA          NA            NA            NA
+B_mean_price_slmn                10.435394          NA          NA          NA          NA            NA            NA
+w_psdn                           -0.050799          NA          NA          NA          NA            NA            NA
+w_nanc                           -0.505228          NA          NA          NA          NA            NA            NA
+w_dcrb                           -0.398409          NA          NA          NA          NA            NA            NA
+w_slmn                            0.736535          NA          NA          NA          NA            NA            NA
+w_cmck                            0.052129          NA          NA          NA          NA            NA            NA
+asc_cba_psdn                     -2.861369          NA          NA          NA          NA            NA            NA
+asc_clo_psdn                     -3.582016          NA          NA          NA          NA            NA            NA
+asc_clw_psdn                     -3.620714          NA          NA          NA          NA            NA            NA
+asc_cwa_psdn                     -3.411459          NA          NA          NA          NA            NA            NA
+asc_clo_nanc                     -4.580151          NA          NA          NA          NA            NA            NA
+asc_clw_nanc                     -7.280301          NA          NA          NA          NA            NA            NA
+asc_cwa_nanc                     -3.844982          NA          NA          NA          NA            NA            NA
+asc_clo_cmck                     -4.482045          NA          NA          NA          NA            NA            NA
+asc_cwa_dcrb                     -4.831311          NA          NA          NA          NA            NA            NA
+asc_nps_sock                    -24.000000          NA          NA          NA          NA            NA            NA
+theta_part                        0.258126          NA          NA          NA          NA            NA            NA
 theta_nanc                       10.000000          NA          NA          NA          NA            NA            NA
-theta_psdn                        1.198603          NA          NA          NA          NA            NA            NA
+theta_psdn                        1.198680          NA          NA          NA          NA            NA            NA
 asc_no_participation              0.000000          NA          NA          NA          NA            NA            NA
 w_nopart                          0.000000          NA          NA          NA          NA            NA            NA
 B_mean_price_no_part              0.000000          NA          NA          NA          NA            NA            NA
@@ -78,11 +78,11 @@ Nesting structure for NL model component :
 Nest: root (1)
 |-------Alternative: no_participation
 |-Nest: part (0.5642)
-|  |-Nest: nanc (0.5642)
+|  |-Nest: nanc (0.5641)
 |  |  |-Alternative: clo_nanc
 |  |  |-Alternative: clw_nanc
 |  |  '-Alternative: cwa_nanc
-|  |-Nest: psdn (0.4334)
+|  |-Nest: psdn (0.4335)
 |  |  |-Alternative: cba_psdn
 |  |  |-Alternative: clo_psdn
 |  |  |-Alternative: clw_psdn
@@ -128,7 +128,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                   B_unem_rate                          B_d_d                         c_dcrb              B_mean_price_part              B_mean_price_crab              B_mean_price_slmn
@@ -158,7 +157,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                        w_psdn                         w_nanc                         w_dcrb                         w_slmn                         w_cmck                   asc_cba_psdn
@@ -188,7 +186,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                  asc_clo_psdn                   asc_clw_psdn                   asc_cwa_psdn                   asc_clo_nanc                   asc_clw_nanc                   asc_cwa_nanc
@@ -218,39 +215,37 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
-                                                 asc_clo_cmck                   asc_cwa_dcrb                   asc_nps_sock                     theta_part                     theta_psdn
-B_mean_avail                                               NA                             NA                             NA                             NA                             NA
-B_wind_max_220_mh                                          NA                             NA                             NA                             NA                             NA
-B_dist_to_cog                                              NA                             NA                             NA                             NA                             NA
-B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA                             NA
-B_dummy_prev_days                                          NA                             NA                             NA                             NA                             NA
-B_dummy_prev_year_days                                     NA                             NA                             NA                             NA                             NA
-B_unem_rate                                                NA                             NA                             NA                             NA                             NA
-B_d_d                                                      NA                             NA                             NA                             NA                             NA
-c_dcrb                                                     NA                             NA                             NA                             NA                             NA
-B_mean_price_part                                          NA                             NA                             NA                             NA                             NA
-B_mean_price_crab                                          NA                             NA                             NA                             NA                             NA
-B_mean_price_slmn                                          NA                             NA                             NA                             NA                             NA
-w_psdn                                                     NA                             NA                             NA                             NA                             NA
-w_nanc                                                     NA                             NA                             NA                             NA                             NA
-w_dcrb                                                     NA                             NA                             NA                             NA                             NA
-w_slmn                                                     NA                             NA                             NA                             NA                             NA
-w_cmck                                                     NA                             NA                             NA                             NA                             NA
-asc_cba_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clo_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clw_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clo_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_clw_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA
-theta_part                                                 NA                             NA                             NA                             NA                             NA
-theta_psdn                                                 NA                             NA                             NA                             NA                             NA
+                                                 asc_clo_cmck                   asc_cwa_dcrb                     theta_part                     theta_psdn
+B_mean_avail                                               NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA                             NA
+c_dcrb                                                     NA                             NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA                             NA
+theta_part                                                 NA                             NA                             NA                             NA
+theta_psdn                                                 NA                             NA                             NA                             NA
 
 Robust covariance matrix:
                                                  B_mean_avail              B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days
@@ -280,7 +275,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                   B_unem_rate                          B_d_d                         c_dcrb              B_mean_price_part              B_mean_price_crab              B_mean_price_slmn
@@ -310,7 +304,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                        w_psdn                         w_nanc                         w_dcrb                         w_slmn                         w_cmck                   asc_cba_psdn
@@ -340,7 +333,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                  asc_clo_psdn                   asc_clw_psdn                   asc_cwa_psdn                   asc_clo_nanc                   asc_clw_nanc                   asc_cwa_nanc
@@ -370,39 +362,37 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
-                                                 asc_clo_cmck                   asc_cwa_dcrb                   asc_nps_sock                     theta_part                     theta_psdn
-B_mean_avail                                               NA                             NA                             NA                             NA                             NA
-B_wind_max_220_mh                                          NA                             NA                             NA                             NA                             NA
-B_dist_to_cog                                              NA                             NA                             NA                             NA                             NA
-B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA                             NA
-B_dummy_prev_days                                          NA                             NA                             NA                             NA                             NA
-B_dummy_prev_year_days                                     NA                             NA                             NA                             NA                             NA
-B_unem_rate                                                NA                             NA                             NA                             NA                             NA
-B_d_d                                                      NA                             NA                             NA                             NA                             NA
-c_dcrb                                                     NA                             NA                             NA                             NA                             NA
-B_mean_price_part                                          NA                             NA                             NA                             NA                             NA
-B_mean_price_crab                                          NA                             NA                             NA                             NA                             NA
-B_mean_price_slmn                                          NA                             NA                             NA                             NA                             NA
-w_psdn                                                     NA                             NA                             NA                             NA                             NA
-w_nanc                                                     NA                             NA                             NA                             NA                             NA
-w_dcrb                                                     NA                             NA                             NA                             NA                             NA
-w_slmn                                                     NA                             NA                             NA                             NA                             NA
-w_cmck                                                     NA                             NA                             NA                             NA                             NA
-asc_cba_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clo_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clw_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clo_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_clw_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA
-theta_part                                                 NA                             NA                             NA                             NA                             NA
-theta_psdn                                                 NA                             NA                             NA                             NA                             NA
+                                                 asc_clo_cmck                   asc_cwa_dcrb                     theta_part                     theta_psdn
+B_mean_avail                                               NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA                             NA
+c_dcrb                                                     NA                             NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA                             NA
+theta_part                                                 NA                             NA                             NA                             NA
+theta_psdn                                                 NA                             NA                             NA                             NA
 
 Classical correlation matrix:
                                                  B_mean_avail              B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days
@@ -432,7 +422,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                   B_unem_rate                          B_d_d                         c_dcrb              B_mean_price_part              B_mean_price_crab              B_mean_price_slmn
@@ -462,7 +451,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                        w_psdn                         w_nanc                         w_dcrb                         w_slmn                         w_cmck                   asc_cba_psdn
@@ -492,7 +480,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                  asc_clo_psdn                   asc_clw_psdn                   asc_cwa_psdn                   asc_clo_nanc                   asc_clw_nanc                   asc_cwa_nanc
@@ -522,39 +509,37 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
-                                                 asc_clo_cmck                   asc_cwa_dcrb                   asc_nps_sock                     theta_part                     theta_psdn
-B_mean_avail                                               NA                             NA                             NA                             NA                             NA
-B_wind_max_220_mh                                          NA                             NA                             NA                             NA                             NA
-B_dist_to_cog                                              NA                             NA                             NA                             NA                             NA
-B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA                             NA
-B_dummy_prev_days                                          NA                             NA                             NA                             NA                             NA
-B_dummy_prev_year_days                                     NA                             NA                             NA                             NA                             NA
-B_unem_rate                                                NA                             NA                             NA                             NA                             NA
-B_d_d                                                      NA                             NA                             NA                             NA                             NA
-c_dcrb                                                     NA                             NA                             NA                             NA                             NA
-B_mean_price_part                                          NA                             NA                             NA                             NA                             NA
-B_mean_price_crab                                          NA                             NA                             NA                             NA                             NA
-B_mean_price_slmn                                          NA                             NA                             NA                             NA                             NA
-w_psdn                                                     NA                             NA                             NA                             NA                             NA
-w_nanc                                                     NA                             NA                             NA                             NA                             NA
-w_dcrb                                                     NA                             NA                             NA                             NA                             NA
-w_slmn                                                     NA                             NA                             NA                             NA                             NA
-w_cmck                                                     NA                             NA                             NA                             NA                             NA
-asc_cba_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clo_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clw_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clo_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_clw_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA
-theta_part                                                 NA                             NA                             NA                             NA                             NA
-theta_psdn                                                 NA                             NA                             NA                             NA                             NA
+                                                 asc_clo_cmck                   asc_cwa_dcrb                     theta_part                     theta_psdn
+B_mean_avail                                               NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA                             NA
+c_dcrb                                                     NA                             NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA                             NA
+theta_part                                                 NA                             NA                             NA                             NA
+theta_psdn                                                 NA                             NA                             NA                             NA
 
 Robust correlation matrix:
                                                  B_mean_avail              B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days
@@ -584,7 +569,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                   B_unem_rate                          B_d_d                         c_dcrb              B_mean_price_part              B_mean_price_crab              B_mean_price_slmn
@@ -614,7 +598,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                        w_psdn                         w_nanc                         w_dcrb                         w_slmn                         w_cmck                   asc_cba_psdn
@@ -644,7 +627,6 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
                                                  asc_clo_psdn                   asc_clw_psdn                   asc_cwa_psdn                   asc_clo_nanc                   asc_clw_nanc                   asc_cwa_nanc
@@ -674,53 +656,51 @@ asc_clw_nanc                                               NA                   
 asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA                             NA
 asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA                             NA                             NA
 theta_psdn                                                 NA                             NA                             NA                             NA                             NA                             NA
-                                                 asc_clo_cmck                   asc_cwa_dcrb                   asc_nps_sock                     theta_part                     theta_psdn
-B_mean_avail                                               NA                             NA                             NA                             NA                             NA
-B_wind_max_220_mh                                          NA                             NA                             NA                             NA                             NA
-B_dist_to_cog                                              NA                             NA                             NA                             NA                             NA
-B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA                             NA
-B_dummy_prev_days                                          NA                             NA                             NA                             NA                             NA
-B_dummy_prev_year_days                                     NA                             NA                             NA                             NA                             NA
-B_unem_rate                                                NA                             NA                             NA                             NA                             NA
-B_d_d                                                      NA                             NA                             NA                             NA                             NA
-c_dcrb                                                     NA                             NA                             NA                             NA                             NA
-B_mean_price_part                                          NA                             NA                             NA                             NA                             NA
-B_mean_price_crab                                          NA                             NA                             NA                             NA                             NA
-B_mean_price_slmn                                          NA                             NA                             NA                             NA                             NA
-w_psdn                                                     NA                             NA                             NA                             NA                             NA
-w_nanc                                                     NA                             NA                             NA                             NA                             NA
-w_dcrb                                                     NA                             NA                             NA                             NA                             NA
-w_slmn                                                     NA                             NA                             NA                             NA                             NA
-w_cmck                                                     NA                             NA                             NA                             NA                             NA
-asc_cba_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clo_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clw_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_psdn                                               NA                             NA                             NA                             NA                             NA
-asc_clo_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_clw_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_nanc                                               NA                             NA                             NA                             NA                             NA
-asc_clo_cmck                                               NA                             NA                             NA                             NA                             NA
-asc_cwa_dcrb                                               NA                             NA                             NA                             NA                             NA
-asc_nps_sock                                               NA                             NA                             NA                             NA                             NA
-theta_part                                                 NA                             NA                             NA                             NA                             NA
-theta_psdn                                                 NA                             NA                             NA                             NA                             NA
+                                                 asc_clo_cmck                   asc_cwa_dcrb                     theta_part                     theta_psdn
+B_mean_avail                                               NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA                             NA
+c_dcrb                                                     NA                             NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA                             NA
+B_mean_price_slmn                                          NA                             NA                             NA                             NA
+w_psdn                                                     NA                             NA                             NA                             NA
+w_nanc                                                     NA                             NA                             NA                             NA
+w_dcrb                                                     NA                             NA                             NA                             NA
+w_slmn                                                     NA                             NA                             NA                             NA
+w_cmck                                                     NA                             NA                             NA                             NA
+asc_cba_psdn                                               NA                             NA                             NA                             NA
+asc_clo_psdn                                               NA                             NA                             NA                             NA
+asc_clw_psdn                                               NA                             NA                             NA                             NA
+asc_cwa_psdn                                               NA                             NA                             NA                             NA
+asc_clo_nanc                                               NA                             NA                             NA                             NA
+asc_clw_nanc                                               NA                             NA                             NA                             NA
+asc_cwa_nanc                                               NA                             NA                             NA                             NA
+asc_clo_cmck                                               NA                             NA                             NA                             NA
+asc_cwa_dcrb                                               NA                             NA                             NA                             NA
+theta_part                                                 NA                             NA                             NA                             NA
+theta_psdn                                                 NA                             NA                             NA                             NA
 
  11 most extreme outliers in terms of lowest average per choice prediction:
  ID Avg prob per choice
-  9           0.4079253
- 11           0.4171503
+  9           0.4079256
+ 11           0.4171500
   3           0.4275147
-  6           0.4280081
- 10           0.4851484
-  4           0.5035863
-  2           0.5050912
-  1           0.5180465
+  6           0.4280088
+ 10           0.4851480
+  4           0.5035864
+  2           0.5050914
+  1           0.5180466
   8           0.5188075
   5           0.5261927
-  7           0.5463689
+  7           0.5463690
 
 Settings and functions used in model definition:
 
@@ -836,13 +816,17 @@ function(apollo_beta, apollo_inputs, functionality="estimate"){
     nlStructure  = nlStructure
   )
   
-  ### Compute probabilities using NL model
   P[["model"]] = apollo_nl(nl_settings, functionality)
   
-  # ### Take product across observation for same individual
-  P = apollo_panelProd(P, apollo_inputs, functionality)
+  # --- OOS/prediction: NO panelProd (evita underflow a 0) ---
+  if(functionality == "prediction"){
+    P = apollo_prepareProb(P, apollo_inputs, functionality)
+    return(P)
+  }
   
-  ### Prepare and return outputs of function
+  # --- Estimación normal ---
+  P = apollo_panelProd(P, apollo_inputs, functionality)
   P = apollo_prepareProb(P, apollo_inputs, functionality)
   return(P)
+  
 }

@@ -5,7 +5,7 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : NL_participation_model_c4_R&R_t1daily
 Model description                           : Participation, location and target species decisions
-Model run at                                : 2026-01-06 16:33:03.777343
+Model run at                                : 2026-01-07 10:40:18.002559
 Estimation method                           : bgw
 Estimation diagnosis                        : Relative function convergence
 Optimisation diagnosis                      : Maximum found
@@ -31,10 +31,10 @@ AIC                                         :  45029.48
 BIC                                         :  45311.02 
 
 Estimated parameters                        : 34
-Time taken (hh:mm:ss)                       :  00:02:24.12 
-     pre-estimation                         :  00:00:18.38 
-     estimation                             :  00:00:20.67 
-     post-estimation                        :  00:01:45.07 
+Time taken (hh:mm:ss)                       :  00:01:50.23 
+     pre-estimation                         :  00:00:16.98 
+     estimation                             :  00:00:15.59 
+     post-estimation                        :  00:01:17.65 
 Iterations                                  :  10  
 
 Unconstrained optimisation.
@@ -1122,8 +1122,17 @@ function(apollo_beta, apollo_inputs, functionality="estimate"){
     alternatives = c(sfa_nanc=1, laa_nanc=2, laa_cmck=3, laa_msqd=4, laa_ytna=5, mna_msqd=6, sba_msqd=7, laa_btna=8, sfa_msqd=9, mna_psdn=10, sba_cmck=11, mra_msqd=12, laa_psdn=13, mna_nanc=14, no_participation=15),
     avail=avail, choiceVar=choice, utilities=V, nlNests=nlNests, nlStructure=nlStructure
   )
-  P[["model"]] <- apollo_nl(nl_settings, functionality)
-  P <- apollo_panelProd(P, apollo_inputs, functionality)
-  P <- apollo_prepareProb(P, apollo_inputs, functionality)
+  P[["model"]] = apollo_nl(nl_settings, functionality)
+  
+  # --- OOS/prediction: NO panelProd (evita underflow a 0) ---
+  if(functionality == "prediction"){
+    P = apollo_prepareProb(P, apollo_inputs, functionality)
+    return(P)
+  }
+  
+  # --- Estimación normal ---
+  P = apollo_panelProd(P, apollo_inputs, functionality)
+  P = apollo_prepareProb(P, apollo_inputs, functionality)
   return(P)
+  
 }

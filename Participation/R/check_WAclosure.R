@@ -1,9 +1,9 @@
-alts <- c("laa_cmck", "mna_cmck", "laa_jmck", "mna_jmck", "laa_msqd", "mra_msqd", "sba_msqd", "sfa_msqd", "mna_msqd", "laa_psdn", "mna_psdn", "mna_nanc", "sba_nanc", "sda_nanc", "no_participation")
-
+alts <- c("mna_msqd", "sba_msqd", "mra_msqd", "laa_msqd", "npa_msqd", "sfa_msqd", "cba_msqd", "laa_psdn", "clo_psdn", "cwa_psdn", "clw_psdn", "sba_cmck", "laa_cmck", "laa_nanc", "cwa_albc", "cwa_dcrb", "clw_dcrb", "no_participation")
 alt_id_map <- setNames(seq_along(alts), alts)
 
 # Define cuáles alternativas son "PSDN-type" (ajusta si corresponde)
-psdn_alts <- c("laa_msqd", "mra_msqd", "sba_msqd", "sfa_msqd", "mna_msqd")
+psdn_alts <- c("mna_msqd", "sba_msqd", "mra_msqd", "laa_msqd", "npa_msqd", "sfa_msqd", "cba_msqd")
+
 
 # indicador de closure (sanitizado)
 psdn1 <- database$msqdclosure == 1
