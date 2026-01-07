@@ -1103,6 +1103,23 @@ oos_compare_cluster <- function(res_cluster,
     p_vec <- pmax(p_vec, eps)
     LL_test <- sum(log(p_vec))
     
+    
+    # calcular pseudo-r2
+    avail_mat <- do.call(
+      cbind,
+      lapply(P_test$model[setdiff(names(P_test$model), "chosen")], 
+             function(x) as.numeric(x > 0))
+    )
+    
+    n_alt_avail <- rowSums(avail_mat)
+    p_null <- 1 / n_alt_avail
+    LL_null_test <- sum(log(p_null))
+    pseudoR2_oos <- 1 - (LL_test / LL_null_test)
+    
+    
+    
+    
+    
     row <- data.frame(
       cluster = cl,
       spec = sp,
@@ -1110,7 +1127,11 @@ oos_compare_cluster <- function(res_cluster,
       nTest  = nrow(db_test),
       nProb  = n_elem,
       LL_test = LL_test,
-      LL_test_perElem = LL_test / n_elem
+      LL_null_test = LL_null_test,
+      pseudoR2_oos = pseudoR2_oos,
+      LL_test_perElem = LL_test / n_elem,
+      LL_test_perIndiv = LL_test / length(unique(db_test$fished_vessel_anon)),
+      nIndiv_test = length(unique(db_test$fished_vessel_anon))
     )
     
     # (opcional) si p_vec parece por obs y existe indiv_id, calcula LL perIndiv
