@@ -960,264 +960,293 @@ res_c7 <- readRDS("res_c7.rds")
 # 
 # 
 # #### OUT OF SAMPLE METRIC ####
-# 
-# oos_compare_cluster <- function(res_cluster,
-#                                 apollo_beta_base, apollo_fixed_base,
-#                                 apollo_prob_fun,
-#                                 cut_date = as.Date("2017-01-01"),
-#                                 specs = c("daily","MA7","MA14","MA30","t1daily"),
-#                                 nCores = 1,
-#                                 cl = "cX",
-#                                 date_var = "set_date",
-#                                 indiv_id = NULL,   # opcional: "fished_vessel_anon" para perIndiv
-#                                 eps = 1e-300,
-#                                 verbose = TRUE){
-#   
-#   # ---------- helpers ----------
-#   safe_date <- function(x){
-#     if(inherits(x, "Date")) return(x)
-#     as.Date(x)
-#   }
-#   
-#   extract_probvec <- function(P_test){
-#     # Queremos un vector numérico de probs "del elegido"
-#     # Casos típicos:
-#     #  A) P_test$model$chosen (validate a veces)
-#     #  B) P_test$model es vector numérico (prediction a veces)
-#     #  C) P_test$model es lista sin nombres (names NULL) -> unlist
-#     if(is.null(P_test)) stop("P_test es NULL")
-#     
-#     if(!is.null(P_test$model)){
-#       m <- P_test$model
-#       
-#       # A: lista nombrada con chosen
-#       if(is.list(m) && !is.null(names(m)) && "chosen" %in% names(m)){
-#         return(as.numeric(m$chosen))
-#       }
-#       
-#       # B: vector numérico
-#       if(is.numeric(m) && is.atomic(m)){
-#         return(as.numeric(m))
-#       }
-#       
-#       # C: lista (posiblemente sin nombres)
-#       if(is.list(m)){
-#         v <- unlist(m, use.names = FALSE)
-#         v <- as.numeric(v)
-#         return(v)
-#       }
-#     }
-#     
-#     # fallback: intenta unlist del objeto completo
-#     v <- unlist(P_test, use.names = FALSE)
-#     as.numeric(v)
-#   }
-#   
-#   drop_parameter <- function(beta, fixed, par){
-#     if(par %in% names(beta)) beta <- beta[names(beta) != par]
-#     if(par %in% fixed) fixed <- setdiff(fixed, par)
-#     list(beta = beta, fixed = fixed)
-#   }
-#   
-#   # ---------- main ----------
-#   out <- list()
-#   
-#   for(sp in specs){
-#     
-#     if(verbose){
-#       cat("\n==============================\n")
-#       cat("Running OOS for cluster:", cl, "\n")
-#       cat("Running OOS for spec:", sp, "\n")
-#       cat("==============================\n")
-#     }
-#     
-#     # база wide del spec
-#     if(is.null(res_cluster$models[[sp]])) {
-#       if(verbose) cat("  -> spec no existe en res_cluster$models\n")
-#       next
-#     }
-#     db <- res_cluster$models[[sp]]$database_wide
-#     if(is.null(db)) {
-#       if(verbose) cat("  -> database_wide es NULL\n")
-#       next
-#     }
-#     
-#     # fechas
-#     if(!(date_var %in% names(db))) stop(paste0("No existe columna fecha: ", date_var))
-#     db[[date_var]] <- safe_date(db[[date_var]])
-#     
-#     db_train <- db[ db[[date_var]] <  cut_date, , drop = FALSE]
-#     db_test  <- db[ db[[date_var]] >= cut_date, , drop = FALSE]
-#     
-#     if(nrow(db_train) == 0 || nrow(db_test) == 0){
-#       if(verbose) cat("  -> train o test vacío. Saltando.\n")
-#       next
-#     }
-#     
-#     # --- ESTIMAR EN TRAIN ---
-#     apollo_control <- res_cluster$models[[sp]]$apollo_control
-#     apollo_control$modelName <- paste0(apollo_control$modelName, "_", sp, "_train")
-#     apollo_control$nCores <- nCores
-#     
-#     # Apollo usa objetos en GlobalEnv
-#     assign("database", db_train, envir = .GlobalEnv)
-#     assign("apollo_control", apollo_control, envir = .GlobalEnv)
-#     
-#     apollo_beta  <- apollo_beta_base
-#     apollo_fixed <- apollo_fixed_base
-#     
-#     # si el spec/cluster define use_d_c, lo pasamos a inputs luego
-#     use_d_c_val <- 0
-#     if(!is.null(res_cluster$models[[sp]]$apollo_inputs$use_d_c)){
-#       use_d_c_val <- res_cluster$models[[sp]]$apollo_inputs$use_d_c
-#       # normaliza a 0/1
-#       use_d_c_val <- as.numeric(!is.na(use_d_c_val) && use_d_c_val > 0)
-#     }
-#     
-#     # Si use_d_c es 0, saca B_d_c (evita "no influye en LL" / "no encontrado")
-#     if(use_d_c_val == 0){
-#       tmp <- drop_parameter(apollo_beta, apollo_fixed, "B_d_c")
-#       apollo_beta  <- tmp$beta
-#       apollo_fixed <- tmp$fixed
-#     }
-#     
-#     assign("apollo_beta",  apollo_beta,  envir = .GlobalEnv)
-#     assign("apollo_fixed", apollo_fixed, envir = .GlobalEnv)
-#     
-#     apollo_inputs <- apollo_validateInputs()
-#     # inyecta use_d_c si aplica
-#     apollo_inputs$use_d_c <- use_d_c_val
-#     
-#     m_train <- apollo_estimate(apollo_beta, apollo_fixed, apollo_prob_fun, apollo_inputs)
-#     beta_hat <- m_train$estimate
-#     
-#     # --- EVALUAR EN TEST (betas fijos) ---
-#     apollo_control_test <- apollo_control
-#     apollo_control_test$modelName <- paste0(apollo_control$modelName, "_", sp, "_test")
-#     
-#     assign("database", db_test, envir = .GlobalEnv)
-#     assign("apollo_control", apollo_control_test, envir = .GlobalEnv)
-#     
-#     apollo_inputs_test <- apollo_validateInputs()
-#     apollo_inputs_test$use_d_c <- use_d_c_val
-#     
-#     # IMPORTANT: usa prediction para OOS (pero si tu prob_fun no soporta, cambia a validate)
-#     P_test <- try(apollo_prob_fun(beta_hat, apollo_inputs_test, functionality = "prediction"),
-#                   silent = TRUE)
-#     
-#     if(inherits(P_test, "try-error")){
-#       # fallback a validate (en varios de tus casos validate sí devuelve estructura útil)
-#       if(verbose) cat("  -> prediction falló, usando validate.\n")
-#       P_test <- apollo_prob_fun(beta_hat, apollo_inputs_test, functionality = "validate")
-#     }
-#     
-#     p_vec <- extract_probvec(P_test)
-#     
-#     # --- decidir si p_vec está a nivel obs o indiv ---
-#     # si indiv_id se entrega, intentamos LL perIndiv agrupando por indiv_id usando p_obs (si viene por obs)
-#     # pero por defecto calculamos por "elemento de p_vec"
-#     n_elem <- length(p_vec)
-#     
-#     # clamp
-#     p_vec <- pmax(p_vec, eps)
-#     LL_test <- sum(log(p_vec))
-#     
-#     
-#     # calcular pseudo-r2
-#     avail_mat <- do.call(
-#       cbind,
-#       lapply(P_test$model[setdiff(names(P_test$model), "chosen")], 
-#              function(x) as.numeric(x > 0))
-#     )
-#     
-#     n_alt_avail <- rowSums(avail_mat)
-#     p_null <- 1 / n_alt_avail
-#     LL_null_test <- sum(log(p_null))
-#     pseudoR2_oos <- 1 - (LL_test / LL_null_test)
-#     
-#     row <- data.frame(
-#       cluster = cl,
-#       spec = sp,
-#       nTrain = nrow(db_train),
-#       nTest  = nrow(db_test),
-#       nProb  = n_elem,
-#       LL_test = LL_test,
-#       LL_null_test = LL_null_test,
-#       pseudoR2_oos = pseudoR2_oos,
-#       LL_test_perElem = LL_test / n_elem,
-#       LL_test_perIndiv = LL_test / length(unique(db_test$fished_vessel_anon)),
-#       nIndiv_test = length(unique(db_test$fished_vessel_anon))
-#     )
-#     
-#     # (opcional) si p_vec parece por obs y existe indiv_id, calcula LL perIndiv
-#     if(!is.null(indiv_id) && (indiv_id %in% names(db_test)) && n_elem == nrow(db_test)){
-#       ids <- db_test[[indiv_id]]
-#       ll_by_obs <- log(pmax(p_vec, eps))
-#       ll_by_ind <- tapply(ll_by_obs, ids, sum)
-#       row$LL_test_perIndiv <- mean(ll_by_ind)
-#       row$nIndiv_test <- length(ll_by_ind)
-#     } else {
-#       row$LL_test_perIndiv <- NA_real_
-#       row$nIndiv_test <- NA_integer_
-#     }
-#     
-#     out[[sp]] <- row
-#   }
-#   
-#   # bind final
-#   out_df <- do.call(rbind, out)
-#   
-#   # orden: mejor LL (más alto, menos negativo)
-#   out_df <- out_df[order(out_df$LL_test_perElem, decreasing = TRUE), ]
-#   
-#   rownames(out_df) <- NULL
-#   out_df
-# }
-# 
-# 
-# 
-# oos_results <- list()
-# 
-# for(k in 4:7){
-#   cl <- paste0("c", k)
-#   
-#   res_cluster       <- get(paste0("res_", cl))
-#   apollo_beta_base  <- get(paste0("apollo_beta_", cl))
-#   apollo_fixed_base <- get(paste0("apollo_fixed_", cl))
-#   apollo_prob_fun   <- get(paste0("apollo_probabilities_", cl))
-#   
-#   oos_results[[cl]] <- oos_compare_cluster(
-#     res_cluster = res_cluster,
-#     apollo_beta_base  = apollo_beta_base,
-#     apollo_fixed_base = apollo_fixed_base,
-#     apollo_prob_fun   = apollo_prob_fun,
-#     cut_date = as.Date("2017-01-01"),
-#     specs = c("daily","MA7","MA14","MA30","t1daily"),
-#     nCores = 1,
-#     cl = cl,
-#     date_var = "set_date",
-#     indiv_id = "fished_vessel_anon",  # si existe en tu db_wide; si no, pon NULL
-#     verbose = TRUE
-#   )
-# }
-# 
-# 
-# ## Tabla
-# 
-# library(dplyr)
-# 
-# 
-# oos_table <- bind_rows(
-#   oos_results$c4,
-#   oos_results$c5,
-#   oos_results$c6,
-#   oos_results$c7
-# )
-# 
-# writexl::write_xlsx(oos_table, path=file.path("R","output","OOS_results_sdm_variation.xlsx"))
-# saveRDS(oos_table, "oos_table.RDS")
 
-oos_table <- readRDS("oos_table.RDS")
+
+apollo_probabilities_null_c4 <- readRDS("apollo_probabilities_null_c4.rds")
+apollo_probabilities_null_c5 <- readRDS("apollo_probabilities_null_c5.rds")
+apollo_probabilities_null_c6 <- readRDS("apollo_probabilities_null_c6.rds")
+apollo_probabilities_null_c7 <- readRDS("apollo_probabilities_null_c7.rds")
+apollo_beta_null_c4          <- readRDS("apollo_beta_null_c4.rds")
+apollo_beta_null_c5          <- readRDS("apollo_beta_null_c5.rds")
+apollo_beta_null_c6          <- readRDS("apollo_beta_null_c6.rds")
+apollo_beta_null_c7          <- readRDS("apollo_beta_null_c7.rds")
+apollo_fixed_null_c4         <- readRDS("apollo_fixed_null_c4.rds")
+apollo_fixed_null_c5         <- readRDS("apollo_fixed_null_c5.rds")
+apollo_fixed_null_c6         <- readRDS("apollo_fixed_null_c6.rds")
+apollo_fixed_null_c7         <- readRDS("apollo_fixed_null_c7.rds")
+
+# #### OUT OF SAMPLE METRIC (FULL vs NULL-ASC trained on TRAIN) ####
+# - Estimates FULL model on TRAIN, evaluates LL on TEST
+# - Estimates NULL model (ASC-only, same NL structure) on TRAIN, evaluates LL on TEST
+# - Computes McFadden-style OOS pseudo-R2: 1 - LL_test_full / LL_test_null
+# - Uses functionality="prediction" (no panelProd) if your prob-funs are coded that way;
+#   falls back to "validate" if prediction fails (symmetrically for full and null).
+
+oos_compare_cluster <- function(res_cluster,
+                                apollo_beta_base, apollo_fixed_base, apollo_prob_fun,
+                                apollo_beta_null, apollo_fixed_null, apollo_prob_fun_null,
+                                cut_date = as.Date("2017-01-01"),
+                                specs = c("daily","MA7","MA14","MA30","t1daily"),
+                                nCores = 1,
+                                cl = "cX",
+                                date_var = "set_date",
+                                indiv_id = NULL,   # e.g., "fished_vessel_anon" for per-individual LL
+                                eps = 1e-300,
+                                verbose = TRUE){
+  
+  # ---------- helpers ----------
+  safe_date <- function(x){
+    if(inherits(x, "Date")) return(x)
+    as.Date(x)
+  }
+  
+  extract_probvec <- function(P_obj){
+    # returns numeric vector of probs of chosen alternative
+    if(is.null(P_obj)) stop("P_obj is NULL")
+    
+    if(!is.null(P_obj$model)){
+      m <- P_obj$model
+      
+      # A) list with chosen
+      if(is.list(m) && !is.null(names(m)) && "chosen" %in% names(m)){
+        return(as.numeric(m$chosen))
+      }
+      
+      # B) numeric vector
+      if(is.numeric(m) && is.atomic(m)){
+        return(as.numeric(m))
+      }
+      
+      # C) list -> unlist
+      if(is.list(m)){
+        v <- unlist(m, use.names = FALSE)
+        return(as.numeric(v))
+      }
+    }
+    
+    # fallback
+    v <- unlist(P_obj, use.names = FALSE)
+    as.numeric(v)
+  }
+  
+  drop_parameter <- function(beta, fixed, par){
+    if(par %in% names(beta)) beta <- beta[names(beta) != par]
+    if(par %in% fixed) fixed <- setdiff(fixed, par)
+    list(beta = beta, fixed = fixed)
+  }
+  
+  run_probs <- function(prob_fun, beta_hat, inputs, what = c("FULL","NULL")){
+    what <- match.arg(what)
+    P <- try(prob_fun(beta_hat, inputs, functionality = "prediction"), silent = TRUE)
+    if(inherits(P, "try-error")){
+      if(verbose) cat("  ->", what, "prediction falló, usando validate.\n")
+      P <- prob_fun(beta_hat, inputs, functionality = "validate")
+    }
+    P
+  }
+  
+  # ---------- main ----------
+  out <- list()
+  
+  for(sp in specs){
+    
+    if(verbose){
+      cat("\n==============================\n")
+      cat("Running OOS for cluster:", cl, "\n")
+      cat("Running OOS for spec:", sp, "\n")
+      cat("==============================\n")
+    }
+    
+    # Check spec exists
+    if(is.null(res_cluster$models[[sp]])) {
+      if(verbose) cat("  -> spec no existe en res_cluster$models\n")
+      next
+    }
+    db <- res_cluster$models[[sp]]$database_wide
+    if(is.null(db)) {
+      if(verbose) cat("  -> database_wide es NULL\n")
+      next
+    }
+    
+    # Dates + split
+    if(!(date_var %in% names(db))) stop(paste0("No existe columna fecha: ", date_var))
+    db[[date_var]] <- safe_date(db[[date_var]])
+    
+    db_train <- db[ db[[date_var]] <  cut_date, , drop = FALSE]
+    db_test  <- db[ db[[date_var]] >= cut_date, , drop = FALSE]
+    
+    if(nrow(db_train) == 0 || nrow(db_test) == 0){
+      if(verbose) cat("  -> train o test vacío. Saltando.\n")
+      next
+    }
+    
+    # Controls
+    apollo_control <- res_cluster$models[[sp]]$apollo_control
+    apollo_control$modelName <- paste0(apollo_control$modelName, "_", sp, "_train")
+    apollo_control$nCores <- nCores
+    
+    # Get use_d_c if present
+    use_d_c_val <- 0
+    if(!is.null(res_cluster$models[[sp]]$apollo_inputs$use_d_c)){
+      use_d_c_val <- res_cluster$models[[sp]]$apollo_inputs$use_d_c
+      use_d_c_val <- as.numeric(!is.na(use_d_c_val) && use_d_c_val > 0)
+    }
+    
+    # ---------- FULL: estimate on TRAIN ----------
+    assign("database", db_train, envir = .GlobalEnv)
+    assign("apollo_control", apollo_control, envir = .GlobalEnv)
+    
+    apollo_beta_full  <- apollo_beta_base
+    apollo_fixed_full <- apollo_fixed_base
+    
+    if(use_d_c_val == 0){
+      tmp <- drop_parameter(apollo_beta_full, apollo_fixed_full, "B_d_c")
+      apollo_beta_full  <- tmp$beta
+      apollo_fixed_full <- tmp$fixed
+    }
+    
+    assign("apollo_beta",  apollo_beta_full,  envir = .GlobalEnv)
+    assign("apollo_fixed", apollo_fixed_full, envir = .GlobalEnv)
+    
+    apollo_inputs_full <- apollo_validateInputs()
+    apollo_inputs_full$use_d_c <- use_d_c_val
+    
+    m_full_train <- apollo_estimate(apollo_beta_full, apollo_fixed_full,
+                                    apollo_prob_fun, apollo_inputs_full)
+    beta_full_hat <- m_full_train$estimate
+    
+    # ---------- NULL: estimate on TRAIN ----------
+    assign("database", db_train, envir = .GlobalEnv)
+    assign("apollo_control", apollo_control, envir = .GlobalEnv)
+    
+    apollo_beta_n  <- apollo_beta_null
+    apollo_fixed_n <- apollo_fixed_null
+    
+    if(use_d_c_val == 0){
+      tmp <- drop_parameter(apollo_beta_n, apollo_fixed_n, "B_d_c")
+      apollo_beta_n  <- tmp$beta
+      apollo_fixed_n <- tmp$fixed
+    }
+    
+    assign("apollo_beta",  apollo_beta_n,  envir = .GlobalEnv)
+    assign("apollo_fixed", apollo_fixed_n, envir = .GlobalEnv)
+    
+    apollo_inputs_null <- apollo_validateInputs()
+    apollo_inputs_null$use_d_c <- use_d_c_val
+    
+    m_null_train <- apollo_estimate(apollo_beta_n, apollo_fixed_n,
+                                    apollo_prob_fun_null, apollo_inputs_null)
+    beta_null_hat <- m_null_train$estimate
+    
+    # ---------- Evaluate on TEST (FULL + NULL) ----------
+    apollo_control_test <- apollo_control
+    apollo_control_test$modelName <- paste0(apollo_control$modelName, "_", sp, "_test")
+    
+    assign("database", db_test, envir = .GlobalEnv)
+    assign("apollo_control", apollo_control_test, envir = .GlobalEnv)
+    
+    apollo_inputs_test <- apollo_validateInputs()
+    apollo_inputs_test$use_d_c <- use_d_c_val
+    
+    # FULL probs + LL
+    P_test_full <- run_probs(apollo_prob_fun, beta_full_hat, apollo_inputs_test, what = "FULL")
+    p_full <- pmax(extract_probvec(P_test_full), eps)
+    LL_test_full <- sum(log(p_full))
+    n_elem <- length(p_full)
+    
+    # NULL probs + LL
+    P_test_null <- run_probs(apollo_prob_fun_null, beta_null_hat, apollo_inputs_test, what = "NULL")
+    p_null <- pmax(extract_probvec(P_test_null), eps)
+    LL_test_null <- sum(log(p_null))
+    
+    # OOS pseudo-R2 (McFadden-style)
+    pseudoR2_oos <- 1 - (LL_test_full / LL_test_null)
+    
+    # Optional per-individual averaging (only if p is per-observation)
+    LL_full_perIndiv <- NA_real_
+    nIndiv_test <- NA_integer_
+    
+    if(!is.null(indiv_id) && (indiv_id %in% names(db_test)) && length(p_full) == nrow(db_test)){
+      ids <- db_test[[indiv_id]]
+      ll_by_obs <- log(pmax(p_full, eps))
+      ll_by_ind <- tapply(ll_by_obs, ids, sum)
+      LL_full_perIndiv <- mean(ll_by_ind)
+      nIndiv_test <- length(ll_by_ind)
+    }
+    
+    row <- data.frame(
+      cluster = cl,
+      spec = sp,
+      nTrain = nrow(db_train),
+      nTest  = nrow(db_test),
+      nProb  = n_elem,
+      LL_test_full = LL_test_full,
+      LL_test_null = LL_test_null,
+      pseudoR2_oos = pseudoR2_oos,
+      LL_full_perElem = LL_test_full / n_elem,
+      LL_full_perIndiv = LL_full_perIndiv,
+      nIndiv_test = nIndiv_test
+    )
+    
+    out[[sp]] <- row
+  }
+  
+  # Bind + order
+  out_df <- do.call(rbind, out)
+  out_df <- out_df[order(out_df$LL_full_perElem, decreasing = TRUE), ]
+  rownames(out_df) <- NULL
+  out_df
+}
+
+oos_results <- list()
+
+for(k in 4:7){
+  cl <- paste0("c", k)
+  
+  res_cluster       <- get(paste0("res_", cl))
+  apollo_beta_base  <- get(paste0("apollo_beta_", cl))
+  apollo_fixed_base <- get(paste0("apollo_fixed_", cl))
+  apollo_prob_fun   <- get(paste0("apollo_probabilities_", cl))
+  
+  apollo_beta_null  <- get(paste0("apollo_beta_null_", cl))
+  apollo_fixed_null <- get(paste0("apollo_fixed_null_", cl))
+  apollo_prob_fun_null <- get(paste0("apollo_probabilities_null_", cl))
+  
+  oos_results[[cl]] <- oos_compare_cluster(
+    res_cluster = res_cluster,
+    apollo_beta_base = apollo_beta_base,
+    apollo_fixed_base = apollo_fixed_base,
+    apollo_prob_fun = apollo_prob_fun,
+    apollo_beta_null = apollo_beta_null,
+    apollo_fixed_null = apollo_fixed_null,
+    apollo_prob_fun_null = apollo_prob_fun_null,
+    cut_date = as.Date("2017-01-01"),
+    specs = c("daily","MA7","MA14","MA30","t1daily"),
+    nCores = 1,
+    cl = cl,
+    date_var = "set_date",
+    indiv_id = "fished_vessel_anon",
+    verbose = TRUE
+  )
+}
+
+
+
+## Tabla
+
+library(dplyr)
+
+
+oos_table <- bind_rows(
+  oos_results$c4,
+  oos_results$c5,
+  oos_results$c6,
+  oos_results$c7
+)
+
+writexl::write_xlsx(oos_table, path=file.path("R","output","OOS_results_sdm_variation.xlsx"))
+saveRDS(oos_table, "oos_table.RDS")
+
 
 
 
