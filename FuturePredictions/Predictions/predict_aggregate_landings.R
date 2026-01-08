@@ -596,3 +596,9 @@ ggplot(landings_MSQD_all, aes(x = reorder(PORT_AREA_CODE, -Avg_Landings), y = Av
 
 ### Optimal would be to use the quota in the simulation!!!
 
+
+### Check historical model.
+
+### Changes come from participation or landings
+
+
