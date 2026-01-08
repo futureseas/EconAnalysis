@@ -499,11 +499,10 @@ apollo_control <- list(
 apollo_beta  <- m$estimate
 apollo_fixed <- apollo_fixed_c5
 
-apollo_randCoeff <- function(apollo_beta, apollo_inputs) list()
-apollo_lcPars    <- function(apollo_beta, apollo_inputs) list()
 
 # 4) Validate inputs
 apollo_inputs2 <- apollo_validateInputs()
+
 
 # 5) Bootstrap
 boot <- apollo_bootstrap(
@@ -511,7 +510,7 @@ boot <- apollo_bootstrap(
   apollo_fixed         = apollo_fixed,
   apollo_probabilities = apollo_probabilities_c5,
   apollo_inputs        = apollo_inputs2,
-  estimate_settings    = list(hessianRoutine="none", maxIterations=0, silent=TRUE),
+  estimate_settings    = list(hessianRoutine="none", maxIterations=1, silent=TRUE),
   bootstrap_settings   = list(nRep=100, seed=123)
 )
 
