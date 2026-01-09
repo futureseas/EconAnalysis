@@ -459,7 +459,7 @@ apollo_beta_c6=c(
               B_mean_avail_psdn                   = 1,
               B_mean_avail_nanc                   = 1,
               B_mean_avail_cmck                   = 1,
-              B_mean_avail_cpue                   = 1,
+              B_mean_avail_cpue                   = 0,
               B_wind_max_220_mh              = -0.05,
               B_dist_to_cog                  = -0.005,
               B_dist_port_to_catch_area_zero = -0.02,
@@ -483,7 +483,7 @@ apollo_beta_c6=c(
              )
 
 apollo_fixed_c6 <- c("asc_no_participation", "theta_nanc", "theta_psdn",  
-                     "asc_psdn", "asc_sock", "asc_nanc", "asc_dcrb", "asc_cmck", "B_mean_price_slmn")
+                     "asc_psdn", "asc_sock", "asc_nanc", "asc_dcrb", "asc_cmck", "B_mean_price_slmn", "B_mean_avail_cpue")
 
 
 

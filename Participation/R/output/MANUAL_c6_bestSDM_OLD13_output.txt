@@ -5,7 +5,7 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : MANUAL_c6_bestSDM
 Model description                           : Manual re-estimation on extracted database_wide
-Model run at                                : 2026-01-09 17:00:26.950496
+Model run at                                : 2026-01-09 16:59:31.566658
 Estimation method                           : bgw
 Estimation diagnosis                        : Relative function convergence
 Optimisation diagnosis                      : Unknown (no Hessian calculated)
@@ -16,62 +16,62 @@ Number of modelled outcomes                 : 2581
 Number of cores used                        :  16 
 Model without mixing
 
-LL(start)                                   : -38385.66
+LL(start)                                   : -39384.24
 LL at equal shares, LL(0)                   : -5523.23
 LL at observed shares, LL(C)                : -3024.73
-LL(final)                                   : -2109.01
-Rho-squared vs equal shares                  :  0.6182 
-Adj.Rho-squared vs equal shares              :  0.6156 
-Rho-squared vs observed shares               :  0.3027 
-Adj.Rho-squared vs observed shares           :  0.3014 
-AIC                                         :  4246.01 
-BIC                                         :  4328 
+LL(final)                                   : -1987.87
+Rho-squared vs equal shares                  :  0.6401 
+Adj.Rho-squared vs equal shares              :  0.6374 
+Rho-squared vs observed shares               :  0.3428 
+Adj.Rho-squared vs observed shares           :  0.3411 
+AIC                                         :  4005.74 
+BIC                                         :  4093.57 
 
-Estimated parameters                        : 14
-Time taken (hh:mm:ss)                       :  00:00:10.11 
+Estimated parameters                        : 15
+Time taken (hh:mm:ss)                       :  00:00:12.55 
      pre-estimation                         :  00:00:7.67 
-     estimation                             :  00:00:2.34 
-     post-estimation                        :  00:00:0.1 
-Iterations                                  :  26  
+     estimation                             :  00:00:4.74 
+     post-estimation                        :  00:00:0.14 
+Iterations                                  :  48  
 
 Unconstrained optimisation.
 
 Estimates:
                                   Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
-B_mean_avail_psdn                  0.44942          NA          NA          NA          NA            NA            NA
-B_mean_avail_nanc                  0.17136          NA          NA          NA          NA            NA            NA
-B_mean_avail_cmck                  3.69658          NA          NA          NA          NA            NA            NA
-B_mean_avail_cpue                  0.00000          NA          NA          NA          NA            NA            NA
-B_wind_max_220_mh                 -0.04155          NA          NA          NA          NA            NA            NA
-B_dist_to_cog                  -2.7657e-04          NA          NA          NA          NA            NA            NA
-B_dist_port_to_catch_area_zero    -0.01259          NA          NA          NA          NA            NA            NA
-B_dummy_prev_days                  3.53049          NA          NA          NA          NA            NA            NA
-B_dummy_prev_year_days             0.39681          NA          NA          NA          NA            NA            NA
-B_unem_rate                        0.44729          NA          NA          NA          NA            NA            NA
-B_d_d                             -0.25299          NA          NA          NA          NA            NA            NA
-c_dcrb                            -0.18485          NA          NA          NA          NA            NA            NA
-B_mean_price_part                 -0.49358          NA          NA          NA          NA            NA            NA
-B_mean_price_crab                  0.24348          NA          NA          NA          NA            NA            NA
-B_mean_price_slmn                  0.00000          NA          NA          NA          NA            NA            NA
-asc_psdn                          -6.00000          NA          NA          NA          NA            NA            NA
-asc_nanc                          -6.00000          NA          NA          NA          NA            NA            NA
-asc_cmck                          -8.00000          NA          NA          NA          NA            NA            NA
-asc_dcrb                          -9.50000          NA          NA          NA          NA            NA            NA
-asc_sock                         -20.00000          NA          NA          NA          NA            NA            NA
-theta_part                         0.72921          NA          NA          NA          NA            NA            NA
-theta_nanc                        10.00000          NA          NA          NA          NA            NA            NA
-theta_psdn                        10.00000          NA          NA          NA          NA            NA            NA
-asc_no_participation               0.00000          NA          NA          NA          NA            NA            NA
+B_mean_avail_psdn                 1.563957          NA          NA          NA          NA            NA            NA
+B_mean_avail_nanc                 1.062399          NA          NA          NA          NA            NA            NA
+B_mean_avail_cmck                 7.153881          NA          NA          NA          NA            NA            NA
+B_mean_avail_cpue                28.479003          NA          NA          NA          NA            NA            NA
+B_wind_max_220_mh                -0.045842          NA          NA          NA          NA            NA            NA
+B_dist_to_cog                    -0.001017          NA          NA          NA          NA            NA            NA
+B_dist_port_to_catch_area_zero   -0.006131          NA          NA          NA          NA            NA            NA
+B_dummy_prev_days                 3.100777          NA          NA          NA          NA            NA            NA
+B_dummy_prev_year_days            0.410238          NA          NA          NA          NA            NA            NA
+B_unem_rate                       0.418510          NA          NA          NA          NA            NA            NA
+B_d_d                            -0.013396          NA          NA          NA          NA            NA            NA
+c_dcrb                           -1.505929          NA          NA          NA          NA            NA            NA
+B_mean_price_part                -0.262388          NA          NA          NA          NA            NA            NA
+B_mean_price_crab                -1.627294          NA          NA          NA          NA            NA            NA
+B_mean_price_slmn                 0.000000          NA          NA          NA          NA            NA            NA
+asc_psdn                         -6.000000          NA          NA          NA          NA            NA            NA
+asc_nanc                         -6.000000          NA          NA          NA          NA            NA            NA
+asc_cmck                         -8.000000          NA          NA          NA          NA            NA            NA
+asc_dcrb                         -9.500000          NA          NA          NA          NA            NA            NA
+asc_sock                        -20.000000          NA          NA          NA          NA            NA            NA
+theta_part                        0.395793          NA          NA          NA          NA            NA            NA
+theta_nanc                       10.000000          NA          NA          NA          NA            NA            NA
+theta_psdn                       10.000000          NA          NA          NA          NA            NA            NA
+asc_no_participation              0.000000          NA          NA          NA          NA            NA            NA
 
 Nesting structure for NL model component :
 Nest: root (1)
 |-------Alternative: no_participation
-|-Nest: part (0.6746)
-|  |-Nest: nanc (0.6746)
+|-Nest: part (0.5977)
+|  |-Nest: nanc (0.5976)
 |  |  |-Alternative: clo_nanc
 |  |  |-Alternative: clw_nanc
 |  |  '-Alternative: cwa_nanc
-|  |-Nest: psdn (0.6746)
+|  |-Nest: psdn (0.5976)
 |  |  |-Alternative: cba_psdn
 |  |  |-Alternative: clo_psdn
 |  |  |-Alternative: clw_psdn
@@ -90,10 +90,11 @@ Percentage chosen when available      0.8    11.95     7.20     6.81     1.51   
 
 
 Classical covariance matrix:
-                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_cmck              B_wind_max_220_mh
+                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_cmck              B_mean_avail_cpue
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -105,10 +106,11 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                                B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days
+                                            B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -120,10 +122,11 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                                  B_unem_rate                          B_d_d                         c_dcrb              B_mean_price_part
+                                       B_dummy_prev_year_days                    B_unem_rate                          B_d_d                         c_dcrb
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -135,27 +138,29 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                            B_mean_price_crab                     theta_part
-B_mean_avail_psdn                                          NA                             NA
-B_mean_avail_nanc                                          NA                             NA
-B_mean_avail_cmck                                          NA                             NA
-B_wind_max_220_mh                                          NA                             NA
-B_dist_to_cog                                              NA                             NA
-B_dist_port_to_catch_area_zero                             NA                             NA
-B_dummy_prev_days                                          NA                             NA
-B_dummy_prev_year_days                                     NA                             NA
-B_unem_rate                                                NA                             NA
-B_d_d                                                      NA                             NA
-c_dcrb                                                     NA                             NA
-B_mean_price_part                                          NA                             NA
-B_mean_price_crab                                          NA                             NA
-theta_part                                                 NA                             NA
+                                            B_mean_price_part              B_mean_price_crab                     theta_part
+B_mean_avail_psdn                                          NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA
+B_mean_avail_cmck                                          NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_dcrb                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+theta_part                                                 NA                             NA                             NA
 
 Robust covariance matrix:
-                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_cmck              B_wind_max_220_mh
+                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_cmck              B_mean_avail_cpue
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -167,10 +172,11 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                                B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days
+                                            B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -182,10 +188,11 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                                  B_unem_rate                          B_d_d                         c_dcrb              B_mean_price_part
+                                       B_dummy_prev_year_days                    B_unem_rate                          B_d_d                         c_dcrb
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -197,27 +204,29 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                            B_mean_price_crab                     theta_part
-B_mean_avail_psdn                                          NA                             NA
-B_mean_avail_nanc                                          NA                             NA
-B_mean_avail_cmck                                          NA                             NA
-B_wind_max_220_mh                                          NA                             NA
-B_dist_to_cog                                              NA                             NA
-B_dist_port_to_catch_area_zero                             NA                             NA
-B_dummy_prev_days                                          NA                             NA
-B_dummy_prev_year_days                                     NA                             NA
-B_unem_rate                                                NA                             NA
-B_d_d                                                      NA                             NA
-c_dcrb                                                     NA                             NA
-B_mean_price_part                                          NA                             NA
-B_mean_price_crab                                          NA                             NA
-theta_part                                                 NA                             NA
+                                            B_mean_price_part              B_mean_price_crab                     theta_part
+B_mean_avail_psdn                                          NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA
+B_mean_avail_cmck                                          NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_dcrb                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+theta_part                                                 NA                             NA                             NA
 
 Classical correlation matrix:
-                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_cmck              B_wind_max_220_mh
+                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_cmck              B_mean_avail_cpue
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -229,10 +238,11 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                                B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days
+                                            B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -244,10 +254,11 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                                  B_unem_rate                          B_d_d                         c_dcrb              B_mean_price_part
+                                       B_dummy_prev_year_days                    B_unem_rate                          B_d_d                         c_dcrb
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -259,27 +270,29 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                            B_mean_price_crab                     theta_part
-B_mean_avail_psdn                                          NA                             NA
-B_mean_avail_nanc                                          NA                             NA
-B_mean_avail_cmck                                          NA                             NA
-B_wind_max_220_mh                                          NA                             NA
-B_dist_to_cog                                              NA                             NA
-B_dist_port_to_catch_area_zero                             NA                             NA
-B_dummy_prev_days                                          NA                             NA
-B_dummy_prev_year_days                                     NA                             NA
-B_unem_rate                                                NA                             NA
-B_d_d                                                      NA                             NA
-c_dcrb                                                     NA                             NA
-B_mean_price_part                                          NA                             NA
-B_mean_price_crab                                          NA                             NA
-theta_part                                                 NA                             NA
+                                            B_mean_price_part              B_mean_price_crab                     theta_part
+B_mean_avail_psdn                                          NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA
+B_mean_avail_cmck                                          NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_dcrb                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+theta_part                                                 NA                             NA                             NA
 
 Robust correlation matrix:
-                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_cmck              B_wind_max_220_mh
+                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_cmck              B_mean_avail_cpue
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -291,10 +304,11 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                                B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days
+                                            B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -306,10 +320,11 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                                  B_unem_rate                          B_d_d                         c_dcrb              B_mean_price_part
+                                       B_dummy_prev_year_days                    B_unem_rate                          B_d_d                         c_dcrb
 B_mean_avail_psdn                                          NA                             NA                             NA                             NA
 B_mean_avail_nanc                                          NA                             NA                             NA                             NA
 B_mean_avail_cmck                                          NA                             NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA                             NA
 B_wind_max_220_mh                                          NA                             NA                             NA                             NA
 B_dist_to_cog                                              NA                             NA                             NA                             NA
 B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
@@ -321,35 +336,36 @@ c_dcrb                                                     NA                   
 B_mean_price_part                                          NA                             NA                             NA                             NA
 B_mean_price_crab                                          NA                             NA                             NA                             NA
 theta_part                                                 NA                             NA                             NA                             NA
-                                            B_mean_price_crab                     theta_part
-B_mean_avail_psdn                                          NA                             NA
-B_mean_avail_nanc                                          NA                             NA
-B_mean_avail_cmck                                          NA                             NA
-B_wind_max_220_mh                                          NA                             NA
-B_dist_to_cog                                              NA                             NA
-B_dist_port_to_catch_area_zero                             NA                             NA
-B_dummy_prev_days                                          NA                             NA
-B_dummy_prev_year_days                                     NA                             NA
-B_unem_rate                                                NA                             NA
-B_d_d                                                      NA                             NA
-c_dcrb                                                     NA                             NA
-B_mean_price_part                                          NA                             NA
-B_mean_price_crab                                          NA                             NA
-theta_part                                                 NA                             NA
+                                            B_mean_price_part              B_mean_price_crab                     theta_part
+B_mean_avail_psdn                                          NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA
+B_mean_avail_cmck                                          NA                             NA                             NA
+B_mean_avail_cpue                                          NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA
+B_unem_rate                                                NA                             NA                             NA
+B_d_d                                                      NA                             NA                             NA
+c_dcrb                                                     NA                             NA                             NA
+B_mean_price_part                                          NA                             NA                             NA
+B_mean_price_crab                                          NA                             NA                             NA
+theta_part                                                 NA                             NA                             NA
 
  11 most extreme outliers in terms of lowest average per choice prediction:
  ID Avg prob per choice
-  9           0.2699245
-  3           0.3475680
- 10           0.4077281
- 11           0.4085488
-  6           0.4186386
-  1           0.4646601
-  8           0.4846496
-  2           0.4873773
-  4           0.4928433
-  5           0.5177787
-  7           0.5362117
+  9           0.3853973
+  3           0.4095454
+ 11           0.4098412
+  6           0.4287512
+ 10           0.4596062
+  1           0.4662264
+  8           0.4900128
+  4           0.4943903
+  2           0.4945974
+  5           0.5193250
+  7           0.5413248
 
 Settings and functions used in model definition:
 
