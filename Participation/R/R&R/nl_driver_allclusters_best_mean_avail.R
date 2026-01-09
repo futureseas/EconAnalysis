@@ -4,6 +4,7 @@
 # You already have these in your current pipeline/script:
 
 library(apollo)
+apollo_initialise()
 
 setwd("D:/GitHub/EconAnalysis/Participation")
 res_c4 <- readRDS("res_c4.rds") 
@@ -473,69 +474,44 @@ lr_test(
 
 ### Bootstrap
 
-library(apollo)
-apollo_initialise()
-
-# 1) Set database
+# Objects from your pipeline
 m <- out_c5$model_manual
 database <- db_c5
 
-# sanity: does the ID column exist?
 stopifnot("fished_vessel_anon" %in% names(database))
 
-# 2) Define control properly (THIS fixes your error)
 apollo_control <- list(
   modelName       = "MANUAL_c5_bootstrap",
   modelDescr      = "Bootstrap SE at optimum",
-  indivID         = "fished_vessel_anon",   # <<< REQUIRED
-  panelData       = TRUE,                   # <<< REQUIRED for your setup
+  indivID         = "fished_vessel_anon",
+  panelData       = TRUE,
   mixing          = FALSE,
-  nCores          = 1,
+  nCores          = 8,  # <- use your machine
   outputDirectory = file.path("R","output"),
   workInLogs      = FALSE
 )
 
-# 3) Provide the objects Apollo expects
 apollo_beta  <- m$estimate
 apollo_fixed <- apollo_fixed_c5
 
-
-# 4) Validate inputs
 apollo_inputs2 <- apollo_validateInputs()
 
-
-# 5) Bootstrap
 boot <- apollo_bootstrap(
   apollo_beta          = apollo_beta,
   apollo_fixed         = apollo_fixed,
   apollo_probabilities = apollo_probabilities_c5,
   apollo_inputs        = apollo_inputs2,
-  estimate_settings    = list(hessianRoutine="none", maxIterations=1, silent=TRUE),
-  bootstrap_settings   = list(nRep=100, seed=123)
+  estimate_settings    = list(
+    hessianRoutine = "none",
+    maxIterations  = 80,     # <<< KEY FIX (NOT 1)
+    silent         = TRUE,
+    scaleBeta      = TRUE
+  ),
+  bootstrap_settings   = list(
+    nRep = 100,
+    seed = 123
+  )
 )
-
-
-
-
-
-# bootstrap SE = SD across bootstrap estimates
-se_boot <- apply(boot$bootstrapEstimates, 2, sd, na.rm = TRUE)
-
-t_boot <- m$estimate / se_boot
-p_boot <- 2 * (1 - pnorm(abs(t_boot)))
-
-tab <- data.frame(
-  param    = names(m$estimate),
-  estimate = as.numeric(m$estimate),
-  se_boot  = as.numeric(se_boot),
-  t_boot   = as.numeric(t_boot),
-  p_boot   = as.numeric(p_boot)
-)
-
-tab[order(tab$p_boot), ]
-
-
-
 
 
 
