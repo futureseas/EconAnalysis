@@ -20,7 +20,7 @@ library(apollo)
 
 ### Initialise code
 apollo_initialise()
-setwd("C:/GitHub/EconAnalysis/Participation/R")
+setwd("D:/GitHub/EconAnalysis/Participation/R")
 
 
 ### Set core controls

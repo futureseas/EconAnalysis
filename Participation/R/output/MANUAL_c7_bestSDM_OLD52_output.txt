@@ -1,0 +1,324 @@
+Model run by Felipe using Apollo 0.3.6 on R 4.5.2 for Windows.
+Please acknowledge the use of Apollo by citing Hess & Palma (2019)
+  DOI 10.1016/j.jocm.2019.100170
+  www.ApolloChoiceModelling.com
+
+Model name                                  : MANUAL_c7_bestSDM
+Model description                           : Manual re-estimation on extracted database_wide
+Model run at                                : 2026-01-13 11:38:49.022044
+Estimation method                           : bfgs
+Estimation diagnosis                        : successful convergence
+Optimisation diagnosis                      : Unknown (no Hessian calculated)
+Number of individuals                       : 8
+Number of rows in database                  : 2402
+Number of modelled outcomes                 : 2402
+
+Number of cores used                        :  16 
+Model without mixing
+
+LL(start)                                   : -1361.62
+LL at equal shares, LL(0)                   : -4975.41
+LL at observed shares, LL(C)                : -2544.89
+LL(final)                                   : -1360.39
+Rho-squared vs equal shares                  :  0.7266 
+Adj.Rho-squared vs equal shares              :  0.7246 
+Rho-squared vs observed shares               :  0.4654 
+Adj.Rho-squared vs observed shares           :  0.4643 
+AIC                                         :  2740.78 
+BIC                                         :  2798.62 
+
+Estimated parameters                        : 10
+Time taken (hh:mm:ss)                       :  00:00:7.67 
+     pre-estimation                         :  00:00:5.72 
+     estimation                             :  00:00:1.88 
+     post-estimation                        :  00:00:0.07 
+Iterations                                  :  20  
+
+Unconstrained optimisation.
+
+Estimates:
+                                  Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
+B_mean_avail_msqd                 0.434954          NA          NA          NA          NA            NA            NA
+B_mean_avail_psdn                -0.552388          NA          NA          NA          NA            NA            NA
+B_mean_avail_nanc                 0.411681          NA          NA          NA          NA            NA            NA
+B_mean_price                      0.063357          NA          NA          NA          NA            NA            NA
+B_wind_max_220_mh                -0.030841          NA          NA          NA          NA            NA            NA
+B_dist_to_cog                    -0.002217          NA          NA          NA          NA            NA            NA
+B_dist_port_to_catch_area_zero   -0.008926          NA          NA          NA          NA            NA            NA
+B_dummy_prev_days                 2.784740          NA          NA          NA          NA            NA            NA
+B_dummy_prev_year_days            0.198365          NA          NA          NA          NA            NA            NA
+c_psdn                           -1.699831          NA          NA          NA          NA            NA            NA
+B_d_d                            -0.742851          NA          NA          NA          NA            NA            NA
+B_unem_rate_part                  0.021763          NA          NA          NA          NA            NA            NA
+w_msqd                           -4.515898          NA          NA          NA          NA            NA            NA
+asc_msqd                         -2.322322          NA          NA          NA          NA            NA            NA
+asc_psdn                         -3.416135          NA          NA          NA          NA            NA            NA
+asc_nanc                         -2.807920          NA          NA          NA          NA            NA            NA
+theta_part                        1.293244          NA          NA          NA          NA            NA            NA
+theta_msqd                        1.139214          NA          NA          NA          NA            NA            NA
+theta_nanc                       -5.379153          NA          NA          NA          NA            NA            NA
+asc_no_participation              0.000000          NA          NA          NA          NA            NA            NA
+
+Nesting structure for NL model component :
+Nest: root (1)
+|-------Alternative: no_participation
+'-Nest: part (0.7847)
+   |-Nest: msqd (0.5944)
+   |  |-Alternative: laa_msqd
+   |  |-Alternative: sba_msqd
+   |  |-Alternative: sfa_msqd
+   |  '-Alternative: mna_msqd
+   |----Alternative: laa_psdn
+   '-Nest: nanc (0.0036)
+      |-Alternative: sba_nanc
+      '-Alternative: sda_nanc
+
+
+Overview of choices for NL model component :
+                                 laa_msqd sba_msqd sfa_msqd mna_msqd laa_psdn sba_nanc sda_nanc no_participation
+Times available                   2374.00  2374.00  2374.00  2374.00  2402.00  2402.00  2402.00          2402.00
+Times chosen                       113.00   254.00    17.00    65.00    26.00   145.00    59.00          1723.00
+Percentage chosen overall            4.70    10.57     0.71     2.71     1.08     6.04     2.46            71.73
+Percentage chosen when available     4.76    10.70     0.72     2.74     1.08     6.04     2.46            71.73
+
+
+Classical covariance matrix:
+                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_nanc                   B_mean_price              B_wind_max_220_mh                  B_dist_to_cog
+B_mean_avail_msqd                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_avail_psdn                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_price                                               NA                             NA                             NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA                             NA                             NA
+B_unem_rate_part                                           NA                             NA                             NA                             NA                             NA                             NA
+                               B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days               B_unem_rate_part
+B_mean_avail_msqd                                          NA                             NA                             NA                             NA
+B_mean_avail_psdn                                          NA                             NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA                             NA
+B_mean_price                                               NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA
+B_unem_rate_part                                           NA                             NA                             NA                             NA
+
+Robust covariance matrix:
+                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_nanc                   B_mean_price              B_wind_max_220_mh                  B_dist_to_cog
+B_mean_avail_msqd                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_avail_psdn                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_price                                               NA                             NA                             NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA                             NA                             NA
+B_unem_rate_part                                           NA                             NA                             NA                             NA                             NA                             NA
+                               B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days               B_unem_rate_part
+B_mean_avail_msqd                                          NA                             NA                             NA                             NA
+B_mean_avail_psdn                                          NA                             NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA                             NA
+B_mean_price                                               NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA
+B_unem_rate_part                                           NA                             NA                             NA                             NA
+
+Classical correlation matrix:
+                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_nanc                   B_mean_price              B_wind_max_220_mh                  B_dist_to_cog
+B_mean_avail_msqd                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_avail_psdn                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_price                                               NA                             NA                             NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA                             NA                             NA
+B_unem_rate_part                                           NA                             NA                             NA                             NA                             NA                             NA
+                               B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days               B_unem_rate_part
+B_mean_avail_msqd                                          NA                             NA                             NA                             NA
+B_mean_avail_psdn                                          NA                             NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA                             NA
+B_mean_price                                               NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA
+B_unem_rate_part                                           NA                             NA                             NA                             NA
+
+Robust correlation matrix:
+                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_nanc                   B_mean_price              B_wind_max_220_mh                  B_dist_to_cog
+B_mean_avail_msqd                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_avail_psdn                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA                             NA                             NA                             NA
+B_mean_price                                               NA                             NA                             NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA                             NA                             NA
+B_unem_rate_part                                           NA                             NA                             NA                             NA                             NA                             NA
+                               B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days               B_unem_rate_part
+B_mean_avail_msqd                                          NA                             NA                             NA                             NA
+B_mean_avail_psdn                                          NA                             NA                             NA                             NA
+B_mean_avail_nanc                                          NA                             NA                             NA                             NA
+B_mean_price                                               NA                             NA                             NA                             NA
+B_wind_max_220_mh                                          NA                             NA                             NA                             NA
+B_dist_to_cog                                              NA                             NA                             NA                             NA
+B_dist_port_to_catch_area_zero                             NA                             NA                             NA                             NA
+B_dummy_prev_days                                          NA                             NA                             NA                             NA
+B_dummy_prev_year_days                                     NA                             NA                             NA                             NA
+B_unem_rate_part                                           NA                             NA                             NA                             NA
+
+ 8 most extreme outliers in terms of lowest average per choice prediction:
+ ID Avg prob per choice
+  2           0.4765996
+  5           0.5190016
+  3           0.5357583
+  4           0.5359350
+  6           0.5391716
+  7           0.5472532
+  1           0.9355304
+  8           0.9422734
+
+Settings and functions used in model definition:
+
+apollo_control
+--------------
+                       Value                                            
+modelName              "MANUAL_c7_bestSDM"                              
+modelDescr             "Manual re-estimation on extracted database_wide"
+indivID                "fished_vessel_anon"                             
+outputDirectory        "R/output/"                                      
+panelData              "TRUE"                                           
+nCores                 "16"                                             
+workInLogs             "TRUE"                                           
+debug                  "FALSE"                                          
+seed                   "13"                                             
+mixing                 "FALSE"                                          
+HB                     "FALSE"                                          
+noValidation           "FALSE"                                          
+noDiagnostics          "FALSE"                                          
+calculateLLC           "TRUE"                                           
+analyticHessian        "FALSE"                                          
+memorySaver            "FALSE"                                          
+analyticGrad           "FALSE"                                          
+analyticGrad_manualSet "FALSE"                                          
+overridePanel          "FALSE"                                          
+preventOverridePanel   "FALSE"                                          
+noModification         "FALSE"                                          
+
+Hessian routines attempted
+--------------------------
+none
+
+
+apollo_probabilities
+----------------------
+function(apollo_beta, apollo_inputs, functionality="estimate"){
+  
+  ### Attach inputs and detach after function exit
+  apollo_attach(apollo_beta, apollo_inputs)
+  on.exit(apollo_detach(apollo_beta, apollo_inputs))
+  use_d_c <- if(!is.null(apollo_inputs$use_d_c)) apollo_inputs$use_d_c else 0
+  
+  if(use_d_c == 0){
+    B_d_c <- 0
+  }
+  
+  lambda_part <- 1 / (1 + exp(-theta_part))
+  lambda_nanc <- lambda_part * (1 / (1 + exp(-theta_nanc)))
+  lambda_msqd <- lambda_part * (1 / (1 + exp(-theta_msqd)))
+
+  
+  ### Create list of probabilities P
+  P = list()
+  
+  # 
+  ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
+  V = list()
+  V[["laa_msqd"]]         = asc_msqd + B_mean_avail_msqd * mean_avail_laa_msqd + B_mean_price * mean_price_laa_msqd + B_wind_max_220_mh * wind_max_220_mh_laa_msqd + B_dist_to_cog * dist_to_cog_laa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd + B_dummy_prev_days * dummy_prev_days_laa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_laa_msqd  + B_unem_rate_part * unem_rate_laa_msqd + B_d_d * d_d_laa_msqd + w_msqd * weekend 
+  V[["sba_msqd"]]         = asc_msqd + B_mean_avail_msqd * mean_avail_sba_msqd + B_mean_price * mean_price_sba_msqd + B_wind_max_220_mh * wind_max_220_mh_sba_msqd + B_dist_to_cog * dist_to_cog_sba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd + B_dummy_prev_days * dummy_prev_days_sba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sba_msqd  + B_unem_rate_part * unem_rate_sba_msqd + B_d_d * d_d_sba_msqd + w_msqd * weekend 
+  V[["sfa_msqd"]]         = asc_msqd + B_mean_avail_msqd * mean_avail_sfa_msqd + B_mean_price * mean_price_sfa_msqd + B_wind_max_220_mh * wind_max_220_mh_sfa_msqd + B_dist_to_cog * dist_to_cog_sfa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd + B_dummy_prev_days * dummy_prev_days_sfa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sfa_msqd  + B_unem_rate_part * unem_rate_sfa_msqd + B_d_d * d_d_sfa_msqd + w_msqd * weekend 
+  V[["mna_msqd"]]         = asc_msqd + B_mean_avail_msqd * mean_avail_mna_msqd + B_mean_price * mean_price_mna_msqd + B_wind_max_220_mh * wind_max_220_mh_mna_msqd + B_dist_to_cog * dist_to_cog_mna_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd + B_dummy_prev_days * dummy_prev_days_mna_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mna_msqd  + B_unem_rate_part * unem_rate_mna_msqd + B_d_d * d_d_mna_msqd + w_msqd * weekend 
+  V[["laa_psdn"]]         = asc_psdn + B_mean_avail_psdn * mean_avail_laa_psdn + B_mean_price * mean_price_laa_psdn + B_wind_max_220_mh * wind_max_220_mh_laa_psdn + B_dist_to_cog * dist_to_cog_laa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_psdn + B_dummy_prev_days * dummy_prev_days_laa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_laa_psdn  + B_unem_rate_part * unem_rate_laa_psdn + B_d_d * d_d_laa_psdn + c_psdn * psdnclosure                            
+  V[["sba_nanc"]]         = asc_nanc + B_mean_avail_nanc * mean_avail_sba_nanc + B_mean_price * mean_price_sba_nanc + B_wind_max_220_mh * wind_max_220_mh_sba_nanc + B_dist_to_cog * dist_to_cog_sba_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_nanc + B_dummy_prev_days * dummy_prev_days_sba_nanc + B_dummy_prev_year_days * dummy_prev_year_days_sba_nanc  + B_unem_rate_part * unem_rate_sba_nanc + B_d_d * d_d_sba_nanc
+  V[["sda_nanc"]]         = asc_nanc + B_mean_avail_nanc * mean_avail_sda_nanc + B_mean_price * mean_price_sda_nanc + B_wind_max_220_mh * wind_max_220_mh_sda_nanc + B_dist_to_cog * dist_to_cog_sda_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sda_nanc + B_dummy_prev_days * dummy_prev_days_sda_nanc + B_dummy_prev_year_days * dummy_prev_year_days_sda_nanc  + B_unem_rate_part * unem_rate_sda_nanc + B_d_d * d_d_sda_nanc
+  V[["no_participation"]] = asc_no_participation 
+  
+  
+  ### Especificar nidos para el modelo NL (Nodos de Especie)
+  nlNests = list(
+    root = 1, 
+    part = lambda_part, 
+    nanc = lambda_nanc, 
+    msqd = lambda_msqd 
+  )
+  
+  
+  ### Especificar estructura de árbol para el modelo NL (Nidos de Especie)
+  nlStructure = list()
+  
+  # 1. Nivel Raíz: Participar o no
+  nlStructure[["root"]] = c("no_participation", "part")
+  
+  # 2. Nivel de Participación: Dividido por Nidos de Especie
+  nlStructure[["part"]] = c("msqd", "laa_psdn", "nanc")
+  
+  # 3. Nivel de Especie: Alternativas de Puertos dentro de cada especie
+  nlStructure[["msqd"]] = c("laa_msqd", "sba_msqd", "sfa_msqd", "mna_msqd")
+  nlStructure[["nanc"]] = c("sba_nanc", "sda_nanc")
+  
+  
+  avail= list(
+    laa_msqd         = 1 - msqdclosure,
+    sba_msqd         = 1 - msqdclosure,
+    sfa_msqd         = 1 - msqdclosure,
+    mna_msqd         = 1 - msqdclosure,
+    laa_psdn         = 1,
+    sba_nanc         = 1,
+    sda_nanc         = 1,
+    no_participation = 1)
+  
+  
+  nl_settings <- list(
+    alternatives = c(
+      laa_msqd = 5,
+      sba_msqd = 7,
+      sfa_msqd = 8,
+      mna_msqd = 9,
+      laa_psdn = 10,
+      sba_nanc = 13,
+      sda_nanc = 14,
+      no_participation = 15),
+    avail        = avail,
+    choiceVar    = choice,
+    utilities    = V,
+    nlNests      = nlNests,
+    nlStructure  = nlStructure
+  )
+  
+
+  
+  P[["model"]] = apollo_nl(nl_settings, functionality)
+  
+  # --- OOS/prediction: NO panelProd (evita underflow a 0) ---
+  if(functionality == "prediction"){
+    P = apollo_prepareProb(P, apollo_inputs, functionality)
+    return(P)
+  }
+  
+  # --- Estimación normal ---
+  P = apollo_panelProd(P, apollo_inputs, functionality)
+  P = apollo_prepareProb(P, apollo_inputs, functionality)
+  return(P)
+  
+}
