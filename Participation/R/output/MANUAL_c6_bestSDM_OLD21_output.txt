@@ -1,0 +1,351 @@
+Model run by Felipe using Apollo 0.3.6 on R 4.5.2 for Windows.
+Please acknowledge the use of Apollo by citing Hess & Palma (2019)
+  DOI 10.1016/j.jocm.2019.100170
+  www.ApolloChoiceModelling.com
+
+Model name                                  : MANUAL_c6_bestSDM
+Model description                           : Manual re-estimation on extracted database_wide
+Model run at                                : 2026-01-14 15:34:29.464342
+Estimation method                           : bfgs
+Estimation diagnosis                        : successful convergence
+Optimisation diagnosis                      : Maximum found
+     hessian properties                     : Negative definite
+     maximum eigenvalue                     : -0.681688
+     reciprocal of condition number         : 1.47843e-07
+Number of individuals                       : 11
+Number of rows in database                  : 2581
+Number of modelled outcomes                 : 2581
+
+Number of cores used                        :  16 
+Model without mixing
+
+LL(start)                                   : -1882.17
+LL at equal shares, LL(0)                   : -5738.96
+LL at observed shares, LL(C)                : -3041.63
+LL(final)                                   : -1880.78
+Rho-squared vs equal shares                  :  0.6723 
+Adj.Rho-squared vs equal shares              :  0.6705 
+Rho-squared vs observed shares               :  0.3817 
+Adj.Rho-squared vs observed shares           :  0.3817 
+AIC                                         :  3781.55 
+BIC                                         :  3840.11 
+
+Estimated parameters                        : 10
+Time taken (hh:mm:ss)                       :  00:00:11.87 
+     pre-estimation                         :  00:00:8.05 
+     estimation                             :  00:00:1.77 
+     post-estimation                        :  00:00:2.04 
+Iterations                                  :  14  
+
+Unconstrained optimisation.
+
+Estimates:
+                                  Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
+B_mean_avail_psdn                 1.848016    0.358560       5.154       2.365    0.529483         3.490         1.602
+B_mean_avail_nanc                 2.505913    0.343315       7.299       4.386    0.610675         4.104         2.466
+B_mean_avail_othr                10.704264    0.418310      25.589      23.199    0.481589        22.227        20.151
+B_mean_avail_cmck                 5.045722    1.193163       4.229       3.391    0.961594         5.247         4.207
+B_wind_max_220_mh                -0.048936    0.007088      -6.904    -147.994    0.005410        -9.046      -193.902
+B_dist_to_cog                    -0.005219  5.3066e-04      -9.835   -1894.286  5.6987e-04        -9.158     -1763.941
+B_dist_port_to_catch_area_zero   -0.020985    0.002126      -9.869    -480.151    0.002468        -8.504      -413.759
+B_dummy_prev_days                 2.127978    0.098853      21.527      11.411    0.106539        19.974        10.587
+B_dummy_prev_year_days            0.287415    0.069658       4.126     -10.230    0.104301         2.756        -6.832
+B_unem_rate                       0.296118          NA          NA          NA          NA            NA            NA
+B_d_d                            -1.045099          NA          NA          NA          NA            NA            NA
+c_dcrb                           -0.370995          NA          NA          NA          NA            NA            NA
+B_mean_price_part                 3.797124    0.179778      21.121      15.559    0.175127        21.682        15.972
+B_mean_price_othr                 0.053017          NA          NA          NA          NA            NA            NA
+asc_cba_psdn                     -3.408862          NA          NA          NA          NA            NA            NA
+asc_clo_psdn                     -4.289892          NA          NA          NA          NA            NA            NA
+asc_clw_psdn                     -4.338542          NA          NA          NA          NA            NA            NA
+asc_cwa_psdn                     -4.034541          NA          NA          NA          NA            NA            NA
+asc_clo_nanc                     -5.619260          NA          NA          NA          NA            NA            NA
+asc_clw_nanc                     -8.610970          NA          NA          NA          NA            NA            NA
+asc_cwa_nanc                     -4.828103          NA          NA          NA          NA            NA            NA
+asc_clo_cmck                     -5.347980          NA          NA          NA          NA            NA            NA
+asc_cwa_dcrb                    -10.069835          NA          NA          NA          NA            NA            NA
+asc_nps_sock                     -8.145702          NA          NA          NA          NA            NA            NA
+theta_part                        0.004439          NA          NA          NA          NA            NA            NA
+theta_nanc                       13.340847          NA          NA          NA          NA            NA            NA
+theta_psdn                        1.033493          NA          NA          NA          NA            NA            NA
+asc_no_participation              0.000000          NA          NA          NA          NA            NA            NA
+
+Nesting structure for NL model component :
+Nest: root (1)
+|-------Alternative: no_participation
+|-Nest: part (0.5011)
+|  |-Nest: nanc (0.5011)
+|  |  |-Alternative: clo_nanc
+|  |  |-Alternative: clw_nanc
+|  |  '-Alternative: cwa_nanc
+|  |-Nest: psdn (0.3696)
+|  |  |-Alternative: cba_psdn
+|  |  |-Alternative: clo_psdn
+|  |  |-Alternative: clw_psdn
+|  |  '-Alternative: cwa_psdn
+|  '----Alternative: clo_cmck
+|-------Alternative: cwa_dcrb
+'-------Alternative: nps_sock
+
+
+Overview of choices for NL model component :
+                                 cba_psdn clo_psdn clw_psdn cwa_psdn clo_nanc clw_nanc cwa_nanc clo_cmck cwa_dcrb nps_sock no_participation
+Times available                    1632.0  1632.00  1527.00  1527.00  2581.00  2581.00  2581.00  2581.00  2581.00  2581.00          2581.00
+Times chosen                         13.0   195.00   110.00   104.00    39.00    22.00   415.00     8.00    28.00    14.00          1633.00
+Percentage chosen overall             0.5     7.56     4.26     4.03     1.51     0.85    16.08     0.31     1.08     0.54            63.27
+Percentage chosen when available      0.8    11.95     7.20     6.81     1.51     0.85    16.08     0.31     1.08     0.54            63.27
+
+
+Classical covariance matrix:
+                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_othr              B_mean_avail_cmck              B_wind_max_220_mh
+B_mean_avail_psdn                                    0.128565                       0.089940                       0.057985                       0.148997                      -0.001128
+B_mean_avail_nanc                                    0.089940                       0.117865                       0.048480                       0.139232                    -9.5896e-04
+B_mean_avail_othr                                    0.057985                       0.048480                       0.174984                       0.099406                    -9.4827e-04
+B_mean_avail_cmck                                    0.148997                       0.139232                       0.099406                       1.423637                      -0.002312
+B_wind_max_220_mh                                   -0.001128                    -9.5896e-04                    -9.4827e-04                      -0.002312                      5.024e-05
+B_dist_to_cog                                      -6.882e-06                      2.619e-06                     -7.113e-05                     -1.836e-05                     -1.667e-07
+B_dist_port_to_catch_area_zero                    -2.9430e-04                     -5.889e-05                     -2.451e-05                     1.2412e-04                      3.762e-07
+B_dummy_prev_days                                   -0.012522                      -0.013195                      -0.010276                      -0.020677                    -1.4406e-04
+B_dummy_prev_year_days                              -0.002832                      -0.003205                       0.001060                       0.004521                     -3.380e-05
+B_mean_price_part                                   -0.008136                      -0.020411                       0.012365                      -0.002772                    -2.1633e-04
+                                                B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days              B_mean_price_part
+B_mean_avail_psdn                                  -6.882e-06                    -2.9430e-04                      -0.012522                      -0.002832                      -0.008136
+B_mean_avail_nanc                                   2.619e-06                     -5.889e-05                      -0.013195                      -0.003205                      -0.020411
+B_mean_avail_othr                                  -7.113e-05                     -2.451e-05                      -0.010276                       0.001060                       0.012365
+B_mean_avail_cmck                                  -1.836e-05                     1.2412e-04                      -0.020677                       0.004521                      -0.002772
+B_wind_max_220_mh                                  -1.667e-07                      3.762e-07                    -1.4406e-04                     -3.380e-05                    -2.1633e-04
+B_dist_to_cog                                       2.816e-07                     -5.176e-08                     -2.995e-06                      3.263e-06                     -1.043e-05
+B_dist_port_to_catch_area_zero                     -5.176e-08                      4.522e-06                     -1.264e-05                      5.102e-06                      5.070e-05
+B_dummy_prev_days                                  -2.995e-06                     -1.264e-05                       0.009772                      -0.002350                      -0.002826
+B_dummy_prev_year_days                              3.263e-06                      5.102e-06                      -0.002350                       0.004852                     6.8643e-04
+B_mean_price_part                                  -1.043e-05                      5.070e-05                      -0.002826                     6.8643e-04                       0.032320
+
+Robust covariance matrix:
+                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_othr              B_mean_avail_cmck              B_wind_max_220_mh
+B_mean_avail_psdn                                    0.280352                       0.253067                       0.109280                       0.306391                      -0.001032
+B_mean_avail_nanc                                    0.253067                       0.372924                       0.016411                       0.207915                      -0.001361
+B_mean_avail_othr                                    0.109280                       0.016411                       0.231928                       0.257950                      -0.001540
+B_mean_avail_cmck                                    0.306391                       0.207915                       0.257950                       0.924663                    -6.0820e-04
+B_wind_max_220_mh                                   -0.001032                      -0.001361                      -0.001540                    -6.0820e-04                      2.926e-05
+B_dist_to_cog                                      1.0532e-04                     1.1436e-04                     1.5499e-04                      5.183e-05                     -1.399e-06
+B_dist_port_to_catch_area_zero                    -6.0321e-04                    -5.5092e-04                     4.1347e-04                    -2.9820e-04                     -3.030e-06
+B_dummy_prev_days                                   -0.022545                      -0.027998                       0.001446                      -0.077567                    -1.2472e-04
+B_dummy_prev_year_days                              -0.036954                      -0.049009                     9.0279e-04                      -0.002162                     1.6070e-04
+B_mean_price_part                                   -0.041541                      -0.052589                       0.008357                      -0.019525                     -6.550e-05
+                                                B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days              B_mean_price_part
+B_mean_avail_psdn                                  1.0532e-04                    -6.0321e-04                      -0.022545                      -0.036954                      -0.041541
+B_mean_avail_nanc                                  1.1436e-04                    -5.5092e-04                      -0.027998                      -0.049009                      -0.052589
+B_mean_avail_othr                                  1.5499e-04                     4.1347e-04                       0.001446                     9.0279e-04                       0.008357
+B_mean_avail_cmck                                   5.183e-05                    -2.9820e-04                      -0.077567                      -0.002162                      -0.019525
+B_wind_max_220_mh                                  -1.399e-06                     -3.030e-06                    -1.2472e-04                     1.6070e-04                     -6.550e-05
+B_dist_to_cog                                       3.248e-07                      7.952e-07                      8.087e-06                     -1.132e-05                     -5.412e-05
+B_dist_port_to_catch_area_zero                      7.952e-07                      6.089e-06                      7.721e-05                     1.3424e-04                     -2.933e-05
+B_dummy_prev_days                                   8.087e-06                      7.721e-05                       0.011351                    -7.7000e-04                       0.005707
+B_dummy_prev_year_days                             -1.132e-05                     1.3424e-04                    -7.7000e-04                       0.010879                       0.004481
+B_mean_price_part                                  -5.412e-05                     -2.933e-05                       0.005707                       0.004481                       0.030669
+
+Classical correlation matrix:
+                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_othr              B_mean_avail_cmck              B_wind_max_220_mh
+B_mean_avail_psdn                                     1.00000                        0.73063                        0.38659                        0.34827                       -0.44404
+B_mean_avail_nanc                                     0.73063                        1.00000                        0.33758                        0.33990                       -0.39410
+B_mean_avail_othr                                     0.38659                        0.33758                        1.00000                        0.19917                       -0.31984
+B_mean_avail_cmck                                     0.34827                        0.33990                        0.19917                        1.00000                       -0.27336
+B_wind_max_220_mh                                    -0.44404                       -0.39410                       -0.31984                       -0.27336                        1.00000
+B_dist_to_cog                                        -0.03617                        0.01438                       -0.32041                       -0.02900                       -0.04431
+B_dist_port_to_catch_area_zero                       -0.38600                       -0.08067                       -0.02756                        0.04892                        0.02496
+B_dummy_prev_days                                    -0.35328                       -0.38879                       -0.24850                       -0.17531                       -0.20561
+B_dummy_prev_year_days                               -0.11337                       -0.13403                        0.03639                        0.05440                       -0.06847
+B_mean_price_part                                    -0.12621                       -0.33070                        0.16442                       -0.01292                       -0.16978
+                                                B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days              B_mean_price_part
+B_mean_avail_psdn                                    -0.03617                       -0.38600                       -0.35328                       -0.11337                       -0.12621
+B_mean_avail_nanc                                     0.01438                       -0.08067                       -0.38879                       -0.13403                       -0.33070
+B_mean_avail_othr                                    -0.32041                       -0.02756                       -0.24850                        0.03639                        0.16442
+B_mean_avail_cmck                                    -0.02900                        0.04892                       -0.17531                        0.05440                       -0.01292
+B_wind_max_220_mh                                    -0.04431                        0.02496                       -0.20561                       -0.06847                       -0.16978
+B_dist_to_cog                                         1.00000                       -0.04587                       -0.05710                        0.08828                       -0.10931
+B_dist_port_to_catch_area_zero                       -0.04587                        1.00000                       -0.06012                        0.03445                        0.13261
+B_dummy_prev_days                                    -0.05710                       -0.06012                        1.00000                       -0.34124                       -0.15903
+B_dummy_prev_year_days                                0.08828                        0.03445                       -0.34124                        1.00000                        0.05481
+B_mean_price_part                                    -0.10931                        0.13261                       -0.15903                        0.05481                        1.00000
+
+Robust correlation matrix:
+                                            B_mean_avail_psdn              B_mean_avail_nanc              B_mean_avail_othr              B_mean_avail_cmck              B_wind_max_220_mh
+B_mean_avail_psdn                                      1.0000                        0.78266                        0.42856                        0.60177                       -0.36041
+B_mean_avail_nanc                                      0.7827                        1.00000                        0.05580                        0.35407                       -0.41208
+B_mean_avail_othr                                      0.4286                        0.05580                        1.00000                        0.55702                       -0.59113
+B_mean_avail_cmck                                      0.6018                        0.35407                        0.55702                        1.00000                       -0.11692
+B_wind_max_220_mh                                     -0.3604                       -0.41208                       -0.59113                       -0.11692                        1.00000
+B_dist_to_cog                                          0.3490                        0.32860                        0.56474                        0.09458                       -0.45391
+B_dist_port_to_catch_area_zero                        -0.4617                       -0.36560                        0.34793                       -0.12567                       -0.22697
+B_dummy_prev_days                                     -0.3997                       -0.43034                        0.02818                       -0.75714                       -0.21640
+B_dummy_prev_year_days                                -0.6692                       -0.76945                        0.01797                       -0.02156                        0.28482
+B_mean_price_part                                     -0.4480                       -0.49173                        0.09909                       -0.11594                       -0.06913
+                                                B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days              B_mean_price_part
+B_mean_avail_psdn                                     0.34905                       -0.46168                       -0.39967                       -0.66916                       -0.44799
+B_mean_avail_nanc                                     0.32860                       -0.36560                       -0.43034                       -0.76945                       -0.49173
+B_mean_avail_othr                                     0.56474                        0.34793                        0.02818                        0.01797                        0.09909
+B_mean_avail_cmck                                     0.09458                       -0.12567                       -0.75714                       -0.02156                       -0.11594
+B_wind_max_220_mh                                    -0.45391                       -0.22697                       -0.21640                        0.28482                       -0.06913
+B_dist_to_cog                                         1.00000                        0.56552                        0.13320                       -0.19038                       -0.54231
+B_dist_port_to_catch_area_zero                        0.56552                        1.00000                        0.29371                        0.52157                       -0.06786
+B_dummy_prev_days                                     0.13320                        0.29371                        1.00000                       -0.06929                        0.30590
+B_dummy_prev_year_days                               -0.19038                        0.52157                       -0.06929                        1.00000                        0.24532
+B_mean_price_part                                    -0.54231                       -0.06786                        0.30590                        0.24532                        1.00000
+
+ 11 most extreme outliers in terms of lowest average per choice prediction:
+ ID Avg prob per choice
+  9           0.4114460
+ 11           0.4161837
+  3           0.4315960
+  6           0.4374128
+ 10           0.4879759
+  4           0.4990401
+  2           0.5104124
+  1           0.5217182
+  8           0.5240107
+  5           0.5310825
+  7           0.5510470
+
+Settings and functions used in model definition:
+
+apollo_control
+--------------
+                       Value                                            
+modelName              "MANUAL_c6_bestSDM"                              
+modelDescr             "Manual re-estimation on extracted database_wide"
+indivID                "fished_vessel_anon"                             
+outputDirectory        "R/output/"                                      
+panelData              "TRUE"                                           
+nCores                 "16"                                             
+workInLogs             "TRUE"                                           
+debug                  "FALSE"                                          
+seed                   "13"                                             
+mixing                 "FALSE"                                          
+HB                     "FALSE"                                          
+noValidation           "FALSE"                                          
+noDiagnostics          "FALSE"                                          
+calculateLLC           "TRUE"                                           
+analyticHessian        "FALSE"                                          
+memorySaver            "FALSE"                                          
+analyticGrad           "FALSE"                                          
+analyticGrad_manualSet "FALSE"                                          
+overridePanel          "FALSE"                                          
+preventOverridePanel   "FALSE"                                          
+noModification         "FALSE"                                          
+
+Hessian routines attempted
+--------------------------
+numerical second derivative of LL (using numDeriv)
+
+Scaling used in computing Hessian
+---------------------------------
+                                      Value
+B_mean_avail_psdn               1.848015624
+B_mean_avail_nanc               2.505912749
+B_mean_avail_othr              10.704264208
+B_mean_avail_cmck               5.045722264
+B_wind_max_220_mh               0.048935514
+B_dist_to_cog                   0.005218889
+B_dist_port_to_catch_area_zero  0.020984865
+B_dummy_prev_days               2.127978100
+B_dummy_prev_year_days          0.287415076
+B_mean_price_part               3.797123908
+
+
+apollo_probabilities
+----------------------
+function(apollo_beta, apollo_inputs, functionality="estimate"){
+  
+  ### Attach inputs and detach after function exit
+  apollo_attach(apollo_beta, apollo_inputs)
+  on.exit(apollo_detach(apollo_beta, apollo_inputs))
+  use_d_c <- if(!is.null(apollo_inputs$use_d_c)) apollo_inputs$use_d_c else 0
+  
+  if(use_d_c == 0){
+    B_d_c <- 0
+  }
+  
+  
+  ### Construir lambda
+  lambda_part <- 1 / (1 + exp(-theta_part))
+  lambda_nanc <- lambda_part * (1 / (1 + exp(-theta_nanc)))
+  lambda_psdn <- lambda_part * (1 / (1 + exp(-theta_psdn)))
+
+  
+  ### Create list of probabilities P
+  P = list()
+
+    # 
+  ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
+  V = list()
+  V[["cba_psdn"]]         = asc_cba_psdn + B_mean_avail_psdn * mean_avail_cba_psdn + B_wind_max_220_mh * wind_max_220_mh_cba_psdn + B_dist_to_cog * dist_to_cog_cba_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cba_psdn + B_dummy_prev_days * dummy_prev_days_cba_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cba_psdn  + B_unem_rate * unem_rate_cba_psdn  + B_d_d * d_d_cba_psdn + B_mean_price_part * mean_price_3_cba_psdn
+  V[["clo_psdn"]]         = asc_clo_psdn + B_mean_avail_psdn * mean_avail_clo_psdn + B_wind_max_220_mh * wind_max_220_mh_clo_psdn + B_dist_to_cog * dist_to_cog_clo_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_psdn + B_dummy_prev_days * dummy_prev_days_clo_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clo_psdn  + B_unem_rate * unem_rate_clo_psdn  + B_d_d * d_d_clo_psdn + B_mean_price_part * mean_price_3_clo_psdn
+  V[["clw_psdn"]]         = asc_clw_psdn + B_mean_avail_psdn * mean_avail_clw_psdn + B_wind_max_220_mh * wind_max_220_mh_clw_psdn + B_dist_to_cog * dist_to_cog_clw_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_psdn + B_dummy_prev_days * dummy_prev_days_clw_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clw_psdn  + B_unem_rate * unem_rate_clw_psdn  + B_d_d * d_d_clw_psdn + B_mean_price_part * mean_price_3_clw_psdn 
+  V[["cwa_psdn"]]         = asc_cwa_psdn + B_mean_avail_psdn * mean_avail_cwa_psdn + B_wind_max_220_mh * wind_max_220_mh_cwa_psdn + B_dist_to_cog * dist_to_cog_cwa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_psdn + B_dummy_prev_days * dummy_prev_days_cwa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cwa_psdn  + B_unem_rate * unem_rate_cwa_psdn  + B_d_d * d_d_cwa_psdn + B_mean_price_part * mean_price_3_cwa_psdn
+  V[["clo_nanc"]]         = asc_clo_nanc + B_mean_avail_nanc * mean_avail_clo_nanc + B_wind_max_220_mh * wind_max_220_mh_clo_nanc + B_dist_to_cog * dist_to_cog_clo_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_nanc + B_dummy_prev_days * dummy_prev_days_clo_nanc + B_dummy_prev_year_days * dummy_prev_year_days_clo_nanc  + B_unem_rate * unem_rate_clo_nanc  + B_d_d * d_d_clo_nanc + B_mean_price_part * mean_price_3_clo_nanc
+  V[["clw_nanc"]]         = asc_clw_nanc + B_mean_avail_nanc * mean_avail_clw_nanc + B_wind_max_220_mh * wind_max_220_mh_clw_nanc + B_dist_to_cog * dist_to_cog_clw_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_nanc + B_dummy_prev_days * dummy_prev_days_clw_nanc + B_dummy_prev_year_days * dummy_prev_year_days_clw_nanc  + B_unem_rate * unem_rate_clw_nanc  + B_d_d * d_d_clw_nanc + B_mean_price_part * mean_price_3_clw_nanc
+  V[["cwa_nanc"]]         = asc_cwa_nanc + B_mean_avail_nanc * mean_avail_cwa_nanc + B_wind_max_220_mh * wind_max_220_mh_cwa_nanc + B_dist_to_cog * dist_to_cog_cwa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_nanc + B_dummy_prev_days * dummy_prev_days_cwa_nanc + B_dummy_prev_year_days * dummy_prev_year_days_cwa_nanc  + B_unem_rate * unem_rate_cwa_nanc  + B_d_d * d_d_cwa_nanc + B_mean_price_part * mean_price_3_cwa_nanc
+  V[["clo_cmck"]]         = asc_clo_cmck + B_mean_avail_cmck * mean_avail_clo_cmck + B_wind_max_220_mh * wind_max_220_mh_clo_cmck + B_dist_to_cog * dist_to_cog_clo_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_cmck + B_dummy_prev_days * dummy_prev_days_clo_cmck + B_dummy_prev_year_days * dummy_prev_year_days_clo_cmck  + B_unem_rate * unem_rate_clo_cmck  + B_d_d * d_d_clo_cmck + B_mean_price_part * mean_price_3_clo_cmck 
+  V[["cwa_dcrb"]]         = asc_cwa_dcrb + B_mean_avail_othr * mean_avail_cwa_dcrb + B_wind_max_220_mh * wind_max_220_mh_cwa_dcrb + B_dist_to_cog * dist_to_cog_cwa_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_dcrb + B_dummy_prev_days * dummy_prev_days_cwa_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_cwa_dcrb  + B_unem_rate * unem_rate_cwa_dcrb  + B_d_d * d_d_cwa_dcrb + B_mean_price_othr * mean_price_3_cwa_dcrb + c_dcrb * dcrbclosurewad_cwa_dcrb
+  V[["nps_sock"]]         = asc_nps_sock + B_mean_avail_othr * mean_avail_nps_sock + B_wind_max_220_mh * wind_max_220_mh_nps_sock + B_dist_to_cog * dist_to_cog_nps_sock + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_nps_sock + B_dummy_prev_days * dummy_prev_days_nps_sock + B_dummy_prev_year_days * dummy_prev_year_days_nps_sock  + B_unem_rate * unem_rate_nps_sock  + B_d_d * d_d_nps_sock + B_mean_price_othr * mean_price_3_nps_sock                          
+  V[["no_participation"]] = asc_no_participation 
+  
+
+  ## Specify nests for NL model
+  nlNests      = list(root=1, part = lambda_part,
+                      nanc = lambda_nanc, psdn = lambda_psdn)   ### Specify tree structure for NL model
+  
+  ### Specify tree structure for NL model
+  nlStructure= list()
+  nlStructure[["root"]] = c("no_participation", "part", "cwa_dcrb", "nps_sock")
+  nlStructure[["part"]] = c("nanc", "psdn", "clo_cmck")
+  nlStructure[["nanc"]] = c("clo_nanc", "clw_nanc", "cwa_nanc")
+  nlStructure[["psdn"]] = c("cba_psdn", "clo_psdn", "clw_psdn", "cwa_psdn")   ### Define settings for NL model
+
+  avail <- list(
+    cba_psdn         = 1 - psdnclosure,
+    clo_psdn         = 1 - psdnclosure,
+    clw_psdn         = (1 - psdnclosure) * (1 - waclosure_clw_psdn),
+    cwa_psdn         = (1 - psdnclosure) * (1 - waclosure_cwa_psdn),
+    clo_nanc         = 1,
+    clw_nanc         = 1,
+    cwa_nanc         = 1,
+    clo_cmck         = 1,
+    cwa_dcrb         = 1,
+    nps_sock         = 1,
+    no_participation = 1)
+  
+  nl_settings <- list(
+    alternatives = c(cba_psdn =1,
+                     clo_psdn =2,
+                     clw_psdn =3,
+                     cwa_psdn =4,
+                     clo_nanc =5,
+                     clw_nanc =6,
+                     cwa_nanc =7,
+                     clo_cmck =8,
+                     cwa_dcrb =9,
+                     nps_sock =10,
+                     no_participation = 11),
+    avail        = avail,
+    choiceVar    = choice,
+    utilities    = V
+    ,
+    nlNests      = nlNests,
+    nlStructure  = nlStructure
+  )
+  
+  P[["model"]] = apollo_nl(nl_settings, functionality)
+  
+  # --- OOS/prediction: NO panelProd (evita underflow a 0) ---
+  if(functionality == "prediction"){
+    P = apollo_prepareProb(P, apollo_inputs, functionality)
+    return(P)
+  }
+  
+  # --- Estimación normal ---
+  P = apollo_panelProd(P, apollo_inputs, functionality)
+  P = apollo_prepareProb(P, apollo_inputs, functionality)
+  return(P)
+  
+}

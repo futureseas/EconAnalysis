@@ -629,38 +629,43 @@ avail <- list(
 
 # ===================== Cluster c6 (from n_logit_c6.R) =====================
 
+# ===================== Cluster c6 (from n_logit_c6.R) =====================
+
 apollo_beta_c6=c(
-  B_mean_avail_psdn               =  2.216315,
-  B_mean_avail_nanc               =  2.385609,
-  B_mean_avail_dcrb               = 11.208784,
-  B_wind_max_220_mh               = -0.049266,
-  B_dist_to_cog                   = -0.004651,
-  B_dist_port_to_catch_area_zero  = -0.017560,
-  B_dummy_prev_days               =  2.125190,
-  B_dummy_prev_year_days          =  0.231417,
-  B_unem_rate                     =  0.264405,
-  B_d_d                           = -0.813181,
-  c_dcrb                          = -0.339827,
-  B_mean_price_part               =  3.767011,
-  B_mean_price_dcrb               = -0.007631,
-  asc_cba_psdn                    = -3.525315,
-  asc_clo_psdn                    = -4.283119,
-  asc_clw_psdn                    = -4.471482,
-  asc_cwa_psdn                    = -4.150492,
-  asc_clo_nanc                    = -5.416916,
-  asc_clw_nanc                    = -8.514552,
-  asc_cwa_nanc                    = -4.797947,
-  asc_cwa_dcrb                    = -9.695670,
-  theta_part                      = -0.311811,
-  theta_nanc                      = 13.340143,
-  theta_psdn                      =  1.714351,
+  B_mean_avail_psdn               =  1.808136,
+  B_mean_avail_nanc               =  2.512979,
+  B_mean_avail_othr               = 10.851420,
+  B_mean_avail_cmck               =  4.999792,
+  B_wind_max_220_mh               = -0.050224,
+  B_dist_to_cog                   = -0.004834,
+  B_dist_port_to_catch_area_zero  = -0.020858,
+  B_dummy_prev_days               =  2.148155,
+  B_dummy_prev_year_days          =  0.279913,
+  B_unem_rate                     =  0.296607,
+  B_d_d                           = -1.049662,
+  c_dcrb                          = -0.342280,
+  B_mean_price_part               =  3.789953,
+  B_mean_price_othr               =  0.000000,
+  asc_cba_psdn                    = -3.415935,
+  asc_clo_psdn                    = -4.292500,
+  asc_clw_psdn                    = -4.342098,
+  asc_cwa_psdn                    = -4.039418,
+  asc_clo_nanc                    = -5.624992,
+  asc_clw_nanc                    = -8.621662,
+  asc_cwa_nanc                    = -4.833624,
+  asc_clo_cmck                    = -5.353759,
+  asc_cwa_dcrb                    = -9.539669,
+  asc_nps_sock                    = -8.590836,
+  theta_part                      =  0.007168,
+  theta_nanc                      = 13.341196,
+  theta_psdn                      =  1.034107,
   asc_no_participation            =  0.000000)
 
-apollo_fixed_c6 <- c("asc_no_participation", 
-                     "theta_part", "theta_nanc", "theta_psdn", "B_d_d", "c_dcrb",
+apollo_fixed_c6 <- c("asc_no_participation", "B_mean_price_othr",
+                     "theta_part", "theta_nanc", "theta_psdn", "B_d_d", "c_dcrb", "B_unem_rate",
                      "asc_cba_psdn", "asc_clo_psdn", "asc_clw_psdn", "asc_cwa_psdn",
-                     "asc_clo_nanc", "asc_clw_nanc", "asc_cwa_nanc", "asc_cwa_dcrb", "B_unem_rate")
-
+                     "asc_clo_nanc", "asc_clw_nanc", "asc_cwa_nanc", "asc_clo_cmck",
+                     "asc_cwa_dcrb", "asc_nps_sock")
 
 
 apollo_probabilities_c6 = function(apollo_beta, apollo_inputs, functionality="estimate"){
@@ -686,7 +691,6 @@ apollo_probabilities_c6 = function(apollo_beta, apollo_inputs, functionality="es
 # 
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
   V = list()
-  
   V[["cba_psdn"]]         = asc_cba_psdn + B_mean_avail_psdn * mean_avail_cba_psdn + B_wind_max_220_mh * wind_max_220_mh_cba_psdn + B_dist_to_cog * dist_to_cog_cba_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cba_psdn + B_dummy_prev_days * dummy_prev_days_cba_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cba_psdn  + B_unem_rate * unem_rate_cba_psdn + (B_d_c*use_d_c) * d_c_cba_psdn + B_d_d * d_d_cba_psdn + B_mean_price_part * mean_price_3_cba_psdn
   V[["clo_psdn"]]         = asc_clo_psdn + B_mean_avail_psdn * mean_avail_clo_psdn + B_wind_max_220_mh * wind_max_220_mh_clo_psdn + B_dist_to_cog * dist_to_cog_clo_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_psdn + B_dummy_prev_days * dummy_prev_days_clo_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clo_psdn  + B_unem_rate * unem_rate_clo_psdn + (B_d_c*use_d_c) * d_c_clo_psdn + B_d_d * d_d_clo_psdn + B_mean_price_part * mean_price_3_clo_psdn
   V[["clw_psdn"]]         = asc_clw_psdn + B_mean_avail_psdn * mean_avail_clw_psdn + B_wind_max_220_mh * wind_max_220_mh_clw_psdn + B_dist_to_cog * dist_to_cog_clw_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_psdn + B_dummy_prev_days * dummy_prev_days_clw_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clw_psdn  + B_unem_rate * unem_rate_clw_psdn + (B_d_c*use_d_c) * d_c_clw_psdn + B_d_d * d_d_clw_psdn + B_mean_price_part * mean_price_3_clw_psdn 
@@ -694,24 +698,22 @@ apollo_probabilities_c6 = function(apollo_beta, apollo_inputs, functionality="es
   V[["clo_nanc"]]         = asc_clo_nanc + B_mean_avail_nanc * mean_avail_clo_nanc + B_wind_max_220_mh * wind_max_220_mh_clo_nanc + B_dist_to_cog * dist_to_cog_clo_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_nanc + B_dummy_prev_days * dummy_prev_days_clo_nanc + B_dummy_prev_year_days * dummy_prev_year_days_clo_nanc  + B_unem_rate * unem_rate_clo_nanc + (B_d_c*use_d_c) * d_c_clo_nanc + B_d_d * d_d_clo_nanc + B_mean_price_part * mean_price_3_clo_nanc
   V[["clw_nanc"]]         = asc_clw_nanc + B_mean_avail_nanc * mean_avail_clw_nanc + B_wind_max_220_mh * wind_max_220_mh_clw_nanc + B_dist_to_cog * dist_to_cog_clw_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_nanc + B_dummy_prev_days * dummy_prev_days_clw_nanc + B_dummy_prev_year_days * dummy_prev_year_days_clw_nanc  + B_unem_rate * unem_rate_clw_nanc + (B_d_c*use_d_c) * d_c_clw_nanc + B_d_d * d_d_clw_nanc + B_mean_price_part * mean_price_3_clw_nanc
   V[["cwa_nanc"]]         = asc_cwa_nanc + B_mean_avail_nanc * mean_avail_cwa_nanc + B_wind_max_220_mh * wind_max_220_mh_cwa_nanc + B_dist_to_cog * dist_to_cog_cwa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_nanc + B_dummy_prev_days * dummy_prev_days_cwa_nanc + B_dummy_prev_year_days * dummy_prev_year_days_cwa_nanc  + B_unem_rate * unem_rate_cwa_nanc + (B_d_c*use_d_c) * d_c_cwa_nanc + B_d_d * d_d_cwa_nanc + B_mean_price_part * mean_price_3_cwa_nanc
-  V[["cwa_dcrb"]]         = asc_cwa_dcrb + B_mean_avail_dcrb * mean_avail_cwa_dcrb + B_wind_max_220_mh * wind_max_220_mh_cwa_dcrb + B_dist_to_cog * dist_to_cog_cwa_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_dcrb + B_dummy_prev_days * dummy_prev_days_cwa_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_cwa_dcrb  + B_unem_rate * unem_rate_cwa_dcrb + (B_d_c*use_d_c) * d_c_cwa_dcrb + B_d_d * d_d_cwa_dcrb + B_mean_price_dcrb * mean_price_3_cwa_dcrb + c_dcrb * dcrbclosurewad_cwa_dcrb
-  V[["no_participation"]] = asc_no_participation
+  V[["clo_cmck"]]         = asc_clo_cmck + B_mean_avail_cmck * mean_avail_clo_cmck + B_wind_max_220_mh * wind_max_220_mh_clo_cmck + B_dist_to_cog * dist_to_cog_clo_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_cmck + B_dummy_prev_days * dummy_prev_days_clo_cmck + B_dummy_prev_year_days * dummy_prev_year_days_clo_cmck  + B_unem_rate * unem_rate_clo_cmck + (B_d_c*use_d_c) * d_c_clo_cmck + B_d_d * d_d_clo_cmck + B_mean_price_part * mean_price_3_clo_cmck 
+  V[["cwa_dcrb"]]         = asc_cwa_dcrb + B_mean_avail_othr * mean_avail_cwa_dcrb + B_wind_max_220_mh * wind_max_220_mh_cwa_dcrb + B_dist_to_cog * dist_to_cog_cwa_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_dcrb + B_dummy_prev_days * dummy_prev_days_cwa_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_cwa_dcrb  + B_unem_rate * unem_rate_cwa_dcrb + (B_d_c*use_d_c) * d_c_cwa_dcrb + B_d_d * d_d_cwa_dcrb + B_mean_price_othr * mean_price_3_cwa_dcrb + c_dcrb * dcrbclosurewad_cwa_dcrb
+  V[["nps_sock"]]         = asc_nps_sock + B_mean_avail_othr * mean_avail_nps_sock + B_wind_max_220_mh * wind_max_220_mh_nps_sock + B_dist_to_cog * dist_to_cog_nps_sock + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_nps_sock + B_dummy_prev_days * dummy_prev_days_nps_sock + B_dummy_prev_year_days * dummy_prev_year_days_nps_sock  + B_unem_rate * unem_rate_nps_sock + (B_d_c*use_d_c) * d_c_nps_sock + B_d_d * d_d_nps_sock + B_mean_price_othr * mean_price_3_nps_sock                          
+  V[["no_participation"]] = asc_no_participation 
   
-  # V[["clo_cmck"]]         = asc_clo_cmck + B_mean_avail * mean_avail_clo_cmck + B_wind_max_220_mh * wind_max_220_mh_clo_cmck + B_dist_to_cog * dist_to_cog_clo_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_cmck + B_dummy_prev_days * dummy_prev_days_clo_cmck + B_dummy_prev_year_days * dummy_prev_year_days_clo_cmck  + B_unem_rate * unem_rate_clo_cmck + (B_d_c*use_d_c) * d_c_clo_cmck + B_d_d * d_d_clo_cmck + B_mean_price_part * mean_price_3_clo_cmck + w_cmck * weekend
-  # V[["nps_sock"]]         = asc_nps_sock + B_mean_avail * mean_avail_nps_sock + B_wind_max_220_mh * wind_max_220_mh_nps_sock + B_dist_to_cog * dist_to_cog_nps_sock + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_nps_sock + B_dummy_prev_days * dummy_prev_days_nps_sock + B_dummy_prev_year_days * dummy_prev_year_days_nps_sock  + B_unem_rate * unem_rate_nps_sock + (B_d_c*use_d_c) * d_c_nps_sock + B_d_d * d_d_nps_sock + B_mean_price_slmn * mean_price_3_nps_sock + w_slmn * weekend                          
-  # 
-
   ## Specify nests for NL model
   nlNests      = list(root=1, part = lambda_part,
                       nanc = lambda_nanc, psdn = lambda_psdn)   ### Specify tree structure for NL model
-
+  
   ### Specify tree structure for NL model
   nlStructure= list()
-  nlStructure[["root"]] = c("no_participation", "part", "cwa_dcrb")
-  nlStructure[["part"]] = c("nanc", "psdn")
+  nlStructure[["root"]] = c("no_participation", "part", "cwa_dcrb", "nps_sock")
+  nlStructure[["part"]] = c("nanc", "psdn", "clo_cmck")
   nlStructure[["nanc"]] = c("clo_nanc", "clw_nanc", "cwa_nanc")
   nlStructure[["psdn"]] = c("cba_psdn", "clo_psdn", "clw_psdn", "cwa_psdn")   ### Define settings for NL model
-
+  
   avail <- list(
     cba_psdn         = 1 - psdnclosure,
     clo_psdn         = 1 - psdnclosure,
@@ -720,19 +722,24 @@ apollo_probabilities_c6 = function(apollo_beta, apollo_inputs, functionality="es
     clo_nanc         = 1,
     clw_nanc         = 1,
     cwa_nanc         = 1,
+    clo_cmck         = 1,
     cwa_dcrb         = 1,
+    nps_sock         = 1,
     no_participation = 1)
+  
   
   nl_settings <- list(
     alternatives = c(cba_psdn =1,
-	                 clo_psdn =2,
-	                 clw_psdn =3,
-	                 cwa_psdn =4,
-	                 clo_nanc =5,
-	                 clw_nanc =6,
-	                 cwa_nanc =7,
-	                 cwa_dcrb =9,
-					 no_participation = 11),
+                     clo_psdn =2,
+                     clw_psdn =3,
+                     cwa_psdn =4,
+                     clo_nanc =5,
+                     clw_nanc =6,
+                     cwa_nanc =7,
+                     clo_cmck =8,
+                     cwa_dcrb =9,
+                     nps_sock =10,
+                     no_participation = 11),
     avail        = avail,
     choiceVar    = choice,
     utilities    = V
@@ -921,28 +928,28 @@ apollo_probabilities_c7 = function(apollo_beta, apollo_inputs, functionality="es
 # ---- Run all clusters ----
 use_d_c_by_spec <- c(daily=1, MA7=1, MA14=0, MA30=0, t1daily=1)  # tweak if needed
 
-res_c4 <- run_cluster("c4", paste0(google_dir,"Data/Anonymised data/part_model_c4.rds"),
-  alts=c("sfa_nanc", "laa_nanc", "laa_cmck", "laa_msqd", "laa_ytna", "mna_msqd", "sba_msqd", "laa_btna", "sfa_msqd", "mna_psdn", "sba_cmck", "mra_msqd", "laa_psdn", "mna_nanc", "no_participation"),
-  apollo_beta_base=apollo_beta_c4, apollo_fixed_base=apollo_fixed_c4,
-  apollo_prob_fun=apollo_probabilities_c4,
-  case_vars=c("weekend","psdnclosure","btnaclosure"),
-  use_d_c_by_spec=use_d_c_by_spec)
-saveRDS(res_c4, "res_c4.rds")
-saveRDS(apollo_beta_c4, "apollo_beta_c4.rds")
-saveRDS(apollo_fixed_c4, "apollo_fixed_c4.rds")
-saveRDS(apollo_probabilities_c4, "apollo_probabilities_c4.rds")
+# res_c4 <- run_cluster("c4", paste0(google_dir,"Data/Anonymised data/part_model_c4.rds"),
+#   alts=c("sfa_nanc", "laa_nanc", "laa_cmck", "laa_msqd", "laa_ytna", "mna_msqd", "sba_msqd", "laa_btna", "sfa_msqd", "mna_psdn", "sba_cmck", "mra_msqd", "laa_psdn", "mna_nanc", "no_participation"),
+#   apollo_beta_base=apollo_beta_c4, apollo_fixed_base=apollo_fixed_c4,
+#   apollo_prob_fun=apollo_probabilities_c4,
+#   case_vars=c("weekend","psdnclosure","btnaclosure"),
+#   use_d_c_by_spec=use_d_c_by_spec)
+# saveRDS(res_c4, "res_c4.rds")
+# saveRDS(apollo_beta_c4, "apollo_beta_c4.rds")
+# saveRDS(apollo_fixed_c4, "apollo_fixed_c4.rds")
+# saveRDS(apollo_probabilities_c4, "apollo_probabilities_c4.rds")
 res_c4 <- readRDS("res_c4.rds")
 
-res_c5 <- run_cluster("c5", paste0(google_dir,"Data/Anonymised data/part_model_c5.rds"),
-  alts=c("mna_msqd", "sba_msqd", "mra_msqd", "laa_msqd", "npa_msqd", "sfa_msqd", "cba_msqd", "laa_psdn", "clo_psdn", "cwa_psdn", "clw_psdn", "sba_cmck", "laa_cmck", "laa_nanc", "cwa_albc", "cwa_dcrb", "clw_dcrb", "no_participation"),
-  apollo_beta_base=apollo_beta_c5, apollo_fixed_base=apollo_fixed_c5,
-  apollo_prob_fun=apollo_probabilities_c5,
-  case_vars=c("weekend","psdnclosure","msqdclosure"),
-  use_d_c_by_spec=use_d_c_by_spec)
-saveRDS(res_c5, "res_c5.rds")
-saveRDS(apollo_beta_c5, "apollo_beta_c5.rds")
-saveRDS(apollo_fixed_c5, "apollo_fixed_c5.rds")
-saveRDS(apollo_probabilities_c5, "apollo_probabilities_c5.rds")
+# res_c5 <- run_cluster("c5", paste0(google_dir,"Data/Anonymised data/part_model_c5.rds"),
+#   alts=c("mna_msqd", "sba_msqd", "mra_msqd", "laa_msqd", "npa_msqd", "sfa_msqd", "cba_msqd", "laa_psdn", "clo_psdn", "cwa_psdn", "clw_psdn", "sba_cmck", "laa_cmck", "laa_nanc", "cwa_albc", "cwa_dcrb", "clw_dcrb", "no_participation"),
+#   apollo_beta_base=apollo_beta_c5, apollo_fixed_base=apollo_fixed_c5,
+#   apollo_prob_fun=apollo_probabilities_c5,
+#   case_vars=c("weekend","psdnclosure","msqdclosure"),
+#   use_d_c_by_spec=use_d_c_by_spec)
+# saveRDS(res_c5, "res_c5.rds")
+# saveRDS(apollo_beta_c5, "apollo_beta_c5.rds")
+# saveRDS(apollo_fixed_c5, "apollo_fixed_c5.rds")
+# saveRDS(apollo_probabilities_c5, "apollo_probabilities_c5.rds")
 res_c5 <- readRDS("res_c5.rds")
 
 res_c6 <- run_cluster("c6", paste0(google_dir,"Data/Anonymised data/part_model_c6.rds"),
@@ -957,16 +964,16 @@ saveRDS(apollo_fixed_c6, "apollo_fixed_c6.rds")
 saveRDS(apollo_probabilities_c6, "apollo_probabilities_c6.rds")
 res_c6 <- readRDS("res_c6.rds")
 
-res_c7 <- run_cluster("c7", paste0(google_dir,"Data/Anonymised data/part_model_c7.rds"),
-  alts=c("laa_cmck", "mna_cmck", "laa_jmck", "mna_jmck", "laa_msqd", "mra_msqd", "sba_msqd", "sfa_msqd", "mna_msqd", "laa_psdn", "mna_psdn", "mna_nanc", "sba_nanc", "sda_nanc", "no_participation"),
-  apollo_beta_base=apollo_beta_c7, apollo_fixed_base=apollo_fixed_c7,
-  apollo_prob_fun=apollo_probabilities_c7,
-  case_vars=c("weekend","psdnclosure","msqdclosure"),
-  use_d_c_by_spec=use_d_c_by_spec)
-saveRDS(res_c7, "res_c7.rds")
-saveRDS(apollo_beta_c7, "apollo_beta_c7.rds")
-saveRDS(apollo_fixed_c7, "apollo_fixed_c7.rds")
-saveRDS(apollo_probabilities_c7, "apollo_probabilities_c7.rds")
+# res_c7 <- run_cluster("c7", paste0(google_dir,"Data/Anonymised data/part_model_c7.rds"),
+#   alts=c("laa_cmck", "mna_cmck", "laa_jmck", "mna_jmck", "laa_msqd", "mra_msqd", "sba_msqd", "sfa_msqd", "mna_msqd", "laa_psdn", "mna_psdn", "mna_nanc", "sba_nanc", "sda_nanc", "no_participation"),
+#   apollo_beta_base=apollo_beta_c7, apollo_fixed_base=apollo_fixed_c7,
+#   apollo_prob_fun=apollo_probabilities_c7,
+#   case_vars=c("weekend","psdnclosure","msqdclosure"),
+#   use_d_c_by_spec=use_d_c_by_spec)
+# saveRDS(res_c7, "res_c7.rds")
+# saveRDS(apollo_beta_c7, "apollo_beta_c7.rds")
+# saveRDS(apollo_fixed_c7, "apollo_fixed_c7.rds")
+# saveRDS(apollo_probabilities_c7, "apollo_probabilities_c7.rds")
 res_c7 <- readRDS("res_c7.rds")
 
 comp_all <- bind_rows(res_c4$comp, res_c5$comp, res_c6$comp, res_c7$comp) %>% arrange(cluster, AIC)
