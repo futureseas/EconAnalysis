@@ -266,9 +266,9 @@ run_cluster <- function(cluster_id, rds_file, alts, apollo_beta_base, apollo_fix
     
     apollo_inputs$use_d_c <- as.numeric(dc_ok)
     
-    apollo_beta <- apollo_readBeta(apollo_beta, apollo_fixed,
-                                   paste0("NL_participation_model_", cluster_id),
-                                   overwriteFixed = FALSE)
+    # apollo_beta <- apollo_readBeta(apollo_beta, apollo_fixed,
+    #                                paste0("NL_participation_model_", cluster_id),
+    #                                overwriteFixed = FALSE)
     
     cat("\n---", cluster_id, spec,
         "dc_ok=", dc_ok,
