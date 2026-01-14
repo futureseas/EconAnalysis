@@ -177,10 +177,10 @@ apollo_probabilities_null_c5 = function(apollo_beta, apollo_inputs, functionalit
     clw_psdn = 1 - waclosure_clw_psdn,
     sba_cmck = 1,
     laa_cmck = 1,
-    laa_nanc = 1 - weekend,
+    laa_nanc = 1,
     cwa_albc = 1,
-    cwa_dcrb = 1 - d_cd_cwa_dcrb,
-    clw_dcrb = 1 - d_cd_clw_dcrb,
+    cwa_dcrb = 1,
+    clw_dcrb = 1,
     no_participation = 1
   )
   
@@ -284,7 +284,7 @@ apollo_probabilities_null_c6 = function(apollo_beta, apollo_inputs, functionalit
     cwa_nanc         = 1,
     clo_cmck         = 1,
     cwa_dcrb         = 1,
-    nps_sock         = 1 - d_cd_nps_sock, 
+    nps_sock         = 1, 
     no_participation = 1)
   
   nl_settings <- list(
