@@ -230,6 +230,7 @@ apollo_beta_c4 <- c(
   asc_no_participation            =  0.000000,
   B_dist_to_cog                   = -0.002598)
 
+
 apollo_fixed_c4 <- c("asc_no_participation", "theta_cmck", "theta_tuna")
 
 apollo_probabilities_c4 <- function(apollo_beta, apollo_inputs, functionality="estimate"){
@@ -316,10 +317,11 @@ out_c4 <- run_manual_and_compare(
 )
 
 summary(out_c4$model_manual)
+
 # LR test
 lr_test(
-  model_restricted   = out_c7$model_manual,
-  model_unrestricted = m0_c7
+  model_restricted   = out_c4$model_manual,
+  model_unrestricted = m0_c4
 )
 
 # ===================== Cluster c5 (from n_logit_c5.R) =====================
@@ -327,48 +329,48 @@ lr_test(
 db_c5 <- assets$c5$database_wide
 m0_c5 <- assets$c5$model_original
 apollo_beta_c5 = c(
-  B_mean_avail_msqd              =   1.678422,
-  B_mean_avail_psdn              =  -0.180270,
-  B_mean_avail_cmck              =  -2.188082,
-  B_mean_avail_nanc              =  11.495322,
-  B_mean_avail_albc              =  -2.175156,
-  B_mean_avail_dcrb              =   5.785351,
-  B_wind_max_220_mh              =  -0.068647,
-  B_dist_to_cog                  = -9.0480e-04,
-  B_dist_port_to_catch_area_zero =  -0.004991,
-  B_dummy_prev_days              =   2.817749,
-  B_dummy_prev_year_days         =   0.380188,
-  B_unem_rate                    =   0.447401,
-  B_d_d                          =  -2.045705,
-  B_d_cd                         =  -9.787837,
-  c_psdn                         =  -2.012613,
-  c_dcrb                         =  -1.491115,
-  B_mean_price_part              =   5.026474,
-  B_mean_price_crab              =  -0.034708,
-  asc_mna_msqd                   =  -9.556309,
-  asc_sba_msqd                   =  -9.461292,
-  asc_mra_msqd                   = -10.505258,
-  asc_laa_msqd                   =  -9.969494,
-  asc_npa_msqd                   =  -9.988268,
-  asc_sfa_msqd                   =  -9.989201,
-  asc_cba_msqd                   =  -9.760118,
-  asc_laa_psdn                   =  -7.892377,
-  asc_clo_psdn                   =  -5.626511,
-  asc_cwa_psdn                   =  -4.018354,
-  asc_clw_psdn                   =  -4.431821,
-  asc_sba_cmck                   =  -7.458361,
-  asc_laa_cmck                   =  -8.744886,
-  asc_laa_nanc                   = -12.709420,
-  asc_cwa_albc                   = -19.493229,
-  asc_cwa_dcrb                   =  -7.072595,
-  asc_clw_dcrb                   =  -7.211646,
-  theta_part                     =   1.081948,
-  theta_cmck                     =  10.446066,
-  theta_msqd                     =   5.753290,
-  theta_psdn                     =   0.139189,
-  theta_part_crab                =  10.484348,
-  w_msqd                         =  -3.945194,
-  asc_no_participation           =   0.000000)
+  B_mean_avail_msqd               =   1.798024,
+  B_mean_avail_psdn               =   0.215478,
+  B_mean_avail_cmck               =  -1.433488,
+  B_mean_avail_nanc               =   4.235208,
+  B_mean_avail_albc               =   2.217832,
+  B_mean_avail_dcrb               =   5.750683,
+  B_wind_max_220_mh               =  -0.066248,
+  B_dist_to_cog                   = -8.8679e-04,
+  B_dist_port_to_catch_area_zero  =  -0.005749,
+  B_dummy_prev_days               =   2.856629,
+  B_dummy_prev_year_days          =   0.371518,
+  B_unem_rate                     =   0.416668,
+  B_d_d                           =  -2.013430,
+  B_d_cd                          =  -9.885199,
+  c_psdn                          =  -2.029390,
+  c_dcrb                          =  -1.485848,
+  B_mean_price_part               =   4.576412,
+  B_mean_price_crab               =  -0.037831, TRABAJAR ACA!!!
+  asc_mna_msqd                    =  -9.015308,
+  asc_sba_msqd                    =  -8.873700,
+  asc_mra_msqd                    =  -9.928477,
+  asc_laa_msqd                    =  -9.370920,
+  asc_npa_msqd                    =  -9.531945,
+  asc_sfa_msqd                    =  -9.450779,
+  asc_cba_msqd                    =  -9.284180,
+  asc_laa_psdn                    =  -7.637802,
+  asc_clo_psdn                    =  -5.479200,
+  asc_cwa_psdn                    =  -3.976182,
+  asc_clw_psdn                    =  -4.314694,
+  asc_sba_cmck                    =  -7.277373,
+  asc_laa_cmck                    =  -8.455520,
+  asc_laa_nanc                    =  -8.768543,
+  asc_cwa_albc                    = -19.832759,
+  asc_cwa_dcrb                    =  -6.951799,
+  asc_clw_dcrb                    =  -7.091162,
+  theta_part                      =   1.100002,
+  theta_cmck                      =  10.760225,
+  theta_msqd                      =  11.124316,
+  theta_psdn                      =   0.146354,
+  theta_part_crab                 =  10.694124,
+  w_msqd                          =  -3.937279,
+  asc_no_participation            =   0.000000)
 
 apollo_fixed_c5 = c("asc_no_participation", "theta_cmck", "theta_part_crab", "theta_msqd", "theta_psdn",
                     "asc_mna_msqd", "asc_sba_msqd", "asc_mra_msqd", "asc_laa_msqd",
@@ -495,8 +497,8 @@ out_c5 <- run_manual_and_compare(
 summary(out_c5$model_manual)
 # LR test
 lr_test(
-  model_restricted   = out_c7$model_manual,
-  model_unrestricted = m0_c7
+  model_restricted   = out_c5$model_manual,
+  model_unrestricted = m0_c5
 )
 
 # ===================== Cluster c6 (from n_logit_c6.R) =====================

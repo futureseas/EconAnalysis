@@ -6,7 +6,7 @@ apollo_beta_null_c4 <- c(
   theta_part=0, theta_cmck=12, theta_msqd=0, theta_psdn=0, theta_nanc=0, theta_tuna=12,
   asc_no_participation=0)
 
-apollo_fixed_null_c4 <- c("asc_no_participation", "theta_cmck","theta_tuna")
+apollo_fixed_null_c4 <- c("asc_no_participation")
 
 apollo_probabilities_null_c4 <- function(apollo_beta, apollo_inputs, functionality="estimate"){
   apollo_attach(apollo_beta, apollo_inputs)
@@ -106,7 +106,7 @@ apollo_beta_null_c5 =c(asc_mna_msqd                   = -8,
               theta_part_crab                = 10,
               asc_no_participation           = 0 )
 
-apollo_fixed_null_c5 = c("asc_no_participation", "theta_msqd", "theta_cmck", "theta_part_crab")
+apollo_fixed_null_c5 = c("asc_no_participation")
 
 
 apollo_probabilities_null_c5 = function(apollo_beta, apollo_inputs, functionality="estimate"){
@@ -232,7 +232,7 @@ apollo_beta_null_c6 = c(asc_cba_psdn                   = -5,
               theta_psdn                    = 0.5,
               asc_no_participation           = 0)
 
-apollo_fixed_null_c6 = c("asc_no_participation", "theta_nanc")
+apollo_fixed_null_c6 = c("asc_no_participation")
 
 apollo_probabilities_null_c6 = function(apollo_beta, apollo_inputs, functionality="estimate"){
   
@@ -345,7 +345,7 @@ apollo_beta_null_c7 = c(
               theta_mna                     = 10,
               asc_no_participation           = 0)
 
-apollo_fixed_null_c7 = c("asc_no_participation", "theta_laa", "theta_mna")
+apollo_fixed_null_c7 = c("asc_no_participation")
 
 apollo_probabilities_null_c7 = function(apollo_beta, apollo_inputs, functionality="estimate"){
   
