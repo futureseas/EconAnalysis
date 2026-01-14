@@ -5,7 +5,7 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : MANUAL_c7_bestSDM
 Model description                           : Manual re-estimation on extracted database_wide
-Model run at                                : 2026-01-14 10:22:14.084206
+Model run at                                : 2026-01-14 10:21:03.201889
 Estimation method                           : bfgs
 Estimation diagnosis                        : successful convergence
 Optimisation diagnosis                      : Unknown (no Hessian calculated)
@@ -28,26 +28,26 @@ AIC                                         :  3381.8
 BIC                                         :  3428.33 
 
 Estimated parameters                        : 8
-Time taken (hh:mm:ss)                       :  00:00:6.79 
+Time taken (hh:mm:ss)                       :  00:00:6.82 
      pre-estimation                         :  00:00:5.75 
-     estimation                             :  00:00:0.88 
-     post-estimation                        :  00:00:0.16 
+     estimation                             :  00:00:0.91 
+     post-estimation                        :  00:00:0.17 
 Iterations                                  :  2  
 
 Unconstrained optimisation.
 
 Estimates:
                                   Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
-B_mean_avail_mckl                -7.179890          NA          NA          NA          NA            NA            NA
-B_mean_avail_msqd                 1.481211          NA          NA          NA          NA            NA            NA
-B_mean_avail_psdn                 0.304228          NA          NA          NA          NA            NA            NA
-B_mean_avail_nanc                -0.911982          NA          NA          NA          NA            NA            NA
-B_mean_price                      0.827211          NA          NA          NA          NA            NA            NA
+B_mean_avail_mckl                -7.179891          NA          NA          NA          NA            NA            NA
+B_mean_avail_msqd                 1.481207          NA          NA          NA          NA            NA            NA
+B_mean_avail_psdn                 0.304227          NA          NA          NA          NA            NA            NA
+B_mean_avail_nanc                -0.911978          NA          NA          NA          NA            NA            NA
+B_mean_price                      0.827208          NA          NA          NA          NA            NA            NA
 B_wind_max_220_mh                -0.043000          NA          NA          NA          NA            NA            NA
 B_dist_to_cog                    -0.003039          NA          NA          NA          NA            NA            NA
 B_dist_port_to_catch_area_zero   -0.005589          NA          NA          NA          NA            NA            NA
-B_dummy_prev_days                 3.010046          NA          NA          NA          NA            NA            NA
-B_dummy_prev_year_days            0.127708          NA          NA          NA          NA            NA            NA
+B_dummy_prev_days                 3.010054          NA          NA          NA          NA            NA            NA
+B_dummy_prev_year_days            0.127715          NA          NA          NA          NA            NA            NA
 c_psdn                           -1.239541          NA          NA          NA          NA            NA            NA
 B_d_d                            -0.515027          NA          NA          NA          NA            NA            NA
 B_unem_rate                       0.101390          NA          NA          NA          NA            NA            NA
@@ -104,95 +104,95 @@ Percentage chosen when available     1.29      0.4     0.28     0.32     4.61   
 
 
 Classical covariance matrix:
-                            B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_dummy_prev_days B_dummy_prev_year_days
+                            B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_wind_max_220_mh      B_dummy_prev_days
 B_mean_avail_mckl                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_msqd                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_psdn                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_nanc                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_price                               NA                     NA                     NA                     NA                     NA                     NA                     NA
+B_wind_max_220_mh                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_dummy_prev_days                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_dummy_prev_year_days                     NA                     NA                     NA                     NA                     NA                     NA                     NA
-c_psdn                                     NA                     NA                     NA                     NA                     NA                     NA                     NA
-                                       c_psdn
+                       B_dummy_prev_year_days
 B_mean_avail_mckl                          NA
 B_mean_avail_msqd                          NA
 B_mean_avail_psdn                          NA
 B_mean_avail_nanc                          NA
 B_mean_price                               NA
+B_wind_max_220_mh                          NA
 B_dummy_prev_days                          NA
 B_dummy_prev_year_days                     NA
-c_psdn                                     NA
 
 Robust covariance matrix:
-                            B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_dummy_prev_days B_dummy_prev_year_days
+                            B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_wind_max_220_mh      B_dummy_prev_days
 B_mean_avail_mckl                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_msqd                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_psdn                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_nanc                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_price                               NA                     NA                     NA                     NA                     NA                     NA                     NA
+B_wind_max_220_mh                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_dummy_prev_days                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_dummy_prev_year_days                     NA                     NA                     NA                     NA                     NA                     NA                     NA
-c_psdn                                     NA                     NA                     NA                     NA                     NA                     NA                     NA
-                                       c_psdn
+                       B_dummy_prev_year_days
 B_mean_avail_mckl                          NA
 B_mean_avail_msqd                          NA
 B_mean_avail_psdn                          NA
 B_mean_avail_nanc                          NA
 B_mean_price                               NA
+B_wind_max_220_mh                          NA
 B_dummy_prev_days                          NA
 B_dummy_prev_year_days                     NA
-c_psdn                                     NA
 
 Classical correlation matrix:
-                            B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_dummy_prev_days B_dummy_prev_year_days
+                            B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_wind_max_220_mh      B_dummy_prev_days
 B_mean_avail_mckl                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_msqd                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_psdn                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_nanc                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_price                               NA                     NA                     NA                     NA                     NA                     NA                     NA
+B_wind_max_220_mh                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_dummy_prev_days                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_dummy_prev_year_days                     NA                     NA                     NA                     NA                     NA                     NA                     NA
-c_psdn                                     NA                     NA                     NA                     NA                     NA                     NA                     NA
-                                       c_psdn
+                       B_dummy_prev_year_days
 B_mean_avail_mckl                          NA
 B_mean_avail_msqd                          NA
 B_mean_avail_psdn                          NA
 B_mean_avail_nanc                          NA
 B_mean_price                               NA
+B_wind_max_220_mh                          NA
 B_dummy_prev_days                          NA
 B_dummy_prev_year_days                     NA
-c_psdn                                     NA
 
 Robust correlation matrix:
-                            B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_dummy_prev_days B_dummy_prev_year_days
+                            B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_wind_max_220_mh      B_dummy_prev_days
 B_mean_avail_mckl                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_msqd                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_psdn                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_avail_nanc                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_mean_price                               NA                     NA                     NA                     NA                     NA                     NA                     NA
+B_wind_max_220_mh                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_dummy_prev_days                          NA                     NA                     NA                     NA                     NA                     NA                     NA
 B_dummy_prev_year_days                     NA                     NA                     NA                     NA                     NA                     NA                     NA
-c_psdn                                     NA                     NA                     NA                     NA                     NA                     NA                     NA
-                                       c_psdn
+                       B_dummy_prev_year_days
 B_mean_avail_mckl                          NA
 B_mean_avail_msqd                          NA
 B_mean_avail_psdn                          NA
 B_mean_avail_nanc                          NA
 B_mean_price                               NA
+B_wind_max_220_mh                          NA
 B_dummy_prev_days                          NA
 B_dummy_prev_year_days                     NA
-c_psdn                                     NA
 
  8 most extreme outliers in terms of lowest average per choice prediction:
  ID Avg prob per choice
-  4           0.4453351
-  2           0.4834310
+  4           0.4453350
+  2           0.4834312
   8           0.5002372
-  5           0.5085788
-  7           0.5115184
-  3           0.5314721
-  6           0.5448266
-  1           0.9262968
+  5           0.5085786
+  7           0.5115182
+  3           0.5314722
+  6           0.5448265
+  1           0.9262972
 
 Settings and functions used in model definition:
 
