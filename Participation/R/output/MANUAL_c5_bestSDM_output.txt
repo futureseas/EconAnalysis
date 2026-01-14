@@ -5,13 +5,13 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : MANUAL_c5_bestSDM
 Model description                           : Manual re-estimation on extracted database_wide
-Model run at                                : 2026-01-13 13:27:20.462023
+Model run at                                : 2026-01-14 11:05:31.507613
 Estimation method                           : bfgs
 Estimation diagnosis                        : successful convergence
 Optimisation diagnosis                      : Maximum found
      hessian properties                     : Negative definite
-     maximum eigenvalue                     : -0.265373
-     reciprocal of condition number         : 8.75333e-10
+     maximum eigenvalue                     : -0.862533
+     reciprocal of condition number         : 2.96829e-09
 Number of individuals                       : 22
 Number of rows in database                  : 6806
 Number of modelled outcomes                 : 6806
@@ -19,64 +19,75 @@ Number of modelled outcomes                 : 6806
 Number of cores used                        :  16 
 Model without mixing
 
-LL(start)                                   : -4864.65
+LL(start)                                   : -4727.98
 LL at equal shares, LL(0)                   : -19262.08
 LL at observed shares, LL(C)                : -8805.84
-LL(final)                                   : -4864.65
-Rho-squared vs equal shares                  :  0.7474 
-Adj.Rho-squared vs equal shares              :  0.7464 
-Rho-squared vs observed shares               :  0.4476 
-Adj.Rho-squared vs observed shares           :  0.4472 
-AIC                                         :  9769.3 
-BIC                                         :  9905.81 
+LL(final)                                   : -4727.98
+Rho-squared vs equal shares                  :  0.7545 
+Adj.Rho-squared vs equal shares              :  0.7536 
+Rho-squared vs observed shares               :  0.4631 
+Adj.Rho-squared vs observed shares           :  0.4629 
+AIC                                         :  9493.96 
+BIC                                         :  9623.64 
 
-Estimated parameters                        : 20
-Time taken (hh:mm:ss)                       :  00:00:25.81 
-     pre-estimation                         :  00:00:10.8 
-     estimation                             :  00:00:2.25 
-     post-estimation                        :  00:00:12.76 
+Estimated parameters                        : 19
+Time taken (hh:mm:ss)                       :  00:00:25.64 
+     pre-estimation                         :  00:00:11.21 
+     estimation                             :  00:00:2.39 
+     post-estimation                        :  00:00:12.04 
 Iterations                                  :  2  
 
 Unconstrained optimisation.
 
 Estimates:
                                   Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
-B_mean_avail_msqd                 1.402309    0.256027      5.4772      1.5714    0.419533        3.3425        0.9589
-B_mean_avail_psdn                 6.062983    0.483227     12.5469     10.4774    1.139649        5.3200        4.4426
-B_mean_avail_cmck                -2.855260    1.299705     -2.1969     -2.9663    2.953082       -0.9669       -1.3055
-B_mean_avail_nanc                 8.718731    0.481267     18.1162     16.0383    0.876289        9.9496        8.8084
-B_mean_avail_albc                -2.494066    1.715440     -1.4539     -2.0368    3.401776       -0.7332       -1.0271
-B_mean_avail_dcrb                 5.372685    0.723912      7.4217      6.0404    0.694279        7.7385        6.2982
-B_wind_max_220_mh                -0.061708    0.005507    -11.2061   -192.8058    0.006299       -9.7959     -168.5425
-B_dist_to_cog                  -8.3226e-04   7.678e-05    -10.8398  -1.304e+04  1.4610e-04       -5.6965    -6850.3062
-B_dist_port_to_catch_area_zero   -0.004147    0.001342     -3.0898   -748.1717    0.001161       -3.5733     -865.2377
-B_dummy_prev_days                 2.980779    0.106591     27.9647     18.5830    0.153323       19.4411       12.9190
-B_dummy_prev_year_days            0.453728    0.051372      8.8322    -10.6336    0.089104        5.0921       -6.1307
-B_unem_rate                       0.311539    0.018074     17.2371    -38.0918    0.044170        7.0531      -15.5865
-B_d_d                            -0.927738    0.105152     -8.8228    -18.3328    0.184306       -5.0337      -10.4594
-c_psdn                           -2.161281    0.312394     -6.9185    -10.1195    0.972120       -2.2233       -3.2519
-c_dcrb                           -1.428572    1.017952     -1.4034     -2.3857    0.726795       -1.9656       -3.3415
-B_mean_price_part                 3.417619    0.218922     15.6111     11.0433    0.410087        8.3339        5.8954
-B_mean_price_crab                -0.035787    0.055177     -0.6486    -18.7722    0.044134       -0.8109      -23.4691
-asc_msqd                         -7.526526    0.242089    -31.0900    -35.2207    0.518712      -14.5100      -16.4379
-asc_psdn                         -6.832146          NA          NA          NA          NA            NA            NA
-asc_cmck                         -6.730814          NA          NA          NA          NA            NA            NA
-asc_nanc                         -9.957979          NA          NA          NA          NA            NA            NA
-asc_albc                        -14.750649          NA          NA          NA          NA            NA            NA
-asc_dcrb                         -7.521978          NA          NA          NA          NA            NA            NA
-theta_part                        0.879738    0.133673      6.5812     -0.8997    0.184293        4.7736       -0.6526
-theta_cmck                       10.068438          NA          NA          NA          NA            NA            NA
-theta_msqd                        2.973926          NA          NA          NA          NA            NA            NA
-theta_psdn                        0.227180          NA          NA          NA          NA            NA            NA
-theta_part_crab                  10.049293          NA          NA          NA          NA            NA            NA
-w_msqd                           -3.758043    0.205710    -18.2686    -23.1299    0.250939      -14.9759      -18.9609
+B_mean_avail_msqd                 1.674983    0.268162      6.2462      2.5171    0.453442        3.6939        1.4886
+B_mean_avail_psdn                -0.168489    0.345335     -0.4879     -3.3836    0.668015       -0.2522       -1.7492
+B_mean_avail_cmck                -2.247578    0.983759     -2.2847     -3.3012    1.891336       -1.1884       -1.7171
+B_mean_avail_nanc                11.415522    0.464802     24.5600     22.4085    0.713884       15.9907       14.5899
+B_mean_avail_albc                -2.192180    0.953092     -2.3001     -3.3493    1.200060       -1.8267       -2.6600
+B_mean_avail_dcrb                 5.784630    0.718992      8.0455      6.6546    0.578626        9.9972        8.2690
+B_wind_max_220_mh                -0.068335    0.005658    -12.0772   -188.8129    0.005894      -11.5939     -181.2558
+B_dist_to_cog                  -9.0910e-04   8.065e-05    -11.2725  -1.241e+04  1.6418e-04       -5.5374    -6096.5882
+B_dist_port_to_catch_area_zero   -0.004889    0.001509     -3.2400   -665.9605    0.001078       -4.5340     -931.9217
+B_dummy_prev_days                 2.802666    0.101175     27.7012     17.8173    0.162666       17.2296       11.0820
+B_dummy_prev_year_days            0.380704    0.053539      7.1107    -11.5671    0.100538        3.7867       -6.1598
+B_unem_rate                       0.448380    0.015339     29.2318    -35.9625    0.027190       16.4905      -20.2875
+B_d_d                            -2.010723    0.117484    -17.1149    -25.6267    0.123812      -16.2402      -24.3169
+c_psdn                           -2.008433    0.319339     -6.2893     -9.4208    0.985632       -2.0377       -3.0523
+c_dcrb                           -1.496208    1.017683     -1.4702     -2.4528    0.746213       -2.0051       -3.3452
+B_mean_price_part                 5.046674    0.140686     35.8718     28.7638    0.204130       24.7228       19.8240
+B_mean_price_crab                -0.034860    0.055182     -0.6317    -18.7534    0.041465       -0.8407      -24.9573
+asc_mna_msqd                     -9.569094          NA          NA          NA          NA            NA            NA
+asc_sba_msqd                     -9.477997          NA          NA          NA          NA            NA            NA
+asc_mra_msqd                    -10.516949          NA          NA          NA          NA            NA            NA
+asc_laa_msqd                     -9.984531          NA          NA          NA          NA            NA            NA
+asc_npa_msqd                    -10.014414          NA          NA          NA          NA            NA            NA
+asc_sfa_msqd                    -10.001498          NA          NA          NA          NA            NA            NA
+asc_cba_msqd                     -9.781821          NA          NA          NA          NA            NA            NA
+asc_laa_psdn                     -7.896198          NA          NA          NA          NA            NA            NA
+asc_clo_psdn                     -5.634865          NA          NA          NA          NA            NA            NA
+asc_cwa_psdn                     -4.053051          NA          NA          NA          NA            NA            NA
+asc_clw_psdn                     -4.473406          NA          NA          NA          NA            NA            NA
+asc_sba_cmck                     -7.459976          NA          NA          NA          NA            NA            NA
+asc_laa_cmck                     -8.743552          NA          NA          NA          NA            NA            NA
+asc_laa_nanc                    -12.205574          NA          NA          NA          NA            NA            NA
+asc_cwa_albc                    -19.579248          NA          NA          NA          NA            NA            NA
+asc_cwa_dcrb                     -7.102633          NA          NA          NA          NA            NA            NA
+asc_clw_dcrb                     -7.240661          NA          NA          NA          NA            NA            NA
+theta_part                        1.064859    0.138824      7.6706      0.4672    0.273896        3.8878        0.2368
+theta_cmck                       10.400237          NA          NA          NA          NA            NA            NA
+theta_msqd                        5.558108          NA          NA          NA          NA            NA            NA
+theta_psdn                        0.125401          NA          NA          NA          NA            NA            NA
+theta_part_crab                  10.456592          NA          NA          NA          NA            NA            NA
+w_msqd                           -3.964041    0.216980    -18.2691    -22.8778    0.274888      -14.4206      -18.0584
 asc_no_participation              0.000000          NA          NA          NA          NA            NA            NA
 
 Nesting structure for NL model component :
 Nest: root (1)
 |-------Alternative: no_participation
-|-Nest: part (0.7068)
-|  |-Nest: msqd (0.6724)
+|-Nest: part (0.7436)
+|  |-Nest: msqd (0.7408)
 |  |  |-Alternative: mna_msqd
 |  |  |-Alternative: sba_msqd
 |  |  |-Alternative: mra_msqd
@@ -84,10 +95,10 @@ Nest: root (1)
 |  |  |-Alternative: npa_msqd
 |  |  |-Alternative: sfa_msqd
 |  |  '-Alternative: cba_msqd
-|  |-Nest: cmck (0.7067)
+|  |-Nest: cmck (0.7436)
 |  |  |-Alternative: sba_cmck
 |  |  '-Alternative: laa_cmck
-|  |-Nest: psdn (0.3934)
+|  |-Nest: psdn (0.3951)
 |  |  |-Alternative: laa_psdn
 |  |  |-Alternative: clo_psdn
 |  |  |-Alternative: cwa_psdn
@@ -108,371 +119,355 @@ Percentage chosen when available     4.91    15.22     0.44     2.87     0.16   
 
 
 Classical covariance matrix:
-                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_cmck              B_mean_avail_nanc              B_mean_avail_albc              B_mean_avail_dcrb
-B_mean_avail_msqd                                    0.065550                      -0.008551                      -0.009614                    -5.9677e-04                       0.020448                      -0.002162
-B_mean_avail_psdn                                   -0.008551                       0.233508                       0.395529                       0.097410                       0.395853                       0.057385
-B_mean_avail_cmck                                   -0.009614                       0.395529                       1.689233                       0.216770                       1.090180                       0.100655
-B_mean_avail_nanc                                 -5.9677e-04                       0.097410                       0.216770                       0.231618                       0.172572                       0.030197
-B_mean_avail_albc                                    0.020448                       0.395853                       1.090180                       0.172572                       2.942733                       0.041185
-B_mean_avail_dcrb                                   -0.002162                       0.057385                       0.100655                       0.030197                       0.041185                       0.524048
-B_wind_max_220_mh                                 -2.1379e-04                    -2.7082e-04                    -2.0413e-04                    -2.2615e-04                     7.5081e-04                    -2.6453e-04
-B_dist_to_cog                                      -1.164e-06                     -1.095e-05                     -8.982e-06                     -4.960e-06                      1.107e-06                     -1.395e-06
-B_dist_port_to_catch_area_zero                      5.985e-05                     -8.929e-05                     -2.010e-05                     -1.634e-05                     4.7722e-04                     -3.475e-05
-B_dummy_prev_days                                 -2.0669e-04                      -0.008021                      -0.035319                      -0.007500                       0.010598                      -0.005921
-B_dummy_prev_year_days                               0.001654                      -0.005649                      -0.004188                    -4.3236e-04                      -0.004523                      -0.001246
-B_unem_rate                                        5.2071e-04                      -0.005112                      -0.009172                      -0.002282                      -0.011867                    -9.7879e-04
-B_d_d                                                0.001147                      -0.014603                      -0.004766                      -0.006363                       0.003335                      -0.008890
-c_psdn                                               0.001019                      -0.019053                      -0.002739                      -0.001821                      -0.022677                    -9.6241e-04
-c_dcrb                                            -2.7253e-04                       0.005129                    -5.4463e-04                       0.001709                       0.012735                       0.077681
-B_mean_price_part                                   -0.003234                      -0.034198                      -0.112809                      -0.013431                      -0.356451                       0.002053
-B_mean_price_crab                                   8.030e-06                       0.003340                       0.004395                       0.001640                       0.002441                      -0.035543
-asc_msqd                                            -0.012552                       0.086641                       0.208729                       0.040660                       0.353518                       0.016679
-theta_part                                          -0.001525                    -9.9276e-04                      -0.045789                      -0.007829                       0.014182                      -0.003062
-w_msqd                                             3.8829e-04                     8.5449e-04                       0.028651                       0.002464                      -0.002808                       0.001585
-                                            B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days                    B_unem_rate
-B_mean_avail_msqd                                 -2.1379e-04                     -1.164e-06                      5.985e-05                    -2.0669e-04                       0.001654                     5.2071e-04
-B_mean_avail_psdn                                 -2.7082e-04                     -1.095e-05                     -8.929e-05                      -0.008021                      -0.005649                      -0.005112
-B_mean_avail_cmck                                 -2.0413e-04                     -8.982e-06                     -2.010e-05                      -0.035319                      -0.004188                      -0.009172
-B_mean_avail_nanc                                 -2.2615e-04                     -4.960e-06                     -1.634e-05                      -0.007500                    -4.3236e-04                      -0.002282
-B_mean_avail_albc                                  7.5081e-04                      1.107e-06                     4.7722e-04                       0.010598                      -0.004523                      -0.011867
-B_mean_avail_dcrb                                 -2.6453e-04                     -1.395e-06                     -3.475e-05                      -0.005921                      -0.001246                    -9.7879e-04
-B_wind_max_220_mh                                   3.032e-05                      5.290e-08                      1.587e-07                    -1.2652e-04                     -3.270e-06                     -2.445e-05
-B_dist_to_cog                                       5.290e-08                      5.895e-09                     -6.113e-09                      5.812e-07                      2.704e-07                     -1.364e-08
-B_dist_port_to_catch_area_zero                      1.587e-07                     -6.113e-09                      1.801e-06                     -2.282e-05                     -3.806e-06                     -1.428e-06
-B_dummy_prev_days                                 -1.2652e-04                      5.812e-07                     -2.282e-05                       0.011362                    -8.4687e-04                    -5.5471e-04
-B_dummy_prev_year_days                             -3.270e-06                      2.704e-07                     -3.806e-06                    -8.4687e-04                       0.002639                     1.1121e-04
-B_unem_rate                                        -2.445e-05                     -1.364e-08                     -1.428e-06                    -5.5471e-04                     1.1121e-04                     3.2666e-04
-B_d_d                                               4.241e-05                      6.621e-07                      8.237e-05                      -0.001159                    -3.4959e-04                      8.178e-05
-c_psdn                                              4.796e-05                      9.945e-07                      1.509e-05                      -0.003539                     2.2063e-04                     4.4499e-04
-c_dcrb                                             -5.258e-05                     -9.141e-07                     -1.720e-05                       0.003466                     5.8064e-04                    -3.8707e-04
-B_mean_price_part                                 -1.4012e-04                     -8.505e-07                     -7.707e-05                      -0.003450                      4.464e-05                       0.001282
-B_mean_price_crab                                  -1.504e-05                     -3.895e-07                     -3.982e-06                      5.962e-05                     -2.398e-05                     -7.214e-05
-asc_msqd                                            3.036e-05                     -1.376e-06                     -1.686e-06                      -0.001439                      -0.001032                      -0.002426
-theta_part                                        -1.3662e-04                     -7.807e-07                     -3.051e-05                       0.011007                     -5.262e-05                    -7.2839e-04
-w_msqd                                              8.198e-05                      1.187e-06                      1.926e-05                      -0.006240                    -2.8428e-04                     3.7381e-04
-                                                        B_d_d                         c_psdn                         c_dcrb              B_mean_price_part              B_mean_price_crab                       asc_msqd
-B_mean_avail_msqd                                    0.001147                       0.001019                    -2.7253e-04                      -0.003234                      8.030e-06                      -0.012552
-B_mean_avail_psdn                                   -0.014603                      -0.019053                       0.005129                      -0.034198                       0.003340                       0.086641
-B_mean_avail_cmck                                   -0.004766                      -0.002739                    -5.4463e-04                      -0.112809                       0.004395                       0.208729
-B_mean_avail_nanc                                   -0.006363                      -0.001821                       0.001709                      -0.013431                       0.001640                       0.040660
-B_mean_avail_albc                                    0.003335                      -0.022677                       0.012735                      -0.356451                       0.002441                       0.353518
-B_mean_avail_dcrb                                   -0.008890                    -9.6241e-04                       0.077681                       0.002053                      -0.035543                       0.016679
-B_wind_max_220_mh                                   4.241e-05                      4.796e-05                     -5.258e-05                    -1.4012e-04                     -1.504e-05                      3.036e-05
-B_dist_to_cog                                       6.621e-07                      9.945e-07                     -9.141e-07                     -8.505e-07                     -3.895e-07                     -1.376e-06
-B_dist_port_to_catch_area_zero                      8.237e-05                      1.509e-05                     -1.720e-05                     -7.707e-05                     -3.982e-06                     -1.686e-06
-B_dummy_prev_days                                   -0.001159                      -0.003539                       0.003466                      -0.003450                      5.962e-05                      -0.001439
-B_dummy_prev_year_days                            -3.4959e-04                     2.2063e-04                     5.8064e-04                      4.464e-05                     -2.398e-05                      -0.001032
-B_unem_rate                                         8.178e-05                     4.4499e-04                    -3.8707e-04                       0.001282                     -7.214e-05                      -0.002426
-B_d_d                                                0.011057                       0.001927                      -0.002437                      -0.003446                    -7.1038e-04                      -0.001502
-c_psdn                                               0.001927                       0.097590                      -0.001972                       0.002776                    -2.5933e-04                      -0.003714
-c_dcrb                                              -0.002437                      -0.001972                       1.036225                      -0.001460                      -0.007243                       0.002111
-B_mean_price_part                                   -0.003446                       0.002776                      -0.001460                       0.047927                      4.917e-05                      -0.041790
-B_mean_price_crab                                 -7.1038e-04                    -2.5933e-04                      -0.007243                      4.917e-05                       0.003044                     8.7584e-04
-asc_msqd                                            -0.001502                      -0.003714                       0.002111                      -0.041790                     8.7584e-04                       0.058607
-theta_part                                          -0.003424                      -0.005250                       0.004418                      -0.003311                     3.1902e-04                      6.483e-05
-w_msqd                                               0.002661                       0.003114                      -0.002831                       0.001073                    -2.5075e-04                    -2.9541e-04
-                                                   theta_part                         w_msqd
-B_mean_avail_msqd                                   -0.001525                     3.8829e-04
-B_mean_avail_psdn                                 -9.9276e-04                     8.5449e-04
-B_mean_avail_cmck                                   -0.045789                       0.028651
-B_mean_avail_nanc                                   -0.007829                       0.002464
-B_mean_avail_albc                                    0.014182                      -0.002808
-B_mean_avail_dcrb                                   -0.003062                       0.001585
-B_wind_max_220_mh                                 -1.3662e-04                      8.198e-05
-B_dist_to_cog                                      -7.807e-07                      1.187e-06
-B_dist_port_to_catch_area_zero                     -3.051e-05                      1.926e-05
-B_dummy_prev_days                                    0.011007                      -0.006240
-B_dummy_prev_year_days                             -5.262e-05                    -2.8428e-04
-B_unem_rate                                       -7.2839e-04                     3.7381e-04
-B_d_d                                               -0.003424                       0.002661
-c_psdn                                              -0.005250                       0.003114
-c_dcrb                                               0.004418                      -0.002831
-B_mean_price_part                                   -0.003311                       0.001073
-B_mean_price_crab                                  3.1902e-04                    -2.5075e-04
-asc_msqd                                            6.483e-05                    -2.9541e-04
-theta_part                                           0.017869                      -0.008917
-w_msqd                                              -0.008917                       0.042317
+                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_cmck              B_mean_avail_nanc              B_mean_avail_albc
+B_mean_avail_msqd                                    0.071911                       0.007458                       0.041025                       0.010645                       0.110889
+B_mean_avail_psdn                                    0.007458                       0.119257                       0.088793                       0.036502                      -0.133138
+B_mean_avail_cmck                                    0.041025                       0.088793                       0.967781                       0.071757                      -0.161129
+B_mean_avail_nanc                                    0.010645                       0.036502                       0.071757                       0.216041                      -0.066865
+B_mean_avail_albc                                    0.110889                      -0.133138                      -0.161129                      -0.066865                       0.908385
+B_mean_avail_dcrb                                   2.910e-05                       0.034818                       0.036319                       0.015286                      -0.056967
+B_wind_max_220_mh                                 -2.7797e-04                    -2.6278e-04                    -4.9682e-04                    -2.6981e-04                     5.8272e-04
+B_dist_to_cog                                      -9.804e-07                     -1.102e-05                     -5.225e-06                     -4.344e-06                      9.740e-06
+B_dist_port_to_catch_area_zero                      8.973e-05                    -1.0811e-04                     -5.071e-05                     -4.245e-06                     6.5081e-04
+B_dummy_prev_days                                 -9.7051e-04                      -0.006470                      -0.020635                      -0.005147                       0.018583
+B_dummy_prev_year_days                               0.001544                      -0.004859                     3.4791e-04                     3.1538e-04                       0.001176
+B_unem_rate                                         7.693e-05                      -0.001560                      -0.001235                    -7.2249e-04                       0.002870
+B_d_d                                                0.003751                      -0.016196                    -9.3378e-04                      -0.003167                       0.013183
+c_psdn                                             6.6091e-04                      -0.014393                       0.007053                     6.6593e-04                       0.001570
+c_dcrb                                            -5.3123e-04                       0.002710                      -0.004523                     3.0337e-04                    -5.5274e-04
+B_mean_price_part                                   -0.014771                       0.029842                       0.033592                       0.013956                      -0.116571
+B_mean_price_crab                                   2.930e-05                       0.002432                       0.001678                     9.9893e-04                      -0.003038
+theta_part                                          -0.002781                    -8.4755e-04                      -0.038602                      -0.007192                       0.010352
+w_msqd                                             4.3950e-04                       0.001646                       0.023500                       0.002181                       0.001911
+                                            B_mean_avail_dcrb              B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days
+B_mean_avail_msqd                                   2.910e-05                    -2.7797e-04                     -9.804e-07                      8.973e-05                    -9.7051e-04
+B_mean_avail_psdn                                    0.034818                    -2.6278e-04                     -1.102e-05                    -1.0811e-04                      -0.006470
+B_mean_avail_cmck                                    0.036319                    -4.9682e-04                     -5.225e-06                     -5.071e-05                      -0.020635
+B_mean_avail_nanc                                    0.015286                    -2.6981e-04                     -4.344e-06                     -4.245e-06                      -0.005147
+B_mean_avail_albc                                   -0.056967                     5.8272e-04                      9.740e-06                     6.5081e-04                       0.018583
+B_mean_avail_dcrb                                    0.516950                    -2.6828e-04                     -1.262e-06                     -4.163e-05                      -0.004077
+B_wind_max_220_mh                                 -2.6828e-04                      3.201e-05                      3.936e-08                     -1.240e-07                    -1.0270e-04
+B_dist_to_cog                                      -1.262e-06                      3.936e-08                      6.504e-09                     -7.827e-09                      1.094e-06
+B_dist_port_to_catch_area_zero                     -4.163e-05                     -1.240e-07                     -7.827e-09                      2.277e-06                     -2.241e-05
+B_dummy_prev_days                                   -0.004077                    -1.0270e-04                      1.094e-06                     -2.241e-05                       0.010236
+B_dummy_prev_year_days                              -0.001234                     -6.665e-06                      3.934e-07                     -5.782e-06                    -8.0829e-04
+B_unem_rate                                       -3.7032e-04                     -2.632e-05                     -1.039e-07                     -1.850e-06                    -5.6998e-04
+B_d_d                                               -0.009715                     -4.281e-07                      8.480e-07                     1.0138e-04                      -0.001741
+c_psdn                                            -2.6213e-04                      3.512e-05                      9.534e-07                      1.605e-05                      -0.002816
+c_dcrb                                               0.075870                     -3.377e-05                     -8.117e-07                     -1.888e-05                       0.003045
+B_mean_price_part                                    0.013622                    -1.1447e-04                     -2.130e-06                    -1.0357e-04                      -0.003929
+B_mean_price_crab                                   -0.035616                     -1.197e-05                     -4.074e-07                     -4.885e-06                      7.423e-05
+theta_part                                          -0.001790                    -1.0495e-04                     -5.525e-07                     -3.592e-05                       0.010099
+w_msqd                                               0.001073                      5.760e-05                      9.986e-07                      1.733e-05                      -0.004619
+                                       B_dummy_prev_year_days                    B_unem_rate                          B_d_d                         c_psdn                         c_dcrb
+B_mean_avail_msqd                                    0.001544                      7.693e-05                       0.003751                     6.6091e-04                    -5.3123e-04
+B_mean_avail_psdn                                   -0.004859                      -0.001560                      -0.016196                      -0.014393                       0.002710
+B_mean_avail_cmck                                  3.4791e-04                      -0.001235                    -9.3378e-04                       0.007053                      -0.004523
+B_mean_avail_nanc                                  3.1538e-04                    -7.2249e-04                      -0.003167                     6.6593e-04                     3.0337e-04
+B_mean_avail_albc                                    0.001176                       0.002870                       0.013183                       0.001570                    -5.5274e-04
+B_mean_avail_dcrb                                   -0.001234                    -3.7032e-04                      -0.009715                    -2.6213e-04                       0.075870
+B_wind_max_220_mh                                  -6.665e-06                     -2.632e-05                     -4.281e-07                      3.512e-05                     -3.377e-05
+B_dist_to_cog                                       3.934e-07                     -1.039e-07                      8.480e-07                      9.534e-07                     -8.117e-07
+B_dist_port_to_catch_area_zero                     -5.782e-06                     -1.850e-06                     1.0138e-04                      1.605e-05                     -1.888e-05
+B_dummy_prev_days                                 -8.0829e-04                    -5.6998e-04                      -0.001741                      -0.002816                       0.003045
+B_dummy_prev_year_days                               0.002866                      5.863e-05                    -2.5835e-04                     1.9579e-04                     6.2321e-04
+B_unem_rate                                         5.863e-05                     2.3528e-04                      7.628e-05                     2.2292e-04                    -2.8876e-04
+B_d_d                                             -2.5835e-04                      7.628e-05                       0.013802                       0.001840                      -0.002883
+c_psdn                                             1.9579e-04                     2.2292e-04                       0.001840                       0.101977                      -0.001558
+c_dcrb                                             6.2321e-04                    -2.8876e-04                      -0.002883                      -0.001558                       1.035680
+B_mean_price_part                                 -7.0431e-04                    -4.9843e-04                      -0.005286                    -2.0994e-04                     3.9564e-04
+B_mean_price_crab                                  -9.943e-06                     -4.266e-05                    -8.6302e-04                    -1.9505e-04                      -0.007114
+theta_part                                          3.386e-05                    -7.1263e-04                      -0.004220                      -0.004847                       0.004105
+w_msqd                                            -2.5738e-04                     2.4213e-04                       0.002289                       0.002159                      -0.002083
+                                            B_mean_price_part              B_mean_price_crab                     theta_part                         w_msqd
+B_mean_avail_msqd                                   -0.014771                      2.930e-05                      -0.002781                     4.3950e-04
+B_mean_avail_psdn                                    0.029842                       0.002432                    -8.4755e-04                       0.001646
+B_mean_avail_cmck                                    0.033592                       0.001678                      -0.038602                       0.023500
+B_mean_avail_nanc                                    0.013956                     9.9893e-04                      -0.007192                       0.002181
+B_mean_avail_albc                                   -0.116571                      -0.003038                       0.010352                       0.001911
+B_mean_avail_dcrb                                    0.013622                      -0.035616                      -0.001790                       0.001073
+B_wind_max_220_mh                                 -1.1447e-04                     -1.197e-05                    -1.0495e-04                      5.760e-05
+B_dist_to_cog                                      -2.130e-06                     -4.074e-07                     -5.525e-07                      9.986e-07
+B_dist_port_to_catch_area_zero                    -1.0357e-04                     -4.885e-06                     -3.592e-05                      1.733e-05
+B_dummy_prev_days                                   -0.003929                      7.423e-05                       0.010099                      -0.004619
+B_dummy_prev_year_days                            -7.0431e-04                     -9.943e-06                      3.386e-05                    -2.5738e-04
+B_unem_rate                                       -4.9843e-04                     -4.266e-05                    -7.1263e-04                     2.4213e-04
+B_d_d                                               -0.005286                    -8.6302e-04                      -0.004220                       0.002289
+c_psdn                                            -2.0994e-04                    -1.9505e-04                      -0.004847                       0.002159
+c_dcrb                                             3.9564e-04                      -0.007114                       0.004105                      -0.002083
+B_mean_price_part                                    0.019793                     7.5869e-04                      -0.002412                     2.9326e-04
+B_mean_price_crab                                  7.5869e-04                       0.003045                     3.5168e-04                    -1.9857e-04
+theta_part                                          -0.002412                     3.5168e-04                       0.019272                      -0.007606
+w_msqd                                             2.9326e-04                    -1.9857e-04                      -0.007606                       0.047080
 
 Robust covariance matrix:
-                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_cmck              B_mean_avail_nanc              B_mean_avail_albc              B_mean_avail_dcrb
-B_mean_avail_msqd                                    0.176008                      -0.069029                      -0.073457                      -0.049996                      -0.606727                       0.015729
-B_mean_avail_psdn                                   -0.069029                       1.298799                       3.162384                       0.597769                       2.316032                       0.266008
-B_mean_avail_cmck                                   -0.073457                       3.162384                       8.720691                       1.662671                       6.158631                       0.945605
-B_mean_avail_nanc                                   -0.049996                       0.597769                       1.662671                       0.767883                       1.807756                       0.127396
-B_mean_avail_albc                                   -0.606727                       2.316032                       6.158631                       1.807756                      11.572077                       0.753903
-B_mean_avail_dcrb                                    0.015729                       0.266008                       0.945605                       0.127396                       0.753903                       0.482023
-B_wind_max_220_mh                                 -2.7192e-04                      -0.002342                      -0.003913                    -6.0269e-04                      -0.002878                      -0.001274
-B_dist_to_cog                                       1.542e-05                     -8.708e-05                    -1.7346e-04                     -5.982e-05                     -6.185e-05                      1.892e-05
-B_dist_port_to_catch_area_zero                     1.4293e-04                      3.441e-05                     5.1298e-04                     4.4449e-04                     -1.920e-05                    -1.3761e-04
-B_dummy_prev_days                                   -0.019624                      -0.040893                      -0.146379                      -0.031648                       0.131369                      -0.009749
-B_dummy_prev_year_days                               0.011773                      -0.064306                      -0.147810                      -0.032943                      -0.215579                      -0.025401
-B_unem_rate                                       -7.3773e-04                      -0.044343                      -0.120617                      -0.020221                      -0.074294                      -0.010580
-B_d_d                                               -0.002647                      -0.036223                      -0.089434                      -0.007393                      -0.234452                      -0.027710
-c_psdn                                               0.314063                      -0.317260                      -0.337641                      -0.043582                      -1.275100                       0.065791
-c_dcrb                                               0.021748                       0.140735                       0.245318                       0.052826                       0.260581                      -0.355540
-B_mean_price_part                                    0.086718                      -0.192972                      -0.515033                      -0.188894                      -1.342327                      -0.062859
-B_mean_price_crab                                 -1.9794e-04                       0.029180                       0.053846                       0.009244                       0.051705                      -0.008548
-asc_msqd                                            -0.095438                       0.490476                       1.268234                       0.288126                       1.631042                       0.141373
-theta_part                                          -0.031055                       0.108237                       0.295656                       0.065214                       0.423580                       0.035130
-w_msqd                                               0.019624                      -0.108869                      -0.257284                      -0.173301                      -0.452180                      -0.010379
-                                            B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days                    B_unem_rate
-B_mean_avail_msqd                                 -2.7192e-04                      1.542e-05                     1.4293e-04                      -0.019624                       0.011773                    -7.3773e-04
-B_mean_avail_psdn                                   -0.002342                     -8.708e-05                      3.441e-05                      -0.040893                      -0.064306                      -0.044343
-B_mean_avail_cmck                                   -0.003913                    -1.7346e-04                     5.1298e-04                      -0.146379                      -0.147810                      -0.120617
-B_mean_avail_nanc                                 -6.0269e-04                     -5.982e-05                     4.4449e-04                      -0.031648                      -0.032943                      -0.020221
-B_mean_avail_albc                                   -0.002878                     -6.185e-05                     -1.920e-05                       0.131369                      -0.215579                      -0.074294
-B_mean_avail_dcrb                                   -0.001274                      1.892e-05                    -1.3761e-04                      -0.009749                      -0.025401                      -0.010580
-B_wind_max_220_mh                                   3.968e-05                      2.267e-08                     -1.070e-06                    -3.5312e-04                     1.8080e-04                      7.509e-05
-B_dist_to_cog                                       2.267e-08                      2.135e-08                     -2.753e-08                      1.018e-05                      3.367e-06                      1.637e-06
-B_dist_port_to_catch_area_zero                     -1.070e-06                     -2.753e-08                      1.347e-06                     -1.172e-05                      2.121e-05                     -1.344e-05
-B_dummy_prev_days                                 -3.5312e-04                      1.018e-05                     -1.172e-05                       0.023508                      -0.001640                       0.001057
-B_dummy_prev_year_days                             1.8080e-04                      3.367e-06                      2.121e-05                      -0.001640                       0.007940                       0.001683
-B_unem_rate                                         7.509e-05                      1.637e-06                     -1.344e-05                       0.001057                       0.001683                       0.001951
-B_d_d                                              -1.071e-06                     -8.798e-06                     1.0524e-04                    -2.0146e-04                       0.005103                     9.2285e-04
-c_psdn                                               0.001059                      3.817e-05                     2.9594e-04                      -0.060908                       0.015416                       0.004532
-c_dcrb                                               0.001073                     -4.037e-05                     1.7021e-04                      -0.021602                       0.002063                      -0.004029
-B_mean_price_part                                  2.2209e-04                      3.231e-06                     -6.661e-06                      -0.025715                       0.022448                       0.005690
-B_mean_price_crab                                  -8.383e-05                     -9.017e-07                     -3.140e-06                     8.3140e-04                      -0.001401                      -0.001035
-asc_msqd                                          -6.3667e-04                     -2.242e-05                     -2.630e-05                       0.004792                      -0.034167                      -0.016297
-theta_part                                        -2.7340e-04                      2.551e-06                      9.986e-06                       0.013624                      -0.006447                      -0.005200
-w_msqd                                             4.0021e-04                      8.617e-06                    -1.2786e-04                      -0.010268                       0.009379                       0.004181
-                                                        B_d_d                         c_psdn                         c_dcrb              B_mean_price_part              B_mean_price_crab                       asc_msqd
-B_mean_avail_msqd                                   -0.002647                       0.314063                       0.021748                       0.086718                    -1.9794e-04                      -0.095438
-B_mean_avail_psdn                                   -0.036223                      -0.317260                       0.140735                      -0.192972                       0.029180                       0.490476
-B_mean_avail_cmck                                   -0.089434                      -0.337641                       0.245318                      -0.515033                       0.053846                       1.268234
-B_mean_avail_nanc                                   -0.007393                      -0.043582                       0.052826                      -0.188894                       0.009244                       0.288126
-B_mean_avail_albc                                   -0.234452                      -1.275100                       0.260581                      -1.342327                       0.051705                       1.631042
-B_mean_avail_dcrb                                   -0.027710                       0.065791                      -0.355540                      -0.062859                      -0.008548                       0.141373
-B_wind_max_220_mh                                  -1.071e-06                       0.001059                       0.001073                     2.2209e-04                     -8.383e-05                    -6.3667e-04
-B_dist_to_cog                                      -8.798e-06                      3.817e-05                     -4.037e-05                      3.231e-06                     -9.017e-07                     -2.242e-05
-B_dist_port_to_catch_area_zero                     1.0524e-04                     2.9594e-04                     1.7021e-04                     -6.661e-06                     -3.140e-06                     -2.630e-05
-B_dummy_prev_days                                 -2.0146e-04                      -0.060908                      -0.021602                      -0.025715                     8.3140e-04                       0.004792
-B_dummy_prev_year_days                               0.005103                       0.015416                       0.002063                       0.022448                      -0.001401                      -0.034167
-B_unem_rate                                        9.2285e-04                       0.004532                      -0.004029                       0.005690                      -0.001035                      -0.016297
-B_d_d                                                0.033969                      -0.017039                      -0.009225                       0.018418                      -0.003855                      -0.030467
-c_psdn                                              -0.017039                       0.945017                      -0.008103                       0.180824                      -0.008939                      -0.215329
-c_dcrb                                              -0.009225                      -0.008103                       0.528231                      -0.022396                       0.015395                       0.037840
-B_mean_price_part                                    0.018418                       0.180824                      -0.022396                       0.168171                      -0.003768                      -0.175477
-B_mean_price_crab                                   -0.003855                      -0.008939                       0.015395                      -0.003768                       0.001948                       0.009977
-asc_msqd                                            -0.030467                      -0.215329                       0.037840                      -0.175477                       0.009977                       0.269062
-theta_part                                          -0.005479                      -0.090722                      -0.013015                      -0.050039                       0.002896                       0.066809
-w_msqd                                              -0.002425                       0.034033                       0.005991                       0.054799                      -0.003102                      -0.059939
-                                                   theta_part                         w_msqd
-B_mean_avail_msqd                                   -0.031055                       0.019624
-B_mean_avail_psdn                                    0.108237                      -0.108869
-B_mean_avail_cmck                                    0.295656                      -0.257284
-B_mean_avail_nanc                                    0.065214                      -0.173301
-B_mean_avail_albc                                    0.423580                      -0.452180
-B_mean_avail_dcrb                                    0.035130                      -0.010379
-B_wind_max_220_mh                                 -2.7340e-04                     4.0021e-04
-B_dist_to_cog                                       2.551e-06                      8.617e-06
-B_dist_port_to_catch_area_zero                      9.986e-06                    -1.2786e-04
-B_dummy_prev_days                                    0.013624                      -0.010268
-B_dummy_prev_year_days                              -0.006447                       0.009379
-B_unem_rate                                         -0.005200                       0.004181
-B_d_d                                               -0.005479                      -0.002425
-c_psdn                                              -0.090722                       0.034033
-c_dcrb                                              -0.013015                       0.005991
-B_mean_price_part                                   -0.050039                       0.054799
-B_mean_price_crab                                    0.002896                      -0.003102
-asc_msqd                                             0.066809                      -0.059939
-theta_part                                           0.033964                      -0.026390
-w_msqd                                              -0.026390                       0.062970
+                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_cmck              B_mean_avail_nanc              B_mean_avail_albc
+B_mean_avail_msqd                                    0.205610                      -0.015533                       0.006820                      -0.082685                       0.107699
+B_mean_avail_psdn                                   -0.015533                       0.446244                       1.043373                       0.078523                      -0.618652
+B_mean_avail_cmck                                    0.006820                       1.043373                       3.577154                       0.242046                      -1.381612
+B_mean_avail_nanc                                   -0.082685                       0.078523                       0.242046                       0.509631                      -0.159321
+B_mean_avail_albc                                    0.107699                      -0.618652                      -1.381612                      -0.159321                       1.440143
+B_mean_avail_dcrb                                    0.039350                      -0.032782                       0.179796                      -0.028733                       0.055789
+B_wind_max_220_mh                                 -2.7180e-04                    -3.5531e-04                     7.0243e-04                     2.1613e-04                     8.7750e-04
+B_dist_to_cog                                       2.512e-05                     -8.751e-05                    -2.1701e-04                     -2.641e-05                     1.1576e-04
+B_dist_port_to_catch_area_zero                     1.2923e-04                     1.6001e-04                       0.001155                      5.890e-05                     -2.940e-05
+B_dummy_prev_days                                   -0.017852                      -0.031480                      -0.102063                      -0.034147                       0.096837
+B_dummy_prev_year_days                               0.021827                      -0.013480                      -0.006996                      -0.014836                      -0.009029
+B_unem_rate                                       -3.9082e-04                      -0.014543                      -0.043512                      -0.001496                       0.014866
+B_d_d                                               -0.001614                      -0.005948                      -0.016165                       0.031663                      -0.031904
+c_psdn                                               0.318554                       0.027160                       0.395783                       0.122217                       0.067215
+c_dcrb                                               0.007509                       0.127671                       0.182238                       0.020004                      -0.043351
+B_mean_price_part                                   -0.011112                       0.120646                       0.285344                       0.025258                      -0.226938
+B_mean_price_crab                                 -9.3949e-04                       0.013018                       0.013751                      -0.003898                      -0.011044
+theta_part                                          -0.062573                       0.049997                       0.178577                       0.007269                       0.015495
+w_msqd                                               0.054010                      -0.037721                      -0.068096                      -0.131467                      -0.012126
+                                            B_mean_avail_dcrb              B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days
+B_mean_avail_msqd                                    0.039350                    -2.7180e-04                      2.512e-05                     1.2923e-04                      -0.017852
+B_mean_avail_psdn                                   -0.032782                    -3.5531e-04                     -8.751e-05                     1.6001e-04                      -0.031480
+B_mean_avail_cmck                                    0.179796                     7.0243e-04                    -2.1701e-04                       0.001155                      -0.102063
+B_mean_avail_nanc                                   -0.028733                     2.1613e-04                     -2.641e-05                      5.890e-05                      -0.034147
+B_mean_avail_albc                                    0.055789                     8.7750e-04                     1.1576e-04                     -2.940e-05                       0.096837
+B_mean_avail_dcrb                                    0.334808                      -0.001003                      1.208e-05                      5.236e-05                       0.008904
+B_wind_max_220_mh                                   -0.001003                      3.474e-05                     -1.106e-08                      7.466e-07                    -3.1111e-04
+B_dist_to_cog                                       1.208e-05                     -1.106e-08                      2.695e-08                     -3.432e-08                      6.949e-06
+B_dist_port_to_catch_area_zero                      5.236e-05                      7.466e-07                     -3.432e-08                      1.163e-06                     -3.018e-05
+B_dummy_prev_days                                    0.008904                    -3.1111e-04                      6.949e-06                     -3.018e-05                       0.026460
+B_dummy_prev_year_days                              -0.006120                     1.3626e-04                      6.217e-06                      1.581e-05                      -0.008436
+B_unem_rate                                       -1.8678e-04                      3.338e-06                      2.410e-06                     -1.600e-05                     -9.017e-05
+B_d_d                                                0.003201                      1.002e-05                     -2.883e-06                      5.814e-06                      -0.008055
+c_psdn                                               0.108548                     3.6835e-04                      2.670e-05                     4.0618e-04                      -0.059684
+c_dcrb                                              -0.343217                       0.001478                     -4.812e-05                     1.2197e-04                      -0.027723
+B_mean_price_part                                   -0.007648                    -1.2731e-04                     -2.282e-05                      2.997e-05                      -0.017066
+B_mean_price_crab                                   -0.013276                     -5.881e-05                     -1.170e-06                      8.492e-07                       0.002222
+theta_part                                           0.023408                    -1.3866e-04                     -1.412e-05                      2.733e-05                       0.030418
+w_msqd                                               0.001053                     3.1006e-04                      1.204e-05                     -2.855e-05                      -0.017905
+                                       B_dummy_prev_year_days                    B_unem_rate                          B_d_d                         c_psdn                         c_dcrb
+B_mean_avail_msqd                                    0.021827                    -3.9082e-04                      -0.001614                       0.318554                       0.007509
+B_mean_avail_psdn                                   -0.013480                      -0.014543                      -0.005948                       0.027160                       0.127671
+B_mean_avail_cmck                                   -0.006996                      -0.043512                      -0.016165                       0.395783                       0.182238
+B_mean_avail_nanc                                   -0.014836                      -0.001496                       0.031663                       0.122217                       0.020004
+B_mean_avail_albc                                   -0.009029                       0.014866                      -0.031904                       0.067215                      -0.043351
+B_mean_avail_dcrb                                   -0.006120                    -1.8678e-04                       0.003201                       0.108548                      -0.343217
+B_wind_max_220_mh                                  1.3626e-04                      3.338e-06                      1.002e-05                     3.6835e-04                       0.001478
+B_dist_to_cog                                       6.217e-06                      2.410e-06                     -2.883e-06                      2.670e-05                     -4.812e-05
+B_dist_port_to_catch_area_zero                      1.581e-05                     -1.600e-05                      5.814e-06                     4.0618e-04                     1.2197e-04
+B_dummy_prev_days                                   -0.008436                     -9.017e-05                      -0.008055                      -0.059684                      -0.027723
+B_dummy_prev_year_days                               0.010108                     5.4061e-04                       0.002372                       0.021005                     7.1509e-04
+B_unem_rate                                        5.4061e-04                     7.3931e-04                       0.001031                      -0.004172                      -0.002966
+B_d_d                                                0.002372                       0.001031                       0.015329                      -0.004387                      -0.014014
+c_psdn                                               0.021005                      -0.004172                      -0.004387                       0.971470                       0.004961
+c_dcrb                                             7.1509e-04                      -0.002966                      -0.014014                       0.004961                       0.556834
+B_mean_price_part                                  -6.859e-05                      -0.003473                     4.2699e-04                       0.013137                       0.019309
+B_mean_price_crab                                 -9.2561e-04                    -6.2466e-04                      -0.002498                      -0.006478                       0.012244
+theta_part                                          -0.017851                      -0.003889                      -0.013892                      -0.103191                      -0.012954
+w_msqd                                               0.019121                       0.002344                      -0.001167                       0.022417                       0.009028
+                                            B_mean_price_part              B_mean_price_crab                     theta_part                         w_msqd
+B_mean_avail_msqd                                   -0.011112                    -9.3949e-04                      -0.062573                       0.054010
+B_mean_avail_psdn                                    0.120646                       0.013018                       0.049997                      -0.037721
+B_mean_avail_cmck                                    0.285344                       0.013751                       0.178577                      -0.068096
+B_mean_avail_nanc                                    0.025258                      -0.003898                       0.007269                      -0.131467
+B_mean_avail_albc                                   -0.226938                      -0.011044                       0.015495                      -0.012126
+B_mean_avail_dcrb                                   -0.007648                      -0.013276                       0.023408                       0.001053
+B_wind_max_220_mh                                 -1.2731e-04                     -5.881e-05                    -1.3866e-04                     3.1006e-04
+B_dist_to_cog                                      -2.282e-05                     -1.170e-06                     -1.412e-05                      1.204e-05
+B_dist_port_to_catch_area_zero                      2.997e-05                      8.492e-07                      2.733e-05                     -2.855e-05
+B_dummy_prev_days                                   -0.017066                       0.002222                       0.030418                      -0.017905
+B_dummy_prev_year_days                             -6.859e-05                    -9.2561e-04                      -0.017851                       0.019121
+B_unem_rate                                         -0.003473                    -6.2466e-04                      -0.003889                       0.002344
+B_d_d                                              4.2699e-04                      -0.002498                      -0.013892                      -0.001167
+c_psdn                                               0.013137                      -0.006478                      -0.103191                       0.022417
+c_dcrb                                               0.019309                       0.012244                      -0.012954                       0.009028
+B_mean_price_part                                    0.041669                       0.002815                      8.883e-05                     1.1390e-04
+B_mean_price_crab                                    0.002815                       0.001719                       0.003790                      -0.002644
+theta_part                                          8.883e-05                       0.003790                       0.075019                      -0.046055
+w_msqd                                             1.1390e-04                      -0.002644                      -0.046055                       0.075564
 
 Classical correlation matrix:
-                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_cmck              B_mean_avail_nanc              B_mean_avail_albc              B_mean_avail_dcrb
-B_mean_avail_msqd                                    1.000000                      -0.069115                      -0.028891                      -0.004843                       0.046557                      -0.011664
-B_mean_avail_psdn                                   -0.069115                       1.000000                       0.629770                       0.418858                       0.477538                       0.164045
-B_mean_avail_cmck                                   -0.028891                       0.629770                       1.000000                       0.346552                       0.488965                       0.106981
-B_mean_avail_nanc                                   -0.004843                       0.418858                       0.346552                       1.000000                       0.209031                       0.086674
-B_mean_avail_albc                                    0.046557                       0.477538                       0.488965                       0.209031                       1.000000                       0.033164
-B_mean_avail_dcrb                                   -0.011664                       0.164045                       0.106981                       0.086674                       0.033164                       1.000000
-B_wind_max_220_mh                                   -0.151637                      -0.101774                      -0.028521                      -0.085335                       0.079482                      -0.066360
-B_dist_to_cog                                       -0.059233                      -0.295208                      -0.090006                      -0.134223                       0.008402                      -0.025107
-B_dist_port_to_catch_area_zero                       0.174178                      -0.137677                      -0.011523                      -0.025298                       0.207274                      -0.035763
-B_dummy_prev_days                                   -0.007574                      -0.155729                      -0.254943                      -0.146197                       0.057962                      -0.076739
-B_dummy_prev_year_days                               0.125740                      -0.227564                      -0.062729                      -0.017487                      -0.051319                      -0.033504
-B_unem_rate                                          0.112528                      -0.585264                      -0.390458                      -0.262380                      -0.382761                      -0.074809
-B_d_d                                                0.042597                      -0.287382                      -0.034873                      -0.125735                       0.018490                      -0.116787
-c_psdn                                               0.012742                      -0.126211                      -0.006745                      -0.012115                      -0.042315                      -0.004256
-c_dcrb                                              -0.001046                       0.010427                    -4.1165e-04                       0.003488                       0.007293                       0.105415
-B_mean_price_part                                   -0.057694                      -0.323263                      -0.396470                      -0.127473                      -0.949150                       0.012956
-B_mean_price_crab                                  5.6844e-04                       0.125284                       0.061287                       0.061768                       0.025793                      -0.889845
-asc_msqd                                            -0.202511                       0.740623                       0.663380                       0.348982                       0.851260                       0.095171
-theta_part                                          -0.044547                      -0.015369                      -0.263557                      -0.121696                       0.061845                      -0.031640
-w_msqd                                               0.007373                       0.008596                       0.107163                       0.024889                      -0.007958                       0.010643
-                                            B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days                    B_unem_rate
-B_mean_avail_msqd                                   -0.151637                      -0.059233                       0.174178                      -0.007574                       0.125740                       0.112528
-B_mean_avail_psdn                                   -0.101774                      -0.295208                      -0.137677                      -0.155729                      -0.227564                      -0.585264
-B_mean_avail_cmck                                   -0.028521                      -0.090006                      -0.011523                      -0.254943                      -0.062729                      -0.390458
-B_mean_avail_nanc                                   -0.085335                      -0.134223                      -0.025298                      -0.146197                      -0.017487                      -0.262380
-B_mean_avail_albc                                    0.079482                       0.008402                       0.207274                       0.057962                      -0.051319                      -0.382761
-B_mean_avail_dcrb                                   -0.066360                      -0.025107                      -0.035763                      -0.076739                      -0.033504                      -0.074809
-B_wind_max_220_mh                                    1.000000                       0.125125                       0.021470                      -0.215548                      -0.011561                      -0.245661
-B_dist_to_cog                                        0.125125                       1.000000                      -0.059323                       0.071023                       0.068562                      -0.009828
-B_dist_port_to_catch_area_zero                       0.021470                      -0.059323                       1.000000                      -0.159491                      -0.055204                      -0.058869
-B_dummy_prev_days                                   -0.215548                       0.071023                      -0.159491                       1.000000                      -0.154656                      -0.287935
-B_dummy_prev_year_days                              -0.011561                       0.068562                      -0.055204                      -0.154656                       1.000000                       0.119778
-B_unem_rate                                         -0.245661                      -0.009828                      -0.058869                      -0.287935                       0.119778                       1.000000
-B_d_d                                                0.073245                       0.082008                       0.583639                      -0.103435                      -0.064717                       0.043030
-c_psdn                                               0.027877                       0.041464                       0.035989                      -0.106297                       0.013748                       0.078813
-c_dcrb                                              -0.009381                      -0.011695                      -0.012593                       0.031942                       0.011103                      -0.021038
-B_mean_price_part                                   -0.116235                      -0.050601                      -0.262314                      -0.147836                       0.003969                       0.324105
-B_mean_price_crab                                   -0.049516                      -0.091937                      -0.053770                       0.010138                      -0.008461                      -0.072336
-asc_msqd                                             0.022771                      -0.074013                      -0.005190                      -0.055770                      -0.082999                      -0.554467
-theta_part                                          -0.185600                      -0.076068                      -0.170066                       0.772500                      -0.007663                      -0.301488
-w_msqd                                               0.072372                       0.075167                       0.069758                      -0.284584                      -0.026901                       0.100542
-                                                        B_d_d                         c_psdn                         c_dcrb              B_mean_price_part              B_mean_price_crab                       asc_msqd
-B_mean_avail_msqd                                     0.04260                       0.012742                      -0.001046                      -0.057694                     5.6844e-04                      -0.202511
-B_mean_avail_psdn                                    -0.28738                      -0.126211                       0.010427                      -0.323263                       0.125284                       0.740623
-B_mean_avail_cmck                                    -0.03487                      -0.006745                    -4.1165e-04                      -0.396470                       0.061287                       0.663380
-B_mean_avail_nanc                                    -0.12574                      -0.012115                       0.003488                      -0.127473                       0.061768                       0.348982
-B_mean_avail_albc                                     0.01849                      -0.042315                       0.007293                      -0.949150                       0.025793                       0.851260
-B_mean_avail_dcrb                                    -0.11679                      -0.004256                       0.105415                       0.012956                      -0.889845                       0.095171
-B_wind_max_220_mh                                     0.07325                       0.027877                      -0.009381                      -0.116235                      -0.049516                       0.022771
-B_dist_to_cog                                         0.08201                       0.041464                      -0.011695                      -0.050601                      -0.091937                      -0.074013
-B_dist_port_to_catch_area_zero                        0.58364                       0.035989                      -0.012593                      -0.262314                      -0.053770                      -0.005190
-B_dummy_prev_days                                    -0.10344                      -0.106297                       0.031942                      -0.147836                       0.010138                      -0.055770
-B_dummy_prev_year_days                               -0.06472                       0.013748                       0.011103                       0.003969                      -0.008461                      -0.082999
-B_unem_rate                                           0.04303                       0.078813                      -0.021038                       0.324105                      -0.072336                      -0.554467
-B_d_d                                                 1.00000                       0.058651                      -0.022766                      -0.149705                      -0.122438                      -0.059022
-c_psdn                                                0.05865                       1.000000                      -0.006201                       0.040596                      -0.015045                      -0.049111
-c_dcrb                                               -0.02277                      -0.006201                       1.000000                      -0.006554                      -0.128946                       0.008565
-B_mean_price_part                                    -0.14971                       0.040596                      -0.006554                       1.000000                       0.004071                      -0.788520
-B_mean_price_crab                                    -0.12244                      -0.015045                      -0.128946                       0.004071                       1.000000                       0.065568
-asc_msqd                                             -0.05902                      -0.049111                       0.008565                      -0.788520                       0.065568                       1.000000
-theta_part                                           -0.24358                      -0.125723                       0.032467                      -0.113137                       0.043253                       0.002003
-w_msqd                                                0.12302                       0.048451                      -0.013519                       0.023837                      -0.022092                      -0.005932
-                                                   theta_part                         w_msqd
-B_mean_avail_msqd                                   -0.044547                       0.007373
-B_mean_avail_psdn                                   -0.015369                       0.008596
-B_mean_avail_cmck                                   -0.263557                       0.107163
-B_mean_avail_nanc                                   -0.121696                       0.024889
-B_mean_avail_albc                                    0.061845                      -0.007958
-B_mean_avail_dcrb                                   -0.031640                       0.010643
-B_wind_max_220_mh                                   -0.185600                       0.072372
-B_dist_to_cog                                       -0.076068                       0.075167
-B_dist_port_to_catch_area_zero                      -0.170066                       0.069758
-B_dummy_prev_days                                    0.772500                      -0.284584
-B_dummy_prev_year_days                              -0.007663                      -0.026901
-B_unem_rate                                         -0.301488                       0.100542
-B_d_d                                               -0.243582                       0.123020
-c_psdn                                              -0.125723                       0.048451
-c_dcrb                                               0.032467                      -0.013519
-B_mean_price_part                                   -0.113137                       0.023837
-B_mean_price_crab                                    0.043253                      -0.022092
-asc_msqd                                             0.002003                      -0.005932
-theta_part                                           1.000000                      -0.324272
-w_msqd                                              -0.324272                       1.000000
+                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_cmck              B_mean_avail_nanc              B_mean_avail_albc
+B_mean_avail_msqd                                    1.000000                       0.080539                       0.155511                       0.085403                       0.433866
+B_mean_avail_psdn                                    0.080539                       1.000000                       0.261366                       0.227407                      -0.404507
+B_mean_avail_cmck                                    0.155511                       0.261366                       1.000000                       0.156931                      -0.171850
+B_mean_avail_nanc                                    0.085403                       0.227407                       0.156931                       1.000000                      -0.150938
+B_mean_avail_albc                                    0.433866                      -0.404507                      -0.171850                      -0.150938                       1.000000
+B_mean_avail_dcrb                                  1.5092e-04                       0.140228                       0.051348                       0.045739                      -0.083131
+B_wind_max_220_mh                                   -0.183202                      -0.134485                      -0.089256                      -0.102591                       0.108055
+B_dist_to_cog                                       -0.045335                      -0.395587                      -0.065853                      -0.115897                       0.126711
+B_dist_port_to_catch_area_zero                       0.221750                      -0.207461                      -0.034164                      -0.006052                       0.452529
+B_dummy_prev_days                                   -0.035771                      -0.185177                      -0.207316                      -0.109442                       0.192710
+B_dummy_prev_year_days                               0.107553                      -0.262783                       0.006606                       0.012674                       0.023053
+B_unem_rate                                          0.018704                      -0.294553                      -0.081832                      -0.101338                       0.196350
+B_d_d                                                0.119074                      -0.399197                      -0.008079                      -0.057992                       0.117737
+c_psdn                                               0.007718                      -0.130514                       0.022450                       0.004486                       0.005157
+c_dcrb                                              -0.001947                       0.007710                      -0.004517                     6.4135e-04                    -5.6986e-04
+B_mean_price_part                                   -0.391534                       0.614234                       0.242716                       0.213417                      -0.869367
+B_mean_price_crab                                    0.001980                       0.127620                       0.030914                       0.038946                      -0.057766
+theta_part                                          -0.074704                      -0.017679                      -0.282656                      -0.111467                       0.078240
+w_msqd                                               0.007553                       0.021965                       0.110094                       0.021629                       0.009241
+                                            B_mean_avail_dcrb              B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days
+B_mean_avail_msqd                                  1.5092e-04                      -0.183202                      -0.045335                       0.221750                       -0.03577
+B_mean_avail_psdn                                    0.140228                      -0.134485                      -0.395587                      -0.207461                       -0.18518
+B_mean_avail_cmck                                    0.051348                      -0.089256                      -0.065853                      -0.034164                       -0.20732
+B_mean_avail_nanc                                    0.045739                      -0.102591                      -0.115897                      -0.006052                       -0.10944
+B_mean_avail_albc                                   -0.083131                       0.108055                       0.126711                       0.452529                        0.19271
+B_mean_avail_dcrb                                    1.000000                      -0.065945                      -0.021764                      -0.038369                       -0.05604
+B_wind_max_220_mh                                   -0.065945                       1.000000                       0.086266                      -0.014527                       -0.17939
+B_dist_to_cog                                       -0.021764                       0.086266                       1.000000                      -0.064320                        0.13412
+B_dist_port_to_catch_area_zero                      -0.038369                      -0.014527                      -0.064320                       1.000000                       -0.14678
+B_dummy_prev_days                                   -0.056042                      -0.179392                       0.134123                      -0.146779                        1.00000
+B_dummy_prev_year_days                              -0.032068                      -0.022001                       0.091116                      -0.071565                       -0.14922
+B_unem_rate                                         -0.033579                      -0.303313                      -0.084008                      -0.079921                       -0.36728
+B_d_d                                               -0.115008                    -6.4394e-04                       0.089496                       0.571894                       -0.14646
+c_psdn                                              -0.001142                       0.019439                       0.037020                       0.033314                       -0.08715
+c_dcrb                                               0.103689                      -0.005865                      -0.009890                      -0.012297                        0.02957
+B_mean_price_part                                    0.134665                      -0.143806                      -0.187724                      -0.487902                       -0.27603
+B_mean_price_crab                                   -0.897684                      -0.038341                      -0.091551                      -0.058671                        0.01330
+theta_part                                          -0.017933                      -0.133608                      -0.049348                      -0.171479                        0.71901
+w_msqd                                               0.006879                       0.046918                       0.057066                       0.052944                       -0.21041
+                                       B_dummy_prev_year_days                    B_unem_rate                          B_d_d                         c_psdn                         c_dcrb
+B_mean_avail_msqd                                    0.107553                        0.01870                       0.119074                       0.007718                      -0.001947
+B_mean_avail_psdn                                   -0.262783                       -0.29455                      -0.399197                      -0.130514                       0.007710
+B_mean_avail_cmck                                    0.006606                       -0.08183                      -0.008079                       0.022450                      -0.004517
+B_mean_avail_nanc                                    0.012674                       -0.10134                      -0.057992                       0.004486                     6.4135e-04
+B_mean_avail_albc                                    0.023053                        0.19635                       0.117737                       0.005157                    -5.6986e-04
+B_mean_avail_dcrb                                   -0.032068                       -0.03358                      -0.115008                      -0.001142                       0.103689
+B_wind_max_220_mh                                   -0.022001                       -0.30331                    -6.4394e-04                       0.019439                      -0.005865
+B_dist_to_cog                                        0.091116                       -0.08401                       0.089496                       0.037020                      -0.009890
+B_dist_port_to_catch_area_zero                      -0.071565                       -0.07992                       0.571894                       0.033314                      -0.012297
+B_dummy_prev_days                                   -0.149219                       -0.36728                      -0.146461                      -0.087150                       0.029573
+B_dummy_prev_year_days                               1.000000                        0.07139                      -0.041073                       0.011452                       0.011438
+B_unem_rate                                          0.071391                        1.00000                       0.042331                       0.045510                      -0.018498
+B_d_d                                               -0.041073                        0.04233                       1.000000                       0.049044                      -0.024115
+c_psdn                                               0.011452                        0.04551                       0.049044                       1.000000                      -0.004794
+c_dcrb                                               0.011438                       -0.01850                      -0.024115                      -0.004794                       1.000000
+B_mean_price_part                                   -0.093506                       -0.23097                      -0.319805                      -0.004673                       0.002763
+B_mean_price_crab                                   -0.003365                       -0.05040                      -0.133120                      -0.011068                      -0.126687
+theta_part                                           0.004555                       -0.33466                      -0.258715                      -0.109324                       0.029059
+w_msqd                                              -0.022155                        0.07275                       0.089775                       0.031161                      -0.009432
+                                            B_mean_price_part              B_mean_price_crab                     theta_part                         w_msqd
+B_mean_avail_msqd                                   -0.391534                       0.001980                      -0.074704                       0.007553
+B_mean_avail_psdn                                    0.614234                       0.127620                      -0.017679                       0.021965
+B_mean_avail_cmck                                    0.242716                       0.030914                      -0.282656                       0.110094
+B_mean_avail_nanc                                    0.213417                       0.038946                      -0.111467                       0.021629
+B_mean_avail_albc                                   -0.869367                      -0.057766                       0.078240                       0.009241
+B_mean_avail_dcrb                                    0.134665                      -0.897684                      -0.017933                       0.006879
+B_wind_max_220_mh                                   -0.143806                      -0.038341                      -0.133608                       0.046918
+B_dist_to_cog                                       -0.187724                      -0.091551                      -0.049348                       0.057066
+B_dist_port_to_catch_area_zero                      -0.487902                      -0.058671                      -0.171479                       0.052944
+B_dummy_prev_days                                   -0.276031                       0.013295                       0.719007                      -0.210408
+B_dummy_prev_year_days                              -0.093506                      -0.003365                       0.004555                      -0.022155
+B_unem_rate                                         -0.230973                      -0.050399                      -0.334663                       0.072750
+B_d_d                                               -0.319805                      -0.133120                      -0.258715                       0.089775
+c_psdn                                              -0.004673                      -0.011068                      -0.109324                       0.031161
+c_dcrb                                               0.002763                      -0.126687                       0.029059                      -0.009432
+B_mean_price_part                                    1.000000                       0.097726                      -0.123480                       0.009607
+B_mean_price_crab                                    0.097726                       1.000000                       0.045908                      -0.016584
+theta_part                                          -0.123480                       0.045908                       1.000000                      -0.252509
+w_msqd                                               0.009607                      -0.016584                      -0.252509                       1.000000
 
 Robust correlation matrix:
-                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_cmck              B_mean_avail_nanc              B_mean_avail_albc              B_mean_avail_dcrb
-B_mean_avail_msqd                                     1.00000                       -0.14438                       -0.05929                       -0.13600                      -0.425130                        0.05400
-B_mean_avail_psdn                                    -0.14438                        1.00000                        0.93965                        0.59857                       0.597404                        0.33619
-B_mean_avail_cmck                                    -0.05929                        0.93965                        1.00000                        0.64251                       0.613060                        0.46121
-B_mean_avail_nanc                                    -0.13600                        0.59857                        0.64251                        1.00000                       0.606438                        0.20940
-B_mean_avail_albc                                    -0.42513                        0.59740                        0.61306                        0.60644                       1.000000                        0.31921
-B_mean_avail_dcrb                                     0.05400                        0.33619                        0.46121                        0.20940                       0.319210                        1.00000
-B_wind_max_220_mh                                    -0.10289                       -0.32625                       -0.21034                       -0.10918                      -0.134284                       -0.29120
-B_dist_to_cog                                         0.25165                       -0.52302                       -0.40204                       -0.46727                      -0.124445                        0.18654
-B_dist_port_to_catch_area_zero                        0.29356                        0.02601                        0.14968                        0.43707                      -0.004863                       -0.17079
-B_dummy_prev_days                                    -0.30508                       -0.23403                       -0.32329                       -0.23555                       0.251872                       -0.09159
-B_dummy_prev_year_days                                0.31494                       -0.63326                       -0.56173                       -0.42190                      -0.711219                       -0.41059
-B_unem_rate                                          -0.03981                       -0.88089                       -0.92470                       -0.52243                      -0.494445                       -0.34500
-B_d_d                                                -0.03424                       -0.17245                       -0.16432                       -0.04578                      -0.373946                       -0.21655
-c_psdn                                                0.77007                       -0.28637                       -0.11761                       -0.05116                      -0.385584                        0.09748
-c_dcrb                                                0.07132                        0.16991                        0.11430                        0.08294                       0.105396                       -0.70460
-B_mean_price_part                                     0.50404                       -0.41290                       -0.42529                       -0.52565                      -0.962225                       -0.22078
-B_mean_price_crab                                    -0.01069                        0.58014                        0.41314                        0.23901                       0.344393                       -0.27897
-asc_msqd                                             -0.43856                        0.82970                        0.82794                        0.63388                       0.924344                        0.39256
-theta_part                                           -0.40166                        0.51534                        0.54325                        0.40382                       0.675649                        0.27456
-w_msqd                                                0.18641                       -0.38068                       -0.34719                       -0.78811                      -0.529709                       -0.05957
-                                            B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days         B_dummy_prev_year_days                    B_unem_rate
-B_mean_avail_msqd                                    -0.10289                        0.25165                       0.293557                      -0.305076                        0.31494                       -0.03981
-B_mean_avail_psdn                                    -0.32625                       -0.52302                       0.026015                      -0.234029                       -0.63326                       -0.88089
-B_mean_avail_cmck                                    -0.21034                       -0.40204                       0.149679                      -0.323292                       -0.56173                       -0.92470
-B_mean_avail_nanc                                    -0.10918                       -0.46727                       0.437071                      -0.235552                       -0.42190                       -0.52243
-B_mean_avail_albc                                    -0.13428                       -0.12444                      -0.004863                       0.251872                       -0.71122                       -0.49445
-B_mean_avail_dcrb                                    -0.29120                        0.18654                      -0.170791                      -0.091586                       -0.41059                       -0.34500
-B_wind_max_220_mh                                     1.00000                        0.02463                      -0.146345                      -0.365610                        0.32210                        0.26986
-B_dist_to_cog                                         0.02463                        1.00000                      -0.162384                       0.454604                        0.25867                        0.25365
-B_dist_port_to_catch_area_zero                       -0.14635                       -0.16238                       1.000000                      -0.065848                        0.20506                       -0.26220
-B_dummy_prev_days                                    -0.36561                        0.45460                      -0.065848                       1.000000                       -0.12002                        0.15605
-B_dummy_prev_year_days                                0.32210                        0.25867                       0.205063                      -0.120025                        1.00000                        0.42756
-B_unem_rate                                           0.26986                        0.25365                      -0.262196                       0.156048                        0.42756                        1.00000
-B_d_d                                             -9.2217e-04                       -0.32674                       0.492030                      -0.007129                        0.31072                        0.11336
-c_psdn                                                0.17299                        0.26876                       0.262312                      -0.408648                        0.17797                        0.10554
-c_dcrb                                                0.23440                       -0.38016                       0.201801                      -0.193850                        0.03186                       -0.12550
-B_mean_price_part                                     0.08597                        0.05393                      -0.013995                      -0.408976                        0.61434                        0.31414
-B_mean_price_crab                                    -0.30151                       -0.13984                      -0.061296                       0.122865                       -0.35619                       -0.53093
-asc_msqd                                             -0.19485                       -0.29585                      -0.043693                       0.060253                       -0.73924                       -0.71129
-theta_part                                           -0.23550                        0.09473                       0.046688                       0.482170                       -0.39258                       -0.63881
-w_msqd                                                0.25318                        0.23504                      -0.439055                      -0.266870                        0.41945                        0.37721
-                                                        B_d_d                         c_psdn                         c_dcrb              B_mean_price_part              B_mean_price_crab                       asc_msqd
-B_mean_avail_msqd                                   -0.034238                        0.77007                        0.07132                        0.50404                       -0.01069                       -0.43856
-B_mean_avail_psdn                                   -0.172453                       -0.28637                        0.16991                       -0.41290                        0.58014                        0.82970
-B_mean_avail_cmck                                   -0.164319                       -0.11761                        0.11430                       -0.42529                        0.41314                        0.82794
-B_mean_avail_nanc                                   -0.045777                       -0.05116                        0.08294                       -0.52565                        0.23901                        0.63388
-B_mean_avail_albc                                   -0.373946                       -0.38558                        0.10540                       -0.96223                        0.34439                        0.92434
-B_mean_avail_dcrb                                   -0.216549                        0.09748                       -0.70460                       -0.22078                       -0.27897                        0.39256
-B_wind_max_220_mh                                 -9.2217e-04                        0.17299                        0.23440                        0.08597                       -0.30151                       -0.19485
-B_dist_to_cog                                       -0.326742                        0.26876                       -0.38016                        0.05393                       -0.13984                       -0.29585
-B_dist_port_to_catch_area_zero                       0.492030                        0.26231                        0.20180                       -0.01400                       -0.06130                       -0.04369
-B_dummy_prev_days                                   -0.007129                       -0.40865                       -0.19385                       -0.40898                        0.12286                        0.06025
-B_dummy_prev_year_days                               0.310716                        0.17797                        0.03186                        0.61434                       -0.35619                       -0.73924
-B_unem_rate                                          0.113360                        0.10554                       -0.12550                        0.31414                       -0.53093                       -0.71129
-B_d_d                                                1.000000                       -0.09510                       -0.06887                        0.24368                       -0.47393                       -0.31869
-c_psdn                                              -0.095099                        1.00000                       -0.01147                        0.45359                       -0.20834                       -0.42703
-c_dcrb                                              -0.068870                       -0.01147                        1.00000                       -0.07514                        0.47995                        0.10037
-B_mean_price_part                                    0.243685                        0.45359                       -0.07514                        1.00000                       -0.20816                       -0.82493
-B_mean_price_crab                                   -0.473930                       -0.20834                        0.47995                       -0.20816                        1.00000                        0.43582
-asc_msqd                                            -0.318687                       -0.42703                        0.10037                       -0.82493                        0.43582                        1.00000
-theta_part                                          -0.161296                       -0.50639                       -0.09717                       -0.66210                        0.35609                        0.69888
-w_msqd                                              -0.052423                        0.13951                        0.03285                        0.53251                       -0.28013                       -0.46048
-                                                   theta_part                         w_msqd
-B_mean_avail_msqd                                    -0.40166                        0.18641
-B_mean_avail_psdn                                     0.51534                       -0.38068
-B_mean_avail_cmck                                     0.54325                       -0.34719
-B_mean_avail_nanc                                     0.40382                       -0.78811
-B_mean_avail_albc                                     0.67565                       -0.52971
-B_mean_avail_dcrb                                     0.27456                       -0.05957
-B_wind_max_220_mh                                    -0.23550                        0.25318
-B_dist_to_cog                                         0.09473                        0.23504
-B_dist_port_to_catch_area_zero                        0.04669                       -0.43905
-B_dummy_prev_days                                     0.48217                       -0.26687
-B_dummy_prev_year_days                               -0.39258                        0.41945
-B_unem_rate                                          -0.63881                        0.37721
-B_d_d                                                -0.16130                       -0.05242
-c_psdn                                               -0.50639                        0.13951
-c_dcrb                                               -0.09717                        0.03285
-B_mean_price_part                                    -0.66210                        0.53251
-B_mean_price_crab                                     0.35609                       -0.28013
-asc_msqd                                              0.69888                       -0.46048
-theta_part                                            1.00000                       -0.57064
-w_msqd                                               -0.57064                        1.00000
+                                            B_mean_avail_msqd              B_mean_avail_psdn              B_mean_avail_cmck              B_mean_avail_nanc              B_mean_avail_albc
+B_mean_avail_msqd                                    1.000000                       -0.05128                       0.007953                       -0.25543                        0.19792
+B_mean_avail_psdn                                   -0.051279                        1.00000                       0.825819                        0.16466                       -0.77172
+B_mean_avail_cmck                                    0.007953                        0.82582                       1.000000                        0.17927                       -0.60872
+B_mean_avail_nanc                                   -0.255433                        0.16466                       0.179267                        1.00000                       -0.18597
+B_mean_avail_albc                                    0.197918                       -0.77172                      -0.608716                       -0.18597                        1.00000
+B_mean_avail_dcrb                                    0.149976                       -0.08481                       0.164291                       -0.06956                        0.08034
+B_wind_max_220_mh                                   -0.101698                       -0.09024                       0.063011                        0.05137                        0.12406
+B_dist_to_cog                                        0.337398                       -0.79790                      -0.698895                       -0.22531                        0.58758
+B_dist_port_to_catch_area_zero                       0.264311                        0.22213                       0.566355                        0.07652                       -0.02272
+B_dummy_prev_days                                   -0.242033                       -0.28970                      -0.331742                       -0.29405                        0.49607
+B_dummy_prev_year_days                               0.478792                       -0.20071                      -0.036792                       -0.20671                       -0.07484
+B_unem_rate                                         -0.031699                       -0.80065                      -0.846115                       -0.07706                        0.45558
+B_d_d                                               -0.028746                       -0.07192                      -0.069031                        0.35823                       -0.21472
+c_psdn                                               0.712764                        0.04125                       0.212312                        0.17370                        0.05683
+c_dcrb                                               0.022192                        0.25612                       0.129124                        0.03755                       -0.04841
+B_mean_price_part                                   -0.120046                        0.88475                       0.739083                        0.17332                       -0.92640
+B_mean_price_crab                                   -0.049967                        0.46997                       0.175334                       -0.13168                       -0.22194
+theta_part                                          -0.503825                        0.27326                       0.344725                        0.03718                        0.04714
+w_msqd                                               0.433311                       -0.20542                      -0.130977                       -0.66993                       -0.03676
+                                            B_mean_avail_dcrb              B_wind_max_220_mh                  B_dist_to_cog B_dist_port_to_catch_area_zero              B_dummy_prev_days
+B_mean_avail_msqd                                    0.149976                       -0.10170                        0.33740                        0.26431                       -0.24203
+B_mean_avail_psdn                                   -0.084811                       -0.09024                       -0.79790                        0.22213                       -0.28970
+B_mean_avail_cmck                                    0.164291                        0.06301                       -0.69889                        0.56635                       -0.33174
+B_mean_avail_nanc                                   -0.069559                        0.05137                       -0.22531                        0.07652                       -0.29405
+B_mean_avail_albc                                    0.080343                        0.12406                        0.58758                       -0.02272                        0.49607
+B_mean_avail_dcrb                                    1.000000                       -0.29408                        0.12719                        0.08391                        0.09460
+B_wind_max_220_mh                                   -0.294078                        1.00000                       -0.01143                        0.11746                       -0.32449
+B_dist_to_cog                                        0.127189                       -0.01143                        1.00000                       -0.19389                        0.26019
+B_dist_port_to_catch_area_zero                       0.083912                        0.11746                       -0.19389                        1.00000                       -0.17205
+B_dummy_prev_days                                    0.094597                       -0.32449                        0.26019                       -0.17205                        1.00000
+B_dummy_prev_year_days                              -0.105209                        0.22994                        0.37664                        0.14586                       -0.51586
+B_unem_rate                                         -0.011872                        0.02083                        0.53984                       -0.54586                       -0.02039
+B_d_d                                                0.044678                        0.01373                       -0.14182                        0.04355                       -0.39995
+c_psdn                                               0.190331                        0.06341                        0.16498                        0.38218                       -0.37226
+c_dcrb                                              -0.794892                        0.33606                       -0.39276                        0.15158                       -0.22839
+B_mean_price_part                                   -0.064749                       -0.10581                       -0.68083                        0.13618                       -0.51395
+B_mean_price_crab                                   -0.553313                       -0.24065                       -0.17193                        0.01899                        0.32938
+theta_part                                           0.147700                       -0.08589                       -0.31394                        0.09253                        0.68273
+w_msqd                                               0.006618                        0.19137                        0.26686                       -0.09632                       -0.40043
+                                       B_dummy_prev_year_days                    B_unem_rate                          B_d_d                         c_psdn                         c_dcrb
+B_mean_avail_msqd                                    0.478792                       -0.03170                       -0.02875                       0.712764                       0.022192
+B_mean_avail_psdn                                   -0.200712                       -0.80065                       -0.07192                       0.041250                       0.256120
+B_mean_avail_cmck                                   -0.036792                       -0.84612                       -0.06903                       0.212312                       0.129124
+B_mean_avail_nanc                                   -0.206710                       -0.07706                        0.35823                       0.173695                       0.037552
+B_mean_avail_albc                                   -0.074836                        0.45558                       -0.21472                       0.056826                      -0.048410
+B_mean_avail_dcrb                                   -0.105209                       -0.01187                        0.04468                       0.190331                      -0.794892
+B_wind_max_220_mh                                    0.229944                        0.02083                        0.01373                       0.063406                       0.336059
+B_dist_to_cog                                        0.376640                        0.53984                       -0.14182                       0.164984                      -0.392758
+B_dist_port_to_catch_area_zero                       0.145859                       -0.54586                        0.04355                       0.382178                       0.151582
+B_dummy_prev_days                                   -0.515859                       -0.02039                       -0.39995                      -0.372263                      -0.228393
+B_dummy_prev_year_days                               1.000000                        0.19776                        0.19058                       0.211973                       0.009532
+B_unem_rate                                          0.197760                        1.00000                        0.30621                      -0.155661                      -0.146206
+B_d_d                                                0.190578                        0.30621                        1.00000                      -0.035951                      -0.151685
+c_psdn                                               0.211973                       -0.15566                       -0.03595                       1.000000                       0.006745
+c_dcrb                                               0.009532                       -0.14621                       -0.15169                       0.006745                       1.000000
+B_mean_price_part                                   -0.003342                       -0.62569                        0.01689                       0.065292                       0.126759
+B_mean_price_crab                                   -0.222030                       -0.55405                       -0.48666                      -0.158509                       0.395710
+theta_part                                          -0.648254                       -0.52221                       -0.40966                      -0.382244                      -0.063381
+w_msqd                                               0.691862                        0.31364                       -0.03429                       0.082737                       0.044014
+                                            B_mean_price_part              B_mean_price_crab                     theta_part                         w_msqd
+B_mean_avail_msqd                                   -0.120046                       -0.04997                      -0.503825                       0.433311
+B_mean_avail_psdn                                    0.884751                        0.46997                       0.273258                      -0.205418
+B_mean_avail_cmck                                    0.739083                        0.17533                       0.344725                      -0.130977
+B_mean_avail_nanc                                    0.173323                       -0.13168                       0.037177                      -0.669933
+B_mean_avail_albc                                   -0.926399                       -0.22194                       0.047143                      -0.036757
+B_mean_avail_dcrb                                   -0.064749                       -0.55331                       0.147700                       0.006618
+B_wind_max_220_mh                                   -0.105815                       -0.24065                      -0.085891                       0.191371
+B_dist_to_cog                                       -0.680826                       -0.17193                      -0.313941                       0.266856
+B_dist_port_to_catch_area_zero                       0.136177                        0.01899                       0.092528                      -0.096324
+B_dummy_prev_days                                   -0.513948                        0.32938                       0.682728                      -0.400435
+B_dummy_prev_year_days                              -0.003342                       -0.22203                      -0.648254                       0.691862
+B_unem_rate                                         -0.625685                       -0.55405                      -0.522214                       0.313640
+B_d_d                                                0.016895                       -0.48666                      -0.409656                      -0.034291
+c_psdn                                               0.065292                       -0.15851                      -0.382244                       0.082737
+c_dcrb                                               0.126759                        0.39571                      -0.063381                       0.044014
+B_mean_price_part                                    1.000000                        0.33252                       0.001589                       0.002030
+B_mean_price_crab                                    0.332524                        1.00000                       0.333732                      -0.231989
+theta_part                                           0.001589                        0.33373                       1.000000                      -0.611699
+w_msqd                                               0.002030                       -0.23199                      -0.611699                       1.000000
 
  20 most extreme outliers in terms of lowest average per choice prediction:
  ID Avg prob per choice
-  1           0.3956959
-  5           0.4340334
- 20           0.4408187
- 19           0.4609933
-  4           0.4706431
- 16           0.4851424
- 13           0.4890281
- 18           0.4893871
- 15           0.4945040
- 17           0.5093702
- 22           0.5125550
-  3           0.5162894
- 12           0.5246965
- 11           0.5409983
-  6           0.5418373
-  7           0.5586042
- 10           0.5604827
- 21           0.6013294
-  2           0.6459439
- 14           0.6691887
+  1           0.4034926
+ 20           0.4530922
+  5           0.4643215
+ 19           0.4696190
+  4           0.4833486
+ 16           0.4941475
+ 13           0.4962188
+ 15           0.5001498
+ 17           0.5167057
+ 22           0.5190453
+ 18           0.5268789
+  3           0.5287265
+ 12           0.5348697
+  6           0.5434797
+ 11           0.5517096
+  7           0.5671674
+ 10           0.5844135
+ 21           0.6144857
+  2           0.6534715
+ 14           0.6746267
 
 Settings and functions used in model definition:
 
@@ -508,26 +503,25 @@ numerical second derivative of LL (using numDeriv)
 Scaling used in computing Hessian
 ---------------------------------
                                       Value
-B_mean_avail_msqd              1.4023090000
-B_mean_avail_psdn              6.0629830000
-B_mean_avail_cmck              2.8552599999
-B_mean_avail_nanc              8.7187310001
-B_mean_avail_albc              2.4940660002
-B_mean_avail_dcrb              5.3726850000
-B_wind_max_220_mh              0.0617079962
-B_dist_to_cog                  0.0008322645
-B_dist_port_to_catch_area_zero 0.0041469856
-B_dummy_prev_days              2.9807790007
-B_dummy_prev_year_days         0.4537280003
-B_unem_rate                    0.3115390025
-B_d_d                          0.9277379999
-c_psdn                         2.1612810001
-c_dcrb                         1.4285720000
-B_mean_price_part              3.4176189995
-B_mean_price_crab              0.0357869999
-asc_msqd                       7.5265259996
-theta_part                     0.8797379995
-w_msqd                         3.7580429998
+B_mean_avail_msqd              1.674983e+00
+B_mean_avail_psdn              1.684890e-01
+B_mean_avail_cmck              2.247578e+00
+B_mean_avail_nanc              1.141552e+01
+B_mean_avail_albc              2.192180e+00
+B_mean_avail_dcrb              5.784630e+00
+B_wind_max_220_mh              6.833500e-02
+B_dist_to_cog                  9.090996e-04
+B_dist_port_to_catch_area_zero 4.888997e-03
+B_dummy_prev_days              2.802666e+00
+B_dummy_prev_year_days         3.807040e-01
+B_unem_rate                    4.483800e-01
+B_d_d                          2.010723e+00
+c_psdn                         2.008433e+00
+c_dcrb                         1.496208e+00
+B_mean_price_part              5.046674e+00
+B_mean_price_crab              3.486000e-02
+theta_part                     1.064859e+00
+w_msqd                         3.964041e+00
 
 
 apollo_probabilities
@@ -551,23 +545,23 @@ function(apollo_beta, apollo_inputs, functionality="estimate"){
   
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
   V = list()
-  V[["mna_msqd"]]         = asc_msqd + B_mean_price_part * mean_price_3_mna_msqd + B_mean_avail_msqd * mean_avail_mna_msqd + B_wind_max_220_mh * wind_max_220_mh_mna_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd + B_dummy_prev_days * dummy_prev_days_mna_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mna_msqd + B_dist_to_cog * dist_to_cog_mna_msqd + B_unem_rate * unem_rate_mna_msqd                                    + B_d_d * d_d_mna_msqd + w_msqd * weekend                            
-  V[["sba_msqd"]]         = asc_msqd + B_mean_price_part * mean_price_3_sba_msqd + B_mean_avail_msqd * mean_avail_sba_msqd + B_wind_max_220_mh * wind_max_220_mh_sba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd + B_dummy_prev_days * dummy_prev_days_sba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sba_msqd + B_dist_to_cog * dist_to_cog_sba_msqd + B_unem_rate * unem_rate_sba_msqd                                    + B_d_d * d_d_sba_msqd + w_msqd * weekend                            
-  V[["mra_msqd"]]         = asc_msqd + B_mean_price_part * mean_price_3_mra_msqd + B_mean_avail_msqd * mean_avail_mra_msqd + B_wind_max_220_mh * wind_max_220_mh_mra_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mra_msqd + B_dummy_prev_days * dummy_prev_days_mra_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mra_msqd + B_dist_to_cog * dist_to_cog_mra_msqd + B_unem_rate * unem_rate_mra_msqd                                    + B_d_d * d_d_mra_msqd + w_msqd * weekend                            
-  V[["laa_msqd"]]         = asc_msqd + B_mean_price_part * mean_price_3_laa_msqd + B_mean_avail_msqd * mean_avail_laa_msqd + B_wind_max_220_mh * wind_max_220_mh_laa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd + B_dummy_prev_days * dummy_prev_days_laa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_laa_msqd + B_dist_to_cog * dist_to_cog_laa_msqd + B_unem_rate * unem_rate_laa_msqd                                    + B_d_d * d_d_laa_msqd + w_msqd * weekend                            
-  V[["npa_msqd"]]         = asc_msqd + B_mean_price_part * mean_price_3_npa_msqd + B_mean_avail_msqd * mean_avail_npa_msqd + B_wind_max_220_mh * wind_max_220_mh_npa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_npa_msqd + B_dummy_prev_days * dummy_prev_days_npa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_npa_msqd + B_dist_to_cog * dist_to_cog_npa_msqd + B_unem_rate * unem_rate_npa_msqd                                    + B_d_d * d_d_npa_msqd     
-  V[["sfa_msqd"]]         = asc_msqd + B_mean_price_part * mean_price_3_sfa_msqd + B_mean_avail_msqd * mean_avail_sfa_msqd + B_wind_max_220_mh * wind_max_220_mh_sfa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd + B_dummy_prev_days * dummy_prev_days_sfa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sfa_msqd + B_dist_to_cog * dist_to_cog_sfa_msqd + B_unem_rate * unem_rate_sfa_msqd                                    + B_d_d * d_d_sfa_msqd + w_msqd * weekend                            
-  V[["cba_msqd"]]         = asc_msqd + B_mean_price_part * mean_price_3_cba_msqd + B_mean_avail_msqd * mean_avail_cba_msqd + B_wind_max_220_mh * wind_max_220_mh_cba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cba_msqd + B_dummy_prev_days * dummy_prev_days_cba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_cba_msqd + B_dist_to_cog * dist_to_cog_cba_msqd + B_unem_rate * unem_rate_cba_msqd                                    + B_d_d * d_d_cba_msqd                              
-  V[["laa_psdn"]]         = asc_psdn + B_mean_price_part * mean_price_3_laa_psdn + B_mean_avail_psdn * mean_avail_laa_psdn + B_wind_max_220_mh * wind_max_220_mh_laa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_psdn + B_dummy_prev_days * dummy_prev_days_laa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_laa_psdn + B_dist_to_cog * dist_to_cog_laa_psdn + B_unem_rate * unem_rate_laa_psdn + c_psdn * psdnclosure             + B_d_d * d_d_laa_psdn     
-  V[["clo_psdn"]]         = asc_psdn + B_mean_price_part * mean_price_3_clo_psdn + B_mean_avail_psdn * mean_avail_clo_psdn + B_wind_max_220_mh * wind_max_220_mh_clo_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_psdn + B_dummy_prev_days * dummy_prev_days_clo_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clo_psdn + B_dist_to_cog * dist_to_cog_clo_psdn + B_unem_rate * unem_rate_clo_psdn + c_psdn * psdnclosure             + B_d_d * d_d_clo_psdn                             
-  V[["cwa_psdn"]]         = asc_psdn + B_mean_price_part * mean_price_3_cwa_psdn + B_mean_avail_psdn * mean_avail_cwa_psdn + B_wind_max_220_mh * wind_max_220_mh_cwa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_psdn + B_dummy_prev_days * dummy_prev_days_cwa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cwa_psdn + B_dist_to_cog * dist_to_cog_cwa_psdn + B_unem_rate * unem_rate_cwa_psdn + c_psdn * psdnclosure             + B_d_d * d_d_cwa_psdn                            
-  V[["clw_psdn"]]         = asc_psdn + B_mean_price_part * mean_price_3_clw_psdn + B_mean_avail_psdn * mean_avail_clw_psdn + B_wind_max_220_mh * wind_max_220_mh_clw_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_psdn + B_dummy_prev_days * dummy_prev_days_clw_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clw_psdn + B_dist_to_cog * dist_to_cog_clw_psdn + B_unem_rate * unem_rate_clw_psdn + c_psdn * psdnclosure             + B_d_d * d_d_clw_psdn                            
-  V[["sba_cmck"]]         = asc_cmck + B_mean_price_part * mean_price_3_sba_cmck + B_mean_avail_cmck * mean_avail_sba_cmck + B_wind_max_220_mh * wind_max_220_mh_sba_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_cmck + B_dummy_prev_days * dummy_prev_days_sba_cmck + B_dummy_prev_year_days * dummy_prev_year_days_sba_cmck + B_dist_to_cog * dist_to_cog_sba_cmck + B_unem_rate * unem_rate_sba_cmck                                    + B_d_d * d_d_sba_cmck                             
-  V[["laa_cmck"]]         = asc_cmck + B_mean_price_part * mean_price_3_laa_cmck + B_mean_avail_cmck * mean_avail_laa_cmck + B_wind_max_220_mh * wind_max_220_mh_laa_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_cmck + B_dummy_prev_days * dummy_prev_days_laa_cmck + B_dummy_prev_year_days * dummy_prev_year_days_laa_cmck + B_dist_to_cog * dist_to_cog_laa_cmck + B_unem_rate * unem_rate_laa_cmck                                    + B_d_d * d_d_laa_cmck                             
-  V[["laa_nanc"]]         = asc_nanc + B_mean_price_part * mean_price_3_laa_nanc + B_mean_avail_nanc * mean_avail_laa_nanc + B_wind_max_220_mh * wind_max_220_mh_laa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_nanc + B_dummy_prev_days * dummy_prev_days_laa_nanc + B_dummy_prev_year_days * dummy_prev_year_days_laa_nanc + B_dist_to_cog * dist_to_cog_laa_nanc + B_unem_rate * unem_rate_laa_nanc                                    + B_d_d * d_d_laa_nanc          
-  V[["cwa_albc"]]         = asc_albc + B_mean_price_part * mean_price_3_cwa_albc + B_mean_avail_albc * mean_avail_cwa_albc + B_wind_max_220_mh * wind_max_220_mh_cwa_albc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_albc + B_dummy_prev_days * dummy_prev_days_cwa_albc + B_dummy_prev_year_days * dummy_prev_year_days_cwa_albc + B_dist_to_cog * dist_to_cog_cwa_albc + B_unem_rate * unem_rate_cwa_albc                                    + B_d_d * d_d_cwa_albc                             
-  V[["cwa_dcrb"]]         = asc_dcrb + B_mean_price_crab * mean_price_3_cwa_dcrb + B_mean_avail_dcrb * mean_avail_cwa_dcrb + B_wind_max_220_mh * wind_max_220_mh_cwa_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_dcrb + B_dummy_prev_days * dummy_prev_days_cwa_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_cwa_dcrb + B_dist_to_cog * dist_to_cog_cwa_dcrb + B_unem_rate * unem_rate_cwa_dcrb + c_dcrb * dcrbclosurewad_cwa_dcrb + B_d_d * d_d_cwa_dcrb                             
-  V[["clw_dcrb"]]         = asc_dcrb + B_mean_price_crab * mean_price_3_clw_dcrb + B_mean_avail_dcrb * mean_avail_clw_dcrb + B_wind_max_220_mh * wind_max_220_mh_clw_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_dcrb + B_dummy_prev_days * dummy_prev_days_clw_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_clw_dcrb + B_dist_to_cog * dist_to_cog_clw_dcrb + B_unem_rate * unem_rate_clw_dcrb + c_dcrb * dcrbclosurewad_clw_dcrb + B_d_d * d_d_clw_dcrb                             
+  V[["mna_msqd"]]         = asc_mna_msqd + B_mean_price_part * mean_price_3_mna_msqd + B_mean_avail_msqd * mean_avail_mna_msqd + B_wind_max_220_mh * wind_max_220_mh_mna_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd + B_dummy_prev_days * dummy_prev_days_mna_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mna_msqd + B_dist_to_cog * dist_to_cog_mna_msqd + B_unem_rate * unem_rate_mna_msqd                                    + B_d_d * d_d_mna_msqd + w_msqd * weekend                            
+  V[["sba_msqd"]]         = asc_sba_msqd + B_mean_price_part * mean_price_3_sba_msqd + B_mean_avail_msqd * mean_avail_sba_msqd + B_wind_max_220_mh * wind_max_220_mh_sba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd + B_dummy_prev_days * dummy_prev_days_sba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sba_msqd + B_dist_to_cog * dist_to_cog_sba_msqd + B_unem_rate * unem_rate_sba_msqd                                    + B_d_d * d_d_sba_msqd + w_msqd * weekend                            
+  V[["mra_msqd"]]         = asc_mra_msqd + B_mean_price_part * mean_price_3_mra_msqd + B_mean_avail_msqd * mean_avail_mra_msqd + B_wind_max_220_mh * wind_max_220_mh_mra_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mra_msqd + B_dummy_prev_days * dummy_prev_days_mra_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mra_msqd + B_dist_to_cog * dist_to_cog_mra_msqd + B_unem_rate * unem_rate_mra_msqd                                    + B_d_d * d_d_mra_msqd + w_msqd * weekend                            
+  V[["laa_msqd"]]         = asc_laa_msqd + B_mean_price_part * mean_price_3_laa_msqd + B_mean_avail_msqd * mean_avail_laa_msqd + B_wind_max_220_mh * wind_max_220_mh_laa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd + B_dummy_prev_days * dummy_prev_days_laa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_laa_msqd + B_dist_to_cog * dist_to_cog_laa_msqd + B_unem_rate * unem_rate_laa_msqd                                    + B_d_d * d_d_laa_msqd + w_msqd * weekend                            
+  V[["npa_msqd"]]         = asc_npa_msqd + B_mean_price_part * mean_price_3_npa_msqd + B_mean_avail_msqd * mean_avail_npa_msqd + B_wind_max_220_mh * wind_max_220_mh_npa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_npa_msqd + B_dummy_prev_days * dummy_prev_days_npa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_npa_msqd + B_dist_to_cog * dist_to_cog_npa_msqd + B_unem_rate * unem_rate_npa_msqd                                    + B_d_d * d_d_npa_msqd     
+  V[["sfa_msqd"]]         = asc_sfa_msqd + B_mean_price_part * mean_price_3_sfa_msqd + B_mean_avail_msqd * mean_avail_sfa_msqd + B_wind_max_220_mh * wind_max_220_mh_sfa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd + B_dummy_prev_days * dummy_prev_days_sfa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sfa_msqd + B_dist_to_cog * dist_to_cog_sfa_msqd + B_unem_rate * unem_rate_sfa_msqd                                    + B_d_d * d_d_sfa_msqd + w_msqd * weekend                            
+  V[["cba_msqd"]]         = asc_cba_msqd + B_mean_price_part * mean_price_3_cba_msqd + B_mean_avail_msqd * mean_avail_cba_msqd + B_wind_max_220_mh * wind_max_220_mh_cba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cba_msqd + B_dummy_prev_days * dummy_prev_days_cba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_cba_msqd + B_dist_to_cog * dist_to_cog_cba_msqd + B_unem_rate * unem_rate_cba_msqd                                    + B_d_d * d_d_cba_msqd                              
+  V[["laa_psdn"]]         = asc_laa_psdn + B_mean_price_part * mean_price_3_laa_psdn + B_mean_avail_psdn * mean_avail_laa_psdn + B_wind_max_220_mh * wind_max_220_mh_laa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_psdn + B_dummy_prev_days * dummy_prev_days_laa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_laa_psdn + B_dist_to_cog * dist_to_cog_laa_psdn + B_unem_rate * unem_rate_laa_psdn + c_psdn * psdnclosure             + B_d_d * d_d_laa_psdn     
+  V[["clo_psdn"]]         = asc_clo_psdn + B_mean_price_part * mean_price_3_clo_psdn + B_mean_avail_psdn * mean_avail_clo_psdn + B_wind_max_220_mh * wind_max_220_mh_clo_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_psdn + B_dummy_prev_days * dummy_prev_days_clo_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clo_psdn + B_dist_to_cog * dist_to_cog_clo_psdn + B_unem_rate * unem_rate_clo_psdn + c_psdn * psdnclosure             + B_d_d * d_d_clo_psdn                             
+  V[["cwa_psdn"]]         = asc_cwa_psdn + B_mean_price_part * mean_price_3_cwa_psdn + B_mean_avail_psdn * mean_avail_cwa_psdn + B_wind_max_220_mh * wind_max_220_mh_cwa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_psdn + B_dummy_prev_days * dummy_prev_days_cwa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cwa_psdn + B_dist_to_cog * dist_to_cog_cwa_psdn + B_unem_rate * unem_rate_cwa_psdn + c_psdn * psdnclosure             + B_d_d * d_d_cwa_psdn                            
+  V[["clw_psdn"]]         = asc_clw_psdn + B_mean_price_part * mean_price_3_clw_psdn + B_mean_avail_psdn * mean_avail_clw_psdn + B_wind_max_220_mh * wind_max_220_mh_clw_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_psdn + B_dummy_prev_days * dummy_prev_days_clw_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clw_psdn + B_dist_to_cog * dist_to_cog_clw_psdn + B_unem_rate * unem_rate_clw_psdn + c_psdn * psdnclosure             + B_d_d * d_d_clw_psdn                            
+  V[["sba_cmck"]]         = asc_sba_cmck + B_mean_price_part * mean_price_3_sba_cmck + B_mean_avail_cmck * mean_avail_sba_cmck + B_wind_max_220_mh * wind_max_220_mh_sba_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_cmck + B_dummy_prev_days * dummy_prev_days_sba_cmck + B_dummy_prev_year_days * dummy_prev_year_days_sba_cmck + B_dist_to_cog * dist_to_cog_sba_cmck + B_unem_rate * unem_rate_sba_cmck                                    + B_d_d * d_d_sba_cmck                             
+  V[["laa_cmck"]]         = asc_laa_cmck + B_mean_price_part * mean_price_3_laa_cmck + B_mean_avail_cmck * mean_avail_laa_cmck + B_wind_max_220_mh * wind_max_220_mh_laa_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_cmck + B_dummy_prev_days * dummy_prev_days_laa_cmck + B_dummy_prev_year_days * dummy_prev_year_days_laa_cmck + B_dist_to_cog * dist_to_cog_laa_cmck + B_unem_rate * unem_rate_laa_cmck                                    + B_d_d * d_d_laa_cmck                             
+  V[["laa_nanc"]]         = asc_laa_nanc + B_mean_price_part * mean_price_3_laa_nanc + B_mean_avail_nanc * mean_avail_laa_nanc + B_wind_max_220_mh * wind_max_220_mh_laa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_nanc + B_dummy_prev_days * dummy_prev_days_laa_nanc + B_dummy_prev_year_days * dummy_prev_year_days_laa_nanc + B_dist_to_cog * dist_to_cog_laa_nanc + B_unem_rate * unem_rate_laa_nanc                                    + B_d_d * d_d_laa_nanc          
+  V[["cwa_albc"]]         = asc_cwa_albc + B_mean_price_part * mean_price_3_cwa_albc + B_mean_avail_albc * mean_avail_cwa_albc + B_wind_max_220_mh * wind_max_220_mh_cwa_albc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_albc + B_dummy_prev_days * dummy_prev_days_cwa_albc + B_dummy_prev_year_days * dummy_prev_year_days_cwa_albc + B_dist_to_cog * dist_to_cog_cwa_albc + B_unem_rate * unem_rate_cwa_albc                                    + B_d_d * d_d_cwa_albc                             
+  V[["cwa_dcrb"]]         = asc_cwa_dcrb + B_mean_price_crab * mean_price_3_cwa_dcrb + B_mean_avail_dcrb * mean_avail_cwa_dcrb + B_wind_max_220_mh * wind_max_220_mh_cwa_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_dcrb + B_dummy_prev_days * dummy_prev_days_cwa_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_cwa_dcrb + B_dist_to_cog * dist_to_cog_cwa_dcrb + B_unem_rate * unem_rate_cwa_dcrb + c_dcrb * dcrbclosurewad_cwa_dcrb + B_d_d * d_d_cwa_dcrb                             
+  V[["clw_dcrb"]]         = asc_clw_dcrb + B_mean_price_crab * mean_price_3_clw_dcrb + B_mean_avail_dcrb * mean_avail_clw_dcrb + B_wind_max_220_mh * wind_max_220_mh_clw_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_dcrb + B_dummy_prev_days * dummy_prev_days_clw_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_clw_dcrb + B_dist_to_cog * dist_to_cog_clw_dcrb + B_unem_rate * unem_rate_clw_dcrb + c_dcrb * dcrbclosurewad_clw_dcrb + B_d_d * d_d_clw_dcrb                             
   V[["no_participation"]] = asc_no_participation
   
   
