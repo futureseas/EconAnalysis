@@ -31,10 +31,13 @@ library(dplyr)
 # ----------------------------
 oos_table <- readRDS("oos_table.RDS")
 
+# best_spec <- oos_table %>%
+#   group_by(cluster) %>%
+#   slice_max(order_by = pseudoR2_oos, n = 1, with_ties = FALSE) %>%
+#   ungroup() 
+
 best_spec <- oos_table %>%
-  group_by(cluster) %>%
-  slice_max(order_by = pseudoR2_oos, n = 1, with_ties = FALSE) %>%
-  ungroup() %>%
+  filter(spec == "daily") %>%
   select(cluster, spec, pseudoR2_oos, LL_test_full) 
 
 print(best_spec)
@@ -493,39 +496,39 @@ out_c5 <- run_manual_and_compare(
 db_c6 <- assets$c6$database_wide
 m0_c6 <- assets$c6$model_original
 apollo_beta_c6=c(
-  B_mean_avail_psdn               = -1.993196,
-  B_mean_avail_nanc               =  1.395448,
-  B_mean_avail_othr               = 10.216345,
-  B_mean_avail_cmck               =  2.262217,
-  B_wind_max_220_mh               = -0.052962,
-  B_dist_to_cog                   = -0.004738,
-  B_dist_port_to_catch_area_zero  = -0.016642,
-  B_dummy_prev_days               =  2.314201,
-  B_dummy_prev_year_days          =  0.300067,
-  B_unem_rate                     =  0.257505,
-  B_d_c                           =  0,
-  B_d_d                           = -1.100474,
-  B_d_cd                          = -8.132902,
-  c_dcrb                          = -0.293244,
-  B_mean_price_part               =  3.386718,
-  B_mean_price_othr               =  0.019998,
-  asc_cba_psdn                    = -2.322374,
-  asc_clo_psdn                    = -2.990346,
-  asc_clw_psdn                    = -2.785120,
-  asc_cwa_psdn                    = -2.563083,
-  asc_clo_nanc                    = -5.013189,
-  asc_clw_nanc                    = -7.673003,
-  asc_cwa_nanc                    = -4.220165,
-  asc_clo_cmck                    = -4.783469,
-  asc_cwa_dcrb                    = -9.176758,
-  asc_nps_sock                    = -8.333882,
-  theta_part                      =  0.182348,
-  theta_nanc                      = 13.345222,
-  theta_psdn                      =  1.240982,
+  B_mean_avail_psdn               = -0.586741,
+  B_mean_avail_nanc               =  1.155165,
+  B_mean_avail_othr               = 10.299538,
+  B_mean_avail_cmck               =  0.871355,
+  B_wind_max_220_mh               = -0.051118,
+  B_dist_to_cog                   = -0.004837,
+  B_dist_port_to_catch_area_zero  = -0.019407,
+  B_dummy_prev_days               =  2.259078,
+  B_dummy_prev_year_days          =  0.288716,
+  B_unem_rate                     =  0.249397,
+  B_d_c                           =  0.000000,
+  B_d_d                           = -1.101265,
+  B_d_cd                          = -8.134455,
+  c_dcrb                          = -0.306777,
+  B_mean_price_part               =  3.207904,
+  B_mean_price_othr               =  0.027459,
+  asc_cba_psdn                    = -2.411466,
+  asc_clo_psdn                    = -3.192864,
+  asc_clw_psdn                    = -3.100084,
+  asc_cwa_psdn                    = -2.895383,
+  asc_clo_nanc                    = -4.764063,
+  asc_clw_nanc                    = -7.290949,
+  asc_cwa_nanc                    = -3.995615,
+  asc_clo_cmck                    = -4.385185,
+  asc_cwa_dcrb                    = -9.208984,
+  asc_nps_sock                    = -8.232519,
+  theta_part                      =  0.127846,
+  theta_nanc                      = 13.345527,
+  theta_psdn                      =  1.146307,
   asc_no_participation            =  0.000000)
 
-apollo_fixed_c6 <- c("asc_no_participation", "B_mean_price_othr",
-                     "theta_part", "theta_nanc", "theta_psdn", "B_d_d", "B_d_c", "B_d_cd", "c_dcrb",
+apollo_fixed_c6 <- c("asc_no_participation", "B_d_c", "B_mean_price_othr",
+                     "theta_part", "theta_nanc", "theta_psdn", "B_d_d", "B_d_cd", "c_dcrb",
                      "asc_cba_psdn", "asc_clo_psdn", "asc_clw_psdn", "asc_cwa_psdn",
                      "asc_clo_nanc", "asc_clw_nanc", "asc_cwa_nanc", "asc_clo_cmck",
                      "asc_cwa_dcrb", "asc_nps_sock", "B_unem_rate")
@@ -817,17 +820,23 @@ out_c7 <- run_manual_and_compare(
 
 
 # MODELS
-
 summary(out_c4$model_manual)
 summary(out_c5$model_manual)
 summary(out_c6$model_manual)
 summary(out_c7$model_manual)
 
-# LR test
-lr_test(model_restricted = out_c4$model_manual, model_unrestricted = m0_c4)
-lr_test(model_restricted = out_c5$model_manual, model_unrestricted = m0_c5)
-lr_test(model_restricted = out_c6$model_manual, model_unrestricted = m0_c6)
-lr_test(model_restricted = out_c7$model_manual, model_unrestricted = m0_c7)
+## Observed shares
+out_c4$model_manual$adjRho2_C
+out_c5$model_manual$adjRho2_C
+out_c6$model_manual$adjRho2_C
+out_c7$model_manual$adjRho2_C
+
+
+# # LR test
+# lr_test(model_restricted = out_c4$model_manual, model_unrestricted = m0_c4)
+# lr_test(model_restricted = out_c5$model_manual, model_unrestricted = m0_c5)
+# lr_test(model_restricted = out_c6$model_manual, model_unrestricted = m0_c6)
+# lr_test(model_restricted = out_c7$model_manual, model_unrestricted = m0_c7)
 
 
 # ### ALL CLUSTERS: bind rows #####
