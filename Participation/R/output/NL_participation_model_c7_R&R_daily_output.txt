@@ -5,13 +5,13 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : NL_participation_model_c7_R&R_daily
 Model description                           : Participation, location and target species decisions
-Model run at                                : 2026-01-14 15:20:56.941164
+Model run at                                : 2026-01-15 09:24:45.581042
 Estimation method                           : bfgs
 Estimation diagnosis                        : successful convergence
 Optimisation diagnosis                      : Maximum found
      hessian properties                     : Negative definite
-     maximum eigenvalue                     : -1.261979
-     reciprocal of condition number         : 0.00154935
+     maximum eigenvalue                     : -1.35357
+     reciprocal of condition number         : 0.00167574
 Number of individuals                       : 8
 Number of rows in database                  : 2481
 Number of modelled outcomes                 : 2481
@@ -19,78 +19,78 @@ Number of modelled outcomes                 : 2481
 Number of cores used                        :  18 
 Model without mixing
 
-LL(start)                                   : -1688.59
+LL(start)                                   : -1683.58
 LL at equal shares, LL(0)                   : -6707.32
 LL at observed shares, LL(C)                : -3032.01
-LL(final)                                   : -1687.94
-Rho-squared vs equal shares                  :  0.7483 
-Adj.Rho-squared vs equal shares              :  0.7473 
-Rho-squared vs observed shares               :  0.4433 
-Adj.Rho-squared vs observed shares           :  0.4456 
-AIC                                         :  3389.89 
-BIC                                         :  3430.6 
+LL(final)                                   : -1683.58
+Rho-squared vs equal shares                  :  0.749 
+Adj.Rho-squared vs equal shares              :  0.748 
+Rho-squared vs observed shares               :  0.4447 
+Adj.Rho-squared vs observed shares           :  0.447 
+AIC                                         :  3381.15 
+BIC                                         :  3421.87 
 
 Estimated parameters                        : 7
-Time taken (hh:mm:ss)                       :  00:00:9.01 
-     pre-estimation                         :  00:00:6.35 
-     estimation                             :  00:00:1.18 
-     post-estimation                        :  00:00:1.49 
-Iterations                                  :  12  
+Time taken (hh:mm:ss)                       :  00:00:8.37 
+     pre-estimation                         :  00:00:6.75 
+     estimation                             :  00:00:0.47 
+     post-estimation                        :  00:00:1.15 
+Iterations                                  :  2  
 
 Unconstrained optimisation.
 
 Estimates:
                                   Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
-B_mean_avail_mckl                -6.357377     0.83215     -7.6397     -8.8414      0.7647       -8.3138       -9.6216
-B_mean_avail_msqd                 1.575166     0.45548      3.4583      1.2628      0.9677        1.6278        0.5944
-B_mean_avail_psdn                 0.360394     0.76359      0.4720     -0.8376      0.5885        0.6124       -1.0869
-B_mean_avail_nanc                -0.980249     0.25655     -3.8209     -7.7188      0.1958       -5.0059      -10.1127
-B_mean_price                      0.822514     0.13286      6.1907     -1.3359      0.1423        5.7793       -1.2471
-B_wind_max_220_mh                -0.043000          NA          NA          NA          NA            NA            NA
-B_dist_to_cog                    -0.003039          NA          NA          NA          NA            NA            NA
-B_dist_port_to_catch_area_zero   -0.005589          NA          NA          NA          NA            NA            NA
-B_dummy_prev_days                 3.010629     0.10166     29.6135     19.7772      0.1218       24.7151       16.5058
-B_dummy_prev_year_days            0.141663     0.08740      1.6209     -9.8211      0.1039        1.3633       -8.2602
-c_psdn                           -1.239541          NA          NA          NA          NA            NA            NA
-B_d_d                            -0.515027          NA          NA          NA          NA            NA            NA
-B_unem_rate                       0.101390          NA          NA          NA          NA            NA            NA
-w_msqd                           -3.886290          NA          NA          NA          NA            NA            NA
-asc_laa_cmck                     -3.243695          NA          NA          NA          NA            NA            NA
-asc_mna_cmck                     -4.787555          NA          NA          NA          NA            NA            NA
-asc_laa_jmck                     -3.361311          NA          NA          NA          NA            NA            NA
-asc_mna_jmck                     -4.188944          NA          NA          NA          NA            NA            NA
-asc_laa_msqd                     -3.814928          NA          NA          NA          NA            NA            NA
-asc_mra_msqd                     -4.724763          NA          NA          NA          NA            NA            NA
-asc_sba_msqd                     -3.829680          NA          NA          NA          NA            NA            NA
-asc_sfa_msqd                     -4.204591          NA          NA          NA          NA            NA            NA
-asc_mna_msqd                     -3.702697          NA          NA          NA          NA            NA            NA
-asc_laa_psdn                     -4.108524          NA          NA          NA          NA            NA            NA
-asc_mna_psdn                     -4.888162          NA          NA          NA          NA            NA            NA
-asc_mna_nanc                     -4.889189          NA          NA          NA          NA            NA            NA
-asc_sba_nanc                     -3.376684          NA          NA          NA          NA            NA            NA
-asc_sda_nanc                     -4.330278          NA          NA          NA          NA            NA            NA
-theta_part                        0.886061          NA          NA          NA          NA            NA            NA
-theta_laa                        10.039759          NA          NA          NA          NA            NA            NA
-theta_mna                        10.017490          NA          NA          NA          NA            NA            NA
-theta_sba                         0.736090          NA          NA          NA          NA            NA            NA
+B_mean_avail_mckl                -1.923781     0.78181     -2.4607     -3.7398     0.58936       -3.2642       -4.9609
+B_mean_avail_msqd                 1.605389     0.46693      3.4382      1.2965     0.98364        1.6321        0.6155
+B_mean_avail_psdn                 0.230032     0.78340      0.2936     -0.9829     0.53522        0.4298       -1.4386
+B_mean_avail_nanc                -1.880464     0.26330     -7.1418    -10.9397     0.22373       -8.4049      -12.8745
+B_mean_price                      0.718056     0.13891      5.1693     -2.0297     0.15372        4.6713       -1.8342
+B_wind_max_220_mh                -0.040749          NA          NA          NA          NA            NA            NA
+B_dist_to_cog                    -0.003076          NA          NA          NA          NA            NA            NA
+B_dist_port_to_catch_area_zero   -0.006335          NA          NA          NA          NA            NA            NA
+B_dummy_prev_days                 3.088290     0.10510     29.3841     19.8694     0.13534       22.8192       15.4302
+B_dummy_prev_year_days            0.133984     0.08885      1.5079     -9.7465     0.09969        1.3441       -8.6874
+c_psdn                           -1.370940          NA          NA          NA          NA            NA            NA
+B_d_d                            -0.515820          NA          NA          NA          NA            NA            NA
+B_unem_rate                       0.088761          NA          NA          NA          NA            NA            NA
+w_msqd                           -3.952120          NA          NA          NA          NA            NA            NA
+asc_laa_cmck                     -3.913923          NA          NA          NA          NA            NA            NA
+asc_mna_cmck                     -5.338789          NA          NA          NA          NA            NA            NA
+asc_laa_jmck                     -4.176227          NA          NA          NA          NA            NA            NA
+asc_mna_jmck                     -5.113068          NA          NA          NA          NA            NA            NA
+asc_laa_msqd                     -3.692253          NA          NA          NA          NA            NA            NA
+asc_mra_msqd                     -4.633509          NA          NA          NA          NA            NA            NA
+asc_sba_msqd                     -3.710028          NA          NA          NA          NA            NA            NA
+asc_sfa_msqd                     -4.128870          NA          NA          NA          NA            NA            NA
+asc_mna_msqd                     -3.607651          NA          NA          NA          NA            NA            NA
+asc_laa_psdn                     -4.062540          NA          NA          NA          NA            NA            NA
+asc_mna_psdn                     -4.832360          NA          NA          NA          NA            NA            NA
+asc_mna_nanc                     -4.579712          NA          NA          NA          NA            NA            NA
+asc_sba_nanc                     -2.896603          NA          NA          NA          NA            NA            NA
+asc_sda_nanc                     -3.952324          NA          NA          NA          NA            NA            NA
+theta_part                        0.993484          NA          NA          NA          NA            NA            NA
+theta_laa                        10.071425          NA          NA          NA          NA            NA            NA
+theta_mna                        10.029563          NA          NA          NA          NA            NA            NA
+theta_sba                         0.733464          NA          NA          NA          NA            NA            NA
 asc_no_participation              0.000000          NA          NA          NA          NA            NA            NA
 
 Nesting structure for NL model component :
 Nest: root (1)
 |-------Alternative: no_participation
-'-Nest: part (0.7081)
-   |-Nest: laa (0.708)
+'-Nest: part (0.7298)
+   |-Nest: laa (0.7297)
    |  |-Alternative: laa_cmck
    |  |-Alternative: laa_jmck
    |  |-Alternative: laa_msqd
    |  '-Alternative: laa_psdn
-   |-Nest: mna (0.708)
+   |-Nest: mna (0.7297)
    |  |-Alternative: mna_cmck
    |  |-Alternative: mna_jmck
    |  |-Alternative: mna_msqd
    |  |-Alternative: mna_psdn
    |  '-Alternative: mna_nanc
-   |-Nest: sba (0.4788)
+   |-Nest: sba (0.493)
    |  |-Alternative: sba_msqd
    |  '-Alternative: sba_nanc
    |----Alternative: mra_msqd
@@ -108,54 +108,54 @@ Percentage chosen when available     1.29      0.4     0.28     0.32     4.61   
 
 Classical covariance matrix:
                             B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_dummy_prev_days B_dummy_prev_year_days
-B_mean_avail_mckl                     0.69247               0.111935               0.117177               0.050407              -0.014094              -0.017255               0.014190
-B_mean_avail_msqd                     0.11194               0.207462               0.014533               0.045129              -0.035565               0.002966               0.008662
-B_mean_avail_psdn                     0.11718               0.014533               0.583074               0.026773               0.021401              -0.025814               0.001459
-B_mean_avail_nanc                     0.05041               0.045129               0.026773               0.065817              -0.005491              -0.005794            -6.4123e-04
-B_mean_price                         -0.01409              -0.035565               0.021401              -0.005491               0.017653              -0.008783              -0.002229
-B_dummy_prev_days                    -0.01725               0.002966              -0.025814              -0.005794              -0.008783               0.010336              -0.002471
-B_dummy_prev_year_days                0.01419               0.008662               0.001459            -6.4123e-04              -0.002229              -0.002471               0.007638
+B_mean_avail_mckl                     0.61122               0.106196               0.105371               0.047686              -0.013937              -0.015777               0.013612
+B_mean_avail_msqd                     0.10620               0.218022               0.011780               0.047912              -0.038854               0.004354               0.008995
+B_mean_avail_psdn                     0.10537               0.011780               0.613718               0.027294               0.023470              -0.027625               0.001673
+B_mean_avail_nanc                     0.04769               0.047912               0.027294               0.069328              -0.006180              -0.005720            -7.8791e-04
+B_mean_price                         -0.01394              -0.038854               0.023470              -0.006180               0.019296              -0.009754              -0.002326
+B_dummy_prev_days                    -0.01578               0.004354              -0.027625              -0.005720              -0.009754               0.011046              -0.002514
+B_dummy_prev_year_days                0.01361               0.008995               0.001673            -7.8791e-04              -0.002326              -0.002514               0.007895
 
 Robust covariance matrix:
                             B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_dummy_prev_days B_dummy_prev_year_days
-B_mean_avail_mckl                    0.584726                0.26671               0.404226              -0.039379              -0.004463              -0.022303               0.002637
-B_mean_avail_msqd                    0.266712                0.93643             5.4375e-04              -0.093238              -0.104988               0.038407               0.031980
-B_mean_avail_psdn                    0.404226             5.4375e-04               0.346311              -0.006698               0.032981              -0.035957              -0.011040
-B_mean_avail_nanc                   -0.039379               -0.09324              -0.006698               0.038345               0.011550              -0.008773             6.6040e-04
-B_mean_price                        -0.004463               -0.10499               0.032981               0.011550               0.020255              -0.012134              -0.004693
-B_dummy_prev_days                   -0.022303                0.03841              -0.035957              -0.008773              -0.012134               0.014839              -0.001908
-B_dummy_prev_year_days               0.002637                0.03198              -0.011040             6.6040e-04              -0.004693              -0.001908               0.010798
+B_mean_avail_mckl                    0.347347                0.25578               0.239292               -0.07586              -0.016536               0.008841              -0.004397
+B_mean_avail_msqd                    0.255778                0.96756              -0.075219               -0.10156              -0.123876               0.055204               0.041124
+B_mean_avail_psdn                    0.239292               -0.07522               0.286459               -0.01656               0.038671              -0.033004              -0.007313
+B_mean_avail_nanc                   -0.075855               -0.10156              -0.016557                0.05006               0.015756              -0.012706            -4.4606e-04
+B_mean_price                        -0.016536               -0.12388               0.038671                0.01576               0.023629              -0.016009              -0.004099
+B_dummy_prev_days                    0.008841                0.05520              -0.033004               -0.01271              -0.016009               0.018316              -0.002754
+B_dummy_prev_year_days              -0.004397                0.04112              -0.007313            -4.4606e-04              -0.004099              -0.002754               0.009937
 
 Classical correlation matrix:
                             B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_dummy_prev_days B_dummy_prev_year_days
-B_mean_avail_mckl                      1.0000                0.29532                0.18441                0.23611                -0.1275               -0.20396                0.19511
-B_mean_avail_msqd                      0.2953                1.00000                0.04179                0.38620                -0.5877                0.06405                0.21759
-B_mean_avail_psdn                      0.1844                0.04179                1.00000                0.13667                 0.2109               -0.33253                0.02187
-B_mean_avail_nanc                      0.2361                0.38620                0.13667                1.00000                -0.1611               -0.22214               -0.02860
-B_mean_price                          -0.1275               -0.58770                0.21095               -0.16109                 1.0000               -0.65026               -0.19193
-B_dummy_prev_days                     -0.2040                0.06405               -0.33253               -0.22214                -0.6503                1.00000               -0.27807
-B_dummy_prev_year_days                 0.1951                0.21759                0.02187               -0.02860                -0.1919               -0.27807                1.00000
+B_mean_avail_mckl                      1.0000                0.29091                0.17204                0.23165                -0.1283               -0.19201                0.19595
+B_mean_avail_msqd                      0.2909                1.00000                0.03220                0.38970                -0.5990                0.08872                0.21681
+B_mean_avail_psdn                      0.1720                0.03220                1.00000                0.13232                 0.2157               -0.33551                0.02403
+B_mean_avail_nanc                      0.2317                0.38970                0.13232                1.00000                -0.1690               -0.20669               -0.03368
+B_mean_price                          -0.1283               -0.59905                0.21568               -0.16898                 1.0000               -0.66813               -0.18846
+B_dummy_prev_days                     -0.1920                0.08872               -0.33551               -0.20669                -0.6681                1.00000               -0.26917
+B_dummy_prev_year_days                 0.1960                0.21681                0.02403               -0.03368                -0.1885               -0.26917                1.00000
 
 Robust correlation matrix:
                             B_mean_avail_mckl      B_mean_avail_msqd      B_mean_avail_psdn      B_mean_avail_nanc           B_mean_price      B_dummy_prev_days B_dummy_prev_year_days
-B_mean_avail_mckl                     1.00000                 0.3604                0.89829               -0.26299               -0.04101                -0.2394                0.03319
-B_mean_avail_msqd                     0.36044                 1.0000             9.5484e-04               -0.49204               -0.76231                 0.3258                0.31804
-B_mean_avail_psdn                     0.89829             9.5484e-04                1.00000               -0.05813                0.39379                -0.5016               -0.18055
-B_mean_avail_nanc                    -0.26299                -0.4920               -0.05813                1.00000                0.41443                -0.3678                0.03246
-B_mean_price                         -0.04101                -0.7623                0.39379                0.41443                1.00000                -0.6999               -0.31731
-B_dummy_prev_days                    -0.23944                 0.3258               -0.50160               -0.36781               -0.69991                 1.0000               -0.15073
-B_dummy_prev_year_days                0.03319                 0.3180               -0.18055                0.03246               -0.31731                -0.1507                1.00000
+B_mean_avail_mckl                     1.00000                 0.4412                 0.7586               -0.57527                -0.1825                 0.1108               -0.07485
+B_mean_avail_msqd                     0.44121                 1.0000                -0.1429               -0.46148                -0.8193                 0.4147                0.41940
+B_mean_avail_psdn                     0.75860                -0.1429                 1.0000               -0.13827                 0.4700                -0.4556               -0.13707
+B_mean_avail_nanc                    -0.57527                -0.4615                -0.1383                1.00000                 0.4581                -0.4196               -0.02000
+B_mean_price                         -0.18253                -0.8193                 0.4700                0.45812                 1.0000                -0.7695               -0.26753
+B_dummy_prev_days                     0.11085                 0.4147                -0.4556               -0.41962                -0.7695                 1.0000               -0.20414
+B_dummy_prev_year_days               -0.07485                 0.4194                -0.1371               -0.02000                -0.2675                -0.2041                1.00000
 
  8 most extreme outliers in terms of lowest average per choice prediction:
  ID Avg prob per choice
-  4           0.4416228
-  2           0.4864629
-  8           0.4960692
-  5           0.5075664
-  7           0.5121603
-  3           0.5329352
-  6           0.5425115
-  1           0.9249411
+  4           0.4419010
+  2           0.4902792
+  8           0.4986264
+  5           0.5072061
+  7           0.5123322
+  3           0.5328100
+  6           0.5416090
+  1           0.9303448
 
 Settings and functions used in model definition:
 
@@ -191,13 +191,13 @@ numerical second derivative of LL (using numDeriv)
 Scaling used in computing Hessian
 ---------------------------------
                            Value
-B_mean_avail_mckl      6.3573773
-B_mean_avail_msqd      1.5751657
-B_mean_avail_psdn      0.3603940
-B_mean_avail_nanc      0.9802488
-B_mean_price           0.8225145
-B_dummy_prev_days      3.0106288
-B_dummy_prev_year_days 0.1416627
+B_mean_avail_mckl      1.9237809
+B_mean_avail_msqd      1.6053890
+B_mean_avail_psdn      0.2300321
+B_mean_avail_nanc      1.8804644
+B_mean_price           0.7180558
+B_dummy_prev_days      3.0882904
+B_dummy_prev_year_days 0.1339842
 
 
 apollo_probabilities

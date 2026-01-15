@@ -316,61 +316,55 @@ out_c4 <- run_manual_and_compare(
   constraints_MANUAL = NULL
 )
 
-summary(out_c4$model_manual)
-
-# LR test
-lr_test(
-  model_restricted   = out_c4$model_manual,
-  model_unrestricted = m0_c4
-)
 
 # ===================== Cluster c5 (from n_logit_c5.R) =====================
 
 db_c5 <- assets$c5$database_wide
 m0_c5 <- assets$c5$model_original
 apollo_beta_c5 = c(
-  B_mean_avail_msqd               =   1.798024,
-  B_mean_avail_psdn               =   0.215478,
-  B_mean_avail_cmck               =  -1.433488,
-  B_mean_avail_nanc               =   4.235208,
-  B_mean_avail_albc               =   2.217832,
-  B_mean_avail_dcrb               =   5.750683,
-  B_wind_max_220_mh               =  -0.066248,
-  B_dist_to_cog                   = -8.8679e-04,
-  B_dist_port_to_catch_area_zero  =  -0.005749,
-  B_dummy_prev_days               =   2.856629,
-  B_dummy_prev_year_days          =   0.371518,
-  B_unem_rate                     =   0.416668,
-  B_d_d                           =  -2.013430,
-  B_d_cd                          =  -9.885199,
-  c_psdn                          =  -2.029390,
-  c_dcrb                          =  -1.485848,
-  B_mean_price_part               =   4.576412,
-  B_mean_price_crab               =  -0.037831, TRABAJAR ACA!!!
-  asc_mna_msqd                    =  -9.015308,
-  asc_sba_msqd                    =  -8.873700,
-  asc_mra_msqd                    =  -9.928477,
-  asc_laa_msqd                    =  -9.370920,
-  asc_npa_msqd                    =  -9.531945,
-  asc_sfa_msqd                    =  -9.450779,
-  asc_cba_msqd                    =  -9.284180,
-  asc_laa_psdn                    =  -7.637802,
-  asc_clo_psdn                    =  -5.479200,
-  asc_cwa_psdn                    =  -3.976182,
-  asc_clw_psdn                    =  -4.314694,
-  asc_sba_cmck                    =  -7.277373,
-  asc_laa_cmck                    =  -8.455520,
-  asc_laa_nanc                    =  -8.768543,
-  asc_cwa_albc                    = -19.832759,
-  asc_cwa_dcrb                    =  -6.951799,
-  asc_clw_dcrb                    =  -7.091162,
-  theta_part                      =   1.100002,
-  theta_cmck                      =  10.760225,
-  theta_msqd                      =  11.124316,
-  theta_psdn                      =   0.146354,
-  theta_part_crab                 =  10.694124,
-  w_msqd                          =  -3.937279,
-  asc_no_participation            =   0.000000)
+  B_mean_avail_msqd              =    1.748535,
+  B_mean_avail_psdn              =    0.226588,
+  B_mean_avail_cmck              =   -1.484157,
+  B_mean_avail_nanc              =    4.193747,
+  B_mean_avail_albc              =    2.202953,
+  B_mean_avail_dcrb              =    5.741342,
+  B_wind_max_220_mh              =   -0.065261,
+  B_dist_to_cog                  = -8.8681e-04,
+  B_dist_port_to_catch_area_zero =   -0.005776,
+  B_dummy_prev_days              =    2.861858,
+  B_dummy_prev_year_days         =    0.366907,
+  B_unem_rate                    =    0.414837,
+  B_d_d                          =   -2.016306,
+  B_d_c                          =   -0.909442,
+  B_d_cd                         =   -9.885604,
+  c_psdn                         =   -2.032304,
+  c_dcrb                         =   -1.485335,
+  B_mean_price_part              =    4.600908,
+  B_mean_price_crab              =   -0.038246,
+  asc_mna_msqd                   =   -9.029365,
+  asc_sba_msqd                   =   -8.888468,
+  asc_mra_msqd                   =   -9.946981,
+  asc_laa_msqd                   =   -9.389892,
+  asc_npa_msqd                   =   -9.545131,
+  asc_sfa_msqd                   =   -9.460032,
+  asc_cba_msqd                   =   -9.295058,
+  asc_laa_psdn                   =   -7.649731,
+  asc_clo_psdn                   =   -5.486854,
+  asc_cwa_psdn                   =   -3.982644,
+  asc_clw_psdn                   =   -4.326057,
+  asc_sba_cmck                   =   -7.286376,
+  asc_laa_cmck                   =   -8.460761,
+  asc_laa_nanc                   =   -8.756927,
+  asc_cwa_albc                   =  -19.907392,
+  asc_cwa_dcrb                   =   -6.945807,
+  asc_clw_dcrb                   =   -7.086131,
+  theta_part                     =    1.109144,
+  theta_cmck                     =   10.761289,
+  theta_msqd                     =   11.124362,
+  theta_psdn                     =    0.143028,
+  theta_part_crab                =   10.694908,
+  w_msqd                         =   -3.940726,
+  asc_no_participation           =    0.000000)
 
 apollo_fixed_c5 = c("asc_no_participation", "theta_cmck", "theta_part_crab", "theta_msqd", "theta_psdn",
                     "asc_mna_msqd", "asc_sba_msqd", "asc_mra_msqd", "asc_laa_msqd",
@@ -398,23 +392,23 @@ apollo_probabilities_c5 = function(apollo_beta, apollo_inputs, functionality="es
   
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
   V = list()
-  V[["mna_msqd"]]         = asc_mna_msqd + B_mean_price_part * mean_price_3_mna_msqd + B_mean_avail_msqd * mean_avail_mna_msqd + B_wind_max_220_mh * wind_max_220_mh_mna_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd + B_dummy_prev_days * dummy_prev_days_mna_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mna_msqd + B_dist_to_cog * dist_to_cog_mna_msqd + B_unem_rate * unem_rate_mna_msqd                                    + B_d_d * d_d_mna_msqd + w_msqd * weekend                            
-  V[["sba_msqd"]]         = asc_sba_msqd + B_mean_price_part * mean_price_3_sba_msqd + B_mean_avail_msqd * mean_avail_sba_msqd + B_wind_max_220_mh * wind_max_220_mh_sba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd + B_dummy_prev_days * dummy_prev_days_sba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sba_msqd + B_dist_to_cog * dist_to_cog_sba_msqd + B_unem_rate * unem_rate_sba_msqd                                    + B_d_d * d_d_sba_msqd + w_msqd * weekend                            
-  V[["mra_msqd"]]         = asc_mra_msqd + B_mean_price_part * mean_price_3_mra_msqd + B_mean_avail_msqd * mean_avail_mra_msqd + B_wind_max_220_mh * wind_max_220_mh_mra_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mra_msqd + B_dummy_prev_days * dummy_prev_days_mra_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mra_msqd + B_dist_to_cog * dist_to_cog_mra_msqd + B_unem_rate * unem_rate_mra_msqd                                    + B_d_d * d_d_mra_msqd + w_msqd * weekend                            
-  V[["laa_msqd"]]         = asc_laa_msqd + B_mean_price_part * mean_price_3_laa_msqd + B_mean_avail_msqd * mean_avail_laa_msqd + B_wind_max_220_mh * wind_max_220_mh_laa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd + B_dummy_prev_days * dummy_prev_days_laa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_laa_msqd + B_dist_to_cog * dist_to_cog_laa_msqd + B_unem_rate * unem_rate_laa_msqd                                    + B_d_d * d_d_laa_msqd + w_msqd * weekend                            
-  V[["npa_msqd"]]         = asc_npa_msqd + B_mean_price_part * mean_price_3_npa_msqd + B_mean_avail_msqd * mean_avail_npa_msqd + B_wind_max_220_mh * wind_max_220_mh_npa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_npa_msqd + B_dummy_prev_days * dummy_prev_days_npa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_npa_msqd + B_dist_to_cog * dist_to_cog_npa_msqd + B_unem_rate * unem_rate_npa_msqd                                    + B_d_d * d_d_npa_msqd     
-  V[["sfa_msqd"]]         = asc_sfa_msqd + B_mean_price_part * mean_price_3_sfa_msqd + B_mean_avail_msqd * mean_avail_sfa_msqd + B_wind_max_220_mh * wind_max_220_mh_sfa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd + B_dummy_prev_days * dummy_prev_days_sfa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sfa_msqd + B_dist_to_cog * dist_to_cog_sfa_msqd + B_unem_rate * unem_rate_sfa_msqd                                    + B_d_d * d_d_sfa_msqd + w_msqd * weekend                            
-  V[["cba_msqd"]]         = asc_cba_msqd + B_mean_price_part * mean_price_3_cba_msqd + B_mean_avail_msqd * mean_avail_cba_msqd + B_wind_max_220_mh * wind_max_220_mh_cba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cba_msqd + B_dummy_prev_days * dummy_prev_days_cba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_cba_msqd + B_dist_to_cog * dist_to_cog_cba_msqd + B_unem_rate * unem_rate_cba_msqd                                    + B_d_d * d_d_cba_msqd                              
-  V[["laa_psdn"]]         = asc_laa_psdn + B_mean_price_part * mean_price_3_laa_psdn + B_mean_avail_psdn * mean_avail_laa_psdn + B_wind_max_220_mh * wind_max_220_mh_laa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_psdn + B_dummy_prev_days * dummy_prev_days_laa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_laa_psdn + B_dist_to_cog * dist_to_cog_laa_psdn + B_unem_rate * unem_rate_laa_psdn + c_psdn * psdnclosure             + B_d_d * d_d_laa_psdn     
-  V[["clo_psdn"]]         = asc_clo_psdn + B_mean_price_part * mean_price_3_clo_psdn + B_mean_avail_psdn * mean_avail_clo_psdn + B_wind_max_220_mh * wind_max_220_mh_clo_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_psdn + B_dummy_prev_days * dummy_prev_days_clo_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clo_psdn + B_dist_to_cog * dist_to_cog_clo_psdn + B_unem_rate * unem_rate_clo_psdn + c_psdn * psdnclosure             + B_d_d * d_d_clo_psdn                             
-  V[["cwa_psdn"]]         = asc_cwa_psdn + B_mean_price_part * mean_price_3_cwa_psdn + B_mean_avail_psdn * mean_avail_cwa_psdn + B_wind_max_220_mh * wind_max_220_mh_cwa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_psdn + B_dummy_prev_days * dummy_prev_days_cwa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cwa_psdn + B_dist_to_cog * dist_to_cog_cwa_psdn + B_unem_rate * unem_rate_cwa_psdn + c_psdn * psdnclosure             + B_d_d * d_d_cwa_psdn                            
-  V[["clw_psdn"]]         = asc_clw_psdn + B_mean_price_part * mean_price_3_clw_psdn + B_mean_avail_psdn * mean_avail_clw_psdn + B_wind_max_220_mh * wind_max_220_mh_clw_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_psdn + B_dummy_prev_days * dummy_prev_days_clw_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clw_psdn + B_dist_to_cog * dist_to_cog_clw_psdn + B_unem_rate * unem_rate_clw_psdn + c_psdn * psdnclosure             + B_d_d * d_d_clw_psdn                            
-  V[["sba_cmck"]]         = asc_sba_cmck + B_mean_price_part * mean_price_3_sba_cmck + B_mean_avail_cmck * mean_avail_sba_cmck + B_wind_max_220_mh * wind_max_220_mh_sba_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_cmck + B_dummy_prev_days * dummy_prev_days_sba_cmck + B_dummy_prev_year_days * dummy_prev_year_days_sba_cmck + B_dist_to_cog * dist_to_cog_sba_cmck + B_unem_rate * unem_rate_sba_cmck                                    + B_d_d * d_d_sba_cmck                             
-  V[["laa_cmck"]]         = asc_laa_cmck + B_mean_price_part * mean_price_3_laa_cmck + B_mean_avail_cmck * mean_avail_laa_cmck + B_wind_max_220_mh * wind_max_220_mh_laa_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_cmck + B_dummy_prev_days * dummy_prev_days_laa_cmck + B_dummy_prev_year_days * dummy_prev_year_days_laa_cmck + B_dist_to_cog * dist_to_cog_laa_cmck + B_unem_rate * unem_rate_laa_cmck                                    + B_d_d * d_d_laa_cmck                             
-  V[["laa_nanc"]]         = asc_laa_nanc + B_mean_price_part * mean_price_3_laa_nanc + B_mean_avail_nanc * mean_avail_laa_nanc + B_wind_max_220_mh * wind_max_220_mh_laa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_nanc + B_dummy_prev_days * dummy_prev_days_laa_nanc + B_dummy_prev_year_days * dummy_prev_year_days_laa_nanc + B_dist_to_cog * dist_to_cog_laa_nanc + B_unem_rate * unem_rate_laa_nanc                                    + B_d_d * d_d_laa_nanc          
-  V[["cwa_albc"]]         = asc_cwa_albc + B_mean_price_part * mean_price_3_cwa_albc + B_mean_avail_albc * mean_avail_cwa_albc + B_wind_max_220_mh * wind_max_220_mh_cwa_albc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_albc + B_dummy_prev_days * dummy_prev_days_cwa_albc + B_dummy_prev_year_days * dummy_prev_year_days_cwa_albc + B_dist_to_cog * dist_to_cog_cwa_albc + B_unem_rate * unem_rate_cwa_albc                                    + B_d_d * d_d_cwa_albc                             
-  V[["cwa_dcrb"]]         = asc_cwa_dcrb + B_mean_price_crab * mean_price_3_cwa_dcrb + B_mean_avail_dcrb * mean_avail_cwa_dcrb + B_wind_max_220_mh * wind_max_220_mh_cwa_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_dcrb + B_dummy_prev_days * dummy_prev_days_cwa_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_cwa_dcrb + B_dist_to_cog * dist_to_cog_cwa_dcrb + B_unem_rate * unem_rate_cwa_dcrb + c_dcrb * dcrbclosurewad_cwa_dcrb + B_d_d * d_d_cwa_dcrb +  B_d_cd * d_cd_cwa_dcrb                            
-  V[["clw_dcrb"]]         = asc_clw_dcrb + B_mean_price_crab * mean_price_3_clw_dcrb + B_mean_avail_dcrb * mean_avail_clw_dcrb + B_wind_max_220_mh * wind_max_220_mh_clw_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_dcrb + B_dummy_prev_days * dummy_prev_days_clw_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_clw_dcrb + B_dist_to_cog * dist_to_cog_clw_dcrb + B_unem_rate * unem_rate_clw_dcrb + c_dcrb * dcrbclosurewad_clw_dcrb + B_d_d * d_d_clw_dcrb +  B_d_cd * d_cd_clw_dcrb                            
+  V[["mna_msqd"]]         = asc_mna_msqd + B_mean_price_part * mean_price_3_mna_msqd + B_mean_avail_msqd * mean_avail_mna_msqd + B_wind_max_220_mh * wind_max_220_mh_mna_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd + B_dummy_prev_days * dummy_prev_days_mna_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mna_msqd + B_dist_to_cog * dist_to_cog_mna_msqd + B_unem_rate * unem_rate_mna_msqd                                    + B_d_c * d_c_mna_msqd + B_d_d * d_d_mna_msqd + w_msqd * weekend                            
+  V[["sba_msqd"]]         = asc_sba_msqd + B_mean_price_part * mean_price_3_sba_msqd + B_mean_avail_msqd * mean_avail_sba_msqd + B_wind_max_220_mh * wind_max_220_mh_sba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd + B_dummy_prev_days * dummy_prev_days_sba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sba_msqd + B_dist_to_cog * dist_to_cog_sba_msqd + B_unem_rate * unem_rate_sba_msqd                                    + B_d_c * d_c_sba_msqd + B_d_d * d_d_sba_msqd + w_msqd * weekend                            
+  V[["mra_msqd"]]         = asc_mra_msqd + B_mean_price_part * mean_price_3_mra_msqd + B_mean_avail_msqd * mean_avail_mra_msqd + B_wind_max_220_mh * wind_max_220_mh_mra_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mra_msqd + B_dummy_prev_days * dummy_prev_days_mra_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mra_msqd + B_dist_to_cog * dist_to_cog_mra_msqd + B_unem_rate * unem_rate_mra_msqd                                    + B_d_c * d_c_mra_msqd + B_d_d * d_d_mra_msqd + w_msqd * weekend                            
+  V[["laa_msqd"]]         = asc_laa_msqd + B_mean_price_part * mean_price_3_laa_msqd + B_mean_avail_msqd * mean_avail_laa_msqd + B_wind_max_220_mh * wind_max_220_mh_laa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd + B_dummy_prev_days * dummy_prev_days_laa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_laa_msqd + B_dist_to_cog * dist_to_cog_laa_msqd + B_unem_rate * unem_rate_laa_msqd                                    + B_d_c * d_c_laa_msqd + B_d_d * d_d_laa_msqd + w_msqd * weekend                            
+  V[["npa_msqd"]]         = asc_npa_msqd + B_mean_price_part * mean_price_3_npa_msqd + B_mean_avail_msqd * mean_avail_npa_msqd + B_wind_max_220_mh * wind_max_220_mh_npa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_npa_msqd + B_dummy_prev_days * dummy_prev_days_npa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_npa_msqd + B_dist_to_cog * dist_to_cog_npa_msqd + B_unem_rate * unem_rate_npa_msqd                                    + B_d_c * d_c_npa_msqd + B_d_d * d_d_npa_msqd     
+  V[["sfa_msqd"]]         = asc_sfa_msqd + B_mean_price_part * mean_price_3_sfa_msqd + B_mean_avail_msqd * mean_avail_sfa_msqd + B_wind_max_220_mh * wind_max_220_mh_sfa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd + B_dummy_prev_days * dummy_prev_days_sfa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sfa_msqd + B_dist_to_cog * dist_to_cog_sfa_msqd + B_unem_rate * unem_rate_sfa_msqd                                    + B_d_c * d_c_sfa_msqd + B_d_d * d_d_sfa_msqd + w_msqd * weekend                            
+  V[["cba_msqd"]]         = asc_cba_msqd + B_mean_price_part * mean_price_3_cba_msqd + B_mean_avail_msqd * mean_avail_cba_msqd + B_wind_max_220_mh * wind_max_220_mh_cba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cba_msqd + B_dummy_prev_days * dummy_prev_days_cba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_cba_msqd + B_dist_to_cog * dist_to_cog_cba_msqd + B_unem_rate * unem_rate_cba_msqd                                    + B_d_c * d_c_cba_msqd + B_d_d * d_d_cba_msqd                              
+  V[["laa_psdn"]]         = asc_laa_psdn + B_mean_price_part * mean_price_3_laa_psdn + B_mean_avail_psdn * mean_avail_laa_psdn + B_wind_max_220_mh * wind_max_220_mh_laa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_psdn + B_dummy_prev_days * dummy_prev_days_laa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_laa_psdn + B_dist_to_cog * dist_to_cog_laa_psdn + B_unem_rate * unem_rate_laa_psdn + c_psdn * psdnclosure             + B_d_c * d_c_laa_psdn + B_d_d * d_d_laa_psdn     
+  V[["clo_psdn"]]         = asc_clo_psdn + B_mean_price_part * mean_price_3_clo_psdn + B_mean_avail_psdn * mean_avail_clo_psdn + B_wind_max_220_mh * wind_max_220_mh_clo_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_psdn + B_dummy_prev_days * dummy_prev_days_clo_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clo_psdn + B_dist_to_cog * dist_to_cog_clo_psdn + B_unem_rate * unem_rate_clo_psdn + c_psdn * psdnclosure             + B_d_c * d_c_clo_psdn + B_d_d * d_d_clo_psdn                             
+  V[["cwa_psdn"]]         = asc_cwa_psdn + B_mean_price_part * mean_price_3_cwa_psdn + B_mean_avail_psdn * mean_avail_cwa_psdn + B_wind_max_220_mh * wind_max_220_mh_cwa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_psdn + B_dummy_prev_days * dummy_prev_days_cwa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cwa_psdn + B_dist_to_cog * dist_to_cog_cwa_psdn + B_unem_rate * unem_rate_cwa_psdn + c_psdn * psdnclosure             + B_d_c * d_c_cwa_psdn + B_d_d * d_d_cwa_psdn                            
+  V[["clw_psdn"]]         = asc_clw_psdn + B_mean_price_part * mean_price_3_clw_psdn + B_mean_avail_psdn * mean_avail_clw_psdn + B_wind_max_220_mh * wind_max_220_mh_clw_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_psdn + B_dummy_prev_days * dummy_prev_days_clw_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clw_psdn + B_dist_to_cog * dist_to_cog_clw_psdn + B_unem_rate * unem_rate_clw_psdn + c_psdn * psdnclosure             + B_d_c * d_c_clw_psdn + B_d_d * d_d_clw_psdn                            
+  V[["sba_cmck"]]         = asc_sba_cmck + B_mean_price_part * mean_price_3_sba_cmck + B_mean_avail_cmck * mean_avail_sba_cmck + B_wind_max_220_mh * wind_max_220_mh_sba_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_cmck + B_dummy_prev_days * dummy_prev_days_sba_cmck + B_dummy_prev_year_days * dummy_prev_year_days_sba_cmck + B_dist_to_cog * dist_to_cog_sba_cmck + B_unem_rate * unem_rate_sba_cmck                                    + B_d_c * d_c_sba_cmck + B_d_d * d_d_sba_cmck                             
+  V[["laa_cmck"]]         = asc_laa_cmck + B_mean_price_part * mean_price_3_laa_cmck + B_mean_avail_cmck * mean_avail_laa_cmck + B_wind_max_220_mh * wind_max_220_mh_laa_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_cmck + B_dummy_prev_days * dummy_prev_days_laa_cmck + B_dummy_prev_year_days * dummy_prev_year_days_laa_cmck + B_dist_to_cog * dist_to_cog_laa_cmck + B_unem_rate * unem_rate_laa_cmck                                    + B_d_c * d_c_laa_cmck + B_d_d * d_d_laa_cmck                             
+  V[["laa_nanc"]]         = asc_laa_nanc + B_mean_price_part * mean_price_3_laa_nanc + B_mean_avail_nanc * mean_avail_laa_nanc + B_wind_max_220_mh * wind_max_220_mh_laa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_nanc + B_dummy_prev_days * dummy_prev_days_laa_nanc + B_dummy_prev_year_days * dummy_prev_year_days_laa_nanc + B_dist_to_cog * dist_to_cog_laa_nanc + B_unem_rate * unem_rate_laa_nanc                                    + B_d_c * d_c_laa_nanc + B_d_d * d_d_laa_nanc          
+  V[["cwa_albc"]]         = asc_cwa_albc + B_mean_price_part * mean_price_3_cwa_albc + B_mean_avail_albc * mean_avail_cwa_albc + B_wind_max_220_mh * wind_max_220_mh_cwa_albc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_albc + B_dummy_prev_days * dummy_prev_days_cwa_albc + B_dummy_prev_year_days * dummy_prev_year_days_cwa_albc + B_dist_to_cog * dist_to_cog_cwa_albc + B_unem_rate * unem_rate_cwa_albc                                    + B_d_c * d_c_cwa_albc + B_d_d * d_d_cwa_albc                             
+  V[["cwa_dcrb"]]         = asc_cwa_dcrb + B_mean_price_crab * mean_price_3_cwa_dcrb + B_mean_avail_dcrb * mean_avail_cwa_dcrb + B_wind_max_220_mh * wind_max_220_mh_cwa_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_dcrb + B_dummy_prev_days * dummy_prev_days_cwa_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_cwa_dcrb + B_dist_to_cog * dist_to_cog_cwa_dcrb + B_unem_rate * unem_rate_cwa_dcrb + c_dcrb * dcrbclosurewad_cwa_dcrb + B_d_c * d_c_cwa_dcrb + B_d_d * d_d_cwa_dcrb +  B_d_cd * d_cd_cwa_dcrb                            
+  V[["clw_dcrb"]]         = asc_clw_dcrb + B_mean_price_crab * mean_price_3_clw_dcrb + B_mean_avail_dcrb * mean_avail_clw_dcrb + B_wind_max_220_mh * wind_max_220_mh_clw_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_dcrb + B_dummy_prev_days * dummy_prev_days_clw_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_clw_dcrb + B_dist_to_cog * dist_to_cog_clw_dcrb + B_unem_rate * unem_rate_clw_dcrb + c_dcrb * dcrbclosurewad_clw_dcrb + B_d_c * d_c_clw_dcrb + B_d_d * d_d_clw_dcrb +  B_d_cd * d_cd_clw_dcrb                            
   V[["no_participation"]] = asc_no_participation
   
   
@@ -494,50 +488,44 @@ out_c5 <- run_manual_and_compare(
   constraints_MANUAL = NULL
 )
 
-summary(out_c5$model_manual)
-# LR test
-lr_test(
-  model_restricted   = out_c5$model_manual,
-  model_unrestricted = m0_c5
-)
-
 # ===================== Cluster c6 (from n_logit_c6.R) =====================
 
 db_c6 <- assets$c6$database_wide
 m0_c6 <- assets$c6$model_original
 apollo_beta_c6=c(
-  B_mean_avail_psdn                =  1.816131,
-  B_mean_avail_nanc                =  2.513599,
-  B_mean_avail_othr                = 10.519578,
-  B_mean_avail_cmck                =  4.998825,
-  B_wind_max_220_mh                = -0.050113,
-  B_dist_to_cog                    = -0.004826,
-  B_dist_port_to_catch_area_zero   = -0.021126,
-  B_dummy_prev_days                =  2.149773,
-  B_dummy_prev_year_days           =  0.281181,
-  B_unem_rate                      =  0.297177,
-  B_d_d                            = -1.058378,
-  B_d_cd                           = -8.130186,
-  c_dcrb                           = -0.332205,
-  B_mean_price_part                =  3.794151,
-  B_mean_price_othr                =  0.000000,
-  asc_cba_psdn                     = -3.419444,
-  asc_clo_psdn                     = -4.292549,
-  asc_clw_psdn                     = -4.344046,
-  asc_cwa_psdn                     = -4.041828,
-  asc_clo_nanc                     = -5.627777,
-  asc_clw_nanc                     = -8.625620,
-  asc_cwa_nanc                     = -4.833813,
-  asc_clo_cmck                     = -5.354638,
-  asc_cwa_dcrb                     = -9.372014,
-  asc_nps_sock                     = -8.437834,
-  theta_part                       =  0.009707,
-  theta_nanc                       = 13.344607,
-  theta_psdn                       =  1.034474,
-  asc_no_participation             =  0.000000)
+  B_mean_avail_psdn               = -1.993196,
+  B_mean_avail_nanc               =  1.395448,
+  B_mean_avail_othr               = 10.216345,
+  B_mean_avail_cmck               =  2.262217,
+  B_wind_max_220_mh               = -0.052962,
+  B_dist_to_cog                   = -0.004738,
+  B_dist_port_to_catch_area_zero  = -0.016642,
+  B_dummy_prev_days               =  2.314201,
+  B_dummy_prev_year_days          =  0.300067,
+  B_unem_rate                     =  0.257505,
+  B_d_c                           =  0,
+  B_d_d                           = -1.100474,
+  B_d_cd                          = -8.132902,
+  c_dcrb                          = -0.293244,
+  B_mean_price_part               =  3.386718,
+  B_mean_price_othr               =  0.019998,
+  asc_cba_psdn                    = -2.322374,
+  asc_clo_psdn                    = -2.990346,
+  asc_clw_psdn                    = -2.785120,
+  asc_cwa_psdn                    = -2.563083,
+  asc_clo_nanc                    = -5.013189,
+  asc_clw_nanc                    = -7.673003,
+  asc_cwa_nanc                    = -4.220165,
+  asc_clo_cmck                    = -4.783469,
+  asc_cwa_dcrb                    = -9.176758,
+  asc_nps_sock                    = -8.333882,
+  theta_part                      =  0.182348,
+  theta_nanc                      = 13.345222,
+  theta_psdn                      =  1.240982,
+  asc_no_participation            =  0.000000)
 
 apollo_fixed_c6 <- c("asc_no_participation", "B_mean_price_othr",
-                     "theta_part", "theta_nanc", "theta_psdn", "B_d_d", "B_d_cd", "c_dcrb",
+                     "theta_part", "theta_nanc", "theta_psdn", "B_d_d", "B_d_c", "B_d_cd", "c_dcrb",
                      "asc_cba_psdn", "asc_clo_psdn", "asc_clw_psdn", "asc_cwa_psdn",
                      "asc_clo_nanc", "asc_clw_nanc", "asc_cwa_nanc", "asc_clo_cmck",
                      "asc_cwa_dcrb", "asc_nps_sock", "B_unem_rate")
@@ -566,16 +554,16 @@ apollo_probabilities_c6 = function(apollo_beta, apollo_inputs, functionality="es
     # 
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
   V = list()
-  V[["cba_psdn"]]         = asc_cba_psdn + B_mean_avail_psdn * mean_avail_cba_psdn + B_wind_max_220_mh * wind_max_220_mh_cba_psdn + B_dist_to_cog * dist_to_cog_cba_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cba_psdn + B_dummy_prev_days * dummy_prev_days_cba_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cba_psdn  + B_unem_rate * unem_rate_cba_psdn  + B_d_d * d_d_cba_psdn + B_mean_price_part * mean_price_3_cba_psdn
-  V[["clo_psdn"]]         = asc_clo_psdn + B_mean_avail_psdn * mean_avail_clo_psdn + B_wind_max_220_mh * wind_max_220_mh_clo_psdn + B_dist_to_cog * dist_to_cog_clo_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_psdn + B_dummy_prev_days * dummy_prev_days_clo_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clo_psdn  + B_unem_rate * unem_rate_clo_psdn  + B_d_d * d_d_clo_psdn + B_mean_price_part * mean_price_3_clo_psdn
-  V[["clw_psdn"]]         = asc_clw_psdn + B_mean_avail_psdn * mean_avail_clw_psdn + B_wind_max_220_mh * wind_max_220_mh_clw_psdn + B_dist_to_cog * dist_to_cog_clw_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_psdn + B_dummy_prev_days * dummy_prev_days_clw_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clw_psdn  + B_unem_rate * unem_rate_clw_psdn  + B_d_d * d_d_clw_psdn + B_mean_price_part * mean_price_3_clw_psdn 
-  V[["cwa_psdn"]]         = asc_cwa_psdn + B_mean_avail_psdn * mean_avail_cwa_psdn + B_wind_max_220_mh * wind_max_220_mh_cwa_psdn + B_dist_to_cog * dist_to_cog_cwa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_psdn + B_dummy_prev_days * dummy_prev_days_cwa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cwa_psdn  + B_unem_rate * unem_rate_cwa_psdn  + B_d_d * d_d_cwa_psdn + B_mean_price_part * mean_price_3_cwa_psdn
-  V[["clo_nanc"]]         = asc_clo_nanc + B_mean_avail_nanc * mean_avail_clo_nanc + B_wind_max_220_mh * wind_max_220_mh_clo_nanc + B_dist_to_cog * dist_to_cog_clo_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_nanc + B_dummy_prev_days * dummy_prev_days_clo_nanc + B_dummy_prev_year_days * dummy_prev_year_days_clo_nanc  + B_unem_rate * unem_rate_clo_nanc  + B_d_d * d_d_clo_nanc + B_mean_price_part * mean_price_3_clo_nanc
-  V[["clw_nanc"]]         = asc_clw_nanc + B_mean_avail_nanc * mean_avail_clw_nanc + B_wind_max_220_mh * wind_max_220_mh_clw_nanc + B_dist_to_cog * dist_to_cog_clw_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_nanc + B_dummy_prev_days * dummy_prev_days_clw_nanc + B_dummy_prev_year_days * dummy_prev_year_days_clw_nanc  + B_unem_rate * unem_rate_clw_nanc  + B_d_d * d_d_clw_nanc + B_mean_price_part * mean_price_3_clw_nanc
-  V[["cwa_nanc"]]         = asc_cwa_nanc + B_mean_avail_nanc * mean_avail_cwa_nanc + B_wind_max_220_mh * wind_max_220_mh_cwa_nanc + B_dist_to_cog * dist_to_cog_cwa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_nanc + B_dummy_prev_days * dummy_prev_days_cwa_nanc + B_dummy_prev_year_days * dummy_prev_year_days_cwa_nanc  + B_unem_rate * unem_rate_cwa_nanc  + B_d_d * d_d_cwa_nanc + B_mean_price_part * mean_price_3_cwa_nanc
-  V[["clo_cmck"]]         = asc_clo_cmck + B_mean_avail_cmck * mean_avail_clo_cmck + B_wind_max_220_mh * wind_max_220_mh_clo_cmck + B_dist_to_cog * dist_to_cog_clo_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_cmck + B_dummy_prev_days * dummy_prev_days_clo_cmck + B_dummy_prev_year_days * dummy_prev_year_days_clo_cmck  + B_unem_rate * unem_rate_clo_cmck  + B_d_d * d_d_clo_cmck + B_mean_price_part * mean_price_3_clo_cmck 
-  V[["cwa_dcrb"]]         = asc_cwa_dcrb + B_mean_avail_othr * mean_avail_cwa_dcrb + B_wind_max_220_mh * wind_max_220_mh_cwa_dcrb + B_dist_to_cog * dist_to_cog_cwa_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_dcrb + B_dummy_prev_days * dummy_prev_days_cwa_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_cwa_dcrb  + B_unem_rate * unem_rate_cwa_dcrb  + B_d_d * d_d_cwa_dcrb + B_mean_price_othr * mean_price_3_cwa_dcrb + c_dcrb * dcrbclosurewad_cwa_dcrb
-  V[["nps_sock"]]         = asc_nps_sock + B_mean_avail_othr * mean_avail_nps_sock + B_wind_max_220_mh * wind_max_220_mh_nps_sock + B_dist_to_cog * dist_to_cog_nps_sock + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_nps_sock + B_dummy_prev_days * dummy_prev_days_nps_sock + B_dummy_prev_year_days * dummy_prev_year_days_nps_sock  + B_unem_rate * unem_rate_nps_sock  + B_d_d * d_d_nps_sock + B_mean_price_othr * mean_price_3_nps_sock + B_d_cd * d_cd_nps_sock                        
+  V[["cba_psdn"]]         = asc_cba_psdn + B_mean_avail_psdn * mean_avail_cba_psdn + B_wind_max_220_mh * wind_max_220_mh_cba_psdn + B_dist_to_cog * dist_to_cog_cba_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cba_psdn + B_dummy_prev_days * dummy_prev_days_cba_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cba_psdn  + B_unem_rate * unem_rate_cba_psdn + B_d_c * d_c_cba_psdn + B_d_d * d_d_cba_psdn + B_mean_price_part * mean_price_3_cba_psdn
+  V[["clo_psdn"]]         = asc_clo_psdn + B_mean_avail_psdn * mean_avail_clo_psdn + B_wind_max_220_mh * wind_max_220_mh_clo_psdn + B_dist_to_cog * dist_to_cog_clo_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_psdn + B_dummy_prev_days * dummy_prev_days_clo_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clo_psdn  + B_unem_rate * unem_rate_clo_psdn + B_d_c * d_c_clo_psdn + B_d_d * d_d_clo_psdn + B_mean_price_part * mean_price_3_clo_psdn
+  V[["clw_psdn"]]         = asc_clw_psdn + B_mean_avail_psdn * mean_avail_clw_psdn + B_wind_max_220_mh * wind_max_220_mh_clw_psdn + B_dist_to_cog * dist_to_cog_clw_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_psdn + B_dummy_prev_days * dummy_prev_days_clw_psdn + B_dummy_prev_year_days * dummy_prev_year_days_clw_psdn  + B_unem_rate * unem_rate_clw_psdn + B_d_c * d_c_clw_psdn + B_d_d * d_d_clw_psdn + B_mean_price_part * mean_price_3_clw_psdn 
+  V[["cwa_psdn"]]         = asc_cwa_psdn + B_mean_avail_psdn * mean_avail_cwa_psdn + B_wind_max_220_mh * wind_max_220_mh_cwa_psdn + B_dist_to_cog * dist_to_cog_cwa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_psdn + B_dummy_prev_days * dummy_prev_days_cwa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_cwa_psdn  + B_unem_rate * unem_rate_cwa_psdn + B_d_c * d_c_cwa_psdn + B_d_d * d_d_cwa_psdn + B_mean_price_part * mean_price_3_cwa_psdn
+  V[["clo_nanc"]]         = asc_clo_nanc + B_mean_avail_nanc * mean_avail_clo_nanc + B_wind_max_220_mh * wind_max_220_mh_clo_nanc + B_dist_to_cog * dist_to_cog_clo_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_nanc + B_dummy_prev_days * dummy_prev_days_clo_nanc + B_dummy_prev_year_days * dummy_prev_year_days_clo_nanc  + B_unem_rate * unem_rate_clo_nanc + B_d_c * d_c_clo_nanc + B_d_d * d_d_clo_nanc + B_mean_price_part * mean_price_3_clo_nanc
+  V[["clw_nanc"]]         = asc_clw_nanc + B_mean_avail_nanc * mean_avail_clw_nanc + B_wind_max_220_mh * wind_max_220_mh_clw_nanc + B_dist_to_cog * dist_to_cog_clw_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clw_nanc + B_dummy_prev_days * dummy_prev_days_clw_nanc + B_dummy_prev_year_days * dummy_prev_year_days_clw_nanc  + B_unem_rate * unem_rate_clw_nanc + B_d_c * d_c_clw_nanc + B_d_d * d_d_clw_nanc + B_mean_price_part * mean_price_3_clw_nanc
+  V[["cwa_nanc"]]         = asc_cwa_nanc + B_mean_avail_nanc * mean_avail_cwa_nanc + B_wind_max_220_mh * wind_max_220_mh_cwa_nanc + B_dist_to_cog * dist_to_cog_cwa_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_nanc + B_dummy_prev_days * dummy_prev_days_cwa_nanc + B_dummy_prev_year_days * dummy_prev_year_days_cwa_nanc  + B_unem_rate * unem_rate_cwa_nanc + B_d_c * d_c_cwa_nanc + B_d_d * d_d_cwa_nanc + B_mean_price_part * mean_price_3_cwa_nanc
+  V[["clo_cmck"]]         = asc_clo_cmck + B_mean_avail_cmck * mean_avail_clo_cmck + B_wind_max_220_mh * wind_max_220_mh_clo_cmck + B_dist_to_cog * dist_to_cog_clo_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_clo_cmck + B_dummy_prev_days * dummy_prev_days_clo_cmck + B_dummy_prev_year_days * dummy_prev_year_days_clo_cmck  + B_unem_rate * unem_rate_clo_cmck + B_d_c * d_c_clo_cmck + B_d_d * d_d_clo_cmck + B_mean_price_part * mean_price_3_clo_cmck 
+  V[["cwa_dcrb"]]         = asc_cwa_dcrb + B_mean_avail_othr * mean_avail_cwa_dcrb + B_wind_max_220_mh * wind_max_220_mh_cwa_dcrb + B_dist_to_cog * dist_to_cog_cwa_dcrb + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_cwa_dcrb + B_dummy_prev_days * dummy_prev_days_cwa_dcrb + B_dummy_prev_year_days * dummy_prev_year_days_cwa_dcrb  + B_unem_rate * unem_rate_cwa_dcrb + B_d_c * d_c_cwa_dcrb + B_d_d * d_d_cwa_dcrb + B_mean_price_othr * mean_price_3_cwa_dcrb + c_dcrb * dcrbclosurewad_cwa_dcrb
+  V[["nps_sock"]]         = asc_nps_sock + B_mean_avail_othr * mean_avail_nps_sock + B_wind_max_220_mh * wind_max_220_mh_nps_sock + B_dist_to_cog * dist_to_cog_nps_sock + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_nps_sock + B_dummy_prev_days * dummy_prev_days_nps_sock + B_dummy_prev_year_days * dummy_prev_year_days_nps_sock  + B_unem_rate * unem_rate_nps_sock + B_d_c * d_c_nps_sock + B_d_d * d_d_nps_sock + B_mean_price_othr * mean_price_3_nps_sock + B_d_cd * d_cd_nps_sock                        
   V[["no_participation"]] = asc_no_participation 
   
 
@@ -647,60 +635,50 @@ out_c6 <- run_manual_and_compare(
   apollo_probabilities_MANUAL = apollo_probabilities_c6,
   constraints_MANUAL = NULL)
 
-summary(out_c6$model_manual)
-
-# LR test
-lr_test(
-  model_restricted   = out_c7$model_manual,
-  model_unrestricted = m0_c7
-)
-
-
 # ===================== Cluster c7 (from n_logit_c7.R) =====================
 db_c7 <- assets$c7$database_wide
 m0_c7 <- assets$c7$model_original
 apollo_beta_c7 = c(
-  B_mean_avail_mckl                = -7.179891,
-  B_mean_avail_msqd                =  1.481207,
-  B_mean_avail_psdn                =  0.304227,
-  B_mean_avail_nanc                = -0.911978,
-  B_mean_price                     =  0.827208,
-  B_wind_max_220_mh                = -0.043000,
-  B_dist_to_cog                    = -0.003039,
-  B_dist_port_to_catch_area_zero   = -0.005589,
-  B_dummy_prev_days                =  3.010054,
-  B_dummy_prev_year_days           =  0.127715,
-  c_psdn                           = -1.239541,
-  B_d_d                            = -0.515027,
-  B_unem_rate                      =  0.101390,
-  w_msqd                           = -3.886290,
-  asc_laa_cmck                     = -3.243695,
-  asc_mna_cmck                     = -4.787555,
-  asc_laa_jmck                     = -3.361311,
-  asc_mna_jmck                     = -4.188944,
-  asc_laa_msqd                     = -3.814928,
-  asc_mra_msqd                     = -4.724763,
-  asc_sba_msqd                     = -3.829680,
-  asc_sfa_msqd                     = -4.204591,
-  asc_mna_msqd                     = -3.702697,
-  asc_laa_psdn                     = -4.108524,
-  asc_mna_psdn                     = -4.888162,
-  asc_mna_nanc                     = -4.889189,
-  asc_sba_nanc                     = -3.376684,
-  asc_sda_nanc                     = -4.330278,
-  theta_part                       =  0.886061,
-  theta_laa                        = 10.039759,
-  theta_mna                        = 10.017490,
-  theta_sba                        =  0.736090,
-  asc_no_participation             =  0.000000
-)
+  B_mean_avail_mckl               = -1.923781,
+  B_mean_avail_msqd               =  1.605385,
+  B_mean_avail_psdn               =  0.230033,
+  B_mean_avail_nanc               = -1.880464,
+  B_mean_price                    =  0.718037,
+  B_wind_max_220_mh               = -0.040749,
+  B_dist_to_cog                   = -0.003076,
+  B_dist_port_to_catch_area_zero  = -0.006335,
+  B_dummy_prev_days               =  3.088275,
+  B_dummy_prev_year_days          =  0.133980,
+  c_psdn                          = -1.370940,
+  B_d_d                           = -0.515820,
+  B_unem_rate                     =  0.088761,
+  w_msqd                          = -3.952120,
+  asc_laa_cmck                    = -3.913923,
+  asc_mna_cmck                    = -5.338789,
+  asc_laa_jmck                    = -4.176227,
+  asc_mna_jmck                    = -5.113068,
+  asc_laa_msqd                    = -3.692253,
+  asc_mra_msqd                    = -4.633509,
+  asc_sba_msqd                    = -3.710028,
+  asc_sfa_msqd                    = -4.128870,
+  asc_mna_msqd                    = -3.607651,
+  asc_laa_psdn                    = -4.062540,
+  asc_mna_psdn                    = -4.832360,
+  asc_mna_nanc                    = -4.579712,
+  asc_sba_nanc                    = -2.896603,
+  asc_sda_nanc                    = -3.952324,
+  theta_part                      =  0.993484,
+  theta_laa                       = 10.071425,
+  theta_mna                       = 10.029563,
+  theta_sba                       =  0.733464,
+  asc_no_participation            =  0.000000)
 
 
 apollo_fixed_c7 = c("asc_no_participation", "theta_mna",  "theta_laa", "theta_sba", "theta_part", 
-                    "asc_laa_cmck", "asc_mna_cmck", "asc_laa_jmck", "asc_mna_jmck",  "asc_laa_msqd",     
-                    "asc_mra_msqd", "asc_sba_msqd", "asc_sfa_msqd", "asc_mna_msqd",       
-                    "asc_laa_psdn", "asc_mna_psdn",  
-                    "asc_mna_nanc", "asc_sba_nanc", "asc_sda_nanc", 
+                    "asc_laa_cmck", "asc_mna_cmck", "asc_laa_jmck", "asc_mna_jmck",  "asc_laa_msqd",
+                    "asc_mra_msqd", "asc_sba_msqd", "asc_sfa_msqd", "asc_mna_msqd",
+                    "asc_laa_psdn", "asc_mna_psdn",
+                    "asc_mna_nanc", "asc_sba_nanc", "asc_sda_nanc",
                     "c_psdn", "B_d_d", "w_msqd", "B_unem_rate", "B_dist_to_cog", "B_wind_max_220_mh", "B_dist_port_to_catch_area_zero")
 
 
@@ -838,13 +816,18 @@ out_c7 <- run_manual_and_compare(
 )
 
 
+# MODELS
+
+summary(out_c4$model_manual)
+summary(out_c5$model_manual)
+summary(out_c6$model_manual)
 summary(out_c7$model_manual)
 
 # LR test
-lr_test(
-  model_restricted   = out_c7$model_manual,
-  model_unrestricted = m0_c7
-)
+lr_test(model_restricted = out_c4$model_manual, model_unrestricted = m0_c4)
+lr_test(model_restricted = out_c5$model_manual, model_unrestricted = m0_c5)
+lr_test(model_restricted = out_c6$model_manual, model_unrestricted = m0_c6)
+lr_test(model_restricted = out_c7$model_manual, model_unrestricted = m0_c7)
 
 
 # ### ALL CLUSTERS: bind rows #####
