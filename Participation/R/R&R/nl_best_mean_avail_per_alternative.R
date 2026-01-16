@@ -1,7 +1,6 @@
-# ==========================================================
-# REQUIRED OBJECTS (must exist in your session)
-# ==========================================================
-# You already have these in your current pipeline/script:
+# ==================================== #
+#### REQUIRED OBJECTS (must exist in your session) ####
+# ==================================== #
 
 gc()
 
@@ -15,20 +14,15 @@ res_c6 <- readRDS("res_c6.rds")
 res_c7 <- readRDS("res_c7.rds") 
 
 
-############################################################
-# SIMPLE EXTRACT + RUN + COMPARE
-# 1) Pick best SDM spec per cluster (from oos_table.RDS)
-# 2) Extract database_wide per cluster/spec from res_c4..res_c7
-# 3) Save databases to disk (RDS)
-# 4) Re-estimate your manual model per cluster (you fill beta/fixed/prob)
-# 5) Compare LL and k vs original model in res_c*
-############################################################
+# ==================================== #
+#### SIMPLE EXTRACT + RUN + COMPARE ####
+# ==================================== #
 
 library(dplyr)
 
-# ----------------------------
-# (A) Pick best SDM spec per cluster
-# ----------------------------
+# ---------------------------- #
+##### (A) Pick best SDM spec per cluster #####
+# ----------------------------  #
 oos_table <- readRDS("oos_table.RDS")
 
 # best_spec <- oos_table %>%
@@ -42,9 +36,9 @@ best_spec <- oos_table %>%
 
 print(best_spec)
 
-# ----------------------------
-# (B) Collect res objects (must exist in memory)
-# ----------------------------
+# ---------------------------- #
+##### (B) Collect res objects (must exist in memory) ##### 
+# ---------------------------- #
 res_list <- list(
   c4 = res_c4,
   c5 = res_c5,
@@ -736,14 +730,6 @@ apollo_probabilities_c7 = function(apollo_beta, apollo_inputs, functionality="es
   
   ### Specify tree structure for NL model
   nlStructure= list()
-  
-  nlStructure = list()
-  # nlStructure[["root"]] = c("no_participation", "part")
-  # nlStructure[["part"]] = c("laa_cmck", "mna_cmck", "laa_jmck", "mna_jmck", 
-  #                           "laa_msqd", "mra_msqd", "sba_msqd", "sfa_msqd", 
-  #                           "mna_msqd", "laa_psdn", "mna_psdn", "mna_nanc", 
-  #                           "sba_nanc", "sda_nanc")
-  
   nlStructure[["root"]] = c("no_participation", "part")
   nlStructure[["part"]] = c("laa", "mna", "sba", "mra_msqd", "sfa_msqd", "sda_nanc")
   nlStructure[["laa"]] = c("laa_cmck", "laa_jmck", "laa_msqd", "laa_psdn")
@@ -842,3 +828,63 @@ out_c7$model_manual$adjRho2_C
 # ### ALL CLUSTERS: bind rows #####
 # comp_all <- bind_rows(out_c4$compare, out_c5$compare, out_c6$compare, out_c7$compare)
 # write.csv(comp_all, file=file.path("R","output","compare_manual_vs_original_bestSDM.csv"), row.names=FALSE)
+
+
+#### CALCULATE ELASTICITIES ####
+
+library(dplyr)
+library(tibble)
+library(officer)
+library(flextable)
+
+
+#--- load functions ---
+
+source("R/R&R/nl_elasticities_species.R")
+
+
+clusters <- list(
+  c4 = list(db=db_c4, beta=apollo_beta_c4, fixed=apollo_fixed_c4, prob=apollo_probabilities_c4, nl=nlStructure_c4),
+  c5 = list(db=db_c5, beta=apollo_beta_c5, fixed=apollo_fixed_c5, prob=apollo_probabilities_c5, nl=nlStructure_c5),
+  c6 = list(db=db_c6, beta=apollo_beta_c6, fixed=apollo_fixed_c6, prob=apollo_probabilities_c6, nl=nlStructure_c6),
+  c7 = list(db=db_c7, beta=apollo_beta_c7, fixed=apollo_fixed_c7, prob=apollo_probabilities_c7, nl=nlStructure_c7)
+)
+
+# prefixes
+price_prefix_by_cluster <- c(c4="mean_price", c5="mean_price_3", c6="mean_price_3", c7="mean_price")
+avail_prefix_by_cluster <- c(c4="mean_avail", c5="mean_avail",   c6="mean_avail",   c7="mean_avail")
+
+
+# -----------------------------
+# 10) RUN + EXPORT
+# -----------------------------
+doc <- read_docx()
+
+for(cl in names(clusters)){
+  obj <- clusters[[cl]]
+  
+  # PRICE
+  vp <- price_prefix_by_cluster[[cl]]
+  tab_p <- make_species_table(obj$db, obj$beta, obj$fixed, obj$prob, obj$nl,
+                              var_prefix=vp, delta=0.01, digits=3, nCores=16)
+  doc <- add_table_to_doc(doc, tab_p,
+                          paste0("Appendix Table. Species-level price elasticities (Cluster ", cl, ")"),
+                          note_price
+  )
+  
+  # AVAIL
+  va <- avail_prefix_by_cluster[[cl]]
+  tab_a <- make_species_table(obj$db, obj$beta, obj$fixed, obj$prob, obj$nl,
+                              var_prefix=va, delta=0.01, digits=3, nCores=16)
+  doc <- add_table_to_doc(doc, tab_a,
+                          paste0("Appendix Table. Species-level availability elasticities (Cluster ", cl, ")"),
+                          note_avail
+  )
+}
+
+out_path <- file.path("R", "output", "appendix_species_elasticities_allclusters_price_avail.docx")
+print(doc, target = out_path)
+
+out_path
+
+

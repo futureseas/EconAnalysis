@@ -1,0 +1,8 @@
+nlStructure <- list()
+nlStructure[["root"]] <- c("no_participation","part")
+nlStructure[["part"]] <- c("cmck","msqd","psdn","nanc","tuna")
+nlStructure[["cmck"]] <- c("laa_cmck","sba_cmck")
+nlStructure[["msqd"]] <- c("laa_msqd","mna_msqd","mra_msqd","sba_msqd","sfa_msqd")
+nlStructure[["psdn"]] <- c("laa_psdn","mna_psdn")
+nlStructure[["nanc"]] <- c("laa_nanc","mna_nanc","sfa_nanc")
+nlStructure[["tuna"]] <- c("laa_ytna","laa_btna")

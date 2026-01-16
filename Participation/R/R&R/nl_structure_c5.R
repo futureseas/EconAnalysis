@@ -1,0 +1,7 @@
+nlStructure= list()
+nlStructure[["root"]] = c("no_participation", "part", "part_crab")
+nlStructure[["part"]] = c("msqd", "cmck", "psdn", "laa_nanc", "cwa_albc" )
+nlStructure[["msqd"]] = c("mna_msqd", "sba_msqd", "mra_msqd", "laa_msqd", "npa_msqd", "sfa_msqd", "cba_msqd" )
+nlStructure[["cmck"]] = c("sba_cmck", "laa_cmck")
+nlStructure[["psdn"]] = c("laa_psdn", "clo_psdn", "cwa_psdn", "clw_psdn" )
+nlStructure[["part_crab"]] = c("cwa_dcrb", "clw_dcrb")
