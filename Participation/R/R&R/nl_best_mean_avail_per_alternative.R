@@ -806,9 +806,16 @@ out_c7 <- run_manual_and_compare(
 
 
 # MODELS
+apollo_modelOutput(out_c4$model_manual)
 summary(out_c4$model_manual)
+
+apollo_modelOutput(out_c5$model_manual)
 summary(out_c5$model_manual)
+
+apollo_modelOutput(out_c6$model_manual)
 summary(out_c6$model_manual)
+
+apollo_modelOutput(out_c7$model_manual)
 summary(out_c7$model_manual)
 
 ## Observed shares
