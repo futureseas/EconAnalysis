@@ -178,7 +178,6 @@ lr_test <- function(model_restricted, model_unrestricted){
 }
 
 
-# RUN MODELS
 
 
 
