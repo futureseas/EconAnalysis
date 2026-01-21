@@ -258,6 +258,8 @@ apollo_beta_c4 <- c(
 
 apollo_fixed_c4 <- c("asc_no_participation", "theta_cmck", "theta_tuna", "B_d_d", "B_d_cd", "B_d_c")
 
+apollo_fixed_c4 = c("asc_no_participation")
+
 apollo_probabilities_c4 <- function(apollo_beta, apollo_inputs, functionality="estimate"){
   apollo_attach(apollo_beta, apollo_inputs)
   closure <- closure1517
@@ -424,7 +426,7 @@ apollo_fixed_c5 = c("asc_no_participation", "theta_cmck", "theta_part_crab", "th
                     "B_mean_price_part",
                     "B_mean_price_crab")
 
-# apollo_fixed_c5 = c("asc_no_participation")
+apollo_fixed_c5 = c("asc_no_participation")
 
 apollo_probabilities_c5 = function(apollo_beta, apollo_inputs, functionality="estimate"){
   
@@ -607,8 +609,9 @@ apollo_fixed_c6 <- c("asc_no_participation", "B_d_c", "theta_part", "theta_nanc"
                      "B_mean_price_part",  
                      "B_mean_price_othr",
                      "B_closure_dist_to_cog")
-# ,           
-#                      "B_closure_dist_port_to_catch_area_zero")
+
+apollo_fixed_c6 = c("asc_no_participation")
+
                      
 apollo_probabilities_c6 = function(apollo_beta, apollo_inputs, functionality="estimate"){
   
@@ -804,9 +807,8 @@ apollo_fixed_c7 = c(
 "B_closure_dist_to_cog",
 "B_closure_dist_port_to_catch_area_zero")
   
+apollo_fixed_c7 = c("asc_no_participation")
   
-  
-
 apollo_probabilities_c7 = function(apollo_beta, apollo_inputs, functionality="estimate"){
   
   ### Attach inputs and detach after function exit
