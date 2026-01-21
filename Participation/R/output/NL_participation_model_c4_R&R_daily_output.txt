@@ -5,7 +5,7 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : NL_participation_model_c4_R&R_daily
 Model description                           : Participation, location and target species decisions
-Model run at                                : 2026-01-20 17:07:59.650492
+Model run at                                : 2026-01-21 09:11:23.617339
 Estimation method                           : bfgs
 Estimation diagnosis                        : successful convergence
 Optimisation diagnosis                      : Maximum found
@@ -31,10 +31,10 @@ AIC                                         :  47166.51
 BIC                                         :  47464.61 
 
 Estimated parameters                        : 36
-Time taken (hh:mm:ss)                       :  00:02:22.36 
-     pre-estimation                         :  00:00:18.71 
-     estimation                             :  00:00:9.92 
-     post-estimation                        :  00:01:53.73 
+Time taken (hh:mm:ss)                       :  00:02:31.49 
+     pre-estimation                         :  00:00:17.56 
+     estimation                             :  00:00:11.73 
+     post-estimation                        :  00:02:2.2 
 Iterations                                  :  2  
 
 Unconstrained optimisation.
