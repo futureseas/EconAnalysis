@@ -894,3 +894,165 @@ print(doc, target = out_path)
 out_path
 
 
+# ---- Descriptive Statistics ---- #
+
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(purrr)
+library(officer)
+library(flextable)
+
+# ==========================
+# Helpers
+# ==========================
+
+desc_stats <- function(x){
+  x_num <- suppressWarnings(as.numeric(x))
+  tibble(
+    N      = sum(!is.na(x_num)),
+    mean   = mean(x_num, na.rm=TRUE),
+    sd     = sd(x_num, na.rm=TRUE),
+    min    = min(x_num, na.rm=TRUE),
+    p05    = quantile(x_num, 0.05, na.rm=TRUE, names=FALSE),
+    p25    = quantile(x_num, 0.25, na.rm=TRUE, names=FALSE),
+    median = quantile(x_num, 0.50, na.rm=TRUE, names=FALSE),
+    p75    = quantile(x_num, 0.75, na.rm=TRUE, names=FALSE),
+    p95    = quantile(x_num, 0.95, na.rm=TRUE, names=FALSE),
+    max    = max(x_num, na.rm=TRUE),
+    share_zero = mean(x_num == 0, na.rm=TRUE),
+    share_one  = mean(x_num == 1, na.rm=TRUE)
+  )
+}
+
+# Descriptiva de variables CASE-LEVEL (columnas sin sufijo de alternativa)
+make_case_level_desc <- function(db, drop_cols = c("choice","fished_vessel_anon")){
+  # Heurística: nos quedamos con columnas que NO contienen "_<alt>" al final,
+  # y que NO son claramente alt-level (mean_avail_, mean_price_, etc.)
+  # Ajusta si tienes nombres raros.
+  alt_prefixes <- c(
+    "mean_avail_", "mean_price_", "mean_price_3_",
+    "wind_max_220_mh_", "dist_to_cog_", "dist_port_to_catch_area_zero_",
+    "dummy_prev_days_", "dummy_prev_year_days_",
+    "unem_rate_", "d_c_", "d_d_", "d_cd_"
+  )
+  
+  case_cols <- setdiff(names(db), drop_cols)
+  case_cols <- case_cols[!Reduce(`|`, lapply(alt_prefixes, \(p) str_starts(case_cols, p)))]
+  
+  # Además, algunas variables alt-level podrían no estar en esa lista: filtra por patrón "_[a-z]{2,3}_.+"
+  # (si esto te elimina cosas que sí quieres, comenta esta línea)
+  case_cols <- case_cols[!str_detect(case_cols, "_.+_.+")]  # muy conservador para tu set actual
+  
+  out <- map_dfr(case_cols, \(v){
+    tibble(variable = v) %>% bind_cols(desc_stats(db[[v]]))
+  }) %>%
+    arrange(variable)
+  
+  out
+}
+
+# Descriptiva ALT-LEVEL: agrupa columnas por prefijo (var_prefix),
+# pivotea a long, calcula stats "pooled over alternatives"
+make_alt_level_desc <- function(db, var_prefix){
+  cols <- names(db)[str_starts(names(db), paste0(var_prefix, "_"))]
+  if(length(cols)==0) return(NULL)
+  
+  long <- db %>%
+    select(all_of(cols)) %>%
+    pivot_longer(everything(), names_to="name", values_to="value") %>%
+    mutate(
+      alt = str_remove(name, paste0("^", var_prefix, "_"))
+    )
+  
+  # pooled (todas las alternativas juntas)
+  pooled <- tibble(variable = var_prefix, level="pooled") %>%
+    bind_cols(desc_stats(long$value))
+  
+  # por alternativa (útil para apéndice/supl)
+  by_alt <- long %>%
+    group_by(alt) %>%
+    summarise(desc_stats(value), .groups="drop") %>%
+    mutate(variable = var_prefix, level="by_alt") %>%
+    relocate(variable, level, alt)
+  
+  list(pooled = pooled, by_alt = by_alt)
+}
+
+# Wrapper por cluster
+make_desc_by_cluster <- function(db){
+  # Prefijos que quieres sí o sí (ajusta si agregas/quitas)
+  prefixes <- c(
+    "mean_avail",
+    "mean_price", "mean_price_3",
+    "wind_max_220_mh",
+    "dist_to_cog", "dist_port_to_catch_area_zero",
+    "dummy_prev_days", "dummy_prev_year_days",
+    "unem_rate",
+    "d_c", "d_d", "d_cd"
+  )
+  
+  # CASE-LEVEL
+  tab_case <- make_case_level_desc(db)
+  
+  # ALT-LEVEL
+  alt_tabs <- keep(map(prefixes, \(p) make_alt_level_desc(db, p)), ~ !is.null(.x))
+  pooled   <- bind_rows(map(alt_tabs, "pooled"))
+  by_alt   <- bind_rows(map(alt_tabs, "by_alt"))
+  
+  list(case_level = tab_case, alt_pooled = pooled, alt_by_alt = by_alt)
+}
+
+# ==========================
+# RUN for your four clusters
+# ==========================
+db_list <- list(c4=db_c4, c5=db_c5, c6=db_c6, c7=db_c7)
+
+desc_all <- imap(db_list, \(db, cl){
+  make_desc_by_cluster(db)
+})
+
+# ==========================
+# EXPORT to DOCX
+# ==========================
+doc <- read_docx()
+
+for(cl in names(desc_all)){
+  doc <- body_add_par(doc, paste0("Descriptive statistics — Cluster ", cl), style="heading 1")
+  
+  # Case-level
+  doc <- body_add_par(doc, "Case-level variables (trip/choice occasion)", style="heading 2")
+  ft1 <- flextable(desc_all[[cl]]$case_level)
+  ft1 <- autofit(ft1)
+  doc <- body_add_flextable(doc, ft1)
+  
+  # Alt-level pooled
+  doc <- body_add_par(doc, "Alternative-level variables (pooled across alternatives)", style="heading 2")
+  ft2 <- flextable(desc_all[[cl]]$alt_pooled)
+  ft2 <- autofit(ft2)
+  doc <- body_add_flextable(doc, ft2)
+  
+  # Alt-level by alternative (opcional pero útil)
+  doc <- body_add_par(doc, "Alternative-level variables (by alternative)", style="heading 2")
+  ft3 <- flextable(desc_all[[cl]]$alt_by_alt)
+  ft3 <- autofit(ft3)
+  doc <- body_add_flextable(doc, ft3)
+}
+
+out_doc <- file.path("R","output","descriptive_stats_by_cluster.docx")
+print(doc, target = out_doc)
+out_doc
+
+# ==========================
+# OPTIONAL: also export CSVs
+# ==========================
+dir.create(file.path("R","output","desc_stats"), showWarnings = FALSE, recursive = TRUE)
+
+for(cl in names(desc_all)){
+  write.csv(desc_all[[cl]]$case_level, file.path("R","output","desc_stats", paste0("desc_case_", cl, ".csv")), row.names=FALSE)
+  write.csv(desc_all[[cl]]$alt_pooled, file.path("R","output","desc_stats", paste0("desc_alt_pooled_", cl, ".csv")), row.names=FALSE)
+  write.csv(desc_all[[cl]]$alt_by_alt, file.path("R","output","desc_stats", paste0("desc_alt_byalt_", cl, ".csv")), row.names=FALSE)
+}
+
+
+

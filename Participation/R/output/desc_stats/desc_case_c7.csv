@@ -1,0 +1,5 @@
+"variable","N","mean","sd","min","max"
+"msqdclosure",2481,0.011,0.106,0,1
+"psdnclosure",2481,0.411,0.492,0,1
+"set_date",0,NA,NA,Inf,-Inf
+"weekend",2481,0.274,0.446,0,1

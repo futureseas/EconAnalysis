@@ -1,0 +1,5 @@
+"variable","N","mean","sd","min","max"
+"btnaclosure",29160,0.179,0.383,0,1
+"psdnclosure",29160,0.542,0.498,0,1
+"set_date",0,NA,NA,Inf,-Inf
+"weekend",29160,0.281,0.449,0,1

@@ -5,13 +5,13 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : MANUAL_c7_bestSDM
 Model description                           : Manual re-estimation on extracted database_wide
-Model run at                                : 2026-01-21 16:39:26.058896
+Model run at                                : 2026-01-22 12:56:29.460639
 Estimation method                           : bfgs
 Estimation diagnosis                        : successful convergence
 Optimisation diagnosis                      : Maximum found
      hessian properties                     : Negative definite
-     maximum eigenvalue                     : -0.65444
-     reciprocal of condition number         : 1.57467e-05
+     maximum eigenvalue                     : -0.495782
+     reciprocal of condition number         : 1.37794e-05
 Number of individuals                       : 8
 Number of rows in database                  : 2481
 Number of modelled outcomes                 : 2481
@@ -19,86 +19,85 @@ Number of modelled outcomes                 : 2481
 Number of cores used                        :  16 
 Model without mixing
 
-LL(start)                                   : -1669.8
+LL(start)                                   : -1675.24
 LL at equal shares, LL(0)                   : -6707.32
 LL at observed shares, LL(C)                : -3032.01
-LL(final)                                   : -1669.8
-Rho-squared vs equal shares                  :  0.751 
-Adj.Rho-squared vs equal shares              :  0.7502 
-Rho-squared vs observed shares               :  0.4493 
-Adj.Rho-squared vs observed shares           :  0.4519 
-AIC                                         :  3351.61 
-BIC                                         :  3386.51 
+LL(final)                                   : -1675.24
+Rho-squared vs equal shares                  :  0.7502 
+Adj.Rho-squared vs equal shares              :  0.7495 
+Rho-squared vs observed shares               :  0.4475 
+Adj.Rho-squared vs observed shares           :  0.4505 
+AIC                                         :  3360.47 
+BIC                                         :  3389.56 
 
-Estimated parameters                        : 6
-Time taken (hh:mm:ss)                       :  00:00:7.89 
-     pre-estimation                         :  00:00:6.18 
-     estimation                             :  00:00:0.82 
-     post-estimation                        :  00:00:0.89 
+Estimated parameters                        : 5
+Time taken (hh:mm:ss)                       :  00:00:7.12 
+     pre-estimation                         :  00:00:5.72 
+     estimation                             :  00:00:0.75 
+     post-estimation                        :  00:00:0.65 
 Iterations                                  :  2  
 
 Unconstrained optimisation.
 
 Estimates:
-                                      Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
-B_mean_avail_mckl                    -8.358936          NA          NA          NA          NA            NA            NA
-B_mean_avail_msqd                     0.772054          NA          NA          NA          NA            NA            NA
-B_mean_avail_psdn                    -0.646459          NA          NA          NA          NA            NA            NA
-B_mean_avail_nanc                    -2.419057          NA          NA          NA          NA            NA            NA
-B_mean_price                          0.200397          NA          NA          NA          NA            NA            NA
-B_wind_max_220_mh                    -0.043364          NA          NA          NA          NA            NA            NA
-B_dist_to_cog                        -0.002664          NA          NA          NA          NA            NA            NA
-B_dist_port_to_catch_area_zero        0.003470          NA          NA          NA          NA            NA            NA
-B_mhw_mean_avail_mckl                 7.887799     0.91931      8.5801      7.4923    0.902895        8.7361        7.6286
-B_mhw_mean_avail_msqd                 1.409685     0.63536      2.2187      0.6448    1.498040        0.9410        0.2735
-B_mhw_mean_avail_psdn                 0.447252     1.16196      0.3849     -0.4757    0.752388        0.5944       -0.7347
-B_mhw_mean_avail_nanc                 0.754018     0.40757      1.8500     -0.6035    0.293203        2.5717       -0.8389
-B_mhw_mean_price                      0.910516     0.21411      4.2526     -0.4179    0.128103        7.1077       -0.6985
-B_mhw_wind_max_220_mh                 0.002014     0.01269      0.1587    -78.6284    0.007880        0.2555     -126.6503
-B_mhw_dist_to_cog                  -8.7820e-04          NA          NA          NA          NA            NA            NA
-B_mhw_dist_port_to_catch_area_zero   -0.019983          NA          NA          NA          NA            NA            NA
-B_dummy_prev_days                     3.133901          NA          NA          NA          NA            NA            NA
-B_dummy_prev_year_days                0.203803          NA          NA          NA          NA            NA            NA
-c_psdn                               -1.411177          NA          NA          NA          NA            NA            NA
-B_d_d                                -0.650174          NA          NA          NA          NA            NA            NA
-B_unem_rate                           0.056998          NA          NA          NA          NA            NA            NA
-w_msqd                               -4.143058          NA          NA          NA          NA            NA            NA
-asc_laa_cmck                         -3.549095          NA          NA          NA          NA            NA            NA
-asc_mna_cmck                         -5.421331          NA          NA          NA          NA            NA            NA
-asc_laa_jmck                         -3.685704          NA          NA          NA          NA            NA            NA
-asc_mna_jmck                         -5.328260          NA          NA          NA          NA            NA            NA
-asc_laa_msqd                         -3.463903          NA          NA          NA          NA            NA            NA
-asc_mra_msqd                         -4.654475          NA          NA          NA          NA            NA            NA
-asc_sba_msqd                         -3.490889          NA          NA          NA          NA            NA            NA
-asc_sfa_msqd                         -3.920708          NA          NA          NA          NA            NA            NA
-asc_mna_msqd                         -3.405901          NA          NA          NA          NA            NA            NA
-asc_laa_psdn                         -3.920159          NA          NA          NA          NA            NA            NA
-asc_mna_psdn                         -4.381788          NA          NA          NA          NA            NA            NA
-asc_mna_nanc                         -4.291128          NA          NA          NA          NA            NA            NA
-asc_sba_nanc                         -2.645885          NA          NA          NA          NA            NA            NA
-asc_sda_nanc                         -3.763726          NA          NA          NA          NA            NA            NA
-theta_part                            1.158210          NA          NA          NA          NA            NA            NA
-theta_laa                            10.126098          NA          NA          NA          NA            NA            NA
-theta_mna                            10.051506          NA          NA          NA          NA            NA            NA
-theta_sba                             0.920563          NA          NA          NA          NA            NA            NA
-asc_no_participation                  0.000000          NA          NA          NA          NA            NA            NA
+                                          Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
+B_mean_avail_mckl                        -0.368964          NA          NA          NA          NA            NA            NA
+B_mean_avail_msqd                         3.692580          NA          NA          NA          NA            NA            NA
+B_mean_avail_psdn                         0.160806          NA          NA          NA          NA            NA            NA
+B_mean_avail_nanc                        -2.186450          NA          NA          NA          NA            NA            NA
+B_mean_price                              0.576464          NA          NA          NA          NA            NA            NA
+B_wind_max_220_mh                        -0.036316          NA          NA          NA          NA            NA            NA
+B_dist_to_cog                            -0.002947          NA          NA          NA          NA            NA            NA
+B_dist_port_to_catch_area_zero           -0.004731          NA          NA          NA          NA            NA            NA
+B_closure_mean_avail_mckl                -3.324804     1.38317    -2.40375     -3.1267     0.85060      -3.90877        -5.084
+B_closure_mean_avail_msqd                -3.591292     0.68711    -5.22669     -6.6821     0.84266      -4.26187        -5.449
+B_closure_mean_avail_nanc                -0.012616     0.42278    -0.02984     -2.3951     0.29692      -0.04249        -3.410
+B_closure_mean_price                      0.810512     0.21004     3.85878     -0.9021     0.14733       5.50150        -1.286
+B_closure_wind_max_220_mh                -0.013260     0.01400    -0.94745    -72.4009     0.01473      -0.90006       -68.779
+B_closure_dist_to_cog                   2.0495e-04          NA          NA          NA          NA            NA            NA
+B_closure_dist_port_to_catch_area_zero   -0.002349          NA          NA          NA          NA            NA            NA
+B_dummy_prev_days                         3.087478          NA          NA          NA          NA            NA            NA
+B_dummy_prev_year_days                    0.177936          NA          NA          NA          NA            NA            NA
+c_psdn                                   -1.330414          NA          NA          NA          NA            NA            NA
+B_d_d                                    -0.518813          NA          NA          NA          NA            NA            NA
+B_unem_rate                               0.102807          NA          NA          NA          NA            NA            NA
+w_msqd                                   -3.986706          NA          NA          NA          NA            NA            NA
+asc_laa_cmck                             -4.291057          NA          NA          NA          NA            NA            NA
+asc_mna_cmck                             -5.708159          NA          NA          NA          NA            NA            NA
+asc_laa_jmck                             -4.587824          NA          NA          NA          NA            NA            NA
+asc_mna_jmck                             -5.359585          NA          NA          NA          NA            NA            NA
+asc_laa_msqd                             -4.049706          NA          NA          NA          NA            NA            NA
+asc_mra_msqd                             -4.994241          NA          NA          NA          NA            NA            NA
+asc_sba_msqd                             -4.115469          NA          NA          NA          NA            NA            NA
+asc_sfa_msqd                             -4.676275          NA          NA          NA          NA            NA            NA
+asc_mna_msqd                             -4.029841          NA          NA          NA          NA            NA            NA
+asc_laa_psdn                             -4.256098          NA          NA          NA          NA            NA            NA
+asc_mna_psdn                             -4.991503          NA          NA          NA          NA            NA            NA
+asc_mna_nanc                             -4.638374          NA          NA          NA          NA            NA            NA
+asc_sba_nanc                             -3.059797          NA          NA          NA          NA            NA            NA
+asc_sda_nanc                             -4.064235          NA          NA          NA          NA            NA            NA
+theta_part                                0.944799          NA          NA          NA          NA            NA            NA
+theta_laa                                10.237990          NA          NA          NA          NA            NA            NA
+theta_mna                                10.104330          NA          NA          NA          NA            NA            NA
+theta_sba                                 0.731990          NA          NA          NA          NA            NA            NA
+asc_no_participation                      0.000000          NA          NA          NA          NA            NA            NA
 
 Nesting structure for NL model component :
 Nest: root (1)
 |-------Alternative: no_participation
-'-Nest: part (0.761)
-   |-Nest: laa (0.761)
+'-Nest: part (0.7201)
+   |-Nest: laa (0.72)
    |  |-Alternative: laa_cmck
    |  |-Alternative: laa_jmck
    |  |-Alternative: laa_msqd
    |  '-Alternative: laa_psdn
-   |-Nest: mna (0.761)
+   |-Nest: mna (0.72)
    |  |-Alternative: mna_cmck
    |  |-Alternative: mna_jmck
    |  |-Alternative: mna_msqd
    |  |-Alternative: mna_psdn
    |  '-Alternative: mna_nanc
-   |-Nest: sba (0.5442)
+   |-Nest: sba (0.4862)
    |  |-Alternative: sba_msqd
    |  '-Alternative: sba_nanc
    |----Alternative: mra_msqd
@@ -115,51 +114,47 @@ Percentage chosen when available     1.29      0.4     0.28     0.32     4.61   
 
 
 Classical covariance matrix:
-                      B_mhw_mean_avail_mckl B_mhw_mean_avail_msqd B_mhw_mean_avail_psdn B_mhw_mean_avail_nanc      B_mhw_mean_price B_mhw_wind_max_220_mh
-B_mhw_mean_avail_mckl              0.845135               0.23918              0.267865              0.147316             -0.001487             -0.004003
-B_mhw_mean_avail_msqd              0.239184               0.40368              0.098777              0.118646             -0.047221           -9.8718e-04
-B_mhw_mean_avail_psdn              0.267865               0.09878              1.350152              0.119864              0.082159             -0.006964
-B_mhw_mean_avail_nanc              0.147316               0.11865              0.119864              0.166113              0.003301             -0.002294
-B_mhw_mean_price                  -0.001487              -0.04722              0.082159              0.003301              0.045843             -0.002100
-B_mhw_wind_max_220_mh             -0.004003           -9.8718e-04             -0.006964             -0.002294             -0.002100            1.6110e-04
+                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd B_closure_mean_avail_nanc      B_closure_mean_price B_closure_wind_max_220_mh
+B_closure_mean_avail_mckl                  1.913172                   0.35586                  0.157830                 -0.056799                 -0.002092
+B_closure_mean_avail_msqd                  0.355857                   0.47212                  0.130656                 -0.062734               -9.8053e-04
+B_closure_mean_avail_nanc                  0.157830                   0.13066                  0.178745                  0.009697                 -0.003098
+B_closure_mean_price                      -0.056799                  -0.06273                  0.009697                  0.044118                 -0.002231
+B_closure_wind_max_220_mh                 -0.002092               -9.8053e-04                 -0.003098                 -0.002231                1.9586e-04
 
 Robust covariance matrix:
-                      B_mhw_mean_avail_mckl B_mhw_mean_avail_msqd B_mhw_mean_avail_psdn B_mhw_mean_avail_nanc      B_mhw_mean_price B_mhw_wind_max_220_mh
-B_mhw_mean_avail_mckl              0.815220              1.138411              0.244179               0.12322              -0.06626             -0.005648
-B_mhw_mean_avail_msqd              1.138411              2.244123              0.125343               0.26328              -0.14456             -0.006960
-B_mhw_mean_avail_psdn              0.244179              0.125343              0.566088               0.06404              -0.02291             -0.003492
-B_mhw_mean_avail_nanc              0.123222              0.263278              0.064035               0.08597              -0.03369           -3.1209e-04
-B_mhw_mean_price                  -0.066263             -0.144564             -0.022906              -0.03369               0.01641            1.5115e-04
-B_mhw_wind_max_220_mh             -0.005648             -0.006960             -0.003492           -3.1209e-04            1.5115e-04             6.209e-05
+                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd B_closure_mean_avail_nanc      B_closure_mean_price B_closure_wind_max_220_mh
+B_closure_mean_avail_mckl                  0.723522                  0.294607                  0.089680                  0.001291                 -0.006284
+B_closure_mean_avail_msqd                  0.294607                  0.710069                  0.118921                 -0.002431                 -0.007445
+B_closure_mean_avail_nanc                  0.089680                  0.118921                  0.088162                  0.021621                 -0.003589
+B_closure_mean_price                       0.001291                 -0.002431                  0.021621                  0.021705                 -0.001491
+B_closure_wind_max_220_mh                 -0.006284                 -0.007445                 -0.003589                 -0.001491                2.1703e-04
 
 Classical correlation matrix:
-                      B_mhw_mean_avail_mckl B_mhw_mean_avail_msqd B_mhw_mean_avail_psdn B_mhw_mean_avail_nanc      B_mhw_mean_price B_mhw_wind_max_220_mh
-B_mhw_mean_avail_mckl              1.000000                0.4095                0.2508               0.39317             -0.007554               -0.3431
-B_mhw_mean_avail_msqd              0.409497                1.0000                0.1338               0.45818             -0.347124               -0.1224
-B_mhw_mean_avail_psdn              0.250762                0.1338                1.0000               0.25310              0.330238               -0.4722
-B_mhw_mean_avail_nanc              0.393174                0.4582                0.2531               1.00000              0.037828               -0.4435
-B_mhw_mean_price                  -0.007554               -0.3471                0.3302               0.03783              1.000000               -0.7728
-B_mhw_wind_max_220_mh             -0.343067               -0.1224               -0.4722              -0.44353             -0.772826                1.0000
+                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd B_closure_mean_avail_nanc      B_closure_mean_price B_closure_wind_max_220_mh
+B_closure_mean_avail_mckl                    1.0000                    0.3744                    0.2699                   -0.1955                   -0.1081
+B_closure_mean_avail_msqd                    0.3744                    1.0000                    0.4498                   -0.4347                   -0.1020
+B_closure_mean_avail_nanc                    0.2699                    0.4498                    1.0000                    0.1092                   -0.5235
+B_closure_mean_price                        -0.1955                   -0.4347                    0.1092                    1.0000                   -0.7589
+B_closure_wind_max_220_mh                   -0.1081                   -0.1020                   -0.5235                   -0.7589                    1.0000
 
 Robust correlation matrix:
-                      B_mhw_mean_avail_mckl B_mhw_mean_avail_msqd B_mhw_mean_avail_psdn B_mhw_mean_avail_nanc      B_mhw_mean_price B_mhw_wind_max_220_mh
-B_mhw_mean_avail_mckl                1.0000                0.8417                0.3594                0.4655               -0.5729               -0.7938
-B_mhw_mean_avail_msqd                0.8417                1.0000                0.1112                0.5994               -0.7533               -0.5896
-B_mhw_mean_avail_psdn                0.3594                0.1112                1.0000                0.2903               -0.2377               -0.5890
-B_mhw_mean_avail_nanc                0.4655                0.5994                0.2903                1.0000               -0.8971               -0.1351
-B_mhw_mean_price                    -0.5729               -0.7533               -0.2377               -0.8971                1.0000                0.1497
-B_mhw_wind_max_220_mh               -0.7938               -0.5896               -0.5890               -0.1351                0.1497                1.0000
+                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd B_closure_mean_avail_nanc      B_closure_mean_price B_closure_wind_max_220_mh
+B_closure_mean_avail_mckl                   1.00000                   0.41102                    0.3551                   0.01030                   -0.5015
+B_closure_mean_avail_msqd                   0.41102                   1.00000                    0.4753                  -0.01958                   -0.5998
+B_closure_mean_avail_nanc                   0.35508                   0.47530                    1.0000                   0.49427                   -0.8204
+B_closure_mean_price                        0.01030                  -0.01958                    0.4943                   1.00000                   -0.6868
+B_closure_wind_max_220_mh                  -0.50151                  -0.59976                   -0.8204                  -0.68675                    1.0000
 
  8 most extreme outliers in terms of lowest average per choice prediction:
  ID Avg prob per choice
-  4           0.4512515
-  2           0.4884084
-  8           0.4955382
-  7           0.5100953
-  5           0.5122259
-  6           0.5368459
-  3           0.5393678
-  1           0.9456355
+  4           0.4426052
+  2           0.4921763
+  8           0.4996063
+  5           0.5023821
+  7           0.5142488
+  6           0.5402726
+  3           0.5419863
+  1           0.9149363
 
 Settings and functions used in model definition:
 
@@ -194,13 +189,12 @@ numerical second derivative of LL (using numDeriv)
 
 Scaling used in computing Hessian
 ---------------------------------
-                            Value
-B_mhw_mean_avail_mckl 7.887798994
-B_mhw_mean_avail_msqd 1.409685001
-B_mhw_mean_avail_psdn 0.447252008
-B_mhw_mean_avail_nanc 0.754017987
-B_mhw_mean_price      0.910515992
-B_mhw_wind_max_220_mh 0.002013663
+                               Value
+B_closure_mean_avail_mckl 3.32480400
+B_closure_mean_avail_msqd 3.59129201
+B_closure_mean_avail_nanc 0.01261600
+B_closure_mean_price      0.81051195
+B_closure_wind_max_220_mh 0.01325968
 
 
 apollo_probabilities
@@ -209,7 +203,7 @@ function(apollo_beta, apollo_inputs, functionality="estimate"){
   
   ### Attach inputs and detach after function exit
   apollo_attach(apollo_beta, apollo_inputs)
-  mhw <- mhw1416
+  closure <- closure1517
   on.exit(apollo_detach(apollo_beta, apollo_inputs))
   use_d_c <- if(!is.null(apollo_inputs$use_d_c)) apollo_inputs$use_d_c else 0
   
@@ -234,20 +228,20 @@ function(apollo_beta, apollo_inputs, functionality="estimate"){
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
   
   V = list()
-  V[["laa_cmck"]]         = asc_laa_cmck + B_mean_avail_mckl * mean_avail_laa_cmck + B_mean_price * mean_price_laa_cmck + B_wind_max_220_mh * wind_max_220_mh_laa_cmck + B_dist_to_cog * dist_to_cog_laa_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_cmck + B_dummy_prev_days * dummy_prev_days_laa_cmck + B_dummy_prev_year_days * dummy_prev_year_days_laa_cmck  + B_unem_rate * unem_rate_laa_cmck + B_d_d * d_d_laa_cmck + B_mhw_mean_avail_mckl * mean_avail_laa_cmck * mhw + B_mhw_mean_price * mean_price_laa_cmck * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_laa_cmck * mhw + B_mhw_dist_to_cog * dist_to_cog_laa_cmck * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_cmck * mhw
-  V[["mna_cmck"]]         = asc_mna_cmck + B_mean_avail_mckl * mean_avail_mna_cmck + B_mean_price * mean_price_mna_cmck + B_wind_max_220_mh * wind_max_220_mh_mna_cmck + B_dist_to_cog * dist_to_cog_mna_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_cmck + B_dummy_prev_days * dummy_prev_days_mna_cmck + B_dummy_prev_year_days * dummy_prev_year_days_mna_cmck  + B_unem_rate * unem_rate_mna_cmck + B_d_d * d_d_mna_cmck + B_mhw_mean_avail_mckl * mean_avail_mna_cmck * mhw + B_mhw_mean_price * mean_price_mna_cmck * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_mna_cmck * mhw + B_mhw_dist_to_cog * dist_to_cog_mna_cmck * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_cmck * mhw
-  V[["laa_jmck"]]         = asc_laa_jmck + B_mean_avail_mckl * mean_avail_laa_jmck + B_mean_price * mean_price_laa_jmck + B_wind_max_220_mh * wind_max_220_mh_laa_jmck + B_dist_to_cog * dist_to_cog_laa_jmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_jmck + B_dummy_prev_days * dummy_prev_days_laa_jmck + B_dummy_prev_year_days * dummy_prev_year_days_laa_jmck  + B_unem_rate * unem_rate_laa_jmck + B_d_d * d_d_laa_jmck + B_mhw_mean_avail_mckl * mean_avail_laa_jmck * mhw + B_mhw_mean_price * mean_price_laa_jmck * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_laa_jmck * mhw + B_mhw_dist_to_cog * dist_to_cog_laa_jmck * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_jmck * mhw
-  V[["mna_jmck"]]         = asc_mna_jmck + B_mean_avail_mckl * mean_avail_mna_jmck + B_mean_price * mean_price_mna_jmck + B_wind_max_220_mh * wind_max_220_mh_mna_jmck + B_dist_to_cog * dist_to_cog_mna_jmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_jmck + B_dummy_prev_days * dummy_prev_days_mna_jmck + B_dummy_prev_year_days * dummy_prev_year_days_mna_jmck  + B_unem_rate * unem_rate_mna_jmck + B_d_d * d_d_mna_jmck + B_mhw_mean_avail_mckl * mean_avail_mna_jmck * mhw + B_mhw_mean_price * mean_price_mna_jmck * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_mna_jmck * mhw + B_mhw_dist_to_cog * dist_to_cog_mna_jmck * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_jmck * mhw
-  V[["laa_msqd"]]         = asc_laa_msqd + B_mean_avail_msqd * mean_avail_laa_msqd + B_mean_price * mean_price_laa_msqd + B_wind_max_220_mh * wind_max_220_mh_laa_msqd + B_dist_to_cog * dist_to_cog_laa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd + B_dummy_prev_days * dummy_prev_days_laa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_laa_msqd  + B_unem_rate * unem_rate_laa_msqd + B_d_d * d_d_laa_msqd + B_mhw_mean_avail_msqd * mean_avail_laa_msqd * mhw + B_mhw_mean_price * mean_price_laa_msqd * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_laa_msqd * mhw + B_mhw_dist_to_cog * dist_to_cog_laa_msqd * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd * mhw + w_msqd * weekend 
-  V[["mra_msqd"]]         = asc_mra_msqd + B_mean_avail_msqd * mean_avail_mra_msqd + B_mean_price * mean_price_mra_msqd + B_wind_max_220_mh * wind_max_220_mh_mra_msqd + B_dist_to_cog * dist_to_cog_mra_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mra_msqd + B_dummy_prev_days * dummy_prev_days_mra_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mra_msqd  + B_unem_rate * unem_rate_mra_msqd + B_d_d * d_d_mra_msqd + B_mhw_mean_avail_msqd * mean_avail_mra_msqd * mhw + B_mhw_mean_price * mean_price_mra_msqd * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_mra_msqd * mhw + B_mhw_dist_to_cog * dist_to_cog_mra_msqd * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mra_msqd * mhw + w_msqd * weekend 
-  V[["sba_msqd"]]         = asc_sba_msqd + B_mean_avail_msqd * mean_avail_sba_msqd + B_mean_price * mean_price_sba_msqd + B_wind_max_220_mh * wind_max_220_mh_sba_msqd + B_dist_to_cog * dist_to_cog_sba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd + B_dummy_prev_days * dummy_prev_days_sba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sba_msqd  + B_unem_rate * unem_rate_sba_msqd + B_d_d * d_d_sba_msqd + B_mhw_mean_avail_msqd * mean_avail_sba_msqd * mhw + B_mhw_mean_price * mean_price_sba_msqd * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_sba_msqd * mhw + B_mhw_dist_to_cog * dist_to_cog_sba_msqd * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd * mhw + w_msqd * weekend 
-  V[["sfa_msqd"]]         = asc_sfa_msqd + B_mean_avail_msqd * mean_avail_sfa_msqd + B_mean_price * mean_price_sfa_msqd + B_wind_max_220_mh * wind_max_220_mh_sfa_msqd + B_dist_to_cog * dist_to_cog_sfa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd + B_dummy_prev_days * dummy_prev_days_sfa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sfa_msqd  + B_unem_rate * unem_rate_sfa_msqd + B_d_d * d_d_sfa_msqd + B_mhw_mean_avail_msqd * mean_avail_sfa_msqd * mhw + B_mhw_mean_price * mean_price_sfa_msqd * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_sfa_msqd * mhw + B_mhw_dist_to_cog * dist_to_cog_sfa_msqd * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd * mhw + w_msqd * weekend 
-  V[["mna_msqd"]]         = asc_mna_msqd + B_mean_avail_msqd * mean_avail_mna_msqd + B_mean_price * mean_price_mna_msqd + B_wind_max_220_mh * wind_max_220_mh_mna_msqd + B_dist_to_cog * dist_to_cog_mna_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd + B_dummy_prev_days * dummy_prev_days_mna_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mna_msqd  + B_unem_rate * unem_rate_mna_msqd + B_d_d * d_d_mna_msqd + B_mhw_mean_avail_msqd * mean_avail_mna_msqd * mhw + B_mhw_mean_price * mean_price_mna_msqd * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_mna_msqd * mhw + B_mhw_dist_to_cog * dist_to_cog_mna_msqd * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd * mhw + w_msqd * weekend 
-  V[["laa_psdn"]]         = asc_laa_psdn + B_mean_avail_psdn * mean_avail_laa_psdn + B_mean_price * mean_price_laa_psdn + B_wind_max_220_mh * wind_max_220_mh_laa_psdn + B_dist_to_cog * dist_to_cog_laa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_psdn + B_dummy_prev_days * dummy_prev_days_laa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_laa_psdn  + B_unem_rate * unem_rate_laa_psdn + B_d_d * d_d_laa_psdn + B_mhw_mean_avail_psdn * mean_avail_laa_psdn * mhw + B_mhw_mean_price * mean_price_laa_psdn * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_laa_psdn * mhw + B_mhw_dist_to_cog * dist_to_cog_laa_psdn * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_psdn * mhw + c_psdn * psdnclosure                            
-  V[["mna_psdn"]]         = asc_mna_psdn + B_mean_avail_psdn * mean_avail_mna_psdn + B_mean_price * mean_price_mna_psdn + B_wind_max_220_mh * wind_max_220_mh_mna_psdn + B_dist_to_cog * dist_to_cog_mna_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_psdn + B_dummy_prev_days * dummy_prev_days_mna_psdn + B_dummy_prev_year_days * dummy_prev_year_days_mna_psdn  + B_unem_rate * unem_rate_mna_psdn + B_d_d * d_d_mna_psdn + B_mhw_mean_avail_psdn * mean_avail_mna_psdn * mhw + B_mhw_mean_price * mean_price_mna_psdn * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_mna_psdn * mhw + B_mhw_dist_to_cog * dist_to_cog_mna_psdn * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_psdn * mhw + c_psdn * psdnclosure
-  V[["mna_nanc"]]         = asc_mna_nanc + B_mean_avail_nanc * mean_avail_mna_nanc + B_mean_price * mean_price_mna_nanc + B_wind_max_220_mh * wind_max_220_mh_mna_nanc + B_dist_to_cog * dist_to_cog_mna_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_nanc + B_dummy_prev_days * dummy_prev_days_mna_nanc + B_dummy_prev_year_days * dummy_prev_year_days_mna_nanc  + B_unem_rate * unem_rate_mna_nanc + B_d_d * d_d_mna_nanc + B_mhw_mean_avail_nanc * mean_avail_mna_nanc * mhw + B_mhw_mean_price * mean_price_mna_nanc * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_mna_nanc * mhw + B_mhw_dist_to_cog * dist_to_cog_mna_nanc * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_nanc * mhw
-  V[["sba_nanc"]]         = asc_sba_nanc + B_mean_avail_nanc * mean_avail_sba_nanc + B_mean_price * mean_price_sba_nanc + B_wind_max_220_mh * wind_max_220_mh_sba_nanc + B_dist_to_cog * dist_to_cog_sba_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_nanc + B_dummy_prev_days * dummy_prev_days_sba_nanc + B_dummy_prev_year_days * dummy_prev_year_days_sba_nanc  + B_unem_rate * unem_rate_sba_nanc + B_d_d * d_d_sba_nanc + B_mhw_mean_avail_nanc * mean_avail_sba_nanc * mhw + B_mhw_mean_price * mean_price_sba_nanc * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_sba_nanc * mhw + B_mhw_dist_to_cog * dist_to_cog_sba_nanc * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_nanc * mhw
-  V[["sda_nanc"]]         = asc_sda_nanc + B_mean_avail_nanc * mean_avail_sda_nanc + B_mean_price * mean_price_sda_nanc + B_wind_max_220_mh * wind_max_220_mh_sda_nanc + B_dist_to_cog * dist_to_cog_sda_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sda_nanc + B_dummy_prev_days * dummy_prev_days_sda_nanc + B_dummy_prev_year_days * dummy_prev_year_days_sda_nanc  + B_unem_rate * unem_rate_sda_nanc + B_d_d * d_d_sda_nanc + B_mhw_mean_avail_nanc * mean_avail_sda_nanc * mhw + B_mhw_mean_price * mean_price_sda_nanc * mhw + B_mhw_wind_max_220_mh * wind_max_220_mh_sda_nanc * mhw + B_mhw_dist_to_cog * dist_to_cog_sda_nanc * mhw + B_mhw_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sda_nanc * mhw
+  V[["laa_cmck"]]         = asc_laa_cmck + B_mean_avail_mckl * mean_avail_laa_cmck + B_mean_price * mean_price_laa_cmck + B_wind_max_220_mh * wind_max_220_mh_laa_cmck + B_dist_to_cog * dist_to_cog_laa_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_cmck + B_dummy_prev_days * dummy_prev_days_laa_cmck + B_dummy_prev_year_days * dummy_prev_year_days_laa_cmck  + B_unem_rate * unem_rate_laa_cmck + B_d_d * d_d_laa_cmck + B_closure_mean_avail_mckl * mean_avail_laa_cmck * closure + B_closure_mean_price * mean_price_laa_cmck * closure + B_closure_wind_max_220_mh * wind_max_220_mh_laa_cmck * closure + B_closure_dist_to_cog * dist_to_cog_laa_cmck * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_cmck * closure
+  V[["mna_cmck"]]         = asc_mna_cmck + B_mean_avail_mckl * mean_avail_mna_cmck + B_mean_price * mean_price_mna_cmck + B_wind_max_220_mh * wind_max_220_mh_mna_cmck + B_dist_to_cog * dist_to_cog_mna_cmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_cmck + B_dummy_prev_days * dummy_prev_days_mna_cmck + B_dummy_prev_year_days * dummy_prev_year_days_mna_cmck  + B_unem_rate * unem_rate_mna_cmck + B_d_d * d_d_mna_cmck + B_closure_mean_avail_mckl * mean_avail_mna_cmck * closure + B_closure_mean_price * mean_price_mna_cmck * closure + B_closure_wind_max_220_mh * wind_max_220_mh_mna_cmck * closure + B_closure_dist_to_cog * dist_to_cog_mna_cmck * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_cmck * closure
+  V[["laa_jmck"]]         = asc_laa_jmck + B_mean_avail_mckl * mean_avail_laa_jmck + B_mean_price * mean_price_laa_jmck + B_wind_max_220_mh * wind_max_220_mh_laa_jmck + B_dist_to_cog * dist_to_cog_laa_jmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_jmck + B_dummy_prev_days * dummy_prev_days_laa_jmck + B_dummy_prev_year_days * dummy_prev_year_days_laa_jmck  + B_unem_rate * unem_rate_laa_jmck + B_d_d * d_d_laa_jmck + B_closure_mean_avail_mckl * mean_avail_laa_jmck * closure + B_closure_mean_price * mean_price_laa_jmck * closure + B_closure_wind_max_220_mh * wind_max_220_mh_laa_jmck * closure + B_closure_dist_to_cog * dist_to_cog_laa_jmck * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_jmck * closure
+  V[["mna_jmck"]]         = asc_mna_jmck + B_mean_avail_mckl * mean_avail_mna_jmck + B_mean_price * mean_price_mna_jmck + B_wind_max_220_mh * wind_max_220_mh_mna_jmck + B_dist_to_cog * dist_to_cog_mna_jmck + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_jmck + B_dummy_prev_days * dummy_prev_days_mna_jmck + B_dummy_prev_year_days * dummy_prev_year_days_mna_jmck  + B_unem_rate * unem_rate_mna_jmck + B_d_d * d_d_mna_jmck + B_closure_mean_avail_mckl * mean_avail_mna_jmck * closure + B_closure_mean_price * mean_price_mna_jmck * closure + B_closure_wind_max_220_mh * wind_max_220_mh_mna_jmck * closure + B_closure_dist_to_cog * dist_to_cog_mna_jmck * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_jmck * closure
+  V[["laa_msqd"]]         = asc_laa_msqd + B_mean_avail_msqd * mean_avail_laa_msqd + B_mean_price * mean_price_laa_msqd + B_wind_max_220_mh * wind_max_220_mh_laa_msqd + B_dist_to_cog * dist_to_cog_laa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd + B_dummy_prev_days * dummy_prev_days_laa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_laa_msqd  + B_unem_rate * unem_rate_laa_msqd + B_d_d * d_d_laa_msqd + B_closure_mean_avail_msqd * mean_avail_laa_msqd * closure + B_closure_mean_price * mean_price_laa_msqd * closure + B_closure_wind_max_220_mh * wind_max_220_mh_laa_msqd * closure + B_closure_dist_to_cog * dist_to_cog_laa_msqd * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_msqd * closure + w_msqd * weekend 
+  V[["mra_msqd"]]         = asc_mra_msqd + B_mean_avail_msqd * mean_avail_mra_msqd + B_mean_price * mean_price_mra_msqd + B_wind_max_220_mh * wind_max_220_mh_mra_msqd + B_dist_to_cog * dist_to_cog_mra_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mra_msqd + B_dummy_prev_days * dummy_prev_days_mra_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mra_msqd  + B_unem_rate * unem_rate_mra_msqd + B_d_d * d_d_mra_msqd + B_closure_mean_avail_msqd * mean_avail_mra_msqd * closure + B_closure_mean_price * mean_price_mra_msqd * closure + B_closure_wind_max_220_mh * wind_max_220_mh_mra_msqd * closure + B_closure_dist_to_cog * dist_to_cog_mra_msqd * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mra_msqd * closure + w_msqd * weekend 
+  V[["sba_msqd"]]         = asc_sba_msqd + B_mean_avail_msqd * mean_avail_sba_msqd + B_mean_price * mean_price_sba_msqd + B_wind_max_220_mh * wind_max_220_mh_sba_msqd + B_dist_to_cog * dist_to_cog_sba_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd + B_dummy_prev_days * dummy_prev_days_sba_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sba_msqd  + B_unem_rate * unem_rate_sba_msqd + B_d_d * d_d_sba_msqd + B_closure_mean_avail_msqd * mean_avail_sba_msqd * closure + B_closure_mean_price * mean_price_sba_msqd * closure + B_closure_wind_max_220_mh * wind_max_220_mh_sba_msqd * closure + B_closure_dist_to_cog * dist_to_cog_sba_msqd * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_msqd * closure + w_msqd * weekend 
+  V[["sfa_msqd"]]         = asc_sfa_msqd + B_mean_avail_msqd * mean_avail_sfa_msqd + B_mean_price * mean_price_sfa_msqd + B_wind_max_220_mh * wind_max_220_mh_sfa_msqd + B_dist_to_cog * dist_to_cog_sfa_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd + B_dummy_prev_days * dummy_prev_days_sfa_msqd + B_dummy_prev_year_days * dummy_prev_year_days_sfa_msqd  + B_unem_rate * unem_rate_sfa_msqd + B_d_d * d_d_sfa_msqd + B_closure_mean_avail_msqd * mean_avail_sfa_msqd * closure + B_closure_mean_price * mean_price_sfa_msqd * closure + B_closure_wind_max_220_mh * wind_max_220_mh_sfa_msqd * closure + B_closure_dist_to_cog * dist_to_cog_sfa_msqd * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sfa_msqd * closure + w_msqd * weekend 
+  V[["mna_msqd"]]         = asc_mna_msqd + B_mean_avail_msqd * mean_avail_mna_msqd + B_mean_price * mean_price_mna_msqd + B_wind_max_220_mh * wind_max_220_mh_mna_msqd + B_dist_to_cog * dist_to_cog_mna_msqd + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd + B_dummy_prev_days * dummy_prev_days_mna_msqd + B_dummy_prev_year_days * dummy_prev_year_days_mna_msqd  + B_unem_rate * unem_rate_mna_msqd + B_d_d * d_d_mna_msqd + B_closure_mean_avail_msqd * mean_avail_mna_msqd * closure + B_closure_mean_price * mean_price_mna_msqd * closure + B_closure_wind_max_220_mh * wind_max_220_mh_mna_msqd * closure + B_closure_dist_to_cog * dist_to_cog_mna_msqd * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_msqd * closure + w_msqd * weekend 
+  V[["laa_psdn"]]         = asc_laa_psdn + B_mean_avail_psdn * mean_avail_laa_psdn + B_mean_price * mean_price_laa_psdn + B_wind_max_220_mh * wind_max_220_mh_laa_psdn + B_dist_to_cog * dist_to_cog_laa_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_laa_psdn + B_dummy_prev_days * dummy_prev_days_laa_psdn + B_dummy_prev_year_days * dummy_prev_year_days_laa_psdn  + B_unem_rate * unem_rate_laa_psdn + B_d_d * d_d_laa_psdn + c_psdn * psdnclosure                            
+  V[["mna_psdn"]]         = asc_mna_psdn + B_mean_avail_psdn * mean_avail_mna_psdn + B_mean_price * mean_price_mna_psdn + B_wind_max_220_mh * wind_max_220_mh_mna_psdn + B_dist_to_cog * dist_to_cog_mna_psdn + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_psdn + B_dummy_prev_days * dummy_prev_days_mna_psdn + B_dummy_prev_year_days * dummy_prev_year_days_mna_psdn  + B_unem_rate * unem_rate_mna_psdn + B_d_d * d_d_mna_psdn + c_psdn * psdnclosure
+  V[["mna_nanc"]]         = asc_mna_nanc + B_mean_avail_nanc * mean_avail_mna_nanc + B_mean_price * mean_price_mna_nanc + B_wind_max_220_mh * wind_max_220_mh_mna_nanc + B_dist_to_cog * dist_to_cog_mna_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_nanc + B_dummy_prev_days * dummy_prev_days_mna_nanc + B_dummy_prev_year_days * dummy_prev_year_days_mna_nanc  + B_unem_rate * unem_rate_mna_nanc + B_d_d * d_d_mna_nanc + B_closure_mean_avail_nanc * mean_avail_mna_nanc * closure + B_closure_mean_price * mean_price_mna_nanc * closure + B_closure_wind_max_220_mh * wind_max_220_mh_mna_nanc * closure + B_closure_dist_to_cog * dist_to_cog_mna_nanc * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_mna_nanc * closure
+  V[["sba_nanc"]]         = asc_sba_nanc + B_mean_avail_nanc * mean_avail_sba_nanc + B_mean_price * mean_price_sba_nanc + B_wind_max_220_mh * wind_max_220_mh_sba_nanc + B_dist_to_cog * dist_to_cog_sba_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_nanc + B_dummy_prev_days * dummy_prev_days_sba_nanc + B_dummy_prev_year_days * dummy_prev_year_days_sba_nanc  + B_unem_rate * unem_rate_sba_nanc + B_d_d * d_d_sba_nanc + B_closure_mean_avail_nanc * mean_avail_sba_nanc * closure + B_closure_mean_price * mean_price_sba_nanc * closure + B_closure_wind_max_220_mh * wind_max_220_mh_sba_nanc * closure + B_closure_dist_to_cog * dist_to_cog_sba_nanc * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sba_nanc * closure
+  V[["sda_nanc"]]         = asc_sda_nanc + B_mean_avail_nanc * mean_avail_sda_nanc + B_mean_price * mean_price_sda_nanc + B_wind_max_220_mh * wind_max_220_mh_sda_nanc + B_dist_to_cog * dist_to_cog_sda_nanc + B_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sda_nanc + B_dummy_prev_days * dummy_prev_days_sda_nanc + B_dummy_prev_year_days * dummy_prev_year_days_sda_nanc  + B_unem_rate * unem_rate_sda_nanc + B_d_d * d_d_sda_nanc + B_closure_mean_avail_nanc * mean_avail_sda_nanc * closure + B_closure_mean_price * mean_price_sda_nanc * closure + B_closure_wind_max_220_mh * wind_max_220_mh_sda_nanc * closure + B_closure_dist_to_cog * dist_to_cog_sda_nanc * closure + B_closure_dist_port_to_catch_area_zero * dist_port_to_catch_area_zero_sda_nanc * closure
   V[["no_participation"]] = asc_no_participation 
   
   
