@@ -19,142 +19,191 @@ c6 <- read.csv(file = paste0(dir, "Data\\Anonymised data\\rdo_Stata_c6_full_noid
 c7 <- read.csv(file = paste0(dir, "Data\\Anonymised data\\rdo_Stata_c7_full_noid.csv")) 
 
 
-### Revisar autocorrelacion de SDM por dia
+# ### Revisar autocorrelacion de SDM por dia
+# 
+# data_c4 <- c4 %>% group_by(selection, set_date, set_year, set_month) %>% 
+#   summarize(mean_sdm = mean(mean_avail, na.rm = TRUE)) %>%
+#   mutate(date = as.Date(set_date)) %>% filter(set_year == 2014) %>% 
+#   filter(selection != "LAA-BTNA") %>% 
+#   filter(selection != "LAA-YTNA") %>% 
+#   filter(selection != "No-Participation")
+#   
+# tabla <- table(c4$selection)
+# print(tabla)
+# 
+# # LAA-CMCK
+# # LAA-MSQD 
+# # LAA-NANC
+# # LAA-PSDN
+# # MNA-MSQD
+# # MNA-NANC
+# # MNA-PSDN
+# # MRA-MSQD
+# # SBA-CMCK 
+# # SBA-MSQD
+# # SFA-MSQD
+# # SFA-NANC 
+# 
+# 
+# 
+# library(ggplot2)
+# library(dplyr)
+# 
+# # Assuming your summarized data is stored in data_c4
+# ggplot(data_c4, aes(x = set_date, y = mean_sdm, group = selection)) +
+#   geom_line() + 
+#   labs(title = "SDM Over Time by Alternative (2014)",
+#        x = "Day",
+#        y = "SDM") +
+#   theme_minimal() +
+#   theme(axis.text.x = element_blank()) + 
+#   facet_wrap(~ selection, scales = "free_y")
+# 
+# data_c4 <- data_c4 %>% filter(set_month == 6) 
+# ggplot(data_c4, aes(x = set_date, y = mean_sdm, group = selection)) +
+#   geom_line() + 
+#   labs(title = "SDM Over Time by Alternative (June 2014)",
+#        x = "Day",
+#        y = "SDM") +
+#   theme_minimal() +
+#   theme(axis.text.x = element_blank()) + 
+#   facet_wrap(~ selection, scales = "free_y")
 
-data_c4 <- c4 %>% group_by(selection, set_date, set_year, set_month) %>% 
-  summarize(mean_sdm = mean(mean_avail, na.rm = TRUE)) %>%
-  mutate(date = as.Date(set_date)) %>% filter(set_year == 2014) %>% 
-  filter(selection != "LAA-BTNA") %>% 
-  filter(selection != "LAA-YTNA") %>% 
-  filter(selection != "No-Participation")
-  
-tabla <- table(c4$selection)
-print(tabla)
-
-# LAA-CMCK
-# LAA-MSQD 
-# LAA-NANC
-# LAA-PSDN
-# MNA-MSQD
-# MNA-NANC
-# MNA-PSDN
-# MRA-MSQD
-# SBA-CMCK 
-# SBA-MSQD
-# SFA-MSQD
-# SFA-NANC 
 
 
 
-library(ggplot2)
-library(dplyr)
+#################################################
+### 1. Data Preparation & Participation Plot  ###
+#################################################
 
-# Assuming your summarized data is stored in data_c4
-ggplot(data_c4, aes(x = set_date, y = mean_sdm, group = selection)) +
-  geom_line() + 
-  labs(title = "SDM Over Time by Alternative (2014)",
-       x = "Day",
-       y = "SDM") +
-  theme_minimal() +
-  theme(axis.text.x = element_blank()) + 
-  facet_wrap(~ selection, scales = "free_y")
+library(tidyverse)
+library(viridis)
 
-data_c4 <- data_c4 %>% filter(set_month == 6) 
-ggplot(data_c4, aes(x = set_date, y = mean_sdm, group = selection)) +
-  geom_line() + 
-  labs(title = "SDM Over Time by Alternative (June 2014)",
-       x = "Day",
-       y = "SDM") +
-  theme_minimal() +
-  theme(axis.text.x = element_blank()) + 
-  facet_wrap(~ selection, scales = "free_y")
-
-
-
-#################################
-### Daily participation graph ###
-#################################
-
-# Select and filter the data
-
-set.seed(123)  # For reproducibility
+set.seed(123) 
 df.subs <- c4 %>%
   dplyr::filter(fished == 1) %>%
   mutate(set_date = as.Date(set_date)) %>%
   group_by(fished_VESSEL_anon) %>%
-  mutate(random_offset = sample(1:60, 1),  # Random offset between 1-30 days
-         set_date = set_date + random_offset,
-         ) %>% 
+  mutate(random_offset = sample(1:60, 1),
+         set_date = set_date + random_offset) %>% 
   ungroup() %>%
-  select(c('set_date', 'fished_VESSEL_anon', 'selection')) %>% 
   mutate(set_year = year(set_date), set_month = month(set_date)) %>%
-  dplyr::filter(set_year == 2014 & (set_month == 8 | set_month == 9 | set_month == 10)) %>%
-    mutate(
-      simulated_selection = sample(selection, size = n(), replace = TRUE)
-    ) %>%
-  drop_na() %>% 
-  mutate(Species = substr(selection, nchar(selection) - 3, nchar(selection)),
-         Port = substr(selection, 1, 3)) %>%
-  dplyr::filter(set_month == 9)
+  dplyr::filter(set_year == 2014 & set_month == 9) %>%
+  drop_na(selection) %>% 
+  mutate(
+    Species = substr(selection, nchar(selection) - 3, nchar(selection)),
+    Port = substr(selection, 1, 3),
+    # Forzar etiquetas de No-Participation
+    Port = ifelse(selection == "No-Participation", "No-Participation", Port),
+    Species = ifelse(selection == "No-Participation", "No-Participation", Species),
+    days_since_start = as.numeric(set_date - min(set_date))
+  )
+
+# Ordenar barcos por frecuencia de cambio
+vessel_order <- df.subs %>%
+  arrange(fished_VESSEL_anon, set_date) %>%
+  group_by(fished_VESSEL_anon) %>%
+  mutate(switched = selection != lag(selection)) %>%
+  summarize(switch_count = sum(switched, na.rm = TRUE)) %>%
+  arrange(switch_count)
+
+df.subs$fished_VESSEL_anon <- factor(df.subs$fished_VESSEL_anon, levels = vessel_order$fished_VESSEL_anon)
+
+# Paletas
+colores_pro <- c("No-Participation"="#999999", "LAA"="#56B4E9", "MNA"="#009E73", "MRA"="#CC79A7", "SBA"="#F0E442", "SFA"="#E69F00")
+shapes_pro <- c("No-Participation"=16, "MSQD"=18, "PSDN"=15, "CMCK"=17, "NANC"=19, "YTNA"=20, "BTNA"=8)
+
+# Gráfico de Dinámica Temporal
+ggplot(df.subs, aes(x = days_since_start, y = fished_VESSEL_anon)) +
+  geom_hline(aes(yintercept = as.numeric(fished_VESSEL_anon)), color = "grey90", size = 0.2) +
+  geom_point(aes(color = Port, shape = Species,
+                 size = ifelse(selection == "No-Participation", 1.2, 3.5), 
+                 alpha = ifelse(selection == "No-Participation", 0.5, 1))) +
+  scale_color_manual(values = colores_pro) +
+  scale_shape_manual(values = shapes_pro) +
+  scale_size_identity() + scale_alpha_identity() +
+  theme_minimal() +
+  labs(title = "Vessel Dynamics: Port (Color) and Species (Shape)",
+       x = "Days", y = "Vessel ID (Sorted by switches)") +
+  theme(axis.text.y = element_text(size = 7), panel.grid = element_blank())
 
 
 
 
-# Define custom color and shape mappings
-selection_colors <- c(
-  "No-Participation" = "black",
-  "SFA-MSQD" = "orange",
-  "MRA-MSQD" = "red",
-  "MNA-PSDN" = "lightgreen",
-  "SFA-NANC" = "orange",
-  "LAA-MSQD" = "blue",
-  "LAA-PSDN" = "blue",
-  "LAA-YTNA" = "blue",
-  "SBA-CMCK" = "purple",
-  "LAA-CMCK" = "blue",
-  "MNA-MSQD" = "lightgreen",
-  "LAA-NANC" = "blue",
-  "MNA-NANC" = "lightgreen",
-  "LAA-BTNA" = "blue",
-  "SBA-MSQD" = "purple")
+library(tidyverse)
+library(viridis)
+
+# Usamos c4 completo para las matrices (sin filtros de fecha ni offsets aleatorios)
+df_total <- c4 %>%
+  dplyr::filter(fished == 1) %>%
+  mutate(set_date = as.Date(set_date)) %>%
+  # Aseguramos que existan las columnas de Port y Species
+  mutate(
+    Species = substr(selection, nchar(selection) - 3, nchar(selection)),
+    Port = substr(selection, 1, 3),
+    # Forzar etiquetas consistentes para No-Participation
+    Port = ifelse(selection == "No-Participation", "No-Participation", Port),
+    Species = ifelse(selection == "No-Participation", "No-Participation", Species)
+  ) %>%
+  arrange(fished_VESSEL_anon, set_date) %>%
+  group_by(fished_VESSEL_anon) %>%
+  # Creamos los estados t+1
+  mutate(
+    port_next = lead(Port),
+    spec_next = lead(Species),
+    selection_next = lead(selection)
+  ) %>%
+  filter(!is.na(selection_next)) %>%
+  ungroup()
+
+# Función para generar Heatmaps con los datos completos
+plot_full_transition <- function(df, current_col, next_col, title_lab) {
+  counts <- df %>%
+    count(!!sym(current_col), !!sym(next_col)) %>%
+    group_by(!!sym(current_col)) %>%
+    mutate(prob = n / sum(n), total_n = sum(n)) %>%
+    mutate(y_label = paste0(!!sym(current_col), "\n(n=", total_n, ")"))
+  
+  ggplot(counts, aes(x = !!sym(next_col), y = y_label, fill = prob)) +
+    geom_tile(color = "white") +
+    geom_text(aes(label = sprintf("%.2f", prob), color = prob < 0.4), fontface = "bold") +
+    scale_color_manual(values = c("TRUE" = "white", "FALSE" = "black"), guide = "none") +
+    scale_fill_viridis_c(option = "mako", direction = -1) +
+    labs(title = title_lab, x = "State Tomorrow (t+1)", y = "State Today (t)", fill = "Prob.") +
+    theme_minimal() + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+
+# Generar Matrices Finales
+matrix_port <- plot_full_transition(df_total, "Port", "port_next", "Full Port Transition Matrix")
+matrix_species <- plot_full_transition(df_total, "Species", "spec_next", "Full Species Transition Matrix")
+
+print(matrix_port)
+print(matrix_species)
 
 
-selection_shapes <- c(
-  "No-Participation" = 4,
-  "SFA-MSQD" = 18,
-  "MRA-MSQD" = 18,
-  "MNA-PSDN" = 15,
-  "SFA-NANC" = 19,
-  "LAA-MSQD" = 18,
-  "LAA-PSDN" = 15,
-  "LAA-YTNA" = 20,
-  "SBA-CMCK" = 17,
-  "LAA-CMCK" = 17,
-  "MNA-MSQD" = 18,
-  "LAA-NANC" = 19,
-  "MNA-NANC" = 19,
-  "LAA-BTNA" = 16,
-  "SBA-MSQD" = 18)  
+#################################################
+### 3. Summary Statistics (CORREGIDO)        ###
+#################################################
+
+# 1. Switch Rate usando el dataset TOTAL
+# Esto calcula el % de días donde el barco cambió de puerto O de especie
+overall_switch_rate <- mean(df_total$selection != df_total$selection_next)
+
+# 2. Median Run Length usando el dataset TOTAL
+run_lengths_total <- c4 %>%
+  dplyr::filter(fished == 1) %>%
+  arrange(fished_VESSEL_anon, set_date) %>%
+  group_by(fished_VESSEL_anon) %>%
+  do(data.frame(len = rle(as.character(.$selection))$lengths))
+
+final_median_run <- median(run_lengths_total$len)
+
+cat("\n--- Descriptive Switching Evidence (Full Data) ---\n",
+    "Overall Switch Rate:", round(overall_switch_rate, 3), "\n",
+    "Median Run Length:", final_median_run, "days\n")
 
 
-# Ensure set_date is in Date format
-df.subs <- df.subs %>%
-  mutate(set_date = as.Date(set_date)) %>%  # Convert to Date format
-  mutate(days_since_start = as.numeric(set_date - min(set_date))) 
-
-# Update the plot with the new x-axis label and variable
-ggplot(df.subs, 
-       aes(x = days_since_start, 
-           y = fished_VESSEL_anon, 
-           color = selection, 
-           shape = selection)) +
-  geom_point(size = 3) +
-  scale_color_manual(values = selection_colors) +  # Apply color mapping by Port
-  scale_shape_manual(values = selection_shapes) + 
-  labs(x = "Days", 
-       y = "Vessel anonymized ID", 
-       color = "Simulated alternative", 
-       shape = "Simulated alternative") 
 
 
 #################################
