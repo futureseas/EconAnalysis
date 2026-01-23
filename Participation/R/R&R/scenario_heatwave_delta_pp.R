@@ -417,6 +417,15 @@ for(cl in names(cluster_rds)){
     warning("Ports in data not in port_lookup: ", paste(miss_ports, collapse=", "),
             "\n-> These observations will still run; but centroid/shift selection ignores missing coords.")
   }
+  
+  long_data <- long_data %>%
+    filter(set_date >= baseline_start, set_date <= baseline_end)
+  
+  # sanity
+  message("Prediction sample range: ",
+          min(long_data$set_date, na.rm=TRUE), " to ",
+          max(long_data$set_date, na.rm=TRUE),
+          " | n=", nrow(long_data))
 
   long_data2 <- long_data %>%
     left_join(sdm_all, by = c("PORT_AREA_CODE", "date")) %>%
