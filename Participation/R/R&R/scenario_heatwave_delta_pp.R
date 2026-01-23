@@ -42,13 +42,13 @@ apollo_initialise()
 # -----------------------------
 # USER PATHS (edit if needed)
 # -----------------------------
-setwd("D:/GitHub/EconAnalysis/Participation")
-google_dir <- "G:/Mi unidad/"             # adjust if needed
+setwd("C:/GitHub/EconAnalysis/Participation")
+google_dir <- "H:/My Drive"             # adjust if needed
 sdm_dir    <- "SDMs"
-cpue_rds   <- "D:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds"
+cpue_rds   <- "C:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds"
 
 # Port coordinates file (you uploaded this)
-port_csv_path <- "/mnt/data/port_areas.csv"
+port_csv_path <- "C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv"
 
 # Cluster data files (anonymised)
 cluster_rds <- list(
