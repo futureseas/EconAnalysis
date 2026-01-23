@@ -315,25 +315,24 @@ aggregate_probs <- function(Pmat, alts){
   )
 }
 
-predict_on_database <- function(model_obj, prob_fun, database_wide, apollo_control, use_d_c_val=0){
-  # Use estimated parameters from model_obj
+predict_on_database <- function(model_obj, prob_fun, database_wide, use_d_c_val=0){
+  
   beta_hat <- model_obj$estimate
-
-  # Build apollo inputs for prediction
-  assign("database", database_wide, envir = .GlobalEnv)
-  assign("apollo_control", apollo_control, envir = .GlobalEnv)
-
-  # To validate inputs, apollo_beta must exist
-  assign("apollo_beta", beta_hat, envir = .GlobalEnv)
-  assign("apollo_fixed", character(0), envir = .GlobalEnv)  # <- clave
-
-  apollo_inputs <- apollo_validateInputs()
+  
+  # reutiliza los inputs del modelo estimado
+  apollo_inputs <- model_obj$apollo_inputs
+  
+  # reemplaza SOLO la base
+  apollo_inputs$database <- database_wide
+  
+  # si usas este switch en tus prob-funs:
   apollo_inputs$use_d_c <- as.numeric(use_d_c_val)
-
+  
   P <- prob_fun(beta_hat, apollo_inputs, functionality="prediction")
   Pmat <- safe_get_Pmodel(P)
   return(Pmat)
 }
+
 
 # =========================================================
 # Cluster metadata (alts + case_vars)
