@@ -325,7 +325,7 @@ predict_on_database <- function(model_obj, prob_fun, database_wide, apollo_contr
 
   # To validate inputs, apollo_beta must exist
   assign("apollo_beta", beta_hat, envir = .GlobalEnv)
-  assign("apollo_fixed", names(beta_hat), envir = .GlobalEnv)
+  assign("apollo_fixed", character(0), envir = .GlobalEnv)  # <- clave
 
   apollo_inputs <- apollo_validateInputs()
   apollo_inputs$use_d_c <- as.numeric(use_d_c_val)
