@@ -540,6 +540,169 @@ writexl::write_xlsx(
 )
 
 message("\nAll scenario outputs written to: R/output/scenarios/")
-############################################################
-# END
-############################################################
+
+
+# =========================================================
+# FIGURE: Heatwave-like scenario — Δpp by species × cluster
+# (ports aggregated; pp = percentage points)
+# Input: R/output/scenarios/scenario_delta_species_pp.csv
+# Output: R/output/scenarios/Fig_heatwave_delta_species_pp.png
+# =========================================================
+
+library(tidyverse)
+
+in_file  <- file.path("R","output","scenarios","scenario_delta_species_pp.csv")
+out_png  <- file.path("R","output","scenarios","Fig_heatwave_delta_species_pp.png")
+out_pdf  <- file.path("R","output","scenarios","Fig_heatwave_delta_species_pp.pdf")
+
+df <- readr::read_csv(in_file, show_col_types = FALSE)
+
+# Espera columnas tipo:
+# cluster, level (="species"), group (species), delta_pp, baseline_prob, scenario_prob
+# Si tu script usa otros nombres, mira names(df) y ajusta group/delta_pp.
+
+# Limpieza / orden bonito de especies (opcional)
+species_order <- c("MSQD","NANC","PSDN","CMCK","JMCK","ALBC","DCRB","SOCK","BTNA","YTNA","PHRG","OTHR","MCKL","NOPART")
+
+df_plot <- df %>%
+  mutate(
+    cluster = factor(cluster, levels = c("c4","c5","c6","c7")),
+    species = toupper(group),
+    species = factor(species, levels = intersect(species_order, unique(species)))
+  ) %>%
+  filter(!is.na(delta_pp)) %>%
+  # opcional: muestra solo especies con cambio relevante
+  # filter(abs(delta_pp) >= 0.05) %>%
+  arrange(cluster, desc(delta_pp))
+
+p <- ggplot(df_plot, aes(x = species, y = delta_pp)) +
+  geom_hline(yintercept = 0) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ cluster, ncol = 2, scales = "free_y") +
+  labs(
+    x = NULL,
+    y = expression(Delta*" probability (pp)"),
+    title = "Heatwave-like availability redistribution scenario",
+    subtitle = "Change in predicted choice probability by target species (ports aggregated)"
+  ) +
+  theme_bw(base_size = 12) +
+  theme(
+    legend.position = "none",
+    strip.background = element_rect(fill = "white"),
+    panel.grid.minor = element_blank()
+  )
+
+ggsave(out_png, p, width = 8.5, height = 6.5, dpi = 300)
+ggsave(out_pdf, p, width = 8.5, height = 6.5)
+
+print(p)
+
+
+# =========================================================
+# FIGURE: Heatwave-like scenario — Δpp by port × cluster
+# (species aggregated; pp = percentage points)
+# Input: R/output/scenarios/scenario_delta_port_pp.csv
+# Output: R/output/scenarios/Fig_heatwave_delta_port_pp.png
+# =========================================================
+
+library(tidyverse)
+
+in_file <- file.path("R","output","scenarios","scenario_delta_port_pp.csv")
+out_png <- file.path("R","output","scenarios","Fig_heatwave_delta_port_pp.png")
+out_pdf <- file.path("R","output","scenarios","Fig_heatwave_delta_port_pp.pdf")
+
+df <- readr::read_csv(in_file, show_col_types = FALSE)
+
+# Espera columnas tipo:
+# cluster, level (="port"), group (port code), delta_pp, baseline_prob, scenario_prob
+# (si tu script usa otros nombres, ajusta "group"/"delta_pp" abajo)
+
+df_plot <- df %>%
+  mutate(
+    cluster = factor(cluster, levels = c("c4","c5","c6","c7")),
+    port = toupper(group)
+  ) %>%
+  filter(!is.na(delta_pp)) %>%
+  # opcional: filtra puertos muy pequeños
+  # filter(abs(delta_pp) >= 0.05) %>%
+  group_by(cluster) %>%
+  mutate(port = fct_reorder(port, delta_pp)) %>%
+  ungroup()
+
+p <- ggplot(df_plot, aes(x = port, y = delta_pp)) +
+  geom_hline(yintercept = 0) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ cluster, ncol = 2, scales = "free_y") +
+  labs(
+    x = NULL,
+    y = expression(Delta*" probability (pp)"),
+    title = "Heatwave-like availability redistribution scenario",
+    subtitle = "Change in predicted choice probability by landing port (species aggregated)"
+  ) +
+  theme_bw(base_size = 12) +
+  theme(
+    legend.position = "none",
+    strip.background = element_rect(fill = "white"),
+    panel.grid.minor = element_blank()
+  )
+
+ggsave(out_png, p, width = 8.5, height = 6.5, dpi = 300)
+ggsave(out_pdf, p, width = 8.5, height = 6.5)
+
+print(p)
+
+
+# =========================================================
+# FIGURE: Heatwave-like scenario — Δpp by alternative × cluster
+# (includes no_participation)
+# =========================================================
+
+library(tidyverse)
+
+in_file <- file.path("R","output","scenarios","scenario_delta_alternative_pp.csv")
+out_png <- file.path("R","output","scenarios","Fig_heatwave_delta_alternative_pp.png")
+out_pdf <- file.path("R","output","scenarios","Fig_heatwave_delta_alternative_pp.pdf")
+
+df <- readr::read_csv(in_file, show_col_types = FALSE)
+
+# Expected columns: cluster, metric=="alternative", group, delta_pp
+df_plot <- df %>%
+  filter(metric == "alternative") %>%
+  mutate(
+    cluster = factor(cluster, levels = c("c4","c5","c6","c7")),
+    alternative = tolower(group)
+  ) %>%
+  group_by(cluster) %>%
+  mutate(
+    rk_pos = rank(-delta_pp, ties.method = "first"),
+    rk_neg = rank( delta_pp, ties.method = "first")
+  ) %>%
+  filter(rk_pos <= 6 | rk_neg <= 6) %>%
+  ungroup() %>%
+  group_by(cluster) %>%
+  mutate(alternative = fct_reorder(alternative, delta_pp)) %>%
+  ungroup()
+
+p <- ggplot(df_plot, aes(x = alternative, y = delta_pp)) +
+  geom_hline(yintercept = 0, linewidth = 0.3) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ cluster, ncol = 2, scales = "free_y") +
+  labs(
+    x = NULL,
+    y = expression(Delta*" probability (pp)"),
+    title = "Heatwave-like availability redistribution scenario",
+    subtitle = "Change in predicted choice probabilities by alternative (including non-participation)"
+  ) +
+  theme_bw(base_size = 12) +
+  theme(
+    panel.grid.minor = element_blank(),
+    strip.background = element_rect(fill = "white")
+  )
+
+ggsave(out_png, p, width = 9, height = 7, dpi = 300)
+ggsave(out_pdf, p, width = 9, height = 7)
+
+print(p)
