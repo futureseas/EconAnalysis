@@ -61,8 +61,8 @@ cluster_rds <- list(
 # Scenario settings
 baseline_start <- as.Date("2013-01-01")
 baseline_end   <- as.Date("2013-12-31")
-mhw_start <- as.Date("2015-06-01")
-mhw_end   <- as.Date("2015-08-31")
+mhw_start <- as.Date("2015-01-01")
+mhw_end   <- as.Date("2015-12-31")
 peak_year      <- 2016
 window_days    <- 60
 anchor_spec    <- "MSQD"   # anchor species to pick the "max northward" window
