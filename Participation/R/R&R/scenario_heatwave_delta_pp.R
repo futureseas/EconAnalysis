@@ -60,7 +60,9 @@ cluster_rds <- list(
 
 # Scenario settings
 baseline_start <- as.Date("2013-01-01")
-baseline_end   <- as.Date("2014-12-31")
+baseline_end   <- as.Date("2013-12-31")
+mhw_start <- as.Date("2015-06-01")
+mhw_end   <- as.Date("2015-08-31")
 peak_year      <- 2016
 window_days    <- 60
 anchor_spec    <- "MSQD"   # anchor species to pick the "max northward" window
@@ -267,8 +269,11 @@ sdm_period_means <- function(sdm_all, start_date, end_date, species_codes){
 base_means <- sdm_period_means(sdm_all, baseline_start, baseline_end, sdm_species) %>%
   rename(avail_base = avail_mean)
 
-hw_means <- sdm_period_means(sdm_all, win$start_date, win$end_date, sdm_species) %>%
-  rename(avail_hw = avail_mean)
+# hw_means <- sdm_period_means(sdm_all, win$start_date, win$end_date, sdm_species) %>%
+#   rename(avail_hw = avail_mean)
+
+hw_means <- sdm_period_means(sdm_all, mhw_start, mhw_end, sdm_species) %>%
+   rename(avail_hw = avail_mean)
 
 # =========================================================
 # Prediction helpers
@@ -467,6 +472,13 @@ for(cl in names(cluster_rds)){
   long_base_ready <- prepare_avail_spec(long_scn, "mean_avail_daily_base")
   long_hw_ready   <- prepare_avail_spec(long_scn, "mean_avail_daily_hw")
 
+  long_base_ready <- long_base_ready %>%
+    mutate(dummy_prev_days = 0, dummy_prev_year_days = 0)
+  
+  long_hw_ready <- long_hw_ready %>%
+    mutate(dummy_prev_days = 0, dummy_prev_year_days = 0)
+  
+  
   db_base <- build_database(long_base_ready, alts, case_vars)
   db_hw   <- build_database(long_hw_ready,   alts, case_vars)
 
