@@ -5,7 +5,7 @@ Please acknowledge the use of Apollo by citing Hess & Palma (2019)
 
 Model name                                  : MANUAL_c7_bestSDM
 Model description                           : Manual re-estimation on extracted database_wide
-Model run at                                : 2026-01-22 12:56:29.460639
+Model run at                                : 2026-03-05 15:48:52.872629
 Estimation method                           : bfgs
 Estimation diagnosis                        : successful convergence
 Optimisation diagnosis                      : Maximum found
@@ -31,56 +31,97 @@ AIC                                         :  3360.47
 BIC                                         :  3389.56 
 
 Estimated parameters                        : 5
-Time taken (hh:mm:ss)                       :  00:00:7.12 
-     pre-estimation                         :  00:00:5.72 
-     estimation                             :  00:00:0.75 
-     post-estimation                        :  00:00:0.65 
+Time taken (hh:mm:ss)                       :  00:00:8.23 
+     pre-estimation                         :  00:00:5.97 
+     estimation                             :  00:00:0.8 
+     post-estimation                        :  00:00:1.45 
 Iterations                                  :  2  
 
 Unconstrained optimisation.
 
 Estimates:
-                                          Estimate        s.e.   t.rat.(0)    t.rat(1)    Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
-B_mean_avail_mckl                        -0.368964          NA          NA          NA          NA            NA            NA
-B_mean_avail_msqd                         3.692580          NA          NA          NA          NA            NA            NA
-B_mean_avail_psdn                         0.160806          NA          NA          NA          NA            NA            NA
-B_mean_avail_nanc                        -2.186450          NA          NA          NA          NA            NA            NA
-B_mean_price                              0.576464          NA          NA          NA          NA            NA            NA
-B_wind_max_220_mh                        -0.036316          NA          NA          NA          NA            NA            NA
-B_dist_to_cog                            -0.002947          NA          NA          NA          NA            NA            NA
-B_dist_port_to_catch_area_zero           -0.004731          NA          NA          NA          NA            NA            NA
-B_closure_mean_avail_mckl                -3.324804     1.38317    -2.40375     -3.1267     0.85060      -3.90877        -5.084
-B_closure_mean_avail_msqd                -3.591292     0.68711    -5.22669     -6.6821     0.84266      -4.26187        -5.449
-B_closure_mean_avail_nanc                -0.012616     0.42278    -0.02984     -2.3951     0.29692      -0.04249        -3.410
-B_closure_mean_price                      0.810512     0.21004     3.85878     -0.9021     0.14733       5.50150        -1.286
-B_closure_wind_max_220_mh                -0.013260     0.01400    -0.94745    -72.4009     0.01473      -0.90006       -68.779
-B_closure_dist_to_cog                   2.0495e-04          NA          NA          NA          NA            NA            NA
-B_closure_dist_port_to_catch_area_zero   -0.002349          NA          NA          NA          NA            NA            NA
-B_dummy_prev_days                         3.087478          NA          NA          NA          NA            NA            NA
-B_dummy_prev_year_days                    0.177936          NA          NA          NA          NA            NA            NA
-c_psdn                                   -1.330414          NA          NA          NA          NA            NA            NA
-B_d_d                                    -0.518813          NA          NA          NA          NA            NA            NA
-B_unem_rate                               0.102807          NA          NA          NA          NA            NA            NA
-w_msqd                                   -3.986706          NA          NA          NA          NA            NA            NA
-asc_laa_cmck                             -4.291057          NA          NA          NA          NA            NA            NA
-asc_mna_cmck                             -5.708159          NA          NA          NA          NA            NA            NA
-asc_laa_jmck                             -4.587824          NA          NA          NA          NA            NA            NA
-asc_mna_jmck                             -5.359585          NA          NA          NA          NA            NA            NA
-asc_laa_msqd                             -4.049706          NA          NA          NA          NA            NA            NA
-asc_mra_msqd                             -4.994241          NA          NA          NA          NA            NA            NA
-asc_sba_msqd                             -4.115469          NA          NA          NA          NA            NA            NA
-asc_sfa_msqd                             -4.676275          NA          NA          NA          NA            NA            NA
-asc_mna_msqd                             -4.029841          NA          NA          NA          NA            NA            NA
-asc_laa_psdn                             -4.256098          NA          NA          NA          NA            NA            NA
-asc_mna_psdn                             -4.991503          NA          NA          NA          NA            NA            NA
-asc_mna_nanc                             -4.638374          NA          NA          NA          NA            NA            NA
-asc_sba_nanc                             -3.059797          NA          NA          NA          NA            NA            NA
-asc_sda_nanc                             -4.064235          NA          NA          NA          NA            NA            NA
-theta_part                                0.944799          NA          NA          NA          NA            NA            NA
-theta_laa                                10.237990          NA          NA          NA          NA            NA            NA
-theta_mna                                10.104330          NA          NA          NA          NA            NA            NA
-theta_sba                                 0.731990          NA          NA          NA          NA            NA            NA
-asc_no_participation                      0.000000          NA          NA          NA          NA            NA            NA
+                                          Estimate        s.e.   t.rat.(0)    t.rat(1)
+B_mean_avail_mckl                        -0.368964          NA          NA          NA
+B_mean_avail_msqd                         3.692580          NA          NA          NA
+B_mean_avail_psdn                         0.160806          NA          NA          NA
+B_mean_avail_nanc                        -2.186450          NA          NA          NA
+B_mean_price                              0.576464          NA          NA          NA
+B_wind_max_220_mh                        -0.036316          NA          NA          NA
+B_dist_to_cog                            -0.002947          NA          NA          NA
+B_dist_port_to_catch_area_zero           -0.004731          NA          NA          NA
+B_closure_mean_avail_mckl                -3.324804     1.38317    -2.40375     -3.1267
+B_closure_mean_avail_msqd                -3.591292     0.68711    -5.22669     -6.6821
+B_closure_mean_avail_nanc                -0.012616     0.42278    -0.02984     -2.3951
+B_closure_mean_price                      0.810512     0.21004     3.85878     -0.9021
+B_closure_wind_max_220_mh                -0.013260     0.01400    -0.94745    -72.4009
+B_closure_dist_to_cog                   2.0495e-04          NA          NA          NA
+B_closure_dist_port_to_catch_area_zero   -0.002349          NA          NA          NA
+B_dummy_prev_days                         3.087478          NA          NA          NA
+B_dummy_prev_year_days                    0.177936          NA          NA          NA
+c_psdn                                   -1.330414          NA          NA          NA
+B_d_d                                    -0.518813          NA          NA          NA
+B_unem_rate                               0.102807          NA          NA          NA
+w_msqd                                   -3.986706          NA          NA          NA
+asc_laa_cmck                             -4.291057          NA          NA          NA
+asc_mna_cmck                             -5.708159          NA          NA          NA
+asc_laa_jmck                             -4.587824          NA          NA          NA
+asc_mna_jmck                             -5.359585          NA          NA          NA
+asc_laa_msqd                             -4.049706          NA          NA          NA
+asc_mra_msqd                             -4.994241          NA          NA          NA
+asc_sba_msqd                             -4.115469          NA          NA          NA
+asc_sfa_msqd                             -4.676275          NA          NA          NA
+asc_mna_msqd                             -4.029841          NA          NA          NA
+asc_laa_psdn                             -4.256098          NA          NA          NA
+asc_mna_psdn                             -4.991503          NA          NA          NA
+asc_mna_nanc                             -4.638374          NA          NA          NA
+asc_sba_nanc                             -3.059797          NA          NA          NA
+asc_sda_nanc                             -4.064235          NA          NA          NA
+theta_part                                0.944799          NA          NA          NA
+theta_laa                                10.237990          NA          NA          NA
+theta_mna                                10.104330          NA          NA          NA
+theta_sba                                 0.731990          NA          NA          NA
+asc_no_participation                      0.000000          NA          NA          NA
+                                          Rob.s.e. Rob.t.rat.(0) Rob.t.rat.(1)
+B_mean_avail_mckl                               NA            NA            NA
+B_mean_avail_msqd                               NA            NA            NA
+B_mean_avail_psdn                               NA            NA            NA
+B_mean_avail_nanc                               NA            NA            NA
+B_mean_price                                    NA            NA            NA
+B_wind_max_220_mh                               NA            NA            NA
+B_dist_to_cog                                   NA            NA            NA
+B_dist_port_to_catch_area_zero                  NA            NA            NA
+B_closure_mean_avail_mckl                  0.85060      -3.90877        -5.084
+B_closure_mean_avail_msqd                  0.84266      -4.26187        -5.449
+B_closure_mean_avail_nanc                  0.29692      -0.04249        -3.410
+B_closure_mean_price                       0.14733       5.50150        -1.286
+B_closure_wind_max_220_mh                  0.01473      -0.90006       -68.779
+B_closure_dist_to_cog                           NA            NA            NA
+B_closure_dist_port_to_catch_area_zero          NA            NA            NA
+B_dummy_prev_days                               NA            NA            NA
+B_dummy_prev_year_days                          NA            NA            NA
+c_psdn                                          NA            NA            NA
+B_d_d                                           NA            NA            NA
+B_unem_rate                                     NA            NA            NA
+w_msqd                                          NA            NA            NA
+asc_laa_cmck                                    NA            NA            NA
+asc_mna_cmck                                    NA            NA            NA
+asc_laa_jmck                                    NA            NA            NA
+asc_mna_jmck                                    NA            NA            NA
+asc_laa_msqd                                    NA            NA            NA
+asc_mra_msqd                                    NA            NA            NA
+asc_sba_msqd                                    NA            NA            NA
+asc_sfa_msqd                                    NA            NA            NA
+asc_mna_msqd                                    NA            NA            NA
+asc_laa_psdn                                    NA            NA            NA
+asc_mna_psdn                                    NA            NA            NA
+asc_mna_nanc                                    NA            NA            NA
+asc_sba_nanc                                    NA            NA            NA
+asc_sda_nanc                                    NA            NA            NA
+theta_part                                      NA            NA            NA
+theta_laa                                       NA            NA            NA
+theta_mna                                       NA            NA            NA
+theta_sba                                       NA            NA            NA
+asc_no_participation                            NA            NA            NA
 
 Nesting structure for NL model component :
 Nest: root (1)
@@ -106,44 +147,102 @@ Nest: root (1)
 
 
 Overview of choices for NL model component :
-                                 laa_cmck mna_cmck laa_jmck mna_jmck laa_msqd mra_msqd sba_msqd sfa_msqd mna_msqd laa_psdn mna_psdn mna_nanc sba_nanc sda_nanc no_participation
-Times available                   2481.00   2481.0  2481.00  2481.00  2453.00  2453.00  2453.00  2453.00  2453.00  2481.00  2481.00  2481.00  2481.00  2481.00          2481.00
-Times chosen                        32.00     10.0     7.00     8.00   113.00     8.00   254.00    17.00    65.00    26.00     8.00     6.00   145.00    59.00          1723.00
-Percentage chosen overall            1.29      0.4     0.28     0.32     4.55     0.32    10.24     0.69     2.62     1.05     0.32     0.24     5.84     2.38            69.45
-Percentage chosen when available     1.29      0.4     0.28     0.32     4.61     0.33    10.35     0.69     2.65     1.05     0.32     0.24     5.84     2.38            69.45
+                                 laa_cmck mna_cmck laa_jmck mna_jmck laa_msqd mra_msqd
+Times available                   2481.00   2481.0  2481.00  2481.00  2453.00  2453.00
+Times chosen                        32.00     10.0     7.00     8.00   113.00     8.00
+Percentage chosen overall            1.29      0.4     0.28     0.32     4.55     0.32
+Percentage chosen when available     1.29      0.4     0.28     0.32     4.61     0.33
+                                 sba_msqd sfa_msqd mna_msqd laa_psdn mna_psdn mna_nanc
+Times available                   2453.00  2453.00  2453.00  2481.00  2481.00  2481.00
+Times chosen                       254.00    17.00    65.00    26.00     8.00     6.00
+Percentage chosen overall           10.24     0.69     2.62     1.05     0.32     0.24
+Percentage chosen when available    10.35     0.69     2.65     1.05     0.32     0.24
+                                 sba_nanc sda_nanc no_participation
+Times available                   2481.00  2481.00          2481.00
+Times chosen                       145.00    59.00          1723.00
+Percentage chosen overall            5.84     2.38            69.45
+Percentage chosen when available     5.84     2.38            69.45
 
 
 Classical covariance matrix:
-                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd B_closure_mean_avail_nanc      B_closure_mean_price B_closure_wind_max_220_mh
-B_closure_mean_avail_mckl                  1.913172                   0.35586                  0.157830                 -0.056799                 -0.002092
-B_closure_mean_avail_msqd                  0.355857                   0.47212                  0.130656                 -0.062734               -9.8053e-04
-B_closure_mean_avail_nanc                  0.157830                   0.13066                  0.178745                  0.009697                 -0.003098
-B_closure_mean_price                      -0.056799                  -0.06273                  0.009697                  0.044118                 -0.002231
-B_closure_wind_max_220_mh                 -0.002092               -9.8053e-04                 -0.003098                 -0.002231                1.9586e-04
+                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd
+B_closure_mean_avail_mckl                  1.913172                   0.35586
+B_closure_mean_avail_msqd                  0.355857                   0.47212
+B_closure_mean_avail_nanc                  0.157830                   0.13066
+B_closure_mean_price                      -0.056799                  -0.06273
+B_closure_wind_max_220_mh                 -0.002092               -9.8053e-04
+                          B_closure_mean_avail_nanc      B_closure_mean_price
+B_closure_mean_avail_mckl                  0.157830                 -0.056799
+B_closure_mean_avail_msqd                  0.130656                 -0.062734
+B_closure_mean_avail_nanc                  0.178745                  0.009697
+B_closure_mean_price                       0.009697                  0.044118
+B_closure_wind_max_220_mh                 -0.003098                 -0.002231
+                          B_closure_wind_max_220_mh
+B_closure_mean_avail_mckl                 -0.002092
+B_closure_mean_avail_msqd               -9.8053e-04
+B_closure_mean_avail_nanc                 -0.003098
+B_closure_mean_price                      -0.002231
+B_closure_wind_max_220_mh                1.9586e-04
 
 Robust covariance matrix:
-                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd B_closure_mean_avail_nanc      B_closure_mean_price B_closure_wind_max_220_mh
-B_closure_mean_avail_mckl                  0.723522                  0.294607                  0.089680                  0.001291                 -0.006284
-B_closure_mean_avail_msqd                  0.294607                  0.710069                  0.118921                 -0.002431                 -0.007445
-B_closure_mean_avail_nanc                  0.089680                  0.118921                  0.088162                  0.021621                 -0.003589
-B_closure_mean_price                       0.001291                 -0.002431                  0.021621                  0.021705                 -0.001491
-B_closure_wind_max_220_mh                 -0.006284                 -0.007445                 -0.003589                 -0.001491                2.1703e-04
+                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd
+B_closure_mean_avail_mckl                  0.723522                  0.294607
+B_closure_mean_avail_msqd                  0.294607                  0.710069
+B_closure_mean_avail_nanc                  0.089680                  0.118921
+B_closure_mean_price                       0.001291                 -0.002431
+B_closure_wind_max_220_mh                 -0.006284                 -0.007445
+                          B_closure_mean_avail_nanc      B_closure_mean_price
+B_closure_mean_avail_mckl                  0.089680                  0.001291
+B_closure_mean_avail_msqd                  0.118921                 -0.002431
+B_closure_mean_avail_nanc                  0.088162                  0.021621
+B_closure_mean_price                       0.021621                  0.021705
+B_closure_wind_max_220_mh                 -0.003589                 -0.001491
+                          B_closure_wind_max_220_mh
+B_closure_mean_avail_mckl                 -0.006284
+B_closure_mean_avail_msqd                 -0.007445
+B_closure_mean_avail_nanc                 -0.003589
+B_closure_mean_price                      -0.001491
+B_closure_wind_max_220_mh                2.1703e-04
 
 Classical correlation matrix:
-                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd B_closure_mean_avail_nanc      B_closure_mean_price B_closure_wind_max_220_mh
-B_closure_mean_avail_mckl                    1.0000                    0.3744                    0.2699                   -0.1955                   -0.1081
-B_closure_mean_avail_msqd                    0.3744                    1.0000                    0.4498                   -0.4347                   -0.1020
-B_closure_mean_avail_nanc                    0.2699                    0.4498                    1.0000                    0.1092                   -0.5235
-B_closure_mean_price                        -0.1955                   -0.4347                    0.1092                    1.0000                   -0.7589
-B_closure_wind_max_220_mh                   -0.1081                   -0.1020                   -0.5235                   -0.7589                    1.0000
+                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd
+B_closure_mean_avail_mckl                    1.0000                    0.3744
+B_closure_mean_avail_msqd                    0.3744                    1.0000
+B_closure_mean_avail_nanc                    0.2699                    0.4498
+B_closure_mean_price                        -0.1955                   -0.4347
+B_closure_wind_max_220_mh                   -0.1081                   -0.1020
+                          B_closure_mean_avail_nanc      B_closure_mean_price
+B_closure_mean_avail_mckl                    0.2699                   -0.1955
+B_closure_mean_avail_msqd                    0.4498                   -0.4347
+B_closure_mean_avail_nanc                    1.0000                    0.1092
+B_closure_mean_price                         0.1092                    1.0000
+B_closure_wind_max_220_mh                   -0.5235                   -0.7589
+                          B_closure_wind_max_220_mh
+B_closure_mean_avail_mckl                   -0.1081
+B_closure_mean_avail_msqd                   -0.1020
+B_closure_mean_avail_nanc                   -0.5235
+B_closure_mean_price                        -0.7589
+B_closure_wind_max_220_mh                    1.0000
 
 Robust correlation matrix:
-                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd B_closure_mean_avail_nanc      B_closure_mean_price B_closure_wind_max_220_mh
-B_closure_mean_avail_mckl                   1.00000                   0.41102                    0.3551                   0.01030                   -0.5015
-B_closure_mean_avail_msqd                   0.41102                   1.00000                    0.4753                  -0.01958                   -0.5998
-B_closure_mean_avail_nanc                   0.35508                   0.47530                    1.0000                   0.49427                   -0.8204
-B_closure_mean_price                        0.01030                  -0.01958                    0.4943                   1.00000                   -0.6868
-B_closure_wind_max_220_mh                  -0.50151                  -0.59976                   -0.8204                  -0.68675                    1.0000
+                          B_closure_mean_avail_mckl B_closure_mean_avail_msqd
+B_closure_mean_avail_mckl                   1.00000                   0.41102
+B_closure_mean_avail_msqd                   0.41102                   1.00000
+B_closure_mean_avail_nanc                   0.35508                   0.47530
+B_closure_mean_price                        0.01030                  -0.01958
+B_closure_wind_max_220_mh                  -0.50151                  -0.59976
+                          B_closure_mean_avail_nanc      B_closure_mean_price
+B_closure_mean_avail_mckl                    0.3551                   0.01030
+B_closure_mean_avail_msqd                    0.4753                  -0.01958
+B_closure_mean_avail_nanc                    1.0000                   0.49427
+B_closure_mean_price                         0.4943                   1.00000
+B_closure_wind_max_220_mh                   -0.8204                  -0.68675
+                          B_closure_wind_max_220_mh
+B_closure_mean_avail_mckl                   -0.5015
+B_closure_mean_avail_msqd                   -0.5998
+B_closure_mean_avail_nanc                   -0.8204
+B_closure_mean_price                        -0.6868
+B_closure_wind_max_220_mh                    1.0000
 
  8 most extreme outliers in terms of lowest average per choice prediction:
  ID Avg prob per choice

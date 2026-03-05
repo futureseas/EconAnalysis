@@ -946,5 +946,17 @@ out_c6$model_manual$adjRho2_C
 out_c7$model_manual$adjRho2_C
 
 
+out_c4$model_manual$AIC - m0_c4$AIC 
+out_c5$model_manual$AIC - m0_c5$AIC 
+out_c6$model_manual$AIC - m0_c6$AIC 
+out_c7$model_manual$AIC - m0_c7$AIC 
+
+
+out_c4$model_manual$BIC - m0_c4$BIC
+out_c5$model_manual$BIC - m0_c5$BIC
+out_c6$model_manual$BIC - m0_c6$BIC
+out_c7$model_manual$BIC - m0_c7$BIC
+
+
 
 

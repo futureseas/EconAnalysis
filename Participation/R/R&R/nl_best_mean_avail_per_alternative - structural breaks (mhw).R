@@ -345,14 +345,6 @@ out_c4 <- run_manual_and_compare(
 apollo_modelOutput(out_c4$model_manual)
 summary(out_c4$model_manual)
 
-deltaAIC <- m0_c4$AIC - out_c4$model_manual$AIC 
-deltaBIC <- m0_c4$BIC - out_c4$model_manual$BIC 
-
-deltaAIC
-deltaBIC
-
-
-
 # ===================== Cluster c5 (from n_logit_c5.R) =====================
 
 db_c5 <- assets$c5$database_wide
@@ -949,6 +941,21 @@ out_c4$model_manual$adjRho2_C
 out_c5$model_manual$adjRho2_C
 out_c6$model_manual$adjRho2_C
 out_c7$model_manual$adjRho2_C
+
+
+
+
+out_c4$model_manual$AIC - m0_c4$AIC 
+out_c5$model_manual$AIC - m0_c5$AIC 
+out_c6$model_manual$AIC - m0_c6$AIC 
+out_c7$model_manual$AIC - m0_c7$AIC 
+
+
+out_c4$model_manual$BIC - m0_c4$BIC
+out_c5$model_manual$BIC - m0_c5$BIC
+out_c6$model_manual$BIC - m0_c6$BIC
+out_c7$model_manual$BIC - m0_c7$BIC
+
 
 
 
