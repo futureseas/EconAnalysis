@@ -1,5 +1,5 @@
-cluster,metric,group,delta_pp
-c4,participation,ALL,5.9998718099895045
-c5,participation,ALL,4.177771891224213
-c6,participation,ALL,-0.6431749747037461
-c7,participation,ALL,1.9017876944138534
+cluster,metric,group,delta_pp,cluster_name
+c4,participation,ALL,5.9998718099895045,Southern CCS industrial squid specialist
+c5,participation,ALL,4.177771891224213,Roving industrial squid-sardine generalist
+c6,participation,ALL,-0.6431749747037461,PNW sardine specialist
+c7,participation,ALL,1.9017876944138534,Southern CCS forage fish diverse

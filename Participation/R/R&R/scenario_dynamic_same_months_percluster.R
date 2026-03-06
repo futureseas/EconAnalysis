@@ -52,6 +52,22 @@ window_days <- 60        # length of window (days)
 n_months    <- 3         # months block (e.g., Jan-Feb-Mar)
 anchor_spec <- "MSQD"    # anchor used to choose windows
 
+
+cluster_names <- c(
+  c4 = "Southern CCS industrial squid specialist",
+  c5 = "Roving industrial squid-sardine generalist",
+  c6 = "PNW sardine specialist",
+  c7 = "Southern CCS forage fish diverse"
+)
+
+cluster_order <- c(
+  "Southern CCS industrial squid specialist",
+  "Roving industrial squid-sardine generalist",
+  "PNW sardine specialist",
+  "Southern CCS forage fish diverse"
+)
+
+
 sdm_species <- c("MSQD","PSDN","NANC","JMCK","CMCK","PHRG","ALBC")
 no_sdm_species <- c("BTNA","YTNA","DCRB","SOCK")  # CPUE fallback species
 
@@ -593,6 +609,7 @@ for(cl in names(cluster_rds)){
   
   window_tbl[[cl]] <- tibble(
     cluster = cl,
+    cluster_name = cluster_names[cl],
     anchor = anchor_spec,
     months_block = paste(picked$months_block, collapse="-"),
     window_days = window_days_eff,
@@ -685,11 +702,33 @@ for(cl in names(cluster_rds)){
 # =========================================================
 # Export results
 # =========================================================
-all_part <- bind_rows(lapply(scenario_results, `[[`, "participation"))
-all_sp   <- bind_rows(lapply(scenario_results, `[[`, "species"))
-all_port <- bind_rows(lapply(scenario_results, `[[`, "port"))
-all_alt  <- bind_rows(lapply(scenario_results, `[[`, "alternative"))
+
+all_part <- bind_rows(lapply(scenario_results, `[[`, "participation")) %>%
+  mutate(cluster_name = cluster_names[cluster])
+all_sp   <- bind_rows(lapply(scenario_results, `[[`, "species")) %>%
+  mutate(cluster_name = cluster_names[cluster])
+all_port <- bind_rows(lapply(scenario_results, `[[`, "port")) %>%
+  mutate(cluster_name = cluster_names[cluster])
+all_alt  <- bind_rows(lapply(scenario_results, `[[`, "alternative")) %>%
+  mutate(cluster_name = cluster_names[cluster])
 all_win  <- bind_rows(window_tbl)
+
+
+all_part <- all_part %>%
+  mutate(cluster_name = factor(cluster_name, levels = cluster_order))
+
+all_sp <- all_sp %>%
+  mutate(cluster_name = factor(cluster_name, levels = cluster_order))
+
+all_port <- all_port %>%
+  mutate(cluster_name = factor(cluster_name, levels = cluster_order))
+
+all_alt <- all_alt %>%
+  mutate(cluster_name = factor(cluster_name, levels = cluster_order))
+
+
+
+
 
 dir.create(file.path("R","output","scenarios"), showWarnings = FALSE, recursive = TRUE)
 
@@ -741,17 +780,17 @@ port_labels <- c(
 )
 
 spec_labels <- c(
-  psdn = "Pacific sardine",
-  nanc = "Northern anchovy",
-  msqd = "Market squid",
-  cmck = "Chub mackerel",
-  jmck = "Jack mackerel",
-  ytna = "Yellowfin tuna",  # <-- adjust if needed
-  btna = "Bluefin tuna",
-  dcrb = "Dungeness Crab",
-  albc = "Albacore", 
-  sock = "Sockeye", # <-- adjust if needed
-  cpue = "CPUE index"                # if appears
+ PSDN = "Pacific sardine",
+ NANC = "Northern anchovy",
+ MSQD = "Market squid",
+ CMCK = "Chub mackerel",
+ JMCK = "Jack mackerel",
+ YTNA = "Yellowfin tuna",  # <-- adjust if needed
+ BTNA = "Bluefin tuna",
+ DCRB = "Dungeness Crab",
+ ALBC = "Albacore", 
+ SOCK = "Sockeye", # <-- adjust if needed
+ CPUE = "CPUE index"                # if appears
 )
 
 # Helper to build a pretty alternative label
@@ -820,7 +859,7 @@ plot_delta_facet <- function(df, title, ylab, fname, topN = NULL, force_include 
   
   p <- ggplot(df2, aes(x = delta_pp, y = group_f)) +
     geom_col() +
-    facet_wrap(~ cluster, scales = "free_y") +
+    facet_wrap(~ cluster_name, scales = "free_y") +
     labs(
       x = "Change in predicted probability (percentage points)",
       y = ylab,
@@ -839,25 +878,26 @@ plot_delta_facet <- function(df, title, ylab, fname, topN = NULL, force_include 
 # Species
 p_species <- plot_delta_facet(
   df    = all_sp,
-  title = "Scenario vs baseline: changes by species (Top 10 by |Δ| within fleet segment)",
+  title = NULL, #"Scenario vs baseline: changes by species",
   ylab  = "Species",
   fname = "delta_by_species_top10_EN.png",
-  topN  = 5
+  topN  = NULL
 )
 
 # Port
 p_port <- plot_delta_facet(
   df    = all_port,
-  title = "Scenario vs baseline: changes by landing port (Top 10 by |Δ| within fleet segment)",
+  title = "Scenario vs baseline: changes by landing port",
   ylab  = "Landing port",
   fname = "delta_by_port_top10_EN.png",
-  topN  = 5
+  topN  = NULL
 )
 
 # All alternatives (include no_participation)
 p_alt <- plot_delta_facet(
   df    = all_alt,
-  title = "Scenario vs baseline: changes by alternative (port × target species), incl. No participation (Top 10 by |Δ| within fleet segment)",
+  # title = "Scenario vs baseline: changes by alternative (port × target species), incl. No participation (Top 10 by |Δ| within fleet segment)",
+  title = NULL,
   ylab  = "Alternative",
   fname = "delta_by_alternative_top15_EN.png",
   topN  = 10,
