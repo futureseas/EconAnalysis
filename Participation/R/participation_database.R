@@ -266,7 +266,9 @@ Tickets_exp_md <- Tickets_exp %>%
 PAM_Vessel_Groups <- read.csv("D:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
 Tickets_clust <- merge(Tickets_exp_md, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 rm(PAM_Vessel_Groups)
-Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ]
+Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ] %>%
+  filter(group_all %in% c(4,5,6,7))
+
 
 #-----------------------------------------------
 ### Merge data to fishing locations
@@ -460,6 +462,12 @@ Tickets_final$trip_id <- udpipe::unique_identifier(Tickets_final, fields = c('VE
 
 saveRDS(Tickets_final, "D:\\Data\\participation_data.rds")
 #Tickets_final <- readRDS("C:\\Data\\PacFIN data\\participation_data.rds")
+
+
+
+
+Ticket_final2 <- Tickets_final %>% filter(set_year >= 2013 & set_year <= 2017)
+
 
 
 # #################################

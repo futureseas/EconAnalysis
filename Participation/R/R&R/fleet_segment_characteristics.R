@@ -12,6 +12,8 @@ res_c6 <- readRDS("res_c6.rds")
 res_c7 <- readRDS("res_c7.rds") 
 
 
+
+
 # ==================================== #
 #### SIMPLE EXTRACT + RUN + COMPARE ####
 # ==================================== #
@@ -81,6 +83,44 @@ segment_names <- c(
 
 results <- list()
 
+db <- assets$c4$database_wide
+
+# Cuantas filas totales
+cat("Nrow:", nrow(db), "\n")
+
+# Cuantos trips unicos
+cat("Unique trips:", n_distinct(db$fished_haul_anon), "\n")
+
+# Cuantas filas por trip (deberia ser 1 si es wide)
+rows_per_trip <- db %>% 
+  group_by(fished_haul_anon) %>% 
+  summarise(n = n(), .groups="drop")
+
+cat("Rows per trip - min:", min(rows_per_trip$n), 
+    " max:", max(rows_per_trip$n), 
+    " mean:", round(mean(rows_per_trip$n), 2), "\n")
+
+
+for(cl in names(assets)){
+  db <- assets[[cl]]$database_wide
+  
+  # todas las columnas de dist_to_cog (excluyendo no_participation)
+  cog_cols <- grep("^dist_to_cog_", names(db), value=TRUE)
+  cog_cols <- cog_cols[!grepl("no_participation", cog_cols)]
+  
+  # todas las columnas de dist_port_to_catch_area_zero (excluyendo no_participation)
+  port_cols <- grep("^dist_port_to_catch_area_zero_", names(db), value=TRUE)
+  port_cols <- port_cols[!grepl("no_participation", port_cols)]
+  
+  # promedio por trip (rowMeans), luego promedio general
+  mean_cog  <- round(mean(rowMeans(db[, cog_cols],  na.rm=TRUE), na.rm=TRUE), 1)
+  mean_port <- round(mean(rowMeans(db[, port_cols], na.rm=TRUE), na.rm=TRUE), 1)
+  
+  cat("\n===", cl, "===\n")
+  cat("Mean dist to CoG:            ", mean_cog, "km\n")
+  cat("Mean dist port to catch area:", mean_port, "km\n")
+}
+
 for(cl in names(assets)){
   db <- assets[[cl]]$database_wide
   db <- db %>% mutate(year = as.integer(substr(set_date, 1, 4)))
@@ -89,21 +129,13 @@ for(cl in names(assets)){
     group_by(year) %>%
     summarise(vessels = n_distinct(fished_vessel_anon), .groups="drop")
   
-  hauls_yr <- db %>%
+  trips_yr <- db %>%
     group_by(year) %>%
-    summarise(hauls = n_distinct(fished_haul_anon), .groups="drop")
+    summarise(trips = n(), .groups="drop")  # n() porque 1 fila = 1 trip
   
-  results[[cl]] <- data.frame(
-    segment   = segment_names[cl],
-    cluster   = cl,
-    years     = paste(range(db$year), collapse="-"),
-    mean_vessels_yr = round(mean(vessels_yr$vessels), 0),
-    mean_hauls_yr   = round(mean(hauls_yr$hauls), 0)
-  )
-  
-  # also print year-by-year so you can check
   cat("\n===", cl, "===\n")
-  print(merge(vessels_yr, hauls_yr, by="year"))
+  cat("Total trips (N):", nrow(db), "\n")
+  print(merge(vessels_yr, trips_yr, by="year"))
 }
 
 summary_table <- do.call(rbind, results)

@@ -266,3 +266,103 @@ for(cl in names(desc_all)){
 
 
 
+# ==========================
+# SUPPLEMENTARY S3: Correlation heatmap of main regressors
+# ==========================
+
+library(ggplot2)
+library(reshape2)
+
+# --- Helper: extract and label the main regressors for one cluster ---
+# --- Helper: extract and label the main regressors for one cluster ---
+get_regressor_matrix <- function(db) {
+  
+  # Pick the correct price prefix depending on what exists in the database
+  price_prefix <- if (any(stringr::str_starts(names(db), "mean_price_3_"))) {
+    "mean_price_3"
+  } else {
+    "mean_price"
+  }
+  
+  alt_prefixes <- c("mean_avail", price_prefix,
+                    "wind_max_220_mh", "dist_to_cog",
+                    "dist_port_to_catch_area_zero")
+  
+  alt_means <- purrr::map_dfc(alt_prefixes, function(pfx) {
+    cols <- names(db)[stringr::str_starts(names(db), paste0(pfx, "_"))]
+    cols <- cols[!stringr::str_detect(cols, "no_part")]
+    if (length(cols) == 0) return(NULL)
+    avg <- rowMeans(db[, cols], na.rm = TRUE)
+    tibble::tibble(!!pfx := avg)
+  })
+  
+  alt_means %>%
+    dplyr::select(where(~ var(.x, na.rm = TRUE) > 0))
+}
+
+
+nice_labels <- c(
+  mean_avail                    = "Mean availability",
+  mean_price                    = "Mean price",       # c4, c7
+  mean_price_3                  = "Mean price",       # c5, c6
+  wind_max_220_mh               = "Max wind speed",
+  dist_to_cog                   = "Dist. to center of gravity",
+  dist_port_to_catch_area_zero  = "Dist. port to catch area"
+)
+
+plot_corr_heatmap <- function(db, cluster_id) {
+  
+  mat <- get_regressor_matrix(db)
+  
+  cor_mat <- cor(mat, use = "pairwise.complete.obs", method = "pearson")
+  
+  colnames(cor_mat) <- rownames(cor_mat) <-
+    dplyr::recode(colnames(cor_mat), !!!nice_labels)
+  
+  cor_mat_idx <- cor_mat
+  cor_mat_idx[upper.tri(cor_mat_idx, diag = TRUE)] <- NA
+  cor_long2 <- reshape2::melt(cor_mat_idx, varnames = c("Var1", "Var2"), value.name = "r") %>%
+    dplyr::filter(!is.na(r))
+  
+  ggplot(cor_long2, aes(x = Var1, y = Var2, fill = r)) +
+    geom_tile(color = "white", linewidth = 0.4) +
+    geom_text(aes(label = sprintf("%.2f", r)),
+              size = 2.8, color = "black") +
+    scale_fill_gradient2(
+      low      = "#2166ac",
+      mid      = "white",
+      high     = "#d6604d",
+      midpoint = 0,
+      limits   = c(-1, 1),
+      name     = "Pearson r"
+    ) +
+    coord_fixed() +
+    labs(
+      x = NULL, y = NULL
+    ) +
+    theme_minimal(base_size = 10) +
+    theme(
+      axis.text.x      = element_text(angle = 45, hjust = 1, size = 8),
+      axis.text.y      = element_text(size = 8),
+      panel.grid       = element_blank(),
+      legend.position  = "right",
+      plot.title       = element_text(face = "bold", size = 11),
+      plot.subtitle    = element_text(size = 8, color = "grey40")
+    )
+}
+
+
+dir.create(file.path("R", "output", "corr_heatmaps"), showWarnings = FALSE, recursive = TRUE)
+
+db_list_raw <- list(c4 = db_c4, c5 = db_c5, c6 = db_c6, c7 = db_c7)
+
+for (cl in names(db_list_raw)) {
+  p <- plot_corr_heatmap(db_list_raw[[cl]], cl)
+  
+  out_png <- file.path("R", "output", "corr_heatmaps",
+                       paste0("corr_heatmap_cluster_", cl, ".png"))
+  
+  ggsave(out_png, plot = p, width = 8, height = 7, dpi = 300, bg = "white")
+  cat("Saved:", out_png, "\n")
+}
+
