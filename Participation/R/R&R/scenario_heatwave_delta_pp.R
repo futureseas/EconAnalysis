@@ -2,26 +2,7 @@
 # Scenario: Heatwave-like SDM availability redistribution (daily)
 # Output: Δ probabilities (pp) for participation, species, and port by segment
 #
-# What this script does:
-# 1) Loads port coordinates (port_areas.csv)
-# 2) Loads SDMs (daily) and merges into sdm_all (PORT_AREA_CODE x date)
-# 3) For each cluster (c4–c7):
-#    - Rebuilds long_data2 exactly like your run_cluster() pre-processing
-#    - Builds two scenario datasets:
-#        (a) BASELINE availability = mean SDM availability by port over 2013–2014
-#        (b) HEATWAVE availability = mean SDM availability by port over an objective "peak northward shift" window in 2016
-#    - Rebuilds wide databases (same alts/case_vars) for BASELINE and HEATWAVE
-#    - Uses your already-estimated DAILY model (res_cX$models$daily$model$estimate) to predict probabilities
-#    - Aggregates probabilities to: participation, species (ports aggregated), port (species aggregated), and alternative
-#    - Writes results to CSV/XLSX
-#
-# Assumptions:
-# - You have these files in your working directory (as in your pipeline):
-#     res_c4.rds, res_c5.rds, res_c6.rds, res_c7.rds
-#     apollo_probabilities_c4.rds ... apollo_probabilities_c7.rds  (optional; you can source R scripts instead)
-# - You have the anonymised long RDS for each cluster:
-#     G:/Mi unidad/Data/Anonymised data/part_model_c4.rds  etc.
-# - SDM RDS files exist in sdm_dir (SDMs/): sdm_msqd.rds, sdm_psdn.rds, ...
+
 #
 # Notes:
 # - "Δpp" reported as (heatwave - baseline) * 100 (percentage points).

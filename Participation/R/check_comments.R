@@ -157,6 +157,8 @@ df_total <- c4 %>%
   ungroup()
 
 # Función para generar Heatmaps con alta legibilidad de números
+library(tidyverse)
+
 plot_full_transition <- function(df, current_col, next_col, title_lab) {
   counts <- df %>%
     count(!!sym(current_col), !!sym(next_col)) %>%
@@ -165,32 +167,28 @@ plot_full_transition <- function(df, current_col, next_col, title_lab) {
     mutate(y_label = paste0(!!sym(current_col), "\n(n=", total_n, ")"))
   
   ggplot(counts, aes(x = !!sym(next_col), y = y_label, fill = prob)) +
-    geom_tile(color = "white", size = 0.3) + # Bordes blancos para separar celdas
-    geom_text(aes(label = sprintf("%.2f", prob), 
-                  # Color dinámico: Blanco en fondos oscuros (prob < 0.5), 
-                  # Negro en fondos claros.
-                  color = prob < 0.5), 
+    geom_tile(color = "grey30", linewidth = 0.3) +
+    geom_text(aes(label = sprintf("%.2f", prob),
+                  color = prob > 0.35),
               size = 3.5, fontface = "bold") +
-    
-    # Definición manual de colores de texto
-    scale_color_manual(values = c("TRUE" = "black", "FALSE" = "white"), guide = "none") +
-    
-    # Escala de color de fondo (Mako es excelente para legibilidad científica)
-    scale_fill_viridis_c(option = "mako", direction = -1, end = 0.95) + 
-    
-    labs(
-      # title = title_lab, 
-      #    subtitle = "High-contrast labels (White on dark / Black on light)",
-         x = "State Tomorrow (t+1)", 
-         y = "State Today (t)", 
+    scale_color_manual(values = c("TRUE" = "white", "FALSE" = "black"), guide = "none") +
+    scale_fill_viridis_c(option = "inferno", direction = -1,
+                         begin = 0.05, end = 0.9,
+                         trans = "sqrt",
+                         limits = c(0, 1), breaks = seq(0, 1, 0.25)) +
+    labs(x = "State Tomorrow (t+1)",
+         y = "State Today (t)",
          fill = "Prob.") +
-    theme_minimal() + 
+    theme_minimal(base_size = 11) +
     theme(
       axis.text.x = element_text(angle = 45, hjust = 1, size = 9),
       axis.text.y = element_text(size = 9),
-      panel.grid = element_blank()
+      panel.grid  = element_blank(),
+      legend.key.height = unit(1.2, "cm")
     )
 }
+
+
 
 # Generar Matrices Finales actualizadas
 matrix_port <- plot_full_transition(df_total, "Port", "port_next", "Full Port Transition Matrix")

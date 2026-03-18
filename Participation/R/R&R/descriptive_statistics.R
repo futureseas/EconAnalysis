@@ -1,5 +1,5 @@
 # ==================================== #
-#### REQUIRED OBJECTS (must exist in your session) ####
+#### REQUIRED OBJECTS ####
 # ==================================== #
 
 
@@ -23,7 +23,7 @@ best_spec <- oos_table %>%
 print(best_spec)
 
 # ---------------------------- #
-##### (B) Collect res objects (must exist in memory) ##### 
+##### (B) Collect res objects ##### 
 # ---------------------------- #
 res_list <- list(
   c4 = res_c4,
