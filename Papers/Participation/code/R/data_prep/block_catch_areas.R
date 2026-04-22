@@ -52,7 +52,8 @@ Tickets_catch <- Tickets %>%
 #   ifelse()
 
 ### Open layers
-setwd("C:/GitHub/EconAnalysis/Papers/Participation/data/BlockAreas")
+library(here)
+setwd(here::here("Papers", "Participation", "data", "BlockAreas"))
 
 library(maptools)
 library(rgeos)

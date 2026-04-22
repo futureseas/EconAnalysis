@@ -8,7 +8,8 @@ if (PC == "home") {
   google_dir <- "G:/Mi unidad/"
 }
 
-setwd("C:/GitHub/EconAnalysis/Papers/Participation/code/R")
+library(here)
+setwd(here::here("Papers", "Participation", "code", "R"))
 
 ## Read database
 library(tidyr)

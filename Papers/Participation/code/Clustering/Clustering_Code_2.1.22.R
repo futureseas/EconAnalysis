@@ -19,7 +19,8 @@ library(factoextra)
 
 rm(list=ls())
 gc()
-setwd("C:/GitHub/EconAnalysis/Clustering")
+library(here)
+setwd(here::here("Papers", "Participation", "code", "Clustering"))
 
 
 #######################
@@ -528,7 +529,7 @@ rm(Group_Stats_Wide, Group_Stats, FTID)
 
 ### Figure 7. Inputs contribution to each cluster
 library(viridis)
-Group_Stats_Wide <- readRDS(here::here("Clustering", "stats_input.RDS"))
+Group_Stats_Wide <- readRDS(here::here("Papers", "Participation", "code", "Clustering", "stats_input.RDS"))
   ggplot(Group_Stats_Wide, aes(memb, y=mean, fill=Variable)) + 
     geom_bar(stat='identity', position=position_dodge(.9), color="black") + 
     geom_errorbar(aes(ymin = mean-1.96*sd, ymax = mean+1.96*sd, group=Variable), 

@@ -17,7 +17,7 @@ apollo_control = list(
   modelDescr      = "Three-level NL model with socio-demographics on mode choice SP data",
   indivID         = "ID", 
   mixing          = FALSE,
-  outputDirectory = "C:/GitHub/EconAnalysis/Papers/Participation/R/output"
+  outputDirectory = here::here("Papers", "Participation", "Results", "r_output")
 )
 
 # ################################################################# #

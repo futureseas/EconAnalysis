@@ -20,10 +20,17 @@ library(ggspatial)
 library(tidygeocoder)
 library(ggrepel)
 library(scatterpie)
+library(here)
 
-setwd("D:/GitHub/EconAnalysis/")
+# Portable paths (anchored at EconAnalysis.Rproj)
+root_dir     <- here::here()
+part_dir     <- file.path(root_dir, "Papers", "Participation")
+shared_dir   <- file.path(root_dir, "Shared")
+r_output_dir <- file.path(part_dir, "Results", "r_output")
+setwd(root_dir)
+
 ## Load datase (from Stata work on predicting shares)
-Simulated_shares <- read.csv("D:/GitHub/EconAnalysis/Papers/Participation/R/Simulated_shares_fig.csv") %>%
+Simulated_shares <- read.csv(file.path(r_output_dir, "Simulated_shares_fig.csv")) %>%
   complete(selection, set_year) %>% mutate(perc = ifelse(is.na(perc), 0, perc),
                                            perc3 = ifelse(is.na(perc3), 0, perc3)) %>%
   mutate(port = ifelse(selection != "No-Participation",  substr(selection, 1, 3), NA)) %>%  
@@ -34,7 +41,7 @@ Simulated_shares <- read.csv("D:/GitHub/EconAnalysis/Papers/Participation/R/Simu
 
 
 ## Get coordinates for port area
-ports <- read_csv("Data/Ports/port_areas.csv") %>% 
+ports <- read_csv(file.path(shared_dir, "Data", "Ports", "port_areas.csv")) %>%
   drop_na() %>%
   rename(port = port_group_code) %>%
   rename(lat_port = lat) %>%

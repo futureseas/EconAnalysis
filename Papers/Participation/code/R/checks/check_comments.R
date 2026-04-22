@@ -8,6 +8,9 @@ rm(list=ls())
 #dir = "H:\\My Drive\\"
 dir = "G:\\Mi unidad\\"
 
+## Portable paths (anchored at EconAnalysis.Rproj) ##
+library(here)
+part_dir <- here::here("Papers", "Participation")
 
 ## Load packages ##
 library(tidyverse)
@@ -363,5 +366,5 @@ summary_table <- flextable(combined_summary)
 
 # Save the table as a DOCX file
 summary_table %>% save_as_docx(
-  path = "C:/GitHub/EconAnalysis/Papers/Participation/Results/Switching_Behavior_Summary.docx")
+  path = file.path(part_dir, "manuscript", "Switching_Behavior_Summary.docx"))
 

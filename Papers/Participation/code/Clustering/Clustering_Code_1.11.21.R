@@ -7,7 +7,8 @@ library(forcats)
 library(cluster)
 library(ggplot2)
 
-setwd("C:/Data/clusteringcode")
+library(here)
+setwd(here::here("Papers", "Participation", "code", "Clustering"))
 rm(list=ls())
 
 ###Load in the data
@@ -257,7 +258,7 @@ Hierarchical_Vessel_Groups <- Vessels %>% mutate(cluster=sub_grp)
 names(Hierarchical_Vessel_Groups)<-c("VESSEL_NUM", "group")
 
 write.csv(Hierarchical_Vessel_Groups,
-          "C:\\GitHub\\EconAnalysis\\Data\\Hierarchical_Vessel_Groups.csv", 
+          file.path(here::here("Shared", "Data"), "Hierarchical_Vessel_Groups.csv"), 
           row.names = FALSE)
 
 
@@ -280,7 +281,7 @@ PAM_Vessel_Groups<-Vessels
 PAM_Vessel_Groups$group<-Clusters$clustering
 
 write.csv(PAM_Vessel_Groups,
-          "C:\\GitHub\\EconAnalysis\\Data\\PAM_Vessel_Groups.csv", 
+          file.path(here::here("Shared", "Data"), "PAM_Vessel_Groups.csv"), 
           row.names = FALSE)
 
 # --------------------------------------------------------

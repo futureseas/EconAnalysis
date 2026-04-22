@@ -14,7 +14,8 @@ library(tidyr)
 library(geosphere)
 library(tidyverse)  
 
-setwd("C:/GitHub/EconAnalysis")
+library(here)
+setwd(here::here())
 
 #-----------------------------------------------------
 ### Load in the data

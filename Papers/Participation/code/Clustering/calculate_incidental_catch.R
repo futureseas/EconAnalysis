@@ -12,7 +12,8 @@ library(forcats)
 
 rm(list=ls())
 gc()
-setwd("C:/GitHub/EconAnalysis/Clustering")
+library(here)
+setwd(here::here("Papers", "Participation", "code", "Clustering"))
 
 
 #######################

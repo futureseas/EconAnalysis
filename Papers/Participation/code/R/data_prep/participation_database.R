@@ -12,9 +12,14 @@ library(dplyr)
 library(lubridate)
 library(tidyr)
 library(geosphere)
-library(tidyverse)  
+library(tidyverse)
+library(here)
 
-setwd("D:/GitHub/EconAnalysis")
+# Portable paths (anchored at EconAnalysis.Rproj)
+root_dir <- here::here()
+part_dir <- file.path(root_dir, "Papers", "Participation")
+data_dir <- file.path(part_dir, "data")
+setwd(root_dir)
 
 #-----------------------------------------------------
 ### Load in the data
@@ -274,7 +279,7 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ] %>%
 ### Merge data to fishing locations
 
 loogbook_coord <- readRDS("D:/Data/logbooks_FTID.rds")
-catch_area_coord <- readRDS("D:/GitHub/EconAnalysis/Papers/Participation/BlockAreas/catchareas_FTID.rds")
+catch_area_coord <- readRDS(file.path(data_dir, "BlockAreas", "catchareas_FTID.rds"))
 
 Tickets_coord <- merge(Tickets_clust, loogbook_coord, 
                      by = (c('FTID', 'PACFIN_SPECIES_CODE')),

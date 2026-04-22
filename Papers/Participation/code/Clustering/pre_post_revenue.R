@@ -11,7 +11,8 @@ library(tidyverse)
 
 rm(list=ls())
 gc()
-setwd("C:/GitHub/EconAnalysis/Clustering")
+library(here)
+setwd(here::here("Papers", "Participation", "code", "Clustering"))
 
 
 # ----------------------------------------
@@ -29,8 +30,8 @@ Tickets <- dplyr::select(Tickets, c(LANDING_YEAR, VESSEL_NUM, AFI_EXVESSEL_REVEN
 #--------------------------
 ## Load cluster groups
 
-new_entrants_ID <- readRDS(here::here("Clustering", "new_entrants_ID.rds"))
-PAM_Vessel_Groups <- read.csv("C:\\GitHub\\EconAnalysis\\Clustering\\PAM_Vessel_Groups.csv")
+new_entrants_ID <- readRDS(here::here("Papers", "Participation", "code", "Clustering", "new_entrants_ID.rds"))
+PAM_Vessel_Groups <- read.csv(file.path(here::here("Papers", "Participation", "code", "Clustering"), "PAM_Vessel_Groups.csv"))
 
 Tickets.c <- merge(Tickets, PAM_Vessel_Groups, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
 Tickets.cluster <- merge(Tickets.c, new_entrants_ID, by = ("VESSEL_NUM"), all.x = TRUE, all.y = FALSE)
