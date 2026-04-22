@@ -23,13 +23,23 @@ apollo_initialise()
 # -----------------------------
 # USER PATHS (edit if needed)
 # -----------------------------
-setwd("C:/GitHub/EconAnalysis/Participation")
-google_dir <- "H:/My Drive"             # adjust if needed
-sdm_dir    <- "SDMs"
-cpue_rds   <- "C:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds"
+library(here)  # portable paths anchored at EconAnalysis.Rproj
 
-# Port coordinates file (you uploaded this)
-port_csv_path <- "C:/GitHub/EconAnalysis/Data/Ports/port_areas.csv"
+# ---- Portable project paths (anchored at EconAnalysis.Rproj) ----
+part_dir      <- here::here("Papers", "Participation")
+data_dir      <- file.path(part_dir, "data")
+sdm_dir       <- file.path(part_dir, "code", "SDMs")
+apollo_dir    <- file.path(part_dir, "Results", "apollo")
+pred_dir      <- file.path(part_dir, "Results", "predictions")
+r_output_dir  <- file.path(part_dir, "Results", "r_output")
+shared_dir    <- here::here("Shared")
+
+setwd(part_dir)
+google_dir <- "H:/My Drive"             # adjust if needed
+cpue_rds   <- file.path(data_dir, "CPUE_index.rds")
+
+# Port coordinates file
+port_csv_path <- file.path(shared_dir, "Data", "Ports", "port_areas.csv")
 
 # Cluster data files (anonymised)
 cluster_rds <- list(
@@ -352,18 +362,18 @@ cluster_meta <- list(
 # =========================================================
 # Load estimated models + probability functions
 # =========================================================
-res_c4 <- readRDS("res_c4.rds")
-res_c5 <- readRDS("res_c5.rds")
-res_c6 <- readRDS("res_c6.rds")
-res_c7 <- readRDS("res_c7.rds")
+res_c4 <- readRDS(file.path(pred_dir, "res_c4.rds"))
+res_c5 <- readRDS(file.path(pred_dir, "res_c5.rds"))
+res_c6 <- readRDS(file.path(pred_dir, "res_c6.rds"))
+res_c7 <- readRDS(file.path(pred_dir, "res_c7.rds"))
 
 res_list <- list(c4=res_c4, c5=res_c5, c6=res_c6, c7=res_c7)
 
 # If you saved prob-funs as RDS (recommended). Otherwise, source your model scripts.
-apollo_probabilities_c4 <- readRDS("apollo_probabilities_c4.rds")
-apollo_probabilities_c5 <- readRDS("apollo_probabilities_c5.rds")
-apollo_probabilities_c6 <- readRDS("apollo_probabilities_c6.rds")
-apollo_probabilities_c7 <- readRDS("apollo_probabilities_c7.rds")
+apollo_probabilities_c4 <- readRDS(file.path(apollo_dir, "apollo_probabilities_c4.rds"))
+apollo_probabilities_c5 <- readRDS(file.path(apollo_dir, "apollo_probabilities_c5.rds"))
+apollo_probabilities_c6 <- readRDS(file.path(apollo_dir, "apollo_probabilities_c6.rds"))
+apollo_probabilities_c7 <- readRDS(file.path(apollo_dir, "apollo_probabilities_c7.rds"))
 
 prob_fun_list <- list(
   c4 = apollo_probabilities_c4,
@@ -517,12 +527,12 @@ all_sp   <- bind_rows(lapply(scenario_results, `[[`, "species"))
 all_port <- bind_rows(lapply(scenario_results, `[[`, "port"))
 all_alt  <- bind_rows(lapply(scenario_results, `[[`, "alternative"))
 
-dir.create(file.path("R","output","scenarios"), showWarnings = FALSE, recursive = TRUE)
+dir.create(file.path(r_output_dir, "scenarios"), showWarnings = FALSE, recursive = TRUE)
 
-write_csv(all_part, file.path("R","output","scenarios","scenario_delta_participation_pp.csv"))
-write_csv(all_sp,   file.path("R","output","scenarios","scenario_delta_species_pp.csv"))
-write_csv(all_port, file.path("R","output","scenarios","scenario_delta_port_pp.csv"))
-write_csv(all_alt,  file.path("R","output","scenarios","scenario_delta_alternative_pp.csv"))
+write_csv(all_part, file.path(r_output_dir, "scenarios","scenario_delta_participation_pp.csv"))
+write_csv(all_sp,   file.path(r_output_dir, "scenarios","scenario_delta_species_pp.csv"))
+write_csv(all_port, file.path(r_output_dir, "scenarios","scenario_delta_port_pp.csv"))
+write_csv(all_alt,  file.path(r_output_dir, "scenarios","scenario_delta_alternative_pp.csv"))
 
 writexl::write_xlsx(
   list(
@@ -538,7 +548,7 @@ writexl::write_xlsx(
                              window_start=win$start_date,
                              window_end=win$end_date)
   ),
-  path = file.path("R","output","scenarios","scenario_heatwave_delta_pp.xlsx")
+  path = file.path(r_output_dir, "scenarios","scenario_heatwave_delta_pp.xlsx")
 )
 
 message("\nAll scenario outputs written to: R/output/scenarios/")
@@ -553,9 +563,9 @@ message("\nAll scenario outputs written to: R/output/scenarios/")
 
 library(tidyverse)
 
-in_file  <- file.path("R","output","scenarios","scenario_delta_species_pp.csv")
-out_png  <- file.path("R","output","scenarios","Fig_heatwave_delta_species_pp.png")
-out_pdf  <- file.path("R","output","scenarios","Fig_heatwave_delta_species_pp.pdf")
+in_file  <- file.path(r_output_dir, "scenarios","scenario_delta_species_pp.csv")
+out_png  <- file.path(r_output_dir, "scenarios","Fig_heatwave_delta_species_pp.png")
+out_pdf  <- file.path(r_output_dir, "scenarios","Fig_heatwave_delta_species_pp.pdf")
 
 df <- readr::read_csv(in_file, show_col_types = FALSE)
 
@@ -610,9 +620,9 @@ print(p)
 
 library(tidyverse)
 
-in_file <- file.path("R","output","scenarios","scenario_delta_port_pp.csv")
-out_png <- file.path("R","output","scenarios","Fig_heatwave_delta_port_pp.png")
-out_pdf <- file.path("R","output","scenarios","Fig_heatwave_delta_port_pp.pdf")
+in_file <- file.path(r_output_dir, "scenarios","scenario_delta_port_pp.csv")
+out_png <- file.path(r_output_dir, "scenarios","Fig_heatwave_delta_port_pp.png")
+out_pdf <- file.path(r_output_dir, "scenarios","Fig_heatwave_delta_port_pp.pdf")
 
 df <- readr::read_csv(in_file, show_col_types = FALSE)
 
@@ -663,9 +673,9 @@ print(p)
 
 library(tidyverse)
 
-in_file <- file.path("R","output","scenarios","scenario_delta_alternative_pp.csv")
-out_png <- file.path("R","output","scenarios","Fig_heatwave_delta_alternative_pp.png")
-out_pdf <- file.path("R","output","scenarios","Fig_heatwave_delta_alternative_pp.pdf")
+in_file <- file.path(r_output_dir, "scenarios","scenario_delta_alternative_pp.csv")
+out_png <- file.path(r_output_dir, "scenarios","Fig_heatwave_delta_alternative_pp.png")
+out_pdf <- file.path(r_output_dir, "scenarios","Fig_heatwave_delta_alternative_pp.pdf")
 
 df <- readr::read_csv(in_file, show_col_types = FALSE)
 

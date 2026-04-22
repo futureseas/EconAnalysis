@@ -186,7 +186,7 @@ Catch.per.trip <- Tickets_chr %>%
   mutate(CPUE_index = sigmoid(CPUE.z)) %>%
   dplyr::select(-c('mean.CPUE', 'sd.CPUE', 'CPUE', 'CPUE.z'))
 
-# saveRDS(Catch.per.trip, "D:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds")
+# saveRDS(Catch.per.trip, "D:/GitHub/EconAnalysis/Papers/Participation/data/CPUE_index.rds")
 
 
 #----------------------------------------------------------------------------------------
@@ -274,7 +274,7 @@ Tickets_clust <- Tickets_clust[!is.na(Tickets_clust$group_all), ] %>%
 ### Merge data to fishing locations
 
 loogbook_coord <- readRDS("D:/Data/logbooks_FTID.rds")
-catch_area_coord <- readRDS("D:/GitHub/EconAnalysis/Participation/BlockAreas/catchareas_FTID.rds")
+catch_area_coord <- readRDS("D:/GitHub/EconAnalysis/Papers/Participation/BlockAreas/catchareas_FTID.rds")
 
 Tickets_coord <- merge(Tickets_clust, loogbook_coord, 
                      by = (c('FTID', 'PACFIN_SPECIES_CODE')),

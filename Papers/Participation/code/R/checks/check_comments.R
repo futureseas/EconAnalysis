@@ -363,5 +363,5 @@ summary_table <- flextable(combined_summary)
 
 # Save the table as a DOCX file
 summary_table %>% save_as_docx(
-  path = "C:/GitHub/EconAnalysis/Participation/Results/Switching_Behavior_Summary.docx")
+  path = "C:/GitHub/EconAnalysis/Papers/Participation/Results/Switching_Behavior_Summary.docx")
 

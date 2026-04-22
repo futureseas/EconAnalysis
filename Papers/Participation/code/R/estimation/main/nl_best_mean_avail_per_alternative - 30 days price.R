@@ -9,10 +9,20 @@ library(lubridate)
 
 apollo_initialise()
 
-setwd("D:/GitHub/EconAnalysis/Participation")
+library(here)  # portable paths anchored at EconAnalysis.Rproj
+
+# ---- Portable project paths (anchored at EconAnalysis.Rproj) ----
+part_dir      <- here::here("Papers", "Participation")
+data_dir      <- file.path(part_dir, "data")
+sdm_dir       <- file.path(part_dir, "code", "SDMs")
+apollo_dir    <- file.path(part_dir, "Results", "apollo")
+pred_dir      <- file.path(part_dir, "Results", "predictions")
+r_output_dir  <- file.path(part_dir, "Results", "r_output")
+
+setwd(part_dir)
 google_dir <- "G:/Mi unidad/"  # adjust if needed
-cpue_rds   <- "D:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds"
-sdm_dir    <- "SDMs"
+cpue_rds   <- file.path(data_dir, "CPUE_index.rds")
+sdm_dir    <- "code/SDMs"
 
 
 prepare_sdm <- function(sdm_rds, species_code, sdm_col, port_var="PORT_AREA_CODE"){
@@ -132,7 +142,7 @@ run_cluster <- function(cluster_id, rds_file, alts, apollo_beta_base, apollo_fix
     modelName       = paste0("NL_participation_model_", cluster_id, "_R&R"),
     modelDescr      = "Participation, location and target species decisions",
     indivID         = "fished_vessel_anon",
-    outputDirectory = file.path("R","output"),
+    outputDirectory = r_output_dir,
     panelData       = TRUE,
     nCores          = 18,
     workInLogs      = TRUE

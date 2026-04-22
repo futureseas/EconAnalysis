@@ -5,11 +5,21 @@ gc()
 library(apollo)
 apollo_initialise()
 
-setwd("D:/GitHub/EconAnalysis/Participation")
-res_c4 <- readRDS("res_c4.rds") 
-res_c5 <- readRDS("res_c5.rds") 
-res_c6 <- readRDS("res_c6.rds") 
-res_c7 <- readRDS("res_c7.rds") 
+library(here)  # portable paths anchored at EconAnalysis.Rproj
+
+# ---- Portable project paths (anchored at EconAnalysis.Rproj) ----
+part_dir      <- here::here("Papers", "Participation")
+data_dir      <- file.path(part_dir, "data")
+sdm_dir       <- file.path(part_dir, "code", "SDMs")
+apollo_dir    <- file.path(part_dir, "Results", "apollo")
+pred_dir      <- file.path(part_dir, "Results", "predictions")
+r_output_dir  <- file.path(part_dir, "Results", "r_output")
+
+setwd(part_dir)
+res_c4 <- readRDS(file.path(pred_dir, "res_c4.rds")) 
+res_c5 <- readRDS(file.path(pred_dir, "res_c5.rds")) 
+res_c6 <- readRDS(file.path(pred_dir, "res_c6.rds")) 
+res_c7 <- readRDS(file.path(pred_dir, "res_c7.rds")) 
 
 
 
@@ -23,7 +33,7 @@ library(dplyr)
 # ---------------------------- #
 ##### (A) Pick best SDM spec per cluster #####
 # ----------------------------  #
-oos_table <- readRDS("oos_table.RDS")
+oos_table <- readRDS(file.path(pred_dir, "oos_table.RDS"))
 
 # best_spec <- oos_table %>%
 #   group_by(cluster) %>%

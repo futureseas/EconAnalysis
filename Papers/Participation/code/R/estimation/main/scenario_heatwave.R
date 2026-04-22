@@ -10,11 +10,13 @@ library(dplyr)
 library(tidyr)
 library(slider)
 library(lubridate)
+library(here)
 
 # -----------------------------
 # 0) YOUR SDM PIPELINE (daily only)
 # -----------------------------
-sdm_dir <- "SDMs"
+part_dir <- here::here("Papers", "Participation")
+sdm_dir  <- file.path(part_dir, "code", "SDMs")
 
 prepare_sdm <- function(sdm_rds, species_code, sdm_col, port_var="PORT_AREA_CODE"){
   stopifnot(file.exists(sdm_rds))

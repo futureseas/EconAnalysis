@@ -8,7 +8,7 @@ if (PC == "home") {
   google_dir <- "G:/Mi unidad/"
 }
 
-setwd("C:/GitHub/EconAnalysis/Participation/R")
+setwd("C:/GitHub/EconAnalysis/Papers/Participation/code/R")
 
 ## Read database
 library(tidyr)

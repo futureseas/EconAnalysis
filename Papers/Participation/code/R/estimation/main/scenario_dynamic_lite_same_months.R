@@ -39,17 +39,28 @@ apollo_initialise()
 # -----------------------------
 # USER PATHS (edit if needed)
 # -----------------------------
-setwd("D:/GitHub/EconAnalysis/Participation")
+library(here)  # portable paths anchored at EconAnalysis.Rproj
+
+# ---- Portable project paths (anchored at EconAnalysis.Rproj) ----
+part_dir      <- here::here("Papers", "Participation")
+data_dir      <- file.path(part_dir, "data")
+sdm_dir       <- file.path(part_dir, "code", "SDMs")
+apollo_dir    <- file.path(part_dir, "Results", "apollo")
+pred_dir      <- file.path(part_dir, "Results", "predictions")
+r_output_dir  <- file.path(part_dir, "Results", "r_output")
+shared_dir    <- here::here("Shared")
+
+setwd(part_dir)
 
 # Your Google Drive / project paths
 google_dir <- "G:/Mi unidad"             # adjust if needed
-sdm_dir    <- "SDMs"
-cpue_rds   <- "D:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds"
+sdm_dir    <- "code/SDMs"
+cpue_rds   <- file.path(data_dir, "CPUE_index.rds")
 
 # Port coordinates file
 # If you want to use the uploaded CSV in this environment, set:
 # port_csv_path <- "/mnt/data/port_areas.csv"
-port_csv_path <- "D:/GitHub/EconAnalysis/Data/Ports/port_areas.csv"
+port_csv_path <- file.path(shared_dir, "Data", "Ports", "port_areas.csv")
 
 # Cluster long data files (anonymised)
 cluster_rds <- list(
@@ -60,17 +71,17 @@ cluster_rds <- list(
 )
 
 # Model objects (estimated already)
-res_c4 <- readRDS("res_c4.rds")
-res_c5 <- readRDS("res_c5.rds")
-res_c6 <- readRDS("res_c6.rds")
-res_c7 <- readRDS("res_c7.rds")
+res_c4 <- readRDS(file.path(pred_dir, "res_c4.rds"))
+res_c5 <- readRDS(file.path(pred_dir, "res_c5.rds"))
+res_c6 <- readRDS(file.path(pred_dir, "res_c6.rds"))
+res_c7 <- readRDS(file.path(pred_dir, "res_c7.rds"))
 res_list <- list(c4=res_c4, c5=res_c5, c6=res_c6, c7=res_c7)
 
 # Probability functions (either RDS or source your scripts)
-apollo_probabilities_c4 <- readRDS("apollo_probabilities_c4.rds")
-apollo_probabilities_c5 <- readRDS("apollo_probabilities_c5.rds")
-apollo_probabilities_c6 <- readRDS("apollo_probabilities_c6.rds")
-apollo_probabilities_c7 <- readRDS("apollo_probabilities_c7.rds")
+apollo_probabilities_c4 <- readRDS(file.path(apollo_dir, "apollo_probabilities_c4.rds"))
+apollo_probabilities_c5 <- readRDS(file.path(apollo_dir, "apollo_probabilities_c5.rds"))
+apollo_probabilities_c6 <- readRDS(file.path(apollo_dir, "apollo_probabilities_c6.rds"))
+apollo_probabilities_c7 <- readRDS(file.path(apollo_dir, "apollo_probabilities_c7.rds"))
 prob_fun_list <- list(c4=apollo_probabilities_c4, c5=apollo_probabilities_c5,
                       c6=apollo_probabilities_c6, c7=apollo_probabilities_c7)
 
@@ -560,7 +571,7 @@ all_port <- bind_rows(lapply(scenario_results, `[[`, "port"))
 all_alt  <- bind_rows(lapply(scenario_results, `[[`, "alternative"))
 season_tbl <- bind_rows(lapply(scenario_results, `[[`, "season")) %>% distinct()
 
-out_dir <- file.path("R","output","scenarios_dynamic_lite")
+out_dir <- file.path(r_output_dir, "scenarios_dynamic_lite")
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
 write_csv(all_part, file.path(out_dir,"scenario_dynamic_lite_delta_participation_pp.csv"))

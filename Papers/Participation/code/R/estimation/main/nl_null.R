@@ -1,3 +1,10 @@
+# Null models (null-ASC) per cluster — sourced by nl_driver_allclusters.R or
+# runnable standalone. Paths anchored at EconAnalysis.Rproj via here().
+
+library(here)
+part_dir   <- here::here("Papers", "Participation")
+apollo_dir <- file.path(part_dir, "Results", "apollo")
+
 # ===================== Cluster c4 =====================
 
 apollo_beta_null_c4 <- c(
@@ -452,15 +459,15 @@ apollo_probabilities_null_c7 = function(apollo_beta, apollo_inputs, functionalit
   
 }
 
-saveRDS(apollo_probabilities_null_c4, "apollo_probabilities_null_c4.rds")
-saveRDS(apollo_probabilities_null_c5, "apollo_probabilities_null_c5.rds")
-saveRDS(apollo_probabilities_null_c6, "apollo_probabilities_null_c6.rds")
-saveRDS(apollo_probabilities_null_c7, "apollo_probabilities_null_c7.rds")
-saveRDS(apollo_beta_null_c4, "apollo_beta_null_c4.rds")
-saveRDS(apollo_beta_null_c5, "apollo_beta_null_c5.rds")
-saveRDS(apollo_beta_null_c6, "apollo_beta_null_c6.rds")
-saveRDS(apollo_beta_null_c7, "apollo_beta_null_c7.rds")
-saveRDS(apollo_fixed_null_c4, "apollo_fixed_null_c4.rds")
-saveRDS(apollo_fixed_null_c5, "apollo_fixed_null_c5.rds")
-saveRDS(apollo_fixed_null_c6, "apollo_fixed_null_c6.rds")
-saveRDS(apollo_fixed_null_c7, "apollo_fixed_null_c7.rds")
+saveRDS(apollo_probabilities_null_c4, file.path(apollo_dir, "apollo_probabilities_null_c4.rds"))
+saveRDS(apollo_probabilities_null_c5, file.path(apollo_dir, "apollo_probabilities_null_c5.rds"))
+saveRDS(apollo_probabilities_null_c6, file.path(apollo_dir, "apollo_probabilities_null_c6.rds"))
+saveRDS(apollo_probabilities_null_c7, file.path(apollo_dir, "apollo_probabilities_null_c7.rds"))
+saveRDS(apollo_beta_null_c4, file.path(apollo_dir, "apollo_beta_null_c4.rds"))
+saveRDS(apollo_beta_null_c5, file.path(apollo_dir, "apollo_beta_null_c5.rds"))
+saveRDS(apollo_beta_null_c6, file.path(apollo_dir, "apollo_beta_null_c6.rds"))
+saveRDS(apollo_beta_null_c7, file.path(apollo_dir, "apollo_beta_null_c7.rds"))
+saveRDS(apollo_fixed_null_c4, file.path(apollo_dir, "apollo_fixed_null_c4.rds"))
+saveRDS(apollo_fixed_null_c5, file.path(apollo_dir, "apollo_fixed_null_c5.rds"))
+saveRDS(apollo_fixed_null_c6, file.path(apollo_dir, "apollo_fixed_null_c6.rds"))
+saveRDS(apollo_fixed_null_c7, file.path(apollo_dir, "apollo_fixed_null_c7.rds"))

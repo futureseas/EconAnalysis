@@ -6,14 +6,17 @@ library(dplyr)
 library(tibble)
 library(officer)
 library(flextable)
+library(here)
+part_dir <- here::here("Papers", "Participation")
+setwd(part_dir)
 
 # -----------------------------
 # 0) SOURCE YOUR FUNCTIONS / NL STRUCTURES
 # -----------------------------
-source("R/R&R/nl_structure_c4.R"); nlStructure_c4 <- nlStructure
-source("R/R&R/nl_structure_c5.R"); nlStructure_c5 <- nlStructure
-source("R/R&R/nl_structure_c6.R"); nlStructure_c6 <- nlStructure
-source("R/R&R/nl_structure_c7.R"); nlStructure_c7 <- nlStructure
+source(here::here("Papers", "Participation", "code", "R", "estimation", "main", "nl_structure_c4.R")); nlStructure_c4 <- nlStructure
+source(here::here("Papers", "Participation", "code", "R", "estimation", "main", "nl_structure_c5.R")); nlStructure_c5 <- nlStructure
+source(here::here("Papers", "Participation", "code", "R", "estimation", "main", "nl_structure_c6.R")); nlStructure_c6 <- nlStructure
+source(here::here("Papers", "Participation", "code", "R", "estimation", "main", "nl_structure_c7.R")); nlStructure_c7 <- nlStructure
 
 # -----------------------------
 # 1) GET PROBABILITY MATRIX (N x J) FROM APOLLO PREDICTION

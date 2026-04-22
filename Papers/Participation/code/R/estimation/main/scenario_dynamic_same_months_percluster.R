@@ -30,14 +30,25 @@ apollo_initialise()
 # -----------------------------
 # USER PATHS (edit if needed)
 # -----------------------------
-setwd("D:/GitHub/EconAnalysis/Participation")
+library(here)  # portable paths anchored at EconAnalysis.Rproj
+
+# ---- Portable project paths (anchored at EconAnalysis.Rproj) ----
+part_dir      <- here::here("Papers", "Participation")
+data_dir      <- file.path(part_dir, "data")
+sdm_dir       <- file.path(part_dir, "code", "SDMs")
+apollo_dir    <- file.path(part_dir, "Results", "apollo")
+pred_dir      <- file.path(part_dir, "Results", "predictions")
+r_output_dir  <- file.path(part_dir, "Results", "r_output")
+shared_dir    <- here::here("Shared")
+
+setwd(part_dir)
 
 google_dir <- "G:/Mi unidad"             # adjust if needed
-sdm_dir    <- "SDMs"
-cpue_rds   <- "D:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds"
+sdm_dir    <- "code/SDMs"
+cpue_rds   <- file.path(data_dir, "CPUE_index.rds")
 
 # Port coordinates file
-port_csv_path <- "D:/GitHub/EconAnalysis/Data/Ports/port_areas.csv"
+port_csv_path <- file.path(shared_dir, "Data", "Ports", "port_areas.csv")
 
 # Cluster data files (anonymised)
 cluster_rds <- list(
@@ -404,17 +415,17 @@ cluster_meta <- list(
 # Load estimated models + probability functions
 # -----------------------------
 res_list <- list(
-  c4 = readRDS("res_c4.rds"),
-  c5 = readRDS("res_c5.rds"),
-  c6 = readRDS("res_c6.rds"),
-  c7 = readRDS("res_c7.rds")
+  c4 = readRDS(file.path(pred_dir, "res_c4.rds")),
+  c5 = readRDS(file.path(pred_dir, "res_c5.rds")),
+  c6 = readRDS(file.path(pred_dir, "res_c6.rds")),
+  c7 = readRDS(file.path(pred_dir, "res_c7.rds"))
 )
 
 prob_fun_list <- list(
-  c4 = readRDS("apollo_probabilities_c4.rds"),
-  c5 = readRDS("apollo_probabilities_c5.rds"),
-  c6 = readRDS("apollo_probabilities_c6.rds"),
-  c7 = readRDS("apollo_probabilities_c7.rds")
+  c4 = readRDS(file.path(apollo_dir, "apollo_probabilities_c4.rds")),
+  c5 = readRDS(file.path(apollo_dir, "apollo_probabilities_c5.rds")),
+  c6 = readRDS(file.path(apollo_dir, "apollo_probabilities_c6.rds")),
+  c7 = readRDS(file.path(apollo_dir, "apollo_probabilities_c7.rds"))
 )
 
 
@@ -730,13 +741,13 @@ all_alt <- all_alt %>%
 
 
 
-dir.create(file.path("R","output","scenarios"), showWarnings = FALSE, recursive = TRUE)
+dir.create(file.path(r_output_dir, "scenarios"), showWarnings = FALSE, recursive = TRUE)
 
-write_csv(all_win,  file.path("R","output","scenarios","scenario_dynamic_same_months_windows.csv"))
-write_csv(all_part, file.path("R","output","scenarios","scenario_dynamic_same_months_delta_participation_pp.csv"))
-write_csv(all_sp,   file.path("R","output","scenarios","scenario_dynamic_same_months_delta_species_pp.csv"))
-write_csv(all_port, file.path("R","output","scenarios","scenario_dynamic_same_months_delta_port_pp.csv"))
-write_csv(all_alt,  file.path("R","output","scenarios","scenario_dynamic_same_months_delta_alternative_pp.csv"))
+write_csv(all_win,  file.path(r_output_dir, "scenarios","scenario_dynamic_same_months_windows.csv"))
+write_csv(all_part, file.path(r_output_dir, "scenarios","scenario_dynamic_same_months_delta_participation_pp.csv"))
+write_csv(all_sp,   file.path(r_output_dir, "scenarios","scenario_dynamic_same_months_delta_species_pp.csv"))
+write_csv(all_port, file.path(r_output_dir, "scenarios","scenario_dynamic_same_months_delta_port_pp.csv"))
+write_csv(all_alt,  file.path(r_output_dir, "scenarios","scenario_dynamic_same_months_delta_alternative_pp.csv"))
 
 writexl::write_xlsx(
   list(
@@ -746,7 +757,7 @@ writexl::write_xlsx(
     port = all_port,
     alternative = all_alt
   ),
-  path = file.path("R","output","scenarios","scenario_dynamic_same_months_delta_pp.xlsx")
+  path = file.path(r_output_dir, "scenarios","scenario_dynamic_same_months_delta_pp.xlsx")
 )
 
 message("\nAll scenario outputs written to: R/output/scenarios/")
@@ -828,7 +839,7 @@ all_sp   <- all_sp   %>% mutate(group_label = vapply(group, pretty_spec, charact
 # ----------------------------
 # 1) Plot helper (English labels, facet by cluster)
 # ----------------------------
-out_dir <- file.path("R","output","scenarios")
+out_dir <- file.path(r_output_dir, "scenarios")
 fig_dir <- file.path(out_dir, "figs")
 dir.create(fig_dir, showWarnings = FALSE, recursive = TRUE)
 

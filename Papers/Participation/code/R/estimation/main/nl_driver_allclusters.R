@@ -1,4 +1,4 @@
-# Nested logit model using 30 days state dependency # 
+# Nested logit model using 30 days state dependency #
 
 rm(list=ls())
 
@@ -6,13 +6,23 @@ library(apollo)
 library(tidyverse)
 library(slider)
 library(lubridate)
+library(here)  # portable paths anchored at EconAnalysis.Rproj
 
 apollo_initialise()
 
-setwd("D:/GitHub/EconAnalysis/Participation")
+# ---- Portable project paths (anchored at EconAnalysis.Rproj) ----
+part_dir      <- here::here("Papers", "Participation")
+data_dir      <- file.path(part_dir, "data")
+sdm_dir       <- file.path(part_dir, "code", "SDMs")
+apollo_dir    <- file.path(part_dir, "Results", "apollo")
+pred_dir      <- file.path(part_dir, "Results", "predictions")
+r_output_dir  <- file.path(part_dir, "Results", "r_output")
+
+# Apollo needs the working directory to be the paper root (for relative outputs)
+setwd(part_dir)
+
 google_dir <- "G:/Mi unidad/"  # adjust if needed
-cpue_rds   <- "D:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds"
-sdm_dir    <- "SDMs"
+cpue_rds   <- file.path(data_dir, "CPUE_index.rds")
 
 
 prepare_sdm <- function(sdm_rds, species_code, sdm_col, port_var="PORT_AREA_CODE"){
@@ -133,7 +143,7 @@ run_cluster <- function(cluster_id, rds_file, alts, apollo_beta_base, apollo_fix
     modelName       = paste0("NL_participation_model_", cluster_id, "_R&R"),
     modelDescr      = "Participation, location and target species decisions",
     indivID         = "fished_vessel_anon",
-    outputDirectory = file.path("R","output"),
+    outputDirectory = r_output_dir,
     panelData       = TRUE,
     nCores          = 18,
     workInLogs      = TRUE
@@ -936,11 +946,11 @@ use_d_c_by_spec <- c(daily=1, MA7=1, MA14=0, MA30=0, t1daily=1)  # tweak if need
 #   apollo_prob_fun=apollo_probabilities_c4,
 #   case_vars=c("weekend","psdnclosure","btnaclosure"),
 #   use_d_c_by_spec=use_d_c_by_spec)
-# saveRDS(res_c4, "res_c4.rds")
-# saveRDS(apollo_beta_c4, "apollo_beta_c4.rds")
-saveRDS(apollo_fixed_c4, "apollo_fixed_c4.rds")
-# saveRDS(apollo_probabilities_c4, "apollo_probabilities_c4.rds")
-res_c4 <- readRDS("res_c4.rds")
+# saveRDS(res_c4, file.path(pred_dir, "res_c4.rds"))
+# saveRDS(apollo_beta_c4, file.path(apollo_dir, "apollo_beta_c4.rds"))
+saveRDS(apollo_fixed_c4, file.path(apollo_dir, "apollo_fixed_c4.rds"))
+# saveRDS(apollo_probabilities_c4, file.path(apollo_dir, "apollo_probabilities_c4.rds"))
+res_c4 <- readRDS(file.path(pred_dir, "res_c4.rds"))
 
 # res_c5 <- run_cluster("c5", paste0(google_dir,"Data/Anonymised data/part_model_c5.rds"),
 #   alts=c("mna_msqd", "sba_msqd", "mra_msqd", "laa_msqd", "npa_msqd", "sfa_msqd", "cba_msqd", "laa_psdn", "clo_psdn", "cwa_psdn", "clw_psdn", "sba_cmck", "laa_cmck", "laa_nanc", "cwa_albc", "cwa_dcrb", "clw_dcrb", "no_participation"),
@@ -948,11 +958,11 @@ res_c4 <- readRDS("res_c4.rds")
 #   apollo_prob_fun=apollo_probabilities_c5,
 #   case_vars=c("weekend","psdnclosure","msqdclosure"),
 #   use_d_c_by_spec=use_d_c_by_spec)
-# saveRDS(res_c5, "res_c5.rds")
-# saveRDS(apollo_beta_c5, "apollo_beta_c5.rds")
-saveRDS(apollo_fixed_c5, "apollo_fixed_c5.rds")
-# saveRDS(apollo_probabilities_c5, "apollo_probabilities_c5.rds")
-res_c5 <- readRDS("res_c5.rds")
+# saveRDS(res_c5, file.path(pred_dir, "res_c5.rds"))
+# saveRDS(apollo_beta_c5, file.path(apollo_dir, "apollo_beta_c5.rds"))
+saveRDS(apollo_fixed_c5, file.path(apollo_dir, "apollo_fixed_c5.rds"))
+# saveRDS(apollo_probabilities_c5, file.path(apollo_dir, "apollo_probabilities_c5.rds"))
+res_c5 <- readRDS(file.path(pred_dir, "res_c5.rds"))
 
 # res_c6 <- run_cluster("c6", paste0(google_dir,"Data/Anonymised data/part_model_c6.rds"),
 #   alts=c("cba_psdn", "clo_psdn", "clw_psdn", "cwa_psdn", "clo_nanc", "clw_nanc", "cwa_nanc", "clo_cmck","cwa_dcrb", "nps_sock", "no_participation"),
@@ -960,11 +970,11 @@ res_c5 <- readRDS("res_c5.rds")
 #   apollo_prob_fun=apollo_probabilities_c6,
 #   case_vars=c("weekend","psdnclosure","msqdclosure"),
 #   use_d_c_by_spec=use_d_c_by_spec)
-# saveRDS(res_c6, "res_c6.rds")
-# saveRDS(apollo_beta_c6, "apollo_beta_c6.rds")
-saveRDS(apollo_fixed_c6, "apollo_fixed_c6.rds")
-# saveRDS(apollo_probabilities_c6, "apollo_probabilities_c6.rds")
-res_c6 <- readRDS("res_c6.rds")
+# saveRDS(res_c6, file.path(pred_dir, "res_c6.rds"))
+# saveRDS(apollo_beta_c6, file.path(apollo_dir, "apollo_beta_c6.rds"))
+saveRDS(apollo_fixed_c6, file.path(apollo_dir, "apollo_fixed_c6.rds"))
+# saveRDS(apollo_probabilities_c6, file.path(apollo_dir, "apollo_probabilities_c6.rds"))
+res_c6 <- readRDS(file.path(pred_dir, "res_c6.rds"))
 
 # res_c7 <- run_cluster("c7", paste0(google_dir,"Data/Anonymised data/part_model_c7.rds"),
 #   alts=c("laa_cmck", "mna_cmck", "laa_jmck", "mna_jmck", "laa_msqd", "mra_msqd", "sba_msqd", "sfa_msqd", "mna_msqd", "laa_psdn", "mna_psdn", "mna_nanc", "sba_nanc", "sda_nanc", "no_participation"),
@@ -972,32 +982,32 @@ res_c6 <- readRDS("res_c6.rds")
 #   apollo_prob_fun=apollo_probabilities_c7,
 #   case_vars=c("weekend","psdnclosure","msqdclosure"),
 #   use_d_c_by_spec=use_d_c_by_spec)
-# saveRDS(res_c7, "res_c7.rds")
-# saveRDS(apollo_beta_c7, "apollo_beta_c7.rds")
-saveRDS(apollo_fixed_c7, "apollo_fixed_c7.rds")
-# saveRDS(apollo_probabilities_c7, "apollo_probabilities_c7.rds")
-res_c7 <- readRDS("res_c7.rds")
+# saveRDS(res_c7, file.path(pred_dir, "res_c7.rds"))
+# saveRDS(apollo_beta_c7, file.path(apollo_dir, "apollo_beta_c7.rds"))
+saveRDS(apollo_fixed_c7, file.path(apollo_dir, "apollo_fixed_c7.rds"))
+# saveRDS(apollo_probabilities_c7, file.path(apollo_dir, "apollo_probabilities_c7.rds"))
+res_c7 <- readRDS(file.path(pred_dir, "res_c7.rds"))
 
 comp_all <- bind_rows(res_c4$comp, res_c5$comp, res_c6$comp, res_c7$comp) %>% arrange(cluster, AIC)
 # print(comp_all)
-# write.csv(comp_all, file=file.path("R","output","LL_AIC_BIC_allclusters.csv"), row.names=FALSE)
-# writexl::write_xlsx(comp_all, path=file.path("R","output","LL_AIC_BIC_allclusters.xlsx"))
+# write.csv(comp_all, file=file.path(r_output_dir,"LL_AIC_BIC_allclusters.csv"), row.names=FALSE)
+# writexl::write_xlsx(comp_all, path=file.path(r_output_dir,"LL_AIC_BIC_allclusters.xlsx"))
 
 
 
 #### OUT OF SAMPLE METRIC ####
-apollo_probabilities_null_c4 <- readRDS("apollo_probabilities_null_c4.rds")
-apollo_probabilities_null_c5 <- readRDS("apollo_probabilities_null_c5.rds")
-apollo_probabilities_null_c6 <- readRDS("apollo_probabilities_null_c6.rds")
-apollo_probabilities_null_c7 <- readRDS("apollo_probabilities_null_c7.rds")
-apollo_beta_null_c4          <- readRDS("apollo_beta_null_c4.rds")
-apollo_beta_null_c5          <- readRDS("apollo_beta_null_c5.rds")
-apollo_beta_null_c6          <- readRDS("apollo_beta_null_c6.rds")
-apollo_beta_null_c7          <- readRDS("apollo_beta_null_c7.rds")
-apollo_fixed_null_c4         <- readRDS("apollo_fixed_null_c4.rds")
-apollo_fixed_null_c5         <- readRDS("apollo_fixed_null_c5.rds")
-apollo_fixed_null_c6         <- readRDS("apollo_fixed_null_c6.rds")
-apollo_fixed_null_c7         <- readRDS("apollo_fixed_null_c7.rds")
+apollo_probabilities_null_c4 <- readRDS(file.path(apollo_dir, "apollo_probabilities_null_c4.rds"))
+apollo_probabilities_null_c5 <- readRDS(file.path(apollo_dir, "apollo_probabilities_null_c5.rds"))
+apollo_probabilities_null_c6 <- readRDS(file.path(apollo_dir, "apollo_probabilities_null_c6.rds"))
+apollo_probabilities_null_c7 <- readRDS(file.path(apollo_dir, "apollo_probabilities_null_c7.rds"))
+apollo_beta_null_c4          <- readRDS(file.path(apollo_dir, "apollo_beta_null_c4.rds"))
+apollo_beta_null_c5          <- readRDS(file.path(apollo_dir, "apollo_beta_null_c5.rds"))
+apollo_beta_null_c6          <- readRDS(file.path(apollo_dir, "apollo_beta_null_c6.rds"))
+apollo_beta_null_c7          <- readRDS(file.path(apollo_dir, "apollo_beta_null_c7.rds"))
+apollo_fixed_null_c4         <- readRDS(file.path(apollo_dir, "apollo_fixed_null_c4.rds"))
+apollo_fixed_null_c5         <- readRDS(file.path(apollo_dir, "apollo_fixed_null_c5.rds"))
+apollo_fixed_null_c6         <- readRDS(file.path(apollo_dir, "apollo_fixed_null_c6.rds"))
+apollo_fixed_null_c7         <- readRDS(file.path(apollo_dir, "apollo_fixed_null_c7.rds"))
 
 
 apollo_fixed_c4 <- c("asc_no_participation")
@@ -1281,8 +1291,8 @@ oos_table <- bind_rows(
   oos_results$c7
 )
 
-writexl::write_xlsx(oos_table, path=file.path("R","output","OOS_results_sdm_variation.xlsx"))
-saveRDS(oos_table, "oos_table.RDS")
+writexl::write_xlsx(oos_table, path=file.path(r_output_dir,"OOS_results_sdm_variation.xlsx"))
+saveRDS(oos_table, file.path(pred_dir, "oos_table.RDS"))
 
 
 

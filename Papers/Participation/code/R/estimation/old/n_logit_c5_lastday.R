@@ -20,7 +20,7 @@ if (PC == "home") {
 ### Load Apollo library
 library(apollo)
 apollo_initialise()
-setwd("C:/GitHub/EconAnalysis/Participation/R")
+setwd("C:/GitHub/EconAnalysis/Papers/Participation/code/R")
 
 
 

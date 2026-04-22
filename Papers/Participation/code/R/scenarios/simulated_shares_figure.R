@@ -7,8 +7,8 @@ gc()
 
 
 ## Load datase (from Stata work on predicting shares)
-Simulated_shares2 <- read.csv("C:/GitHub/EconAnalysis/Participation/R/Simulated_shares.csv") 
-Simulated_shares <- read.csv("C:/GitHub/EconAnalysis/Participation/R/Simulated_shares_fig.csv") %>%
+Simulated_shares2 <- read.csv("C:/GitHub/EconAnalysis/Papers/Participation/R/Simulated_shares.csv") 
+Simulated_shares <- read.csv("C:/GitHub/EconAnalysis/Papers/Participation/R/Simulated_shares_fig.csv") %>%
   complete(selection, set_year) %>% mutate(perc = ifelse(is.na(perc), 0, perc),
                                            perc3 = ifelse(is.na(perc3), 0, perc3)) %>%
   group_by(selection) %>%

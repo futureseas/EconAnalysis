@@ -8,11 +8,21 @@ gc()
 library(apollo)
 apollo_initialise()
 
-setwd("D:/GitHub/EconAnalysis/Participation")
-res_c4 <- readRDS("res_c4.rds") 
-res_c5 <- readRDS("res_c5.rds") 
-res_c6 <- readRDS("res_c6.rds") 
-res_c7 <- readRDS("res_c7.rds") 
+library(here)  # portable paths anchored at EconAnalysis.Rproj
+
+# ---- Portable project paths (anchored at EconAnalysis.Rproj) ----
+part_dir      <- here::here("Papers", "Participation")
+data_dir      <- file.path(part_dir, "data")
+sdm_dir       <- file.path(part_dir, "code", "SDMs")
+apollo_dir    <- file.path(part_dir, "Results", "apollo")
+pred_dir      <- file.path(part_dir, "Results", "predictions")
+r_output_dir  <- file.path(part_dir, "Results", "r_output")
+
+setwd(part_dir)
+res_c4 <- readRDS(file.path(pred_dir, "res_c4.rds")) 
+res_c5 <- readRDS(file.path(pred_dir, "res_c5.rds")) 
+res_c6 <- readRDS(file.path(pred_dir, "res_c6.rds")) 
+res_c7 <- readRDS(file.path(pred_dir, "res_c7.rds")) 
 
 
 ############################################################
@@ -29,7 +39,7 @@ library(dplyr)
 # ----------------------------
 # (A) Pick best SDM spec per cluster
 # ----------------------------
-oos_table <- readRDS("oos_table.RDS")
+oos_table <- readRDS(file.path(pred_dir, "oos_table.RDS"))
 
 best_spec <- oos_table %>%
   group_by(cluster) %>%
@@ -80,22 +90,22 @@ for(cl in names(res_list)){
 # ----------------------------
 # (D) Save databases to disk (one file per cluster) + a combined list
 # ----------------------------
-dir.create(file.path("R","output","databases_bestSDM"), showWarnings = FALSE, recursive = TRUE)
+dir.create(file.path(r_output_dir, "databases_bestSDM"), showWarnings = FALSE, recursive = TRUE)
 
 for(cl in names(assets)){
   saveRDS(
     assets[[cl]]$database_wide,
-    file = file.path("R","output","databases_bestSDM", paste0("database_", cl, "_", assets[[cl]]$spec, ".rds"))
+    file = file.path(r_output_dir, "databases_bestSDM", paste0("database_", cl, "_", assets[[cl]]$spec, ".rds"))
   )
 }
 
-saveRDS(assets, file = file.path("R","output","assets_bestSDM_byCluster.rds"))
+saveRDS(assets, file = file.path(r_output_dir, "assets_bestSDM_byCluster.rds"))
 
 cat("\nSaved:\n")
 for(cl in names(assets)){
-  cat(" - ", file.path("R","output","databases_bestSDM", paste0("database_", cl, "_", assets[[cl]]$spec, ".rds")), "\n")
+  cat(" - ", file.path(r_output_dir, "databases_bestSDM", paste0("database_", cl, "_", assets[[cl]]$spec, ".rds")), "\n")
 }
-cat(" - ", file.path("R","output","assets_bestSDM_byCluster.rds"), "\n")
+cat(" - ", file.path(r_output_dir, "assets_bestSDM_byCluster.rds"), "\n")
 
 
 
@@ -107,7 +117,7 @@ cat(" - ", file.path("R","output","assets_bestSDM_byCluster.rds"), "\n")
 
 run_manual_and_compare <- function(cluster_id, database_wide, model_original,
                                    apollo_beta_MANUAL, apollo_fixed_MANUAL, apollo_probabilities_MANUAL, constraints_MANUAL, indivID="fished_vessel_anon", nCores=16,
-                                   outDir=file.path("R","output")){
+                                   outDir=r_output_dir){
   
   apollo_control <- list(
     modelName       = paste0("MANUAL_", cluster_id, "_bestSDM"),
@@ -828,4 +838,4 @@ lr_test(model_restricted = out_c7$model_manual, model_unrestricted = m0_c7)
 
 # ### ALL CLUSTERS: bind rows #####
 # comp_all <- bind_rows(out_c4$compare, out_c5$compare, out_c6$compare, out_c7$compare)
-# write.csv(comp_all, file=file.path("R","output","compare_manual_vs_original_bestSDM.csv"), row.names=FALSE)
+# write.csv(comp_all, file=file.path(r_output_dir, "compare_manual_vs_original_bestSDM.csv"), row.names=FALSE)

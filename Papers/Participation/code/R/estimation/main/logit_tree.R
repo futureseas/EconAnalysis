@@ -8,13 +8,23 @@ gc()
 library(dplyr)
 
 
-setwd("D:/GitHub/EconAnalysis/Participation")
-res_c4 <- readRDS("res_c4.rds") 
-res_c5 <- readRDS("res_c5.rds") 
-res_c6 <- readRDS("res_c6.rds") 
-res_c7 <- readRDS("res_c7.rds") 
+library(here)  # portable paths anchored at EconAnalysis.Rproj
 
-oos_table <- readRDS("oos_table.RDS")
+# ---- Portable project paths (anchored at EconAnalysis.Rproj) ----
+part_dir      <- here::here("Papers", "Participation")
+data_dir      <- file.path(part_dir, "data")
+sdm_dir       <- file.path(part_dir, "code", "SDMs")
+apollo_dir    <- file.path(part_dir, "Results", "apollo")
+pred_dir      <- file.path(part_dir, "Results", "predictions")
+r_output_dir  <- file.path(part_dir, "Results", "r_output")
+
+setwd(part_dir)
+res_c4 <- readRDS(file.path(pred_dir, "res_c4.rds")) 
+res_c5 <- readRDS(file.path(pred_dir, "res_c5.rds")) 
+res_c6 <- readRDS(file.path(pred_dir, "res_c6.rds")) 
+res_c7 <- readRDS(file.path(pred_dir, "res_c7.rds")) 
+
+oos_table <- readRDS(file.path(pred_dir, "oos_table.RDS"))
 
 best_spec <- oos_table %>%
   filter(spec == "daily") %>%
@@ -63,22 +73,22 @@ for(cl in names(res_list)){
 # ----------------------------
 # (D) Save databases to disk (one file per cluster) + a combined list
 # ----------------------------
-dir.create(file.path("R","output","databases_bestSDM"), showWarnings = FALSE, recursive = TRUE)
+dir.create(file.path(r_output_dir, "databases_bestSDM"), showWarnings = FALSE, recursive = TRUE)
 
 for(cl in names(assets)){
   saveRDS(
     assets[[cl]]$database_wide,
-    file = file.path("R","output","databases_bestSDM", paste0("database_", cl, "_", assets[[cl]]$spec, ".rds"))
+    file = file.path(r_output_dir, "databases_bestSDM", paste0("database_", cl, "_", assets[[cl]]$spec, ".rds"))
   )
 }
 
-saveRDS(assets, file = file.path("R","output","assets_bestSDM_byCluster.rds"))
+saveRDS(assets, file = file.path(r_output_dir, "assets_bestSDM_byCluster.rds"))
 
 cat("\nSaved:\n")
 for(cl in names(assets)){
-  cat(" - ", file.path("R","output","databases_bestSDM", paste0("database_", cl, "_", assets[[cl]]$spec, ".rds")), "\n")
+  cat(" - ", file.path(r_output_dir, "databases_bestSDM", paste0("database_", cl, "_", assets[[cl]]$spec, ".rds")), "\n")
 }
-cat(" - ", file.path("R","output","assets_bestSDM_byCluster.rds"), "\n")
+cat(" - ", file.path(r_output_dir, "assets_bestSDM_byCluster.rds"), "\n")
 
 
 
@@ -581,6 +591,6 @@ doc <- flextable::body_add_flextable(doc, value = ft_c6)
 doc <- body_add_par(doc, "NL nesting table — Cluster c7", style="heading 1")
 doc <- flextable::body_add_flextable(doc, value = ft_c7)
 
-print(doc, target = "R/output/nl_tree_table.docx")
+print(doc, target = "Results/r_output/nl_tree_table.docx")
 
 

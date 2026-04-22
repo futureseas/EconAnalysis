@@ -11,7 +11,7 @@ library(apollo)
 
 ### Initialise code
 apollo_initialise()
-setwd("C:/GitHub/EconAnalysis/Participation/R")
+setwd("C:/GitHub/EconAnalysis/Papers/Participation/code/R")
 
 ### Set core controls
 apollo_control = list(

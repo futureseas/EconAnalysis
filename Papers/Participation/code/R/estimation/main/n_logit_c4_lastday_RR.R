@@ -14,7 +14,18 @@ library(zoo)
 ### Initialise code
 apollo_initialise()
 
-setwd("D:/GitHub/EconAnalysis/Participation")
+library(here)  # portable paths anchored at EconAnalysis.Rproj
+
+# ---- Portable project paths (anchored at EconAnalysis.Rproj) ----
+part_dir      <- here::here("Papers", "Participation")
+data_dir      <- file.path(part_dir, "data")
+sdm_dir       <- file.path(part_dir, "code", "SDMs")
+apollo_dir    <- file.path(part_dir, "Results", "apollo")
+pred_dir      <- file.path(part_dir, "Results", "predictions")
+r_output_dir  <- file.path(part_dir, "Results", "r_output")
+shared_dir    <- here::here("Shared")
+
+setwd(part_dir)
 
 
 ### Set core controls
@@ -22,7 +33,7 @@ apollo_control = list(
   modelName       = "NL_participation_model_c4_lastday_R&R",
   modelDescr      = "Participation, location and target species decisions",
   indivID         = "fished_vessel_anon", 
-  outputDirectory = "R/output",
+  outputDirectory = r_output_dir,
   panelData       = TRUE,
   nCores          = 18,
   workInLogs      = TRUE
@@ -93,13 +104,13 @@ prepare_sdm <- function(sdm_rds,
   return(sdm)
 }
 
-MSQD_sdm <- prepare_sdm("SDMs/sdm_msqd.rds", "MSQD", "MSQD_SDM_90")
-PSDN_sdm <- prepare_sdm("SDMs/sdm_psdn.rds", "PSDN", "PSDN_SDM_60")
-NANC_sdm <- prepare_sdm("SDMs/sdm_nanc.rds", "NANC", "NANC_SDM_60")
-JMCK_sdm <- prepare_sdm("SDMs/sdm_jmck.rds", "JMCK", "JMCK_SDM_60")
-CMCK_sdm <- prepare_sdm("SDMs/sdm_cmck.rds", "CMCK", "CMCK_SDM_60")
-PHRG_sdm <- prepare_sdm("SDMs/sdm_phrg.rds", "PHRG", "PHRG_SDM_20")
-ALBC_sdm <- prepare_sdm("SDMs/sdm_albc.rds", "ALBC", "albc_SDM_90")
+MSQD_sdm <- prepare_sdm("code/SDMs/sdm_msqd.rds", "MSQD", "MSQD_SDM_90")
+PSDN_sdm <- prepare_sdm("code/SDMs/sdm_psdn.rds", "PSDN", "PSDN_SDM_60")
+NANC_sdm <- prepare_sdm("code/SDMs/sdm_nanc.rds", "NANC", "NANC_SDM_60")
+JMCK_sdm <- prepare_sdm("code/SDMs/sdm_jmck.rds", "JMCK", "JMCK_SDM_60")
+CMCK_sdm <- prepare_sdm("code/SDMs/sdm_cmck.rds", "CMCK", "CMCK_SDM_60")
+PHRG_sdm <- prepare_sdm("code/SDMs/sdm_phrg.rds", "PHRG", "PHRG_SDM_20")
+ALBC_sdm <- prepare_sdm("code/SDMs/sdm_albc.rds", "ALBC", "albc_SDM_90")
 
 
 sdm_all <- Reduce(
@@ -109,7 +120,7 @@ sdm_all <- Reduce(
 
 ### Add CPU Index
 
-cpue_raw <- readRDS("D:/GitHub/EconAnalysis/Participation/R/CPUE_index.rds") %>%
+cpue_raw <- readRDS(file.path(data_dir, "CPUE_index.rds")) %>%
   mutate(date = make_date(LANDING_YEAR, LANDING_MONTH, LANDING_DAY)) %>%
   select(PORT_AREA_CODE, Species_Dominant, date, CPUE_index)
 

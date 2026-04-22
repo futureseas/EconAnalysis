@@ -19,7 +19,7 @@ library(apollo)
 
 ### Initialise code
 apollo_initialise()
-setwd("C:/GitHub/EconAnalysis/Participation/R")
+setwd("C:/GitHub/EconAnalysis/Papers/Participation/code/R")
 
 
 ### Set core controls
@@ -288,7 +288,7 @@ apollo_sink()
 
 summary(model)
 
-# model2 <- readRDS("C:/GitHub/EconAnalysis/Participation/R/output/NL_participation_model_c6_model.rds")
+# model2 <- readRDS("C:/GitHub/EconAnalysis/Papers/Participation/R/output/NL_participation_model_c6_model.rds")
 # apollo_lrTest(model, model2)
 
 
