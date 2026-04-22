@@ -2,7 +2,12 @@
 *** Predict monthly vessel participation if squid collapse ***
 **************************************************************
 
-global path "C:\GitHub\EconAnalysis\Participation\" 
+* === EDIT ONE LINE: set repo root for your machine ===
+global root "D:\GitHub\EconAnalysis"
+*global root "C:\GitHub\EconAnalysis"
+* =====================================================
+global path       "${root}\Papers\Participation\"
+global shared_dir "${root}\Shared\"
 global results "${path}Results\"
 global figures "${results}Figures\"
 global tables "${results}Tables\"
@@ -76,4 +81,4 @@ cmclogit fished mean_avail mean_price diesel_price wind_max_220_mh d_missing dis
     rename set_year LANDING_YEAR
     rename fished_vessel_num VESSEL_NUM
 
-export delimited using "C:\GitHub\EconAnalysis\Participation\R\monthly_participation_pred.csv", replace
+export delimited using "${path}Results\r_output\monthly_participation_pred.csv", replace

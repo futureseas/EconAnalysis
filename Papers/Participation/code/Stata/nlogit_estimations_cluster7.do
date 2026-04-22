@@ -1,6 +1,11 @@
 global path_google "G:\Mi unidad"
 *global path_google "H:\My drive"
-global path "C:\GitHub\EconAnalysis\Participation\"
+* === EDIT ONE LINE: set repo root for your machine ===
+global root "D:\GitHub\EconAnalysis"
+*global root "C:\GitHub\EconAnalysis"
+* =====================================================
+global path       "${root}\Papers\Participation\"
+global shared_dir "${root}\Shared\"
 global results "${path}Results\"
 global figures "${results}Figures\"
 global tables "${results}Tables\"
@@ -10,7 +15,7 @@ cd $path
 clear all
 
 
-// import delimited "C:\GitHub\EconAnalysis\Data\Ports\ports_area_and_name_codes.csv", varnames(1) clear
+// import delimited "${shared_dir}Data\Ports\ports_area_and_name_codes.csv", varnames(1) clear
 // tempfile port_area
 // save `port_area'
 

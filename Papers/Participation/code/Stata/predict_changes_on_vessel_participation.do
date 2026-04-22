@@ -1,7 +1,12 @@
 ******************************
 *** Calculate changes on catch composition
 
-global path "C:\GitHub\EconAnalysis\Participation\" 
+* === EDIT ONE LINE: set repo root for your machine ===
+global root "D:\GitHub\EconAnalysis"
+*global root "C:\GitHub\EconAnalysis"
+* =====================================================
+global path       "${root}\Papers\Participation\"
+global shared_dir "${root}\Shared\"
 global results "${path}Results\"
 global figures "${results}Figures\"
 global tables "${results}Tables\"
@@ -86,4 +91,4 @@ replace perc  = 0 if perc == .
 replace perc3 = 0 if perc3 == .
 
 export excel using "G:\My Drive\Tables\Participation\Simulated_shares_fig.xlsx", replace
-export delimited using "C:\GitHub\EconAnalysis\Participation\R\Simulated_shares_fig.csv", replace
+export delimited using "${path}Results\r_output\Simulated_shares_fig.csv", replace

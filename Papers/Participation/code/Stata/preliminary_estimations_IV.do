@@ -7,7 +7,12 @@
 * - Compute mean_catch for sardine, anchovy, squid, mackerrrel and herring. Constant and sdm explain catch.
 * - Add predicted choices without "No-participation"
 
-global path "C:\GitHub\EconAnalysis\Participation\" 
+* === EDIT ONE LINE: set repo root for your machine ===
+global root "D:\GitHub\EconAnalysis"
+*global root "C:\GitHub\EconAnalysis"
+* =====================================================
+global path       "${root}\Papers\Participation\"
+global shared_dir "${root}\Shared\"
 global results "${path}Results\"
 global figures "${results}Figures\"
 global tables "${results}Tables\"
