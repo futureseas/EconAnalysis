@@ -4,13 +4,17 @@ Nested logit / DCM for vessel participation and target-species decisions using P
 
 ## Main results
 
-Los resultados principales vienen de **`code/R/estimation/main/`**:
-- `n_logit_c4_RR.R` — modelo Apollo c4 R&R (principal)
-- `n_logit_c4_lastday_RR.R` — variante last-day
-- `n_logit_all_RR.R` — archivo que estaba vacío (ver nota abajo)
-- `R&R/` scripts: `nl_structure_c4..c7.R`, `nl_best_mean_avail_per_alternative*.R`, `nl_elasticities*.R`, `nl_driver_allclusters.R`, `scenario_*.R`, etc.
+El driver principal (OOS + base para varias estimaciones) es:
+**`code/R/estimation/main/nl_driver_allclusters.R`**
 
-> **Nota:** `n_logit_all_RR.R` quedó en 0 bytes (vaciado 2024-12-19 12:42). Se conservó vacío por si quieres recuperar su contenido del historial git.
+Desde ahí se alimentan / estiman:
+- `nl_structure_c{4..7}.R` (estructura del nested logit por cluster)
+- `nl_best_mean_avail_per_alternative*.R` (variantes: 30 días, last day, structural breaks closure/mhw, no unemployment)
+- `nl_elasticities*.R`, `nl_null.R`, `logit_tree.R`
+- `scenario_heatwave*.R`, `scenario_dynamic_*.R` (escenarios)
+- `n_logit_c4_RR.R`, `n_logit_c4_lastday_RR.R` (modelos Apollo c4 R&R)
+
+> **Nota:** `n_logit_all_RR.R` (0 bytes) no tiene contenido recuperable desde git — siempre se committeó vacío. No es el script importante; el driver real es `nl_driver_allclusters.R`.
 
 ## Folder layout
 
