@@ -1,0 +1,379 @@
+% !TEX program = xelatex
+% =========================================================================
+%  IIFET talk -- 14 min (+3 Q), MAX 12 slides. Beamer/metropolis.
+%  Paper: "Are fishing decisions flexible? Participation, species target, and
+%  landing location choices in the U.S. West Coast CPS fishery."
+%  Quezada-Escalona, Tommasi, Kaplan, Muhling & Stohs, Ecol. Econ. 247 (2026).
+%  Compile with xelatex/lualatex (metropolis needs Fira fonts). 12 presented
+%  frames (title..thanks); everything after \section{Backup} is extra.
+%  Figures in ../figs, logos in ../logo. Missing figures fall back to a box.
+% =========================================================================
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{metropolis}
+\metroset{block=fill, numbering=fraction, progressbar=foot}
+
+% ---- UdeC brand colors ----
+\definecolor{udecblue}{HTML}{113B63}
+\definecolor{udecgold}{HTML}{F59F18}
+
+\setbeamercolor{frametitle}{bg=udecblue, fg=white}
+\setbeamercolor{progress bar}{fg=udecgold}
+\setbeamercolor{alerted text}{fg=udecgold}
+\setbeamercolor{palette primary}{bg=udecblue, fg=white}          % standout frames
+\setbeamercolor{takeaway}{fg=black!90, bg=udecgold!16}           % take-home box
+
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs, multirow, array}
+\usepackage{pifont}   % \ding checkmarks / crosses
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins}
+\usetikzlibrary{shadows}
+
+% take-home highlight: soft callout with a gold left accent bar, rounded
+% corners and a subtle shadow (tcolorbox).
+\newtcolorbox{takeawaybox}{%
+  enhanced, frame hidden, colback=udecgold!12, coltext=black!88,
+  borderline west={3.5pt}{0pt}{udecgold},
+  arc=3pt, boxsep=2pt, left=12pt, right=10pt, top=7pt, bottom=7pt,
+  drop shadow={black!35, opacity=0.35, shadow xshift=0.7pt, shadow yshift=-0.9pt},
+  width=\linewidth,
+}
+\newcommand{\takeaway}[1]{\vskip6pt\begin{takeawaybox}\small #1\end{takeawaybox}}
+% figure-or-placeholder (compiles without ../figs; \detokenize prints paths safely)
+\newcommand{\figbox}[3]{\IfFileExists{#1}{\includegraphics[#2]{#1}}%
+  {\fbox{\parbox{#3}{\centering\footnotesize\ttfamily\detokenize{#1}\\[2pt]%
+   \normalfont\itshape figure not found}}}}
+
+\title{Are fishing decisions flexible?}
+\subtitle{Participation, target, and landing choices in the U.S. West Coast pelagic fishery}
+\author{Felipe J. Quezada-Escalona \\ {\scriptsize D.~Tommasi \textbullet\ I.C.~Kaplan \textbullet\ B.~Muhling \textbullet\ S.M.~Stohs}}
+\date{IIFET 2026 --- T\'orshavn, Faroe Islands --- August 17--21, 2026}
+
+% White logos for the (blue) title slide. Both vertically centered on a common
+% line; INCAR logo uses a padding-trimmed copy so it doesn't render as a sliver.
+\titlegraphic{%
+  \raisebox{-0.5\height}{\includegraphics[height=0.95cm]{../logo/depto_economia_blanco.png}}%
+  \hspace{2.6em}%
+  \raisebox{-0.5\height}{\includegraphics[height=1.35cm]{../logo/incar2_blanco_trim.png}}%
+}
+
+% Custom title page: logos get real vertical space at the top so they never
+% collide with the title (metropolis' default puts them in a 0pt box).
+\setbeamertemplate{title page}{%
+  \begin{minipage}[b][\paperheight]{\textwidth}
+    \vspace*{6mm}%
+    \inserttitlegraphic\par
+    \vfill
+    \usebeamertemplate*{title}%
+    \usebeamertemplate*{subtitle}%
+    \usebeamertemplate*{title separator}%
+    \usebeamertemplate*{author}%
+    \usebeamertemplate*{date}%
+    \vfill
+    {\scriptsize\color{white!70} NOAA CAFA (NA20OAR4310507) \textbullet\ ANID-Chile FONDECYT Iniciaci\'on N$^{\circ}$ 11250223 \textbullet\ INCAR$^2$ CIA250009.\par}
+    \vspace*{5mm}
+  \end{minipage}%
+}
+
+\begin{document}
+
+% Blue title slide with white text (scoped to this frame only).
+{%
+  \setbeamercolor{background canvas}{bg=udecblue}%
+  \setbeamercolor{normal text}{fg=white, bg=udecblue}%
+  \usebeamercolor[fg]{normal text}%
+  \maketitle
+}
+
+% ========================== 2. MOTIVATION ================================
+\begin{frame}{Motivation --- the human margin of climate adaptation}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.55\textwidth}
+\begin{itemize}
+  \item Climate \textbf{reallocates} forage-species distributions --- the 2014--2016 heatwave shifted squid \textbf{northward}.
+  \item To keep fishing, harvesters can \textbf{follow} species, \textbf{switch} species, \textbf{switch ports}, halt, or exit.
+  \item Standard projections \textbf{fix behavior} --- missing the margin where fishers actually \emph{adapt}.
+\end{itemize}
+\end{column}
+\begin{column}{0.45\textwidth}
+\textbf{Question}\\[2pt]
+How did \textbf{availability, prices, costs, weather} shape \textbf{daily} decisions to
+\alert{participate}, \alert{target}, and \alert{land} --- over 2013--2017, spanning the
+\textbf{2015 sardine closure} and the \textbf{2014--2016 heatwave}?
+\end{column}
+\end{columns}
+\takeaway{We measure \textbf{demonstrated flexibility} across the joint choice
+\emph{participate $\times$ target $\times$ land}.}
+\end{frame}
+
+% ========================== 3. CONTRIBUTION / SDM =======================
+\begin{frame}{The key input: availability from \textbf{SDMs}, not past catch}
+{\small We estimate a nested-logit RUM of the joint daily choice (participate/target/land),
+by fleet segment. Its central covariate is \textbf{expected species availability} --- and \emph{how} we
+measure it is the contribution.}
+\vskip5pt
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\textwidth}
+\textbf{Past catch} {\scriptsize(the usual proxy)}
+\begin{itemize}\small
+  \item[\textcolor{red!70}{\ding{55}}] \textbf{Endogenous} --- reflects where vessels already \emph{chose} to fish.
+  \item[\textcolor{red!70}{\ding{55}}] \textbf{Selection bias} --- only observed at fished sites (Chen et al., 2023).
+  \item[\textcolor{red!70}{\ding{55}}] \textbf{Gaps} --- undefined on days/ports with no fishing.
+\end{itemize}
+\end{column}
+\begin{column}{0.52\textwidth}
+\textbf{SDM habitat index} {\scriptsize(ours)}
+\begin{itemize}\small
+  \item[\textcolor{udecgold}{\ding{51}}] \textbf{Exogenous} environmental input to the choice.
+  \item[\textcolor{udecgold}{\ding{51}}] \textbf{No gaps} --- an availability value for \emph{every} port--day.
+  \item[\textcolor{udecgold}{\ding{51}}] \textbf{Time-varying} --- captures environmentally-driven interannual shifts.
+\end{itemize}
+\end{column}
+\end{columns}
+\takeaway{An \textbf{exogenous}, gap-free, climate-responsive proxy $\Rightarrow$ cleaner identification
+\emph{and} climate-ready counterfactuals.}
+\end{frame}
+
+% ========================== 4. SETTING / FLEETS =========================
+\begin{frame}{Setting --- four fleet segments, four portfolios}
+\footnotesize
+U.S. West Coast CPS fishery: squid, sardine, anchovy, mackerels ($+$ non-CPS crab, salmon, tuna);
+purse seine. Segments from cluster analysis (Quezada et al., 2024).
+\vskip3pt
+\begin{tabular}{@{}p{0.30\textwidth} p{0.26\textwidth} r r@{}}
+\toprule
+Fleet segment & Main target(s) & Trips $N$ & Vessels/yr \\
+\midrule
+\textbf{S.\ CCS industrial squid specialist} & Market squid & 29{,}160 & 42 \\
+\textbf{Roving squid--sardine generalist}   & Squid \& sardine & 6{,}806 & 14 \\
+\textbf{PNW sardine specialist}             & Pacific sardine & 2{,}581 & 6 \\
+\textbf{S.\ CCS forage-fish diverse}        & Diverse CPS & 2{,}481 & 5 \\
+\bottomrule
+\end{tabular}
+\takeaway{Same shock, \textbf{different portfolios} --- the unit of adaptation is the \emph{fleet segment}.}
+\end{frame}
+
+% ========================== 5. MODEL ====================================
+\begin{frame}{The model --- nested logit over \emph{participate $\times$ target $\times$ port}}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.54\textwidth}
+\small
+Utility of alternative $j=(p,s,l)$ for vessel $i$ on day $t$:
+\[ U_{itj}= \delta_j + \beta_{1,s}\,\mathrm{Avail}_{tj} + \beta_{2,g}\,\mathrm{Price}_{tj} + \ldots + \varepsilon_{itj} \]
+\begin{itemize}\footnotesize
+  \item \textbf{Availability} = daily \textbf{SDM} index (species radius); CPUE index otherwise.
+  \item Also: price, distances (catch, center of gravity), wind, closures, unemployment.
+  \item \textbf{State dependence} (chosen in last 30 days) --- proxy for processor ties / port capacity.
+\end{itemize}
+\end{column}
+\begin{column}{0.46\textwidth}
+\textbf{Nesting (by segment)}
+\begin{itemize}\footnotesize
+  \item Correlation within \textbf{participation}, then within \textbf{species}\ldots
+  \item \ldots except \textbf{forage-diverse}: nests by \textbf{port}.
+  \item Crab/salmon split off (costly gear switch).
+\end{itemize}
+\vskip3pt
+{\footnotesize Apollo (R). Dominant species $=$ target (\textbf{93.6\%} of trip revenue); $\sim$60/40 no-participation/trips.}
+\end{column}
+\end{columns}
+\takeaway{Availability enters at \textbf{daily} frequency and is \textbf{exogenous} to the vessel's choice.}
+\end{frame}
+
+% ========================== 6. DESCRIPTIVE / FLEXIBILITY =================
+\begin{frame}{Descriptives --- persistence \emph{and} frequent switching}
+\small
+\begin{tabular}{@{}p{0.34\textwidth} c c c c@{}}
+\toprule
+& \multicolumn{2}{c}{Species} & \multicolumn{2}{c}{Ports} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Fleet segment & Switches & Unique & Switches & Unique \\
+\midrule
+S.\ CCS industrial squid specialist & \textbf{19.8} & 2.6 & \textbf{20.7} & 3.3 \\
+Roving squid--sardine generalist   & 4.6  & 1.7 & 9.5  & 2.7 \\
+PNW sardine specialist             & 3.8  & 2.4 & 4.7  & 2.1 \\
+S.\ CCS forage-fish diverse        & 10.8 & 2.4 & 5.1  & 2.0 \\
+\bottomrule
+\end{tabular}
+\vskip3pt
+{\footnotesize Vessel-level means, 2013--2017. Squid specialist: \textbf{switch rate 0.36},
+\textbf{median run 2 days} --- persistence \emph{and} regular switching.}
+\takeaway{Short-run \textbf{persistence} $+$ frequent \textbf{switching} $\Rightarrow$ recent choices matter
+(motivates state dependence).}
+\end{frame}
+
+% ========================== 7. RESULTS -- DRIVERS ========================
+\begin{frame}{What drives the choice? Availability signs by segment}
+\scriptsize
+\begin{tabular}{@{}l c c c c@{}}
+\toprule
+Availability of\ldots & Squid spec. & Roving gen. & PNW sardine & Forage diverse \\
+\midrule
+Market squid   & $+2.45^{***}$ & $+1.75^{***}$ & --- & $+1.61^{*}$ \\
+Northern anchovy & $+1.35^{***}$ & $+4.19^{***}$ & $+1.16^{***}$ & $\mathbf{-1.88^{***}}$ \\
+Pacific sardine  & $-1.78^{**}$ & $0.23$ & $-0.59^{**}$ & $0.23$ \\
+Chub \& jack mackerel & $-3.94^{***}$ & $-1.48$ & $0.87$ & $-1.92^{***}$ \\
+Non-CPS (crab/salmon) & --- & $+5.74^{***}$ & $+10.3^{***}$ & --- \\
+\midrule
+Expected price (CPS/tuna) & $0.26$ & $+4.60^{***}$ & $+3.21^{***}$ & $+0.72^{***}$ \\
+State dependence (30-day) & $+2.63^{***}$ & $+2.86^{***}$ & $+2.26^{***}$ & $+3.09^{***}$ \\
+\bottomrule
+\end{tabular}
+\vskip3pt
+{\scriptsize Wind, distance-to-catch, distance-to-CG all $(-)$; unemployment $(+)$. Negative anchovy for
+forage-diverse: anchovy--squid availability correlate $r=-0.29$.}
+\takeaway{State dependence is \textbf{large} (coef.\ $\approx\!2.3$--$3.1$), yet availability and price
+\textbf{stay significant} $\Rightarrow$ flexibility is \textbf{genuine}, not just habit.}
+\end{frame}
+
+% ========================== 8. SUBSTITUTION STRUCTURE ====================
+\begin{frame}{Two adaptation modes --- ``on the move'' vs.\ ``in place''}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.5\textwidth}
+\textbf{Adapt \emph{on the move}} {\scriptsize(species nests)}
+\begin{itemize}\small
+  \item Low dissimilarity $\lambda$ $\Rightarrow$ strong within-species correlation across \textbf{ports}.
+  \item Anchovy $\lambda=0.49$ (squid spec.); sardine $\lambda=0.40$ (roving, PNW).
+  \item $\Rightarrow$ \textbf{follow the species across ports}.
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Adapt \emph{in place}} {\scriptsize(port nests)}
+\begin{itemize}\small
+  \item Forage-diverse nests by \textbf{port}; Santa Barbara $\lambda=0.49$ vs.\ LA/Monterey $\lambda=0.73$.
+  \item Substitution across \textbf{species within a port}.
+  \item $\Rightarrow$ \textbf{switch species, stay put} (by relative price).
+\end{itemize}
+\end{column}
+\end{columns}
+\takeaway{The adaptation \emph{mode} is a structural property of the fleet
+(sensu Samhouri et al., 2024).}
+\end{frame}
+
+% ========================== 9. ELASTICITIES =============================
+\begin{frame}{Elasticities --- price drives \emph{entry}, availability drives \emph{targeting}}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.5\textwidth}
+\textbf{Extensive margin} {\scriptsize(participate)}
+\begin{itemize}\small
+  \item Price dominates for mobile fleets: squid \textbf{1.71} (roving); anchovy \textbf{0.43} (PNW).
+  \item Non-CPS availability matters where crab/salmon are relevant: crab \textbf{0.24}, sockeye \textbf{0.19} (PNW).
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Intensive margin} {\scriptsize(conditional target)}
+\begin{itemize}\small
+  \item Availability often $>$ price: anchovy \textbf{2.55}, crab \textbf{2.12} (roving); crab \textbf{3.85}, sockeye \textbf{3.71} (PNW).
+  \item Several \textbf{$>1$} $\Rightarrow$ more-than-proportional responses.
+  \item Exception: forage-diverse is \textbf{price}-driven.
+\end{itemize}
+\end{column}
+\end{columns}
+\takeaway{\textbf{Prices} move participation; \textbf{availability} moves which species, once at sea.}
+\end{frame}
+
+% ========================== 10. SCENARIO ================================
+\begin{frame}{Scenario --- redistribute squid availability southward}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.40\textwidth}\footnotesize
+Replace squid availability with a later observed window (SDM centroid
+\textbf{42.99$^{\circ}$N $\to$ 40.66$^{\circ}$N}); hold prices, closures, distances, state fixed.
+\vskip3pt
+\begin{itemize}\footnotesize
+  \item Squid spec.: \textbf{$\uparrow$ squid}, $\downarrow$ chub, $\downarrow$ no-participation.
+  \item Roving: \textbf{$\uparrow$ squid}. PNW: small (no squid target).
+  \item Forage-diverse: large reallocations.
+\end{itemize}
+\end{column}
+\begin{column}{0.60\textwidth}\centering
+\figbox{../figs/scenario_species.png}{width=\linewidth}{0.95\linewidth}\\[1pt]
+{\scriptsize $\Delta$ predicted probability (pp) by target species, per segment.}
+\end{column}
+\end{columns}
+\takeaway{Species availability is a \textbf{key short-run driver} --- with \textbf{heterogeneous} responses by segment.}
+\end{frame}
+
+% ========================== 11. TAKEAWAYS ==============================
+\begin{frame}{Takeaways}
+\begin{enumerate}
+  \item Harvesters are \textbf{flexible}: participation, target, and landing respond to
+        \textbf{availability, prices, costs, weather} --- \textbf{even controlling for strong state
+        dependence}, so it is not just habit.
+  \item \textbf{Two adaptation modes} --- ``on the move'' (substitute across \emph{ports}) vs.\
+        ``in place'' (switch \emph{species} within a port).
+  \item \textbf{SDM-based} availability is exogenous and gap-free; OOS pseudo-$\rho^2$ \textbf{0.22--0.44}
+        $\Rightarrow$ a reliable, climate-ready policy tool.
+\end{enumerate}
+\takeaway{Adaptive capacity is a property of the \textbf{bundle} (portfolio $\times$ ports $\times$
+institutions $\times$ market), not of fishers alone.}
+\end{frame}
+
+% ========================== 12. THANKS =================================
+\begin{frame}[standout]
+Thank you! / \textquestiondown Gracias?\\[10pt]
+{\normalsize
+Questions?\\[14pt]
+\textbf{Felipe J. Quezada-Escalona}\\[2pt]
+\texttt{felipequezada@udec.cl} \textbullet\ felipequezada.com}
+\end{frame}
+
+% ========================== BACKUP =====================================
+\section{Backup}
+
+\begin{frame}{Backup \textbullet\ Scenario --- change by port $\times$ species alternative}
+\centering
+\figbox{../figs/scenario_alternative.png}{width=0.86\linewidth}{0.86\linewidth}\\[2pt]
+{\scriptsize Ten largest absolute changes within each fleet segment (percentage points).}
+\end{frame}
+
+\begin{frame}{Backup \textbullet\ Scenario --- change in participation}
+\centering
+\figbox{../figs/scenario_participation.png}{width=0.72\linewidth}{0.72\linewidth}\\[2pt]
+{\scriptsize $\Delta$ probability of no-participation under the redistribution scenario, by segment.}
+\end{frame}
+
+\begin{frame}{Backup \textbullet\ Dissimilarity parameters ($\lambda$)}
+\small
+\begin{tabular}{@{}l c c c c@{}}
+\toprule
+Nest & Squid spec. & Roving gen. & PNW sardine & Forage diverse \\
+\midrule
+Participation (CPS/Tuna) & 0.977 & 0.752 & 0.532 & 0.730 \\
+Market squid  & 0.777 & 0.752 & --- & --- \\
+Pacific sardine & 0.617 & \textbf{0.403} & \textbf{0.404} & --- \\
+Northern anchovy & \textbf{0.494} & --- & 0.532 & --- \\
+Santa Barbara (port) & --- & --- & --- & \textbf{0.490} \\
+Los Angeles / Monterey (port) & --- & --- & --- & 0.730 \\
+\bottomrule
+\end{tabular}
+\vskip4pt
+{\scriptsize Lower $\lambda$ $=$ stronger within-nest correlation (more substitution within the nest).}
+\end{frame}
+
+\begin{frame}{Backup \textbullet\ Variable construction}
+\small
+\begin{itemize}
+  \item \textbf{Availability:} binomial GAM SDMs (Muhling et al., 2019, 2020); mean presence within a
+        species radius (60 km sardine/anchovy/mackerel, 90 km squid). CPUE $z$-score $\to$ sigmoid for non-SDM species.
+  \item \textbf{Price:} predicted from $\ln(\text{price})=\alpha+T_y+\gamma_m+\gamma_p$ (year trend, month \& port FE);
+        robustness with 30-day moving average.
+  \item \textbf{Costs:} Haversine distance port$\to$catch area and port$\to$center of gravity.
+  \item \textbf{Weather:} max ERA5 surface wind within 220 km. \textbf{Opportunity cost:} state unemployment.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Backup \textbullet\ Limitations}
+\small
+\begin{itemize}
+  \item \textbf{Aggregation bias:} port-area resolution may mask finer spatial heterogeneity (D\'epalle et al., 2021).
+  \item \textbf{Choice-set truncation:} rare alternatives folded into the outside option ($\ge$0.5\% filter); IIA assumed for omitted alternatives.
+  \item \textbf{Price endogeneity:} predicted / MA prices reduce but do not eliminate simultaneity $\Rightarrow$
+        interpret price coefficients as \textbf{reduced-form} behavioral responses.
+  \item \textbf{SDM proxy:} habitat suitability $\ne$ catch rate exactly $\Rightarrow$ availability effect may be attenuated.
+\end{itemize}
+\takeaway{Main qualitative result --- \textbf{availability drives targeting} --- is robust across price specifications.}
+\end{frame}
+
+\end{document}
