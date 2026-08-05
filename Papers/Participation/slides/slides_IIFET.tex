@@ -171,9 +171,8 @@ How do \textbf{availability, prices, costs, weather} shape \textbf{daily} choice
 % then say the sentence: "the oceanographers' model becomes the economists'
 % regressor."
 \begin{frame}{The contribution --- an \textbf{oceanographic SDM} as the economic regressor}
-{\small Species distribution models built by \textbf{oceanographers} for \emph{ecological}
-purposes; we use their daily output as the central covariate in a \textbf{discrete-choice
-model of fishing behavior}.}
+{\small SDMs built by \textbf{oceanographers} for \emph{ecological} purposes; their daily
+output is the central covariate in our \textbf{discrete-choice model of fishing behavior}.}
 \vskip3pt
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.63\textwidth}
@@ -211,7 +210,7 @@ model of fishing behavior}.}
 % 2019) of figs/sdm_example.jpg, cropped so the 0-1 colour scale stays visible.
 % Confirm the full Chasco et al. citation before presenting.
 \centering
-\figbox{../figs/sdm_example_crop.jpg}{height=3.3cm}{2.7cm}\par
+\figbox{../figs/sdm_example_crop.jpg}{height=3.1cm}{2.6cm}\par
 \vskip-2pt
 {\scriptsize\color{black!60}\emph{Illustrative} --- Chasco et al.\ (2022)\par}
 \end{column}
@@ -224,7 +223,10 @@ model of fishing behavior}.}
   {$\mathrm{Avail}_{p,s,t}$: an \textbf{exogenous}, gap-free measure of availability for
    \emph{each} port $\times$ species $\times$ day
    \quad{\bfseries\color{udecgold!80!black}$\Rightarrow$ enters the fisher's utility directly}};
-\end{tikzpicture}
+\end{tikzpicture}\par
+\vskip1pt
+{\scriptsize\color{black!60}\emph{Assumption:} habitat suitability tracks \textbf{potential
+catch rates} --- if only partly, the availability effect is attenuated.\par}
 \takeaway{The usual proxy is \textbf{past catch}. Replacing it with an SDM is what makes the
 behavioral model \textbf{identifiable} \emph{and} \textbf{climate-ready}.}
 \end{frame}
