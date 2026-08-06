@@ -337,35 +337,7 @@ comes from the scenario (elasticities in backup).}
 survives it} --- so the flexibility we measure is genuine, not inertia.}
 \end{frame}
 
-% ========================== 8. SUBSTITUTION STRUCTURE ===================
-% ~45 s. [CUT] Drop this frame first if the session is running late --
-% the takeaways slide still states both modes.
-\begin{frame}{Two adaptation modes --- ``on the move'' vs.\ ``in place''}
-\begin{columns}[T,onlytextwidth]
-\begin{column}{0.47\textwidth}
-\textbf{Adapt \emph{on the move}} {\scriptsize(species nests)}
-\begin{itemize}\small
-  \item Low $\lambda$ $\Rightarrow$ strong correlation across \textbf{ports}, same species.
-  \item Anchovy $\lambda=0.49$; sardine $\lambda=0.40$.
-  \item $\Rightarrow$ \textbf{follow the species across ports}.
-\end{itemize}
-\end{column}
-\hfill
-\begin{column}{0.49\textwidth}
-\textbf{Adapt \emph{in place}} {\scriptsize(port nests)}
-\begin{itemize}\small
-  \item Forage-diverse nests by \textbf{port}: Santa Barbara $\lambda=0.49$ vs.\ LA/Monterey $0.73$.
-  \item Substitution across \textbf{species within a port}.
-  \item $\Rightarrow$ \textbf{switch species, stay put}.
-\end{itemize}
-\end{column}
-\end{columns}
-\takeaway{The mode is a \textbf{structural property of the fleet} (sensu Samhouri et al., 2024)
---- and it predicts who absorbs a \textbf{closed area}: ``on the move'' fleets re-route,
-``in place'' fleets cannot.}
-\end{frame}
-
-% ========================== 9. SCENARIO (PAYOFF) ========================
+% ========================== 8. SCENARIO (PAYOFF) ========================
 % ~80 s. The payoff of the SDM input, told as a SPATIAL reallocation --
 % this is the frame that speaks to the session. Say: "we move the habitat
 % field and the model re-predicts where the effort lands. You cannot do
@@ -427,6 +399,39 @@ squid ($+1.5$) but \textbf{loses more chub mackerel} ($-1.9$) --- the port total
 \textbf{species recomposition}.}
 \end{frame}
 
+% ========================== 9. SUBSTITUTION STRUCTURE ===================
+% ~45 s. [CUT] Drop this frame first if the session is running late -- it
+% EXPLAINS the previous slide rather than adding a result, and the takeaways
+% slide still lands the point. Say: "why did LA lose effort while its squid
+% went up? Because for that fleet the closest substitute is another species."
+\begin{frame}{What produced that --- ``on the move'' vs.\ ``in place'' substitution}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.47\textwidth}
+\textbf{Adapt \emph{on the move}} {\scriptsize(species nests)}
+\begin{itemize}\small
+  \item Low $\lambda$ $\Rightarrow$ strong correlation across \textbf{ports}, same species.
+  \item Anchovy $\lambda=0.49$; sardine $\lambda=0.40$.
+  \item $\Rightarrow$ \textbf{follow the species across ports}.
+\end{itemize}
+\end{column}
+\hfill
+\begin{column}{0.49\textwidth}
+\textbf{Adapt \emph{in place}} {\scriptsize(port nests)}
+\begin{itemize}\small
+  \item Forage-diverse nests by \textbf{port}: Santa Barbara $\lambda=0.49$ vs.\ LA/Monterey $0.73$.
+  \item Substitution across \textbf{species within a port}.
+  \item $\Rightarrow$ closest substitute is \textbf{another species}, not another port.
+\end{itemize}
+\end{column}
+\end{columns}
+\vskip2pt
+{\scriptsize\color{black!60}
+Lower $\lambda$ $=$ alternatives inside the nest are \textbf{closer substitutes} ($\lambda=1$: no
+nesting).\quad\textbullet\quad Terms after Samhouri et al.\ (2024).\par}
+\takeaway{In both cases the aggregate outcome is a \textbf{spatial reallocation of effort}
+between ports, but the mechanism differs: one follows the species, the other substitutes species in place.}
+\end{frame}
+
 % ========================== 10. TAKEAWAYS ==============================
 % ~55 s. If time is gone, this frame alone can close the talk.
 \begin{frame}{Takeaways}
@@ -437,11 +442,10 @@ squid ($+1.5$) but \textbf{loses more chub mackerel} ($-1.9$) --- the port total
   \item \textbf{Harvesters are flexible.} Participation, target and landing all respond to
         availability, prices, costs and weather --- \emph{even} controlling for strong
         state dependence.
-  \item \textbf{The spatial answer runs through the portfolio.} Two adaptation modes ---
-        ``on the move'' (across \emph{ports}) vs.\ ``in place'' (switch \emph{species}
-        within a port) --- and Los Angeles shows why it matters: squid targeting there
-        \emph{rises} ($+1.5$\,pp), yet the port \textbf{loses} effort ($-0.6$) because
-        mackerel falls more.
+  \item \textbf{The spatial answer runs through the portfolio.} Even the fleet that adapts
+        \emph{in place} --- substituting \textbf{species}, not ports --- redistributes effort
+        \textbf{in space}: Los Angeles \textbf{loses} effort ($-0.6$\,pp) while its squid
+        targeting \emph{rises} ($+1.5$), because mackerel falls more.
 \end{enumerate}
 \takeaway{Availability is an \textbf{ocean-model output}, so the same machinery runs forward
 under \textbf{climate projections}.}
