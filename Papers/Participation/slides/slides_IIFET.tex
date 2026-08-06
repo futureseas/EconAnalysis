@@ -436,9 +436,12 @@ between ports, but the mechanism differs: one follows the species, the other sub
 % ~55 s. If time is gone, this frame alone can close the talk.
 \begin{frame}{Takeaways}
 \begin{enumerate}
-  \item \textbf{Oceanographic SDMs work as economic regressors.} An exogenous, gap-free
-        daily availability index replaces the endogenous past-catch proxy --- and
-        out-of-sample pseudo-$\rho^2$ is \textbf{0.22--0.44}.
+  % The case for the SDM is identification, not predictive superiority: we never
+  % ran an SDM vs past-catch horse race. Table S1 compares SDM timing variants
+  % (daily / lag-1 / MA7 / MA14 / MA30) and the null -- keep the two claims apart.
+  \item \textbf{Oceanographic SDMs work as economic regressors.} Exogenous, gap-free
+        and daily --- and the estimated models predict a \textbf{held-out year} well
+        (OOS pseudo-$\rho^2$ \textbf{0.22--0.44} against the null).
   \item \textbf{Harvesters are flexible.} Participation, target and landing all respond to
         availability, prices, costs and weather --- \emph{even} controlling for strong
         state dependence.
