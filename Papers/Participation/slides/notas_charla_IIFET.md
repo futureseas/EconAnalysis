@@ -153,6 +153,8 @@ Los dos slides que **no** se sacrifican son el **3** (la contribución) y el **8
 >
 > Squid availability is strongly positive wherever squid is relevant. Anchovy is positive for three segments. Non-CPS availability — crab and salmon — is large and positive for the two segments that have those options: those species **gate participation**.
 >
+> The row I want you to hold on to is the **mackerels**. Chub and jack mackerel come in **negative in all three southern segments** — minus 3.9 for the squid specialist, minus 1.9 for the forage-diverse fleet, both significant. Mackerel is **not a draw**: it's what these fleets land when the species they'd rather have isn't around. Keep that sign in mind — the Los Angeles result two slides from now is made of it.
+>
 > Now look at the **bottom two rows**, because that's the whole argument. **Prices** are positive and significant for three of four segments. And **state dependence is big** — between 2.3 and 3.1 everywhere. These fleets are **habitual**: contracts, processors, capacity."
 
 **Frase clave (decirla mirando a la audiencia):**
@@ -163,31 +165,35 @@ Los dos slides que **no** se sacrifican son el **3** (la contribución) y el **8
 
 **Si preguntan por el anchovy negativo del forage-diverse (−1.88):** está en la nota al pie — la disponibilidad de anchoveta y de calamar están **correlacionadas negativamente** (r = −0.29), así que ese coeficiente recoge el costo de oportunidad, no aversión a la anchoveta.
 
+**Si preguntan por el mackerel negativo:** el mackerel es la **especie de respaldo**, no un objetivo — el signo dice que más hábitat de mackerel **no atrae** esfuerzo. **Ojo con el argumento:** a diferencia de la anchoveta, el hábitat de mackerel está **positivamente** correlacionado con el del calamar en el sur (r ≈ **+0.51** chub, **+0.43** jack, 2013–2017), así que **no** decir "días de mackerel son días sin calamar" — es falso y alguien de la sala lo sabe. Lo defendible: los buenos días de mackerel coinciden con la temporada de calamar, y estas flotas prefieren calamar; el mackerel es de bajo precio y se desembarca cuando no hay algo mejor. **Y este coeficiente es el motor del resultado de LA** (ver slide 8): en la ventana del escenario la disponibilidad de *ambos* mackerels **sube** en Los Angeles (+0.14 chub, +0.16 jack), y con coeficiente negativo eso **baja** la utilidad de esas alternativas. No es sólo sustitución hacia el calamar: es un efecto directo del signo.
+
 **Transición (memorizar):** "Signs are one thing. Here's what it's worth in space."
 
 ---
 
 ## Slide 8 — El payoff: mover el campo de hábitat ⭐
 
-**Idea única:** movemos el hábitat del calamar y el modelo re-predice **dónde termina el esfuerzo** — y el total por puerto **esconde una recomposición de especies**.
+**Idea única:** movemos el campo de hábitat a una ventana donde el calamar está más al sur, y el modelo re-predice **dónde termina el esfuerzo** — y el total por puerto **esconde una recomposición de especies**.
 
 **Guion:**
 
-> "This is what the SDM input buys you. We take the squid habitat field and swap it for a **later window within the same season** — the habitat centroid moves south, from about **43 degrees North to 40.7**. Everything else is held fixed: prices, costs, weather, the other species. Then we let the model re-predict.
+> "This is what the SDM input buys you. We take the **whole daily habitat panel** — every species — and swap it for a **later window within the same season**: two 60-day windows, same months, chosen so that the **squid** centroid sits about **two and a half degrees further south**, 43 North to 40.7. Everything that is *not* habitat is held fixed: prices, costs, distances, weather, state dependence. Then we let the model re-predict.
 >
 > Each panel is a fleet segment; bars are the change in the **probability of landing at each port**, in percentage points. Gold gains effort, blue loses it.
 >
 > Two things. First, **Santa Barbara absorbs the squid** — plus 5.8 points for the squid specialist, plus 3.4 for the roving generalist, plus 2.1 for the forage-diverse fleet. And the fleets go out **more often**: non-participation falls by 6 and 4 points for the two southern squid fleets. The Pacific Northwest sardine fleet barely moves — it has no squid to follow.
 >
-> Second, and this is the interesting one — [apuntar al panel **abajo a la derecha**, *S. CCS forage diverse*] — **Los Angeles goes down**, minus 0.6. But its *squid* landings go **up**. It loses effort because it loses **chub mackerel**, almost two full points. The port-level total **hides a recomposition of the species mix.**"
+> Second, and this is the interesting one — [apuntar al panel **abajo a la derecha**, *S. CCS forage diverse*] — **Los Angeles goes down**, minus 0.6. But its *squid* landings go **up**, plus 2.0. What it gives up is **mackerel**: chub minus 1.8 and jack minus 0.8, at that same port. And that follows straight from the table you just saw: in this window mackerel habitat improves at Los Angeles as well — but mackerel enters with a **negative** sign, so a better mackerel day is a day these vessels do something else. Mackerel is the species that pays for the squid across the whole south: it's the biggest loser for the squid specialist too, minus 2.2. So the port-level total **hides a recomposition of the species mix.**"
 
 **Frase para cerrar (es la que habla directamente a la sesión):**
 
 > "And note what this machinery is: we moved a habitat field and got a spatial reallocation. **A closed area is the same operation** — you mask the field inside the polygon and re-predict. That's the door the SDM opens."
 
-**Puntero:** primero el panel superior izquierdo (squid specialist, la barra grande de Santa Barbara), después el **inferior derecho** (forage diverse) para la historia de LA. **Ojo: la historia de Los Angeles es la del panel forage-diverse** (LA = −0.59, chub mackerel = −1.88), no la del squid specialist.
+**Puntero:** primero el panel superior izquierdo (squid specialist, la barra grande de Santa Barbara), después el **inferior derecho** (forage diverse) para la historia de LA. **Ojo: la historia de Los Angeles es la del panel forage-diverse**, no la del squid specialist. Aritmética exacta de LA: calamar **+2.02**, chub mackerel **−1.85**, jack mackerel **−0.77**, sardina +0.01 ⇒ **−0.59**. Sin el jack mackerel los números no cierran: hay que nombrar los dos.
 
-**Cuidado:** el escenario es una **redistribución dentro de la misma temporada**, no una proyección climática. Si se dice "climate scenario", alguien va a preguntar por el forzante y no lo hay.
+**Qué se mueve realmente (importante, y está mal contado si se dice "movimos el calamar"):** el script intercambia el panel **completo** de SDM diarios — MSQD, PSDN, NANC, JMCK, CMCK, PHRG, ALBC — de la ventana 2016-10-01→11-29 sobre las fechas de la ventana base 2014-10-28→12-26. El calamar es el **criterio** con que se eligen las dos ventanas (centroide más disímil), no lo único que cambia. Δ disponibilidad en Los Angeles: calamar **+0.08**, chub **+0.14**, jack **+0.16**, anchoveta +0.14, sardina +0.08. En el PNW el calamar **no** mejora (CLO −0.005, CWA −0.001): por eso ese segmento casi no se mueve.
+
+**Cuidado:** el escenario es una **redistribución dentro de la misma temporada**, no una proyección climática. Si se dice "climate scenario", alguien va a preguntar por el forzante y no lo hay. Y **no** decir "movimos el hábitat del calamar" a secas: se mueve el panel entero (ver nota de arriba). Decirlo mal es regalar una pregunta incómoda.
 
 **Transición:** "Why did LA lose effort while its squid went up? One slide."
 
@@ -205,7 +211,7 @@ Los dos slides que **no** se sacrifican son el **3** (la contribución) y el **8
 >
 > For most segments the nests are **species**, and the lambdas are low — anchovy 0.49, sardine 0.40. That means: given the species, the **ports** are close substitutes. Those fleets adapt **on the move** — they follow the species along the coast.
 >
-> The forage-diverse segment nests by **port**: Santa Barbara 0.49 against 0.73 for Los Angeles and Monterey. There, substitution happens **across species within a port**. That fleet adapts **in place** — and that's why Los Angeles lost effort even as its squid went up: its closest substitute was another species, and that species left.
+> The forage-diverse segment nests by **port**: Santa Barbara 0.49 against 0.73 for Los Angeles and Monterey. There, substitution happens **across species within a port**. That fleet adapts **in place** — and that's why Los Angeles lost effort even as its squid went up: its closest substitute is another species at the *same* port, so when both mackerels lose ground at Los Angeles, the port's own squid can only take part of it back — the rest walks up the coast to Santa Barbara.
 >
 > The terminology — 'on the move' versus 'in place' — is from Samhouri and co-authors, 2024."
 
@@ -262,13 +268,19 @@ Hablamos últimos: es probable que haya que hacer esto. Orden de sacrificio:
 | State dependence (30 d) | +2.3 a +3.1, *** en los cuatro segmentos |
 | Radios del SDM | 60 km (sardina/anchoveta/caballa), 90 km (calamar) |
 | Escenario: centroide del calamar | 42.99°N → 40.66°N (mismo período estacional) |
+| Escenario: ventanas | base 2014-10-28→12-26 vs. escenario 2016-10-01→11-29 (60 días, meses 10-11-12) |
+| Escenario: qué se intercambia | **todos** los SDM diarios (MSQD, PSDN, NANC, JMCK, CMCK, PHRG, ALBC); el resto de covariables queda en la ventana base |
+| Δ disponibilidad en LA | calamar +0.08, chub +0.14, jack +0.16, anchoveta +0.14, sardina +0.08 |
 | Δ Santa Barbara | +5.8 / +3.4 / — / +2.1 pp |
-| Δ Los Angeles (forage diverse) | −0.6 neto (calamar +1.5, chub mackerel −1.9) |
+| Δ Los Angeles (forage diverse) | −0.6 neto = calamar +2.0, chub mackerel −1.8, jack mackerel −0.8 |
+| Coef. disponibilidad mackerel | −3.94\*\*\* / −1.48 / +0.87 / −1.92\*\*\* (negativo en los tres segmentos del sur) |
+| Δ chub mackerel por segmento | −2.2 / −0.3 / +0.1 / −1.9 pp (es la especie que paga el calamar) |
 | Δ participación | +6.0 / +4.2 / −0.6 / +1.9 pp |
 | Δ target calamar | +8.4 (squid spec.) / +4.5 (roving) / +5.0 (forage div.) pp |
 | λ más bajos | anchoveta 0.49, sardina 0.40, Santa Barbara 0.49 |
 | OOS pseudo-ρ² (año retenido, **vs. nulo**) | 0.22–0.44 |
-| Correlación anchoveta–calamar (disponibilidad) | r = −0.29 |
+| Correlación anchoveta–calamar (disponibilidad) | r = −0.29 (en los SDM 2013–17: −0.20 a −0.22) |
+| Correlación mackerel–calamar (disponibilidad, sur) | **+0.51** chub, **+0.43** jack — es **positiva**, no negativa |
 
 ---
 
@@ -292,39 +304,47 @@ Formato de respuesta: **una frase de respuesta directa, una de sustento, parar.*
 
 > "Because it's an opportunity cost, not a dislike of anchovy. In that region anchovy and squid availability are **negatively correlated** — r of about −0.29 — so high anchovy days are low squid days for a fleet whose best option is squid."
 
-**5. "¿Podrían correr un cierre por eólica offshore / un AMP?"**
+**5. "El mackerel sale negativo en casi todas las columnas. ¿Por qué?"**
+
+> "Because for these fleets mackerel is the **fallback**, not the target — it's low-value, often incidental, and the coefficient says a better mackerel field doesn't pull vessels in. Two things I'd be honest about: mackerel habitat actually *co-moves* with squid habitat in the south, so good mackerel days are peak squid days and the vessels take the squid; and mackerel suitability is probably the weakest of our proxies for catch rates. What the sign does buy us is the scenario result — mackerel habitat improves in the scenario window, and with a negative coefficient that pushes those alternatives down. That's the Los Angeles story."
+
+**6. "En el escenario, ¿movieron sólo el calamar o todo el campo de hábitat?"** — *Es la pregunta natural después del slide 8; contestarla mal deja la impresión de un shock de una sola especie.*
+
+> "The whole habitat panel — every species' daily field moves together. We pick two 60-day windows in the same months of the year, the pair whose **squid** centroid is most dissimilar, and we transplant the later window's habitat fields onto the baseline dates day by day. Squid is the **criterion** for choosing the windows, not the only thing that changes. Everything that isn't habitat — prices, distances, wind, unemployment, state dependence — stays at its observed baseline value. So it's a coherent ocean state, not a one-species shock; a closed-area counterfactual would be the cleaner single-species experiment, and that's the natural next run."
+
+**7. "¿Podrían correr un cierre por eólica offshore / un AMP?"**
 
 > "Yes — it's the same operation as the scenario I showed. You mask the habitat field inside the closure polygon, recompute the port-radius averages, and re-predict. We haven't run it in this paper, but nothing in the machinery has to change. That's exactly why the exogenous field matters."
 
-**6. "¿Por qué las estructuras de nidos difieren entre segmentos?"**
+**8. "¿Por qué las estructuras de nidos difieren entre segmentos?"**
 
 > "It's empirical. We tried both structures for each segment and kept the one the data supported — fit, and dissimilarity parameters inside the unit interval. For the forage-diverse fleet the port nesting wins, and that's substantively informative: it *is* the finding about adapting in place."
 
-**7. "¿Agregación a nivel de puerto no oculta heterogeneidad espacial fina?"**
+**9. "¿Agregación a nivel de puerto no oculta heterogeneidad espacial fina?"**
 
 > "It does — we list it as our first limitation, following Dépalle and co-authors, 2021. Our choice set is port × species, so within-port location choice is averaged out. The trade-off buys us the joint participation–target–location model; a finer grid would make the choice set intractable."
 
-**8. "¿Cómo separan state dependence de heterogeneidad no observada?"**
+**10. "¿Cómo separan state dependence de heterogeneidad no observada?"**
 
 > "Honestly, not perfectly — that's the classic initial-conditions problem. What I'd emphasise is the direction: the thirty-day term absorbs a lot of persistence, so it makes it **harder** for availability to show up. The availability effects survive that, which is the point of the slide."
 
-**9. "¿Por qué sólo 2013–2017?"**
+**11. "¿Por qué sólo 2013–2017?"**
 
 > "Two reasons: it's the window where the daily SDM fields and the trip-level PacFIN data overlap cleanly, and it contains the two shocks we care about — the 2015 sardine closure and the 2014–16 marine heatwave."
 
-**10. "¿Modelan entrada y salida de embarcaciones?"**
+**12. "¿Modelan entrada y salida de embarcaciones?"**
 
 > "No. Our extensive margin is the **daily** decision to go fishing or not, conditional on being in the fleet. Long-run exit and vessel investment are a different model."
 
-**11. "¿Propagan la incertidumbre del SDM?"**
+**13. "¿Propagan la incertidumbre del SDM?"**
 
 > "Not in this paper — availability enters as a fixed regressor. That's measurement error, so again it attenuates. Propagating the SDM's predictive distribution through the choice model is a clear next step."
 
-**12. "Los coeficientes de no-CPS son enormes (+10.3 crab en PNW)."**
+**14. "Los coeficientes de no-CPS son enormes (+10.3 crab en PNW)."**
 
 > "They are, and they're doing a specific job: crab and salmon availability essentially **gate participation** for the fleets that have those permits. They sit in a separate nest because switching gear is costly, so those magnitudes aren't comparable to the CPS terms."
 
-**13. "¿Y bajo proyecciones climáticas?"**
+**15. "¿Y bajo proyecciones climáticas?"**
 
 > "The SDMs are driven by ROMS output, so in principle you force them with downscaled projections and run the same behavioural model forward. That's the direction we're taking it — with the caveat that the behavioural parameters are assumed stable, which is a strong assumption over decades."
 

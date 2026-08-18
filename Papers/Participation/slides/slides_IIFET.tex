@@ -142,12 +142,11 @@
 
 % ========================== 2. MOTIVATION ==============================
 % ~50 s. Land the question; do not linger.
-\begin{frame}{Motivation --- spatial trade-offs run through the \textbf{species portfolio}}
+\begin{frame}{Motivation}
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.53\textwidth}
 \begin{itemize}
-  \item Fishable area shrinking (\textbf{wind, conservation, mining}); species moving
-        (\textbf{climate}).
+  \item Species are moving (\textbf{climate}).
   \item What matters is how fleets \textbf{redistribute effort} --- follow, switch species,
         switch ports, halt, exit.
   \item Location choice usually models \textbf{one fishery at a time} $\Rightarrow$ the
@@ -159,20 +158,21 @@
 \textbf{Question}\\[2pt]
 How do \textbf{availability, prices, costs, weather} shape \textbf{daily} choices to
 \alert{participate}, \alert{target}, \alert{land}?\\[4pt]
-2013--2017: the \textbf{2015 sardine closure} and the \textbf{2014--2016 heatwave}.
+\textbf{Model}\\[2pt]
+3-level nested logit model
 \end{column}
 \end{columns}
-\takeaway{Where the boats end up is produced by \textbf{which species they can switch to}
---- so we model \emph{participate $\times$ target $\times$ land} \textbf{jointly}.}
+\takeaway{Where the boats end up is produced by \textbf{which species they can switch to}.}
 \end{frame}
 
 % ========================== 3. THE CONTRIBUTION (HERO) =================
 % ~90 s. THIS is the slide of the talk. Walk the handoff left to right,
 % then say the sentence: "the oceanographers' model becomes the economists'
 % regressor."
-\begin{frame}{The contribution --- an \textbf{oceanographic SDM} as the economic regressor}
-{\small SDMs built by \textbf{oceanographers} for \emph{ecological} purposes; their daily
-output is the central covariate in our \textbf{discrete-choice model of fishing behavior}.}
+\begin{frame}{The contribution: an \textbf{oceanographic SDM} as the economic regressor}
+
+SDMs built by \textbf{oceanographers} for \emph{ecological} purposes; their daily output is the central covariate in our \textbf{discrete-choice model of fishing behavior}.
+
 \vskip3pt
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.63\textwidth}
@@ -184,7 +184,7 @@ output is the central covariate in our \textbf{discrete-choice model of fishing 
   ar/.style={-{Stealth[length=4pt]}, draw=black!45, line width=0.7pt},
 ]
 % Two-by-two so the pipeline leaves the right third of the slide to the map.
-\node[box] (ocean) {\textbf{Ocean state} --- ROMS:\\SST, SSH, chl-$a$};
+\node[box] (ocean) {\textbf{Ocean state} --- ROMS:\\SST, chl-$a$};
 \node[box, right=0.45cm of ocean] (sdm) {\textbf{GAM SDM} per species\\{\scriptsize(Muhling et al.\ 2019, 2020)}};
 \node[box, below=0.55cm of ocean] (grid) {\textbf{Daily} $P(\text{presence})$\\on a spatial grid};
 \node[box, right=0.45cm of grid] (radius) {Mean within the species\\\textbf{radius} of each port};
@@ -227,16 +227,14 @@ output is the central covariate in our \textbf{discrete-choice model of fishing 
 \vskip1pt
 {\scriptsize\color{black!60}\emph{Assumption:} habitat suitability tracks \textbf{potential
 catch rates} --- if only partly, the availability effect is attenuated.\par}
-\takeaway{The usual proxy is \textbf{past catch}. Replacing it with an SDM is what makes the
-behavioral model \textbf{identifiable} \emph{and} \textbf{climate-ready}.}
 \end{frame}
 
 % ========================== 4. WHY IT MATTERS ==========================
 % ~55 s. The three-against-three contrast. Read only the bold words.
-\begin{frame}{Why that swap matters --- past catch vs.\ SDM}
+\begin{frame}{Past catch vs.\ SDM}
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.46\textwidth}
-\textbf{Past catch} {\scriptsize(the usual proxy)}
+\textbf{Past catch}
 \begin{itemize}\small
   \item[\textcolor{red!70}{\ding{55}}] \textbf{Endogenous} --- where vessels already \emph{chose} to fish.
   \item[\textcolor{red!70}{\ding{55}}] \textbf{Selection bias} --- only at fished sites (Chen et al., 2023).
@@ -249,12 +247,10 @@ behavioral model \textbf{identifiable} \emph{and} \textbf{climate-ready}.}
 \begin{itemize}\small
   \item[\textcolor{udecgold}{\ding{51}}] \textbf{Exogenous} --- an environmental input.
   \item[\textcolor{udecgold}{\ding{51}}] \textbf{No gaps} --- a value for \emph{every} port--day.
-  \item[\textcolor{udecgold}{\ding{51}}] \textbf{Counterfactual-ready} --- move the field, re-predict.
+  \item[\textcolor{udecgold}{\ding{51}}] \textbf{Counterfactual-ready}.
 \end{itemize}
 \end{column}
 \end{columns}
-\takeaway{The third point buys us the \textbf{scenario} --- you cannot shift a
-``past catch'' field.}
 \end{frame}
 
 % ========================== 5. SETTING =================================
@@ -263,7 +259,7 @@ behavioral model \textbf{identifiable} \emph{and} \textbf{climate-ready}.}
 \footnotesize
 U.S. West Coast Coastal Pelagic Species fishery: squid, sardine, anchovy, mackerels
 ($+$ non-CPS crab, salmon, tuna); purse seine. Segments from cluster analysis
-(Quezada et al., 2024).
+(Quezada et al., 2024, CJFAS).
 \vskip4pt
 \begin{tabular}{@{}p{0.34\textwidth} p{0.24\textwidth} r r@{}}
 \toprule
@@ -294,7 +290,7 @@ Utility of alternative $j=(p,s,l)$ for vessel $i$ on day $t$:
 \begin{itemize}\footnotesize
   \item \alert{$\mathrm{Avail}$} $=$ the daily \textbf{SDM} index from the previous slide.
   \item Also: price, distances, wind, closures, unemployment.
-  \item \textbf{State dependence} (last 30 days) --- processor ties / port capacity.
+  \item \textbf{State dependence} (last 30 days): processor ties / port capacity.
 \end{itemize}
 \end{column}
 \hfill
@@ -303,11 +299,10 @@ Utility of alternative $j=(p,s,l)$ for vessel $i$ on day $t$:
   \item Nests: \textbf{participation}, then \textbf{species} --- except forage-diverse,
         which nests by \textbf{port}.
   \item Crab/salmon split off (costly gear switch).
-  \item Apollo (R); dominant species $=$ target (\textbf{93.6\%} of revenue).
+  \item Dominant species $=$ target (\textbf{93.6\%} of revenue).
 \end{itemize}
 \end{column}
 \end{columns}
-\takeaway{Availability enters at \textbf{daily} frequency and is \textbf{exogenous} to the vessel's choice.}
 \end{frame}
 
 % ========================== 7. RESULTS -- DRIVERS =======================
@@ -330,11 +325,10 @@ State dependence (30-day) & $+2.63^{***}$ & $+2.86^{***}$ & $+2.26^{***}$ & $+3.
 \end{tabular}
 \vskip3pt
 {\scriptsize Wind, distance-to-catch, distance-to-CG all $(-)$; unemployment $(+)$. Negative anchovy for
-forage-diverse: anchovy--squid availability correlate $r=-0.29$. \emph{Read signs and significance:}
-coefficients are in utility units, so magnitudes are not comparable across segments --- magnitude
-comes from the scenario (elasticities in backup).}
+forage-diverse: anchovy--squid availability correlate $r=-0.29$. Mackerel is negative in all three
+southern segments (\emph{fallback} target).}
 \takeaway{Habit is \textbf{strong} (state dependence $\approx\!2.3$--$3.1$), yet the \textbf{SDM signal
-survives it} --- so the flexibility we measure is genuine, not inertia.}
+survives it}. Flexibility we measure is genuine, not inertia.}
 \end{frame}
 
 % ========================== 8. SCENARIO (PAYOFF) ========================
@@ -343,11 +337,11 @@ survives it} --- so the flexibility we measure is genuine, not inertia.}
 % field and the model re-predicts where the effort lands. You cannot do
 % this with past catch -- and the same machinery takes a closed area."
 \input{data/scenario_port}
-\begin{frame}{The payoff --- move the habitat field, see \textbf{where the effort goes}}
+\begin{frame}{Move the habitat field, see \textbf{where the effort goes}}
 \vskip-4pt
-{\scriptsize Squid habitat swapped for a \emph{same-season} later window (centroid
-\textbf{42.99$^{\circ}$N\,$\rightarrow$\,40.66$^{\circ}$N}); all else fixed.}
-\vskip1pt
+{\scriptsize \emph{Same-season}, squid change centroid (\textbf{42.99$^{\circ}$N\,$\rightarrow$\,40.66$^{\circ}$N});
+prices, costs, weather and state dependence fixed.}
+
 \centering
 \begin{tikzpicture}
 \begin{groupplot}[
@@ -387,16 +381,14 @@ survives it} --- so the flexibility we measure is genuine, not inertia.}
   \scenariolabels{\PrtLabNegCseven}{east}
 \end{groupplot}
 \end{tikzpicture}
-\vskip1pt
 {\scriptsize\color{black!65}
 $\Delta$ P(landing at each port), pp: \
 \textcolor{divpos}{\rule[0.35ex]{7pt}{5pt}}~gains effort \quad
 \textcolor{divneg}{\rule[0.35ex]{7pt}{5pt}}~loses effort\\[1pt]
 $\Delta$ \textbf{no-participation}: $-6.0$ / $-4.2$ / $+0.6$ / $-1.9$\,pp \quad\textbullet\quad
 same run as Figs.~5--6 of the paper, here by port.}
-\takeaway{Santa Barbara absorbs the squid. Los Angeles still nets $-0.6$: it \emph{gains}
-squid ($+1.5$) but \textbf{loses more chub mackerel} ($-1.9$) --- the port total hides a
-\textbf{species recomposition}.}
+\takeaway{Santa Barbara absorbs the squid. Los Angeles loses $-0.6$: it \emph{gains}
+squid but \textbf{loses mackerels}. Port aggregate hides a \textbf{species recomposition}.}
 \end{frame}
 
 % ========================== 9. SUBSTITUTION STRUCTURE ===================
@@ -404,7 +396,7 @@ squid ($+1.5$) but \textbf{loses more chub mackerel} ($-1.9$) --- the port total
 % EXPLAINS the previous slide rather than adding a result, and the takeaways
 % slide still lands the point. Say: "why did LA lose effort while its squid
 % went up? Because for that fleet the closest substitute is another species."
-\begin{frame}{What produced that --- ``on the move'' vs.\ ``in place'' substitution}
+\begin{frame}{``On the move'' vs.\ ``in place'' substitution}
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.47\textwidth}
 \textbf{Adapt \emph{on the move}} {\scriptsize(species nests)}
@@ -445,12 +437,10 @@ between ports, but the mechanism differs: one follows the species, the other sub
   \item \textbf{Harvesters are flexible.} Participation, target and landing all respond to
         availability, prices, costs and weather --- \emph{even} controlling for strong
         state dependence.
-  \item \textbf{The spatial answer runs through the portfolio.} Even the fleet that adapts
+  \item \textbf{Spatial redistribution can be explained by species substituion.} Even the fleet that adapts
         \emph{in place} --- substituting \textbf{species}, not ports --- redistributes effort
         \textbf{in space}.
 \end{enumerate}
-\takeaway{Availability is an \textbf{ocean-model output}, so the same machinery runs forward
-under \textbf{climate projections}.}
 \end{frame}
 
 % ========================== 11. THANKS =================================
@@ -560,7 +550,7 @@ S.\ CCS forage-fish diverse        & 10.8 & 2.4 & 5.1  & 2.0 \\
 \end{tikzpicture}
 \vskip2pt
 {\scriptsize Change in the probability of \textbf{participating} (i.e.\ $-\Delta$P(no participation))
-under the southward squid redistribution. Generated from
+under the same-season window swap (southward squid redistribution). Generated from
 \texttt{scenario\_dynamic\_same\_months\_delta\_participation\_pp.csv}.}
 \takeaway{All three southern, squid-facing fleets go fishing \textbf{more often} when squid
 moves toward them; the PNW sardine fleet is essentially unaffected.}
@@ -614,8 +604,9 @@ $\Delta$ predicted probability (pp): \
 \textcolor{divpos}{\rule[0.35ex]{7pt}{5pt}}~more likely targeted \quad
 \textcolor{divneg}{\rule[0.35ex]{7pt}{5pt}}~less likely \quad\textbullet\quad
 common axis.}
-\takeaway{Southern fleets \textbf{follow the squid} ($+8.4$ and $+5.0$\,pp); the PNW sardine
-fleet barely moves --- it has no squid to follow.}
+\takeaway{Southern fleets \textbf{follow the squid} ($+8.4$ and $+5.0$\,pp), and \textbf{mackerel
+is what they give up} (chub $-2.2$ and $-1.9$); the PNW sardine fleet barely moves --- it has no
+squid to follow.}
 \end{frame}
 
 \begin{frame}{Backup \textbullet\ Scenario --- change by port $\times$ species alternative}
