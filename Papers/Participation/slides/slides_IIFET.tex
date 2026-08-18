@@ -143,26 +143,22 @@
 % ========================== 2. MOTIVATION ==============================
 % ~50 s. Land the question; do not linger.
 \begin{frame}{Motivation}
-\begin{columns}[T,onlytextwidth]
-\begin{column}{0.53\textwidth}
 \begin{itemize}
-  \item Species are moving (\textbf{climate}).
-  \item What matters is how fleets \textbf{redistribute effort} --- follow, switch species,
-        switch ports, halt, exit.
-  \item Location choice usually models \textbf{one fishery at a time} $\Rightarrow$ the
-        \textbf{species portfolio} drops out.
+  \item Species distributions are \textbf{shifting} with changing ocean conditions
+        --- while fishable area shrinks (closures, offshore wind).
+  \item For management, what matters is not the shock but how fleets
+        \textbf{redistribute effort} --- follow, switch species, switch ports, exit.
+  % The gap belongs in the body, not the takeaway box: it is what makes the
+  % research question forced rather than merely interesting.
+  \item \textbf{But} location-choice models take \textbf{one fishery at a time}: the
+        \textbf{species-targeting} margin drops out \emph{by construction}.
+  \item \textbf{Research question:} how do \textbf{availability, prices, costs, weather}
+        shape the \textbf{daily} joint choice to \textbf{participate},
+        \textbf{target a species} and \textbf{land at a port}?
+        \emph{How much flexibility do vessels actually have?}
 \end{itemize}
-\end{column}
-\hfill
-\begin{column}{0.43\textwidth}
-\textbf{Question}\\[2pt]
-How do \textbf{availability, prices, costs, weather} shape \textbf{daily} choices to
-\alert{participate}, \alert{target}, \alert{land}?\\[4pt]
-\textbf{Model}\\[2pt]
-3-level nested logit model
-\end{column}
-\end{columns}
-\takeaway{Where the boats end up is produced by \textbf{which species they can switch to}.}
+\takeaway{\textbf{Spoiler:} where the boats end up is produced by
+\textbf{which species they can switch to}.}
 \end{frame}
 
 % ========================== 3. THE CONTRIBUTION (HERO) =================
@@ -199,8 +195,6 @@ SDMs built by \textbf{oceanographers} for \emph{ecological} purposes; their dail
         inner xsep=6pt, inner ysep=11pt, fill=udecblue!5] (band) {};
 \end{scope}
 % Band caption sits in the band's own top padding, so it never rides the border.
-\node[anchor=north west, font=\scriptsize\bfseries\color{udecblue!75}]
-  at ([xshift=4pt, yshift=-1.5pt] band.north west) {Built by oceanographers};
 \end{tikzpicture}
 \end{column}
 \hfill
@@ -437,7 +431,7 @@ between ports, but the mechanism differs: one follows the species, the other sub
   \item \textbf{Harvesters are flexible.} Participation, target and landing all respond to
         availability, prices, costs and weather --- \emph{even} controlling for strong
         state dependence.
-  \item \textbf{Spatial redistribution can be explained by species substituion.} Even the fleet that adapts
+  \item \textbf{Spatial redistribution can be explained by species substitution.} Even the fleet that adapts
         \emph{in place} --- substituting \textbf{species}, not ports --- redistributes effort
         \textbf{in space}.
 \end{enumerate}
