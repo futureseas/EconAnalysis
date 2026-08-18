@@ -22,3 +22,6 @@ FuturePredictions/Landings/Data/prediction_MSQD_noclosure.rds
 FuturePredictions/Landings/Data/prediction_NANC.rds
 FuturePredictions/Landings/Data/prediction_NANC_noclosure.rds
 FuturePredictions/Landings/Data/prediction_PSDN.rds
+
+# Editor settings (local)
+.vscode/
