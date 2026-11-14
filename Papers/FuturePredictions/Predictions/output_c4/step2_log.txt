@@ -1,0 +1,84 @@
+# A tibble: 6 × 5
+  SPECIES pred_days pred_vm_A obs_vm obs_days
+  <chr>       <dbl>     <dbl>  <int>    <int>
+1 BTNA         98.8      93.0     27       52
+2 CMCK        474.      377.     168      425
+3 MSQD       9062.     3472.    1042     9048
+4 NANC        932.      602.     151      936
+5 PSDN        197.      165.     103      272
+6 YTNA        106.       99.7     52      105
+# A tibble: 16 × 9
+   SPECIES rule      sample     n_years obs_mean pred_mean   ratio   corr   mape
+   <chr>   <chr>     <chr>        <int>    <dbl>     <dbl>   <dbl>  <dbl>  <dbl>
+ 1 MSQD    H_A       In-sample…       5   43333.   148417.  3.43    0.197  3.51 
+ 2 MSQD    H_A       Out-of-sa…      15   34910.   123700.  3.54   -0.460  4.91 
+ 3 MSQD    H_A_noexp In-sample…       5   43333.   260713.  6.02    0.157  6.97 
+ 4 MSQD    H_A_noexp Out-of-sa…      15   34910.   216846.  6.21   -0.456  9.37 
+ 5 MSQD    H_B       In-sample…       5   43333.   111634.  2.58    0.192  2.39 
+ 6 MSQD    H_B       Out-of-sa…      15   34910.    92089.  2.64   -0.467  3.43 
+ 7 MSQD    H_C       In-sample…       5   43333.    46325.  1.07    0.253  0.666
+ 8 MSQD    H_C       Out-of-sa…      15   34910.    36933.  1.06   -0.450  1.09 
+ 9 PSDN    H_A       In-sample…       3    3384.     8962.  2.65    0.860  4.77 
+10 PSDN    H_A       Out-of-sa…      13   24687.    13499.  0.547   0.388  0.411
+11 PSDN    H_A_noexp In-sample…       3    3384.    34953. 10.3     0.779 25.8  
+12 PSDN    H_A_noexp Out-of-sa…      13   24687.    43328.  1.76    0.310  1.05 
+13 PSDN    H_B       In-sample…       3    3384.     1042.  0.308   0.924  0.674
+14 PSDN    H_B       Out-of-sa…      13   24687.     1803.  0.0730  0.266  0.919
+15 PSDN    H_C       In-sample…       3    3384.     4190.  1.24    0.896  1.81 
+16 PSDN    H_C       Out-of-sa…      13   24687.     6361.  0.258   0.364  0.712
+# A tibble: 12 × 5
+   run   SPECIES     H_A      H_B    H_C
+   <chr> <chr>     <dbl>    <dbl>  <dbl>
+ 1 GFDL  MSQD    142229. 102922.  40886.
+ 2 GFDL  NANC      5308.   2899.   1485.
+ 3 GFDL  PSDN     12307.    584.   5495.
+ 4 HADL  MSQD    134061.  94659.  36408.
+ 5 HADL  NANC      6423.   3557.   1956.
+ 6 HADL  PSDN      9332.      0    3914.
+ 7 HIST  MSQD    133160.  99257.  39972.
+ 8 HIST  NANC      3564.   1643.    889.
+ 9 HIST  PSDN     15156.   1801.   7091.
+10 IPSL  MSQD    133796.  95466.  37612.
+11 IPSL  NANC      6406.   3578.   1987.
+12 IPSL  PSDN     10996.     74.0  4660.
+# A tibble: 9 × 8
+  run   SPECIES     H0     H1 d_participation d_landings d_interaction
+  <chr> <chr>    <dbl>  <dbl>           <dbl>      <dbl>         <dbl>
+1 GFDL  MSQD    39873. 41074.          -1811.     4221.        -1210. 
+2 GFDL  NANC      885.  1478.            470.       56.2          67.5
+3 GFDL  PSDN     7001.  5523.          -1976.      278.          220. 
+4 HADL  MSQD    39873. 36466.          -5150.     4567.        -2823. 
+5 HADL  NANC      885.  1949.            816.       94.7         154. 
+6 HADL  PSDN     7001.  3923.          -3691.     1031.         -418. 
+7 IPSL  MSQD    39873. 37647.          -3590.     3154.        -1791. 
+8 IPSL  NANC      885.  1982.            841.       96.0         160. 
+9 IPSL  PSDN     7001.  4687.          -3212.     1126.         -228. 
+# ℹ 1 more variable: pct_change <dbl>
+# A tibble: 24 × 3
+   run   SPECIES   days
+   <chr> <chr>    <dbl>
+ 1 GFDL  BTNA      21.3
+ 2 GFDL  CMCK      81.2
+ 3 GFDL  MSQD    1598. 
+ 4 GFDL  NANC     301. 
+ 5 GFDL  PSDN      59.5
+ 6 GFDL  YTNA      22.4
+ 7 HADL  BTNA      22.3
+ 8 HADL  CMCK      85.9
+ 9 HADL  MSQD    1456. 
+10 HADL  NANC     385. 
+11 HADL  PSDN      43.3
+12 HADL  YTNA      23.5
+13 HIST  BTNA      20.3
+14 HIST  CMCK      92.4
+15 HIST  MSQD    1688. 
+16 HIST  NANC     192. 
+17 HIST  PSDN      89.6
+18 HIST  YTNA      21.7
+19 IPSL  BTNA      21.5
+20 IPSL  CMCK      81.4
+21 IPSL  MSQD    1519. 
+22 IPSL  NANC     391. 
+23 IPSL  PSDN      46.5
+24 IPSL  YTNA      22.5
+Step 2 finished

@@ -25,3 +25,6 @@ FuturePredictions/Landings/Data/prediction_PSDN.rds
 
 # Editor settings (local)
 .vscode/
+
+# Local drafts (shared via Google Docs)
+Papers/FuturePredictions/Draft/
